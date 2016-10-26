@@ -1,0 +1,57 @@
+{
+  "name": "logux-server",
+  "version": "0.0.0",
+  "description": "Logux server-side framework",
+  "keywords": [
+    "logux",
+    "server"
+  ],
+  "author": "Andrey Sitnik <andrey@sitnik.ru>",
+  "license": "MIT",
+  "repository": "logux/logux-server",
+  "dependencies": {
+    "logux-core": "logux/logux-core",
+    "logux-sync": "logux/logux-sync",
+    "ws": "^1.1.1"
+  },
+  "devDependencies": {
+    "docdash": "^0.4.0",
+    "eslint": "^3.8.1",
+    "eslint-config-logux": "^2.0.0",
+    "eslint-config-standard": "^6.2.1",
+    "eslint-plugin-promise": "^3.3.0",
+    "eslint-plugin-standard": "^2.0.1",
+    "jest": "^16.0.2",
+    "jsdoc": "^3.4.2",
+    "lint-staged": "^3.2.0",
+    "pre-commit": "^1.1.3",
+    "rimraf": "^2.5.4",
+    "yaspeller": "^3.0.0"
+  },
+  "scripts": {
+    "lint-staged": "lint-staged",
+    "spellcheck": "npm run cleandocs && yaspeller *.md docs/*.html",
+    "cleandocs": "npm run docs && rimraf docs/*.js.html",
+    "clean": "rimraf docs/ coverage/",
+    "lint": "eslint *.js test/*.js",
+    "docs": "jsdoc --configure .jsdocrc *.js",
+    "test": "jest --coverage && npm run lint && npm run spellcheck"
+  },
+  "jest": {
+    "coverageThreshold": {
+      "global": {
+        "statements": 100
+      }
+    }
+  },
+  "eslintConfig": {
+    "extends": "eslint-config-logux"
+  },
+  "lint-staged": {
+    "*.md": "yaspeller",
+    "*.js": "eslint"
+  },
+  "pre-commit": [
+    "lint-staged"
+  ]
+}
