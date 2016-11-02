@@ -1,5 +1,6 @@
-var server = require('../')
+var Server = require('../server')
+var index = require('../')
 
-it('exports', function () {
-  expect(typeof server).toEqual('object')
+it('has Server class', function () {
+  expect(index.Server).toBe(Server)
 })

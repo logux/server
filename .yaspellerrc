@@ -4,6 +4,11 @@
   "dictionary": [
     "Logux",
     "docdash",
-    "JSDoc"
+    "JSDoc",
+    "js",
+    "WSS",
+    "WebSocket",
+    "ws",
+    "env"
   ]
 }
