@@ -7,25 +7,40 @@ var promisify = require('./promisify')
 /**
  * Logux Server API.
  *
- * @param {"production"|"development"} [env] Development or production server
- *                                           mode. By default, it will be taken
- *                                           from `NODE_ENV` environment
- *                                           variable. On missed `NODE_ENV`
- *                                           it will be `"development"`.
+ * @param {string|number} host Unique server ID.
+ * @param {object} options Server options.
+ * @param {"production"|"development"} [options.env] Development or production
+ *                                                   server mode. By default,
+ *                                                   it will be taken from
+ *                                                   `NODE_ENV` environment
+ *                                                   variable. On empty
+ *                                                   `NODE_ENV` it will
+ *                                                   be `"development"`.
  *
  * @example
  * import { Server } from 'logux-server'
- * const app = new Server()
- * app.listen({ port: 8080 })
+ * const app = new Server('server')
+ * app.listen()
  *
  * @class
  */
-function Server (env) {
+function Server (host, options) {
+  if (!host) {
+    throw new Error('Missed unique host ID')
+  }
+  /**
+   * Unique server ID.
+   * @type {string|number}
+   */
+  this.host = host
+
+  if (!options) options = { }
+
   /**
    * Production or development mode.
    * @type {"production"|"development"}
    */
-  this.env = env || process.env.NODE_ENV || 'development'
+  this.env = options.env || process.env.NODE_ENV || 'development'
   this.unbind = []
 }
 
@@ -51,7 +66,7 @@ Server.prototype = {
    * @return {Promise} When the server has been bound
    *
    * @example
-   * app.listen({ server: httpServer })
+   * app.listen({ cert: certFile, key: keyFile })
    */
   listen: function listen (options) {
     this.options = { }
