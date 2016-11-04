@@ -10,6 +10,7 @@
     "WebSocket",
     "ws",
     "env",
-    "BaseServer"
+    "BaseServer",
+    "UI"
   ]
 }

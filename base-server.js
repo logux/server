@@ -5,7 +5,10 @@ var http = require('http')
 var promisify = require('./promisify')
 
 /**
- * Basic Logux Server API.
+ * Basic Logux Server API without good UI. Use it only if you need
+ * to create some special hacks on top of Logux Server.
+ *
+ * In most use cases you should use {@link Server}.
  *
  * @param {string|number} host Unique server ID.
  * @param {object} options Server options.
@@ -19,8 +22,9 @@ var promisify = require('./promisify')
  *
  * @example
  * import { BaseServer } from 'logux-server'
- * const app = new BaseServer('server')
- * app.listen()
+ * class MyLoguxHack extends BaseServer {
+ *   …
+ * }
  *
  * @class
  */
