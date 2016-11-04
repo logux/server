@@ -71,6 +71,24 @@ it('uses 127.0.0.1 to bind server by default', function () {
   expect(this.app.options.host).toEqual('127.0.0.1')
 })
 
+it('throws a error on key without certificate', function () {
+  var app = new BaseServer('server')
+  expect(function () {
+    app.listen({
+      key: fs.readFileSync(path.join(__dirname, 'fixtures/key.pem'))
+    })
+  }).toThrowError(/set cert option/)
+})
+
+it('throws a error on certificate without key', function () {
+  var app = new BaseServer('server')
+  expect(function () {
+    app.listen({
+      cert: fs.readFileSync(path.join(__dirname, 'fixtures/cert.pem'))
+    })
+  }).toThrowError(/set key option/)
+})
+
 it('throws a error on no security in production', function () {
   var app = new BaseServer('server', { env: 'production' })
   expect(function () {

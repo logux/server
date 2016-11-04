@@ -77,6 +77,13 @@ BaseServer.prototype = {
      */
     this.options = options
 
+    if (this.options.key && !this.options.cert) {
+      throw new Error('You must set cert option too if you use key option')
+    }
+    if (!this.options.key && this.options.cert) {
+      throw new Error('You must set key option too if you use cert option')
+    }
+
     var app = this
     var promise
     if (this.options.server) {
