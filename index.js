@@ -1,5 +1,5 @@
-var Server = require('./server')
+var BaseServer = require('./base-server')
 
 module.exports = {
-  Server: Server
+  BaseServer: BaseServer
 }

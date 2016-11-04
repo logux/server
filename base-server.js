@@ -5,7 +5,7 @@ var http = require('http')
 var promisify = require('./promisify')
 
 /**
- * Logux Server API.
+ * Basic Logux Server API.
  *
  * @param {string|number} host Unique server ID.
  * @param {object} options Server options.
@@ -18,13 +18,13 @@ var promisify = require('./promisify')
  *                                                   be `"development"`.
  *
  * @example
- * import { Server } from 'logux-server'
- * const app = new Server('server')
+ * import { BaseServer } from 'logux-server'
+ * const app = new BaseServer('server')
  * app.listen()
  *
  * @class
  */
-function Server (host, options) {
+function BaseServer (host, options) {
   if (!host) {
     throw new Error('Missed unique host ID')
   }
@@ -44,7 +44,7 @@ function Server (host, options) {
   this.unbind = []
 }
 
-Server.prototype = {
+BaseServer.prototype = {
 
   /**
    * Start WebSocket server and listen for clients.
@@ -145,4 +145,4 @@ Server.prototype = {
 
 }
 
-module.exports = Server
+module.exports = BaseServer
