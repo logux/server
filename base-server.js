@@ -11,7 +11,7 @@ var promisify = require('./promisify')
  * In most use cases you should use {@link Server}.
  *
  * @param {object} options Server options.
- * @param {string|number} options.host Unique server ID.
+ * @param {string|number} options.uniqName Unique server ID.
  * @param {"production"|"development"} [options.env] Development or production
  *                                                   server mode. By default,
  *                                                   it will be taken from
@@ -35,8 +35,8 @@ function BaseServer (options) {
    */
   this.options = options || { }
 
-  if (typeof this.options.host === 'undefined') {
-    throw new Error('Missed unique host ID')
+  if (typeof this.options.uniqName === 'undefined') {
+    throw new Error('Missed unique node name')
   }
 
   /**
