@@ -10,8 +10,8 @@ var promisify = require('./promisify')
  *
  * In most use cases you should use {@link Server}.
  *
- * @param {string|number} host Unique server ID.
  * @param {object} options Server options.
+ * @param {string|number} options.host Unique server ID.
  * @param {"production"|"development"} [options.env] Development or production
  *                                                   server mode. By default,
  *                                                   it will be taken from
@@ -28,23 +28,23 @@ var promisify = require('./promisify')
  *
  * @class
  */
-function BaseServer (host, options) {
-  if (!host) {
+function BaseServer (options) {
+  /**
+   * Server options.
+   * @type {object}
+   */
+  this.options = options || { }
+
+  if (typeof this.options.host === 'undefined') {
     throw new Error('Missed unique host ID')
   }
-  /**
-   * Unique server ID.
-   * @type {string|number}
-   */
-  this.host = host
-
-  if (!options) options = { }
 
   /**
    * Production or development mode.
    * @type {"production"|"development"}
    */
-  this.env = options.env || process.env.NODE_ENV || 'development'
+  this.env = this.options.env || process.env.NODE_ENV || 'development'
+
   this.unbind = []
 }
 
@@ -73,41 +73,39 @@ BaseServer.prototype = {
    * app.listen({ cert: certFile, key: keyFile })
    */
   listen: function listen (options) {
-    this.options = { }
-    if (!options) options = { }
     /**
      * Options used to start server.
      * @type {object}
      */
-    this.options = options
+    this.listenOptions = options || { }
 
-    if (this.options.key && !this.options.cert) {
+    if (this.listenOptions.key && !this.listenOptions.cert) {
       throw new Error('You must set cert option too if you use key option')
     }
-    if (!this.options.key && this.options.cert) {
+    if (!this.listenOptions.key && this.listenOptions.cert) {
       throw new Error('You must set key option too if you use cert option')
     }
 
     var app = this
     var promise
-    if (this.options.server) {
-      this.ws = new WebSocket.Server({ server: this.options.server })
+    if (this.listenOptions.server) {
+      this.ws = new WebSocket.Server({ server: this.listenOptions.server })
       promise = Promise.resolve()
     } else {
-      if (!this.options.port) this.options.port = 1337
-      if (!this.options.host) this.options.host = '127.0.0.1'
+      if (!this.listenOptions.port) this.listenOptions.port = 1337
+      if (!this.listenOptions.host) this.listenOptions.host = '127.0.0.1'
 
       if (this.env === 'production') {
-        if (!this.options.key || !this.options.cert) {
+        if (!this.listenOptions.key || !this.listenOptions.cert) {
           throw new Error('SSL is required in production mode. ' +
                           'Set key and cert options or use server option.')
         }
       }
 
-      if (this.options.cert) {
+      if (this.listenOptions.cert) {
         this.http = https.createServer({
-          cert: this.options.cert,
-          key: this.options.key
+          cert: this.listenOptions.cert,
+          key: this.listenOptions.key
         })
       } else {
         this.http = http.createServer()
@@ -118,7 +116,7 @@ BaseServer.prototype = {
       })
 
       promise = promisify(function (done) {
-        app.http.listen(app.options.port, app.options.host, done)
+        app.http.listen(app.listenOptions.port, app.listenOptions.host, done)
       })
       this.unbind.push(function () {
         return promisify(function (done) {

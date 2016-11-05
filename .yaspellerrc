@@ -11,6 +11,7 @@
     "ws",
     "env",
     "BaseServer",
-    "UI"
+    "UI",
+    "listenOptions"
   ]
 }
