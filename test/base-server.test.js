@@ -1,7 +1,10 @@
 /* eslint-disable no-invalid-this */
+var createTestTimer = require('logux-core').createTestTimer
 var EventEmitter = require('events')
+var MemoryStore = require('logux-core').MemoryStore
 var https = require('https')
 var path = require('path')
+var Log = require('logux-core').Log
 var fs = require('fs')
 
 var BaseServer = require('../base-server')
@@ -44,6 +47,24 @@ it('takes environment from NODE_ENV', function () {
 it('sets environment from user', function () {
   var app = new BaseServer({ uniqName: 'server', env: 'production' })
   expect(app.env).toEqual('production')
+})
+
+it('creates log with default timer and store', function () {
+  var app = new BaseServer({ uniqName: 'server' })
+  expect(app.log instanceof Log).toBeTruthy()
+  expect(app.log.store instanceof MemoryStore).toBeTruthy()
+  var time = app.log.timer()
+  expect(typeof time[0]).toEqual('number')
+  expect(time[1]).toEqual('server')
+  expect(time[2]).toEqual(0)
+})
+
+it('creates log with custom timer and store', function () {
+  var timer = createTestTimer()
+  var store = new MemoryStore()
+  var app = new BaseServer({ uniqName: 'server', store: store, timer: timer })
+  expect(app.log.store).toBe(store)
+  expect(app.log.timer).toBe(timer)
 })
 
 it('destroys application without runned server', function () {

@@ -1,6 +1,9 @@
+var createTimer = require('logux-core').createTimer
+var MemoryStore = require('logux-core').MemoryStore
 var WebSocket = require('ws')
 var https = require('https')
 var http = require('http')
+var Log = require('logux-core').Log
 
 var promisify = require('./promisify')
 
@@ -12,6 +15,10 @@ var promisify = require('./promisify')
  *
  * @param {object} options Server options.
  * @param {string|number} options.uniqName Unique server ID.
+ * @param {function} [options.timer] Timer to use in log. Will be default
+ *                                   timer with server `uniqName`, by default.
+ * @param {Store} [options.store] Store to save log. Will be `MemoryStore`,
+ *                                by default.
  * @param {"production"|"development"} [options.env] Development or production
  *                                                   server mode. By default,
  *                                                   it will be taken from
@@ -38,6 +45,18 @@ function BaseServer (options) {
   if (typeof this.options.uniqName === 'undefined') {
     throw new Error('Missed unique node name')
   }
+
+  var timer = this.options.timer || createTimer(this.options.uniqName)
+  var store = this.options.store || new MemoryStore()
+
+  /**
+   * Server events log.
+   * @type {Log}
+   *
+   * @example
+   * app.log.keep(customKeeper)
+   */
+  this.log = new Log({ store: store, timer: timer })
 
   /**
    * Production or development mode.
