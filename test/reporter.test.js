@@ -24,8 +24,8 @@ describe('mocked output', function () {
       return promisify(function (done) {
         fs.readFile(path.join(__dirname, 'snapshots', test + '.out'), done)
       }).then(function (shapshot) {
-        var output = reporter.apply({ }, reports[test])
-        expect(output).toEqual(shapshot.toString())
+        var out = reporter.apply({ }, reports[test])
+        expect(out).toEqual(shapshot.toString())
       })
     })
   })
