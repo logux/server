@@ -6,6 +6,16 @@ it('makes promise from callback function', function () {
   })
 })
 
+it('sends first result to resolve', function () {
+  return promisify(function (done) {
+    setTimeout(function () {
+      done(null, 'test')
+    }, 1)
+  }).then(function (result) {
+    expect(result).toEqual('test')
+  })
+})
+
 it('rejects promise on error', function () {
   return promisify(function (done) {
     setTimeout(function () {
