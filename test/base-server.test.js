@@ -150,3 +150,15 @@ it('reporters on start listening', function () {
     expect(reports).toEqual(['listen', server])
   })
 })
+
+it('reporters on destroing', function () {
+  var reports = []
+  var server = new BaseServer({ uniqName: 'server' }, function (type, app) {
+    reports.push(type, app)
+  })
+
+  var promise = server.destroy()
+  expect(reports).toEqual(['destroy', server])
+
+  return promise
+})

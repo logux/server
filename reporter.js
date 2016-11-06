@@ -50,6 +50,10 @@ var reporters = {
              ['Listen', url]
            ]) +
            (dev ? note(c, 'Press Ctrl-C to shutdown server') : '')
+  },
+
+  destroy: function destroy (c) {
+    return info(c, 'Shutting down Logux server')
   }
 
 }
