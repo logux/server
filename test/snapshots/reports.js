@@ -1,3 +1,4 @@
+var createServer = require('http').createServer
 var BaseServer = require('../../base-server')
 
 var app = new BaseServer({
@@ -16,8 +17,16 @@ var wss = new BaseServer({
 })
 wss.listenOptions = { cert: 'A', host: '0.0.0.0', port: 1337 }
 
+var http = new BaseServer({
+  uniqName: 'server',
+  subprotocol: [1, 0],
+  supports: [1]
+})
+http.listenOptions = { server: createServer() }
+
 module.exports = {
   listen: ['listen', app],
-  wss: ['listen', wss],
+  production: ['listen', wss],
+  http: ['listen', http],
   destroy: ['destroy', app]
 }

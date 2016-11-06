@@ -37,8 +37,13 @@ function note (c, str) {
 var reporters = {
 
   listen: function listen (c, app) {
-    var url = app.listenOptions.cert ? 'wss://' : 'ws://'
-    url += app.listenOptions.host + ':' + app.listenOptions.port
+    var url
+    if (app.listenOptions.server) {
+      url = 'Custom HTTP server'
+    } else {
+      url = (app.listenOptions.cert ? 'wss://' : 'ws://') +
+            app.listenOptions.host + ':' + app.listenOptions.port
+    }
 
     var supports = app.options.supports.map(function (i) {
       return i + '.x'
