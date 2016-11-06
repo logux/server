@@ -1,20 +1,30 @@
-var childProcess = require('child_process')
+var spawn = require('child_process').spawn
 var path = require('path')
 
 function exec (name) {
   return new Promise(function (resolve) {
-    childProcess.exec('NODE_ENV=test ' + path.join(__dirname, name), {
-      timeout: 1000
-    }, function (error, stdout, stderr) {
-      resolve(stderr, error)
+    var out = ''
+    var server = spawn(path.join(__dirname, name))
+    server.stderr.on('data', function (chank) {
+      out += chank
     })
+    server.on('close', function () {
+      resolve(out)
+    })
+    setTimeout(function () {
+      server.kill('SIGINT')
+    }, 1000)
   })
 }
 
 module.exports = {
 
-  simple: function () {
-    return exec('simple.js')
+  waiting: function () {
+    return exec('destroyer.js')
+  },
+
+  unbind: function () {
+    return exec('closer.js')
   }
 
 }

@@ -38,6 +38,18 @@ function Server (options) {
   BaseServer.call(this, options, function () {
     process.stderr.write(reporter.apply(reporter, arguments))
   })
+
+  var app = this
+  function onExit () {
+    app.destroy().then(function () {
+      process.exit()
+    })
+  }
+
+  process.on('SIGINT', onExit)
+  this.unbind.push(function () {
+    process.removeListener('SIGINT', onExit)
+  })
 }
 
 Server.prototype = BaseServer.prototype
