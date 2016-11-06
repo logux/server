@@ -11,6 +11,6 @@ reporter.now = function () {
 
 for (var test in reports) {
   var output = reporter.apply({ }, reports[test])
-  fs.writeFileSync(path.join(__dirname, test), output)
+  fs.writeFileSync(path.join(__dirname, test + '.out'), output)
   process.stdout.write(output)
 }

@@ -22,7 +22,7 @@ describe('mocked output', function () {
   Object.keys(reports).forEach(function (test) {
     it('reports ' + test, function () {
       return promisify(function (done) {
-        fs.readFile(path.join(__dirname, 'snapshots', test), done)
+        fs.readFile(path.join(__dirname, 'snapshots', test + '.out'), done)
       }).then(function (shapshot) {
         var output = reporter.apply({ }, reports[test])
         expect(output).toEqual(shapshot.toString())
