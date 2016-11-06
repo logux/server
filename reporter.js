@@ -31,7 +31,7 @@ function params (c, fields) {
 }
 
 function note (c, str) {
-  return c.grey('       ' + str + '\n')
+  return '       ' + c.grey(str) + '\n'
 }
 
 var reporters = {
