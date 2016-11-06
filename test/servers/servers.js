@@ -8,12 +8,12 @@ function exec (name) {
     server.stderr.on('data', function (chank) {
       out += chank
     })
-    server.on('close', function () {
-      resolve(out)
+    server.on('close', function (exitCode) {
+      resolve([out, exitCode])
     })
     setTimeout(function () {
       server.kill('SIGINT')
-    }, 1000)
+    }, 500)
   })
 }
 
