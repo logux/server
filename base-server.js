@@ -26,6 +26,7 @@ var promisify = require('./promisify')
  *                                                   variable. On empty
  *                                                   `NODE_ENV` it will
  *                                                   be `"development"`.
+ * @param {function} [reporter] Function to show current server status.
  *
  * @example
  * import { BaseServer } from 'logux-server'
@@ -35,12 +36,14 @@ var promisify = require('./promisify')
  *
  * @class
  */
-function BaseServer (options) {
+function BaseServer (options, reporter) {
   /**
    * Server options.
    * @type {object}
    */
   this.options = options || { }
+
+  this.reporter = reporter || function () { }
 
   if (typeof this.options.uniqName === 'undefined') {
     throw new Error('Missed unique node name')
@@ -152,7 +155,9 @@ BaseServer.prototype = {
       })
     })
 
-    return promise
+    return promise.then(function () {
+      app.reporter('listen', app)
+    })
   },
 
   /**

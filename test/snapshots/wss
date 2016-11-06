@@ -1,0 +1,6 @@
+
+ INFO  1970-01-01 00:00:00 Logux server is listening
+       Logux Server: 0.0.0
+       Server name:  server
+       Environment:  production
+       Listen:       wss://0.0.0.0:1337

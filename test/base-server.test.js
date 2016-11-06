@@ -133,3 +133,20 @@ it('uses HTTPS', function () {
   })
   expect(this.app.http instanceof https.Server).toBeTruthy()
 })
+
+it('reporters on start listening', function () {
+  var reports = []
+  var server = new BaseServer({ uniqName: 'server' }, function (type, app) {
+    reports.push(type, app)
+  })
+  this.app = server
+
+  expect(reports).toEqual([])
+
+  var promise = this.app.listen({ port: uniqPort() })
+  expect(reports).toEqual([])
+
+  return promise.then(function () {
+    expect(reports).toEqual(['listen', server])
+  })
+})

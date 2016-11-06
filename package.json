@@ -10,9 +10,11 @@
   "license": "MIT",
   "repository": "logux/logux-server",
   "dependencies": {
+    "chalk": "^1.1.3",
     "logux-core": "logux/logux-core",
     "logux-sync": "logux/logux-sync",
-    "ws": "^1.1.1"
+    "ws": "^1.1.1",
+    "yyyy-mm-dd": "^1.0.1"
   },
   "devDependencies": {
     "docdash": "^0.4.0",
@@ -42,7 +44,11 @@
       "global": {
         "statements": 100
       }
-    }
+    },
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/server.js"
+    ]
   },
   "eslintConfig": {
     "extends": "eslint-config-logux"
