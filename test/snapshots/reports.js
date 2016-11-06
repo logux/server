@@ -18,6 +18,7 @@ var wss = new BaseServer({
 wss.listenOptions = { cert: 'A', host: '0.0.0.0', port: 1337 }
 
 var http = new BaseServer({
+  env: 'development',
   uniqName: 'server',
   subprotocol: [1, 0],
   supports: [1]
