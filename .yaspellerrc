@@ -12,6 +12,7 @@
     "env",
     "BaseServer",
     "UI",
-    "listenOptions"
+    "listenOptions",
+    "subprotocol"
   ]
 }

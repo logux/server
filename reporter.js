@@ -40,6 +40,10 @@ var reporters = {
     var url = app.listenOptions.cert ? 'wss://' : 'ws://'
     url += app.listenOptions.host + ':' + app.listenOptions.port
 
+    var supports = app.options.supports.map(function (i) {
+      return i + '.x'
+    }).join(', ')
+
     var dev = app.env === 'development'
 
     return info(c, 'Logux server is listening') +
@@ -47,6 +51,8 @@ var reporters = {
              ['Logux Server', pkg.version],
              ['Server name', app.options.uniqName],
              ['Environment', app.env],
+             ['Subprotocol', app.options.subprotocol.join('.')],
+             ['Supports', supports],
              ['Listen', url]
            ]) +
            (dev ? note(c, 'Press Ctrl-C to shutdown server') : '')

@@ -15,6 +15,10 @@ var promisify = require('./promisify')
  *
  * @param {object} options Server options.
  * @param {string|number} options.uniqName Unique server ID.
+ * @param {number[]} options.subprotocol Server current application
+ *                                       subprotocol version.
+ * @param {number[]} options.supports Which major client’s subprotocol versions
+ *                                    are supported by server.
  * @param {function} [options.timer] Timer to use in log. Will be default
  *                                   timer with server `uniqName`, by default.
  * @param {Store} [options.store] Store to save log. Will be `MemoryStore`,
@@ -47,6 +51,13 @@ function BaseServer (options, reporter) {
 
   if (typeof this.options.uniqName === 'undefined') {
     throw new Error('Missed unique node name')
+  }
+
+  if (typeof this.options.subprotocol === 'undefined') {
+    throw new Error('Missed subprotocol version')
+  }
+  if (typeof this.options.supports === 'undefined') {
+    throw new Error('Missed supported subprotocol major versions')
   }
 
   var timer = this.options.timer || createTimer(this.options.uniqName)

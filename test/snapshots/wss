@@ -3,4 +3,6 @@
        Logux Server: 0.0.0
        Server name:  server
        Environment:  production
+       Subprotocol:  1.0
+       Supports:     1.x
        Listen:       wss://0.0.0.0:1337

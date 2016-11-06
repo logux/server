@@ -3,6 +3,8 @@
        Logux Server: [1m0.0.0[22m
        Server name:  [1mserver[22m
        Environment:  [1mdevelopment[22m
+       Subprotocol:  [1m2.5[22m
+       Supports:     [1m2.x, 1.x[22m
        Listen:       [1mws://127.0.0.1:1337[22m
 [90m       Press Ctrl-C to shutdown server
 [39m
