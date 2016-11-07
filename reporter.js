@@ -1,5 +1,6 @@
 var yyyymmdd = require('yyyy-mm-dd')
 var chalk = require('chalk')
+var path = require('path')
 var pkg = require('./package.json')
 
 function rightPag (str, length) {
@@ -18,6 +19,12 @@ function info (c, str) {
     c.bold(str) + '\n'
 }
 
+function error (c, str) {
+  return '\n' + c.bold.red.bgBlack.inverse(' ERROR ') + ' ' +
+    time(c) + ' ' +
+    c.bold.red(str) + '\n'
+}
+
 function params (c, fields) {
   var max = 0
   var current
@@ -32,6 +39,25 @@ function params (c, fields) {
 
 function note (c, str) {
   return '       ' + c.grey(str) + '\n'
+}
+
+function prettyStackTrace (c, err, root) {
+  if (root.slice(-1) !== path.sep) root += path.sep
+
+  return err.stack.split('\n').slice(1).map(function (i) {
+    i = i.replace(/^\s*/, '        ')
+    var match = i.match(/(\s+at [^(]+ \()([^)]+)\)/)
+    if (!match || match[2].indexOf(root) !== 0) {
+      return c.red(i)
+    } else {
+      match[2] = match[2].slice(root.length)
+      if (match[2].indexOf('node_modules') !== -1) {
+        return c.red(match[1] + match[2] + ')')
+      } else {
+        return c.yellow(match[1] + match[2] + ')')
+      }
+    }
+  }).join('\n')
 }
 
 var reporters = {
@@ -65,6 +91,13 @@ var reporters = {
 
   destroy: function destroy (c) {
     return info(c, 'Shutting down Logux server')
+  },
+
+  runtimeError: function runtimeError (c, app, err) {
+    var prefix = err.name + ': ' + err.message
+    if (err.name === 'Error') prefix = err.message
+    return error(c, prefix) +
+           prettyStackTrace(c, err, app.options.root) + '\n'
   }
 
 }

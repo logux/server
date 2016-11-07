@@ -15,7 +15,7 @@ Object.keys(servers).forEach(function (test) {
       var exit = results[0][1]
       var snapshot = results[1].toString()
 
-      if (test === 'error' || test === 'promise') {
+      if (test === 'throw' || test === 'uncatch') {
         expect(exit).toEqual(1)
       } else if (test !== 'unbind') {
         expect(exit).toEqual(0)

@@ -19,12 +19,20 @@ function exec (name) {
 
 module.exports = {
 
-  waiting: function () {
-    return exec('destroyer.js')
+  destroy: function () {
+    return exec('destroy.js')
   },
 
   unbind: function () {
-    return exec('closer.js')
+    return exec('unbind.js')
+  },
+
+  throw: function () {
+    return exec('throw.js')
+  },
+
+  uncatch: function () {
+    return exec('uncatch.js')
   }
 
 }

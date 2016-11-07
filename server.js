@@ -43,13 +43,22 @@ function Server (options) {
 
   var app = this
 
-  function onExit () {
+  function onError (e) {
+    app.reporter('runtimeError', app, e)
     app.destroy().then(function () {
-      process.exit()
+      process.exit(1)
     })
   }
+  process.on('uncaughtException', onError)
+  process.on('unhandledRejection', onError)
 
+  function onExit () {
+    app.destroy().then(function () {
+      process.exit(0)
+    })
+  }
   process.on('SIGINT', onExit)
+
   this.unbind.push(function () {
     process.removeListener('SIGINT', onExit)
   })
