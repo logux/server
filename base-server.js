@@ -19,6 +19,8 @@ var promisify = require('./promisify')
  *                                       subprotocol version.
  * @param {number[]} options.supports Which major client’s subprotocol versions
  *                                    are supported by server.
+ * @param {string} [options.root=process.cwd()] Application root to load files
+ *                                              and show errors.
  * @param {function} [options.timer] Timer to use in log. Will be default
  *                                   timer with server `uniqName`, by default.
  * @param {Store} [options.store] Store to save log. Will be `MemoryStore`,
@@ -59,6 +61,8 @@ function BaseServer (options, reporter) {
   if (typeof this.options.supports === 'undefined') {
     throw new Error('Missed supported subprotocol major versions')
   }
+
+  this.options.root = this.options.root || process.cwd()
 
   var timer = this.options.timer || createTimer(this.options.uniqName)
   var store = this.options.store || new MemoryStore()

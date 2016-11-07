@@ -72,6 +72,21 @@ it('sets environment from user', function () {
   expect(app.env).toEqual('production')
 })
 
+it('uses cwd as default root', function () {
+  var app = new BaseServer(defaultOptions)
+  expect(app.options.root).toEqual(process.cwd())
+})
+
+it('uses user root', function () {
+  var app = new BaseServer({
+    uniqName: 'server',
+    subprotocol: [0, 0],
+    supports: [0],
+    root: '/a'
+  })
+  expect(app.options.root).toEqual('/a')
+})
+
 it('creates log with default timer and store', function () {
   var app = new BaseServer(defaultOptions)
   expect(app.log instanceof Log).toBeTruthy()

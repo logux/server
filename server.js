@@ -10,6 +10,8 @@ var reporter = require('./reporter')
  *                                       subprotocol version.
  * @param {number[]} options.supports Which major client’s subprotocol versions
  *                                    are supported by server.
+ * @param {string} [options.root=process.cwd()] Application root to load files
+ *                                              and show errors.
  * @param {function} [options.timer] Timer to use in log. Will be default
  *                                   timer with server `uniqName`, by default.
  * @param {Store} [options.store] Store to save log. Will be `MemoryStore`,
@@ -40,6 +42,7 @@ function Server (options) {
   })
 
   var app = this
+
   function onExit () {
     app.destroy().then(function () {
       process.exit()
