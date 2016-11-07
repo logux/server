@@ -1,9 +1,5 @@
 
  ERROR  1970-01-01 00:00:00 Test Error
-        at Timeout._onTimeout (test/servers/throw.js:12:15)
-        at ontimeout (timers.js:365:14)
-        at tryOnTimeout (timers.js:237:5)
-        at Timer.listOnTimeout (timers.js:207:5)
-        
+        fake stacktrace
 
  INFO  1970-01-01 00:00:00 Shutting down Logux server
