@@ -79,6 +79,11 @@ function BaseServer (options, reporter) {
   /**
    * Production or development mode.
    * @type {"production"|"development"}
+   *
+   * @example
+   * if (app.env === 'development') {
+   *   logDebugData()
+   * }
    */
   this.env = this.options.env || process.env.NODE_ENV || 'development'
 
@@ -86,6 +91,26 @@ function BaseServer (options, reporter) {
 }
 
 BaseServer.prototype = {
+
+  /**
+   * Set authentificate function. It will receive client credentials
+   * and node ID. It should return a Promise with `false`
+   * on bad authentification or with user data on correct credentials.
+   *
+   * @param {authentificator} authentificator The authentification callback.
+   *
+   * @return {undefined}
+   *
+   * @example
+   * app.auth(token => {
+   *   return findUserByToken(token).then(user => {
+   *     return user.blocked ? false : user
+   *   })
+   * })
+   */
+  auth: function auth (authentificator) {
+    this.authentificator = authentificator
+  },
 
   /**
    * Start WebSocket server and listen for clients.
@@ -121,6 +146,10 @@ BaseServer.prototype = {
     }
     if (!this.listenOptions.key && this.listenOptions.cert) {
       throw new Error('You must set key option too if you use cert option')
+    }
+
+    if (!this.authentificator) {
+      throw new Error('You must set authentification callback by app.auth()')
     }
 
     var app = this
@@ -195,3 +224,11 @@ BaseServer.prototype = {
 }
 
 module.exports = BaseServer
+
+/**
+ * @callback authentificator
+ * @param {any} credentials The client credentials.
+ * @param {string|number} nodeId Unique client node name.
+ * @param {WebSocket} ws WebSocket connection.
+ * @return {Promise} Promise with `false` or user data.
+ */

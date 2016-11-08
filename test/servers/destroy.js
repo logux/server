@@ -8,6 +8,10 @@ var app = new Server({
   supports: [1]
 })
 
+app.auth(function () {
+  return Promise.resolve(true)
+})
+
 app.unbind.push(function () {
   return new Promise(function (resolve) {
     setTimeout(function () {

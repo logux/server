@@ -21,6 +21,14 @@ var defaultOptions = {
   supports: [0]
 }
 
+function createServer (options) {
+  var app = new BaseServer(options || defaultOptions)
+  app.auth(function () {
+    return Promise.resolve(true)
+  })
+  return app
+}
+
 var originEnv = process.env.NODE_ENV
 afterEach(function () {
   process.env.NODE_ENV = originEnv
@@ -118,26 +126,33 @@ it('destroys application without runned server', function () {
   })
 })
 
+it('throws without authentificator', function () {
+  var app = new BaseServer(defaultOptions)
+  expect(function () {
+    app.listen()
+  }).toThrowError(/authentification/)
+})
+
 it('uses 1337 port by default', function () {
-  this.app = new BaseServer(defaultOptions)
+  this.app = createServer()
   this.app.listen()
   expect(this.app.listenOptions.port).toEqual(1337)
 })
 
 it('uses user port', function () {
-  this.app = new BaseServer(defaultOptions)
+  this.app = createServer()
   this.app.listen({ port: 31337 })
   expect(this.app.listenOptions.port).toEqual(31337)
 })
 
 it('uses 127.0.0.1 to bind server by default', function () {
-  this.app = new BaseServer(defaultOptions)
+  this.app = createServer()
   this.app.listen({ port: uniqPort() })
   expect(this.app.listenOptions.host).toEqual('127.0.0.1')
 })
 
 it('throws a error on key without certificate', function () {
-  var app = new BaseServer(defaultOptions)
+  var app = createServer()
   expect(function () {
     app.listen({
       key: fs.readFileSync(path.join(__dirname, 'fixtures/key.pem'))
@@ -146,7 +161,7 @@ it('throws a error on key without certificate', function () {
 })
 
 it('throws a error on certificate without key', function () {
-  var app = new BaseServer(defaultOptions)
+  var app = createServer()
   expect(function () {
     app.listen({
       cert: fs.readFileSync(path.join(__dirname, 'fixtures/cert.pem'))
@@ -155,7 +170,7 @@ it('throws a error on certificate without key', function () {
 })
 
 it('throws a error on no security in production', function () {
-  var app = new BaseServer({
+  var app = createServer({
     env: 'production',
     nodeId: 'server',
     subprotocol: [0, 0],
@@ -169,13 +184,13 @@ it('throws a error on no security in production', function () {
 it('accepts custom HTTP server', function () {
   var http = new EventEmitter()
   http.on = jest.fn()
-  this.app = new BaseServer(defaultOptions)
+  this.app = createServer()
   this.app.listen({ server: http })
   expect(http.on).toBeCalled()
 })
 
 it('uses HTTPS', function () {
-  this.app = new BaseServer(defaultOptions)
+  this.app = createServer()
   this.app.listen({
     cert: fs.readFileSync(path.join(__dirname, 'fixtures/cert.pem')),
     key: fs.readFileSync(path.join(__dirname, 'fixtures/key.pem'))
@@ -185,10 +200,13 @@ it('uses HTTPS', function () {
 
 it('reporters on start listening', function () {
   var reports = []
-  var server = new BaseServer(defaultOptions, function (type, app) {
-    reports.push(type, app)
+  var app = new BaseServer(defaultOptions, function (type, server) {
+    reports.push(type, server)
   })
-  this.app = server
+  app.auth(function () {
+    return Promise.resolve(true)
+  })
+  this.app = app
 
   expect(reports).toEqual([])
 
@@ -196,18 +214,18 @@ it('reporters on start listening', function () {
   expect(reports).toEqual([])
 
   return promise.then(function () {
-    expect(reports).toEqual(['listen', server])
+    expect(reports).toEqual(['listen', app])
   })
 })
 
 it('reporters on destroing', function () {
   var reports = []
-  var server = new BaseServer(defaultOptions, function (type, app) {
-    reports.push(type, app)
+  var app = new BaseServer(defaultOptions, function (type, server) {
+    reports.push(type, server)
   })
 
-  var promise = server.destroy()
-  expect(reports).toEqual(['destroy', server])
+  var promise = app.destroy()
+  expect(reports).toEqual(['destroy', app])
 
   return promise
 })
