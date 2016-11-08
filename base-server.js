@@ -14,7 +14,7 @@ var promisify = require('./promisify')
  * In most use cases you should use {@link Server}.
  *
  * @param {object} options Server options.
- * @param {string|number} options.uniqName Unique server ID.
+ * @param {string|number} options.nodeId Unique server ID.
  * @param {number[]} options.subprotocol Server current application
  *                                       subprotocol version.
  * @param {number[]} options.supports Which major client’s subprotocol versions
@@ -22,7 +22,7 @@ var promisify = require('./promisify')
  * @param {string} [options.root=process.cwd()] Application root to load files
  *                                              and show errors.
  * @param {function} [options.timer] Timer to use in log. Will be default
- *                                   timer with server `uniqName`, by default.
+ *                                   timer with server `nodeId`, by default.
  * @param {Store} [options.store] Store to save log. Will be `MemoryStore`,
  *                                by default.
  * @param {"production"|"development"} [options.env] Development or production
@@ -51,7 +51,7 @@ function BaseServer (options, reporter) {
 
   this.reporter = reporter || function () { }
 
-  if (typeof this.options.uniqName === 'undefined') {
+  if (typeof this.options.nodeId === 'undefined') {
     throw new Error('Missed unique node name')
   }
 
@@ -64,7 +64,7 @@ function BaseServer (options, reporter) {
 
   this.options.root = this.options.root || process.cwd()
 
-  var timer = this.options.timer || createTimer(this.options.uniqName)
+  var timer = this.options.timer || createTimer(this.options.nodeId)
   var store = this.options.store || new MemoryStore()
 
   /**

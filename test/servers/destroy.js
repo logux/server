@@ -3,7 +3,7 @@
 var Server = require('../../server')
 var app = new Server({
   env: 'test',
-  uniqName: 'server',
+  nodeId: 'server',
   subprotocol: [1, 0],
   supports: [1]
 })

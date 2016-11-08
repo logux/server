@@ -80,7 +80,7 @@ var reporters = {
     return info(c, 'Logux server is listening') +
            params(c, [
              ['Logux Server', pkg.version],
-             ['Server name', app.options.uniqName],
+             ['Node ID', app.options.nodeId],
              ['Environment', app.env],
              ['Subprotocol', app.options.subprotocol.join('.')],
              ['Supports', supports],

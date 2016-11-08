@@ -16,7 +16,7 @@ function uniqPort () {
 }
 
 var defaultOptions = {
-  uniqName: 'server',
+  nodeId: 'server',
   subprotocol: [0, 0],
   supports: [0]
 }
@@ -40,13 +40,13 @@ it('throws on missed node name', function () {
 
 it('throws on missed subprotocol', function () {
   expect(function () {
-    new BaseServer({ uniqName: 'server' })
+    new BaseServer({ nodeId: 'server' })
   }).toThrowError(/subprotocol version/)
 })
 
 it('throws on missed supported subprotocols', function () {
   expect(function () {
-    new BaseServer({ uniqName: 'server', subprotocol: [0, 0] })
+    new BaseServer({ nodeId: 'server', subprotocol: [0, 0] })
   }).toThrowError(/supported subprotocol/)
 })
 
@@ -65,7 +65,7 @@ it('takes environment from NODE_ENV', function () {
 it('sets environment from user', function () {
   var app = new BaseServer({
     env: 'production',
-    uniqName: 'server',
+    nodeId: 'server',
     subprotocol: [0, 0],
     supports: [0]
   })
@@ -79,7 +79,7 @@ it('uses cwd as default root', function () {
 
 it('uses user root', function () {
   var app = new BaseServer({
-    uniqName: 'server',
+    nodeId: 'server',
     subprotocol: [0, 0],
     supports: [0],
     root: '/a'
@@ -101,7 +101,7 @@ it('creates log with custom timer and store', function () {
   var timer = createTestTimer()
   var store = new MemoryStore()
   var app = new BaseServer({
-    uniqName: 'server',
+    nodeId: 'server',
     subprotocol: [0, 0],
     supports: [0],
     store: store,
@@ -157,7 +157,7 @@ it('throws a error on certificate without key', function () {
 it('throws a error on no security in production', function () {
   var app = new BaseServer({
     env: 'production',
-    uniqName: 'server',
+    nodeId: 'server',
     subprotocol: [0, 0],
     supports: [0]
   })
