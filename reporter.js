@@ -1,11 +1,12 @@
 var yyyymmdd = require('yyyy-mm-dd')
 var chalk = require('chalk')
+var stripAnsi = require('strip-ansi')
 var path = require('path')
 
 var pkg = require('./package.json')
 
 function rightPag (str, length) {
-  var add = length - str.length
+  var add = length - stripAnsi(str).length
   for (var i = 0; i < add; i++) str += ' '
   return str
 }
