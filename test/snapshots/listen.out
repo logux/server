@@ -1,10 +1,9 @@
 
-[1m[32m[40m[7m INFO [27m[49m[39m[22m [90m1970-01-01 00:00:00[39m [1mLogux server is listening[22m
-       Logux server: [1m0.0.0[22m
-       PID:          [1m21384[22m
-       Node ID:      [1mserver:cxH2FjmdeCi8uGRFXJRzi[22m
-       Environment:  [1mdevelopment[22m
-       Subprotocol:  [1m2.5[22m
-       Supports:     [1m2.x, 1.x[22m
-       Listen:       [1mws://127.0.0.1:1337[22m
-       [90mPress Ctrl-C to shutdown server[39m
+[1m[32m[40m[7m INFO [27m[49m[39m[22m  [2m1970-01-01 00:00:00[22m [1m[32mLogux server is listening[39m[22m
+         Logux Server: [37m0.0.0[39m
+         Node ID:      [37mserver[39m
+         Environment:  [37mdevelopment[39m
+         Subprotocol:  [37m2.5[39m
+         Supports:     [37m2.x, 1.x[39m
+         Listen:       [37mws://127.0.0.1:1337[39m
+         [90mPress Ctrl-C to shutdown server[39m
