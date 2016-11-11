@@ -5,20 +5,33 @@ var path = require('path')
 
 var pkg = require('./package.json')
 
+var PADDING_LEFT = 9
+
 function rightPag (str, length) {
   var add = length - stripAnsi(str).length
   for (var i = 0; i < add; i++) str += ' '
   return str
 }
 
+var emptyPaddingLeft = rightPag('', PADDING_LEFT)
+
 function time (c) {
-  return c.gray(yyyymmdd.withTime(module.exports.now()))
+  return c.dim(yyyymmdd.withTime(module.exports.now()))
+}
+
+function line (c, status, message) {
+  return '\n' +
+    rightPag(status, 8) +
+    rightPag(time(c), 20) +
+    message +
+    '\n'
 }
 
 function info (c, str) {
-  return '\n' + c.bold.green.bgBlack.inverse(' INFO ') + ' ' +
-    time(c) + ' ' +
-    c.bold(str) + '\n'
+  return line(c,
+    c.bold.green.bgBlack.inverse(' INFO '),
+    c.bold.green(str)
+  )
 }
 
 function warn (c, str) {
@@ -28,13 +41,13 @@ function warn (c, str) {
 }
 
 function error (c, str) {
-  return '\n' + c.bold.red.bgBlack.inverse(' ERROR ') + ' ' +
-    time(c) + ' ' +
-    c.bold.red(str) + '\n'
+  return line(c,
+    c.bold.red.bgBlack.inverse(' ERROR '),
+    c.bold.red(str)
+  )
 }
 
 function params (c, type, fields) {
-  var prefix = type === 'error' ? '        ' : '       '
   var max = 0
   var current
   for (var i = 0; i < fields.length; i++) {
@@ -42,7 +55,7 @@ function params (c, type, fields) {
     if (current > max) max = current
   }
   return fields.map(function (field) {
-    return prefix + rightPag(field[0] + ': ', max) + c.bold(field[1])
+    return emptyPaddingLeft + rightPag(field[0] + ': ', max) + c.white(field[1])
   }).join('\n') + '\n'
 }
 
@@ -65,23 +78,23 @@ function errorParams (c, type, client) {
 }
 
 function note (c, str) {
-  return '       ' + c.grey(str) + '\n'
+  return emptyPaddingLeft + c.grey(str) + '\n'
 }
 
 function prettyStackTrace (c, err, root) {
   if (root.slice(-1) !== path.sep) root += path.sep
 
   return err.stack.split('\n').slice(1).map(function (i) {
-    i = i.replace(/^\s*/, '        ')
+    i = i.replace(/^\s*/, emptyPaddingLeft)
     var match = i.match(/(\s+at [^(]+ \()([^)]+)\)/)
     if (!match || match[2].indexOf(root) !== 0) {
-      return c.red(i)
+      return c.gray(i)
     } else {
       match[2] = match[2].slice(root.length)
       if (match[2].indexOf('node_modules') !== -1) {
-        return c.red(match[1] + match[2] + ')')
+        return c.gray(match[1] + match[2] + ')')
       } else {
-        return c.yellow(match[1] + match[2] + ')')
+        return c.red(match[1] + match[2] + ')')
       }
     }
   }).join('\n') + '\n'
@@ -95,7 +108,7 @@ var reporters = {
       url = 'Custom HTTP server'
     } else {
       url = (app.listenOptions.cert ? 'wss://' : 'ws://') +
-            app.listenOptions.host + ':' + app.listenOptions.port
+        app.listenOptions.host + ':' + app.listenOptions.port
     }
 
     var supports = app.options.supports.map(function (i) {
