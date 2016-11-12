@@ -2,6 +2,7 @@
 var createTestTimer = require('logux-core').createTestTimer
 var EventEmitter = require('events')
 var MemoryStore = require('logux-core').MemoryStore
+var WebSocket = require('ws')
 var https = require('https')
 var path = require('path')
 var Log = require('logux-core').Log
@@ -27,6 +28,16 @@ function createServer (options) {
     return Promise.resolve(true)
   })
   return app
+}
+
+function createReporter (test) {
+  test.reports = []
+  test.app = new BaseServer(defaultOptions, function () {
+    test.reports.push(Array.prototype.slice.call(arguments, 0))
+  })
+  test.app.auth(function () {
+    return Promise.resolve(true)
+  })
 }
 
 var originEnv = process.env.NODE_ENV
@@ -126,11 +137,11 @@ it('destroys application without runned server', function () {
   })
 })
 
-it('throws without authentificator', function () {
+it('throws without authenticator', function () {
   var app = new BaseServer(defaultOptions)
   expect(function () {
     app.listen()
-  }).toThrowError(/authentification/)
+  }).toThrowError(/authentication/)
 })
 
 it('uses 1337 port by default', function () {
@@ -199,33 +210,50 @@ it('uses HTTPS', function () {
 })
 
 it('reporters on start listening', function () {
-  var reports = []
-  var app = new BaseServer(defaultOptions, function (type, server) {
-    reports.push(type, server)
-  })
-  app.auth(function () {
-    return Promise.resolve(true)
-  })
-  this.app = app
-
-  expect(reports).toEqual([])
+  createReporter(this)
+  var test = this
 
   var promise = this.app.listen({ port: uniqPort() })
-  expect(reports).toEqual([])
+  expect(this.reports).toEqual([])
 
   return promise.then(function () {
-    expect(reports).toEqual(['listen', app])
+    expect(test.reports).toEqual([['listen', test.app]])
   })
 })
 
 it('reporters on destroing', function () {
-  var reports = []
-  var app = new BaseServer(defaultOptions, function (type, server) {
-    reports.push(type, server)
-  })
+  createReporter(this)
 
-  var promise = app.destroy()
-  expect(reports).toEqual(['destroy', app])
+  var promise = this.app.destroy()
+  expect(this.reports).toEqual([['destroy', this.app]])
 
   return promise
+})
+
+it('creates a client on connection', function () {
+  createReporter(this)
+  var test = this
+
+  return test.app.listen({ port: uniqPort() }).then(function () {
+    test.reports = []
+
+    var ws = new WebSocket('ws://localhost:' + test.app.listenOptions.port)
+    return new Promise(function (resolve, reject) {
+      ws.onopen = resolve
+      ws.onerror = reject
+    })
+  }).then(function () {
+    expect(Object.keys(test.app.clients).length).toBe(1)
+
+    var client = test.app.clients[1]
+    expect(client.remoteAddress).toEqual('127.0.0.1')
+    expect(test.reports).toEqual([['connect', test.app, '127.0.0.1']])
+  })
+})
+
+it('disconnects on clients on destroy', function () {
+  var app = createServer()
+  app.clients[1] = { destroy: jest.fn() }
+  app.destroy()
+  expect(app.clients[1].destroy).toBeCalled()
 })

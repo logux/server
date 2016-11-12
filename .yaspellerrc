@@ -13,6 +13,11 @@
     "BaseServer",
     "UI",
     "listenOptions",
-    "subprotocol"
+    "subprotocol",
+    "nodeId",
+    "auth",
+    "ServerSync",
+    "remoteAddress",
+    "ServerConnection"
   ]
 }

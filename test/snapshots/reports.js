@@ -1,5 +1,8 @@
+var ServerConnection = require('logux-sync').ServerConnection
 var createServer = require('http').createServer
 var BaseServer = require('../../base-server')
+var SyncError = require('logux-sync').SyncError
+var Client = require('../../client')
 var path = require('path')
 
 var app = new BaseServer({
@@ -26,6 +29,24 @@ var http = new BaseServer({
 })
 http.listenOptions = { server: createServer() }
 
+var ws = {
+  upgradeReq: {
+    headers: { },
+    connection: {
+      remoteAddress: '127.0.0.1'
+    }
+  },
+  on: function () { }
+}
+
+var authed = new Client(app, new ServerConnection(ws), 1)
+authed.sync.otherSubprotocol = [1, 0]
+authed.sync.otherProtocol = [0, 0]
+authed.user = { id: 100 }
+authed.nodeId = '100:550e8400-e29b-41d4-a716-446655440000'
+
+var unauthed = new Client(app, new ServerConnection(ws), 1)
+
 var file = path.join(__dirname, 'reports.js')
 var jest = path.join(__dirname, '..', '..', 'node_modules', 'jest', 'index.js')
 var error = new Error('Some mistake')
@@ -35,10 +56,20 @@ error.stack = error.name + ': ' + error.message + '\n' +
 '    at at runTest (' + jest + ':50:10)\n' +
 '    at process._tickCallback (internal/process/next_tick.js:103:7)'
 
+var ownError = new SyncError(authed.sync, 'timeout', 5000, false)
+var clientError = new SyncError(authed.sync, 'timeout', 5000, true)
+
 module.exports = {
-  listen: ['listen', app],
-  production: ['listen', wss],
-  http: ['listen', http],
-  error: ['runtimeError', app, error],
-  destroy: ['destroy', app]
+  'listen': ['listen', app],
+  'production': ['listen', wss],
+  'http': ['listen', http],
+  'connect': ['connect', app, '127.0.0.1'],
+  'authenticated': ['authenticated', app, authed],
+  'disconnect': ['disconnect', app, authed],
+  'expel': ['disconnect', app, unauthed],
+  'error': ['runtimeError', app, undefined, error],
+  'client-error': ['clientError', app, authed, clientError],
+  'authed-error': ['syncError', app, authed, ownError],
+  'unauthed-error': ['syncError', app, unauthed, clientError],
+  'destroy': ['destroy', app]
 }

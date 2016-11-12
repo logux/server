@@ -12,6 +12,10 @@ var reporter = require('./reporter')
  *                                    are supported by server.
  * @param {string} [options.root=process.cwd()] Application root to load files
  *                                              and show errors.
+ * @param {number} [options.timeout=20000] Timeout in milliseconds
+ *                                         to disconnect connection.
+ * @param {number} [options.ping=10000] Milliseconds since last message to test
+ *                                      connection by sending ping.
  * @param {function} [options.timer] Timer to use in log. Will be default
  *                                   timer with server `nodeId`, by default.
  * @param {Store} [options.store] Store to save log. Will be `MemoryStore`,
@@ -44,7 +48,7 @@ function Server (options) {
   var app = this
 
   function onError (e) {
-    app.reporter('runtimeError', app, e)
+    app.reporter('runtimeError', app, undefined, e)
     app.destroy().then(function () {
       process.exit(1)
     })

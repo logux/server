@@ -1,6 +1,9 @@
+var ServerConnection = require('logux-sync').ServerConnection
+var remoteAddress = require('./remote-address')
 var createTimer = require('logux-core').createTimer
 var MemoryStore = require('logux-core').MemoryStore
 var WebSocket = require('ws')
+var Client = require('./client')
 var https = require('https')
 var http = require('http')
 var Log = require('logux-core').Log
@@ -21,6 +24,10 @@ var promisify = require('./promisify')
  *                                    are supported by server.
  * @param {string} [options.root=process.cwd()] Application root to load files
  *                                              and show errors.
+ * @param {number} [options.timeout=20000] Timeout in milliseconds
+ *                                         to disconnect connection.
+ * @param {number} [options.ping=10000] Milliseconds since last message to test
+ *                                      connection by sending ping.
  * @param {function} [options.timer] Timer to use in log. Will be default
  *                                   timer with server `nodeId`, by default.
  * @param {Store} [options.store] Store to save log. Will be `MemoryStore`,
@@ -88,16 +95,36 @@ function BaseServer (options, reporter) {
   this.env = this.options.env || process.env.NODE_ENV || 'development'
 
   this.unbind = []
+
+  /**
+   * Connected clients.
+   * @type {Client[]}
+   *
+   * @example
+   * for (let nodeId in app.clients) {
+   *   console.log(app.clients[nodeId].remoteAddress)
+   * }
+   */
+  this.clients = { }
+
+  this.lastClient = 0
+
+  var app = this
+  this.unbind.push(function () {
+    for (var i in app.clients) {
+      app.clients[i].destroy()
+    }
+  })
 }
 
 BaseServer.prototype = {
 
   /**
-   * Set authentificate function. It will receive client credentials
+   * Set authenticate function. It will receive client credentials
    * and node ID. It should return a Promise with `false`
-   * on bad authentification or with user data on correct credentials.
+   * on bad authentication or with {@link User} on correct credentials.
    *
-   * @param {authentificator} authentificator The authentification callback.
+   * @param {authenticator} authenticator The authentication callback.
    *
    * @return {undefined}
    *
@@ -108,8 +135,8 @@ BaseServer.prototype = {
    *   })
    * })
    */
-  auth: function auth (authentificator) {
-    this.authentificator = authentificator
+  auth: function auth (authenticator) {
+    this.authenticator = authenticator
   },
 
   /**
@@ -148,8 +175,8 @@ BaseServer.prototype = {
       throw new Error('You must set key option too if you use cert option')
     }
 
-    if (!this.authentificator) {
-      throw new Error('You must set authentification callback by app.auth()')
+    if (!this.authenticator) {
+      throw new Error('You must set authentication callback by app.auth()')
     }
 
     var app = this
@@ -179,6 +206,13 @@ BaseServer.prototype = {
 
       this.ws = new WebSocket.Server({
         server: this.http
+      })
+
+      this.ws.on('connection', function (ws) {
+        app.reporter('connect', app, remoteAddress(ws))
+        app.lastClient += 1
+        var client = new Client(app, new ServerConnection(ws), app.lastClient)
+        app.clients[app.lastClient] = client
       })
 
       promise = promisify(function (done) {
@@ -226,9 +260,18 @@ BaseServer.prototype = {
 module.exports = BaseServer
 
 /**
- * @callback authentificator
+ * @callback authenticator
  * @param {any} credentials The client credentials.
  * @param {string|number} nodeId Unique client node name.
- * @param {WebSocket} ws WebSocket connection.
- * @return {Promise} Promise with `false` or user data.
+ * @param {Client} client Client object.
+ * @return {Promise} Promise with `false` or {@link User} data.
+ */
+
+/**
+ * Developer defined user data. It is open structure. But you should define
+ * at least `id` property to show it in logs.
+ *
+ * @typedef {object} User
+ *
+ * @property {string|number} id Any user ID to display in server logs.
  */

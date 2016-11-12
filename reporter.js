@@ -19,13 +19,20 @@ function info (c, str) {
     c.bold(str) + '\n'
 }
 
+function warn (c, str) {
+  return '\n' + c.bold.yellow.bgBlack.inverse(' WARN ') + ' ' +
+    time(c) + ' ' +
+    c.bold.yellow(str) + '\n'
+}
+
 function error (c, str) {
   return '\n' + c.bold.red.bgBlack.inverse(' ERROR ') + ' ' +
     time(c) + ' ' +
     c.bold.red(str) + '\n'
 }
 
-function params (c, fields) {
+function params (c, type, fields) {
+  var prefix = type === 'error' ? '        ' : '       '
   var max = 0
   var current
   for (var i = 0; i < fields.length; i++) {
@@ -33,8 +40,26 @@ function params (c, fields) {
     if (current > max) max = current
   }
   return fields.map(function (field) {
-    return '       ' + rightPag(field[0] + ': ', max) + c.bold(field[1])
+    return prefix + rightPag(field[0] + ': ', max) + c.bold(field[1])
   }).join('\n') + '\n'
+}
+
+function errorParams (c, type, client) {
+  if (!client) {
+    return ''
+  } else {
+    var user = client.user ? client.user.id : 'unauthenticated'
+    var subprotocol = 'unknown'
+    if (client.sync.otherSubprotocol) {
+      subprotocol = client.sync.otherSubprotocol.join('.')
+    }
+    return params(c, 'error', [
+      ['User ID', user],
+      ['Node ID', client.nodeId || 'unknown'],
+      ['Subprotocol', subprotocol],
+      ['IP address', client.remoteAddress]
+    ])
+  }
 }
 
 function note (c, str) {
@@ -57,7 +82,7 @@ function prettyStackTrace (c, err, root) {
         return c.yellow(match[1] + match[2] + ')')
       }
     }
-  }).join('\n')
+  }).join('\n') + '\n'
 }
 
 var reporters = {
@@ -78,8 +103,8 @@ var reporters = {
     var dev = app.env === 'development'
 
     return info(c, 'Logux server is listening') +
-           params(c, [
-             ['Logux Server', pkg.version],
+           params(c, 'info', [
+             ['Logux server', pkg.version],
              ['Node ID', app.options.nodeId],
              ['Environment', app.env],
              ['Subprotocol', app.options.subprotocol.join('.')],
@@ -89,15 +114,58 @@ var reporters = {
            (dev ? note(c, 'Press Ctrl-C to shutdown server') : '')
   },
 
+  connect: function connect (c, app, ip) {
+    return info(c, 'Client was connected') +
+           params(c, 'info', [['IP address', ip]])
+  },
+
+  authenticated: function authenticated (c, app, client) {
+    return info(c, 'User was authenticated') +
+           params(c, 'info', [
+             ['User ID', client.user.id],
+             ['Node ID', client.nodeId || 'unknown'],
+             ['Subprotocol', client.sync.otherSubprotocol.join('.')],
+             ['Logux protocol', client.sync.otherProtocol.join('.')],
+             ['IP address', client.remoteAddress]
+           ])
+  },
+
+  disconnect: function disconnect (c, app, client) {
+    var user = client.user ? client.user.id : 'unauthenticated'
+    return info(c, 'Client was disconnected') +
+           params(c, 'info', [
+             ['User ID', user],
+             ['Node ID', client.nodeId || 'unknown'],
+             ['IP address', client.remoteAddress]
+           ])
+  },
+
   destroy: function destroy (c) {
     return info(c, 'Shutting down Logux server')
   },
 
-  runtimeError: function runtimeError (c, app, err) {
+  runtimeError: function runtimeError (c, app, client, err) {
     var prefix = err.name + ': ' + err.message
     if (err.name === 'Error') prefix = err.message
     return error(c, prefix) +
-           prettyStackTrace(c, err, app.options.root) + '\n'
+           prettyStackTrace(c, err, app.options.root) +
+           errorParams(c, 'error', client)
+  },
+
+  syncError: function syncError (c, app, client, err) {
+    var prefix
+    if (err.received) {
+      prefix = 'SyncError from client: ' + err.description
+    } else {
+      prefix = 'SyncError: ' + err.description
+    }
+    return error(c, prefix) +
+           errorParams(c, 'error', client)
+  },
+
+  clientError: function clientError (c, app, client, err) {
+    return warn(c, 'Client error: ' + err.description) +
+           errorParams(c, 'warn', client)
   }
 
 }
