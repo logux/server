@@ -1,8 +1,9 @@
+var path = require('path')
+var fs = require('fs')
+
 var promisify = require('../promisify')
 var reporter = require('../reporter')
 var reports = require('./snapshots/reports')
-var path = require('path')
-var fs = require('fs')
 
 it('uses current time by default', function () {
   expect(reporter.now().getTime()).toBeCloseTo(Date.now(), -1)

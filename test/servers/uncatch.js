@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 var Server = require('../../server')
+
 new Server({
   env: 'test',
   nodeId: 'server',

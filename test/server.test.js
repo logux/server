@@ -1,7 +1,8 @@
-var promisify = require('../promisify')
-var servers = require('./servers/servers')
 var path = require('path')
 var fs = require('fs')
+
+var promisify = require('../promisify')
+var servers = require('./servers/servers')
 
 var DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
 

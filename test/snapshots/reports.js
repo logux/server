@@ -1,9 +1,10 @@
 var ServerConnection = require('logux-sync').ServerConnection
 var createServer = require('http').createServer
-var BaseServer = require('../../base-server')
 var SyncError = require('logux-sync').SyncError
-var Client = require('../../client')
 var path = require('path')
+
+var BaseServer = require('../../base-server')
+var Client = require('../../client')
 
 var app = new BaseServer({
   env: 'development',

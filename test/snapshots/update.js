@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
-var reporter = require('../../reporter')
-var reports = require('./reports')
 var path = require('path')
 var fs = require('fs')
+
+var reporter = require('../../reporter')
+var reports = require('./reports')
 
 reporter.now = function () {
   return new Date((new Date()).getTimezoneOffset() * 60000)

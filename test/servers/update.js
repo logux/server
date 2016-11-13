@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
-var servers = require('./servers')
 var path = require('path')
 var fs = require('fs')
+
+var servers = require('./servers')
 
 var DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
 

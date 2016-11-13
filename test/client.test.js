@@ -1,5 +1,6 @@
-var BaseServer = require('../base-server')
 var LocalPair = require('logux-sync').LocalPair
+
+var BaseServer = require('../base-server')
 var Client = require('../client')
 
 function createConnection () {

@@ -1,4 +1,5 @@
 /* eslint-disable no-invalid-this */
+
 var createTestTimer = require('logux-core').createTestTimer
 var EventEmitter = require('events')
 var MemoryStore = require('logux-core').MemoryStore
