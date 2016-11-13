@@ -20,18 +20,11 @@ function createConnection () {
 function createServer (opts, reporter) {
   if (!opts) {
     opts = {
-      nodeId: 'server',
       subprotocol: [0, 0],
       supports: [0]
     }
   }
-  return new BaseServer({
-    nodeId: 'server',
-    subprotocol: [0, 0],
-    supports: [0],
-    timeout: 16000,
-    ping: 8000
-  }, reporter)
+  return new BaseServer(opts, reporter)
 }
 
 function createReporter () {

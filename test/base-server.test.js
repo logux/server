@@ -18,7 +18,6 @@ function uniqPort () {
 }
 
 var defaultOptions = {
-  nodeId: 'server',
   subprotocol: [0, 0],
   supports: [0]
 }
@@ -49,24 +48,23 @@ afterEach(function () {
 
 it('saves server options', function () {
   var app = new BaseServer(defaultOptions)
-  expect(app.options).toEqual(defaultOptions)
+  expect(app.options.supports).toEqual([0])
 })
 
-it('throws on missed node name', function () {
-  expect(function () {
-    new BaseServer()
-  }).toThrowError(/unique node name/)
+it('generates node ID', function () {
+  var app = new BaseServer(defaultOptions)
+  expect(app.options.nodeId).toMatch(/server:.+/)
 })
 
 it('throws on missed subprotocol', function () {
   expect(function () {
-    new BaseServer({ nodeId: 'server' })
+    new BaseServer({ })
   }).toThrowError(/subprotocol version/)
 })
 
 it('throws on missed supported subprotocols', function () {
   expect(function () {
-    new BaseServer({ nodeId: 'server', subprotocol: [0, 0] })
+    new BaseServer({ subprotocol: [0, 0] })
   }).toThrowError(/supported subprotocol/)
 })
 
@@ -85,7 +83,6 @@ it('takes environment from NODE_ENV', function () {
 it('sets environment from user', function () {
   var app = new BaseServer({
     env: 'production',
-    nodeId: 'server',
     subprotocol: [0, 0],
     supports: [0]
   })
@@ -99,7 +96,6 @@ it('uses cwd as default root', function () {
 
 it('uses user root', function () {
   var app = new BaseServer({
-    nodeId: 'server',
     subprotocol: [0, 0],
     supports: [0],
     root: '/a'
@@ -113,7 +109,7 @@ it('creates log with default timer and store', function () {
   expect(app.log.store instanceof MemoryStore).toBeTruthy()
   var time = app.log.timer()
   expect(typeof time[0]).toEqual('number')
-  expect(time[1]).toEqual('server')
+  expect(time[1]).toEqual(app.options.nodeId)
   expect(time[2]).toEqual(0)
 })
 
@@ -121,7 +117,6 @@ it('creates log with custom timer and store', function () {
   var timer = createTestTimer()
   var store = new MemoryStore()
   var app = new BaseServer({
-    nodeId: 'server',
     subprotocol: [0, 0],
     supports: [0],
     store: store,
@@ -184,7 +179,6 @@ it('throws a error on certificate without key', function () {
 it('throws a error on no security in production', function () {
   var app = createServer({
     env: 'production',
-    nodeId: 'server',
     subprotocol: [0, 0],
     supports: [0]
   })

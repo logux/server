@@ -8,7 +8,7 @@ var Client = require('../../client')
 
 var app = new BaseServer({
   env: 'development',
-  nodeId: 'server',
+  nodeId: 'server:cxH2FjmdeCi8uGRFXJRzi',
   subprotocol: [2, 5],
   supports: [2, 1]
 })
@@ -16,7 +16,7 @@ app.listenOptions = { host: '127.0.0.1', port: 1337 }
 
 var wss = new BaseServer({
   env: 'production',
-  nodeId: 'server',
+  nodeId: 'server:cxH2FjmdeCi8uGRFXJRzi',
   subprotocol: [1, 0],
   supports: [1]
 })
@@ -24,7 +24,7 @@ wss.listenOptions = { cert: 'A', host: '0.0.0.0', port: 1337 }
 
 var http = new BaseServer({
   env: 'development',
-  nodeId: 'server',
+  nodeId: 'server:cxH2FjmdeCi8uGRFXJRzi',
   subprotocol: [1, 0],
   supports: [1]
 })

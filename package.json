@@ -13,6 +13,7 @@
     "chalk": "^1.1.3",
     "logux-core": "logux/logux-core",
     "logux-sync": "logux/logux-sync",
+    "short-uuid": "^2.1.0",
     "ws": "^1.1.1",
     "yyyy-mm-dd": "^1.0.1"
   },
@@ -48,6 +49,9 @@
     "coveragePathIgnorePatterns": [
       "/node_modules/",
       "/server.js"
+    ],
+    "setupFiles": [
+      "test/crypto.setup.js"
     ]
   },
   "eslintConfig": {

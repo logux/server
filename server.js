@@ -5,11 +5,12 @@ var reporter = require('./reporter')
  * End-user API to create Logux server.
  *
  * @param {object} options Server options.
- * @param {string|number} options.nodeId Unique server ID.
  * @param {number[]} options.subprotocol Server current application
  *                                       subprotocol version.
  * @param {number[]} options.supports Which major client’s subprotocol versions
  *                                    are supported by server.
+ * @param {string|number} [options.nodeId] Unique server ID. Be default,
+ *                                         `server:` with compacted UUID.
  * @param {string} [options.root=process.cwd()] Application root to load files
  *                                              and show errors.
  * @param {number} [options.timeout=20000] Timeout in milliseconds
@@ -31,7 +32,6 @@ var reporter = require('./reporter')
  * @example
  * import { Server } from 'logux-server'
  * const app = new Server({
- *   nodeId: 'server',
  *   subprotocol: [1, 0],
  *   supports: [1]
  * })

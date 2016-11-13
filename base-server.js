@@ -2,6 +2,7 @@ var ServerConnection = require('logux-sync').ServerConnection
 var createTimer = require('logux-core').createTimer
 var MemoryStore = require('logux-core').MemoryStore
 var WebSocket = require('ws')
+var shortUUID = require('short-uuid')
 var https = require('https')
 var http = require('http')
 var Log = require('logux-core').Log
@@ -10,6 +11,8 @@ var remoteAddress = require('./remote-address')
 var promisify = require('./promisify')
 var Client = require('./client')
 
+var shortId = shortUUID()
+
 /**
  * Basic Logux Server API without good UI. Use it only if you need
  * to create some special hacks on top of Logux Server.
@@ -17,11 +20,12 @@ var Client = require('./client')
  * In most use cases you should use {@link Server}.
  *
  * @param {object} options Server options.
- * @param {string|number} options.nodeId Unique server ID.
  * @param {number[]} options.subprotocol Server current application
  *                                       subprotocol version.
  * @param {number[]} options.supports Which major client’s subprotocol versions
  *                                    are supported by server.
+ * @param {string|number} [options.nodeId] Unique server ID. Be default,
+ *                                         `server:` with compacted UUID.
  * @param {string} [options.root=process.cwd()] Application root to load files
  *                                              and show errors.
  * @param {number} [options.timeout=20000] Timeout in milliseconds
@@ -59,7 +63,7 @@ function BaseServer (options, reporter) {
   this.reporter = reporter || function () { }
 
   if (typeof this.options.nodeId === 'undefined') {
-    throw new Error('Missed unique node name')
+    this.options.nodeId = 'server:' + shortId.fromUUID(shortId.uuid())
   }
 
   if (typeof this.options.subprotocol === 'undefined') {
