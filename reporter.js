@@ -1,6 +1,7 @@
 var yyyymmdd = require('yyyy-mm-dd')
 var chalk = require('chalk')
 var path = require('path')
+
 var pkg = require('./package.json')
 
 function rightPag (str, length) {

@@ -1,14 +1,14 @@
 var ServerConnection = require('logux-sync').ServerConnection
-var remoteAddress = require('./remote-address')
 var createTimer = require('logux-core').createTimer
 var MemoryStore = require('logux-core').MemoryStore
 var WebSocket = require('ws')
-var Client = require('./client')
 var https = require('https')
 var http = require('http')
 var Log = require('logux-core').Log
 
+var remoteAddress = require('./remote-address')
 var promisify = require('./promisify')
+var Client = require('./client')
 
 /**
  * Basic Logux Server API without good UI. Use it only if you need

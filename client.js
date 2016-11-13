@@ -1,5 +1,6 @@
-var remoteAddress = require('./remote-address')
 var ServerSync = require('logux-sync').ServerSync
+
+var remoteAddress = require('./remote-address')
 
 /**
  * Logux client connected to server.
