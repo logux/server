@@ -43,6 +43,7 @@ var shortId = shortUUID()
  *                                                   variable. On empty
  *                                                   `NODE_ENV` it will
  *                                                   be `"development"`.
+ * @param {number} [options.pid] Process ID, to display in reporter.
  * @param {function} [reporter] Function to show current server status.
  *
  * @example

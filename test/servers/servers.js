@@ -1,6 +1,8 @@
 var spawn = require('child_process').spawn
 var path = require('path')
 
+var DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
+
 function exec (name) {
   return new Promise(function (resolve) {
     var out = ''
@@ -9,7 +11,9 @@ function exec (name) {
       out += chank
     })
     server.on('close', function (exitCode) {
-      resolve([out, exitCode])
+      var fixed = out.replace(DATE, '1970-01-01 00:00:00')
+                     .replace(/PID:(\s+)\d+/, 'PID:$121384')
+      resolve([fixed, exitCode])
     })
     setTimeout(function () {
       server.kill('SIGINT')

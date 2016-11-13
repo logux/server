@@ -106,6 +106,7 @@ var reporters = {
     return info(c, 'Logux server is listening') +
            params(c, 'info', [
              ['Logux server', pkg.version],
+             ['PID', app.options.pid],
              ['Node ID', app.options.nodeId],
              ['Environment', app.env],
              ['Subprotocol', app.options.subprotocol.join('.')],

@@ -41,6 +41,8 @@ var reporter = require('./reporter')
  * @extends BaseServer
  */
 function Server (options) {
+  options.pid = process.pid
+
   BaseServer.call(this, options, function () {
     process.stderr.write(reporter.apply(reporter, arguments))
   })
