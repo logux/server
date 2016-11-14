@@ -1,11 +1,15 @@
 var yyyymmdd = require('yyyy-mm-dd')
-var chalk = require('chalk')
 var stripAnsi = require('strip-ansi')
+var chalk = require('chalk')
 var path = require('path')
+var os = require('os')
 
 var pkg = require('./package.json')
 
 var PADDING = '        '
+var SEPARATOR = os.EOL + os.EOL
+
+var NEXT_LINE = os.EOL === '\n' ? '\r\v' : os.EOL
 
 function rightPag (str, length) {
   var add = length - stripAnsi(str).length
@@ -21,11 +25,9 @@ function line (c, label, color, message) {
   var labelFormat = c.bold[color].bgBlack.inverse
   var messageFormat = c.bold[color]
 
-  return '\n' +
-    rightPag(labelFormat(label), 8) +
-    messageFormat(message) + ' ' +
-    time(c) +
-    '\n'
+  return rightPag(labelFormat(label), 8) +
+         messageFormat(message) + ' ' +
+         time(c)
 }
 
 function info (c, str) {
@@ -49,7 +51,7 @@ function params (c, type, fields) {
   }
   return fields.map(function (field) {
     return PADDING + rightPag(field[0] + ': ', max) + c.white(field[1])
-  }).join('\n') + '\n'
+  }).join(NEXT_LINE)
 }
 
 function errorParams (c, type, client) {
@@ -71,7 +73,7 @@ function errorParams (c, type, client) {
 }
 
 function note (c, str) {
-  return PADDING + c.grey(str) + '\n'
+  return PADDING + c.grey(str)
 }
 
 function prettyStackTrace (c, err, root) {
@@ -90,7 +92,7 @@ function prettyStackTrace (c, err, root) {
         return c.yellow(match[1] + match[2] + ')')
       }
     }
-  }).join('\n') + '\n'
+  }).join(NEXT_LINE)
 }
 
 var reporters = {
@@ -110,55 +112,67 @@ var reporters = {
 
     var dev = app.env === 'development'
 
-    return info(c, 'Logux server is listening') +
-           params(c, 'info', [
-             ['Logux server', pkg.version],
-             ['PID', app.options.pid],
-             ['Node ID', app.options.nodeId],
-             ['Environment', app.env],
-             ['Subprotocol', app.options.subprotocol.join('.')],
-             ['Supports', supports],
-             ['Listen', url]
-           ]) +
-           (dev ? note(c, 'Press Ctrl-C to shutdown server') : '')
+    return [
+      info(c, 'Logux server is listening'),
+      params(c, 'info', [
+        ['Logux server', pkg.version],
+        ['PID', app.options.pid],
+        ['Node ID', app.options.nodeId],
+        ['Environment', app.env],
+        ['Subprotocol', app.options.subprotocol.join('.')],
+        ['Supports', supports],
+        ['Listen', url]
+      ]),
+      (dev ? note(c, 'Press Ctrl-C to shutdown server') : '')
+    ]
   },
 
   connect: function connect (c, app, ip) {
-    return info(c, 'Client was connected') +
-           params(c, 'info', [['IP address', ip]])
+    return [
+      info(c, 'Client was connected'),
+      params(c, 'info', [['IP address', ip]])
+    ]
   },
 
   authenticated: function authenticated (c, app, client) {
-    return info(c, 'User was authenticated') +
-           params(c, 'info', [
-             ['User ID', client.user.id],
-             ['Node ID', client.nodeId || 'unknown'],
-             ['Subprotocol', client.sync.otherSubprotocol.join('.')],
-             ['Logux protocol', client.sync.otherProtocol.join('.')],
-             ['IP address', client.remoteAddress]
-           ])
+    return [
+      info(c, 'User was authenticated'),
+      params(c, 'info', [
+        ['User ID', client.user.id],
+        ['Node ID', client.nodeId || 'unknown'],
+        ['Subprotocol', client.sync.otherSubprotocol.join('.')],
+        ['Logux protocol', client.sync.otherProtocol.join('.')],
+        ['IP address', client.remoteAddress]
+      ])
+    ]
   },
 
   disconnect: function disconnect (c, app, client) {
     var user = client.user ? client.user.id : 'unauthenticated'
-    return info(c, 'Client was disconnected') +
-           params(c, 'info', [
-             ['User ID', user],
-             ['Node ID', client.nodeId || 'unknown'],
-             ['IP address', client.remoteAddress]
-           ])
+    return [
+      info(c, 'Client was disconnected'),
+      params(c, 'info', [
+        ['User ID', user],
+        ['Node ID', client.nodeId || 'unknown'],
+        ['IP address', client.remoteAddress]
+      ])
+    ]
   },
 
   destroy: function destroy (c) {
-    return info(c, 'Shutting down Logux server')
+    return [
+      info(c, 'Shutting down Logux server')
+    ]
   },
 
   runtimeError: function runtimeError (c, app, client, err) {
     var prefix = err.name + ': ' + err.message
     if (err.name === 'Error') prefix = err.message
-    return error(c, prefix) +
-           prettyStackTrace(c, err, app.options.root) +
-           errorParams(c, 'error', client)
+    return [
+      error(c, prefix),
+      prettyStackTrace(c, err, app.options.root),
+      errorParams(c, 'error', client)
+    ]
   },
 
   syncError: function syncError (c, app, client, err) {
@@ -168,13 +182,17 @@ var reporters = {
     } else {
       prefix = 'SyncError: ' + err.description
     }
-    return error(c, prefix) +
-           errorParams(c, 'error', client)
+    return [
+      error(c, prefix),
+      errorParams(c, 'error', client)
+    ]
   },
 
   clientError: function clientError (c, app, client, err) {
-    return warn(c, 'Client error: ' + err.description) +
-           errorParams(c, 'warn', client)
+    return [
+      warn(c, 'Client error: ' + err.description),
+      errorParams(c, 'warn', client)
+    ]
   }
 
 }
@@ -188,7 +206,9 @@ module.exports = function (type, app) {
   var reporter = reporters[type]
   var args = [c].concat(Array.prototype.slice.call(arguments, 1))
 
-  return reporter.apply({ }, args)
+  return reporter.apply({ }, args).filter(function (i) {
+    return i !== ''
+  }).join(NEXT_LINE) + SEPARATOR
 }
 
 module.exports.now = function () {

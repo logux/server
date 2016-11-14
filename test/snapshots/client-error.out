@@ -1,6 +1,2 @@
+[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mClient error: A timeout was reached (5000ms)[39m[22m [2mat 1970-01-01 00:00:00[22m        User ID:     [37m100[39m        Node ID:     [37m100:550e8400-e29b-41d4-a716-446655440000[39m        Subprotocol: [37m1.0[39m        IP address:  [37m127.0.0.1[39m
 
-[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mClient error: A timeout was reached (5000ms)[39m[22m [2mat 1970-01-01 00:00:00[22m
-        User ID:     [37m100[39m
-        Node ID:     [37m100:550e8400-e29b-41d4-a716-446655440000[39m
-        Subprotocol: [37m1.0[39m
-        IP address:  [37m127.0.0.1[39m
