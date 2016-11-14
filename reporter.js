@@ -5,7 +5,7 @@ var path = require('path')
 
 var pkg = require('./package.json')
 
-var PADDING_LEFT = 9
+var PADDING_LEFT = 8
 
 function rightPag (str, length) {
   var add = length - stripAnsi(str).length
@@ -16,14 +16,14 @@ function rightPag (str, length) {
 var emptyPaddingLeft = rightPag('', PADDING_LEFT)
 
 function time (c) {
-  return c.dim(yyyymmdd.withTime(module.exports.now()))
+  return c.dim('at ' + yyyymmdd.withTime(module.exports.now()))
 }
 
 function line (c, status, message) {
   return '\n' +
     rightPag(status, 8) +
-    rightPag(time(c), 20) +
-    message +
+    message + ' ' +
+    time(c) +
     '\n'
 }
 
