@@ -1,5 +1,5 @@
 
-[1m[31m[40m[7m ERROR [27m[49m[39m[22m [90m1970-01-01 00:00:00[39m [1m[31mSome mistake[39m[22m
+[1m[31m[40m[7m ERROR [27m[49m[39m[22m [1m[31mSome mistake[39m[22m [2mat 1970-01-01 00:00:00[22m
 [33m        at Object.<anonymous> (test/snapshots/reports.js:28:13)[39m
 [31m        at Module._compile (module.js:573:32)[39m
 [31m        at at runTest (node_modules/jest/index.js:50:10)[39m

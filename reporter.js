@@ -1,39 +1,65 @@
 var yyyymmdd = require('yyyy-mm-dd')
 var chalk = require('chalk')
+var stripAnsi = require('strip-ansi')
 var path = require('path')
 
 var pkg = require('./package.json')
 
+var PADDING_LEFT = 8
+
+var LOG_LEVELS = {
+  info: {
+    label: ' INFO ',
+    color: 'green'
+  },
+  warn: {
+    label: ' WARN ',
+    color: 'yellow'
+  },
+  error: {
+    label: ' ERROR ',
+    color: 'red'
+  }
+}
+
 function rightPag (str, length) {
-  var add = length - str.length
+  var add = length - stripAnsi(str).length
   for (var i = 0; i < add; i++) str += ' '
   return str
 }
 
+var emptyPaddingLeft = rightPag('', PADDING_LEFT)
+
 function time (c) {
-  return c.gray(yyyymmdd.withTime(module.exports.now()))
+  return c.dim('at ' + yyyymmdd.withTime(module.exports.now()))
+}
+
+function line (c, level, message) {
+  var labelStr = c
+    .bold[level.color]
+    .bgBlack
+    .inverse(level.label)
+  var messageStr = c.bold[level.color](message)
+  return '\n' +
+    rightPag(labelStr, 8) +
+    messageStr + ' ' +
+    time(c) +
+    '\n'
 }
 
 function info (c, str) {
-  return '\n' + c.bold.green.bgBlack.inverse(' INFO ') + ' ' +
-    time(c) + ' ' +
-    c.bold(str) + '\n'
+  return line(c, LOG_LEVELS.info, str)
 }
 
 function warn (c, str) {
-  return '\n' + c.bold.yellow.bgBlack.inverse(' WARN ') + ' ' +
-    time(c) + ' ' +
-    c.bold.yellow(str) + '\n'
+  return line(c, LOG_LEVELS.warn, str)
 }
 
 function error (c, str) {
-  return '\n' + c.bold.red.bgBlack.inverse(' ERROR ') + ' ' +
-    time(c) + ' ' +
-    c.bold.red(str) + '\n'
+  return line(c, LOG_LEVELS.error, str)
 }
 
 function params (c, type, fields) {
-  var prefix = type === 'error' ? '        ' : '       '
   var max = 0
   var current
   for (var i = 0; i < fields.length; i++) {
@@ -41,7 +67,7 @@ function params (c, type, fields) {
     if (current > max) max = current
   }
   return fields.map(function (field) {
-    return prefix + rightPag(field[0] + ': ', max) + c.bold(field[1])
+    return emptyPaddingLeft + rightPag(field[0] + ': ', max) + c.white(field[1])
   }).join('\n') + '\n'
 }
 
@@ -64,14 +90,14 @@ function errorParams (c, type, client) {
 }
 
 function note (c, str) {
-  return '       ' + c.grey(str) + '\n'
+  return emptyPaddingLeft + c.grey(str) + '\n'
 }
 
 function prettyStackTrace (c, err, root) {
   if (root.slice(-1) !== path.sep) root += path.sep
 
   return err.stack.split('\n').slice(1).map(function (i) {
-    i = i.replace(/^\s*/, '        ')
+    i = i.replace(/^\s*/, emptyPaddingLeft)
     var match = i.match(/(\s+at [^(]+ \()([^)]+)\)/)
     if (!match || match[2].indexOf(root) !== 0) {
       return c.red(i)
@@ -94,7 +120,7 @@ var reporters = {
       url = 'Custom HTTP server'
     } else {
       url = (app.listenOptions.cert ? 'wss://' : 'ws://') +
-            app.listenOptions.host + ':' + app.listenOptions.port
+        app.listenOptions.host + ':' + app.listenOptions.port
     }
 
     var supports = app.options.supports.map(function (i) {

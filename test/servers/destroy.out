@@ -1,12 +1,12 @@
 
- INFO  1970-01-01 00:00:00 Logux server is listening
-       Logux server: 0.0.0
-       PID:          21384
-       Node ID:      server
-       Environment:  test
-       Subprotocol:  1.0
-       Supports:     1.x
-       Listen:       ws://127.0.0.1:1337
+ INFO   Logux server is listening at 1970-01-01 00:00:00
+        Logux server: 0.0.0
+        PID:          21384
+        Node ID:      server
+        Environment:  test
+        Subprotocol:  1.0
+        Supports:     1.x
+        Listen:       ws://127.0.0.1:1337
 
- INFO  1970-01-01 00:00:00 Shutting down Logux server
+ INFO   Shutting down Logux server at 1970-01-01 00:00:00
  Custom destroy task finished
