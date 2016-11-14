@@ -8,7 +8,6 @@ var pkg = require('./package.json')
 
 var PADDING = '        '
 var SEPARATOR = os.EOL + os.EOL
-
 var NEXT_LINE = os.EOL === '\n' ? '\r\v' : os.EOL
 
 function rightPag (str, length) {
