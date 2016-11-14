@@ -5,22 +5,7 @@ var path = require('path')
 
 var pkg = require('./package.json')
 
-var PADDING_LEFT = 8
-
-var LOG_LEVELS = {
-  info: {
-    label: ' INFO ',
-    color: 'green'
-  },
-  warn: {
-    label: ' WARN ',
-    color: 'yellow'
-  },
-  error: {
-    label: ' ERROR ',
-    color: 'red'
-  }
-}
+var PADDING = '        '
 
 function rightPag (str, length) {
   var add = length - stripAnsi(str).length
@@ -28,35 +13,31 @@ function rightPag (str, length) {
   return str
 }
 
-var emptyPaddingLeft = rightPag('', PADDING_LEFT)
-
 function time (c) {
   return c.dim('at ' + yyyymmdd.withTime(module.exports.now()))
 }
 
-function line (c, level, message) {
-  var labelStr = c
-    .bold[level.color]
-    .bgBlack
-    .inverse(level.label)
-  var messageStr = c.bold[level.color](message)
+function line (c, label, color, message) {
+  var labelFormat = c.bold[color].bgBlack.inverse
+  var messageFormat = c.bold[color]
+
   return '\n' +
-    rightPag(labelStr, 8) +
-    messageStr + ' ' +
+    rightPag(labelFormat(label), 8) +
+    messageFormat(message) + ' ' +
     time(c) +
     '\n'
 }
 
 function info (c, str) {
-  return line(c, LOG_LEVELS.info, str)
+  return line(c, ' INFO ', 'green', str)
 }
 
 function warn (c, str) {
-  return line(c, LOG_LEVELS.warn, str)
+  return line(c, ' WARN ', 'yellow', str)
 }
 
 function error (c, str) {
-  return line(c, LOG_LEVELS.error, str)
+  return line(c, ' ERROR ', 'red', str)
 }
 
 function params (c, type, fields) {
@@ -67,7 +48,7 @@ function params (c, type, fields) {
     if (current > max) max = current
   }
   return fields.map(function (field) {
-    return emptyPaddingLeft + rightPag(field[0] + ': ', max) + c.white(field[1])
+    return PADDING + rightPag(field[0] + ': ', max) + c.white(field[1])
   }).join('\n') + '\n'
 }
 
@@ -90,14 +71,14 @@ function errorParams (c, type, client) {
 }
 
 function note (c, str) {
-  return emptyPaddingLeft + c.grey(str) + '\n'
+  return PADDING + c.grey(str) + '\n'
 }
 
 function prettyStackTrace (c, err, root) {
   if (root.slice(-1) !== path.sep) root += path.sep
 
   return err.stack.split('\n').slice(1).map(function (i) {
-    i = i.replace(/^\s*/, emptyPaddingLeft)
+    i = i.replace(/^\s*/, PADDING)
     var match = i.match(/(\s+at [^(]+ \()([^)]+)\)/)
     if (!match || match[2].indexOf(root) !== 0) {
       return c.red(i)
