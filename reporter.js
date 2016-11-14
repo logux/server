@@ -88,13 +88,13 @@ function prettyStackTrace (c, err, root) {
     i = i.replace(/^\s*/, emptyPaddingLeft)
     var match = i.match(/(\s+at [^(]+ \()([^)]+)\)/)
     if (!match || match[2].indexOf(root) !== 0) {
-      return c.gray(i)
+      return c.red(i)
     } else {
       match[2] = match[2].slice(root.length)
       if (match[2].indexOf('node_modules') !== -1) {
-        return c.gray(match[1] + match[2] + ')')
-      } else {
         return c.red(match[1] + match[2] + ')')
+      } else {
+        return c.yellow(match[1] + match[2] + ')')
       }
     }
   }).join('\n') + '\n'
