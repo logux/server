@@ -179,6 +179,12 @@ BaseServer.prototype = {
     if (!this.listenOptions.key && this.listenOptions.cert) {
       throw new Error('You must set key option too if you use cert option')
     }
+    if (this.env === 'production') {
+      if (!this.listenOptions.server && !this.listenOptions.key) {
+        throw new Error('SSL is required in production mode. ' +
+                        'Set key and cert options or use server option.')
+      }
+    }
 
     if (!this.authenticator) {
       throw new Error('You must set authentication callback by app.auth()')
@@ -192,13 +198,6 @@ BaseServer.prototype = {
     } else {
       if (!this.listenOptions.port) this.listenOptions.port = 1337
       if (!this.listenOptions.host) this.listenOptions.host = '127.0.0.1'
-
-      if (this.env === 'production') {
-        if (!this.listenOptions.key || !this.listenOptions.cert) {
-          throw new Error('SSL is required in production mode. ' +
-                          'Set key and cert options or use server option.')
-        }
-      }
 
       if (this.listenOptions.cert) {
         this.http = https.createServer({
