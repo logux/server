@@ -7,6 +7,21 @@ var pkg = require('./package.json')
 
 var PADDING_LEFT = 8
 
+var LOG_LEVELS = {
+  info: {
+    label: ' INFO ',
+    color: 'green'
+  },
+  warn: {
+    label: ' WARN ',
+    color: 'yellow'
+  },
+  error: {
+    label: ' ERROR ',
+    color: 'red'
+  }
+}
+
 function rightPag (str, length) {
   var add = length - stripAnsi(str).length
   for (var i = 0; i < add; i++) str += ' '
@@ -19,33 +34,29 @@ function time (c) {
   return c.dim('at ' + yyyymmdd.withTime(module.exports.now()))
 }
 
-function line (c, status, message) {
+function line (c, level, message) {
+  var labelStr = c
+    .bold[level.color]
+    .bgBlack
+    .inverse(level.label)
+  var messageStr = c.bold[level.color](message)
   return '\n' +
-    rightPag(status, 8) +
-    message + ' ' +
+    rightPag(labelStr, 8) +
+    messageStr + ' ' +
     time(c) +
     '\n'
 }
 
 function info (c, str) {
-  return line(c,
-    c.bold.green.bgBlack.inverse(' INFO '),
-    c.bold.green(str)
-  )
+  return line(c, LOG_LEVELS.info, str)
 }
 
 function warn (c, str) {
-  return line(c,
-    c.bold.yellow.bgBlack.inverse(' WARN '),
-    c.bold.yellow(str)
-  )
+  return line(c, LOG_LEVELS.warn, str)
 }
 
 function error (c, str) {
-  return line(c,
-    c.bold.red.bgBlack.inverse(' ERROR '),
-    c.bold.red(str)
-  )
+  return line(c, LOG_LEVELS.error, str)
 }
 
 function params (c, type, fields) {
