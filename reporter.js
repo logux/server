@@ -35,9 +35,10 @@ function info (c, str) {
 }
 
 function warn (c, str) {
-  return '\n' + c.bold.yellow.bgBlack.inverse(' WARN ') + ' ' +
-    time(c) + ' ' +
-    c.bold.yellow(str) + '\n'
+  return line(c,
+    c.bold.yellow.bgBlack.inverse(' WARN '),
+    c.bold.yellow(str)
+  )
 }
 
 function error (c, str) {
