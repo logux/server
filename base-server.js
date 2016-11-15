@@ -42,10 +42,10 @@ function readFile (root, file) {
  * In most use cases you should use {@link Server}.
  *
  * @param {object} options Server options.
- * @param {number[]} options.subprotocol Server current application
- *                                       subprotocol version.
- * @param {number[]} options.supports Which major client’s subprotocol versions
- *                                    are supported by server.
+ * @param {string} options.subprotocol Server current application
+ *                                     subprotocol version in SemVer format.
+ * @param {string} options.supports npm’s version requirements for client
+ *                                  subprotocol version.
  * @param {string|number} [options.nodeId] Unique server ID. Be default,
  *                                         `server:` with compacted UUID.
  * @param {string} [options.root=process.cwd()] Application root to load files

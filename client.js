@@ -1,4 +1,6 @@
 var ServerSync = require('logux-sync').ServerSync
+var SyncError = require('logux-sync').SyncError
+var semver = require('semver')
 
 var remoteAddress = require('./remote-address')
 
@@ -49,7 +51,6 @@ function Client (app, connection, key) {
    */
   this.sync = new ServerSync(app.nodeId, app.log, connection, {
     subprotocol: app.options.subprotocol,
-    supports: app.options.supports,
     timeout: app.options.timeout,
     ping: app.options.ping,
     auth: this.auth.bind(this)
@@ -57,11 +58,19 @@ function Client (app, connection, key) {
 
   var client = this
 
-  this.sync.on('state', function () {
-    if (!client.sync.connected && !client.destroyed) client.destroy()
-  })
   this.sync.catch(function (err) {
     client.app.reporter('syncError', client.app, client, err)
+  })
+  this.sync.on('connect', function () {
+    if (!client.isSubprotocol(client.app.options.supports)) {
+      throw new SyncError(client.sync, 'wrong-subprotocol', {
+        supported: client.app.options.supports,
+        used: client.sync.otherSubprotocol
+      })
+    }
+  })
+  this.sync.on('state', function () {
+    if (!client.sync.connected && !client.destroyed) client.destroy()
   })
   this.sync.on('clientError', function (err) {
     client.app.reporter('clientError', client.app, client, err)
@@ -75,6 +84,23 @@ Client.prototype = {
    * @type {object}
    */
   user: undefined,
+
+  /**
+   * Check client subprotocol version. It uses `semver` npm package
+   * to parse requirements.
+   *
+   * @param {string} range npm’s version requirements.
+   *
+   * @return {boolean} Is version satisfies requirements.
+   *
+   * @example
+   * if (client.isSubprotocol('4.x')) {
+   *   useOldAPI()
+   * }
+   */
+  isSubprotocol: function isSubprotocol (range) {
+    return semver.satisfies(this.sync.otherSubprotocol, range)
+  },
 
   /**
    * Disconnect client.

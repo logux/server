@@ -18,6 +18,8 @@
     "auth",
     "ServerSync",
     "remoteAddress",
-    "ServerConnection"
+    "ServerConnection",
+    "SemVer",
+    "npm"
   ]
 }

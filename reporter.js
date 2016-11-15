@@ -58,14 +58,10 @@ function errorParams (c, type, client) {
     return ''
   } else {
     var user = client.user ? client.user.id : 'unauthenticated'
-    var subprotocol = 'unknown'
-    if (client.sync.otherSubprotocol) {
-      subprotocol = client.sync.otherSubprotocol.join('.')
-    }
     return params(c, 'error', [
       ['User ID', user],
       ['Node ID', client.nodeId || 'unknown'],
-      ['Subprotocol', subprotocol],
+      ['Subprotocol', client.sync.otherSubprotocol || 'unknown'],
       ['IP address', client.remoteAddress]
     ])
   }
@@ -105,10 +101,6 @@ var reporters = {
         app.listenOptions.host + ':' + app.listenOptions.port
     }
 
-    var supports = app.options.supports.map(function (i) {
-      return i + '.x'
-    }).join(', ')
-
     var dev = app.env === 'development'
 
     return [
@@ -118,8 +110,8 @@ var reporters = {
         ['PID', app.options.pid],
         ['Node ID', app.options.nodeId],
         ['Environment', app.env],
-        ['Subprotocol', app.options.subprotocol.join('.')],
-        ['Supports', supports],
+        ['Subprotocol', app.options.subprotocol],
+        ['Supports', app.options.supports],
         ['Listen', url]
       ]),
       (dev ? note(c, 'Press Ctrl-C to shutdown server') : '')
@@ -139,7 +131,7 @@ var reporters = {
       params(c, 'info', [
         ['User ID', client.user.id],
         ['Node ID', client.nodeId || 'unknown'],
-        ['Subprotocol', client.sync.otherSubprotocol.join('.')],
+        ['Subprotocol', client.sync.otherSubprotocol],
         ['Logux protocol', client.sync.otherProtocol.join('.')],
         ['IP address', client.remoteAddress]
       ])

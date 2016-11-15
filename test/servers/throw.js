@@ -5,8 +5,8 @@ var Server = require('../../server')
 new Server({
   env: 'test',
   nodeId: 'server',
-  subprotocol: [1, 0],
-  supports: [1]
+  subprotocol: '1.0.0',
+  supports: '1.x'
 })
 
 setTimeout(function () {

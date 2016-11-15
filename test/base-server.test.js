@@ -18,8 +18,8 @@ function uniqPort () {
 }
 
 var defaultOptions = {
-  subprotocol: [0, 0],
-  supports: [0]
+  subprotocol: '0.0.0',
+  supports: '0.x'
 }
 
 function createServer (options) {
@@ -48,7 +48,7 @@ afterEach(function () {
 
 it('saves server options', function () {
   var app = new BaseServer(defaultOptions)
-  expect(app.options.supports).toEqual([0])
+  expect(app.options.supports).toEqual('0.x')
 })
 
 it('generates node ID', function () {
@@ -64,7 +64,7 @@ it('throws on missed subprotocol', function () {
 
 it('throws on missed supported subprotocols', function () {
   expect(function () {
-    new BaseServer({ subprotocol: [0, 0] })
+    new BaseServer({ subprotocol: '0.0.0' })
   }).toThrowError(/supported subprotocol/)
 })
 
@@ -83,8 +83,8 @@ it('takes environment from NODE_ENV', function () {
 it('sets environment from user', function () {
   var app = new BaseServer({
     env: 'production',
-    subprotocol: [0, 0],
-    supports: [0]
+    subprotocol: '0.0.0',
+    supports: '0.x'
   })
   expect(app.env).toEqual('production')
 })
@@ -96,8 +96,8 @@ it('uses cwd as default root', function () {
 
 it('uses user root', function () {
   var app = new BaseServer({
-    subprotocol: [0, 0],
-    supports: [0],
+    subprotocol: '0.0.0',
+    supports: '0.x',
     root: '/a'
   })
   expect(app.options.root).toEqual('/a')
@@ -117,8 +117,8 @@ it('creates log with custom timer and store', function () {
   var timer = createTestTimer()
   var store = new MemoryStore()
   var app = new BaseServer({
-    subprotocol: [0, 0],
-    supports: [0],
+    subprotocol: '0.0.0',
+    supports: '0.x',
     store: store,
     timer: timer
   })
@@ -179,8 +179,8 @@ it('throws a error on certificate without key', function () {
 it('throws a error on no security in production', function () {
   var app = createServer({
     env: 'production',
-    subprotocol: [0, 0],
-    supports: [0]
+    subprotocol: '0.0.0',
+    supports: '0.x'
   })
   expect(function () {
     app.listen({ port: uniqPort() })
@@ -219,8 +219,8 @@ it('loads keys by absolute path', function () {
 
 it('loads keys by relative path', function () {
   var app = createServer({
-    subprotocol: [0, 0],
-    supports: [0],
+    subprotocol: '0.0.0',
+    supports: '0.x',
     root: __dirname
   })
   this.app = app

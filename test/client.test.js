@@ -20,8 +20,8 @@ function createConnection () {
 function createServer (opts, reporter) {
   if (!opts) {
     opts = {
-      subprotocol: [0, 0],
-      supports: [0]
+      subprotocol: '0.0.0',
+      supports: '0.x'
     }
   }
   return new BaseServer(opts, reporter)
@@ -44,15 +44,14 @@ function nextTick () {
 it('uses server options', function () {
   var app = createServer({
     nodeId: 'server',
-    subprotocol: [0, 0],
-    supports: [0],
+    subprotocol: '0.0.0',
+    supports: '0.x',
     timeout: 16000,
     ping: 8000
   })
   var client = new Client(app, createConnection(), 1)
 
-  expect(client.sync.options.subprotocol).toEqual([0, 0])
-  expect(client.sync.options.supports).toEqual([0])
+  expect(client.sync.options.subprotocol).toEqual('0.0.0')
   expect(client.sync.options.timeout).toEqual(16000)
   expect(client.sync.options.ping).toEqual(8000)
 })
@@ -145,4 +144,29 @@ it('reports about synchronization errors', function () {
   expect(test.reports[0][1]).toEqual(test.app)
   expect(test.reports[0][2]).toEqual(client)
   expect(test.reports[0][3].type).toEqual('wrong-format')
+})
+
+it('checks subprotocol', function () {
+  var test = createReporter()
+
+  var client = new Client(test.app, createConnection(), 1)
+  client.connection.other().send([
+    'connect', client.sync.protocol, 'client', 0, { subprotocol: '1.0.0' }
+  ])
+
+  return nextTick().then(function () {
+    expect(test.reports.length).toEqual(2)
+    expect(test.reports[0][0]).toEqual('clientError')
+    expect(test.reports[0][3].message).toEqual(
+      'Only 0.x application subprotocols are supported, but you use 1.0.0')
+    expect(test.reports[1][0]).toEqual('disconnect')
+  })
+})
+
+it('has method to check client subprotocol', function () {
+  var test = createReporter()
+  var client = new Client(test.app, createConnection(), 1)
+  client.sync.otherSubprotocol = '1.0.1'
+  expect(client.isSubprotocol('>= 1.0.0')).toBeTruthy()
+  expect(client.isSubprotocol('< 1.0.0')).toBeFalsy()
 })
