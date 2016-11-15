@@ -10,8 +10,8 @@ var app = new BaseServer({
   env: 'development',
   pid: 21384,
   nodeId: 'server:cxH2FjmdeCi8uGRFXJRzi',
-  subprotocol: [2, 5],
-  supports: [2, 1]
+  subprotocol: '2.5.0',
+  supports: '2.x || 1.x'
 })
 app.listenOptions = { host: '127.0.0.1', port: 1337 }
 
@@ -19,8 +19,8 @@ var wss = new BaseServer({
   env: 'production',
   pid: 21384,
   nodeId: 'server:cxH2FjmdeCi8uGRFXJRzi',
-  subprotocol: [1, 0],
-  supports: [1]
+  subprotocol: '1.0.0',
+  supports: '1.x'
 })
 wss.listenOptions = { cert: 'A', host: '0.0.0.0', port: 1337 }
 
@@ -28,8 +28,8 @@ var http = new BaseServer({
   env: 'development',
   pid: 21384,
   nodeId: 'server:cxH2FjmdeCi8uGRFXJRzi',
-  subprotocol: [1, 0],
-  supports: [1]
+  subprotocol: '1.0.0',
+  supports: '1.x'
 })
 http.listenOptions = { server: createServer() }
 
@@ -44,7 +44,7 @@ var ws = {
 }
 
 var authed = new Client(app, new ServerConnection(ws), 1)
-authed.sync.otherSubprotocol = [1, 0]
+authed.sync.otherSubprotocol = '1.0.0'
 authed.sync.otherProtocol = [0, 0]
 authed.user = { id: 100 }
 authed.nodeId = '100:550e8400-e29b-41d4-a716-446655440000'

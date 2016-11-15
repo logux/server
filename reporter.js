@@ -49,7 +49,7 @@ function params (c, type, fields) {
     if (current > max) max = current
   }
   return fields.map(function (field) {
-    return PADDING + rightPag(field[0] + ': ', max) + c.white(field[1])
+    return PADDING + rightPag(field[0] + ': ', max) + c.bold(field[1])
   }).join(NEXT_LINE)
 }
 
