@@ -196,12 +196,52 @@ it('accepts custom HTTP server', function () {
 })
 
 it('uses HTTPS', function () {
-  this.app = createServer()
-  this.app.listen({
+  var app = createServer()
+  this.app = app
+  return app.listen({
     cert: fs.readFileSync(path.join(__dirname, 'fixtures/cert.pem')),
     key: fs.readFileSync(path.join(__dirname, 'fixtures/key.pem'))
+  }).then(function () {
+    expect(app.http instanceof https.Server).toBeTruthy()
   })
-  expect(this.app.http instanceof https.Server).toBeTruthy()
+})
+
+it('loads keys by absolute path', function () {
+  var app = createServer()
+  this.app = app
+  return app.listen({
+    cert: path.join(__dirname, 'fixtures/cert.pem'),
+    key: path.join(__dirname, 'fixtures/key.pem')
+  }).then(function () {
+    expect(app.http instanceof https.Server).toBeTruthy()
+  })
+})
+
+it('loads keys by relative path', function () {
+  var app = createServer({
+    subprotocol: [0, 0],
+    supports: [0],
+    root: __dirname
+  })
+  this.app = app
+  return app.listen({
+    cert: 'fixtures/cert.pem',
+    key: 'fixtures/key.pem'
+  }).then(function () {
+    expect(app.http instanceof https.Server).toBeTruthy()
+  })
+})
+
+it('supports object in SSL key', function () {
+  var app = createServer()
+  this.app = app
+  var key = fs.readFileSync(path.join(__dirname, 'fixtures/key.pem'))
+  return app.listen({
+    cert: fs.readFileSync(path.join(__dirname, 'fixtures/cert.pem')),
+    key: { pem: key }
+  }).then(function () {
+    expect(app.http instanceof https.Server).toBeTruthy()
+  })
 })
 
 it('reporters on start listening', function () {

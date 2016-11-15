@@ -33,9 +33,14 @@ var reporter = require('./reporter')
  * import { Server } from 'logux-server'
  * const app = new Server({
  *   subprotocol: [1, 0],
- *   supports: [1]
+ *   supports: [1],
+ *   root: __dirname
  * })
- * app.listen()
+ * if (app.env === 'production') {
+ *   app.listen({ cert: 'cert.pem', key: 'key.pem' })
+ * } else {
+ *   app.listen()
+ * }
  *
  * @class
  * @extends BaseServer

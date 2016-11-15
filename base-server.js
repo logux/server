@@ -5,13 +5,35 @@ var WebSocket = require('ws')
 var shortUUID = require('short-uuid')
 var https = require('https')
 var http = require('http')
+var path = require('path')
 var Log = require('logux-core').Log
+var fs = require('fs')
 
 var remoteAddress = require('./remote-address')
 var promisify = require('./promisify')
 var Client = require('./client')
 
 var shortId = shortUUID()
+
+var PEM_PREAMBLE = '-----BEGIN'
+
+function isPem (content) {
+  if (typeof content === 'object' && content.pem) {
+    return true
+  } else {
+    return content.toString().trim().indexOf(PEM_PREAMBLE) === 0
+  }
+}
+
+function readFile (root, file) {
+  file = file.toString()
+  if (!path.isAbsolute(file)) {
+    file = path.join(root, file)
+  }
+  return promisify(function (done) {
+    fs.readFile(file, done)
+  })
+}
 
 /**
  * Basic Logux Server API without good UI. Use it only if you need
@@ -155,16 +177,18 @@ BaseServer.prototype = {
    *                                    HTTP server manually to connect
    *                                    WebSocket server to it.
    * @param {string} [option.host="127.0.0.1"] IP-address to bind server.
-   * @param {string} [option.key] SSL key content. It is required in production
+   * @param {string} [option.key] SSL key or path to it. Path could be relative
+   *                              from server root. It is required in production
    *                              mode, because WSS is highly recommended.
-   * @param {string} [option.cert] SSL certificate content It is required
+   * @param {string} [option.cert] SSL certificate or path to it. Path could
+   *                               be relative from server root. It is required
    *                               in production mode, because WSS
    *                               is highly recommended.
    *
-   * @return {Promise} When the server has been bound
+   * @return {Promise} When the server has been bound.
    *
    * @example
-   * app.listen({ cert: certFile, key: keyFile })
+   * app.listen({ cert: 'cert.pem', key: 'key.pem' })
    */
   listen: function listen (options) {
     /**
@@ -190,50 +214,63 @@ BaseServer.prototype = {
       throw new Error('You must set authentication callback by app.auth()')
     }
 
-    var app = this
-    var promise
-    if (this.listenOptions.server) {
-      this.ws = new WebSocket.Server({ server: this.listenOptions.server })
-      promise = Promise.resolve()
-    } else {
+    if (!this.listenOptions.server) {
       if (!this.listenOptions.port) this.listenOptions.port = 1337
       if (!this.listenOptions.host) this.listenOptions.host = '127.0.0.1'
+    }
 
-      if (this.listenOptions.cert) {
-        this.http = https.createServer({
-          cert: this.listenOptions.cert,
-          key: this.listenOptions.key
-        })
+    var app = this
+    var promise = Promise.resolve()
+
+    if (this.listenOptions.server) {
+      this.ws = new WebSocket.Server({ server: this.listenOptions.server })
+    } else {
+      var before = []
+      if (this.listenOptions.key && !isPem(this.listenOptions.key)) {
+        before.push(readFile(this.options.root, this.listenOptions.key))
       } else {
-        this.http = http.createServer()
+        before.push(Promise.resolve(this.listenOptions.key))
+      }
+      if (this.listenOptions.cert && !isPem(this.listenOptions.cert)) {
+        before.push(readFile(this.options.root, this.listenOptions.cert))
+      } else {
+        before.push(Promise.resolve(this.listenOptions.cert))
       }
 
-      this.ws = new WebSocket.Server({
-        server: this.http
-      })
+      promise = promise.then(function () {
+        return Promise.all(before)
+      }).then(function (keys) {
+        if (keys[0]) {
+          app.http = https.createServer({ key: keys[0], cert: keys[1] })
+        } else {
+          app.http = http.createServer()
+        }
 
-      this.ws.on('connection', function (ws) {
-        app.reporter('connect', app, remoteAddress(ws))
-        app.lastClient += 1
-        var client = new Client(app, new ServerConnection(ws), app.lastClient)
-        app.clients[app.lastClient] = client
-      })
+        app.ws = new WebSocket.Server({ server: app.http })
+        app.ws.on('connection', function (ws) {
+          app.reporter('connect', app, remoteAddress(ws))
+          app.lastClient += 1
+          var client = new Client(app, new ServerConnection(ws), app.lastClient)
+          app.clients[app.lastClient] = client
+        })
 
-      promise = promisify(function (done) {
-        app.http.listen(app.listenOptions.port, app.listenOptions.host, done)
-      })
-      this.unbind.push(function () {
         return promisify(function (done) {
-          promise.then(function () {
-            app.http.close(done)
-          })
+          app.http.listen(app.listenOptions.port, app.listenOptions.host, done)
         })
       })
     }
 
-    this.unbind.push(function () {
+    app.unbind.push(function () {
       return promisify(function (done) {
-        app.ws.close(done)
+        promise.then(function () {
+          app.ws.close(function () {
+            if (app.http) {
+              app.http.close(done)
+            } else {
+              done()
+            }
+          })
+        })
       })
     })
 
