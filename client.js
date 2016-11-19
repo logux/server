@@ -12,7 +12,7 @@ var remoteAddress = require('./remote-address')
  * @param {number} key Client number used as `app.clients` key.
  *
  * @example
- * var client = app.clients[0]
+ * const client = app.clients[0]
  *
  * @class
  */
