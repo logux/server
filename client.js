@@ -11,6 +11,9 @@ var remoteAddress = require('./remote-address')
  * @param {ServerConnection} connection The Logux connection.
  * @param {number} key Client number used as `app.clients` key.
  *
+ * @example
+ * var client = app.clients[0]
+ *
  * @class
  */
 function Client (app, connection, key) {
