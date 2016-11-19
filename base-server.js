@@ -80,6 +80,9 @@ function BaseServer (options, reporter) {
   /**
    * Server options.
    * @type {object}
+   *
+   * @example
+   * console.log(app.options.nodeId + ' was started')
    */
   this.options = options || { }
 
