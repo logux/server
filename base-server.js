@@ -88,15 +88,15 @@ function BaseServer (options, reporter) {
 
   this.reporter = reporter || function () { }
 
-  if (typeof this.options.nodeId === 'undefined') {
-    this.options.nodeId = 'server:' + shortId.fromUUID(shortId.uuid())
-  }
-
   if (typeof this.options.subprotocol === 'undefined') {
     throw new Error('Missed subprotocol version')
   }
   if (typeof this.options.supports === 'undefined') {
     throw new Error('Missed supported subprotocol major versions')
+  }
+
+  if (typeof this.options.nodeId === 'undefined') {
+    this.options.nodeId = 'server:' + shortId.fromUUID(shortId.uuid())
   }
 
   this.options.root = this.options.root || process.cwd()
