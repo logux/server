@@ -51,6 +51,9 @@ function Client (app, connection, key) {
   /**
    * Sync instance from `logux-sync` to synchronize logs.
    * @type {ServerSync}
+   *
+   * @example
+   * if (client.sync.state === 'synchronized')
    */
   this.sync = new ServerSync(app.nodeId, app.log, connection, {
     subprotocol: app.options.subprotocol,
