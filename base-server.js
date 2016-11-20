@@ -13,8 +13,6 @@ var remoteAddress = require('./remote-address')
 var promisify = require('./promisify')
 var Client = require('./client')
 
-var shortId = shortUUID()
-
 var PEM_PREAMBLE = '-----BEGIN'
 
 function isPem (content) {
@@ -96,6 +94,7 @@ function BaseServer (options, reporter) {
   }
 
   if (typeof this.options.nodeId === 'undefined') {
+    var shortId = shortUUID()
     this.options.nodeId = 'server:' + shortId.fromUUID(shortId.uuid())
   }
 
