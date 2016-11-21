@@ -2,7 +2,7 @@ var ServerConnection = require('logux-sync').ServerConnection
 var createTimer = require('logux-core').createTimer
 var MemoryStore = require('logux-core').MemoryStore
 var WebSocket = require('ws')
-var shortUUID = require('short-uuid')
+var shortid = require('shortid')
 var https = require('https')
 var http = require('http')
 var path = require('path')
@@ -94,8 +94,7 @@ function BaseServer (options, reporter) {
   }
 
   if (typeof this.options.nodeId === 'undefined') {
-    var shortId = shortUUID()
-    this.options.nodeId = 'server:' + shortId.fromUUID(shortId.uuid())
+    this.options.nodeId = 'server:' + shortid.generate()
   }
 
   this.options.root = this.options.root || process.cwd()

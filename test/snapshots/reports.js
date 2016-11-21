@@ -9,7 +9,7 @@ var Client = require('../../client')
 var app = new BaseServer({
   env: 'development',
   pid: 21384,
-  nodeId: 'server:cxH2FjmdeCi8uGRFXJRzi',
+  nodeId: 'server:H1f8LAyzl',
   subprotocol: '2.5.0',
   supports: '2.x || 1.x'
 })
@@ -18,7 +18,7 @@ app.listenOptions = { host: '127.0.0.1', port: 1337 }
 var wss = new BaseServer({
   env: 'production',
   pid: 21384,
-  nodeId: 'server:cxH2FjmdeCi8uGRFXJRzi',
+  nodeId: 'server:H1f8LAyzl',
   subprotocol: '1.0.0',
   supports: '1.x'
 })
@@ -27,7 +27,7 @@ wss.listenOptions = { cert: 'A', host: '0.0.0.0', port: 1337 }
 var http = new BaseServer({
   env: 'development',
   pid: 21384,
-  nodeId: 'server:cxH2FjmdeCi8uGRFXJRzi',
+  nodeId: 'server:H1f8LAyzl',
   subprotocol: '1.0.0',
   supports: '1.x'
 })

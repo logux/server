@@ -53,7 +53,7 @@ it('saves server options', function () {
 
 it('generates node ID', function () {
   var app = new BaseServer(defaultOptions)
-  expect(app.options.nodeId).toMatch(/server:.+/)
+  expect(app.options.nodeId).toMatch(/server:[\w\d]+/)
 })
 
 it('throws on missed subprotocol', function () {
