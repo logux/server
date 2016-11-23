@@ -31,7 +31,7 @@ npm init
 Install Logux Server:
 
 ```sh
-npm install --save-dev logux-server logux-core
+npm install --save logux-server logux-core
 ```
 
 ### Create Main File
