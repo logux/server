@@ -20,6 +20,9 @@
     "remoteAddress",
     "ServerConnection",
     "SemVer",
-    "npm"
+    "npm",
+    "DevOps",
+    "PEM",
+    "dir"
   ]
 }
