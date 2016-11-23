@@ -9,6 +9,11 @@ for each client’s event type.
 This is first **proof-of-concept** version. It synchronizes all events between
 clients and has no many syntax sugar that we planned.
 
+<a href="https://evilmartians.com/?utm_source=logux-server">
+  <img src="https://evilmartians.com/badges/sponsored-by-evil-martians.svg"
+       alt="Sponsored by Evil Martians" width="236" height="54">
+</a>
+
 ## Getting Started
 
 ### Installation
