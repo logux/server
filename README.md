@@ -7,7 +7,7 @@ This framework helps you to write Logux server and define a back-end callbacks
 for each client’s event type.
 
 This is first **proof-of-concept** version. It synchronizes all events between
-clients and has no many syntax sugar that we planned.
+clients and has no many syntax sugar that we planned.
 
 ## Getting Started
 
@@ -66,7 +66,7 @@ if (app.env === 'production') {
 ### Write Business Logic
 
 Logux is a communication protocol. It doesn’t know anything about your database.
-You need to write custom logic in event callback.
+You need to write custom logic in event callback.
 
 ```js
 app.log.on('event', (event, meta) => {
@@ -81,7 +81,7 @@ app.log.on('event', (event, meta) => {
 Read [`logux-core`] docs for `app.log` API.
 
 If you already have business logic written in PHP, Ruby, Java — don’t worry.
-You can do anything in event listener. Just call legacy REST service:
+You can do anything in event listener. Just call legacy REST service:
 
 ```js
 if (event.type === 'changeName') {
