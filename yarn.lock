@@ -1916,15 +1916,15 @@ log-update@^1.0.2:
     ansi-escapes "^1.0.0"
     cli-cursor "^1.0.2"
 
-logux-core@logux/logux-core:
+logux-core@^0.1.0:
   version "0.1.0"
-  resolved "https://codeload.github.com/logux/logux-core/tar.gz/2147d699210774da0779d6e765e062d0481810c8"
+  resolved "https://registry.yarnpkg.com/logux-core/-/logux-core-0.1.0.tgz#1b7663de250170c4e7a13536275af61f93fe54c6"
   dependencies:
     nanoevents "^0.3.0"
 
-logux-sync@logux/logux-sync:
+logux-sync@^0.1.0:
   version "0.1.0"
-  resolved "https://codeload.github.com/logux/logux-sync/tar.gz/d0822cc61de8b93c70e8975badcba8e8605e1e08"
+  resolved "https://registry.yarnpkg.com/logux-sync/-/logux-sync-0.1.0.tgz#3e853e51a50ec9b9219ec976f78a408982a2c910"
   dependencies:
     nanoevents "^0.3.0"
     object-assign "^4.1.0"
