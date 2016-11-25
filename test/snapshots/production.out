@@ -1,2 +1,2 @@
- INFO   Logux server is listening at 1970-01-01 00:00:00        Logux server: 0.0.0        PID:          21384        Node ID:      server:H1f8LAyzl        Environment:  production        Subprotocol:  1.0.0        Supports:     1.x        Listen:       wss://0.0.0.0:1337
+ INFO   Logux server is listening at 1970-01-01 00:00:00        Logux server: 0.1.0        PID:          21384        Node ID:      server:H1f8LAyzl        Environment:  production        Subprotocol:  1.0.0        Supports:     1.x        Listen:       wss://0.0.0.0:1337
 
