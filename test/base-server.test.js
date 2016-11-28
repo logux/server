@@ -1,15 +1,16 @@
 /* eslint-disable no-invalid-this */
 
 var createTestTimer = require('logux-core').createTestTimer
-var EventEmitter = require('events')
 var MemoryStore = require('logux-core').MemoryStore
 var WebSocket = require('ws')
 var https = require('https')
+var http = require('http')
 var path = require('path')
 var Log = require('logux-core').Log
 var fs = require('fs')
 
 var BaseServer = require('../base-server')
+var promisify = require('../promisify')
 
 var lastPort = 9111
 function uniqPort () {
@@ -43,7 +44,18 @@ function createReporter (test) {
 var originEnv = process.env.NODE_ENV
 afterEach(function () {
   process.env.NODE_ENV = originEnv
-  return this.app ? this.app.destroy() : undefined
+  var test = this
+
+  var promise = test.app ? test.app.destroy() : Promise.resolve()
+  return promise.then(function () {
+    if (test.server) {
+      return promisify(function (done) {
+        test.server.close(done)
+      })
+    } else {
+      return true
+    }
+  })
 })
 
 it('saves server options', function () {
@@ -187,14 +199,6 @@ it('throws a error on no security in production', function () {
   }).toThrowError(/SSL/)
 })
 
-it('accepts custom HTTP server', function () {
-  var http = new EventEmitter()
-  http.on = jest.fn()
-  this.app = createServer()
-  this.app.listen({ server: http })
-  expect(http.on).toBeCalled()
-})
-
 it('uses HTTPS', function () {
   var app = createServer()
   this.app = app
@@ -283,6 +287,29 @@ it('creates a client on connection', function () {
     var client = test.app.clients[1]
     expect(client.remoteAddress).toEqual('127.0.0.1')
     expect(test.reports).toEqual([['connect', test.app, '127.0.0.1']])
+  })
+})
+
+it('accepts custom HTTP server', function () {
+  createReporter(this)
+  var test = this
+  var port = uniqPort()
+  test.server = http.createServer()
+
+  return promisify(function (done) {
+    test.server.listen(port, done)
+  }).then(function () {
+    return test.app.listen({ server: test.server })
+  }).then(function () {
+    test.reports = []
+
+    var ws = new WebSocket('ws://localhost:' + port)
+    return new Promise(function (resolve, reject) {
+      ws.onopen = resolve
+      ws.onerror = reject
+    })
+  }).then(function () {
+    expect(Object.keys(test.app.clients).length).toBe(1)
   })
 })
 

@@ -248,13 +248,6 @@ BaseServer.prototype = {
         }
 
         app.ws = new WebSocket.Server({ server: app.http })
-        app.ws.on('connection', function (ws) {
-          app.reporter('connect', app, remoteAddress(ws))
-          app.lastClient += 1
-          var client = new Client(app, new ServerConnection(ws), app.lastClient)
-          app.clients[app.lastClient] = client
-        })
-
         return promisify(function (done) {
           app.http.listen(app.listenOptions.port, app.listenOptions.host, done)
         })
@@ -276,6 +269,13 @@ BaseServer.prototype = {
     })
 
     return promise.then(function () {
+      app.ws.on('connection', function (ws) {
+        app.reporter('connect', app, remoteAddress(ws))
+        app.lastClient += 1
+        var client = new Client(app, new ServerConnection(ws), app.lastClient)
+        app.clients[app.lastClient] = client
+      })
+    }).then(function () {
       app.reporter('listen', app)
     })
   },
