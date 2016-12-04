@@ -3,22 +3,24 @@
 Logux is a client-server communication protocol. It synchronizes events
 between clients and server logs.
 
-This framework helps you to write Logux server and define a back-end callbacks
+This framework helps you to write Logux server and define back-end callbacks
 for each client’s event type.
 
-This is first **proof-of-concept** version. It synchronizes all events between
-clients and has no many syntax sugar that we planned.
+This is a first **proof-of-concept** version. It simply synchronizes all the events between
+clients, not yet having many syntax sugar that we've planned for future.
 
 <a href="https://evilmartians.com/?utm_source=logux-server">
   <img src="https://evilmartians.com/badges/sponsored-by-evil-martians.svg"
        alt="Sponsored by Evil Martians" width="236" height="54">
 </a>
 
+
 ## Getting Started
+
 
 ### Installation
 
-Install a [Node.js](https://nodejs.org/en/download/).
+Install [Node.js](https://nodejs.org/en/download/).
 
 Create new Node.js project:
 
@@ -34,9 +36,10 @@ Install Logux Server:
 npm install --save logux-server logux-core
 ```
 
+
 ### Create Main File
 
-Create a `server.js` with this boilerplate:
+Create `server.js` with this boilerplate:
 
 ```js
 const cleanEvery = require('logux-core').cleanEvery
@@ -68,10 +71,11 @@ if (app.env === 'production') {
 }
 ```
 
+
 ### Write Business Logic
 
 Logux is a communication protocol. It doesn’t know anything about your database.
-You need to write custom logic in event callback.
+You need to write custom logic inside your event callbacks.
 
 ```js
 app.log.on('event', (event, meta) => {
@@ -86,7 +90,7 @@ app.log.on('event', (event, meta) => {
 Read [`logux-core`] docs for `app.log` API.
 
 If you already have business logic written in PHP, Ruby, Java — don’t worry.
-You can do anything in event listener. Just call legacy REST service:
+You can do whatever you want in the event listener. For one, you may just call the legacy REST API:
 
 ```js
 if (event.type === 'changeName') {
@@ -98,9 +102,10 @@ if (event.type === 'changeName') {
 
 [`logux-core`]: https://github.com/logux/logux-core
 
+
 ### Test Your Logic Locally
 
-You can run your server by:
+You can run your server with:
 
 ```sh
 npm start
@@ -110,20 +115,22 @@ Use `ws://localhost:1337` URL in [Logux Client].
 
 [Logux Client]: https://github.com/logux/logux-client
 
+
 ### Get SSL Certificate
 
-Logux uses WebSockets to communicate between client and server.
-Without a SSL old proxies and firewalls could break WebSockets connection.
-Also SSL will prevent many attacks against your server.
+Logux uses WebSockets for communicating between client and server.
+Without SSL, old proxies and firewalls can block WebSockets connection.
+Also, SSL will obviously help to prevent many attacks against your server.
 
-The best way to get free SSL certificate is [Let’s Encrypt].
+Probably the best way to get a free SSL certificate is [Let’s Encrypt].
 
 Save certificate PEM-files to `cert.pem` and `key.pem` in your project directory
 or change `listen()` options to correct certificate paths.
 
 [Let’s Encrypt]: https://letsencrypt.org/
 
-### Start Server in Production
+
+### Start Production Server
 
 Use your favorite DevOps tools to start Logux server in `production` mode:
 
