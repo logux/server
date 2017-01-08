@@ -1,6 +1,7 @@
 var ServerConnection = require('logux-sync').ServerConnection
 var createTimer = require('logux-core').createTimer
 var MemoryStore = require('logux-core').MemoryStore
+var program = require('commander')
 var WebSocket = require('ws')
 var shortid = require('shortid')
 var https = require('https')
@@ -278,6 +279,37 @@ BaseServer.prototype = {
     }).then(function () {
       app.reporter('listen', app)
     })
+  },
+
+  /**
+   * Load options from both CLI and environment
+   *
+   * @param {object} process Current process.
+   * @param {object} defaults Default options.
+   * @return {object} options.
+   *
+   * @example
+   * options = app.loadOptions(process, defaults)
+   *
+   */
+  loadOptions: function loadOptions (process, defaults) {
+    program
+      .option('-p, --port [port]', 'Set up a port')
+      .option('-h, --host [host]', 'Set up a host')
+      .option('-c, --cert [cert]', 'Set up a cert')
+      .option('-k, --key  [key]', 'Set up a key')
+      .parse(process.argv)
+
+    if (!defaults) {
+      defaults = {}
+    }
+
+    return {
+      port: program.port || defaults.port || process.env.LOGUX_PORT,
+      host: program.host || defaults.host || process.env.LOGUX_HOST,
+      cert: program.cert || defaults.cert || process.env.LOGUX_CERT,
+      key: program.key || defaults.key || process.env.LOGUX_KEY
+    }
   },
 
   /**

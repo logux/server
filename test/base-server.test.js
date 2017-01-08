@@ -12,6 +12,9 @@ var fs = require('fs')
 var BaseServer = require('../base-server')
 var promisify = require('../promisify')
 
+var defaultKey = fs.readFileSync(path.join(__dirname, 'fixtures/key.pem'))
+var defaultCert = fs.readFileSync(path.join(__dirname, 'fixtures/cert.pem'))
+
 var lastPort = 9111
 function uniqPort () {
   lastPort += 1
@@ -174,7 +177,7 @@ it('throws a error on key without certificate', function () {
   var app = createServer()
   expect(function () {
     app.listen({
-      key: fs.readFileSync(path.join(__dirname, 'fixtures/key.pem'))
+      key: defaultKey
     })
   }).toThrowError(/set cert option/)
 })
@@ -183,7 +186,7 @@ it('throws a error on certificate without key', function () {
   var app = createServer()
   expect(function () {
     app.listen({
-      cert: fs.readFileSync(path.join(__dirname, 'fixtures/cert.pem'))
+      cert: defaultCert
     })
   }).toThrowError(/set key option/)
 })
@@ -203,8 +206,8 @@ it('uses HTTPS', function () {
   var app = createServer()
   this.app = app
   return app.listen({
-    cert: fs.readFileSync(path.join(__dirname, 'fixtures/cert.pem')),
-    key: fs.readFileSync(path.join(__dirname, 'fixtures/key.pem'))
+    cert: defaultCert,
+    key: defaultKey
   }).then(function () {
     expect(app.http instanceof https.Server).toBeTruthy()
   })
@@ -239,9 +242,9 @@ it('loads keys by relative path', function () {
 it('supports object in SSL key', function () {
   var app = createServer()
   this.app = app
-  var key = fs.readFileSync(path.join(__dirname, 'fixtures/key.pem'))
+  var key = defaultKey
   return app.listen({
-    cert: fs.readFileSync(path.join(__dirname, 'fixtures/cert.pem')),
+    cert: defaultCert,
     key: { pem: key }
   }).then(function () {
     expect(app.http instanceof https.Server).toBeTruthy()
@@ -310,6 +313,51 @@ it('accepts custom HTTP server', function () {
     })
   }).then(function () {
     expect(Object.keys(test.app.clients).length).toBe(1)
+  })
+})
+
+it('loads options from cli', function () {
+  var app = createServer()
+  var key = defaultKey
+  var cert = defaultCert
+  var argv = ['', '--port', '1234', '--host', '127.0.0.1']
+  process.argv = process.argv.concat(argv)
+  var options = app.loadOptions(process, { key: key, cert: cert })
+  expect(options).toEqual({
+    port: '1234',
+    host: '127.0.0.1',
+    key: key,
+    cert: cert
+  })
+})
+
+it('loads options from environment', function () {
+  var app = createServer()
+  var key = defaultKey
+  var cert = defaultCert
+  process.env.LOGUX_PORT = '1234'
+  process.env.LOGUX_HOST = '127.0.0.1'
+  var options = app.loadOptions(process, { key: key, cert: cert })
+  expect(options).toEqual({
+    port: '1234',
+    host: '127.0.0.1',
+    key: key,
+    cert: cert
+  })
+})
+
+it('loads options even if defaults are not passed', function () {
+  var app = createServer()
+  var argv = ['', '--port', '1234', '--host', '127.0.0.1']
+  process.argv = process.argv.concat(argv)
+  process.env.LOGUX_KEY = defaultKey
+  process.env.LOGUX_CERT = defaultCert
+  var options = app.loadOptions(process)
+  expect(options).toEqual({
+    port: '1234',
+    host: '127.0.0.1',
+    key: process.env.LOGUX_KEY,
+    cert: process.env.LOGUX_CERT
   })
 })
 
