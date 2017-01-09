@@ -8,6 +8,28 @@ var http = require('http')
 var path = require('path')
 var Log = require('logux-core').Log
 var fs = require('fs')
+var yargs = require('yargs')
+  .option('h', {
+    alias: 'host',
+    describe: 'IP-address to bind server',
+    type: 'string'
+  })
+  .option('p', {
+    alias: 'port',
+    describe: 'Port to bind server',
+    type: 'number'
+  })
+  .option('k', {
+    alias: 'key',
+    describe: 'SSL key or path to it',
+    type: 'string'
+  })
+  .option('c', {
+    alias: 'cert',
+    describe: 'SSL certificate or path to it',
+    type: 'string'
+  })
+  .help()
 
 var remoteAddress = require('./remote-address')
 var promisify = require('./promisify')
@@ -295,6 +317,20 @@ BaseServer.prototype = {
     return Promise.all(this.unbind.map(function (unbind) {
       return unbind()
     }))
+  },
+
+  loadOptions: function loadOptions (process, defaults) {
+    var argv = yargs.parse(process.argv)
+    var env = process.env
+
+    defaults = defaults || { }
+
+    return {
+      host: argv.h || env.LOGUX_HOST || defaults.host,
+      port: parseInt(argv.p || env.LOGUX_PORT || defaults.port, 10),
+      cert: argv.c || env.LOGUX_CERT || defaults.cert,
+      key: argv.k || env.LOGUX_KEY || defaults.key
+    }
   }
 
 }
