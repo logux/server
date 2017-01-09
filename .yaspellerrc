@@ -3,6 +3,7 @@
   "ignoreCapitalization": true,
   "dictionary": [
     "Logux",
+    "LOGUX",
     "docdash",
     "JSDoc",
     "js",
@@ -24,6 +25,7 @@
     "DevOps",
     "PEM",
     "Versioning",
-    "Wintermute"
+    "Wintermute",
+    "loadOptions"
   ]
 }

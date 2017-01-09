@@ -8,6 +8,34 @@ var http = require('http')
 var path = require('path')
 var Log = require('logux-core').Log
 var fs = require('fs')
+var yargs = require('yargs')
+  .option('h', {
+    alias: 'host',
+    describe: 'Host to bind server.',
+    type: 'string'
+  })
+  .option('p', {
+    alias: 'port',
+    describe: 'Port to bind server',
+    type: 'number'
+  })
+  .option('k', {
+    alias: 'key',
+    describe: 'Path to SSL key ',
+    type: 'string'
+  })
+  .option('c', {
+    alias: 'cert',
+    describe: 'Path to SSL certificate',
+    type: 'string'
+  })
+  .epilog(
+    'Corresponding ENV variables: LOGUX_HOST, LOGUX_PORT, LOGUX_KEY, LOGUX_CERT'
+  )
+  .example('$0 --port 31337 --host 127.0.0.1')
+  .example('LOGUX_PORT=1337 $0')
+  .help()
+yargs.argv
 
 var remoteAddress = require('./remote-address')
 var promisify = require('./promisify')
@@ -295,6 +323,34 @@ BaseServer.prototype = {
     return Promise.all(this.unbind.map(function (unbind) {
       return unbind()
     }))
+  },
+
+  /**
+   * Load options from command-line arguments and/or environment
+   *
+   * @param {object} process Current process object.
+   * @param {object} defaults Default options.
+   * @return {object} Parsed options object.
+   *
+   * @example
+   * app = new BaseServer({
+   *   subprotocol: '0.0.0',
+   *   supports: '0.x'
+   * })
+   * options = app.loadOptions(process)
+   */
+  loadOptions: function loadOptions (process, defaults) {
+    var argv = yargs.parse(process.argv)
+    var env = process.env
+
+    defaults = defaults || { }
+
+    return {
+      host: argv.h || env.LOGUX_HOST || defaults.host,
+      port: parseInt(argv.p || env.LOGUX_PORT || defaults.port, 10),
+      cert: argv.c || env.LOGUX_CERT || defaults.cert,
+      key: argv.k || env.LOGUX_KEY || defaults.key
+    }
   }
 
 }

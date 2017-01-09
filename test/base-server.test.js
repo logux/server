@@ -41,9 +41,15 @@ function createReporter (test) {
   })
 }
 
+var originArgv = process.argv
 var originEnv = process.env.NODE_ENV
 afterEach(function () {
+  process.argv = originArgv
   process.env.NODE_ENV = originEnv
+  delete process.env.LOGUX_HOST
+  delete process.env.LOGUX_PORT
+  delete process.env.LOGUX_KEY
+  delete process.env.LOGUX_CERT
   var test = this
 
   var promise = test.app ? test.app.destroy() : Promise.resolve()
@@ -168,6 +174,69 @@ it('uses 127.0.0.1 to bind server by default', function () {
   this.app = createServer()
   this.app.listen({ port: uniqPort() })
   expect(this.app.listenOptions.host).toEqual('127.0.0.1')
+})
+
+it('uses cli args for options', function () {
+  var origArgv = process.argv
+
+  var app = createServer()
+
+  var cliArgs = ['', '--port', '31337', '--host', '192.168.1.1']
+
+  process.argv = process.argv.concat(cliArgs)
+  var options = app.loadOptions(process)
+  process.argv = origArgv
+
+  expect(options.host).toEqual('192.168.1.1')
+  expect(options.port).toEqual(31337)
+  expect(options.cert).toBeUndefined()
+  expect(options.key).toBeUndefined()
+})
+
+it('uses env for options', function () {
+  process.env.LOGUX_HOST = '127.0.1.1'
+  process.env.LOGUX_PORT = 31337
+
+  var app = createServer()
+  var options = app.loadOptions(process)
+
+  expect(options.host).toEqual('127.0.1.1')
+  expect(options.port).toEqual(31337)
+})
+
+it('uses combined options', function () {
+  var certPath = path.join(__dirname, 'fixtures/cert.pem')
+  process.env.LOGUX_CERT = certPath
+
+  var keyPath = path.join(__dirname, 'fixtures/key.pem')
+  var cliArgs = ['', '--key', keyPath]
+  process.argv = process.argv.concat(cliArgs)
+
+  var app = createServer()
+  var options = app.loadOptions(process, {
+    host: '127.0.1.1',
+    port: 31337
+  })
+
+  expect(options.host).toEqual('127.0.1.1')
+  expect(options.port).toEqual(31337)
+  expect(options.cert).toEqual(certPath)
+  expect(options.key).toEqual(keyPath)
+})
+
+it('uses arg, env, defaults options in given priority', function () {
+  var app = createServer()
+
+  var cliArgs = ['', '--port', '31337']
+  process.argv = process.argv.concat(cliArgs)
+
+  process.env.LOGUX_PORT = 21337
+
+  var options = app.loadOptions(process, {
+    port: 11337
+  })
+
+  expect(options.port).toEqual(31337)
 })
 
 it('throws a error on key without certificate', function () {

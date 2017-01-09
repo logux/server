@@ -3,10 +3,13 @@ var path = require('path')
 
 var DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
 
-function exec (name) {
+function exec (name, args) {
   return new Promise(function (resolve) {
     var out = ''
-    var server = spawn(path.join(__dirname, name))
+    var server = spawn(path.join(__dirname, name), args)
+    server.stdout.on('data', function (chank) {
+      out += chank
+    })
     server.stderr.on('data', function (chank) {
       out += chank
     })
@@ -37,6 +40,16 @@ module.exports = {
 
   uncatch: function () {
     return exec('uncatch.js')
-  }
+  },
 
+  options: function () {
+    process.env.LOGUX_PORT = 31337
+    var test = exec('options.js')
+    delete process.env.LOGUX_PORT
+    return test
+  },
+
+  help: function () {
+    return exec('options.js', ['', '--help'])
+  }
 }
