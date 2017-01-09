@@ -41,19 +41,15 @@ function createReporter (test) {
   })
 }
 
-function envCleanup () {
-  delete process.env.LOGUX_HOST
-  delete process.env.LOGUX_PORT
-  delete process.env.LOGUX_KEY
-  delete process.env.LOGUX_CERT
-}
-
 var originArgv = process.argv
 var originEnv = process.env.NODE_ENV
 afterEach(function () {
   process.argv = originArgv
   process.env.NODE_ENV = originEnv
-  envCleanup()
+  delete process.env.LOGUX_HOST
+  delete process.env.LOGUX_PORT
+  delete process.env.LOGUX_KEY
+  delete process.env.LOGUX_CERT
   var test = this
 
   var promise = test.app ? test.app.destroy() : Promise.resolve()

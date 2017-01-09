@@ -11,7 +11,7 @@ var fs = require('fs')
 var yargs = require('yargs')
   .option('h', {
     alias: 'host',
-    describe: 'IP-address to bind server',
+    describe: 'Host to bind server.',
     type: 'string'
   })
   .option('p', {
@@ -21,14 +21,19 @@ var yargs = require('yargs')
   })
   .option('k', {
     alias: 'key',
-    describe: 'SSL key or path to it',
+    describe: 'Path to SSL key ',
     type: 'string'
   })
   .option('c', {
     alias: 'cert',
-    describe: 'SSL certificate or path to it',
+    describe: 'Path to SSL certificate',
     type: 'string'
   })
+  .epilog(
+    'Corresponding ENV variables: LOGUX_HOST, LOGUX_PORT, LOGUX_KEY, LOGUX_CERT'
+  )
+  .example('$0 --port 31337 --host 127.0.0.1')
+  .example('LOGUX_PORT=1337 $0')
   .help()
 yargs.argv
 

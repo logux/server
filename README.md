@@ -72,13 +72,23 @@ if (app.env === 'production') {
 ```
 
 ### Use console arguments or environment variables to redefine options
+
+Command-line | Environment | Description
+----|-----|------------
+-h, --host | LOGUX_HOST | Host to bind server
+-p, --port | LOGUX_PORT | Port to bind server
+-k, --key  | LOGUX_KEY  | Path to SSL key
+-c, --cert | LOGUX_CERT | Path to SSL certificate
+
+
+Usage:
 ```sh
-$ node base-server.js --help
+$ node server.js --help
 Options:
-  -h, --host  IP-address to bind server                                 [string]
+  -h, --host  Host to bind server.                                      [string]
   -p, --port  Port to bind server                                       [number]
-  -k, --key   SSL key or path to it                                     [string]
-  -c, --cert  SSL certificate or path to it                             [string]
+  -k, --key   Path to SSL key                                           [string]
+  -c, --cert  Path to SSL certificate                                   [string]
   --help      Show help                                                [boolean]
 ```
 
