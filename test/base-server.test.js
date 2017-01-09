@@ -257,17 +257,6 @@ it('throws a error on certificate without key', function () {
   }).toThrowError(/set key option/)
 })
 
-it('throws a error on no security in production', function () {
-  var app = createServer({
-    env: 'production',
-    subprotocol: '0.0.0',
-    supports: '0.x'
-  })
-  expect(function () {
-    app.listen({ port: uniqPort() })
-  }).toThrowError(/SSL/)
-})
-
 it('uses HTTPS', function () {
   var app = createServer()
   this.app = app
