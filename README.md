@@ -67,32 +67,7 @@ app.log.keep((event, meta) => {
   // TODO return true if event should not be removed yet from log
 })
 
-if (app.env === 'production') {
-  app.listen({ cert: 'cert.pem', key: 'key.pem' })
-} else {
-  app.listen()
-}
-```
-
-### Use console arguments or environment variables to redefine options
-
-Command-line | Environment | Description
-----|-----|------------
--h, --host | LOGUX_HOST | Host to bind server
--p, --port | LOGUX_PORT | Port to bind server
--k, --key  | LOGUX_KEY  | Path to SSL key
--c, --cert | LOGUX_CERT | Path to SSL certificate
-
-
-Usage:
-```sh
-$ node server.js --help
-Options:
-  -h, --host  Host to bind server.                                      [string]
-  -p, --port  Port to bind server                                       [number]
-  -k, --key   Path to SSL key                                           [string]
-  -c, --cert  Path to SSL certificate                                   [string]
-  --help      Show help                                                [boolean]
+app.listen(app.loadOptions(process))
 ```
 
 
@@ -161,3 +136,13 @@ Use your favorite DevOps tools to start Logux server in `production` mode:
 ```sh
 NODE_ENV=production npm start
 ```
+
+You DevOps tools could set Logux Server options via arguments
+or environment variables:
+
+Command-line   | Environment  | Description
+---------------|--------------|------------------------
+`-h`, `--host` | `LOGUX_HOST` | Host to bind server
+`-p`, `--port` | `LOGUX_PORT` | Port to bind server
+`-k`, `--key`  | `LOGUX_KEY`  | Path to SSL key
+`-c`, `--cert` | `LOGUX_CERT` | Path to SSL certificate
