@@ -55,7 +55,7 @@ const app = new Server({
 })
 
 app.auth(token => {
-  // TODO Return user by token or false on bad token.
+  // TODO Return user by token or false on bad token. It should be Promise.
 })
 
 app.log.on('event', (event, meta) => {
