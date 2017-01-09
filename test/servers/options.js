@@ -12,4 +12,7 @@ app.auth(function () {
   return Promise.resolve(true)
 })
 
-app.listen(app.loadOptions(process))
+app.listen(app.loadOptions(process, {
+  port: '1337',
+  host: '127.0.0.1'
+}))
