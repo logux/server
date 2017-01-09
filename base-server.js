@@ -8,6 +8,7 @@ var http = require('http')
 var path = require('path')
 var Log = require('logux-core').Log
 var fs = require('fs')
+
 var yargs = require('yargs')
   .option('h', {
     alias: 'host',
@@ -34,6 +35,7 @@ var yargs = require('yargs')
   )
   .example('$0 --port 31337 --host 127.0.0.1')
   .example('LOGUX_PORT=1337 $0')
+  .locale('en')
   .help()
 yargs.argv
 
