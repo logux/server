@@ -70,8 +70,19 @@ app.log.keep((event, meta) => {
 if (app.env === 'production') {
   app.listen({ cert: 'cert.pem', key: 'key.pem' })
 } else {
-  app.listen()
+  var options = app.loadOptions(process)
+  app.listen(options)
 }
+```
+
+
+### Available console arguments and environment variables
+```sh
+-h, --help         output usage information
+-p, --port [port]  Set up a port
+-h, --host [host]  Set up a host
+-c, --cert [cert]  Set up a cert
+-k, --key  [key]   Set up a key
 ```
 
 

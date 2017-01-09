@@ -37,6 +37,10 @@ module.exports = {
 
   uncatch: function () {
     return exec('uncatch.js')
+  },
+
+  loadoptions: function () {
+    return exec('loadoptions.js')
   }
 
 }
