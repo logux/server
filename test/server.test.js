@@ -17,6 +17,9 @@ Object.keys(servers).forEach(function (test) {
       if (test === 'throw' || test === 'uncatch') {
         expect(exit).toEqual(1)
       } else if (test !== 'unbind') {
+        if (exit !== 0) {
+          console.error(test + ' fall with:\n' + out)
+        }
         expect(exit).toEqual(0)
       }
       expect(out).toEqual(snapshot)
