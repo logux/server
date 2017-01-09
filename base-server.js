@@ -30,6 +30,7 @@ var yargs = require('yargs')
     type: 'string'
   })
   .help()
+yargs.argv
 
 var remoteAddress = require('./remote-address')
 var promisify = require('./promisify')
@@ -319,6 +320,20 @@ BaseServer.prototype = {
     }))
   },
 
+  /**
+   * Load options from command-line arguments and/or environment
+   *
+   * @param {object} process Current process object.
+   * @param {object} defaults Default options.
+   * @return {object} Parsed options object.
+   *
+   * @example
+   * app = new BaseServer({
+   *   subprotocol: '0.0.0',
+   *   supports: '0.x'
+   * })
+   * options = app.loadOptions(process)
+   */
   loadOptions: function loadOptions (process, defaults) {
     var argv = yargs.parse(process.argv)
     var env = process.env
