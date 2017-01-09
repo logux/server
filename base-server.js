@@ -4,12 +4,17 @@ var MemoryStore = require('logux-core').MemoryStore
 var WebSocket = require('ws')
 var shortid = require('shortid')
 var https = require('https')
+var yargs = require('yargs')
 var http = require('http')
 var path = require('path')
 var Log = require('logux-core').Log
 var fs = require('fs')
 
-var yargs = require('yargs')
+var remoteAddress = require('./remote-address')
+var promisify = require('./promisify')
+var Client = require('./client')
+
+yargs
   .option('h', {
     alias: 'host',
     describe: 'Host to bind server.',
@@ -38,10 +43,6 @@ var yargs = require('yargs')
   .locale('en')
   .help()
 yargs.argv
-
-var remoteAddress = require('./remote-address')
-var promisify = require('./promisify')
-var Client = require('./client')
 
 var PEM_PREAMBLE = '-----BEGIN'
 
@@ -335,17 +336,13 @@ BaseServer.prototype = {
    * @return {object} Parsed options object.
    *
    * @example
-   * app = new BaseServer({
-   *   subprotocol: '0.0.0',
-   *   supports: '0.x'
-   * })
-   * options = app.loadOptions(process)
+   * app.listen(app.loadOptions(process, { port: 31337 }))
    */
   loadOptions: function loadOptions (process, defaults) {
+    defaults = defaults || { }
+
     var argv = yargs.parse(process.argv)
     var env = process.env
-
-    defaults = defaults || { }
 
     return {
       host: argv.h || env.LOGUX_HOST || defaults.host,
