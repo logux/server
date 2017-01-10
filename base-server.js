@@ -235,12 +235,6 @@ BaseServer.prototype = {
     if (!this.listenOptions.key && this.listenOptions.cert) {
       throw new Error('You must set key option too if you use cert option')
     }
-    if (this.env === 'production') {
-      if (!this.listenOptions.server && !this.listenOptions.key) {
-        throw new Error('SSL is required in production mode. ' +
-                        'Set key and cert options or use server option.')
-      }
-    }
 
     if (!this.authenticator) {
       throw new Error('You must set authentication callback by app.auth()')
