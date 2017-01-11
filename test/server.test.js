@@ -32,8 +32,8 @@ function exec (name, args) {
   })
 }
 
-it('reports destroy', function () {
-  return exec('destroy.js').then(function (result) {
+function checkOut (name, args) {
+  return exec(name, args).then(function (result) {
     var out = result[0]
     var exit = result[1]
 
@@ -41,65 +41,46 @@ it('reports destroy', function () {
       console.error(test + ' fall with:\n' + out)
     }
     expect(exit).toEqual(0)
-
     expect(out).toMatchSnapshot()
   })
+}
+
+function checkError (name, args) {
+  return exec(name, args).then(function (result) {
+    var out = result[0]
+    var exit = result[1]
+    expect(exit).toEqual(1)
+    expect(out).toMatchSnapshot()
+  })
+}
+
+afterEach(function () {
+  delete process.env.LOGUX_PORT
+})
+
+it('reports destroy', function () {
+  return checkOut('destroy.js')
 })
 
 it('reports unbind', function () {
   return exec('unbind.js').then(function (result) {
-    var out = result[0]
-
-    expect(out).toMatchSnapshot()
+    expect(result[0]).toMatchSnapshot()
   })
 })
 
 it('reports throw', function () {
-  return exec('throw.js').then(function (result) {
-    var out = result[0]
-    var exit = result[1]
-
-    expect(exit).toEqual(1)
-    expect(out).toMatchSnapshot()
-  })
+  return checkError('throw.js')
 })
 
 it('reports uncatch', function () {
-  return exec('uncatch.js').then(function (result) {
-    var out = result[0]
-    var exit = result[1]
-
-    expect(exit).toEqual(1)
-    expect(out).toMatchSnapshot()
-  })
+  return checkError('uncatch.js')
 })
 
 it('reports options', function () {
   process.env.LOGUX_PORT = 31337
-  var execution = exec('options.js')
-  delete process.env.LOGUX_PORT
-
-  return execution.then(function (result) {
-    var out = result[0]
-    var exit = result[1]
-
-    if (exit !== 0) {
-      console.error('options fall with:\n' + out)
-    }
-    expect(exit).toEqual(0)
-    expect(out).toMatchSnapshot()
-  })
+  return checkOut('options.js')
 })
 
 it('reports help', function () {
-  return exec('options.js', ['', '--help']).then(function (result) {
-    var out = result[0]
-    var exit = result[1]
-
-    if (exit !== 0) {
-      console.error('help fall with:\n' + out)
-    }
-    expect(exit).toEqual(0)
-    expect(out).toMatchSnapshot()
-  })
+  return checkOut('options.js', ['', '--help'])
 })
