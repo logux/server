@@ -33,9 +33,7 @@ function exec (name, args) {
 }
 
 it('reports destroy', function () {
-  var testCase = exec('destroy.js')
-
-  return testCase.then(function (result) {
+  return exec('destroy.js').then(function (result) {
     var out = result[0]
     var exit = result[1]
 
@@ -49,9 +47,7 @@ it('reports destroy', function () {
 })
 
 it('reports unbind', function () {
-  var testCase = exec('unbind.js')
-
-  return testCase.then(function (result) {
+  return exec('unbind.js').then(function (result) {
     var out = result[0]
 
     expect(out).toMatchSnapshot()
@@ -59,9 +55,7 @@ it('reports unbind', function () {
 })
 
 it('reports throw', function () {
-  var testCase = exec('throw.js')
-
-  return testCase.then(function (result) {
+  return exec('throw.js').then(function (result) {
     var out = result[0]
     var exit = result[1]
 
@@ -71,9 +65,7 @@ it('reports throw', function () {
 })
 
 it('reports uncatch', function () {
-  var testCase = exec('uncatch.js')
-
-  return testCase.then(function (result) {
+  return exec('uncatch.js').then(function (result) {
     var out = result[0]
     var exit = result[1]
 
@@ -84,10 +76,10 @@ it('reports uncatch', function () {
 
 it('reports options', function () {
   process.env.LOGUX_PORT = 31337
-  var testCase = exec('options.js')
+  var execution = exec('options.js')
   delete process.env.LOGUX_PORT
 
-  return testCase.then(function (result) {
+  return execution.then(function (result) {
     var out = result[0]
     var exit = result[1]
 
@@ -100,9 +92,7 @@ it('reports options', function () {
 })
 
 it('reports help', function () {
-  var testCase = exec('options.js', ['', '--help'])
-
-  return testCase.then(function (result) {
+  return exec('options.js', ['', '--help']).then(function (result) {
     var out = result[0]
     var exit = result[1]
 
