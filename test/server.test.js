@@ -1,18 +1,18 @@
-var path = require('path')
-var fs = require('fs')
+function normalizeNewlines (string) {
+  // use local copy of Jest newline normalization function
+  // until Jest doens't apply normalization on comprasion
+  return string.replace(/\r\n|\r/g, '\n')
+}
 
-var promisify = require('../promisify')
 var servers = require('./servers/servers')
 
 Object.keys(servers).forEach(function (test) {
   it('reports ' + test, function () {
-    var read = promisify(function (done) {
-      fs.readFile(path.join(__dirname, 'servers', test + '.out'), done)
-    })
-    return Promise.all([servers[test](), read]).then(function (results) {
-      var out = results[0][0]
-      var exit = results[0][1]
-      var snapshot = results[1].toString()
+    var testCase = servers[test]()
+
+    return testCase.then(function (result) {
+      var out = result[0]
+      var exit = result[1]
 
       if (test === 'throw' || test === 'uncatch') {
         expect(exit).toEqual(1)
@@ -22,7 +22,7 @@ Object.keys(servers).forEach(function (test) {
         }
         expect(exit).toEqual(0)
       }
-      expect(out).toEqual(snapshot)
+      expect(normalizeNewlines(out)).toMatchSnapshot()
     })
   })
 })
