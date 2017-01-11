@@ -1,0 +1,56 @@
+exports[`test reports destroy 1`] = `
+" INFO   Logux server is listening at 1970-01-01 00:00:00        Logux server: 0.1.1        PID:          21384        Node ID:      server        Environment:  test        Subprotocol:  1.0.0        Supports:     1.x        Listen:       ws://127.0.0.1:1337
+
+ INFO   Shutting down Logux server at 1970-01-01 00:00:00
+
+ Custom destroy task finished
+"
+`;
+
+exports[`test reports help 1`] = `
+"Options:
+  -h, --host  Host to bind server.                                      [string]
+  -p, --port  Port to bind server                                       [number]
+  -k, --key   Path to SSL key                                           [string]
+  -c, --cert  Path to SSL certificate                                   [string]
+  --help      Show help                                                [boolean]
+
+Examples:
+  test/servers/options.js --port 31337
+  --host 127.0.0.1
+  LOGUX_PORT=1337 test/servers/options.js
+
+Corresponding ENV variables: LOGUX_HOST, LOGUX_PORT, LOGUX_KEY, LOGUX_CERT
+
+"
+`;
+
+exports[`test reports options 1`] = `
+" INFO   Logux server is listening at 1970-01-01 00:00:00        Logux server: 0.1.1        PID:          21384        Node ID:      server        Environment:  test        Subprotocol:  1.0.0        Supports:     1.x        Listen:       ws://127.0.0.1:31337
+
+ INFO   Shutting down Logux server at 1970-01-01 00:00:00
+
+"
+`;
+
+exports[`test reports throw 1`] = `
+" ERROR  Test Error at 1970-01-01 00:00:00        fake stacktrace
+
+ INFO   Shutting down Logux server at 1970-01-01 00:00:00
+
+"
+`;
+
+exports[`test reports unbind 1`] = `
+" INFO   Shutting down Logux server at 1970-01-01 00:00:00
+
+"
+`;
+
+exports[`test reports uncatch 1`] = `
+" ERROR  Test Error at 1970-01-01 00:00:00        fake stacktrace
+
+ INFO   Shutting down Logux server at 1970-01-01 00:00:00
+
+"
+`;
