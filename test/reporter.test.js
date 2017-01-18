@@ -64,9 +64,7 @@ describe('mocked output', function () {
   })
 
   it('reports listen', function () {
-    var out = reportersOut('listen', app)
-
-    expect(out).toMatchSnapshot()
+    expect(reportersOut('listen', app)).toMatchSnapshot()
   })
 
   it('reports production', function () {
@@ -79,9 +77,7 @@ describe('mocked output', function () {
     })
     wss.listenOptions = { cert: 'A', host: '0.0.0.0', port: 1337 }
 
-    var out = reportersOut('listen', wss)
-
-    expect(out).toMatchSnapshot()
+    expect(reportersOut('listen', wss)).toMatchSnapshot()
   })
 
   it('reports http', function () {
@@ -94,33 +90,23 @@ describe('mocked output', function () {
     })
     http.listenOptions = { server: createServer() }
 
-    var out = reportersOut('listen', http)
-
-    expect(out).toMatchSnapshot()
+    expect(reportersOut('listen', http)).toMatchSnapshot()
   })
 
   it('reports connect', function () {
-    var out = reportersOut('connect', app, '127.0.0.1')
-
-    expect(out).toMatchSnapshot()
+    expect(reportersOut('connect', app, '127.0.0.1')).toMatchSnapshot()
   })
 
   it('reports authenticated', function () {
-    var out = reportersOut('authenticated', app, authed)
-
-    expect(out).toMatchSnapshot()
+    expect(reportersOut('authenticated', app, authed)).toMatchSnapshot()
   })
 
   it('reports disconnect', function () {
-    var out = reportersOut('disconnect', app, authed)
-
-    expect(out).toMatchSnapshot()
+    expect(reportersOut('disconnect', app, authed)).toMatchSnapshot()
   })
 
   it('reports expel', function () {
-    var out = reportersOut('disconnect', app, unauthed)
-
-    expect(out).toMatchSnapshot()
+    expect(reportersOut('disconnect', app, unauthed)).toMatchSnapshot()
   })
 
   it('reports error', function () {
@@ -132,32 +118,27 @@ describe('mocked output', function () {
     '    at Module._compile (module.js:573:32)\n' +
     '    at at runTest (' + jest + ':50:10)\n' +
     '    at process._tickCallback (internal/process/next_tick.js:103:7)'
-    var out = reportersOut('runtimeError', app, undefined, error)
 
+    var out = reportersOut('runtimeError', app, undefined, error)
     expect(out).toMatchSnapshot()
   })
 
   it('reports client-error', function () {
     var out = reportersOut('clientError', app, authed, clientError)
-
     expect(out).toMatchSnapshot()
   })
 
   it('reports authed-error', function () {
     var out = reportersOut('syncError', app, authed, ownError)
-
     expect(out).toMatchSnapshot()
   })
 
   it('reports unauthed-error', function () {
     var out = reportersOut('syncError', app, unauthed, clientError)
-
     expect(out).toMatchSnapshot()
   })
 
   it('reports destroy', function () {
-    var out = reportersOut('destroy', app)
-
-    expect(out).toMatchSnapshot()
+    expect(reportersOut('destroy', app)).toMatchSnapshot()
   })
 })
