@@ -12,6 +12,13 @@ exports[`mocked output handle EADDRINUSE error 1`] = `
 "
 `;
 
+exports[`mocked output handle error in production 1`] = `
+" ERROR  permission denied at 1970-01-01 00:00:00
+ HINT   Run server on port > 1024. Current port: undefined at 1970-01-01 00:00:00
+
+"
+`;
+
 exports[`mocked output handle undefined error 1`] = `
 "[1m[31m[40m[7m ERROR [27m[49m[39m[22m [1m[31mundefined error[39m[22m [2mat 1970-01-01 00:00:00[22m
 [1m[35m[40m[7m HINT [27m[49m[39m[22m  [1m[35mError with this code: undefined is not defined[39m[22m [2mat 1970-01-01 00:00:00[22m

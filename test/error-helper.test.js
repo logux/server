@@ -25,7 +25,6 @@ var app = new BaseServer({
 })
 app.listenOptions = { host: '127.0.0.1', port: 1337 }
 
-
 describe('mocked output', function () {
   var originNow = errorHelper.now
   beforeAll(function () {
@@ -39,6 +38,19 @@ describe('mocked output', function () {
 
   it('handle EACCESS error', function () {
     expect(errorHelperOut({code: 'EACCES'}, app)).toMatchSnapshot()
+  })
+
+  it('handle error in production', function () {
+    var http = new BaseServer({
+      env: 'production',
+      pid: 21384,
+      nodeId: 'server:H1f8LAyzl',
+      subprotocol: '2.5.0',
+      supports: '2.x || 1.x'
+    })
+    http.listenOptions = { host: '127.0.0.1', port: 1337 }
+
+    expect(errorHelperOut({code: 'EACCES'}, http)).toMatchSnapshot()
   })
 
   it('handle EADDRINUSE error', function () {
