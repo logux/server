@@ -1,5 +1,6 @@
 var BaseServer = require('./base-server')
 var reporter = require('./reporter')
+var errorHelper = require('./error-helper')
 
 /**
  * End-user API to create Logux server.
@@ -55,8 +56,11 @@ function Server (options) {
   var app = this
 
   function onError (e) {
-    e.syscall === 'listen' ? process.stderr.write(errorHelper(e, app)) :
-        app.reporter("runtimeError", app, undefined, e)
+    if (e.syscall === 'listen') {
+      process.stderr.write(errorHelper(e, app))
+    } else {
+      app.reporter('runtimeError', app, undefined, e)
+    }
     app.destroy().then(function () {
       process.exit(1)
     })
