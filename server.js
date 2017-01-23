@@ -55,7 +55,8 @@ function Server (options) {
   var app = this
 
   function onError (e) {
-    app.reporter('runtimeError', app, undefined, e)
+    e.syscall === 'listen' ? process.stderr.write(errorHelper(e, app)) :
+        app.reporter("runtimeError", app, undefined, e)
     app.destroy().then(function () {
       process.exit(1)
     })
