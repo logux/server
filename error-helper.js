@@ -1,60 +1,36 @@
-var yyyymmdd = require('yyyy-mm-dd')
-var stripAnsi = require('strip-ansi')
 var chalk = require('chalk')
-var os = require('os')
-var SEPARATOR = os.EOL + os.EOL
-var NEXT_LINE = os.EOL === '\n' ? '\r\v' : os.EOL
-
-function rightPag (str, length) {
-  var add = length - stripAnsi(str).length
-  for (var i = 0; i < add; i++) str += ' '
-  return str
-}
-
-function time (c) {
-  return c.dim('at ' + yyyymmdd.withTime(module.exports.now()))
-}
-
-function line (c, label, color, message) {
-  var labelFormat = c.bold[color].bgBlack.inverse
-  var messageFormat = c.bold[color]
-  return rightPag(labelFormat(label), 8) +
-  messageFormat(message) + ' ' +
-  time(c)
-}
-
-function hint (c, str) {
-  return line(c, ' HINT ', 'magenta', str)
-}
-
-function error (c, str) {
-  return line(c, ' ERROR ', 'red', str)
-}
+var separators = require('./log-helper.js').separators
+var logHelper = require('./log-helper.js')
 
 function getErrorObject (e) {
   switch (e.code) {
     case 'EADDRINUSE':
       return {
-        description: 'address already in use',
-        hint: 'Port :' + e.port + ' already in use. Try to use other port.'
+        description: 'Port :' + e.port + ' already in use.',
+        hint: [
+          'Another Logux server or other app already running on this port',
+          'Maybe you didn’t not stop server from other project',
+          'or previous version of this server was not killed.'
+        ]
       }
     case 'EACCES':
       return {
-        description: 'permission denied',
-        hint: 'Run server on port > 1024. Current port: ' + e.port
+        description: 'You are not allowed to run server on this port',
+        hint: [
+          'Try to change user (e.g. root) or use port >= 1024'
+        ]
       }
     default:
-      return {
-        description: 'undefined error',
-        hint: 'Error with this code: ' + e.port + ' is not defined'
-      }
+      throw e
   }
 }
 
 function buildErrorMessage (c, errObj) {
   return [
-    error(c, errObj.description),
-    hint(c, errObj.hint)
+    logHelper.error(c, errObj.description),
+    logHelper.hint(c, errObj.hint
+      .join(separators.NEXT_LINE + separators.PADDING)
+    )
   ]
 }
 
@@ -66,9 +42,5 @@ module.exports = function (err, app) {
   var errObj = getErrorObject(err)
   return buildErrorMessage(c, errObj).filter(function (i) {
     return i !== ''
-  }).join(NEXT_LINE) + SEPARATOR
-}
-
-module.exports.now = function () {
-  return new Date()
+  }).join(separators.NEXT_LINE) + separators.SEPARATOR
 }
