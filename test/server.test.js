@@ -76,6 +76,18 @@ it('reports uncatch', function () {
   return checkError('uncatch.js')
 })
 
+it('error helper: port already in use', function () {
+  return exec('eaddrinuse.js').then(function (result) {
+    expect(result[0]).toMatchSnapshot()
+  })
+})
+
+it('error helper: privileged port', function () {
+  return exec('eacces.js').then(function (result) {
+    expect(result[0]).toMatchSnapshot()
+  })
+})
+
 it('reports options', function () {
   process.env.LOGUX_PORT = 31337
   return checkOut('options.js')
