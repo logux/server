@@ -1,4 +1,5 @@
 var reporter = require('../reporter')
+var logHelper = require('../log-helper')
 
 function normalizeNewlines (string) {
   // use local copy of Jest newline normalization function
@@ -11,7 +12,7 @@ function reportersOut () {
 }
 
 it('uses current time by default', function () {
-  expect(reporter.now().getTime()).toBeCloseTo(Date.now(), -1)
+  expect(logHelper.now().getTime()).toBeCloseTo(Date.now(), -1)
 })
 
 var ServerConnection = require('logux-sync').ServerConnection
@@ -53,14 +54,14 @@ var ownError = new SyncError(authed.sync, 'timeout', 5000, false)
 var clientError = new SyncError(authed.sync, 'timeout', 5000, true)
 
 describe('mocked output', function () {
-  var originNow = reporter.now
+  var originNow = logHelper.now
   beforeAll(function () {
-    reporter.now = function () {
+    logHelper.now = function () {
       return new Date((new Date()).getTimezoneOffset() * 60000)
     }
   })
   afterAll(function () {
-    reporter.now = originNow
+    logHelper.now = originNow
   })
 
   it('reports listen', function () {

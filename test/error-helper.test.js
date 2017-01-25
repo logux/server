@@ -1,4 +1,5 @@
 var errorHelper = require('../error-helper')
+var logHelper = require('../log-helper')
 
 function normalizeNewlines (string) {
   // use local copy of Jest newline normalization function
@@ -11,7 +12,7 @@ function errorHelperOut () {
 }
 
 it('uses current time by default', function () {
-  expect(errorHelper.now().getTime()).toBeCloseTo(Date.now(), -1)
+  expect(logHelper.now().getTime()).toBeCloseTo(Date.now(), -1)
 })
 
 var BaseServer = require('../base-server')
@@ -26,14 +27,14 @@ var app = new BaseServer({
 app.listenOptions = { host: '127.0.0.1', port: 1337 }
 
 describe('mocked output', function () {
-  var originNow = errorHelper.now
+  var originNow = logHelper.now
   beforeAll(function () {
-    errorHelper.now = function () {
+    logHelper.now = function () {
       return new Date((new Date()).getTimezoneOffset() * 60000)
     }
   })
   afterAll(function () {
-    errorHelper.now = originNow
+    logHelper.now = originNow
   })
 
   it('handle EACCESS error', function () {
@@ -48,16 +49,26 @@ describe('mocked output', function () {
       subprotocol: '2.5.0',
       supports: '2.x || 1.x'
     })
-    http.listenOptions = { host: '127.0.0.1', port: 1337 }
+    http.listenOptions = { host: '127.0.0.1', port: 1000 }
 
-    expect(errorHelperOut({code: 'EACCES'}, http)).toMatchSnapshot()
+    expect(errorHelperOut({code: 'EACCES', port: 1000}, http)).toMatchSnapshot()
   })
 
   it('handle EADDRINUSE error', function () {
-    expect(errorHelperOut({code: 'EADDRINUSE'}, app)).toMatchSnapshot()
+    expect(errorHelperOut({
+      code: 'EADDRINUSE',
+      port: 1337
+    }, app)).toMatchSnapshot()
   })
+})
 
-  it('handle undefined error', function () {
-    expect(errorHelperOut({code: 'UNDEFINED'}, app)).toMatchSnapshot()
-  })
+it('handle thorw on undefined error', function () {
+  var e = {
+    code: 'EAGAIN',
+    message: 'resource temporarily unavailable'
+  }
+  function errorHelperThrow () {
+    errorHelperOut(e, app)
+  }
+  expect(errorHelperThrow).toThrowErrorMatchingSnapshot()
 })
