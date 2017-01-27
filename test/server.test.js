@@ -22,9 +22,7 @@ function exec (name, args) {
     server.on('close', function (exitCode) {
       var fixed = out.replace(DATE, '1970-01-01 00:00:00')
                      .replace(/PID:(\s+)\d+/, 'PID:$121384')
-      // use local copy of Jest newline normalization function
-      // until Jest doens't apply normalization on comprasion
-      fixed = fixed.replace(/\r\n|\r/g, '\n')
+      fixed = fixed.replace(/\r\v/g, '\n')
       resolve([fixed, exitCode])
     })
     wait(500).then(function () {

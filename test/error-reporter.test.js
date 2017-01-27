@@ -2,9 +2,7 @@ var errorReporter = require('../error-reporter')
 var reporter = require('../reporter')
 
 function errorHelperOut () {
-  // use local copy of Jest newline normalization function
-  // until Jest doens't apply normalization on comprasion
-  return errorReporter.apply({}, arguments).replace(/\r\n|\r/g, '\n')
+  return errorReporter.apply({}, arguments).replace(/\r\v/g, '\n')
 }
 
 var BaseServer = require('../base-server')
@@ -28,11 +26,11 @@ afterAll(function () {
   reporter.now = originNow
 })
 
-it('handle EACCESS error', function () {
+it('handles EACCESS error', function () {
   expect(errorHelperOut({code: 'EACCES'}, app)).toMatchSnapshot()
 })
 
-it('handle error in production', function () {
+it('handles error in production', function () {
   var http = new BaseServer({
     env: 'production',
     pid: 21384,
@@ -45,14 +43,14 @@ it('handle error in production', function () {
   expect(errorHelperOut({code: 'EACCES', port: 1000}, http)).toMatchSnapshot()
 })
 
-it('handle EADDRINUSE error', function () {
+it('handles EADDRINUSE error', function () {
   expect(errorHelperOut({
     code: 'EADDRINUSE',
     port: 1337
   }, app)).toMatchSnapshot()
 })
 
-it('handle thorw on undefined error', function () {
+it('throws on undefined error', function () {
   var e = {
     code: 'EAGAIN',
     message: 'resource temporarily unavailable'
@@ -60,5 +58,5 @@ it('handle thorw on undefined error', function () {
   function errorHelperThrow () {
     errorHelperOut(e, app)
   }
-  expect(errorHelperThrow).toThrowErrorMatchingSnapshot()
+  expect(errorHelperThrow).toThrowError(/resource temporarily unavailable/)
 })

@@ -2,9 +2,7 @@ var serverReporter = require('../server-reporter')
 var reporter = require('../reporter')
 
 function reportersOut () {
-  // use local copy of Jest newline normalization function
-  // until Jest doens't apply normalization on comprasion
-  return serverReporter.apply({}, arguments).replace(/\r\n|\r/g, '\n')
+  return serverReporter.apply({}, arguments).replace(/\r\v/g, '\n')
 }
 
 var ServerConnection = require('logux-sync').ServerConnection

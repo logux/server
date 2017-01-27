@@ -1,12 +1,12 @@
 exports[`test destroys everything on exit 1`] = `
 " INFO   Logux server is listening at 1970-01-01 00:00:00
-        Logux server: 0.1.1
-        PID:          21384
-        Node ID:      server
-        Environment:  test
-        Subprotocol:  1.0.0
-        Supports:     1.x
-        Listen:       ws://127.0.0.1:2000
+        Logux server: 0.1.1
+        PID:          21384
+        Node ID:      server
+        Environment:  test
+        Subprotocol:  1.0.0
+        Supports:     1.x
+        Listen:       ws://127.0.0.1:2000
 
  INFO   Shutting down Logux server at 1970-01-01 00:00:00
 
@@ -16,13 +16,13 @@ exports[`test destroys everything on exit 1`] = `
 
 exports[`test euse environment variable for config 1`] = `
 " INFO   Logux server is listening at 1970-01-01 00:00:00
-        Logux server: 0.1.1
-        PID:          21384
-        Node ID:      server
-        Environment:  test
-        Subprotocol:  1.0.0
-        Supports:     1.x
-        Listen:       ws://127.0.0.1:31337
+        Logux server: 0.1.1
+        PID:          21384
+        Node ID:      server
+        Environment:  test
+        Subprotocol:  1.0.0
+        Supports:     1.x
+        Listen:       ws://127.0.0.1:31337
 
  INFO   Shutting down Logux server at 1970-01-01 00:00:00
 
@@ -55,23 +55,23 @@ Corresponding ENV variables: LOGUX_HOST, LOGUX_PORT, LOGUX_KEY, LOGUX_CERT
 
 exports[`test shows help about port in use 1`] = `
 " ERROR  Port :2001 already in use at 1970-01-01 00:00:00
-        Another Logux server or other app already running on this port
-        Maybe you didn’t not stop server from other project
-        or previous version of this server was not killed.
+        Another Logux server or other app already running on this port
+        Maybe you didn’t not stop server from other project
+        or previous version of this server was not killed.
 
 "
 `;
 
 exports[`test shows help about privileged port 1`] = `
 " ERROR  You are not allowed to run server on this port at 1970-01-01 00:00:00
-        Try to change user (e.g. root) or use port >= 1024
+        Try to change user (e.g. root) or use port >= 1024
 
 "
 `;
 
 exports[`test shows uncatch errors 1`] = `
 " ERROR  Test Error at 1970-01-01 00:00:00
-        fake stacktrace
+        fake stacktrace
 
  INFO   Shutting down Logux server at 1970-01-01 00:00:00
 
@@ -80,7 +80,7 @@ exports[`test shows uncatch errors 1`] = `
 
 exports[`test shows uncatch rejects 1`] = `
 " ERROR  Test Error at 1970-01-01 00:00:00
-        fake stacktrace
+        fake stacktrace
 
  INFO   Shutting down Logux server at 1970-01-01 00:00:00
 
