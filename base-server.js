@@ -266,15 +266,19 @@ BaseServer.prototype = {
       promise = promise.then(function () {
         return Promise.all(before)
       }).then(function (keys) {
-        if (keys[0]) {
-          app.http = https.createServer({ key: keys[0], cert: keys[1] })
-        } else {
-          app.http = http.createServer()
-        }
+        return new Promise(function (resolve, reject) {
+          if (keys[0]) {
+            app.http = https.createServer({ key: keys[0], cert: keys[1] })
+          } else {
+            app.http = http.createServer()
+          }
 
-        app.ws = new WebSocket.Server({ server: app.http })
-        return promisify(function (done) {
-          app.http.listen(app.listenOptions.port, app.listenOptions.host, done)
+          app.ws = new WebSocket.Server({ server: app.http })
+
+          app.ws.on('error', reject)
+
+          var opts = app.listenOptions
+          app.http.listen(opts.port, opts.host, resolve)
         })
       })
     }

@@ -1,117 +1,116 @@
+var os = require('os')
+var path = require('path')
 var chalk = require('chalk')
-var separators = require('./log-helper.js').separators
-var logHelper = require('./log-helper.js')
+var yyyymmdd = require('yyyy-mm-dd')
+var stripAnsi = require('strip-ansi')
 
-var pkg = require('./package.json')
+var PADDING = '        '
+var SEPARATOR = os.EOL + os.EOL
+var NEXT_LINE = os.EOL === '\n' ? '\r\v' : os.EOL
 
-var reporters = {
-
-  listen: function listen (c, app) {
-    var url
-    if (app.listenOptions.server) {
-      url = 'Custom HTTP server'
-    } else {
-      url = (app.listenOptions.cert ? 'wss://' : 'ws://') +
-        app.listenOptions.host + ':' + app.listenOptions.port
-    }
-
-    var dev = app.env === 'development'
-
-    return [
-      logHelper.info(c, 'Logux server is listening'),
-      logHelper.params(c, 'info', [
-        ['Logux server', pkg.version],
-        ['PID', app.options.pid],
-        ['Node ID', app.options.nodeId],
-        ['Environment', app.env],
-        ['Subprotocol', app.options.subprotocol],
-        ['Supports', app.options.supports],
-        ['Listen', url]
-      ]),
-      (dev ? logHelper.note(c, 'Press Ctrl-C to shutdown server') : '')
-    ]
-  },
-
-  connect: function connect (c, app, ip) {
-    return [
-      logHelper.info(c, 'Client was connected'),
-      logHelper.params(c, 'info', [['IP address', ip]])
-    ]
-  },
-
-  authenticated: function authenticated (c, app, client) {
-    return [
-      logHelper.info(c, 'User was authenticated'),
-      logHelper.params(c, 'info', [
-        ['User ID', client.user.id],
-        ['Node ID', client.nodeId || 'unknown'],
-        ['Subprotocol', client.sync.otherSubprotocol],
-        ['Logux protocol', client.sync.otherProtocol.join('.')],
-        ['IP address', client.remoteAddress]
-      ])
-    ]
-  },
-
-  disconnect: function disconnect (c, app, client) {
-    var user = client.user ? client.user.id : 'unauthenticated'
-    return [
-      logHelper.info(c, 'Client was disconnected'),
-      logHelper.params(c, 'info', [
-        ['User ID', user],
-        ['Node ID', client.nodeId || 'unknown'],
-        ['IP address', client.remoteAddress]
-      ])
-    ]
-  },
-
-  destroy: function destroy (c) {
-    return [
-      logHelper.info(c, 'Shutting down Logux server')
-    ]
-  },
-
-  runtimeError: function runtimeError (c, app, client, err) {
-    var prefix = err.name + ': ' + err.message
-    if (err.name === 'Error') prefix = err.message
-    return [
-      logHelper.error(c, prefix),
-      logHelper.prettyStackTrace(c, err, app.options.root),
-      logHelper.errorParams(c, 'error', client)
-    ]
-  },
-
-  syncError: function syncError (c, app, client, err) {
-    var prefix
-    if (err.received) {
-      prefix = 'SyncError from client: ' + err.description
-    } else {
-      prefix = 'SyncError: ' + err.description
-    }
-    return [
-      logHelper.error(c, prefix),
-      logHelper.errorParams(c, 'error', client)
-    ]
-  },
-
-  clientError: function clientError (c, app, client, err) {
-    return [
-      logHelper.warn(c, 'Client error: ' + err.description),
-      logHelper.errorParams(c, 'warn', client)
-    ]
-  }
-
+function time (c) {
+  return c.dim('at ' + yyyymmdd.withTime(module.exports.now()))
 }
 
-module.exports = function (type, app) {
-  var c = chalk
-  if (app.env !== 'development') {
-    c = new chalk.constructor({ enabled: false })
+function rightPag (str, length) {
+  var add = length - stripAnsi(str).length
+  for (var i = 0; i < add; i++) str += ' '
+  return str
+}
+
+function labeled (c, label, color, message) {
+  var labelFormat = c.bold[color].bgBlack.inverse
+  var messageFormat = c.bold[color]
+
+  return rightPag(labelFormat(label), 8) +
+         messageFormat(message) + ' ' +
+         time(c)
+}
+
+module.exports = {
+
+  params: function params (c, type, fields) {
+    var max = 0
+    var current
+    for (var i = 0; i < fields.length; i++) {
+      current = fields[i][0].length + 2
+      if (current > max) max = current
+    }
+    return fields.map(function (field) {
+      return PADDING + rightPag(field[0] + ': ', max) + c.bold(field[1])
+    }).join(NEXT_LINE)
+  },
+
+  info: function info (c, str) {
+    return labeled(c, ' INFO ', 'green', str)
+  },
+
+  warn: function warn (c, str) {
+    return labeled(c, ' WARN ', 'yellow', str)
+  },
+
+  error: function error (c, str) {
+    return labeled(c, ' ERROR ', 'red', str)
+  },
+
+  hint: function hint (c, strings) {
+    return strings.map(function (i) {
+      return PADDING + i
+    }).join(NEXT_LINE)
+  },
+
+  errorParams: function errorParams (c, type, client) {
+    if (!client) {
+      return ''
+    } else {
+      var user = client.user ? client.user.id : 'unauthenticated'
+      return module.exports.params(c, 'error', [
+        ['User ID', user],
+        ['Node ID', client.nodeId || 'unknown'],
+        ['Subprotocol', client.sync.otherSubprotocol || 'unknown'],
+        ['IP address', client.remoteAddress]
+      ])
+    }
+  },
+
+  note: function note (c, str) {
+    return PADDING + c.grey(str)
+  },
+
+  prettyStackTrace: function prettyStackTrace (c, err, root) {
+    if (root.slice(-1) !== path.sep) root += path.sep
+
+    return err.stack.split('\n').slice(1).map(function (i) {
+      i = i.replace(/^\s*/, PADDING)
+      var match = i.match(/(\s+at [^(]+ \()([^)]+)\)/)
+      if (!match || match[2].indexOf(root) !== 0) {
+        return c.red(i)
+      } else {
+        match[2] = match[2].slice(root.length)
+        if (match[2].indexOf('node_modules') !== -1) {
+          return c.red(match[1] + match[2] + ')')
+        } else {
+          return c.yellow(match[1] + match[2] + ')')
+        }
+      }
+    }).join(NEXT_LINE)
+  },
+
+  color: function color (app) {
+    if (app.env !== 'development') {
+      return new chalk.constructor({ enabled: false })
+    } else {
+      return chalk
+    }
+  },
+
+  message: function message (strings) {
+    return strings.filter(function (i) {
+      return i !== ''
+    }).join(NEXT_LINE) + SEPARATOR
+  },
+
+  now: function now () {
+    return new Date()
   }
-
-  var reporter = reporters[type]
-  var args = [c].concat(Array.prototype.slice.call(arguments, 1))
-
-  return reporter.apply({ }, args).filter(function (i) {
-    return i !== ''
-  }).join(separators.NEXT_LINE) + separators.SEPARATOR
 }

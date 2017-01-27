@@ -3,10 +3,10 @@ var path = require('path')
 
 var DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
 
-function normalizeNewlines (string) {
-  // use local copy of Jest newline normalization function
-  // until Jest doens't apply normalization on comprasion
-  return string.replace(/\r\n|\r/g, '\n')
+function wait (ms) {
+  return new Promise(function (resolve) {
+    setTimeout(resolve, ms)
+  })
 }
 
 function exec (name, args) {
@@ -22,13 +22,14 @@ function exec (name, args) {
     server.on('close', function (exitCode) {
       var fixed = out.replace(DATE, '1970-01-01 00:00:00')
                      .replace(/PID:(\s+)\d+/, 'PID:$121384')
-
-      fixed = normalizeNewlines(fixed)
+      // use local copy of Jest newline normalization function
+      // until Jest doens't apply normalization on comprasion
+      fixed = fixed.replace(/\r\n|\r/g, '\n')
       resolve([fixed, exitCode])
     })
-    setTimeout(function () {
+    wait(500).then(function () {
       server.kill('SIGINT')
-    }, 500)
+    })
   })
 }
 
@@ -76,18 +77,6 @@ it('reports uncatch', function () {
   return checkError('uncatch.js')
 })
 
-it('error helper: port already in use', function () {
-  return exec('eaddrinuse.js').then(function (result) {
-    expect(result[0]).toMatchSnapshot()
-  })
-})
-
-it('error helper: privileged port', function () {
-  return exec('eacces.js').then(function (result) {
-    expect(result[0]).toMatchSnapshot()
-  })
-})
-
 it('reports options', function () {
   process.env.LOGUX_PORT = 31337
   return checkOut('options.js')
@@ -95,4 +84,21 @@ it('reports options', function () {
 
 it('reports help', function () {
   return checkOut('options.js', ['', '--help'])
+})
+
+it('reports about port already in use', function () {
+  return Promise.all([
+    exec('eaddrinuse.js'),
+    wait(100).then(function () {
+      return exec('eaddrinuse.js')
+    }).then(function (result) {
+      expect(result[0]).toMatchSnapshot()
+    })
+  ])
+})
+
+it('reports about privileged port', function () {
+  return exec('eacces.js').then(function (result) {
+    expect(result[0]).toMatchSnapshot()
+  })
 })

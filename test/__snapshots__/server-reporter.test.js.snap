@@ -1,4 +1,4 @@
-exports[`mocked output reports authed-error 1`] = `
+exports[`test reports authed-error 1`] = `
 "[1m[31m[40m[7m ERROR [27m[49m[39m[22m [1m[31mSyncError: A timeout was reached (5000ms)[39m[22m [2mat 1970-01-01 00:00:00[22m
         User ID:     [1m100[22m
         Node ID:     [1m100:550e8400-e29b-41d4-a716-446655440000[22m
@@ -8,7 +8,7 @@ exports[`mocked output reports authed-error 1`] = `
 "
 `;
 
-exports[`mocked output reports authenticated 1`] = `
+exports[`test reports authenticated 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mUser was authenticated[39m[22m [2mat 1970-01-01 00:00:00[22m
         User ID:        [1m100[22m
         Node ID:        [1m100:550e8400-e29b-41d4-a716-446655440000[22m
@@ -19,7 +19,7 @@ exports[`mocked output reports authenticated 1`] = `
 "
 `;
 
-exports[`mocked output reports client-error 1`] = `
+exports[`test reports client-error 1`] = `
 "[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mClient error: A timeout was reached (5000ms)[39m[22m [2mat 1970-01-01 00:00:00[22m
         User ID:     [1m100[22m
         Node ID:     [1m100:550e8400-e29b-41d4-a716-446655440000[22m
@@ -29,20 +29,20 @@ exports[`mocked output reports client-error 1`] = `
 "
 `;
 
-exports[`mocked output reports connect 1`] = `
+exports[`test reports connect 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mClient was connected[39m[22m [2mat 1970-01-01 00:00:00[22m
         IP address: [1m127.0.0.1[22m
 
 "
 `;
 
-exports[`mocked output reports destroy 1`] = `
+exports[`test reports destroy 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mShutting down Logux server[39m[22m [2mat 1970-01-01 00:00:00[22m
 
 "
 `;
 
-exports[`mocked output reports disconnect 1`] = `
+exports[`test reports disconnect 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mClient was disconnected[39m[22m [2mat 1970-01-01 00:00:00[22m
         User ID:    [1m100[22m
         Node ID:    [1m100:550e8400-e29b-41d4-a716-446655440000[22m
@@ -51,9 +51,9 @@ exports[`mocked output reports disconnect 1`] = `
 "
 `;
 
-exports[`mocked output reports error 1`] = `
+exports[`test reports error 1`] = `
 "[1m[31m[40m[7m ERROR [27m[49m[39m[22m [1m[31mSome mistake[39m[22m [2mat 1970-01-01 00:00:00[22m
-[33m        at Object.<anonymous> (test/reporter.test.js:28:13)[39m
+[33m        at Object.<anonymous> (test/server-reporter.test.js:28:13)[39m
 [31m        at Module._compile (module.js:573:32)[39m
 [31m        at at runTest (node_modules/jest/index.js:50:10)[39m
 [31m        at process._tickCallback (internal/process/next_tick.js:103:7)[39m
@@ -61,7 +61,7 @@ exports[`mocked output reports error 1`] = `
 "
 `;
 
-exports[`mocked output reports expel 1`] = `
+exports[`test reports expel 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mClient was disconnected[39m[22m [2mat 1970-01-01 00:00:00[22m
         User ID:    [1munauthenticated[22m
         Node ID:    [1munknown[22m
@@ -70,7 +70,7 @@ exports[`mocked output reports expel 1`] = `
 "
 `;
 
-exports[`mocked output reports http 1`] = `
+exports[`test reports http 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mLogux server is listening[39m[22m [2mat 1970-01-01 00:00:00[22m
         Logux server: [1m0.1.1[22m
         PID:          [1m21384[22m
@@ -84,7 +84,7 @@ exports[`mocked output reports http 1`] = `
 "
 `;
 
-exports[`mocked output reports listen 1`] = `
+exports[`test reports listen 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mLogux server is listening[39m[22m [2mat 1970-01-01 00:00:00[22m
         Logux server: [1m0.1.1[22m
         PID:          [1m21384[22m
@@ -98,7 +98,7 @@ exports[`mocked output reports listen 1`] = `
 "
 `;
 
-exports[`mocked output reports production 1`] = `
+exports[`test reports production 1`] = `
 " INFO   Logux server is listening at 1970-01-01 00:00:00
         Logux server: 0.1.1
         PID:          21384
@@ -111,7 +111,7 @@ exports[`mocked output reports production 1`] = `
 "
 `;
 
-exports[`mocked output reports unauthed-error 1`] = `
+exports[`test reports unauthed-error 1`] = `
 "[1m[31m[40m[7m ERROR [27m[49m[39m[22m [1m[31mSyncError from client: A timeout was reached (5000ms)[39m[22m [2mat 1970-01-01 00:00:00[22m
         User ID:     [1munauthenticated[22m
         Node ID:     [1munknown[22m

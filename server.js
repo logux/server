@@ -1,6 +1,8 @@
+var assign = require('object-assign')
+
 var BaseServer = require('./base-server')
-var reporter = require('./reporter')
-var errorHelper = require('./error-helper')
+var errorReporter = require('./error-reporter')
+var serverReporter = require('./server-reporter')
 
 /**
  * End-user API to create Logux server.
@@ -50,17 +52,14 @@ function Server (options) {
   options.pid = process.pid
 
   BaseServer.call(this, options, function () {
-    process.stderr.write(reporter.apply(reporter, arguments))
+    if (app.silent) return
+    process.stderr.write(serverReporter.apply(serverReporter, arguments))
   })
 
   var app = this
 
   function onError (e) {
-    try {
-      process.stderr.write(errorHelper(e, app))
-    } catch (err) {
-      app.reporter('runtimeError', app, undefined, err)
-    }
+    app.reporter('runtimeError', app, undefined, e)
     app.destroy().then(function () {
       process.exit(1)
     })
@@ -80,6 +79,19 @@ function Server (options) {
   })
 }
 
-Server.prototype = BaseServer.prototype
+Server.prototype = {
+
+  listen: function listen () {
+    var app = this
+    var origin = BaseServer.prototype.listen
+    return origin.apply(this, arguments).catch(function (e) {
+      process.stderr.write(errorReporter(e, app))
+      process.exit(1)
+    })
+  }
+
+}
+
+Server.prototype = assign({ }, BaseServer.prototype, Server.prototype)
 
 module.exports = Server

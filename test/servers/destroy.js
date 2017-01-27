@@ -3,7 +3,6 @@
 var Server = require('../../server')
 
 var app = new Server({
-  env: 'test',
   nodeId: 'server',
   subprotocol: '1.0.0',
   supports: '1.x'
@@ -22,7 +21,7 @@ app.unbind.push(function () {
   })
 })
 
-app.listen()
+app.listen({ port: 2000 })
 
 process.on('message', function (msg) {
   if (msg === 'close') {

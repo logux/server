@@ -2,7 +2,6 @@
 var Server = require('../../server')
 
 var app = new Server({
-  env: 'test',
   nodeId: 'server',
   subprotocol: '1.0.0',
   supports: '1.x'
@@ -13,6 +12,6 @@ app.auth(function () {
 })
 
 app.listen(app.loadOptions(process, {
-  port: '1337',
+  port: '1338',
   host: '127.0.0.1'
 }))
