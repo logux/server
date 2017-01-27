@@ -59,7 +59,7 @@ afterEach(function () {
   delete process.env.LOGUX_PORT
 })
 
-it('reports destroy', function () {
+it('destroys everything on exit', function () {
   return checkOut('destroy.js')
 })
 
@@ -69,24 +69,24 @@ it('reports unbind', function () {
   })
 })
 
-it('reports throw', function () {
+it('shows uncatch errors', function () {
   return checkError('throw.js')
 })
 
-it('reports uncatch', function () {
+it('shows uncatch rejects', function () {
   return checkError('uncatch.js')
 })
 
-it('reports options', function () {
+it('euse environment variable for config', function () {
   process.env.LOGUX_PORT = 31337
   return checkOut('options.js')
 })
 
-it('reports help', function () {
+it('shows help', function () {
   return checkOut('options.js', ['', '--help'])
 })
 
-it('reports about port already in use', function () {
+it('shows help about port in use', function () {
   return Promise.all([
     exec('eaddrinuse.js'),
     wait(100).then(function () {
@@ -97,7 +97,7 @@ it('reports about port already in use', function () {
   ])
 })
 
-it('reports about privileged port', function () {
+it('shows help about privileged port', function () {
   return exec('eacces.js').then(function (result) {
     expect(result[0]).toMatchSnapshot()
   })
