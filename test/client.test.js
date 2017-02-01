@@ -174,3 +174,46 @@ it('has method to check client subprotocol', function () {
   expect(client.isSubprotocol('>= 1.0.0')).toBeTruthy()
   expect(client.isSubprotocol('< 1.0.0')).toBeFalsy()
 })
+
+it('sends server credentials in development', function () {
+  var app = new BaseServer({
+    subprotocol: '0.0.0',
+    supports: '0.x',
+    env: 'development'
+  })
+  app.auth(function () {
+    return Promise.resolve({ id: 'user' })
+  })
+  var client = new Client(app, createConnection(), 1)
+  return client.connection.connect().then(function () {
+    var protocol = client.sync.localProtocol
+    client.connection.other().send(['connect', protocol, 'client', 0])
+    return client.connection.pair.wait('right')
+  }).then(function () {
+    expect(client.connection.pair.leftSent[0][4]).toEqual({
+      credentials: { env: 'development' },
+      subprotocol: '0.0.0'
+    })
+  })
+})
+
+it('does not send server credentials in production', function () {
+  var app = new BaseServer({
+    subprotocol: '0.0.0',
+    supports: '0.x',
+    env: 'production'
+  })
+  app.auth(function () {
+    return Promise.resolve({ id: 'user' })
+  })
+  var client = new Client(app, createConnection(), 1)
+  return client.connection.connect().then(function () {
+    var protocol = client.sync.localProtocol
+    client.connection.other().send(['connect', protocol, 'client', 0])
+    return client.connection.pair.wait('right')
+  }).then(function () {
+    expect(client.connection.pair.leftSent[0][4]).toEqual({
+      subprotocol: '0.0.0'
+    })
+  })
+})

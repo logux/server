@@ -48,6 +48,11 @@ function Client (app, connection, key) {
    */
   this.remoteAddress = remoteAddress(this.connection.ws)
 
+  var credentials
+  if (this.app.env === 'development') {
+    credentials = { env: 'development' }
+  }
+
   /**
    * Sync instance from `logux-sync` to synchronize logs.
    * @type {ServerSync}
@@ -56,6 +61,7 @@ function Client (app, connection, key) {
    * if (client.sync.state === 'synchronized')
    */
   this.sync = new ServerSync(app.nodeId, app.log, connection, {
+    credentials: credentials,
     subprotocol: app.options.subprotocol,
     timeout: app.options.timeout,
     ping: app.options.ping,
