@@ -79,7 +79,6 @@ module.exports = {
     } else {
       return module.exports.params(c, 'error', [
         ['Node ID', client.nodeId || 'unknown'],
-        ['Subprotocol', client.sync.remoteSubprotocol || 'unknown'],
         ['IP address', client.remoteAddress]
       ])
     }

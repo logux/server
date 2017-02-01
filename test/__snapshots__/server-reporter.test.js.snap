@@ -1,8 +1,7 @@
 exports[`test reports authed-error 1`] = `
 "[1m[31m[40m[7m ERROR [27m[49m[39m[22m [1m[31mSyncError: A timeout was reached (5000ms)[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Node ID:     [1m100[22m:550e8400-e29b-41d4-a716-446655440000
-        Subprotocol: [1m1.0.0[22m
-        IP address:  [1m127.0.0.1[22m
+        Node ID:    [1m100[22m:550e8400-e29b-41d4-a716-446655440000
+        IP address: [1m127.0.0.1[22m
 
 "
 `;
@@ -19,9 +18,8 @@ exports[`test reports authenticated 1`] = `
 
 exports[`test reports client-error 1`] = `
 "[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mClient error: A timeout was reached (5000ms)[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Node ID:     [1m100[22m:550e8400-e29b-41d4-a716-446655440000
-        Subprotocol: [1m1.0.0[22m
-        IP address:  [1m127.0.0.1[22m
+        Node ID:    [1m100[22m:550e8400-e29b-41d4-a716-446655440000
+        IP address: [1m127.0.0.1[22m
 
 "
 `;
@@ -108,9 +106,8 @@ exports[`test reports production 1`] = `
 
 exports[`test reports unauthed-error 1`] = `
 "[1m[31m[40m[7m ERROR [27m[49m[39m[22m [1m[31mSyncError from client: A timeout was reached (5000ms)[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Node ID:     unknown
-        Subprotocol: [1munknown[22m
-        IP address:  [1m127.0.0.1[22m
+        Node ID:    unknown
+        IP address: [1m127.0.0.1[22m
 
 "
 `;
