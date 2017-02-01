@@ -1,5 +1,4 @@
 var ServerConnection = require('logux-sync').ServerConnection
-var createTimer = require('logux-core').createTimer
 var MemoryStore = require('logux-core').MemoryStore
 var WebSocket = require('ws')
 var shortid = require('shortid')
@@ -83,8 +82,6 @@ function readFile (root, file) {
  *                                         to disconnect connection.
  * @param {number} [options.ping=10000] Milliseconds since last message to test
  *                                      connection by sending ping.
- * @param {function} [options.timer] Timer to use in log. Will be default
- *                                   timer with server `nodeId`, by default.
  * @param {Store} [options.store] Store to save log. Will be `MemoryStore`,
  *                                by default.
  * @param {"production"|"development"} [options.env] Development or production
@@ -130,17 +127,16 @@ function BaseServer (options, reporter) {
 
   this.options.root = this.options.root || process.cwd()
 
-  var timer = this.options.timer || createTimer(this.options.nodeId)
   var store = this.options.store || new MemoryStore()
 
   /**
-   * Server events log.
+   * Server actions log.
    * @type {Log}
    *
    * @example
-   * app.log.keep(customKeeper)
+   * app.log.each(finder)
    */
-  this.log = new Log({ store: store, timer: timer })
+  this.log = new Log({ store: store, nodeId: this.options.nodeId })
 
   /**
    * Production or development mode.

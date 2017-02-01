@@ -1874,18 +1874,18 @@ log-update@^1.0.2:
     ansi-escapes "^1.0.0"
     cli-cursor "^1.0.2"
 
-logux-core@^0.1.0:
+logux-core@logux/logux-core:
   version "0.1.0"
-  resolved "https://registry.yarnpkg.com/logux-core/-/logux-core-0.1.0.tgz#1b7663de250170c4e7a13536275af61f93fe54c6"
+  resolved "https://codeload.github.com/logux/logux-core/tar.gz/59f4859b55d0eec80dbe1b35eab5653cee1e3389"
   dependencies:
     nanoevents "^0.3.0"
 
-logux-sync@^0.1.2:
+logux-sync@logux/logux-sync:
   version "0.1.2"
-  resolved "https://registry.yarnpkg.com/logux-sync/-/logux-sync-0.1.2.tgz#219973ee3cccdc03027acd089938315b5e60a78d"
+  resolved "https://codeload.github.com/logux/logux-sync/tar.gz/6dbe85679b24801f4af33821b3fe58252bfebe90"
   dependencies:
     nanoevents "^0.3.0"
-    object-assign "^4.1.0"
+    object-assign "^4.1.1"
 
 longest@^1.0.1:
   version "1.0.1"
@@ -2814,13 +2814,9 @@ window-size@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/window-size/-/window-size-0.1.4.tgz#f8e1aa1ee5a53ec5bf151ffa09742a6ad7697876"
 
-wordwrap@0.0.2:
+wordwrap@0.0.2, wordwrap@~0.0.2:
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/wordwrap/-/wordwrap-0.0.2.tgz#b79669bb42ecb409f83d583cad52ca17eaa1643f"
-
-wordwrap@~0.0.2:
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/wordwrap/-/wordwrap-0.0.3.tgz#a3d5da6cd5c0bc0008d37234bbaf1bed63059107"
 
 wordwrap@~1.0.0:
   version "1.0.0"

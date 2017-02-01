@@ -42,8 +42,8 @@ var reporters = {
       reporter.params(c, 'info', [
         ['User ID', client.user.id],
         ['Node ID', client.nodeId || 'unknown'],
-        ['Subprotocol', client.sync.otherSubprotocol],
-        ['Logux protocol', client.sync.otherProtocol.join('.')],
+        ['Subprotocol', client.sync.remoteSubprotocol],
+        ['Logux protocol', client.sync.remoteProtocol.join('.')],
         ['IP address', client.remoteAddress]
       ])
     ]

@@ -1,10 +1,10 @@
-var LocalPair = require('logux-sync').LocalPair
+var TestPair = require('logux-sync').TestPair
 
 var BaseServer = require('../base-server')
 var Client = require('../client')
 
 function createConnection () {
-  var pair = new LocalPair()
+  var pair = new TestPair()
   pair.left.ws = {
     upgradeReq: {
       headers: { },
@@ -13,7 +13,6 @@ function createConnection () {
       }
     }
   }
-  pair.right.connect()
   return pair.left
 }
 
@@ -33,12 +32,6 @@ function createReporter () {
     reports.push(Array.prototype.slice.call(arguments, 0))
   })
   return { app: app, reports: reports }
-}
-
-function nextTick () {
-  return new Promise(function (resolve) {
-    setTimeout(resolve, 1)
-  })
 }
 
 it('uses server options', function () {
@@ -79,18 +72,23 @@ it('removes itself on destroy', function () {
   var client = new Client(test.app, createConnection(), 1)
   test.app.clients[1] = client
 
-  client.destroy()
-  expect(test.app.clients).toEqual({ })
-  expect(client.connection.connected).toBeFalsy()
-  expect(test.reports).toEqual([['disconnect', test.app, client]])
+  return client.connection.connect().then(function () {
+    client.destroy()
+    expect(test.app.clients).toEqual({ })
+    expect(client.connection.connected).toBeFalsy()
+    expect(test.reports).toEqual([['disconnect', test.app, client]])
+  })
 })
 
 it('destroys on disconnect', function () {
   var client = new Client(createServer(), createConnection(), 1)
   client.destroy = jest.fn()
-
-  client.connection.other().disconnect()
-  expect(client.destroy).toBeCalled()
+  return client.connection.connect().then(function () {
+    client.connection.other().disconnect()
+    return client.connection.pair.wait()
+  }).then(function () {
+    expect(client.destroy).toBeCalled()
+  })
 })
 
 it('reports on wrong authentication', function () {
@@ -98,11 +96,12 @@ it('reports on wrong authentication', function () {
   test.app.auth(function () {
     return Promise.resolve(false)
   })
-
   var client = new Client(test.app, createConnection(), 1)
-  client.connection.other().send(['connect', client.sync.protocol, 'client', 0])
-
-  return nextTick().then(function () {
+  return client.connection.connect().then(function () {
+    var protocol = client.sync.localProtocol
+    client.connection.other().send(['connect', protocol, 'client', 0])
+    return client.connection.pair.wait('right')
+  }).then(function () {
     expect(test.reports.length).toEqual(2)
     expect(test.reports[0][0]).toEqual('clientError')
     expect(test.reports[0][1]).toEqual(test.app)
@@ -121,13 +120,14 @@ it('authenticates user', function () {
       return Promise.resolve(false)
     }
   })
-
   var client = new Client(test.app, createConnection(), 1)
-  client.connection.other().send([
-    'connect', client.sync.protocol, 'client', 0, { credentials: 'token' }
-  ])
-
-  return nextTick().then(function () {
+  return client.connection.connect().then(function () {
+    var protocol = client.sync.localProtocol
+    client.connection.other().send([
+      'connect', protocol, 'client', 0, { credentials: 'token' }
+    ])
+    return client.connection.pair.wait('right')
+  }).then(function () {
     expect(client.user).toEqual({ id: 'user' })
     expect(client.nodeId).toEqual('client')
     expect(client.sync.authenticated).toBeTruthy()
@@ -138,23 +138,27 @@ it('authenticates user', function () {
 it('reports about synchronization errors', function () {
   var test = createReporter()
   var client = new Client(test.app, createConnection(), 1)
-
-  client.connection.other().send(['error', 'wrong-format'])
-  expect(test.reports[0][0]).toEqual('syncError')
-  expect(test.reports[0][1]).toEqual(test.app)
-  expect(test.reports[0][2]).toEqual(client)
-  expect(test.reports[0][3].type).toEqual('wrong-format')
+  return client.connection.connect().then(function () {
+    client.connection.other().send(['error', 'wrong-format'])
+    return client.connection.pair.wait()
+  }).then(function () {
+    expect(test.reports[0][0]).toEqual('syncError')
+    expect(test.reports[0][1]).toEqual(test.app)
+    expect(test.reports[0][2]).toEqual(client)
+    expect(test.reports[0][3].type).toEqual('wrong-format')
+  })
 })
 
 it('checks subprotocol', function () {
   var test = createReporter()
-
   var client = new Client(test.app, createConnection(), 1)
-  client.connection.other().send([
-    'connect', client.sync.protocol, 'client', 0, { subprotocol: '1.0.0' }
-  ])
-
-  return nextTick().then(function () {
+  return client.connection.connect().then(function () {
+    var protocol = client.sync.localProtocol
+    client.connection.other().send([
+      'connect', protocol, 'client', 0, { subprotocol: '1.0.0' }
+    ])
+    return client.connection.pair.wait('right')
+  }).then(function () {
     expect(test.reports.length).toEqual(2)
     expect(test.reports[0][0]).toEqual('clientError')
     expect(test.reports[0][3].message).toEqual(
@@ -166,7 +170,7 @@ it('checks subprotocol', function () {
 it('has method to check client subprotocol', function () {
   var test = createReporter()
   var client = new Client(test.app, createConnection(), 1)
-  client.sync.otherSubprotocol = '1.0.1'
+  client.sync.remoteSubprotocol = '1.0.1'
   expect(client.isSubprotocol('>= 1.0.0')).toBeTruthy()
   expect(client.isSubprotocol('< 1.0.0')).toBeFalsy()
 })

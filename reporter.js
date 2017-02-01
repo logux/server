@@ -67,7 +67,7 @@ module.exports = {
       return module.exports.params(c, 'error', [
         ['User ID', user],
         ['Node ID', client.nodeId || 'unknown'],
-        ['Subprotocol', client.sync.otherSubprotocol || 'unknown'],
+        ['Subprotocol', client.sync.remoteSubprotocol || 'unknown'],
         ['IP address', client.remoteAddress]
       ])
     }

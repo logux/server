@@ -3,14 +3,15 @@
 <img align="right" width="95" height="95" title="Logux logo"
      src="https://cdn.rawgit.com/logux/logux/master/logo.svg">
 
-Logux is a client-server communication protocol. It synchronizes events
+Logux is a client-server communication protocol. It synchronizes actions
 between clients and server logs.
 
 This framework helps you to write Logux server and define back-end callbacks
 for each client’s event type.
 
-This is a first **proof-of-concept** version. It simply synchronizes all the events between
-clients, not yet having many syntax sugar that we've planned for future.
+This is a first **proof-of-concept** version. It simply synchronizes all
+the actions between clients, not yet having many syntax sugar
+that we've planned for future.
 
 <a href="https://evilmartians.com/?utm_source=logux-server">
   <img src="https://evilmartians.com/badges/sponsored-by-evil-martians.svg"
@@ -58,13 +59,13 @@ app.auth(token => {
   // TODO Check token and return a Promise with user or false on bad token.
 })
 
-app.log.on('event', (event, meta) => {
-  // TODO Do something on client event. Write to database, ask other service.
+app.log.on('add', (action, meta) => {
+  // TODO Do something on client action. Write to database, ask other service.
 })
 
 cleanEvery(app.log, 1000)
-app.log.keep((event, meta) => {
-  // TODO return true if event should not be removed yet from log
+app.log.keep((action, meta) => {
+  // TODO return true if action should not be removed yet from log
 })
 
 app.listen(app.loadOptions(process))
@@ -74,13 +75,13 @@ app.listen(app.loadOptions(process))
 ### Write Business Logic
 
 Logux is a communication protocol. It doesn’t know anything about your database.
-You need to write custom logic inside your event callbacks.
+You need to write custom logic inside your action callbacks.
 
 ```js
-app.log.on('event', (event, meta) => {
-  if (event.type === 'changeName') {
-    users.find({ id: event.user }).then(user => {
-      user.update({ name: event.name })
+app.log.on('add', (action, meta) => {
+  if (action.type === 'CHANGE_NAME') {
+    users.find({ id: action.user }).then(user => {
+      user.update({ name: action.name })
     })
   }
 })
@@ -89,12 +90,13 @@ app.log.on('event', (event, meta) => {
 Read [`logux-core`] docs for `app.log` API.
 
 If you already have business logic written in PHP, Ruby, Java — don’t worry.
-You can do whatever you want in the event listener. For one, you may just call the legacy REST API:
+You can do whatever you want in the action listener.
+For one, you may just call the legacy REST API:
 
 ```js
-if (event.type === 'changeName') {
-  request.put(`http://example.com/users/${event.user}`).form({
-    name: event.name
+if (action.type === 'CHANGE_NAME') {
+  request.put(`http://example.com/users/${action.user}`).form({
+    name: action.name
   })
 }
 ```

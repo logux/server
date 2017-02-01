@@ -1,6 +1,5 @@
 /* eslint-disable no-invalid-this */
 
-var createTestTimer = require('logux-core').createTestTimer
 var MemoryStore = require('logux-core').MemoryStore
 var WebSocket = require('ws')
 var https = require('https')
@@ -72,6 +71,7 @@ it('saves server options', function () {
 it('generates node ID', function () {
   var app = new BaseServer(defaultOptions)
   expect(app.options.nodeId).toMatch(/server:[\w\d]+/)
+  expect(app.options.nodeId).toEqual(app.log.nodeId)
 })
 
 it('throws on missed subprotocol', function () {
@@ -121,27 +121,20 @@ it('uses user root', function () {
   expect(app.options.root).toEqual('/a')
 })
 
-it('creates log with default timer and store', function () {
+it('creates log with default store', function () {
   var app = new BaseServer(defaultOptions)
   expect(app.log instanceof Log).toBeTruthy()
   expect(app.log.store instanceof MemoryStore).toBeTruthy()
-  var time = app.log.timer()
-  expect(typeof time[0]).toEqual('number')
-  expect(time[1]).toEqual(app.options.nodeId)
-  expect(time[2]).toEqual(0)
 })
 
-it('creates log with custom timer and store', function () {
-  var timer = createTestTimer()
+it('creates log with custom store', function () {
   var store = new MemoryStore()
   var app = new BaseServer({
     subprotocol: '0.0.0',
     supports: '0.x',
-    store: store,
-    timer: timer
+    store: store
   })
   expect(app.log.store).toBe(store)
-  expect(app.log.timer).toBe(timer)
 })
 
 it('destroys application without runned server', function () {

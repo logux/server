@@ -71,7 +71,7 @@ function Client (app, connection, key) {
     if (!client.isSubprotocol(client.app.options.supports)) {
       throw new SyncError(client.sync, 'wrong-subprotocol', {
         supported: client.app.options.supports,
-        used: client.sync.otherSubprotocol
+        used: client.sync.remoteSubprotocol
       })
     }
   })
@@ -105,7 +105,7 @@ Client.prototype = {
    * }
    */
   isSubprotocol: function isSubprotocol (range) {
-    return semver.satisfies(this.sync.otherSubprotocol, range)
+    return semver.satisfies(this.sync.remoteSubprotocol, range)
   },
 
   /**

@@ -33,8 +33,8 @@ var ws = {
 }
 
 var authed = new Client(app, new ServerConnection(ws), 1)
-authed.sync.otherSubprotocol = '1.0.0'
-authed.sync.otherProtocol = [0, 0]
+authed.sync.remoteSubprotocol = '1.0.0'
+authed.sync.remoteProtocol = [0, 0]
 authed.user = { id: 100 }
 authed.nodeId = '100:550e8400-e29b-41d4-a716-446655440000'
 
