@@ -1,7 +1,6 @@
 exports[`test reports authed-error 1`] = `
 "[1m[31m[40m[7m ERROR [27m[49m[39m[22m [1m[31mSyncError: A timeout was reached (5000ms)[39m[22m [2mat 1970-01-01 00:00:00[22m
-        User ID:     [1m100[22m
-        Node ID:     [1m100:550e8400-e29b-41d4-a716-446655440000[22m
+        Node ID:     [1m100[22m:550e8400-e29b-41d4-a716-446655440000
         Subprotocol: [1m1.0.0[22m
         IP address:  [1m127.0.0.1[22m
 
@@ -10,8 +9,7 @@ exports[`test reports authed-error 1`] = `
 
 exports[`test reports authenticated 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mUser was authenticated[39m[22m [2mat 1970-01-01 00:00:00[22m
-        User ID:        [1m100[22m
-        Node ID:        [1m100:550e8400-e29b-41d4-a716-446655440000[22m
+        Node ID:        [1m100[22m:550e8400-e29b-41d4-a716-446655440000
         Subprotocol:    [1m1.0.0[22m
         Logux protocol: [1m0.0[22m
         IP address:     [1m127.0.0.1[22m
@@ -21,8 +19,7 @@ exports[`test reports authenticated 1`] = `
 
 exports[`test reports client-error 1`] = `
 "[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mClient error: A timeout was reached (5000ms)[39m[22m [2mat 1970-01-01 00:00:00[22m
-        User ID:     [1m100[22m
-        Node ID:     [1m100:550e8400-e29b-41d4-a716-446655440000[22m
+        Node ID:     [1m100[22m:550e8400-e29b-41d4-a716-446655440000
         Subprotocol: [1m1.0.0[22m
         IP address:  [1m127.0.0.1[22m
 
@@ -44,8 +41,7 @@ exports[`test reports destroy 1`] = `
 
 exports[`test reports disconnect 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mClient was disconnected[39m[22m [2mat 1970-01-01 00:00:00[22m
-        User ID:    [1m100[22m
-        Node ID:    [1m100:550e8400-e29b-41d4-a716-446655440000[22m
+        Node ID:    [1m100[22m:550e8400-e29b-41d4-a716-446655440000
         IP address: [1m127.0.0.1[22m
 
 "
@@ -63,8 +59,7 @@ exports[`test reports error 1`] = `
 
 exports[`test reports expel 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mClient was disconnected[39m[22m [2mat 1970-01-01 00:00:00[22m
-        User ID:    [1munauthenticated[22m
-        Node ID:    [1munknown[22m
+        Node ID:    unknown
         IP address: [1m127.0.0.1[22m
 
 "
@@ -74,7 +69,7 @@ exports[`test reports http 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mLogux server is listening[39m[22m [2mat 1970-01-01 00:00:00[22m
         Logux server: [1m0.1.1[22m
         PID:          [1m21384[22m
-        Node ID:      [1mserver:H1f8LAyzl[22m
+        Node ID:      [1mserver[22m:H1f8LAyzl
         Environment:  [1mdevelopment[22m
         Subprotocol:  [1m1.0.0[22m
         Supports:     [1m1.x[22m
@@ -88,7 +83,7 @@ exports[`test reports listen 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mLogux server is listening[39m[22m [2mat 1970-01-01 00:00:00[22m
         Logux server: [1m0.1.1[22m
         PID:          [1m21384[22m
-        Node ID:      [1mserver:H1f8LAyzl[22m
+        Node ID:      [1mserver[22m:H1f8LAyzl
         Environment:  [1mdevelopment[22m
         Subprotocol:  [1m2.5.0[22m
         Supports:     [1m2.x || 1.x[22m
@@ -113,8 +108,7 @@ exports[`test reports production 1`] = `
 
 exports[`test reports unauthed-error 1`] = `
 "[1m[31m[40m[7m ERROR [27m[49m[39m[22m [1m[31mSyncError from client: A timeout was reached (5000ms)[39m[22m [2mat 1970-01-01 00:00:00[22m
-        User ID:     [1munauthenticated[22m
-        Node ID:     [1munknown[22m
+        Node ID:     unknown
         Subprotocol: [1munknown[22m
         IP address:  [1m127.0.0.1[22m
 

@@ -37,7 +37,21 @@ module.exports = {
       if (current > max) max = current
     }
     return fields.map(function (field) {
-      return PADDING + rightPag(field[0] + ': ', max) + c.bold(field[1])
+      var start = PADDING + rightPag(field[0] + ': ', max)
+      if (field[0] === 'Node ID') {
+        var pos = field[1].indexOf(':')
+        var id, random
+        if (pos === -1) {
+          id = ''
+          random = field[1]
+        } else {
+          id = field[1].slice(0, pos)
+          random = field[1].slice(pos)
+        }
+        return start + c.bold(id) + random
+      } else {
+        return start + c.bold(field[1])
+      }
     }).join(NEXT_LINE)
   },
 
@@ -63,9 +77,7 @@ module.exports = {
     if (!client) {
       return ''
     } else {
-      var user = client.user ? client.user.id : 'unauthenticated'
       return module.exports.params(c, 'error', [
-        ['User ID', user],
         ['Node ID', client.nodeId || 'unknown'],
         ['Subprotocol', client.sync.remoteSubprotocol || 'unknown'],
         ['IP address', client.remoteAddress]

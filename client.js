@@ -92,10 +92,16 @@ function Client (app, connection, key) {
 Client.prototype = {
 
   /**
-   * Developer defined user object. It should have at least
+   * Developer defined user object.
    * @type {object}
    */
   user: undefined,
+
+  /**
+   * User ID. It will be filled from client’s node ID.
+   *
+   */
+  id: undefined,
 
   /**
    * Check client subprotocol version. It uses `semver` npm package
@@ -133,8 +139,13 @@ Client.prototype = {
      */
     this.nodeId = nodeId
 
+    var pos = nodeId.indexOf(':')
+    if (pos !== -1) {
+      this.id = nodeId.slice(0, pos)
+    }
+
     var client = this
-    return this.app.authenticator(credentials, nodeId, this)
+    return this.app.authenticator(this.id, credentials, this)
       .then(function (user) {
         if (user) {
           client.user = user

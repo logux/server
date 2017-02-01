@@ -55,8 +55,8 @@ const app = new Server({
   root: __dirname
 })
 
-app.auth(token => {
-  // TODO Check token and return a Promise with user or false on bad token.
+app.auth((userId, token) => {
+  // TODO Check token and return a Promise with user data or false on bad token.
 })
 
 app.log.on('add', (action, meta) => {

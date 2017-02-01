@@ -113,9 +113,9 @@ it('reports on wrong authentication', function () {
 
 it('authenticates user', function () {
   var test = createReporter()
-  test.app.auth(function (token, nodeId, who) {
-    if (token === 'token' && nodeId === 'client' && who === client) {
-      return Promise.resolve({ id: 'user' })
+  test.app.auth(function (id, token, who) {
+    if (token === 'token' && id === '10' && who === client) {
+      return Promise.resolve({ name: 'user' })
     } else {
       return Promise.resolve(false)
     }
@@ -124,12 +124,13 @@ it('authenticates user', function () {
   return client.connection.connect().then(function () {
     var protocol = client.sync.localProtocol
     client.connection.other().send([
-      'connect', protocol, 'client', 0, { credentials: 'token' }
+      'connect', protocol, '10:random', 0, { credentials: 'token' }
     ])
     return client.connection.pair.wait('right')
   }).then(function () {
-    expect(client.user).toEqual({ id: 'user' })
-    expect(client.nodeId).toEqual('client')
+    expect(client.id).toEqual('10')
+    expect(client.user).toEqual({ name: 'user' })
+    expect(client.nodeId).toEqual('10:random')
     expect(client.sync.authenticated).toBeTruthy()
     expect(test.reports).toEqual([['authenticated', test.app, client]])
   })

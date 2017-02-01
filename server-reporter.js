@@ -40,7 +40,6 @@ var reporters = {
     return [
       reporter.info(c, 'User was authenticated'),
       reporter.params(c, 'info', [
-        ['User ID', client.user.id],
         ['Node ID', client.nodeId || 'unknown'],
         ['Subprotocol', client.sync.remoteSubprotocol],
         ['Logux protocol', client.sync.remoteProtocol.join('.')],
@@ -50,11 +49,9 @@ var reporters = {
   },
 
   disconnect: function disconnect (c, app, client) {
-    var user = client.user ? client.user.id : 'unauthenticated'
     return [
       reporter.info(c, 'Client was disconnected'),
       reporter.params(c, 'info', [
-        ['User ID', user],
         ['Node ID', client.nodeId || 'unknown'],
         ['IP address', client.remoteAddress]
       ])
