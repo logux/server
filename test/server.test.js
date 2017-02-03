@@ -87,7 +87,7 @@ it('shows help', function () {
 it('shows help about port in use', function () {
   return Promise.all([
     exec('eaddrinuse.js'),
-    wait(100).then(function () {
+    wait(150).then(function () {
       return exec('eaddrinuse.js')
     }).then(function (result) {
       expect(result[0]).toMatchSnapshot()
