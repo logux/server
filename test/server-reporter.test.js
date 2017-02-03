@@ -39,6 +39,12 @@ authed.id = '100'
 authed.user = { }
 authed.nodeId = '100:550e8400-e29b-41d4-a716-446655440000'
 
+var noUserId = new Client(app, new ServerConnection(ws), 1)
+noUserId.sync.remoteSubprotocol = '1.0.0'
+noUserId.sync.remoteProtocol = [0, 0]
+noUserId.user = { }
+noUserId.nodeId = '550e8400-e29b-41d4-a716-446655440000'
+
 var unauthed = new Client(app, new ServerConnection(ws), 1)
 
 var ownError = new SyncError(authed.sync, 'timeout', 5000, false)
@@ -90,6 +96,10 @@ it('reports connect', function () {
 
 it('reports authenticated', function () {
   expect(reportersOut('authenticated', app, authed)).toMatchSnapshot()
+})
+
+it('reports authenticated without user ID', function () {
+  expect(reportersOut('authenticated', app, noUserId)).toMatchSnapshot()
 })
 
 it('reports bad authenticated', function () {

@@ -7,6 +7,15 @@ exports[`test reports authenticated 1`] = `
 "
 `;
 
+exports[`test reports authenticated without user ID 1`] = `
+"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mUser was authenticated[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Node ID:     550e8400-e29b-41d4-a716-446655440000
+        Subprotocol: [1m1.0.0[22m
+        IP address:  [1m127.0.0.1[22m
+
+"
+`;
+
 exports[`test reports bad authenticated 1`] = `
 "[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mBad authentication[39m[22m [2mat 1970-01-01 00:00:00[22m
         Node ID:     [1m100[22m:550e8400-e29b-41d4-a716-446655440000
