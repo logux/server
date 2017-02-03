@@ -103,10 +103,9 @@ it('reports on wrong authentication', function () {
     return client.connection.pair.wait('right')
   }).then(function () {
     expect(test.reports.length).toEqual(2)
-    expect(test.reports[0][0]).toEqual('clientError')
+    expect(test.reports[0][0]).toEqual('unauthenticated')
     expect(test.reports[0][1]).toEqual(test.app)
     expect(test.reports[0][2]).toEqual(client)
-    expect(test.reports[0][3].message).toEqual('Wrong credentials')
     expect(test.reports[1][0]).toEqual('disconnect')
   })
 })

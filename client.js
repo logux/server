@@ -85,7 +85,9 @@ function Client (app, connection, key) {
     if (!client.sync.connected && !client.destroyed) client.destroy()
   })
   this.sync.on('clientError', function (err) {
-    client.app.reporter('clientError', client.app, client, err)
+    if (err.type !== 'wrong-credentials') {
+      client.app.reporter('clientError', client.app, client, err)
+    }
   })
 }
 
@@ -152,6 +154,7 @@ Client.prototype = {
           client.app.reporter('authenticated', client.app, client)
           return true
         } else {
+          client.app.reporter('unauthenticated', client.app, client)
           return false
         }
       })

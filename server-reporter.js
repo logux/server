@@ -36,13 +36,23 @@ var reporters = {
     ]
   },
 
+  unauthenticated: function unauthenticated (c, app, client) {
+    return [
+      reporter.warn(c, 'Bad authentication'),
+      reporter.params(c, 'warn', [
+        ['Node ID', client.nodeId || 'unknown'],
+        ['Subprotocol', client.sync.remoteSubprotocol],
+        ['IP address', client.remoteAddress]
+      ])
+    ]
+  },
+
   authenticated: function authenticated (c, app, client) {
     return [
       reporter.info(c, 'User was authenticated'),
       reporter.params(c, 'info', [
         ['Node ID', client.nodeId || 'unknown'],
         ['Subprotocol', client.sync.remoteSubprotocol],
-        ['Logux protocol', client.sync.remoteProtocol.join('.')],
         ['IP address', client.remoteAddress]
       ])
     ]

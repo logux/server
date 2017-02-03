@@ -92,11 +92,15 @@ it('reports authenticated', function () {
   expect(reportersOut('authenticated', app, authed)).toMatchSnapshot()
 })
 
+it('reports bad authenticated', function () {
+  expect(reportersOut('unauthenticated', app, authed)).toMatchSnapshot()
+})
+
 it('reports disconnect', function () {
   expect(reportersOut('disconnect', app, authed)).toMatchSnapshot()
 })
 
-it('reports expel', function () {
+it('reports disconnect from unauthenticated user', function () {
   expect(reportersOut('disconnect', app, unauthed)).toMatchSnapshot()
 })
 
@@ -114,17 +118,17 @@ it('reports error', function () {
   expect(out).toMatchSnapshot()
 })
 
-it('reports client-error', function () {
+it('reports client error', function () {
   var out = reportersOut('clientError', app, authed, clientError)
   expect(out).toMatchSnapshot()
 })
 
-it('reports authed-error', function () {
+it('reports synchroniation error', function () {
   var out = reportersOut('syncError', app, authed, ownError)
   expect(out).toMatchSnapshot()
 })
 
-it('reports unauthed-error', function () {
+it('reports error from unautheficated user', function () {
   var out = reportersOut('syncError', app, unauthed, clientError)
   expect(out).toMatchSnapshot()
 })
