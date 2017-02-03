@@ -17,18 +17,15 @@ function createConnection () {
 }
 
 function createServer (opts, reporter) {
-  if (!opts) {
-    opts = {
-      subprotocol: '0.0.0',
-      supports: '0.x'
-    }
-  }
+  if (!opts) opts = { }
+  opts.subprotocol = '0.0.0'
+  opts.supports = '0.x'
   return new BaseServer(opts, reporter)
 }
 
 function createReporter () {
   var reports = []
-  var app = createServer(undefined, function () {
+  var app = createServer({ }, function () {
     reports.push(Array.prototype.slice.call(arguments, 0))
   })
   return { app: app, reports: reports }
@@ -176,11 +173,7 @@ it('has method to check client subprotocol', function () {
 })
 
 it('sends server credentials in development', function () {
-  var app = new BaseServer({
-    subprotocol: '0.0.0',
-    supports: '0.x',
-    env: 'development'
-  })
+  var app = createServer({ env: 'development' })
   app.auth(function () {
     return Promise.resolve({ id: 'user' })
   })
@@ -198,11 +191,7 @@ it('sends server credentials in development', function () {
 })
 
 it('does not send server credentials in production', function () {
-  var app = new BaseServer({
-    subprotocol: '0.0.0',
-    supports: '0.x',
-    env: 'production'
-  })
+  var app = createServer({ env: 'production' })
   app.auth(function () {
     return Promise.resolve({ id: 'user' })
   })
