@@ -206,3 +206,32 @@ it('does not send server credentials in production', function () {
     })
   })
 })
+
+it('marks all actions with user and server IDs', function () {
+  var app = createServer({ nodeId: 'server' })
+  app.auth(function () {
+    return Promise.resolve(true)
+  })
+  var client = new Client(app, createConnection(), 1)
+  return client.connection.connect().then(function () {
+    var protocol = client.sync.localProtocol
+    client.connection.other().send(['connect', protocol, '10:uuid', 0])
+    return client.connection.pair.wait('right')
+  }).then(function () {
+    client.connection.other().send([
+      'sync',
+      1,
+      { type: 'a' },
+      { id: [1, '10:uuid', 0], time: 1 }
+    ])
+    return client.connection.pair.wait('right')
+  }).then(function () {
+    expect(app.log.store.created[0][1]).toEqual({
+      added: 1,
+      id: [1, '10:uuid', 0],
+      time: 1,
+      user: '10',
+      server: 'server'
+    })
+  })
+})

@@ -64,6 +64,7 @@ function Client (app, connection, key) {
     credentials: credentials,
     subprotocol: app.options.subprotocol,
     timeout: app.options.timeout,
+    inMap: this.map.bind(this),
     ping: app.options.ping,
     auth: this.auth.bind(this)
   })
@@ -158,6 +159,12 @@ Client.prototype = {
           return false
         }
       })
+  },
+
+  map: function map (action, meta) {
+    meta.user = this.id
+    meta.server = this.app.options.nodeId
+    return [action, meta]
   }
 
 }
