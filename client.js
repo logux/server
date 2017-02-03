@@ -130,7 +130,7 @@ Client.prototype = {
    */
   destroy: function destroy () {
     this.destroyed = true
-    this.app.reporter('disconnect', this.app, this)
+    if (!this.app.destroing) this.app.reporter('disconnect', this.app, this)
     if (this.sync.connected) this.sync.destroy()
     delete this.app.clients[this.key]
   },

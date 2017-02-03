@@ -77,6 +77,20 @@ it('removes itself on destroy', function () {
   })
 })
 
+it('does not report users disconnects on server destory', function () {
+  var test = createReporter()
+
+  var client = new Client(test.app, createConnection(), 1)
+  test.app.clients[1] = client
+
+  return client.connection.connect().then(function () {
+    test.app.destroy()
+    expect(test.app.clients).toEqual({ })
+    expect(client.connection.connected).toBeFalsy()
+    expect(test.reports).toEqual([['destroy', test.app]])
+  })
+})
+
 it('destroys on disconnect', function () {
   var client = new Client(createServer(), createConnection(), 1)
   client.destroy = jest.fn()

@@ -316,6 +316,7 @@ BaseServer.prototype = {
    * })
    */
   destroy: function destroy () {
+    this.destroing = true
     this.reporter('destroy', this)
     return Promise.all(this.unbind.map(function (unbind) {
       return unbind()
