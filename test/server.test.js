@@ -9,7 +9,22 @@ function wait (ms) {
   })
 }
 
-function exec (name, args) {
+function start (name, args) {
+  return new Promise(function (resolve) {
+    var server = spawn(path.join(__dirname, '/servers/', name), args)
+    var started = false
+    function callback () {
+      if (!started) {
+        started = true
+        resolve()
+      }
+    }
+    server.stdout.on('data', callback)
+    server.stderr.on('data', callback)
+  })
+}
+
+function test (name, args) {
   return new Promise(function (resolve) {
     var out = ''
     var server = spawn(path.join(__dirname, '/servers/', name), args)
@@ -32,7 +47,7 @@ function exec (name, args) {
 }
 
 function checkOut (name, args) {
-  return exec(name, args).then(function (result) {
+  return test(name, args).then(function (result) {
     var out = result[0]
     var exit = result[1]
 
@@ -45,7 +60,7 @@ function checkOut (name, args) {
 }
 
 function checkError (name, args) {
-  return exec(name, args).then(function (result) {
+  return test(name, args).then(function (result) {
     var out = result[0]
     var exit = result[1]
     expect(exit).toEqual(1)
@@ -62,7 +77,7 @@ it('destroys everything on exit', function () {
 })
 
 it('reports unbind', function () {
-  return exec('unbind.js').then(function (result) {
+  return test('unbind.js').then(function (result) {
     expect(result[0]).toMatchSnapshot()
   })
 })
@@ -85,18 +100,13 @@ it('shows help', function () {
 })
 
 it('shows help about port in use', function () {
-  return Promise.all([
-    exec('eaddrinuse.js'),
-    wait(150).then(function () {
-      return exec('eaddrinuse.js')
-    }).then(function (result) {
-      expect(result[0]).toMatchSnapshot()
-    })
-  ])
+  return start('eaddrinuse.js').then(function () {
+    return test('eaddrinuse.js')
+  }).then(function (result) {
+    expect(result[0]).toMatchSnapshot()
+  })
 })
 
 it('shows help about privileged port', function () {
-  return exec('eacces.js').then(function (result) {
-    expect(result[0]).toMatchSnapshot()
-  })
+  return checkError('eacces.js')
 })
