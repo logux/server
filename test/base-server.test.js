@@ -254,7 +254,7 @@ it('uses HTTPS', function () {
   var app = createServer()
   this.app = app
   return app.listen({
-    port: 2001,
+    port: 2002,
     cert: fs.readFileSync(path.join(__dirname, 'fixtures/cert.pem')),
     key: fs.readFileSync(path.join(__dirname, 'fixtures/key.pem'))
   }).then(function () {
