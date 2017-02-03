@@ -16,7 +16,7 @@ var reporters = {
 
     return [
       reporter.info(c, 'Logux server is listening'),
-      reporter.params(c, 'info', [
+      reporter.params(c, [
         ['Logux server', pkg.version],
         ['PID', app.options.pid],
         ['Node ID', app.options.nodeId],
@@ -32,14 +32,14 @@ var reporters = {
   connect: function connect (c, app, ip) {
     return [
       reporter.info(c, 'Client was connected'),
-      reporter.params(c, 'info', [['IP address', ip]])
+      reporter.params(c, [['IP address', ip]])
     ]
   },
 
   unauthenticated: function unauthenticated (c, app, client) {
     return [
       reporter.warn(c, 'Bad authentication'),
-      reporter.params(c, 'warn', [
+      reporter.params(c, [
         ['Node ID', client.nodeId || 'unknown'],
         ['Subprotocol', client.sync.remoteSubprotocol],
         ['IP address', client.remoteAddress]
@@ -50,7 +50,7 @@ var reporters = {
   authenticated: function authenticated (c, app, client) {
     return [
       reporter.info(c, 'User was authenticated'),
-      reporter.params(c, 'info', [
+      reporter.params(c, [
         ['Node ID', client.nodeId || 'unknown'],
         ['Subprotocol', client.sync.remoteSubprotocol],
         ['IP address', client.remoteAddress]
@@ -61,7 +61,7 @@ var reporters = {
   disconnect: function disconnect (c, app, client) {
     return [
       reporter.info(c, 'Client was disconnected'),
-      reporter.params(c, 'info', [
+      reporter.params(c, [
         ['Node ID', client.nodeId || 'unknown'],
         ['IP address', client.remoteAddress]
       ])
@@ -80,7 +80,7 @@ var reporters = {
     return [
       reporter.error(c, prefix),
       reporter.prettyStackTrace(c, err, app.options.root),
-      reporter.errorParams(c, 'error', client)
+      reporter.errorParams(c, client)
     ]
   },
 
@@ -93,14 +93,14 @@ var reporters = {
     }
     return [
       reporter.error(c, prefix),
-      reporter.errorParams(c, 'error', client)
+      reporter.errorParams(c, client)
     ]
   },
 
   clientError: function clientError (c, app, client, err) {
     return [
       reporter.warn(c, 'Client error: ' + err.description),
-      reporter.errorParams(c, 'warn', client)
+      reporter.errorParams(c, client)
     ]
   }
 

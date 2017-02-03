@@ -29,7 +29,7 @@ function labeled (c, label, color, message) {
 
 module.exports = {
 
-  params: function params (c, type, fields) {
+  params: function params (c, fields) {
     var max = 0
     var current
     for (var i = 0; i < fields.length; i++) {
@@ -73,11 +73,11 @@ module.exports = {
     }).join(NEXT_LINE)
   },
 
-  errorParams: function errorParams (c, type, client) {
+  errorParams: function errorParams (c, client) {
     if (!client) {
       return ''
     } else {
-      return module.exports.params(c, 'error', [
+      return module.exports.params(c, [
         ['Node ID', client.nodeId || 'unknown'],
         ['IP address', client.remoteAddress]
       ])
