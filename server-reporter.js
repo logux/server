@@ -40,7 +40,7 @@ var reporters = {
     return [
       reporter.warn(c, 'Bad authentication'),
       reporter.params(c, [
-        ['Node ID', client.nodeId || 'unknown'],
+        ['Node ID', client.nodeId],
         ['Subprotocol', client.sync.remoteSubprotocol],
         ['IP address', client.remoteAddress]
       ])
@@ -51,7 +51,7 @@ var reporters = {
     return [
       reporter.info(c, 'User was authenticated'),
       reporter.params(c, [
-        ['Node ID', client.nodeId || 'unknown'],
+        ['Node ID', client.nodeId],
         ['Subprotocol', client.sync.remoteSubprotocol],
         ['IP address', client.remoteAddress]
       ])
@@ -59,12 +59,19 @@ var reporters = {
   },
 
   disconnect: function disconnect (c, app, client) {
-    return [
-      reporter.info(c, 'Client was disconnected'),
-      reporter.params(c, [
-        ['Node ID', client.nodeId || 'unknown'],
+    var params
+    if (client.nodeId) {
+      params = reporter.params(c, [
+        ['Node ID', client.nodeId]
+      ])
+    } else {
+      params = reporter.params(c, [
         ['IP address', client.remoteAddress]
       ])
+    }
+    return [
+      reporter.info(c, 'Client was disconnected'),
+      params
     ]
   },
 

@@ -76,9 +76,12 @@ module.exports = {
   errorParams: function errorParams (c, client) {
     if (!client) {
       return ''
+    } else if (client.nodeId) {
+      return module.exports.params(c, [
+        ['Node ID', client.nodeId || 'unknown']
+      ])
     } else {
       return module.exports.params(c, [
-        ['Node ID', client.nodeId || 'unknown'],
         ['IP address', client.remoteAddress]
       ])
     }
