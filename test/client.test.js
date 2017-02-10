@@ -226,6 +226,9 @@ it('marks all actions with user and server IDs', function () {
   app.auth(function () {
     return Promise.resolve(true)
   })
+  app.log.on('before', function (action, meta) {
+    meta.reasons = ['test']
+  })
   var client = new Client(app, createConnection(), 1)
   return client.connection.connect().then(function () {
     var protocol = client.sync.localProtocol
@@ -245,7 +248,8 @@ it('marks all actions with user and server IDs', function () {
       id: [1, '10:uuid', 0],
       time: 1,
       user: '10',
-      server: 'server'
+      server: 'server',
+      reasons: ['test']
     })
   })
 })
