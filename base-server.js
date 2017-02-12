@@ -1,17 +1,17 @@
-var ServerConnection = require('logux-sync').ServerConnection
-var MemoryStore = require('logux-core').MemoryStore
-var WebSocket = require('ws')
-var shortid = require('shortid')
-var https = require('https')
-var yargs = require('yargs')
-var http = require('http')
-var path = require('path')
-var Log = require('logux-core').Log
-var fs = require('fs')
+const ServerConnection = require('logux-sync').ServerConnection
+const MemoryStore = require('logux-core').MemoryStore
+const WebSocket = require('ws')
+const shortid = require('shortid')
+const https = require('https')
+const yargs = require('yargs')
+const http = require('http')
+const path = require('path')
+const Log = require('logux-core').Log
+const fs = require('fs')
 
-var remoteAddress = require('./remote-address')
-var promisify = require('./promisify')
-var Client = require('./client')
+const remoteAddress = require('./remote-address')
+const promisify = require('./promisify')
+const Client = require('./client')
 
 yargs
   .option('h', {
@@ -43,7 +43,7 @@ yargs
   .help()
 yargs.argv
 
-var PEM_PREAMBLE = '-----BEGIN'
+const PEM_PREAMBLE = '-----BEGIN'
 
 function isPem (content) {
   if (typeof content === 'object' && content.pem) {
@@ -58,7 +58,7 @@ function readFile (root, file) {
   if (!path.isAbsolute(file)) {
     file = path.join(root, file)
   }
-  return promisify(function (done) {
+  return promisify((done) => {
     fs.readFile(file, done)
   })
 }
@@ -122,12 +122,12 @@ function BaseServer (options, reporter) {
   }
 
   if (typeof this.options.nodeId === 'undefined') {
-    this.options.nodeId = 'server:' + shortid.generate()
+    this.options.nodeId = `'server: ${ shortid.generate() }`
   }
 
   this.options.root = this.options.root || process.cwd()
 
-  var store = this.options.store || new MemoryStore()
+  const store = this.options.store || new MemoryStore()
 
   /**
    * Server actions log.
@@ -164,9 +164,9 @@ function BaseServer (options, reporter) {
 
   this.lastClient = 0
 
-  var app = this
-  this.unbind.push(function () {
-    for (var i in app.clients) {
+  const app = this
+  this.unbind.push(() => {
+    for (const i in app.clients) {
       app.clients[i].destroy()
     }
   })
@@ -241,13 +241,13 @@ BaseServer.prototype = {
       if (!this.listenOptions.host) this.listenOptions.host = '127.0.0.1'
     }
 
-    var app = this
-    var promise = Promise.resolve()
+    const app = this
+    let promise = Promise.resolve()
 
     if (this.listenOptions.server) {
       this.ws = new WebSocket.Server({ server: this.listenOptions.server })
     } else {
-      var before = []
+      const before = []
       if (this.listenOptions.key && !isPem(this.listenOptions.key)) {
         before.push(readFile(this.options.root, this.listenOptions.key))
       } else {
@@ -259,10 +259,10 @@ BaseServer.prototype = {
         before.push(Promise.resolve(this.listenOptions.cert))
       }
 
-      promise = promise.then(function () {
+      promise = promise.then(() => {
         return Promise.all(before)
-      }).then(function (keys) {
-        return new Promise(function (resolve, reject) {
+      }).then((keys) => {
+        return new Promise((resolve, reject) => {
           if (keys[0]) {
             app.http = https.createServer({ key: keys[0], cert: keys[1] })
           } else {
@@ -273,16 +273,16 @@ BaseServer.prototype = {
 
           app.ws.on('error', reject)
 
-          var opts = app.listenOptions
+          const opts = app.listenOptions
           app.http.listen(opts.port, opts.host, resolve)
         })
       })
     }
 
-    app.unbind.push(function () {
-      return promisify(function (done) {
-        promise.then(function () {
-          app.ws.close(function () {
+    app.unbind.push(() => {
+      return promisify((done) => {
+        promise.then(() => {
+          app.ws.close(() => {
             if (app.http) {
               app.http.close(done)
             } else {
@@ -293,14 +293,14 @@ BaseServer.prototype = {
       })
     })
 
-    return promise.then(function () {
-      app.ws.on('connection', function (ws) {
+    return promise.then(() => {
+      app.ws.on('connection', (ws) => {
         app.reporter('connect', app, remoteAddress(ws))
         app.lastClient += 1
-        var client = new Client(app, new ServerConnection(ws), app.lastClient)
+        const client = new Client(app, new ServerConnection(ws), app.lastClient)
         app.clients[app.lastClient] = client
       })
-    }).then(function () {
+    }).then(() => {
       app.reporter('listen', app)
     })
   },
@@ -318,7 +318,7 @@ BaseServer.prototype = {
   destroy: function destroy () {
     this.destroing = true
     this.reporter('destroy', this)
-    return Promise.all(this.unbind.map(function (unbind) {
+    return Promise.all(this.unbind.map((unbind) => {
       return unbind()
     }))
   },
@@ -336,8 +336,8 @@ BaseServer.prototype = {
   loadOptions: function loadOptions (process, defaults) {
     defaults = defaults || { }
 
-    var argv = yargs.parse(process.argv)
-    var env = process.env
+    const argv = yargs.parse(process.argv)
+    const env = process.env
 
     return {
       host: argv.h || env.LOGUX_HOST || defaults.host,
