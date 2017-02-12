@@ -1,11 +1,11 @@
-var BaseServer = require('../base-server')
-var Server = require('../server')
-var index = require('../')
+const BaseServer = require('../base-server')
+const Server = require('../server')
+const index = require('../')
 
-it('has BaseServer class', function () {
+it('has BaseServer class', () => {
   expect(index.BaseServer).toBe(BaseServer)
 })
 
-it('has Server class', function () {
+it('has Server class', () => {
   expect(index.Server).toBe(Server)
 })

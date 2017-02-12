@@ -1,18 +1,18 @@
-var spawn = require('child_process').spawn
-var path = require('path')
+const spawn = require('child_process').spawn
+const path = require('path')
 
-var DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
+const DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
 
 function wait (ms) {
-  return new Promise(function (resolve) {
+  return new Promise(resolve => {
     setTimeout(resolve, ms)
   })
 }
 
 function start (name, args) {
-  return new Promise(function (resolve) {
-    var server = spawn(path.join(__dirname, '/servers/', name), args)
-    var started = false
+  return new Promise(resolve => {
+    const server = spawn(path.join(__dirname, '/servers/', name), args)
+    let started = false
     function callback () {
       if (!started) {
         started = true
@@ -25,31 +25,31 @@ function start (name, args) {
 }
 
 function test (name, args) {
-  return new Promise(function (resolve) {
-    var out = ''
-    var server = spawn(path.join(__dirname, '/servers/', name), args)
-    server.stdout.on('data', function (chank) {
+  return new Promise(resolve => {
+    let out = ''
+    const server = spawn(path.join(__dirname, '/servers/', name), args)
+    server.stdout.on('data', chank => {
       out += chank
     })
-    server.stderr.on('data', function (chank) {
+    server.stderr.on('data', chank => {
       out += chank
     })
-    server.on('close', function (exitCode) {
-      var fixed = out.replace(DATE, '1970-01-01 00:00:00')
+    server.on('close', exitCode => {
+      let fixed = out.replace(DATE, '1970-01-01 00:00:00')
                      .replace(/PID:(\s+)\d+/, 'PID:$121384')
       fixed = fixed.replace(/\r\v/g, '\n')
       resolve([fixed, exitCode])
     })
-    wait(500).then(function () {
+    wait(500).then(() => {
       server.kill('SIGINT')
     })
   })
 }
 
 function checkOut (name, args) {
-  return test(name, args).then(function (result) {
-    var out = result[0]
-    var exit = result[1]
+  return test(name, args).then(result => {
+    const out = result[0]
+    const exit = result[1]
 
     if (exit !== 0) {
       console.error(test + ' fall with:\n' + out)
@@ -60,53 +60,53 @@ function checkOut (name, args) {
 }
 
 function checkError (name, args) {
-  return test(name, args).then(function (result) {
-    var out = result[0]
-    var exit = result[1]
+  return test(name, args).then(result => {
+    const out = result[0]
+    const exit = result[1]
     expect(exit).toEqual(1)
     expect(out).toMatchSnapshot()
   })
 }
 
-afterEach(function () {
+afterEach(() => {
   delete process.env.LOGUX_PORT
 })
 
-it('destroys everything on exit', function () {
+it('destroys everything on exit', () => {
   return checkOut('destroy.js')
 })
 
-it('reports unbind', function () {
-  return test('unbind.js').then(function (result) {
+it('reports unbind', () => {
+  return test('unbind.js').then(result => {
     expect(result[0]).toMatchSnapshot()
   })
 })
 
-it('shows uncatch errors', function () {
+it('shows uncatch errors', () => {
   return checkError('throw.js')
 })
 
-it('shows uncatch rejects', function () {
+it('shows uncatch rejects', () => {
   return checkError('uncatch.js')
 })
 
-it('euse environment variable for config', function () {
+it('euse environment constiable for config', () => {
   process.env.LOGUX_PORT = 31337
   return checkOut('options.js')
 })
 
-it('shows help', function () {
+it('shows help', () => {
   return checkOut('options.js', ['', '--help'])
 })
 
-it('shows help about port in use', function () {
-  return start('eaddrinuse.js').then(function () {
+it('shows help about port in use', () => {
+  return start('eaddrinuse.js').then(() => {
     return test('eaddrinuse.js')
-  }).then(function (result) {
+  }).then(result => {
     expect(result[0]).toMatchSnapshot()
   })
 })
 
-it('shows help about privileged port', function () {
+it('shows help about privileged port', () => {
   return checkError('eacces.js')
 })
