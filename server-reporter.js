@@ -1,18 +1,18 @@
-var reporter = require('./reporter.js')
-var pkg = require('./package.json')
+const reporter = require('./reporter.js')
+const pkg = require('./package.json')
 
-var reporters = {
+const reporters = {
 
   listen: function listen (c, app) {
-    var url
+    let url
     if (app.listenOptions.server) {
       url = 'Custom HTTP server'
     } else {
-      url = (app.listenOptions.cert ? 'wss://' : 'ws://') +
-        app.listenOptions.host + ':' + app.listenOptions.port
+      url = `${ app.listenOptions.cert ? 'wss://' : 'ws://' }
+      ${ app.listenOptions.host }:${ app.listenOptions.port }`
     }
 
-    var dev = app.env === 'development'
+    const dev = app.env === 'development'
 
     return [
       reporter.info(c, 'Logux server is listening'),
@@ -59,7 +59,7 @@ var reporters = {
   },
 
   disconnect: function disconnect (c, app, client) {
-    var params
+    let params
     if (client.nodeId) {
       params = reporter.params(c, [
         ['Node ID', client.nodeId]
@@ -82,7 +82,7 @@ var reporters = {
   },
 
   runtimeError: function runtimeError (c, app, client, err) {
-    var prefix = err.name + ': ' + err.message
+    let prefix = `${ err.name }: ${ err.message }`
     if (err.name === 'Error') prefix = err.message
     return [
       reporter.error(c, prefix),
@@ -92,11 +92,11 @@ var reporters = {
   },
 
   syncError: function syncError (c, app, client, err) {
-    var prefix
+    let prefix
     if (err.received) {
-      prefix = 'SyncError from client: ' + err.description
+      prefix = `SyncError from client: ${ err.description }`
     } else {
-      prefix = 'SyncError: ' + err.description
+      prefix = `SyncError: ${ err.description }`
     }
     return [
       reporter.error(c, prefix),
@@ -106,7 +106,7 @@ var reporters = {
 
   clientError: function clientError (c, app, client, err) {
     return [
-      reporter.warn(c, 'Client error: ' + err.description),
+      reporter.warn(c, `Client error: ${ err.description }`),
       reporter.errorParams(c, client)
     ]
   }
@@ -114,7 +114,7 @@ var reporters = {
 }
 
 module.exports = function serverReporter (type, app) {
-  var c = reporter.color(app)
-  var args = [c].concat(Array.prototype.slice.call(arguments, 1))
+  const c = reporter.color(app)
+  const args = [c].concat(Array.prototype.slice.call(arguments, 1))
   return reporter.message(reporters[type].apply({ }, args))
 }

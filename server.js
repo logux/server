@@ -1,8 +1,8 @@
-var assign = require('object-assign')
+const assign = require('object-assign')
 
-var BaseServer = require('./base-server')
-var errorReporter = require('./error-reporter')
-var serverReporter = require('./server-reporter')
+const BaseServer = require('./base-server')
+const errorReporter = require('./error-reporter')
+const serverReporter = require('./server-reporter')
 
 /**
  * End-user API to create Logux server.
@@ -56,11 +56,11 @@ function Server (options) {
     process.stderr.write(serverReporter.apply(serverReporter, arguments))
   })
 
-  var app = this
+  const app = this
 
   function onError (e) {
     app.reporter('runtimeError', app, undefined, e)
-    app.destroy().then(function () {
+    app.destroy().then(() => {
       process.exit(1)
     })
   }
@@ -68,13 +68,13 @@ function Server (options) {
   process.on('unhandledRejection', onError)
 
   function onExit () {
-    app.destroy().then(function () {
+    app.destroy().then(() => {
       process.exit(0)
     })
   }
   process.on('SIGINT', onExit)
 
-  this.unbind.push(function () {
+  this.unbind.push(() => {
     process.removeListener('SIGINT', onExit)
   })
 }
@@ -82,9 +82,9 @@ function Server (options) {
 Server.prototype = {
 
   listen: function listen () {
-    var app = this
-    var origin = BaseServer.prototype.listen
-    return origin.apply(this, arguments).catch(function (e) {
+    const app = this
+    const origin = BaseServer.prototype.listen
+    return origin.apply(this, arguments).catch((e) => {
       process.stderr.write(errorReporter(e, app))
       process.exit(1)
     })

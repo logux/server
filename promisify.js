@@ -1,6 +1,6 @@
 module.exports = function promisify (callback) {
-  return new Promise(function (resolve, reject) {
-    callback(function (err, result) {
+  return new Promise((resolve, reject) => {
+    callback((err, result) => {
       if (err) {
         reject(err)
       } else {
