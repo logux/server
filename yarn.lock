@@ -728,9 +728,9 @@ escope@^3.6.0:
     esrecurse "^4.1.0"
     estraverse "^4.1.1"
 
-"eslint-config-logux@git+ssh://git@github.com/lamartire/eslint-config-logux":
+"eslint-config-logux@git+https://git@github.com/logux/eslint-config-logux":
   version "4.0.0"
-  resolved "git+ssh://git@github.com/lamartire/eslint-config-logux#728ba27edb29176b55298b0213009350a06771ac"
+  resolved "git+https://git@github.com/logux/eslint-config-logux#65e8a4356c9a4ab7ff8a1fc5f5d669308c1cf80a"
 
 eslint-config-standard@^6.2.1:
   version "6.2.1"
@@ -739,6 +739,20 @@ eslint-config-standard@^6.2.1:
 eslint-plugin-es5@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/eslint-plugin-es5/-/eslint-plugin-es5-1.0.1.tgz#bafe65e479da2c24b39e6957e1a06ba54036d32b"
+
+eslint-plugin-node@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-node/-/eslint-plugin-node-4.0.1.tgz#02eba2eb3eb522378de15881db19d3e5570110f6"
+  dependencies:
+    ignore "^3.0.11"
+    minimatch "^3.0.2"
+    object-assign "^4.0.1"
+    resolve "^1.1.7"
+    semver "5.3.0"
+
+eslint-plugin-promise@^3.4.1:
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-promise/-/eslint-plugin-promise-3.4.1.tgz#6911a9010bf84e17d82e19e0ab0f80ab3ad6db4c"
 
 eslint-plugin-standard@^2.0.1:
   version "2.0.1"
@@ -1123,6 +1137,10 @@ http-signature@~1.1.0:
 iconv-lite@0.4.13:
   version "0.4.13"
   resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.13.tgz#1f88aba4ab0b1508e8312acc39345f36e992e2f2"
+
+ignore@^3.0.11, ignore@^3.2.0:
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/ignore/-/ignore-3.2.2.tgz#1c51e1ef53bab6ddc15db4d9ac4ec139eceb3410"
 
 imurmurhash@^0.1.4:
   version "0.1.4"

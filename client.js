@@ -71,7 +71,7 @@ function Client (app, connection, key) {
 
   const client = this
 
-  this.sync.catch((err) => {
+  this.sync.catch(err => {
     client.app.reporter('syncError', client.app, client, err)
   })
   this.sync.on('connect', () => {
@@ -85,7 +85,7 @@ function Client (app, connection, key) {
   this.sync.on('state', () => {
     if (!client.sync.connected && !client.destroyed) client.destroy()
   })
-  this.sync.on('clientError', (err) => {
+  this.sync.on('clientError', err => {
     if (err.type !== 'wrong-credentials') {
       client.app.reporter('clientError', client.app, client, err)
     }
@@ -149,7 +149,7 @@ Client.prototype = {
 
     const client = this
     return this.app.authenticator(this.id, credentials, this)
-      .then((user) => {
+      .then(user => {
         if (user) {
           client.user = user
           client.app.reporter('authenticated', client.app, client)

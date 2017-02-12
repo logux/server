@@ -84,7 +84,7 @@ Server.prototype = {
   listen: function listen () {
     const app = this
     const origin = BaseServer.prototype.listen
-    return origin.apply(this, arguments).catch((e) => {
+    return origin.apply(this, arguments).catch(e => {
       process.stderr.write(errorReporter(e, app))
       process.exit(1)
     })

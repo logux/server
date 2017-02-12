@@ -58,7 +58,7 @@ function readFile (root, file) {
   if (!path.isAbsolute(file)) {
     file = path.join(root, file)
   }
-  return promisify((done) => {
+  return promisify(done => {
     fs.readFile(file, done)
   })
 }
@@ -122,7 +122,7 @@ function BaseServer (options, reporter) {
   }
 
   if (typeof this.options.nodeId === 'undefined') {
-    this.options.nodeId = `'server: ${ shortid.generate() }`
+    this.options.nodeId = `server:${shortid.generate()}`
   }
 
   this.options.root = this.options.root || process.cwd()
@@ -261,7 +261,7 @@ BaseServer.prototype = {
 
       promise = promise.then(() => {
         return Promise.all(before)
-      }).then((keys) => {
+      }).then(keys => {
         return new Promise((resolve, reject) => {
           if (keys[0]) {
             app.http = https.createServer({ key: keys[0], cert: keys[1] })
@@ -280,7 +280,7 @@ BaseServer.prototype = {
     }
 
     app.unbind.push(() => {
-      return promisify((done) => {
+      return promisify(done => {
         promise.then(() => {
           app.ws.close(() => {
             if (app.http) {
@@ -294,7 +294,7 @@ BaseServer.prototype = {
     })
 
     return promise.then(() => {
-      app.ws.on('connection', (ws) => {
+      app.ws.on('connection', ws => {
         app.reporter('connect', app, remoteAddress(ws))
         app.lastClient += 1
         const client = new Client(app, new ServerConnection(ws), app.lastClient)
@@ -318,7 +318,7 @@ BaseServer.prototype = {
   destroy: function destroy () {
     this.destroing = true
     this.reporter('destroy', this)
-    return Promise.all(this.unbind.map((unbind) => {
+    return Promise.all(this.unbind.map(unbind => {
       return unbind()
     }))
   },
