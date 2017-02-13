@@ -1,13 +1,13 @@
-const errorReporter = require('../error-reporter')
-const reporter = require('../reporter')
+var errorReporter = require('../error-reporter')
+var reporter = require('../reporter')
 
 function errorHelperOut () {
   return errorReporter.apply({}, arguments).replace(/\r\v/g, '\n')
 }
 
-const BaseServer = require('../base-server')
+var BaseServer = require('../base-server')
 
-const app = new BaseServer({
+var app = new BaseServer({
   env: 'development',
   pid: 21384,
   nodeId: 'server:H1f8LAyzl',
@@ -16,7 +16,7 @@ const app = new BaseServer({
 })
 app.listenOptions = { host: '127.0.0.1', port: 1337 }
 
-const originNow = reporter.now
+var originNow = reporter.now
 beforeAll(() => {
   reporter.now = () => {
     return new Date((new Date()).getTimezoneOffset() * 60000)
@@ -31,7 +31,7 @@ it('handles EACCESS error', () => {
 })
 
 it('handles error in production', () => {
-  const http = new BaseServer({
+  var http = new BaseServer({
     env: 'production',
     pid: 21384,
     nodeId: 'server:H1f8LAyzl',
@@ -51,7 +51,7 @@ it('handles EADDRINUSE error', () => {
 })
 
 it('throws on undefined error', () => {
-  const e = {
+  var e = {
     code: 'EAGAIN',
     message: 'resource temporarily unavailable'
   }

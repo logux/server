@@ -1,19 +1,19 @@
-const serverReporter = require('../server-reporter')
-const reporter = require('../reporter')
+var serverReporter = require('../server-reporter')
+var reporter = require('../reporter')
 
 function reportersOut () {
   return serverReporter.apply({}, arguments).replace(/\r\v/g, '\n')
 }
 
-const ServerConnection = require('logux-sync').ServerConnection
-const createServer = require('http').createServer
-const SyncError = require('logux-sync').SyncError
-const path = require('path')
+var ServerConnection = require('logux-sync').ServerConnection
+var createServer = require('http').createServer
+var SyncError = require('logux-sync').SyncError
+var path = require('path')
 
-const BaseServer = require('../base-server')
-const Client = require('../client')
+var BaseServer = require('../base-server')
+var Client = require('../client')
 
-const app = new BaseServer({
+var app = new BaseServer({
   env: 'development',
   pid: 21384,
   nodeId: 'server:H1f8LAyzl',
@@ -22,7 +22,7 @@ const app = new BaseServer({
 })
 app.listenOptions = { host: '127.0.0.1', port: 1337 }
 
-const ws = {
+var ws = {
   upgradeReq: {
     headers: { },
     connection: {
@@ -32,25 +32,25 @@ const ws = {
   on: () => { }
 }
 
-const authed = new Client(app, new ServerConnection(ws), 1)
+var authed = new Client(app, new ServerConnection(ws), 1)
 authed.sync.remoteSubprotocol = '1.0.0'
 authed.sync.remoteProtocol = [0, 0]
 authed.id = '100'
 authed.user = { }
 authed.nodeId = '100:550e8400-e29b-41d4-a716-446655440000'
 
-const noUserId = new Client(app, new ServerConnection(ws), 1)
+var noUserId = new Client(app, new ServerConnection(ws), 1)
 noUserId.sync.remoteSubprotocol = '1.0.0'
 noUserId.sync.remoteProtocol = [0, 0]
 noUserId.user = { }
 noUserId.nodeId = '550e8400-e29b-41d4-a716-446655440000'
 
-const unauthed = new Client(app, new ServerConnection(ws), 1)
+var unauthed = new Client(app, new ServerConnection(ws), 1)
 
-const ownError = new SyncError(authed.sync, 'timeout', 5000, false)
-const clientError = new SyncError(authed.sync, 'timeout', 5000, true)
+var ownError = new SyncError(authed.sync, 'timeout', 5000, false)
+var clientError = new SyncError(authed.sync, 'timeout', 5000, true)
 
-const originNow = reporter.now
+var originNow = reporter.now
 beforeAll(() => {
   reporter.now = () => {
     return new Date((new Date()).getTimezoneOffset() * 60000)
@@ -65,7 +65,7 @@ it('reports listen', () => {
 })
 
 it('reports production', () => {
-  const wss = new BaseServer({
+  var wss = new BaseServer({
     env: 'production',
     pid: 21384,
     nodeId: 'server:H1f8LAyzl',
@@ -78,7 +78,7 @@ it('reports production', () => {
 })
 
 it('reports http', () => {
-  const http = new BaseServer({
+  var http = new BaseServer({
     env: 'development',
     pid: 21384,
     nodeId: 'server:H1f8LAyzl',
@@ -115,31 +115,34 @@ it('reports disconnect from unauthenticated user', () => {
 })
 
 it('reports error', () => {
-  const file = __filename
-  const jest = path.join(__dirname, '..', 'node_modules', 'jest', 'index.js')
-  const error = new Error('Some mistake')
-  error.stack = error.name + ': ' + error.message + '\n' +
-  '    at Object.<anonymous> (' + file + ':28:13)\n' +
-  '    at Module._compile (module.js:573:32)\n' +
-  '    at at runTest (' + jest + ':50:10)\n' +
-  '    at process._tickCallback (internal/process/next_tick.js:103:7)'
+  var file = __filename
+  var jest = path.join(__dirname, '..', 'node_modules', 'jest', 'index.js')
+  var error = new Error('Some mistake')
+  var errorStack = [
+    `${ error.name }: ${ error.message }`,
+    `    at Object.<anonymous> (${ file }:28:13)`,
+    `    at Module._compile (module.js:573:32)`,
+    `    at at runTest (${ jest }:50:10)`,
+    `    at process._tickCallback (internal/process/next_tick.js:103:7)`
+  ]
+  error.stack = errorStack.join('\n')
 
-  const out = reportersOut('runtimeError', app, undefined, error)
+  var out = reportersOut('runtimeError', app, undefined, error)
   expect(out).toMatchSnapshot()
 })
 
 it('reports client error', () => {
-  const out = reportersOut('clientError', app, authed, clientError)
+  var out = reportersOut('clientError', app, authed, clientError)
   expect(out).toMatchSnapshot()
 })
 
 it('reports synchroniation error', () => {
-  const out = reportersOut('syncError', app, authed, ownError)
+  var out = reportersOut('syncError', app, authed, ownError)
   expect(out).toMatchSnapshot()
 })
 
 it('reports error from unautheficated user', () => {
-  const out = reportersOut('syncError', app, unauthed, clientError)
+  var out = reportersOut('syncError', app, unauthed, clientError)
   expect(out).toMatchSnapshot()
 })
 

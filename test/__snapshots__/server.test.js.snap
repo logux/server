@@ -14,6 +14,21 @@ exports[`test destroys everything on exit 1`] = `
 "
 `;
 
+exports[`test euse environment constiable for config 1`] = `
+" INFO   Logux server is listening at 1970-01-01 00:00:00
+        Logux server: 0.1.1
+        PID:          21384
+        Node ID:      server
+        Environment:  test
+        Subprotocol:  1.0.0
+        Supports:     1.x
+        Listen:       ws://127.0.0.1:31337
+
+ INFO   Shutting down Logux server at 1970-01-01 00:00:00
+
+"
+`;
+
 exports[`test euse environment variable for config 1`] = `
 " INFO   Logux server is listening at 1970-01-01 00:00:00
         Logux server: 0.1.1

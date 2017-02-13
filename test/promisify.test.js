@@ -1,4 +1,4 @@
-const promisify = require('../promisify')
+var promisify = require('../promisify')
 
 it('makes promise from callback function', () => {
   return promisify(done => {
