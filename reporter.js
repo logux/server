@@ -9,7 +9,7 @@ const SEPARATOR = os.EOL + os.EOL
 const NEXT_LINE = os.EOL === '\n' ? '\r\v' : os.EOL
 
 function time (c) {
-  return c.dim(`at ${yyyymmdd.withTime(module.exports.now())}`)
+  return c.dim(`at ${ yyyymmdd.withTime(module.exports.now()) }`)
 }
 
 function rightPag (str, length) {
@@ -23,7 +23,7 @@ function labeled (c, label, color, message) {
   const messageFormat = c.bold[color]
   const pagged = rightPag(labelFormat(label), 8)
 
-  return `${pagged}${messageFormat(message)} ${time(c)}`
+  return `${ pagged }${ messageFormat(message) } ${ time(c) }`
 }
 
 module.exports = {
@@ -36,7 +36,7 @@ module.exports = {
       if (current > max) max = current
     }
     return fields.map(field => {
-      const start = PADDING + rightPag(`${field[0]}: `, max)
+      const start = PADDING + rightPag(`${ field[0] }: `, max)
       if (field[0] === 'Node ID') {
         const pos = field[1].indexOf(':')
         let id, random
@@ -101,9 +101,9 @@ module.exports = {
       } else {
         match[2] = match[2].slice(root.length)
         if (match[2].indexOf('node_modules') !== -1) {
-          return c.red(`${match[1]}${match[2]})`)
+          return c.red(`${ match[1] }${ match[2] })`)
         } else {
-          return c.yellow(`${match[1]}${match[2]})`)
+          return c.yellow(`${ match[1] }${ match[2] })`)
         }
       }
     }).join(NEXT_LINE)

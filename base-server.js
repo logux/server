@@ -122,7 +122,7 @@ function BaseServer (options, reporter) {
   }
 
   if (typeof this.options.nodeId === 'undefined') {
-    this.options.nodeId = `server:${shortid.generate()}`
+    this.options.nodeId = `server:${ shortid.generate() }`
   }
 
   this.options.root = this.options.root || process.cwd()

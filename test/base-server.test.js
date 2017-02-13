@@ -262,7 +262,7 @@ it('uses HTTPS', () => {
   })
 })
 
-it('loads keys by absolute path', function () {
+it('loads keys by absolute path', () => {
   const app = createServer()
   this.app = app
   return app.listen({
@@ -273,7 +273,7 @@ it('loads keys by absolute path', function () {
   })
 })
 
-it('loads keys by relative path', function () {
+it('loads keys by relative path', () => {
   const app = createServer({
     subprotocol: '0.0.0',
     supports: '0.x',
@@ -328,7 +328,7 @@ it('creates a client on connection', function () {
   return test.app.listen({ port: uniqPort() }).then(() => {
     test.reports = []
 
-    const ws = new WebSocket('ws://localhost:' + test.app.listenOptions.port)
+    const ws = new WebSocket(`ws://localhost:${ test.app.listenOptions.port }`)
     return new Promise((resolve, reject) => {
       ws.onopen = resolve
       ws.onerror = reject
@@ -355,7 +355,7 @@ it('accepts custom HTTP server', function () {
   }).then(() => {
     test.reports = []
 
-    const ws = new WebSocket('ws://localhost:' + port)
+    const ws = new WebSocket(`ws://localhost:${ port }`)
     return new Promise((resolve, reject) => {
       ws.onopen = resolve
       ws.onerror = reject

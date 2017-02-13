@@ -11,7 +11,7 @@ const reporters = {
       const protocol = app.listenOptions.cert ? 'wss://' : 'ws://'
       const host = app.listenOptions.host
       const port = app.listenOptions.port
-      url = `${protocol}${host}:${port}`
+      url = `${ protocol }${ host }:${ port }`
     }
 
     const dev = app.env === 'development'
@@ -84,7 +84,7 @@ const reporters = {
   },
 
   runtimeError: function runtimeError (c, app, client, err) {
-    let prefix = `${err.name}: ${err.message}`
+    let prefix = `${ err.name }: ${ err.message }`
     if (err.name === 'Error') prefix = err.message
     return [
       reporter.error(c, prefix),
@@ -96,9 +96,9 @@ const reporters = {
   syncError: function syncError (c, app, client, err) {
     let prefix
     if (err.received) {
-      prefix = `SyncError from client: ${err.description}`
+      prefix = `SyncError from client: ${ err.description }`
     } else {
-      prefix = `SyncError: ${err.description}`
+      prefix = `SyncError: ${ err.description }`
     }
     return [
       reporter.error(c, prefix),
@@ -108,7 +108,7 @@ const reporters = {
 
   clientError: function clientError (c, app, client, err) {
     return [
-      reporter.warn(c, `Client error: ${err.description}`),
+      reporter.warn(c, `Client error: ${ err.description }`),
       reporter.errorParams(c, client)
     ]
   }
