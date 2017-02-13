@@ -46,10 +46,10 @@ npm install --save logux-server logux-core
 Create `server.js` with this boilerplate:
 
 ```js
-const cleanEvery = require('logux-core').cleanEvery
-const Server = require('logux-server').Server
+var cleanEvery = require('logux-core').cleanEvery
+var Server = require('logux-server').Server
 
-const app = new Server({
+var app = new Server({
   subprotocol: '1.0.0',
   supports: '1.x',
   root: __dirname

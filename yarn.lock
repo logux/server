@@ -732,6 +732,10 @@ escope@^3.6.0:
   version "4.0.0"
   resolved "git+https://git@github.com/logux/eslint-config-logux#65e8a4356c9a4ab7ff8a1fc5f5d669308c1cf80a"
 
+"eslint-config-logux@git+https://github.com/logux/eslint-config-logux.git":
+  version "4.0.0"
+  resolved "git+https://github.com/logux/eslint-config-logux.git#440637c0d580f219f3bd20e4c56876ffc5719531"
+
 eslint-config-standard@^6.2.1:
   version "6.2.1"
   resolved "https://registry.yarnpkg.com/eslint-config-standard/-/eslint-config-standard-6.2.1.tgz#d3a68aafc7191639e7ee441e7348739026354292"
