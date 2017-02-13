@@ -1,20 +1,20 @@
-const reporter = require('./reporter.js')
-const pkg = require('./package.json')
+var reporter = require('./reporter.js')
+var pkg = require('./package.json')
 
-const reporters = {
+var reporters = {
 
   listen: function listen (c, app) {
-    let url
+    var url
     if (app.listenOptions.server) {
       url = 'Custom HTTP server'
     } else {
-      const protocol = app.listenOptions.cert ? 'wss://' : 'ws://'
-      const host = app.listenOptions.host
-      const port = app.listenOptions.port
+      var protocol = app.listenOptions.cert ? 'wss://' : 'ws://'
+      var host = app.listenOptions.host
+      var port = app.listenOptions.port
       url = `${ protocol }${ host }:${ port }`
     }
 
-    const dev = app.env === 'development'
+    var dev = app.env === 'development'
 
     return [
       reporter.info(c, 'Logux server is listening'),
@@ -61,7 +61,7 @@ const reporters = {
   },
 
   disconnect: function disconnect (c, app, client) {
-    let params
+    var params
     if (client.nodeId) {
       params = reporter.params(c, [
         ['Node ID', client.nodeId]
@@ -84,7 +84,7 @@ const reporters = {
   },
 
   runtimeError: function runtimeError (c, app, client, err) {
-    let prefix = `${ err.name }: ${ err.message }`
+    var prefix = `${ err.name }: ${ err.message }`
     if (err.name === 'Error') prefix = err.message
     return [
       reporter.error(c, prefix),
@@ -94,7 +94,7 @@ const reporters = {
   },
 
   syncError: function syncError (c, app, client, err) {
-    let prefix
+    var prefix
     if (err.received) {
       prefix = `SyncError from client: ${ err.description }`
     } else {
@@ -116,7 +116,7 @@ const reporters = {
 }
 
 module.exports = function serverReporter (type, app) {
-  const c = reporter.color(app)
-  const args = [c].concat(Array.prototype.slice.call(arguments, 1))
+  var c = reporter.color(app)
+  var args = [c].concat(Array.prototype.slice.call(arguments, 1))
   return reporter.message(reporters[type].apply({ }, args))
 }

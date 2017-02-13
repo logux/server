@@ -1,8 +1,8 @@
-const assign = require('object-assign')
+var assign = require('object-assign')
 
-const BaseServer = require('./base-server')
-const errorReporter = require('./error-reporter')
-const serverReporter = require('./server-reporter')
+var BaseServer = require('./base-server')
+var errorReporter = require('./error-reporter')
+var serverReporter = require('./server-reporter')
 
 /**
  * End-user API to create Logux server.
@@ -34,7 +34,7 @@ const serverReporter = require('./server-reporter')
  *
  * @example
  * import { Server } from 'logux-server'
- * const app = new Server({
+ * var app = new Server({
  *   subprotocol: '1.0.0',
  *   supports: '1.x || 0.x',
  *   root: __dirname
@@ -56,7 +56,7 @@ function Server (options) {
     process.stderr.write(serverReporter.apply(serverReporter, arguments))
   })
 
-  const app = this
+  var app = this
 
   function onError (e) {
     app.reporter('runtimeError', app, undefined, e)
@@ -82,8 +82,8 @@ function Server (options) {
 Server.prototype = {
 
   listen: function listen () {
-    const app = this
-    const origin = BaseServer.prototype.listen
+    var app = this
+    var origin = BaseServer.prototype.listen
     return origin.apply(this, arguments).catch(e => {
       process.stderr.write(errorReporter(e, app))
       process.exit(1)

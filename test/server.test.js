@@ -1,7 +1,7 @@
-const spawn = require('child_process').spawn
-const path = require('path')
+var spawn = require('child_process').spawn
+var path = require('path')
 
-const DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
+var DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
 
 function wait (ms) {
   return new Promise(resolve => {
@@ -11,8 +11,8 @@ function wait (ms) {
 
 function start (name, args) {
   return new Promise(resolve => {
-    const server = spawn(path.join(__dirname, '/servers/', name), args)
-    let started = false
+    var server = spawn(path.join(__dirname, '/servers/', name), args)
+    var started = false
     function callback () {
       if (!started) {
         started = true
@@ -26,8 +26,8 @@ function start (name, args) {
 
 function test (name, args) {
   return new Promise(resolve => {
-    let out = ''
-    const server = spawn(path.join(__dirname, '/servers/', name), args)
+    var out = ''
+    var server = spawn(path.join(__dirname, '/servers/', name), args)
     server.stdout.on('data', chank => {
       out += chank
     })
@@ -35,7 +35,7 @@ function test (name, args) {
       out += chank
     })
     server.on('close', exitCode => {
-      let fixed = out.replace(DATE, '1970-01-01 00:00:00')
+      var fixed = out.replace(DATE, '1970-01-01 00:00:00')
                      .replace(/PID:(\s+)\d+/, 'PID:$121384')
       fixed = fixed.replace(/\r\v/g, '\n')
       resolve([fixed, exitCode])
@@ -48,11 +48,11 @@ function test (name, args) {
 
 function checkOut (name, args) {
   return test(name, args).then(result => {
-    const out = result[0]
-    const exit = result[1]
+    var out = result[0]
+    var exit = result[1]
 
     if (exit !== 0) {
-      console.error(test + ' fall with:\n' + out)
+      console.error(`${ test } fall with:\n${ out }`)
     }
     expect(exit).toEqual(0)
     expect(out).toMatchSnapshot()
@@ -61,8 +61,8 @@ function checkOut (name, args) {
 
 function checkError (name, args) {
   return test(name, args).then(result => {
-    const out = result[0]
-    const exit = result[1]
+    var out = result[0]
+    var exit = result[1]
     expect(exit).toEqual(1)
     expect(out).toMatchSnapshot()
   })
