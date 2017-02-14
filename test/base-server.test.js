@@ -254,7 +254,7 @@ it('uses HTTPS', () => {
   var app = createServer()
   this.app = app
   return app.listen({
-    port: 2002,
+    port: uniqPort(),
     cert: fs.readFileSync(path.join(__dirname, 'fixtures/cert.pem')),
     key: fs.readFileSync(path.join(__dirname, 'fixtures/key.pem'))
   }).then(() => {
@@ -267,7 +267,8 @@ it('loads keys by absolute path', () => {
   this.app = app
   return app.listen({
     cert: path.join(__dirname, 'fixtures/cert.pem'),
-    key: path.join(__dirname, 'fixtures/key.pem')
+    key: path.join(__dirname, 'fixtures/key.pem'),
+    port: uniqPort()
   }).then(() => {
     expect(app.http instanceof https.Server).toBeTruthy()
   })
@@ -282,7 +283,8 @@ it('loads keys by relative path', () => {
   this.app = app
   return app.listen({
     cert: 'fixtures/cert.pem',
-    key: 'fixtures/key.pem'
+    key: 'fixtures/key.pem',
+    port: uniqPort()
   }).then(() => {
     expect(app.http instanceof https.Server).toBeTruthy()
   })
@@ -294,7 +296,8 @@ it('supports object in SSL key', function () {
   var key = fs.readFileSync(path.join(__dirname, 'fixtures/key.pem'))
   return app.listen({
     cert: fs.readFileSync(path.join(__dirname, 'fixtures/cert.pem')),
-    key: { pem: key }
+    key: { pem: key },
+    port: uniqPort()
   }).then(() => {
     expect(app.http instanceof https.Server).toBeTruthy()
   })
