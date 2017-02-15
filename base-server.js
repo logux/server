@@ -58,7 +58,7 @@ function readFile (root, file) {
   if (!path.isAbsolute(file)) {
     file = path.join(root, file)
   }
-  return promisify(function (done) {
+  return promisify(done => {
     fs.readFile(file, done)
   })
 }
@@ -122,7 +122,7 @@ function BaseServer (options, reporter) {
   }
 
   if (typeof this.options.nodeId === 'undefined') {
-    this.options.nodeId = 'server:' + shortid.generate()
+    this.options.nodeId = `server:${ shortid.generate() }`
   }
 
   this.options.root = this.options.root || process.cwd()
@@ -156,7 +156,7 @@ function BaseServer (options, reporter) {
    * @type {Client[]}
    *
    * @example
-   * for (let nodeId in app.clients) {
+   * for (var nodeId in app.clients) {
    *   console.log(app.clients[nodeId].remoteAddress)
    * }
    */
@@ -165,7 +165,7 @@ function BaseServer (options, reporter) {
   this.lastClient = 0
 
   var app = this
-  this.unbind.push(function () {
+  this.unbind.push(() => {
     for (var i in app.clients) {
       app.clients[i].destroy()
     }
@@ -259,10 +259,10 @@ BaseServer.prototype = {
         before.push(Promise.resolve(this.listenOptions.cert))
       }
 
-      promise = promise.then(function () {
+      promise = promise.then(() => {
         return Promise.all(before)
-      }).then(function (keys) {
-        return new Promise(function (resolve, reject) {
+      }).then(keys => {
+        return new Promise((resolve, reject) => {
           if (keys[0]) {
             app.http = https.createServer({ key: keys[0], cert: keys[1] })
           } else {
@@ -279,10 +279,10 @@ BaseServer.prototype = {
       })
     }
 
-    app.unbind.push(function () {
-      return promisify(function (done) {
-        promise.then(function () {
-          app.ws.close(function () {
+    app.unbind.push(() => {
+      return promisify(done => {
+        promise.then(() => {
+          app.ws.close(() => {
             if (app.http) {
               app.http.close(done)
             } else {
@@ -293,14 +293,14 @@ BaseServer.prototype = {
       })
     })
 
-    return promise.then(function () {
-      app.ws.on('connection', function (ws) {
+    return promise.then(() => {
+      app.ws.on('connection', ws => {
         app.reporter('connect', app, remoteAddress(ws))
         app.lastClient += 1
         var client = new Client(app, new ServerConnection(ws), app.lastClient)
         app.clients[app.lastClient] = client
       })
-    }).then(function () {
+    }).then(() => {
       app.reporter('listen', app)
     })
   },
@@ -318,7 +318,7 @@ BaseServer.prototype = {
   destroy: function destroy () {
     this.destroing = true
     this.reporter('destroy', this)
-    return Promise.all(this.unbind.map(function (unbind) {
+    return Promise.all(this.unbind.map(unbind => {
       return unbind()
     }))
   },

@@ -10,4 +10,4 @@ var app = new Server({
 
 app.destroy()
 
-setTimeout(function () { }, 10000)
+setTimeout(() => { }, 10000)

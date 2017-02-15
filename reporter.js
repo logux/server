@@ -9,7 +9,7 @@ var SEPARATOR = os.EOL + os.EOL
 var NEXT_LINE = os.EOL === '\n' ? '\r\v' : os.EOL
 
 function time (c) {
-  return c.dim('at ' + yyyymmdd.withTime(module.exports.now()))
+  return c.dim(`at ${ yyyymmdd.withTime(module.exports.now()) }`)
 }
 
 function rightPag (str, length) {
@@ -21,10 +21,9 @@ function rightPag (str, length) {
 function labeled (c, label, color, message) {
   var labelFormat = c.bold[color].bgBlack.inverse
   var messageFormat = c.bold[color]
+  var pagged = rightPag(labelFormat(label), 8)
 
-  return rightPag(labelFormat(label), 8) +
-         messageFormat(message) + ' ' +
-         time(c)
+  return `${ pagged }${ messageFormat(message) } ${ time(c) }`
 }
 
 module.exports = {
@@ -36,8 +35,8 @@ module.exports = {
       current = fields[i][0].length + 2
       if (current > max) max = current
     }
-    return fields.map(function (field) {
-      var start = PADDING + rightPag(field[0] + ': ', max)
+    return fields.map(field => {
+      var start = PADDING + rightPag(`${ field[0] }: `, max)
       if (field[0] === 'Node ID') {
         var pos = field[1].indexOf(':')
         var id, random
@@ -68,7 +67,7 @@ module.exports = {
   },
 
   hint: function hint (c, strings) {
-    return strings.map(function (i) {
+    return strings.map(i => {
       return PADDING + i
     }).join(NEXT_LINE)
   },
@@ -94,7 +93,7 @@ module.exports = {
   prettyStackTrace: function prettyStackTrace (c, err, root) {
     if (root.slice(-1) !== path.sep) root += path.sep
 
-    return err.stack.split('\n').slice(1).map(function (i) {
+    return err.stack.split('\n').slice(1).map(i => {
       i = i.replace(/^\s*/, PADDING)
       var match = i.match(/(\s+at [^(]+ \()([^)]+)\)/)
       if (!match || match[2].indexOf(root) !== 0) {
@@ -102,9 +101,9 @@ module.exports = {
       } else {
         match[2] = match[2].slice(root.length)
         if (match[2].indexOf('node_modules') !== -1) {
-          return c.red(match[1] + match[2] + ')')
+          return c.red(`${ match[1] }${ match[2] })`)
         } else {
-          return c.yellow(match[1] + match[2] + ')')
+          return c.yellow(`${ match[1] }${ match[2] })`)
         }
       }
     }).join(NEXT_LINE)
@@ -119,7 +118,7 @@ module.exports = {
   },
 
   message: function message (strings) {
-    return strings.filter(function (i) {
+    return strings.filter(i => {
       return i !== ''
     }).join(NEXT_LINE) + SEPARATOR
   },

@@ -4,7 +4,7 @@ function errorHelp (e) {
   switch (e.code) {
     case 'EADDRINUSE':
       return {
-        description: 'Port :' + e.port + ' already in use',
+        description: `Port :${ e.port } already in use`,
         hint: [
           'Another Logux server or other app already running on this port',
           'Maybe you didn’t not stop server from other project',

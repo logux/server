@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 var Server = require('../../server')
 
 var app = new Server({
@@ -7,7 +8,7 @@ var app = new Server({
   supports: '1.x'
 })
 
-app.auth(function () {
+app.auth(() => {
   return Promise.resolve(true)
 })
 

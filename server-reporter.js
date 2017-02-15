@@ -8,8 +8,10 @@ var reporters = {
     if (app.listenOptions.server) {
       url = 'Custom HTTP server'
     } else {
-      url = (app.listenOptions.cert ? 'wss://' : 'ws://') +
-        app.listenOptions.host + ':' + app.listenOptions.port
+      var protocol = app.listenOptions.cert ? 'wss://' : 'ws://'
+      var host = app.listenOptions.host
+      var port = app.listenOptions.port
+      url = `${ protocol }${ host }:${ port }`
     }
 
     var dev = app.env === 'development'
@@ -82,7 +84,7 @@ var reporters = {
   },
 
   runtimeError: function runtimeError (c, app, client, err) {
-    var prefix = err.name + ': ' + err.message
+    var prefix = `${ err.name }: ${ err.message }`
     if (err.name === 'Error') prefix = err.message
     return [
       reporter.error(c, prefix),
@@ -94,9 +96,9 @@ var reporters = {
   syncError: function syncError (c, app, client, err) {
     var prefix
     if (err.received) {
-      prefix = 'SyncError from client: ' + err.description
+      prefix = `SyncError from client: ${ err.description }`
     } else {
-      prefix = 'SyncError: ' + err.description
+      prefix = `SyncError: ${ err.description }`
     }
     return [
       reporter.error(c, prefix),
@@ -106,7 +108,7 @@ var reporters = {
 
   clientError: function clientError (c, app, client, err) {
     return [
-      reporter.warn(c, 'Client error: ' + err.description),
+      reporter.warn(c, `Client error: ${ err.description }`),
       reporter.errorParams(c, client)
     ]
   }

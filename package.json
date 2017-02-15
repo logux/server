@@ -24,9 +24,10 @@
   "devDependencies": {
     "docdash": "^0.4.0",
     "eslint": "^3.15.0",
-    "eslint-config-logux": "^4.0.0",
+    "eslint-config-logux": "git+https://github.com/logux/eslint-config-logux.git",
     "eslint-config-standard": "^6.2.1",
     "eslint-plugin-es5": "^1.0.1",
+    "eslint-plugin-node": "^4.0.1",
     "eslint-plugin-promise": "^3.4.1",
     "eslint-plugin-standard": "^2.0.1",
     "jest": "^18.1.0",
@@ -57,11 +58,14 @@
     ]
   },
   "eslintConfig": {
-    "extends": "eslint-config-logux"
+    "extends": "eslint-config-logux/node4"
   },
   "lint-staged": {
     "*.md": "yaspeller",
     "*.js": "eslint"
+  },
+  "engines": {
+    "node": ">=4.0.0"
   },
   "pre-commit": [
     "lint-staged"

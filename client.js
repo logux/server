@@ -12,7 +12,7 @@ var remoteAddress = require('./remote-address')
  * @param {number} key Client number used as `app.clients` key.
  *
  * @example
- * const client = app.clients[0]
+ * var client = app.clients[0]
  *
  * @class
  */
@@ -71,10 +71,10 @@ function Client (app, connection, key) {
 
   var client = this
 
-  this.sync.catch(function (err) {
+  this.sync.catch(err => {
     client.app.reporter('syncError', client.app, client, err)
   })
-  this.sync.on('connect', function () {
+  this.sync.on('connect', () => {
     if (!client.isSubprotocol(client.app.options.supports)) {
       throw new SyncError(client.sync, 'wrong-subprotocol', {
         supported: client.app.options.supports,
@@ -82,10 +82,10 @@ function Client (app, connection, key) {
       })
     }
   })
-  this.sync.on('state', function () {
+  this.sync.on('state', () => {
     if (!client.sync.connected && !client.destroyed) client.destroy()
   })
-  this.sync.on('clientError', function (err) {
+  this.sync.on('clientError', err => {
     if (err.type !== 'wrong-credentials') {
       client.app.reporter('clientError', client.app, client, err)
     }
@@ -149,7 +149,7 @@ Client.prototype = {
 
     var client = this
     return this.app.authenticator(this.id, credentials, this)
-      .then(function (user) {
+      .then(user => {
         if (user) {
           client.user = user
           client.app.reporter('authenticated', client.app, client)

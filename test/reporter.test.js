@@ -1,5 +1,5 @@
 var reporter = require('../reporter')
 
-it('returns current time', function () {
+it('returns current time', () => {
   expect(reporter.now().valueOf()).toBeCloseTo(Date.now(), -2)
 })

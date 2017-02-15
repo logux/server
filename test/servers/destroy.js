@@ -8,13 +8,13 @@ var app = new Server({
   supports: '1.x'
 })
 
-app.auth(function () {
+app.auth(() => {
   return Promise.resolve(true)
 })
 
-app.unbind.push(function () {
-  return new Promise(function (resolve) {
-    setTimeout(function () {
+app.unbind.push(() => {
+  return new Promise(resolve => {
+    setTimeout(() => {
       process.stderr.write(' Custom destroy task finished\n')
       resolve()
     }, 10)
@@ -23,7 +23,7 @@ app.unbind.push(function () {
 
 app.listen({ port: 2000 })
 
-process.on('message', function (msg) {
+process.on('message', msg => {
   if (msg === 'close') {
     console.error('close')
     app.destroy()
