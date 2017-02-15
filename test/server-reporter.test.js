@@ -52,9 +52,7 @@ var clientError = new SyncError(authed.sync, 'timeout', 5000, true)
 
 var originNow = reporter.now
 beforeAll(() => {
-  reporter.now = () => {
-    return new Date((new Date()).getTimezoneOffset() * 60000)
-  }
+  reporter.now = () => new Date((new Date()).getTimezoneOffset() * 60000)
 })
 afterAll(() => {
   reporter.now = originNow

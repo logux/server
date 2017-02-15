@@ -12,7 +12,7 @@ var remoteAddress = require('./remote-address')
  * @param {number} key Client number used as `app.clients` key.
  *
  * @example
- * var client = app.clients[0]
+ * const client = app.clients[0]
  *
  * @class
  */
@@ -44,7 +44,7 @@ function Client (app, connection, key) {
    * @type {string}
    *
    * @example
-   * var clientCity = detectLocation(client.remoteAddress)
+   * const clientCity = detectLocation(client.remoteAddress)
    */
   this.remoteAddress = remoteAddress(this.connection.ws)
 
@@ -61,7 +61,7 @@ function Client (app, connection, key) {
    * if (client.sync.state === 'synchronized')
    */
   this.sync = new ServerSync(app.nodeId, app.log, connection, {
-    credentials: credentials,
+    credentials,
     subprotocol: app.options.subprotocol,
     timeout: app.options.timeout,
     inMap: this.map.bind(this),

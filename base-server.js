@@ -136,7 +136,7 @@ function BaseServer (options, reporter) {
    * @example
    * app.log.each(finder)
    */
-  this.log = new Log({ store: store, nodeId: this.options.nodeId })
+  this.log = new Log({ store, nodeId: this.options.nodeId })
 
   /**
    * Production or development mode.
@@ -156,7 +156,7 @@ function BaseServer (options, reporter) {
    * @type {Client[]}
    *
    * @example
-   * for (var nodeId in app.clients) {
+   * for (let nodeId in app.clients) {
    *   console.log(app.clients[nodeId].remoteAddress)
    * }
    */
@@ -259,10 +259,9 @@ BaseServer.prototype = {
         before.push(Promise.resolve(this.listenOptions.cert))
       }
 
-      promise = promise.then(() => {
-        return Promise.all(before)
-      }).then(keys => {
-        return new Promise((resolve, reject) => {
+      promise = promise
+        .then(() => Promise.all(before))
+        .then(keys => new Promise((resolve, reject) => {
           if (keys[0]) {
             app.http = https.createServer({ key: keys[0], cert: keys[1] })
           } else {
@@ -275,23 +274,20 @@ BaseServer.prototype = {
 
           var opts = app.listenOptions
           app.http.listen(opts.port, opts.host, resolve)
-        })
-      })
+        }))
     }
 
-    app.unbind.push(() => {
-      return promisify(done => {
-        promise.then(() => {
-          app.ws.close(() => {
-            if (app.http) {
-              app.http.close(done)
-            } else {
-              done()
-            }
-          })
+    app.unbind.push(() => promisify(done => {
+      promise.then(() => {
+        app.ws.close(() => {
+          if (app.http) {
+            app.http.close(done)
+          } else {
+            done()
+          }
         })
       })
-    })
+    }))
 
     return promise.then(() => {
       app.ws.on('connection', ws => {
@@ -318,9 +314,7 @@ BaseServer.prototype = {
   destroy: function destroy () {
     this.destroing = true
     this.reporter('destroy', this)
-    return Promise.all(this.unbind.map(unbind => {
-      return unbind()
-    }))
+    return Promise.all(this.unbind.map(i => i()))
   },
 
   /**

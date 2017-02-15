@@ -67,9 +67,7 @@ module.exports = {
   },
 
   hint: function hint (c, strings) {
-    return strings.map(i => {
-      return PADDING + i
-    }).join(NEXT_LINE)
+    return strings.map(i => PADDING + i).join(NEXT_LINE)
   },
 
   errorParams: function errorParams (c, client) {
@@ -118,9 +116,7 @@ module.exports = {
   },
 
   message: function message (strings) {
-    return strings.filter(i => {
-      return i !== ''
-    }).join(NEXT_LINE) + SEPARATOR
+    return strings.filter(i => i !== '').join(NEXT_LINE) + SEPARATOR
   },
 
   now: function now () {

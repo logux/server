@@ -21,7 +21,6 @@ that we've planned for future.
 
 ## Getting Started
 
-
 ### Installation
 
 Install [Node.js](https://nodejs.org/en/download/).

@@ -728,9 +728,9 @@ escope@^3.6.0:
     esrecurse "^4.1.0"
     estraverse "^4.1.1"
 
-"eslint-config-logux@git+https://git@github.com/logux/eslint-config-logux":
+eslint-config-logux@logux/eslint-config-logux:
   version "4.0.0"
-  resolved "git+https://git@github.com/logux/eslint-config-logux#65e8a4356c9a4ab7ff8a1fc5f5d669308c1cf80a"
+  resolved "https://codeload.github.com/logux/eslint-config-logux/tar.gz/dd682ad45c5fea958d3461d43b1e5adb3198b142"
 
 eslint-config-standard@^6.2.1:
   version "6.2.1"

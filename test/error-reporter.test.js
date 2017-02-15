@@ -18,9 +18,7 @@ app.listenOptions = { host: '127.0.0.1', port: 1337 }
 
 var originNow = reporter.now
 beforeAll(() => {
-  reporter.now = () => {
-    return new Date((new Date()).getTimezoneOffset() * 60000)
-  }
+  reporter.now = () => new Date((new Date()).getTimezoneOffset() * 60000)
 })
 afterAll(() => {
   reporter.now = originNow

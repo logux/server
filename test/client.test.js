@@ -28,7 +28,7 @@ function createReporter () {
   var app = createServer({ }, function () {
     reports.push(Array.prototype.slice.call(arguments, 0))
   })
-  return { app: app, reports: reports }
+  return { app, reports }
 }
 
 it('uses server options', () => {
@@ -104,9 +104,7 @@ it('destroys on disconnect', () => {
 
 it('reports on wrong authentication', () => {
   var test = createReporter()
-  test.app.auth(() => {
-    return Promise.resolve(false)
-  })
+  test.app.auth(() => Promise.resolve(false))
   var client = new Client(test.app, createConnection(), 1)
   return client.connection.connect().then(() => {
     var protocol = client.sync.localProtocol
@@ -188,9 +186,8 @@ it('has method to check client subprotocol', () => {
 
 it('sends server credentials in development', () => {
   var app = createServer({ env: 'development' })
-  app.auth(() => {
-    return Promise.resolve({ id: 'user' })
-  })
+  app.auth(() => Promise.resolve({ id: 'user' }))
+
   var client = new Client(app, createConnection(), 1)
   return client.connection.connect().then(() => {
     var protocol = client.sync.localProtocol
@@ -206,9 +203,8 @@ it('sends server credentials in development', () => {
 
 it('does not send server credentials in production', () => {
   var app = createServer({ env: 'production' })
-  app.auth(() => {
-    return Promise.resolve({ id: 'user' })
-  })
+  app.auth(() => Promise.resolve({ id: 'user' }))
+
   var client = new Client(app, createConnection(), 1)
   return client.connection.connect().then(() => {
     var protocol = client.sync.localProtocol
@@ -223,12 +219,11 @@ it('does not send server credentials in production', () => {
 
 it('marks all actions with user and server IDs', () => {
   var app = createServer({ nodeId: 'server' })
-  app.auth(() => {
-    return Promise.resolve(true)
-  })
+  app.auth(() => Promise.resolve(true))
   app.log.on('before', (action, meta) => {
     meta.reasons = ['test']
   })
+
   var client = new Client(app, createConnection(), 1)
   return client.connection.connect().then(() => {
     var protocol = client.sync.localProtocol

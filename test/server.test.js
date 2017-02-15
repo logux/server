@@ -72,41 +72,26 @@ afterEach(() => {
   delete process.env.LOGUX_PORT
 })
 
-it('destroys everything on exit', () => {
-  return checkOut('destroy.js')
-})
+it('destroys everything on exit', () => checkOut('destroy.js'))
 
-it('reports unbind', () => {
-  return test('unbind.js').then(result => {
-    expect(result[0]).toMatchSnapshot()
-  })
-})
+it('reports unbind', () => test('unbind.js').then(result => {
+  expect(result[0]).toMatchSnapshot()
+}))
 
-it('shows uncatch errors', () => {
-  return checkError('throw.js')
-})
+it('shows uncatch errors', () => checkError('throw.js'))
 
-it('shows uncatch rejects', () => {
-  return checkError('uncatch.js')
-})
+it('shows uncatch rejects', () => checkError('uncatch.js'))
 
 it('euse environment constiable for config', () => {
   process.env.LOGUX_PORT = 31337
   return checkOut('options.js')
 })
 
-it('shows help', () => {
-  return checkOut('options.js', ['', '--help'])
-})
+it('shows help', () => checkOut('options.js', ['', '--help']))
 
-it('shows help about port in use', () => {
-  return start('eaddrinuse.js').then(() => {
-    return test('eaddrinuse.js')
-  }).then(result => {
+it('shows help about port in use', () => start('eaddrinuse.js')
+  .then(() => test('eaddrinuse.js')).then(result => {
     expect(result[0]).toMatchSnapshot()
-  })
-})
+  }))
 
-it('shows help about privileged port', () => {
-  return checkError('eacces.js')
-})
+it('shows help about privileged port', () => checkError('eacces.js'))

@@ -34,7 +34,7 @@ var serverReporter = require('./server-reporter')
  *
  * @example
  * import { Server } from 'logux-server'
- * var app = new Server({
+ * const app = new Server({
  *   subprotocol: '1.0.0',
  *   supports: '1.x || 0.x',
  *   root: __dirname
