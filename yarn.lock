@@ -729,9 +729,9 @@ escope@^3.6.0:
     esrecurse "^4.1.0"
     estraverse "^4.1.1"
 
-eslint-config-logux@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/eslint-config-logux/-/eslint-config-logux-5.0.0.tgz#916a1c4f14d17d9d5a3571e3090d9d93303d4b76"
+eslint-config-logux@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/eslint-config-logux/-/eslint-config-logux-5.0.1.tgz#e341255070de229143a22604068d3a9d3eb2f4c3"
 
 eslint-config-standard@^6.2.1:
   version "6.2.1"
@@ -1882,13 +1882,13 @@ log-update@^1.0.2:
 
 logux-core@logux/logux-core:
   version "0.1.0"
-  resolved "https://codeload.github.com/logux/logux-core/tar.gz/e8d86572ecebc951e2709bc8d4821ef5c662e8fc"
+  resolved "https://codeload.github.com/logux/logux-core/tar.gz/c055fa8e91c4d1386edf7cb403584411d6093b41"
   dependencies:
     nanoevents "^0.3.0"
 
 logux-sync@logux/logux-sync:
   version "0.1.2"
-  resolved "https://codeload.github.com/logux/logux-sync/tar.gz/c71b5736e4e9e0f2dedfe042b61a82c40f88fa69"
+  resolved "https://codeload.github.com/logux/logux-sync/tar.gz/a9c27e146dac870df708441d86bf8c56787eed50"
   dependencies:
     nanoevents "^0.3.0"
     object-assign "^4.1.1"
