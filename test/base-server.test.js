@@ -1,5 +1,3 @@
-/* eslint-disable no-invalid-this */
-
 var MemoryStore = require('logux-core').MemoryStore
 var WebSocket = require('ws')
 var https = require('https')
