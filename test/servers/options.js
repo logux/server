@@ -8,9 +8,7 @@ var app = new Server({
   supports: '1.x'
 })
 
-app.auth(() => {
-  return Promise.resolve(true)
-})
+app.auth(() => Promise.resolve(true))
 
 app.listen(app.loadOptions(process, {
   port: '1338',

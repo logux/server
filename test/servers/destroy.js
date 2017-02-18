@@ -8,18 +8,14 @@ var app = new Server({
   supports: '1.x'
 })
 
-app.auth(() => {
-  return Promise.resolve(true)
-})
+app.auth(() => Promise.resolve(true))
 
-app.unbind.push(() => {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      process.stderr.write(' Custom destroy task finished\n')
-      resolve()
-    }, 10)
-  })
-})
+app.unbind.push(() => new Promise(resolve => {
+  setTimeout(() => {
+    process.stderr.write(' Custom destroy task finished\n')
+    resolve()
+  }, 10)
+}))
 
 app.listen({ port: 2000 })
 
