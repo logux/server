@@ -165,6 +165,7 @@ function BaseServer (options, reporter) {
    * }
    */
   this.clients = { }
+  this.actions = { }
 
   this.lastClient = 0
 
@@ -181,7 +182,7 @@ BaseServer.prototype = {
   /**
    * Set authenticate function. It will receive client credentials
    * and node ID. It should return a Promise with `false`
-   * on bad authentication or with {@link User} on correct credentials.
+   * on bad authentication or with any user data on correct credentials.
    *
    * @param {authenticator} authenticator The authentication callback.
    *
@@ -343,6 +344,41 @@ BaseServer.prototype = {
       cert: argv.c || env.LOGUX_CERT || defaults.cert,
       key: argv.k || env.LOGUX_KEY || defaults.key
     }
+  },
+
+  /**
+   * Define action type’s callbacks.
+   *
+   * @param {string} name The action’s type.
+   * @param {object} callbacks Callbacks for actions with this type.
+   * @param {authorizer} callback.access Check does user can do this action.
+   * @param {processor} callback.process Action business logic.
+   *
+   * @return {undefined}
+   *
+   * @example
+   * app.type('CHANGE_NAME', {
+   *   access (action, meta, user) {
+   *     return Promise.resolve(action.user === user.id)
+   *   },
+   *   process (action, meta) {
+   *     if (isFirstOlder(lastNameChange(action.user), meta)) {
+   *       return db.changeUserName({ id: action.user, name: action.name })
+   *     }
+   *   }
+   * })
+   */
+  type: function type (name, callbacks) {
+    if (this.actions[name]) {
+      throw new Error(`Action type ${ name } was already defined`)
+    }
+    if (!callbacks || !callbacks.access) {
+      throw new Error(`Action type ${ name } must have access callback`)
+    }
+    if (!callbacks.process) {
+      throw new Error(`Action type ${ name } must have process callback`)
+    }
+    this.actions[name] = callbacks
   }
 
 }
@@ -351,17 +387,25 @@ module.exports = BaseServer
 
 /**
  * @callback authenticator
+ * @param {string} id User ID.
  * @param {any} credentials The client credentials.
- * @param {string|number} nodeId Unique client node name.
  * @param {Client} client Client object.
- * @return {Promise} Promise with `false` or {@link User} data.
+ * @return {Promise} Promise with `false` or user data.
  */
 
 /**
- * Developer defined user data. It is open structure. But you should define
- * at least `id` property to show it in logs.
- *
- * @typedef {object} User
- *
- * @property {string|number} id Any user ID to display in server logs.
+ * @callback authorizer
+ * @param {Action} action The action data.
+ * @param {Meta} action The action metadata.
+ * @param {Client} client The client object.
+ * @return {Promise} Promise with `true` if client are allowed
+ *                   to use this action.
+ */
+
+/**
+ * @callback processor
+ * @param {Action} action The action data.
+ * @param {Meta} action The action metadata.
+ * @param {Client} client The client object.
+ * @return {Promise} Promise when processing will be finished.
  */

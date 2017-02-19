@@ -370,3 +370,42 @@ it('marks actions with own node ID', () => {
     expect(added).toEqual([app.options.nodeId, 'server2'])
   })
 })
+
+it('defines actions types', () => {
+  app = createServer()
+  app.type('FOO', {
+    access () { },
+    process () { }
+  })
+  expect(app.actions.FOO).not.toBeUndefined()
+})
+
+it('does not allow to define type twice', () => {
+  app = createServer()
+  app.type('FOO', {
+    access () { },
+    process () { }
+  })
+  expect(() => {
+    app.type('FOO', {
+      access () { },
+      process () { }
+    })
+  }).toThrowError(/already/)
+})
+
+it('requires access callback for type', () => {
+  app = createServer()
+  expect(() => {
+    app.type('FOO')
+  }).toThrowError(/access callback/)
+})
+
+it('requires process callback for type', () => {
+  app = createServer()
+  expect(() => {
+    app.type('FOO', {
+      access () { }
+    })
+  }).toThrowError(/process callback/)
+})
