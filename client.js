@@ -163,7 +163,6 @@ Client.prototype = {
 
   map: function map (action, meta) {
     meta.user = this.id
-    meta.server = this.app.options.nodeId
     return [action, meta]
   }
 

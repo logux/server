@@ -138,6 +138,10 @@ function BaseServer (options, reporter) {
    */
   this.log = new Log({ store, nodeId: this.options.nodeId })
 
+  this.log.on('before', (action, meta) => {
+    if (!meta.server) meta.server = this.options.nodeId
+  })
+
   /**
    * Production or development mode.
    * @type {"production"|"development"}

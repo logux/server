@@ -355,3 +355,18 @@ it('accepts custom HTTP server', () => {
     expect(Object.keys(test.app.clients).length).toBe(1)
   })
 })
+
+it('marks actions with own node ID', () => {
+  app = createServer()
+  var added = []
+  app.log.on('add', (action, meta) => {
+    added.push(meta.server)
+  })
+
+  return Promise.all([
+    app.log.add({ type: 'A' }, { reasons: ['test'] }),
+    app.log.add({ type: 'B' }, { reasons: ['test'], server: 'server2' })
+  ]).then(() => {
+    expect(added).toEqual([app.options.nodeId, 'server2'])
+  })
+})
