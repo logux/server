@@ -44,6 +44,7 @@ it('uses server options', () => {
   expect(client.sync.options.subprotocol).toEqual('0.0.0')
   expect(client.sync.options.timeout).toEqual(16000)
   expect(client.sync.options.ping).toEqual(8000)
+  expect(client.sync.localNodeId).toEqual('server')
 })
 
 it('saves connection', () => {
