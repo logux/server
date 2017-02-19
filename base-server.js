@@ -407,5 +407,5 @@ module.exports = BaseServer
  * @param {Action} action The action data.
  * @param {Meta} action The action metadata.
  * @param {Client} client The client object.
- * @return {Promise} Promise when processing will be finished.
+ * @return {Promise|undefined} Promise when processing will be finished.
  */
