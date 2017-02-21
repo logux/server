@@ -64,6 +64,12 @@ it('has remote address shortcut', () => {
   expect(client.remoteAddress).toEqual('127.0.0.1')
 })
 
+it('reports about connection', () => {
+  var test = createReporter()
+  var client = new Client(test.app, createConnection(), 1)
+  expect(test.reports).toEqual([['connect', test.app, client]])
+})
+
 it('removes itself on destroy', () => {
   var test = createReporter()
 
@@ -74,7 +80,8 @@ it('removes itself on destroy', () => {
     client.destroy()
     expect(test.app.clients).toEqual({ })
     expect(client.connection.connected).toBeFalsy()
-    expect(test.reports).toEqual([['disconnect', test.app, client]])
+    expect(test.reports[0][0]).toEqual('connect')
+    expect(test.reports[1]).toEqual(['disconnect', test.app, client])
   })
 })
 
@@ -88,7 +95,8 @@ it('does not report users disconnects on server destory', () => {
     test.app.destroy()
     expect(test.app.clients).toEqual({ })
     expect(client.connection.connected).toBeFalsy()
-    expect(test.reports).toEqual([['destroy', test.app]])
+    expect(test.reports[0][0]).toEqual('connect')
+    expect(test.reports[1]).toEqual(['destroy', test.app])
   })
 })
 
@@ -112,11 +120,12 @@ it('reports on wrong authentication', () => {
     client.connection.other().send(['connect', protocol, 'client', 0])
     return client.connection.pair.wait('right')
   }).then(() => {
-    expect(test.reports.length).toEqual(2)
-    expect(test.reports[0][0]).toEqual('unauthenticated')
-    expect(test.reports[0][1]).toEqual(test.app)
-    expect(test.reports[0][2]).toEqual(client)
-    expect(test.reports[1][0]).toEqual('disconnect')
+    expect(test.reports.length).toEqual(3)
+    expect(test.reports[0][0]).toEqual('connect')
+    expect(test.reports[1][0]).toEqual('unauthenticated')
+    expect(test.reports[1][1]).toEqual(test.app)
+    expect(test.reports[1][2]).toEqual(client)
+    expect(test.reports[2][0]).toEqual('disconnect')
   })
 })
 
@@ -141,7 +150,8 @@ it('authenticates user', () => {
     expect(client.user).toEqual({ name: 'user' })
     expect(client.nodeId).toEqual('10:random')
     expect(client.sync.authenticated).toBeTruthy()
-    expect(test.reports).toEqual([['authenticated', test.app, client]])
+    expect(test.reports[0][0]).toEqual('connect')
+    expect(test.reports[1]).toEqual(['authenticated', test.app, client])
   })
 })
 
@@ -152,10 +162,11 @@ it('reports about synchronization errors', () => {
     client.connection.other().send(['error', 'wrong-format'])
     return client.connection.pair.wait()
   }).then(() => {
-    expect(test.reports[0][0]).toEqual('syncError')
-    expect(test.reports[0][1]).toEqual(test.app)
-    expect(test.reports[0][2]).toEqual(client)
-    expect(test.reports[0][3].type).toEqual('wrong-format')
+    expect(test.reports[0][0]).toEqual('connect')
+    expect(test.reports[1][0]).toEqual('syncError')
+    expect(test.reports[1][1]).toEqual(test.app)
+    expect(test.reports[1][2]).toEqual(client)
+    expect(test.reports[1][3].type).toEqual('wrong-format')
   })
 })
 
@@ -169,11 +180,12 @@ it('checks subprotocol', () => {
     ])
     return client.connection.pair.wait('right')
   }).then(() => {
-    expect(test.reports.length).toEqual(2)
-    expect(test.reports[0][0]).toEqual('clientError')
-    expect(test.reports[0][3].message).toEqual(
+    expect(test.reports.length).toEqual(3)
+    expect(test.reports[0][0]).toEqual('connect')
+    expect(test.reports[1][0]).toEqual('clientError')
+    expect(test.reports[1][3].message).toEqual(
       'Only 0.x application subprotocols are supported, but you use 1.0.0')
-    expect(test.reports[1][0]).toEqual('disconnect')
+    expect(test.reports[2][0]).toEqual('disconnect')
   })
 })
 

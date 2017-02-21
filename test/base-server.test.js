@@ -312,21 +312,17 @@ it('reporters on destroing', () => {
 })
 
 it('creates a client on connection', () => {
-  var test = createReporter()
-  return test.app.listen({ port: uniqPort() }).then(() => {
-    test.reports = []
-
-    var ws = new WebSocket(`ws://localhost:${ test.app.listenOptions.port }`)
+  app = createServer()
+  return app.listen({ port: uniqPort() }).then(() => {
+    var ws = new WebSocket(`ws://localhost:${ app.listenOptions.port }`)
     return new Promise((resolve, reject) => {
       ws.onopen = resolve
       ws.onerror = reject
     })
   }).then(() => {
-    expect(Object.keys(test.app.clients).length).toBe(1)
-
-    var client = test.app.clients[1]
+    expect(Object.keys(app.clients).length).toBe(1)
+    var client = app.clients[1]
     expect(client.remoteAddress).toEqual('127.0.0.1')
-    expect(test.reports).toEqual([['connect', test.app, client]])
   })
 })
 

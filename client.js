@@ -89,6 +89,8 @@ function Client (app, connection, key) {
       client.app.reporter('clientError', client.app, client, err)
     }
   })
+
+  app.reporter('connect', app, this)
 }
 
 Client.prototype = {

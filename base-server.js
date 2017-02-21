@@ -298,7 +298,6 @@ BaseServer.prototype = {
         app.lastClient += 1
         var client = new Client(app, new ServerConnection(ws), app.lastClient)
         app.clients[app.lastClient] = client
-        app.reporter('connect', app, client)
       })
     }).then(() => {
       app.reporter('listen', app)
