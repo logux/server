@@ -35,6 +35,7 @@ var reporters = {
     return [
       reporter.info(c, 'Client was connected'),
       reporter.params(c, [
+        ['Client ID', client.key],
         ['IP address', client.remoteAddress]
       ])
     ]
@@ -46,7 +47,7 @@ var reporters = {
       reporter.params(c, [
         ['Node ID', client.nodeId],
         ['Subprotocol', client.sync.remoteSubprotocol],
-        ['IP address', client.remoteAddress]
+        ['Client ID', client.key]
       ])
     ]
   },
@@ -57,7 +58,7 @@ var reporters = {
       reporter.params(c, [
         ['Node ID', client.nodeId],
         ['Subprotocol', client.sync.remoteSubprotocol],
-        ['IP address', client.remoteAddress]
+        ['Client ID', client.key]
       ])
     ]
   },
@@ -70,7 +71,7 @@ var reporters = {
       ])
     } else {
       params = reporter.params(c, [
-        ['IP address', client.remoteAddress]
+        ['Client ID', client.key]
       ])
     }
     return [

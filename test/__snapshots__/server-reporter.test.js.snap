@@ -4,7 +4,7 @@ exports[`reports authenticated 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mUser was authenticated[39m[22m [2mat 1970-01-01 00:00:00[22m
         Node ID:     [1m100[22m:550e8400-e29b-41d4-a716-446655440000
         Subprotocol: [1m1.0.0[22m
-        IP address:  [1m127.0.0.1[22m
+        Client ID:   [1m1[22m
 
 "
 `;
@@ -13,7 +13,7 @@ exports[`reports authenticated without user ID 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mUser was authenticated[39m[22m [2mat 1970-01-01 00:00:00[22m
         Node ID:     550e8400-e29b-41d4-a716-446655440000
         Subprotocol: [1m1.0.0[22m
-        IP address:  [1m127.0.0.1[22m
+        Client ID:   [1m1[22m
 
 "
 `;
@@ -22,7 +22,7 @@ exports[`reports bad authenticated 1`] = `
 "[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mBad authentication[39m[22m [2mat 1970-01-01 00:00:00[22m
         Node ID:     [1m100[22m:550e8400-e29b-41d4-a716-446655440000
         Subprotocol: [1m1.0.0[22m
-        IP address:  [1m127.0.0.1[22m
+        Client ID:   [1m1[22m
 
 "
 `;
@@ -36,6 +36,7 @@ exports[`reports client error 1`] = `
 
 exports[`reports connect 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mClient was connected[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Client ID:  [1m1[22m
         IP address: [1m127.0.0.1[22m
 
 "
@@ -56,7 +57,7 @@ exports[`reports disconnect 1`] = `
 
 exports[`reports disconnect from unauthenticated user 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mClient was disconnected[39m[22m [2mat 1970-01-01 00:00:00[22m
-        IP address: [1m127.0.0.1[22m
+        Client ID: [1m1[22m
 
 "
 `;
@@ -73,7 +74,7 @@ exports[`reports error 1`] = `
 
 exports[`reports error from unautheficated user 1`] = `
 "[1m[31m[40m[7m ERROR [27m[49m[39m[22m [1m[31mSyncError from client: A timeout was reached (5000ms)[39m[22m [2mat 1970-01-01 00:00:00[22m
-        IP address: [1m127.0.0.1[22m
+        Client ID: [1m1[22m
 
 "
 `;

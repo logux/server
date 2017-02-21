@@ -79,7 +79,7 @@ module.exports = {
       ])
     } else {
       return module.exports.params(c, [
-        ['IP address', client.remoteAddress]
+        ['Client ID', client.key]
       ])
     }
   },
