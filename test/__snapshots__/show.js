@@ -4,11 +4,14 @@ var fs = require('fs')
 var path = require('path')
 var chalk = require('chalk')
 
+var filter = process.argv[2]
+
 function show (result) {
   Object.keys(result).sort().reverse().forEach(file => {
     var test = file.replace(/\.test\.js\.snap$/, '')
     result[file].split('exports[`')
       .filter(str => str.indexOf('// ') !== 0)
+      .filter(str => !filter || str.indexOf(filter) !== -1)
       .forEach(str => {
         if (str.trim().length === 0) return
         var parts = str.replace(/"\s*`;\s*$/, '').split(/`] = `\s*"/)
