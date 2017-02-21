@@ -2,6 +2,7 @@
 
 var fs = require('fs')
 var path = require('path')
+var chalk = require('chalk')
 
 function show (result) {
   Object.keys(result).sort().reverse().forEach(file => {
@@ -11,7 +12,8 @@ function show (result) {
       .forEach(str => {
         if (str.trim().length === 0) return
         var parts = str.replace(/"\s*`;\s*$/, '').split(/`] = `\s*"/)
-        process.stdout.write(`${ test } ${ parts[0].replace(/ 1$/, '') }:\n\n`)
+        process.stdout.write(
+          chalk.gray(`${ test } ${ parts[0].replace(/ 1$/, '') }:\n\n`))
         process.stdout.write(parts[1])
       })
   })
