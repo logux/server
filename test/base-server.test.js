@@ -326,7 +326,7 @@ it('creates a client on connection', () => {
 
     var client = test.app.clients[1]
     expect(client.remoteAddress).toEqual('127.0.0.1')
-    expect(test.reports).toEqual([['connect', test.app, '127.0.0.1']])
+    expect(test.reports).toEqual([['connect', test.app, client]])
   })
 })
 

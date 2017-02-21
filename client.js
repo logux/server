@@ -2,8 +2,6 @@ var ServerSync = require('logux-sync').ServerSync
 var SyncError = require('logux-sync').SyncError
 var semver = require('semver')
 
-var remoteAddress = require('./remote-address')
-
 /**
  * Logux client connected to server.
  *
@@ -46,7 +44,8 @@ function Client (app, connection, key) {
    * @example
    * const clientCity = detectLocation(client.remoteAddress)
    */
-  this.remoteAddress = remoteAddress(this.connection.ws)
+  this.remoteAddress = connection.ws.upgradeReq.headers['x-forwarded-for'] ||
+                       connection.ws.upgradeReq.connection.remoteAddress
 
   var credentials
   if (this.app.env === 'development') {

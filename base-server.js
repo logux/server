@@ -9,7 +9,6 @@ var path = require('path')
 var Log = require('logux-core').Log
 var fs = require('fs')
 
-var remoteAddress = require('./remote-address')
 var promisify = require('./promisify')
 var Client = require('./client')
 
@@ -296,10 +295,10 @@ BaseServer.prototype = {
 
     return promise.then(() => {
       app.ws.on('connection', ws => {
-        app.reporter('connect', app, remoteAddress(ws))
         app.lastClient += 1
         var client = new Client(app, new ServerConnection(ws), app.lastClient)
         app.clients[app.lastClient] = client
+        app.reporter('connect', app, client)
       })
     }).then(() => {
       app.reporter('listen', app)

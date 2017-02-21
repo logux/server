@@ -89,7 +89,7 @@ it('reports http', () => {
 })
 
 it('reports connect', () => {
-  expect(reportersOut('connect', app, '127.0.0.1')).toMatchSnapshot()
+  expect(reportersOut('connect', app, authed)).toMatchSnapshot()
 })
 
 it('reports authenticated', () => {

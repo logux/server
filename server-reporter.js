@@ -31,10 +31,12 @@ var reporters = {
     ]
   },
 
-  connect: function connect (c, app, ip) {
+  connect: function connect (c, app, client) {
     return [
       reporter.info(c, 'Client was connected'),
-      reporter.params(c, [['IP address', ip]])
+      reporter.params(c, [
+        ['IP address', client.remoteAddress]
+      ])
     ]
   },
 
