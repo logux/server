@@ -6,13 +6,14 @@ var path = require('path')
 function show (result) {
   Object.keys(result).sort().reverse().forEach(file => {
     var test = file.replace(/\.test\.js\.snap$/, '')
-    result[file].split('exports[`').forEach(str => {
-      if (str.trim().length === 0) return
-      var parts = str.replace(/"\s*`;\s*$/, '').split(/`] = `\s*"/)
-      process.stdout.write(
-        `${ test } ${ parts[0].replace(/^test /, '').replace(/ 1$/, '') }:\n\n`)
-      process.stdout.write(parts[1])
-    })
+    result[file].split('exports[`')
+      .filter(str => str.indexOf('// ') !== 0)
+      .forEach(str => {
+        if (str.trim().length === 0) return
+        var parts = str.replace(/"\s*`;\s*$/, '').split(/`] = `\s*"/)
+        process.stdout.write(`${ test } ${ parts[0].replace(/ 1$/, '') }:\n\n`)
+        process.stdout.write(parts[1])
+      })
   })
 }
 

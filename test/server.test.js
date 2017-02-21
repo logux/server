@@ -9,18 +9,20 @@ function wait (ms) {
   })
 }
 
+var started
+
 function start (name, args) {
   return new Promise(resolve => {
-    var server = spawn(path.join(__dirname, '/servers/', name), args)
-    var started = false
+    started = spawn(path.join(__dirname, '/servers/', name), args)
+    var running = false
     function callback () {
-      if (!started) {
-        started = true
+      if (!running) {
+        running = true
         resolve()
       }
     }
-    server.stdout.on('data', callback)
-    server.stderr.on('data', callback)
+    started.stdout.on('data', callback)
+    started.stderr.on('data', callback)
   })
 }
 
@@ -70,6 +72,10 @@ function checkError (name, args) {
 
 afterEach(() => {
   delete process.env.LOGUX_PORT
+  if (started) {
+    started.kill('SIGINT')
+    started = undefined
+  }
 })
 
 it('destroys everything on exit', () => checkOut('destroy.js'))
@@ -82,7 +88,7 @@ it('shows uncatch errors', () => checkError('throw.js'))
 
 it('shows uncatch rejects', () => checkError('uncatch.js'))
 
-it('euse environment constiable for config', () => {
+it('use environment constiable for config', () => {
   process.env.LOGUX_PORT = 31337
   return checkOut('options.js')
 })

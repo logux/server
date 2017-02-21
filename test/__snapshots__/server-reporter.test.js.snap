@@ -1,4 +1,6 @@
-exports[`test reports authenticated 1`] = `
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`reports authenticated 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mUser was authenticated[39m[22m [2mat 1970-01-01 00:00:00[22m
         Node ID:     [1m100[22m:550e8400-e29b-41d4-a716-446655440000
         Subprotocol: [1m1.0.0[22m
@@ -7,7 +9,7 @@ exports[`test reports authenticated 1`] = `
 "
 `;
 
-exports[`test reports authenticated without user ID 1`] = `
+exports[`reports authenticated without user ID 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mUser was authenticated[39m[22m [2mat 1970-01-01 00:00:00[22m
         Node ID:     550e8400-e29b-41d4-a716-446655440000
         Subprotocol: [1m1.0.0[22m
@@ -16,7 +18,7 @@ exports[`test reports authenticated without user ID 1`] = `
 "
 `;
 
-exports[`test reports bad authenticated 1`] = `
+exports[`reports bad authenticated 1`] = `
 "[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mBad authentication[39m[22m [2mat 1970-01-01 00:00:00[22m
         Node ID:     [1m100[22m:550e8400-e29b-41d4-a716-446655440000
         Subprotocol: [1m1.0.0[22m
@@ -25,41 +27,41 @@ exports[`test reports bad authenticated 1`] = `
 "
 `;
 
-exports[`test reports client error 1`] = `
+exports[`reports client error 1`] = `
 "[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mClient error: A timeout was reached (5000ms)[39m[22m [2mat 1970-01-01 00:00:00[22m
         Node ID: [1m100[22m:550e8400-e29b-41d4-a716-446655440000
 
 "
 `;
 
-exports[`test reports connect 1`] = `
+exports[`reports connect 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mClient was connected[39m[22m [2mat 1970-01-01 00:00:00[22m
         IP address: [1m127.0.0.1[22m
 
 "
 `;
 
-exports[`test reports destroy 1`] = `
+exports[`reports destroy 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mShutting down Logux server[39m[22m [2mat 1970-01-01 00:00:00[22m
 
 "
 `;
 
-exports[`test reports disconnect 1`] = `
+exports[`reports disconnect 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mClient was disconnected[39m[22m [2mat 1970-01-01 00:00:00[22m
         Node ID: [1m100[22m:550e8400-e29b-41d4-a716-446655440000
 
 "
 `;
 
-exports[`test reports disconnect from unauthenticated user 1`] = `
+exports[`reports disconnect from unauthenticated user 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mClient was disconnected[39m[22m [2mat 1970-01-01 00:00:00[22m
         IP address: [1m127.0.0.1[22m
 
 "
 `;
 
-exports[`test reports error 1`] = `
+exports[`reports error 1`] = `
 "[1m[31m[40m[7m ERROR [27m[49m[39m[22m [1m[31mSome mistake[39m[22m [2mat 1970-01-01 00:00:00[22m
 [33m        at Object.<anonymous> (test/server-reporter.test.js:28:13)[39m
 [31m        at Module._compile (module.js:573:32)[39m
@@ -69,14 +71,14 @@ exports[`test reports error 1`] = `
 "
 `;
 
-exports[`test reports error from unautheficated user 1`] = `
+exports[`reports error from unautheficated user 1`] = `
 "[1m[31m[40m[7m ERROR [27m[49m[39m[22m [1m[31mSyncError from client: A timeout was reached (5000ms)[39m[22m [2mat 1970-01-01 00:00:00[22m
         IP address: [1m127.0.0.1[22m
 
 "
 `;
 
-exports[`test reports http 1`] = `
+exports[`reports http 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mLogux server is listening[39m[22m [2mat 1970-01-01 00:00:00[22m
         Logux server: [1m0.1.1[22m
         PID:          [1m21384[22m
@@ -90,7 +92,7 @@ exports[`test reports http 1`] = `
 "
 `;
 
-exports[`test reports listen 1`] = `
+exports[`reports listen 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mLogux server is listening[39m[22m [2mat 1970-01-01 00:00:00[22m
         Logux server: [1m0.1.1[22m
         PID:          [1m21384[22m
@@ -104,7 +106,7 @@ exports[`test reports listen 1`] = `
 "
 `;
 
-exports[`test reports production 1`] = `
+exports[`reports production 1`] = `
 " INFO   Logux server is listening at 1970-01-01 00:00:00
         Logux server: 0.1.1
         PID:          21384
@@ -117,7 +119,7 @@ exports[`test reports production 1`] = `
 "
 `;
 
-exports[`test reports synchroniation error 1`] = `
+exports[`reports synchroniation error 1`] = `
 "[1m[31m[40m[7m ERROR [27m[49m[39m[22m [1m[31mSyncError: A timeout was reached (5000ms)[39m[22m [2mat 1970-01-01 00:00:00[22m
         Node ID: [1m100[22m:550e8400-e29b-41d4-a716-446655440000
 

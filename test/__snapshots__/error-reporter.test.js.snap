@@ -1,11 +1,13 @@
-exports[`test handles EACCESS error 1`] = `
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`handles EACCESS error 1`] = `
 "[1m[31m[40m[7m ERROR [27m[49m[39m[22m [1m[31mYou are not allowed to run server on this port[39m[22m [2mat 1970-01-01 00:00:00[22m
         Try to change user (e.g. root) or use port >= 1024
 
 "
 `;
 
-exports[`test handles EADDRINUSE error 1`] = `
+exports[`handles EADDRINUSE error 1`] = `
 "[1m[31m[40m[7m ERROR [27m[49m[39m[22m [1m[31mPort :1337 already in use[39m[22m [2mat 1970-01-01 00:00:00[22m
         Another Logux server or other app already running on this port
         Maybe you didn’t not stop server from other project
@@ -14,7 +16,7 @@ exports[`test handles EADDRINUSE error 1`] = `
 "
 `;
 
-exports[`test handles error in production 1`] = `
+exports[`handles error in production 1`] = `
 " ERROR  You are not allowed to run server on this port at 1970-01-01 00:00:00
         Try to change user (e.g. root) or use port >= 1024
 
