@@ -1,4 +1,6 @@
-exports[`test calls debugError if env is development 1`] = `
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`calls debugError if env is development 1`] = `
 " ERROR  Test Error at 1970-01-01 00:00:00
         fake stacktrace
 
@@ -7,7 +9,7 @@ exports[`test calls debugError if env is development 1`] = `
 "
 `;
 
-exports[`test destroys everything on exit 1`] = `
+exports[`destroys everything on exit 1`] = `
 " INFO   Logux server is listening at 1970-01-01 00:00:00
         Logux server: 0.1.1
         PID:          21384
@@ -23,13 +25,13 @@ exports[`test destroys everything on exit 1`] = `
 "
 `;
 
-exports[`test reports unbind 1`] = `
+exports[`reports unbind 1`] = `
 " INFO   Shutting down Logux server at 1970-01-01 00:00:00
 
 "
 `;
 
-exports[`test shows help 1`] = `
+exports[`shows help 1`] = `
 "Options:
   -h, --host  Host to bind server.                                      [string]
   -p, --port  Port to bind server                                       [number]
@@ -47,7 +49,7 @@ Corresponding ENV variables: LOGUX_HOST, LOGUX_PORT, LOGUX_KEY, LOGUX_CERT
 "
 `;
 
-exports[`test shows help about port in use 1`] = `
+exports[`shows help about port in use 1`] = `
 " ERROR  Port :2001 already in use at 1970-01-01 00:00:00
         Another Logux server or other app already running on this port
         Maybe you didn’t not stop server from other project
@@ -56,14 +58,14 @@ exports[`test shows help about port in use 1`] = `
 "
 `;
 
-exports[`test shows help about privileged port 1`] = `
+exports[`shows help about privileged port 1`] = `
 " ERROR  You are not allowed to run server on this port at 1970-01-01 00:00:00
         Try to change user (e.g. root) or use port >= 1024
 
 "
 `;
 
-exports[`test shows uncatch errors 1`] = `
+exports[`shows uncatch errors 1`] = `
 " ERROR  Test Error at 1970-01-01 00:00:00
         fake stacktrace
 
@@ -72,7 +74,7 @@ exports[`test shows uncatch errors 1`] = `
 "
 `;
 
-exports[`test shows uncatch rejects 1`] = `
+exports[`shows uncatch rejects 1`] = `
 " ERROR  Test Error at 1970-01-01 00:00:00
         fake stacktrace
 
@@ -81,16 +83,7 @@ exports[`test shows uncatch rejects 1`] = `
 "
 `;
 
-exports[`test test 1`] = `
-" ERROR  Test Error at 1970-01-01 00:00:00
-        fake stacktrace
-
- INFO   Shutting down Logux server at 1970-01-01 00:00:00
-
-"
-`;
-
-exports[`test use environment constiable for config 1`] = `
+exports[`use environment constiable for config 1`] = `
 " INFO   Logux server is listening at 1970-01-01 00:00:00
         Logux server: 0.1.1
         PID:          21384

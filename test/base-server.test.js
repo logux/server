@@ -336,6 +336,7 @@ it('send debug message to clients on runtimeError', () => {
   app.debugError(error)
   expect(app.clients[1].connection.send).toBeCalledWith([
     'debug',
+    'error',
     'Error: Test Error\n' +
     'fake stacktrace'
   ])

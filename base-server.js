@@ -391,7 +391,7 @@ BaseServer.prototype = {
    */
   debugError: function debugError (error) {
     for (var i in this.clients) {
-      this.clients[i].connection.send(['debug', error.stack])
+      this.clients[i].connection.send(['debug', 'error', error.stack])
     }
   }
 }
