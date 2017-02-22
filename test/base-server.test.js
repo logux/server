@@ -65,10 +65,20 @@ it('saves server options', () => {
   expect(app.options.supports).toEqual('0.x')
 })
 
+it('saves node ID', () => {
+  app = new BaseServer({
+    subprotocol: '0.0.0',
+    supports: '0.x',
+    nodeId: 'server'
+  })
+  expect(app.nodeId).toEqual('server')
+  expect(app.nodeId).toEqual(app.options.nodeId)
+  expect(app.nodeId).toEqual(app.log.nodeId)
+})
+
 it('generates node ID', () => {
   app = new BaseServer(defaultOptions)
-  expect(app.options.nodeId).toMatch(/server:[\w\d]+/)
-  expect(app.options.nodeId).toEqual(app.log.nodeId)
+  expect(app.nodeId).toMatch(/server:[\w\d]+/)
 })
 
 it('throws on missed subprotocol', () => {
@@ -379,7 +389,7 @@ it('marks actions with own node ID', () => {
     app.log.add({ type: 'A' }, { reasons: ['test'] }),
     app.log.add({ type: 'B' }, { reasons: ['test'], server: 'server2' })
   ]).then(() => {
-    expect(added).toEqual([app.options.nodeId, 'server2'])
+    expect(added).toEqual([app.nodeId, 'server2'])
   })
 })
 

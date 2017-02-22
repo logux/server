@@ -19,7 +19,7 @@ var reporters = {
       common.params(c, [
         ['Logux server', pkg.version],
         ['PID', app.options.pid],
-        ['Node ID', app.options.nodeId],
+        ['Node ID', app.nodeId],
         ['Environment', app.env],
         ['Subprotocol', app.options.subprotocol],
         ['Supports', app.options.supports],

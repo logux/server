@@ -119,10 +119,18 @@ function BaseServer (options, reporter) {
   if (typeof this.options.supports === 'undefined') {
     throw new Error('Missed supported subprotocol major versions')
   }
-
   if (typeof this.options.nodeId === 'undefined') {
     this.options.nodeId = `server:${ shortid.generate() }`
   }
+
+  /**
+   * Server unique ID.
+   * @type {string}
+   *
+   * @example
+   * console.log('Error was raised on ' + app.nodeId)
+   */
+  this.nodeId = this.options.nodeId
 
   this.options.root = this.options.root || process.cwd()
 
@@ -135,10 +143,10 @@ function BaseServer (options, reporter) {
    * @example
    * app.log.each(finder)
    */
-  this.log = new Log({ store, nodeId: this.options.nodeId })
+  this.log = new Log({ store, nodeId: this.nodeId })
 
   this.log.on('before', (action, meta) => {
-    if (!meta.server) meta.server = this.options.nodeId
+    if (!meta.server) meta.server = this.nodeId
   })
 
   /**

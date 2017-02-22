@@ -59,7 +59,7 @@ function Client (app, connection, key) {
    * @example
    * if (client.sync.state === 'synchronized')
    */
-  this.sync = new ServerSync(app.options.nodeId, app.log, connection, {
+  this.sync = new ServerSync(app.nodeId, app.log, connection, {
     credentials,
     subprotocol: app.options.subprotocol,
     timeout: app.options.timeout,
