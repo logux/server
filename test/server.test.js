@@ -88,9 +88,9 @@ it('shows uncatch errors', () => checkError('throw.js'))
 
 it('shows uncatch rejects', () => checkError('uncatch.js'))
 
-it('calls debugError if env is development', () => {
+it('calls debugError on error if env is development', () => {
   process.env.NODE_ENV = 'development'
-  return checkError('throw.js')
+  return checkError('debug.js')
 })
 
 it('use environment constiable for config', () => {
