@@ -1,11 +1,11 @@
 var errorReporter = require('../reporters/human/error')
 var common = require('../reporters/human/common')
 
+var BaseServer = require('../base-server')
+
 function errorHelperOut () {
   return errorReporter.apply({}, arguments).replace(/\r\v/g, '\n')
 }
-
-var BaseServer = require('../base-server')
 
 var app = new BaseServer({
   env: 'development',

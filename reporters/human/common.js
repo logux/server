@@ -4,6 +4,7 @@ var chalk = require('chalk')
 var yyyymmdd = require('yyyy-mm-dd')
 var stripAnsi = require('strip-ansi')
 
+var INDENT = '  '
 var PADDING = '        '
 var SEPARATOR = os.EOL + os.EOL
 var NEXT_LINE = os.EOL === '\n' ? '\r\v' : os.EOL
@@ -36,20 +37,34 @@ module.exports = {
       if (current > max) max = current
     }
     return fields.map(field => {
-      var start = PADDING + rightPag(`${ field[0] }: `, max)
-      if (field[0] === 'Node ID') {
-        var pos = field[1].indexOf(':')
+      var name = field[0]
+      var value = field[1]
+
+      var start = PADDING + rightPag(`${ name }: `, max)
+      if (value instanceof Date) {
+        value = yyyymmdd.withTime(value)
+      }
+
+      if (name === 'Node ID') {
+        var pos = value.indexOf(':')
         var id, random
         if (pos === -1) {
           id = ''
-          random = field[1]
+          random = value
         } else {
-          id = field[1].slice(0, pos)
-          random = field[1].slice(pos)
+          id = value.slice(0, pos)
+          random = value.slice(pos)
         }
         return start + c.bold(id) + random
+      } else if (Array.isArray(value)) {
+        return `${ start }[${ value.map(j => c.bold(j)).join(', ') }]`
+      } else if (typeof value === 'object') {
+        return start + NEXT_LINE + INDENT +
+          module.exports.params(c,
+            Object.keys(value).map(key => [key, value[key]]
+          )).split(NEXT_LINE).join(NEXT_LINE + INDENT)
       } else {
-        return start + c.bold(field[1])
+        return start + c.bold(value)
       }
     }).join(NEXT_LINE)
   },

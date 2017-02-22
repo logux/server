@@ -312,6 +312,26 @@ it('reporters on start listening', () => {
   })
 })
 
+it('reporters on log events', () => {
+  var test = createReporter()
+  test.app.log.generateId = () => [1]
+  test.app.log.add({ type: 'A' })
+  expect(test.reports).toEqual([
+    [
+      'add',
+      test.app,
+      { type: 'A' },
+      { id: [1], reasons: [], server: test.app.options.nodeId, time: 1 }
+    ],
+    [
+      'clean',
+      test.app,
+      { type: 'A' },
+      { id: [1], reasons: [], server: test.app.options.nodeId, time: 1 }
+    ]
+  ])
+})
+
 it('reporters on destroing', () => {
   var test = createReporter()
 

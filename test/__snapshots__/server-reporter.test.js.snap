@@ -1,8 +1,26 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`reports action 1`] = `
+"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mAction was added[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Time:   [1m2017-02-22 23:11:39[22m
+        Action: 
+          type: [1mCHANGE_USER[22m
+          id:   [1m100[22m
+          data: 
+            name: [1mJohn[22m
+        Meta:   
+          id:      [[1m1487805099387[22m, [1m100:H10Nf5stl[22m, [1m0[22m]
+          time:    [1m1487805099387[22m
+          reasons: [[1mlastValue[22m, [1mdebug[22m]
+          user:    [1m100:H10Nf5stl[22m
+          server:  [1mserver:H1f8LAyzl[22m
+
+"
+`;
+
 exports[`reports authenticated 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mUser was authenticated[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Node ID:     [1m100[22m:550e8400-e29b-41d4-a716-446655440000
+        Node ID:     [1m100[22m:H10Nf5stl
         Subprotocol: [1m1.0.0[22m
         Client ID:   [1m1[22m
 
@@ -11,7 +29,7 @@ exports[`reports authenticated 1`] = `
 
 exports[`reports authenticated without user ID 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mUser was authenticated[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Node ID:     550e8400-e29b-41d4-a716-446655440000
+        Node ID:     H10Nf5stl
         Subprotocol: [1m1.0.0[22m
         Client ID:   [1m1[22m
 
@@ -20,16 +38,23 @@ exports[`reports authenticated without user ID 1`] = `
 
 exports[`reports bad authenticated 1`] = `
 "[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mBad authentication[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Node ID:     [1m100[22m:550e8400-e29b-41d4-a716-446655440000
+        Node ID:     [1m100[22m:H10Nf5stl
         Subprotocol: [1m1.0.0[22m
         Client ID:   [1m1[22m
 
 "
 `;
 
+exports[`reports clean 1`] = `
+"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mAction was cleaned[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Action ID: [[1m1487805099387[22m, [1m100:H10Nf5stl[22m, [1m0[22m]
+
+"
+`;
+
 exports[`reports client error 1`] = `
 "[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mClient error: A timeout was reached (5000ms)[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Node ID: [1m100[22m:550e8400-e29b-41d4-a716-446655440000
+        Node ID: [1m100[22m:H10Nf5stl
 
 "
 `;
@@ -50,7 +75,7 @@ exports[`reports destroy 1`] = `
 
 exports[`reports disconnect 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mClient was disconnected[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Node ID: [1m100[22m:550e8400-e29b-41d4-a716-446655440000
+        Node ID: [1m100[22m:H10Nf5stl
 
 "
 `;
@@ -124,7 +149,7 @@ exports[`reports production 1`] = `
 
 exports[`reports synchroniation error 1`] = `
 "[1m[31m[40m[7m ERROR [27m[49m[39m[22m [1m[31mSyncError: A timeout was reached (5000ms)[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Node ID: [1m100[22m:550e8400-e29b-41d4-a716-446655440000
+        Node ID: [1m100[22m:H10Nf5stl
 
 "
 `;

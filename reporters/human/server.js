@@ -120,6 +120,26 @@ var reporters = {
       common.warn(c, `Client error: ${ err.description }`),
       common.errorParams(c, client)
     ]
+  },
+
+  add: function add (c, app, action, meta) {
+    return [
+      common.info(c, 'Action was added'),
+      common.params(c, [
+        ['Time', new Date(meta.time)],
+        ['Action', action],
+        ['Meta', meta]
+      ])
+    ]
+  },
+
+  clean: function clean (c, app, action, meta) {
+    return [
+      common.info(c, 'Action was cleaned'),
+      common.params(c, [
+        ['Action ID', meta.id]
+      ])
+    ]
   }
 
 }

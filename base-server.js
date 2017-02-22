@@ -135,6 +135,7 @@ function BaseServer (options, reporter) {
   this.options.root = this.options.root || process.cwd()
 
   var store = this.options.store || new MemoryStore()
+  var app = this
 
   /**
    * Server actions log.
@@ -147,6 +148,13 @@ function BaseServer (options, reporter) {
 
   this.log.on('before', (action, meta) => {
     if (!meta.server) meta.server = this.nodeId
+  })
+
+  this.log.on('add', (action, meta) => {
+    app.reporter('add', this, action, meta)
+  })
+  this.log.on('clean', (action, meta) => {
+    app.reporter('clean', this, action, meta)
   })
 
   /**
@@ -176,7 +184,6 @@ function BaseServer (options, reporter) {
 
   this.lastClient = 0
 
-  var app = this
   this.unbind.push(() => {
     for (var i in app.clients) {
       app.clients[i].destroy()

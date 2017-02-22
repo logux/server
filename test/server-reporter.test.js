@@ -1,17 +1,20 @@
 var serverReporter = require('../reporters/human/server')
 var common = require('../reporters/human/common')
 
-function reportersOut () {
-  return serverReporter.apply({}, arguments).replace(/\r\v/g, '\n')
-}
-
 var ServerConnection = require('logux-sync').ServerConnection
 var createServer = require('http').createServer
 var SyncError = require('logux-sync').SyncError
+var yyyymmdd = require('yyyy-mm-dd')
 var path = require('path')
 
 var BaseServer = require('../base-server')
 var Client = require('../client')
+
+function reportersOut () {
+  return serverReporter.apply({}, arguments)
+    .replace(/\r\v/g, '\n')
+    .replace(yyyymmdd.withTime(new Date(1487805099387)), '2017-02-22 23:11:39')
+}
 
 var app = new BaseServer({
   env: 'development',
@@ -37,13 +40,13 @@ authed.sync.remoteSubprotocol = '1.0.0'
 authed.sync.remoteProtocol = [0, 0]
 authed.id = '100'
 authed.user = { }
-authed.nodeId = '100:550e8400-e29b-41d4-a716-446655440000'
+authed.nodeId = '100:H10Nf5stl'
 
 var noUserId = new Client(app, new ServerConnection(ws), 1)
 noUserId.sync.remoteSubprotocol = '1.0.0'
 noUserId.sync.remoteProtocol = [0, 0]
 noUserId.user = { }
-noUserId.nodeId = '550e8400-e29b-41d4-a716-446655440000'
+noUserId.nodeId = 'H10Nf5stl'
 
 var unauthed = new Client(app, new ServerConnection(ws), 1)
 
@@ -57,6 +60,19 @@ beforeAll(() => {
 afterAll(() => {
   common.now = originNow
 })
+
+var action = {
+  type: 'CHANGE_USER',
+  id: 100,
+  data: { name: 'John' }
+}
+var meta = {
+  id: [1487805099387, authed.nodeId, 0],
+  time: 1487805099387,
+  reasons: ['lastValue', 'debug'],
+  user: authed.nodeId,
+  server: 'server:H1f8LAyzl'
+}
 
 it('reports listen', () => {
   expect(reportersOut('listen', app)).toMatchSnapshot()
@@ -102,6 +118,14 @@ it('reports authenticated without user ID', () => {
 
 it('reports bad authenticated', () => {
   expect(reportersOut('unauthenticated', app, authed)).toMatchSnapshot()
+})
+
+it('reports action', () => {
+  expect(reportersOut('add', app, action, meta)).toMatchSnapshot()
+})
+
+it('reports clean', () => {
+  expect(reportersOut('clean', app, action, meta)).toMatchSnapshot()
 })
 
 it('reports disconnect', () => {
