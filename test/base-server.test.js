@@ -335,10 +335,10 @@ it('send debug message to clients on runtimeError', () => {
 
   app.debugError(error)
   expect(app.clients[1].connection.send).toBeCalledWith([
-        'debug',
-        'Error: Test Error\n' +
-        'fake stacktrace'
-    ])
+    'debug',
+    'Error: Test Error\n' +
+    'fake stacktrace'
+  ])
 })
 
 it('disconnects on clients on destroy', () => {
