@@ -88,6 +88,7 @@ exports[`reports http 1`] = `
         Subprotocol:  [1m1.0.0[22m
         Supports:     [1m1.x[22m
         Listen:       [1mCustom HTTP server[22m
+        [90mServer was started in non-secure development mode[39m
         [90mPress Ctrl-C to shutdown server[39m
 
 "
@@ -102,6 +103,7 @@ exports[`reports listen 1`] = `
         Subprotocol:  [1m2.5.0[22m
         Supports:     [1m2.x || 1.x[22m
         Listen:       [1mws://127.0.0.1:1337[22m
+        [90mServer was started in non-secure development mode[39m
         [90mPress Ctrl-C to shutdown server[39m
 
 "

@@ -14,9 +14,7 @@ var reporters = {
       url = `${ protocol }${ host }:${ port }`
     }
 
-    var dev = app.env === 'development'
-
-    return [
+    var result = [
       reporter.info(c, 'Logux server is listening'),
       reporter.params(c, [
         ['Logux server', pkg.version],
@@ -26,9 +24,17 @@ var reporters = {
         ['Subprotocol', app.options.subprotocol],
         ['Supports', app.options.supports],
         ['Listen', url]
-      ]),
-      (dev ? reporter.note(c, 'Press Ctrl-C to shutdown server') : '')
+      ])
     ]
+
+    if (app.env === 'development') {
+      result = result.concat([
+        reporter.note(c, 'Server was started in non-secure development mode'),
+        reporter.note(c, 'Press Ctrl-C to shutdown server')
+      ])
+    }
+
+    return result
   },
 
   connect: function connect (c, app, client) {
