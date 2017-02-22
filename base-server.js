@@ -377,8 +377,23 @@ BaseServer.prototype = {
       throw new Error(`Action type ${ name } must have process callback`)
     }
     this.actions[name] = callbacks
-  }
+  },
 
+  /**
+   * Send runtime error stacktrace to all clients.
+   *
+   * @param {Error} error Runtime error instance.
+   *
+   * @return {undefined}
+   *
+   * @example
+   * process.on('uncaughtException', app.debugError)
+   */
+  debugError: function debugError (error) {
+    for (var i in this.clients) {
+      this.clients[i].connection.send(['debug', error.stack])
+    }
+  }
 }
 
 module.exports = BaseServer

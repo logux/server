@@ -326,6 +326,21 @@ it('creates a client on connection', () => {
   })
 })
 
+it('send debug message to clients on runtimeError', () => {
+  app = createServer()
+  app.clients[1] = { connection: { send: jest.fn() }, destroy: jest.fn() }
+
+  var error = new Error('Test Error')
+  error.stack = `${ error.stack.split('\n')[0] }\nfake stacktrace`
+
+  app.debugError(error)
+  expect(app.clients[1].connection.send).toBeCalledWith([
+        'debug',
+        'Error: Test Error\n' +
+        'fake stacktrace'
+    ])
+})
+
 it('disconnects on clients on destroy', () => {
   app = createServer()
   app.clients[1] = { destroy: jest.fn() }

@@ -88,6 +88,11 @@ it('shows uncatch errors', () => checkError('throw.js'))
 
 it('shows uncatch rejects', () => checkError('uncatch.js'))
 
+it('calls debugError if env is development', () => {
+  process.env.NODE_ENV = 'development'
+  return checkError('throw.js')
+})
+
 it('use environment constiable for config', () => {
   process.env.LOGUX_PORT = 31337
   return checkOut('options.js')
