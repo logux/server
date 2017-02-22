@@ -1,4 +1,4 @@
-var reporter = require('./common')
+var common = require('./common')
 
 function errorHelp (e) {
   switch (e.code) {
@@ -24,10 +24,10 @@ function errorHelp (e) {
 }
 
 module.exports = function errorReporter (err, app) {
-  var c = reporter.color(app)
+  var c = common.color(app)
   var help = errorHelp(err)
-  return reporter.message([
-    reporter.error(c, help.description),
-    reporter.hint(c, help.hint)
+  return common.message([
+    common.error(c, help.description),
+    common.hint(c, help.hint)
   ])
 }

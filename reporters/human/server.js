@@ -1,4 +1,4 @@
-var reporter = require('./common.js')
+var common = require('./common.js')
 var pkg = require('../../package.json')
 
 var reporters = {
@@ -15,8 +15,8 @@ var reporters = {
     }
 
     var result = [
-      reporter.info(c, 'Logux server is listening'),
-      reporter.params(c, [
+      common.info(c, 'Logux server is listening'),
+      common.params(c, [
         ['Logux server', pkg.version],
         ['PID', app.options.pid],
         ['Node ID', app.options.nodeId],
@@ -29,8 +29,8 @@ var reporters = {
 
     if (app.env === 'development') {
       result = result.concat([
-        reporter.note(c, 'Server was started in non-secure development mode'),
-        reporter.note(c, 'Press Ctrl-C to shutdown server')
+        common.note(c, 'Server was started in non-secure development mode'),
+        common.note(c, 'Press Ctrl-C to shutdown server')
       ])
     }
 
@@ -39,8 +39,8 @@ var reporters = {
 
   connect: function connect (c, app, client) {
     return [
-      reporter.info(c, 'Client was connected'),
-      reporter.params(c, [
+      common.info(c, 'Client was connected'),
+      common.params(c, [
         ['Client ID', client.key],
         ['IP address', client.remoteAddress]
       ])
@@ -49,8 +49,8 @@ var reporters = {
 
   unauthenticated: function unauthenticated (c, app, client) {
     return [
-      reporter.warn(c, 'Bad authentication'),
-      reporter.params(c, [
+      common.warn(c, 'Bad authentication'),
+      common.params(c, [
         ['Node ID', client.nodeId],
         ['Subprotocol', client.sync.remoteSubprotocol],
         ['Client ID', client.key]
@@ -60,8 +60,8 @@ var reporters = {
 
   authenticated: function authenticated (c, app, client) {
     return [
-      reporter.info(c, 'User was authenticated'),
-      reporter.params(c, [
+      common.info(c, 'User was authenticated'),
+      common.params(c, [
         ['Node ID', client.nodeId],
         ['Subprotocol', client.sync.remoteSubprotocol],
         ['Client ID', client.key]
@@ -72,23 +72,23 @@ var reporters = {
   disconnect: function disconnect (c, app, client) {
     var params
     if (client.nodeId) {
-      params = reporter.params(c, [
+      params = common.params(c, [
         ['Node ID', client.nodeId]
       ])
     } else {
-      params = reporter.params(c, [
+      params = common.params(c, [
         ['Client ID', client.key]
       ])
     }
     return [
-      reporter.info(c, 'Client was disconnected'),
+      common.info(c, 'Client was disconnected'),
       params
     ]
   },
 
   destroy: function destroy (c) {
     return [
-      reporter.info(c, 'Shutting down Logux server')
+      common.info(c, 'Shutting down Logux server')
     ]
   },
 
@@ -96,9 +96,9 @@ var reporters = {
     var prefix = `${ err.name }: ${ err.message }`
     if (err.name === 'Error') prefix = err.message
     return [
-      reporter.error(c, prefix),
-      reporter.prettyStackTrace(c, err, app.options.root),
-      reporter.errorParams(c, client)
+      common.error(c, prefix),
+      common.prettyStackTrace(c, err, app.options.root),
+      common.errorParams(c, client)
     ]
   },
 
@@ -110,22 +110,22 @@ var reporters = {
       prefix = `SyncError: ${ err.description }`
     }
     return [
-      reporter.error(c, prefix),
-      reporter.errorParams(c, client)
+      common.error(c, prefix),
+      common.errorParams(c, client)
     ]
   },
 
   clientError: function clientError (c, app, client, err) {
     return [
-      reporter.warn(c, `Client error: ${ err.description }`),
-      reporter.errorParams(c, client)
+      common.warn(c, `Client error: ${ err.description }`),
+      common.errorParams(c, client)
     ]
   }
 
 }
 
 module.exports = function serverReporter (type, app) {
-  var c = reporter.color(app)
+  var c = common.color(app)
   var args = [c].concat(Array.prototype.slice.call(arguments, 1))
-  return reporter.message(reporters[type].apply({ }, args))
+  return common.message(reporters[type].apply({ }, args))
 }
