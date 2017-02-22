@@ -1,5 +1,5 @@
-var reporter = require('./reporter.js')
-var pkg = require('./package.json')
+var reporter = require('./common.js')
+var pkg = require('../../package.json')
 
 var reporters = {
 

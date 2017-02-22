@@ -1,4 +1,4 @@
-var reporter = require('./reporter')
+var reporter = require('./common')
 
 function errorHelp (e) {
   switch (e.code) {

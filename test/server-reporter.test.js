@@ -1,5 +1,5 @@
-var serverReporter = require('../server-reporter')
-var reporter = require('../reporter')
+var serverReporter = require('../reporters/human/server')
+var common = require('../reporters/human/common')
 
 function reportersOut () {
   return serverReporter.apply({}, arguments).replace(/\r\v/g, '\n')
@@ -50,12 +50,12 @@ var unauthed = new Client(app, new ServerConnection(ws), 1)
 var ownError = new SyncError(authed.sync, 'timeout', 5000, false)
 var clientError = new SyncError(authed.sync, 'timeout', 5000, true)
 
-var originNow = reporter.now
+var originNow = common.now
 beforeAll(() => {
-  reporter.now = () => new Date((new Date()).getTimezoneOffset() * 60000)
+  common.now = () => new Date((new Date()).getTimezoneOffset() * 60000)
 })
 afterAll(() => {
-  reporter.now = originNow
+  common.now = originNow
 })
 
 it('reports listen', () => {

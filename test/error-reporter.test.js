@@ -1,5 +1,5 @@
-var errorReporter = require('../error-reporter')
-var reporter = require('../reporter')
+var errorReporter = require('../reporters/human/error')
+var common = require('../reporters/human/common')
 
 function errorHelperOut () {
   return errorReporter.apply({}, arguments).replace(/\r\v/g, '\n')
@@ -16,12 +16,12 @@ var app = new BaseServer({
 })
 app.listenOptions = { host: '127.0.0.1', port: 1337 }
 
-var originNow = reporter.now
+var originNow = common.now
 beforeAll(() => {
-  reporter.now = () => new Date((new Date()).getTimezoneOffset() * 60000)
+  common.now = () => new Date((new Date()).getTimezoneOffset() * 60000)
 })
 afterAll(() => {
-  reporter.now = originNow
+  common.now = originNow
 })
 
 it('handles EACCESS error', () => {

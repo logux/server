@@ -1,8 +1,8 @@
 var assign = require('object-assign')
 
 var BaseServer = require('./base-server')
-var errorReporter = require('./error-reporter')
-var serverReporter = require('./server-reporter')
+var errorReporter = require('./reporters/human/error')
+var serverReporter = require('./reporters/human/server')
 
 /**
  * End-user API to create Logux server.
