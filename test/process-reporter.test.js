@@ -1,4 +1,4 @@
-var serverReporter = require('../reporters/human/server')
+var processReporter = require('../reporters/human/process')
 var common = require('../reporters/human/common')
 
 var ServerConnection = require('logux-sync').ServerConnection
@@ -11,7 +11,7 @@ var BaseServer = require('../base-server')
 var Client = require('../client')
 
 function reportersOut () {
-  return serverReporter.apply({}, arguments)
+  return processReporter.apply({}, arguments)
     .replace(/\r\v/g, '\n')
     .replace(yyyymmdd.withTime(new Date(1487805099387)), '2017-02-22 23:11:39')
 }

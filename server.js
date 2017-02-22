@@ -2,7 +2,7 @@ var assign = require('object-assign')
 
 var BaseServer = require('./base-server')
 var errorReporter = require('./reporters/human/error')
-var serverReporter = require('./reporters/human/server')
+var processReporter = require('./reporters/human/process')
 
 /**
  * End-user API to create Logux server.
@@ -53,7 +53,7 @@ function Server (options) {
 
   BaseServer.call(this, options, function () {
     if (app.silent) return
-    process.stderr.write(serverReporter.apply(serverReporter, arguments))
+    process.stderr.write(processReporter.apply(processReporter, arguments))
   })
 
   var app = this

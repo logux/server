@@ -144,7 +144,7 @@ var reporters = {
 
 }
 
-module.exports = function serverReporter (type, app) {
+module.exports = function processReporter (type, app) {
   var c = common.color(app)
   var args = [c].concat(Array.prototype.slice.call(arguments, 1))
   return common.message(reporters[type].apply({ }, args))
