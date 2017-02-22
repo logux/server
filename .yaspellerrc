@@ -26,6 +26,8 @@
     "PEM",
     "Versioning",
     "Wintermute",
-    "loadOptions"
+    "loadOptions",
+    "stacktrace",
+    "debugError"
   ]
 }

@@ -60,6 +60,9 @@ function Server (options) {
 
   function onError (e) {
     app.reporter('runtimeError', app, undefined, e)
+    if (app.env === 'development') {
+      app.debugError(e)
+    }
     app.destroy().then(() => {
       process.exit(1)
     })

@@ -1,5 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`calls debugError on error if env is development 1`] = `
+" ERROR  Test Error at 1970-01-01 00:00:00
+        fake stacktrace
+
+debugError was called with error 'Error: Test Error' and stacktrace 'Error: Test Error
+fake stacktrace'
+ INFO   Shutting down Logux server at 1970-01-01 00:00:00
+
+"
+`;
+
 exports[`destroys everything on exit 1`] = `
 " INFO   Logux server is listening at 1970-01-01 00:00:00
         Logux server: 0.1.1
@@ -79,10 +90,11 @@ exports[`use environment constiable for config 1`] = `
         Logux server: 0.1.1
         PID:          21384
         Node ID:      server
-        Environment:  test
+        Environment:  development
         Subprotocol:  1.0.0
         Supports:     1.x
         Listen:       ws://127.0.0.1:31337
+        Press Ctrl-C to shutdown server
 
  INFO   Shutting down Logux server at 1970-01-01 00:00:00
 
