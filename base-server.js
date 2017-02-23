@@ -1,3 +1,5 @@
+'use strict'
+
 var ServerConnection = require('logux-sync').ServerConnection
 var MemoryStore = require('logux-core').MemoryStore
 var WebSocket = require('ws')

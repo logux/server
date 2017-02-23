@@ -1,3 +1,5 @@
+'use strict'
+
 var ServerSync = require('logux-sync').ServerSync
 var SyncError = require('logux-sync').SyncError
 var semver = require('semver')

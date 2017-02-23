@@ -1,3 +1,5 @@
+'use strict'
+
 var BaseServer = require('./base-server')
 var errorReporter = require('./reporters/human/error')
 var processReporter = require('./reporters/human/process')
