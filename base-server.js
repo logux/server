@@ -148,6 +148,7 @@ function BaseServer (options, reporter) {
 
   this.log.on('before', (action, meta) => {
     if (!meta.server) meta.server = this.nodeId
+    if (!meta.status) meta.status = 'waiting'
   })
 
   this.log.on('add', (action, meta) => {

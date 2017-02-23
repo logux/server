@@ -230,7 +230,7 @@ it('does not send server credentials in production', () => {
   })
 })
 
-it('marks all actions with user and server IDs', () => {
+it('marks all actions with user ID', () => {
   var app = createServer({ nodeId: 'server' })
   app.auth(() => Promise.resolve(true))
   app.log.on('before', (action, meta) => {
@@ -251,13 +251,6 @@ it('marks all actions with user and server IDs', () => {
     ])
     return client.connection.pair.wait('right')
   }).then(() => {
-    expect(app.log.store.created[0][1]).toEqual({
-      added: 1,
-      id: [1, '10:uuid', 0],
-      time: 1,
-      user: '10',
-      server: 'server',
-      reasons: ['test']
-    })
+    expect(app.log.store.created[0][1].user).toEqual('10')
   })
 })

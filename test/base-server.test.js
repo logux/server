@@ -316,18 +316,19 @@ it('reporters on log events', () => {
   var test = createReporter()
   test.app.log.generateId = () => [1]
   test.app.log.add({ type: 'A' })
+  var nodeId = test.app.nodeId
   expect(test.reports).toEqual([
     [
       'add',
       test.app,
       { type: 'A' },
-      { id: [1], reasons: [], server: test.app.options.nodeId, time: 1 }
+      { id: [1], reasons: [], status: 'waiting', server: nodeId, time: 1 }
     ],
     [
       'clean',
       test.app,
       { type: 'A' },
-      { id: [1], reasons: [], server: test.app.options.nodeId, time: 1 }
+      { id: [1], reasons: [], status: 'waiting', server: nodeId, time: 1 }
     ]
   ])
 })
@@ -400,16 +401,31 @@ it('accepts custom HTTP server', () => {
 
 it('marks actions with own node ID', () => {
   app = createServer()
-  var added = []
+  var servers = []
   app.log.on('add', (action, meta) => {
-    added.push(meta.server)
+    servers.push(meta.server)
   })
 
   return Promise.all([
     app.log.add({ type: 'A' }, { reasons: ['test'] }),
     app.log.add({ type: 'B' }, { reasons: ['test'], server: 'server2' })
   ]).then(() => {
-    expect(added).toEqual([app.nodeId, 'server2'])
+    expect(servers).toEqual([app.nodeId, 'server2'])
+  })
+})
+
+it('marks actions with start status', () => {
+  app = createServer()
+  var statuses = []
+  app.log.on('add', (action, meta) => {
+    statuses.push(meta.status)
+  })
+
+  return Promise.all([
+    app.log.add({ type: 'A' }, { reasons: ['test'] }),
+    app.log.add({ type: 'B' }, { reasons: ['test'], status: 'processed' })
+  ]).then(() => {
+    expect(statuses).toEqual(['waiting', 'processed'])
   })
 })
 
