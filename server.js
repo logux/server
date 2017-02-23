@@ -1,5 +1,3 @@
-var assign = require('object-assign')
-
 var BaseServer = require('./base-server')
 var errorReporter = require('./reporters/human/error')
 var processReporter = require('./reporters/human/process')
@@ -45,56 +43,51 @@ var processReporter = require('./reporters/human/process')
  *   app.listen()
  * }
  *
- * @class
  * @extends BaseServer
  */
-function Server (options) {
-  options.pid = process.pid
+class Server extends BaseServer {
 
-  BaseServer.call(this, options, function () {
-    if (app.silent) return
-    process.stderr.write(processReporter.apply(processReporter, arguments))
-  })
+  constructor (options) {
+    options.pid = process.pid
 
-  var app = this
-
-  function onError (e) {
-    app.reporter('runtimeError', app, undefined, e)
-    if (app.env === 'development') {
-      app.debugError(e)
-    }
-    app.destroy().then(() => {
-      process.exit(1)
+    super(options, function () {
+      if (app.silent) return
+      process.stderr.write(processReporter.apply(processReporter, arguments))
     })
-  }
-  process.on('uncaughtException', onError)
-  process.on('unhandledRejection', onError)
-
-  function onExit () {
-    app.destroy().then(() => {
-      process.exit(0)
-    })
-  }
-  process.on('SIGINT', onExit)
-
-  this.unbind.push(() => {
-    process.removeListener('SIGINT', onExit)
-  })
-}
-
-Server.prototype = {
-
-  listen: function listen () {
     var app = this
+
+    var onError = e => {
+      this.reporter('runtimeError', this, undefined, e)
+      if (this.env === 'development') {
+        this.debugError(e)
+      }
+      this.destroy().then(() => {
+        process.exit(1)
+      })
+    }
+    process.on('uncaughtException', onError)
+    process.on('unhandledRejection', onError)
+
+    var onExit = () => {
+      this.destroy().then(() => {
+        process.exit(0)
+      })
+    }
+    process.on('SIGINT', onExit)
+
+    this.unbind.push(() => {
+      process.removeListener('SIGINT', onExit)
+    })
+  }
+
+  listen () {
     var origin = BaseServer.prototype.listen
     return origin.apply(this, arguments).catch(e => {
-      process.stderr.write(errorReporter(e, app))
+      process.stderr.write(errorReporter(e, this))
       process.exit(1)
     })
   }
 
 }
-
-Server.prototype = assign({ }, BaseServer.prototype, Server.prototype)
 
 module.exports = Server

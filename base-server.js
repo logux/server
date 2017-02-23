@@ -98,107 +98,104 @@ function readFile (root, file) {
  * class MyLoguxHack extends BaseServer {
  *   …
  * }
- *
- * @class
  */
-function BaseServer (options, reporter) {
-  /**
-   * Server options.
-   * @type {object}
-   *
-   * @example
-   * console.log(app.options.nodeId + ' was started')
-   */
-  this.options = options || { }
+class BaseServer {
 
-  this.reporter = reporter || function () { }
+  constructor (options, reporter) {
+    /**
+     * Server options.
+     * @type {object}
+     *
+     * @example
+     * console.log(app.options.nodeId + ' was started')
+     */
+    this.options = options || { }
 
-  if (typeof this.options.subprotocol === 'undefined') {
-    throw new Error('Missed subprotocol version')
-  }
-  if (typeof this.options.supports === 'undefined') {
-    throw new Error('Missed supported subprotocol major versions')
-  }
-  if (typeof this.options.nodeId === 'undefined') {
-    this.options.nodeId = `server:${ shortid.generate() }`
-  }
+    this.reporter = reporter || function () { }
 
-  /**
-   * Server unique ID.
-   * @type {string}
-   *
-   * @example
-   * console.log('Error was raised on ' + app.nodeId)
-   */
-  this.nodeId = this.options.nodeId
+    if (typeof this.options.subprotocol === 'undefined') {
+      throw new Error('Missed subprotocol version')
+    }
+    if (typeof this.options.supports === 'undefined') {
+      throw new Error('Missed supported subprotocol major versions')
+    }
+    if (typeof this.options.nodeId === 'undefined') {
+      this.options.nodeId = `server:${ shortid.generate() }`
+    }
 
-  this.options.root = this.options.root || process.cwd()
+    /**
+     * Server unique ID.
+     * @type {string}
+     *
+     * @example
+     * console.log('Error was raised on ' + app.nodeId)
+     */
+    this.nodeId = this.options.nodeId
 
-  var store = this.options.store || new MemoryStore()
-  var app = this
+    this.options.root = this.options.root || process.cwd()
 
-  /**
-   * Server actions log.
-   * @type {Log}
-   *
-   * @example
-   * app.log.each(finder)
-   */
-  this.log = new Log({ store, nodeId: this.nodeId })
+    var store = this.options.store || new MemoryStore()
 
-  this.log.on('before', (action, meta) => {
-    if (!meta.server) meta.server = this.nodeId
-    if (!meta.status) meta.status = 'waiting'
-  })
+    /**
+     * Server actions log.
+     * @type {Log}
+     *
+     * @example
+     * app.log.each(finder)
+     */
+    this.log = new Log({ store, nodeId: this.nodeId })
 
-  this.log.on('add', (action, meta) => {
-    app.reporter('add', this, action, meta)
+    this.log.on('before', (action, meta) => {
+      if (!meta.server) meta.server = this.nodeId
+      if (!meta.status) meta.status = 'waiting'
+    })
 
-    if (meta.status === 'waiting') {
-      if (!this.actions[action.type]) {
-        this.unknownAction(action, meta)
+    this.log.on('add', (action, meta) => {
+      this.reporter('add', this, action, meta)
+
+      if (meta.status === 'waiting') {
+        if (!this.actions[action.type]) {
+          this.unknownAction(action, meta)
+        }
       }
-    }
-  })
-  this.log.on('clean', (action, meta) => {
-    app.reporter('clean', this, action, meta)
-  })
+    })
+    this.log.on('clean', (action, meta) => {
+      this.reporter('clean', this, action, meta)
+    })
 
-  /**
-   * Production or development mode.
-   * @type {"production"|"development"}
-   *
-   * @example
-   * if (app.env === 'development') {
-   *   logDebugData()
-   * }
-   */
-  this.env = this.options.env || process.env.NODE_ENV || 'development'
+    /**
+     * Production or development mode.
+     * @type {"production"|"development"}
+     *
+     * @example
+     * if (app.env === 'development') {
+     *   logDebugData()
+     * }
+     */
+    this.env = this.options.env || process.env.NODE_ENV || 'development'
 
-  this.unbind = []
+    this.unbind = []
 
-  /**
-   * Connected clients.
-   * @type {Client[]}
-   *
-   * @example
-   * for (let nodeId in app.clients) {
-   *   console.log(app.clients[nodeId].remoteAddress)
-   * }
-   */
-  this.clients = { }
-  this.actions = { }
+    /**
+     * Connected clients.
+     * @type {Client[]}
+     *
+     * @example
+     * for (let nodeId in app.clients) {
+     *   console.log(app.clients[nodeId].remoteAddress)
+     * }
+     */
+    this.clients = { }
+    this.actions = { }
 
-  this.lastClient = 0
+    this.lastClient = 0
 
-  this.unbind.push(() => {
-    for (var i in app.clients) {
-      app.clients[i].destroy()
-    }
-  })
-}
-
-BaseServer.prototype = {
+    this.unbind.push(() => {
+      for (var i in this.clients) {
+        this.clients[i].destroy()
+      }
+    })
+  }
 
   /**
    * Set authenticate function. It will receive client credentials
@@ -216,9 +213,9 @@ BaseServer.prototype = {
    *   })
    * })
    */
-  auth: function auth (authenticator) {
+  auth (authenticator) {
     this.authenticator = authenticator
-  },
+  }
 
   /**
    * Start WebSocket server and listen for clients.
@@ -244,7 +241,7 @@ BaseServer.prototype = {
    * @example
    * app.listen({ cert: 'cert.pem', key: 'key.pem' })
    */
-  listen: function listen (options) {
+  listen (options) {
     /**
      * Options used to start server.
      * @type {object}
@@ -267,7 +264,6 @@ BaseServer.prototype = {
       if (!this.listenOptions.host) this.listenOptions.host = '127.0.0.1'
     }
 
-    var app = this
     var promise = Promise.resolve()
 
     if (this.listenOptions.server) {
@@ -289,25 +285,25 @@ BaseServer.prototype = {
         .then(() => Promise.all(before))
         .then(keys => new Promise((resolve, reject) => {
           if (keys[0]) {
-            app.http = https.createServer({ key: keys[0], cert: keys[1] })
+            this.http = https.createServer({ key: keys[0], cert: keys[1] })
           } else {
-            app.http = http.createServer()
+            this.http = http.createServer()
           }
 
-          app.ws = new WebSocket.Server({ server: app.http })
+          this.ws = new WebSocket.Server({ server: this.http })
 
-          app.ws.on('error', reject)
+          this.ws.on('error', reject)
 
-          var opts = app.listenOptions
-          app.http.listen(opts.port, opts.host, resolve)
+          var opts = this.listenOptions
+          this.http.listen(opts.port, opts.host, resolve)
         }))
     }
 
-    app.unbind.push(() => promisify(done => {
+    this.unbind.push(() => promisify(done => {
       promise.then(() => {
-        app.ws.close(() => {
-          if (app.http) {
-            app.http.close(done)
+        this.ws.close(() => {
+          if (this.http) {
+            this.http.close(done)
           } else {
             done()
           }
@@ -316,15 +312,15 @@ BaseServer.prototype = {
     }))
 
     return promise.then(() => {
-      app.ws.on('connection', ws => {
-        app.lastClient += 1
-        var client = new Client(app, new ServerConnection(ws), app.lastClient)
-        app.clients[app.lastClient] = client
+      this.ws.on('connection', ws => {
+        this.lastClient += 1
+        var client = new Client(this, new ServerConnection(ws), this.lastClient)
+        this.clients[this.lastClient] = client
       })
     }).then(() => {
-      app.reporter('listen', app)
+      this.reporter('listen', this)
     })
-  },
+  }
 
   /**
    * Stop server and unbind all listeners.
@@ -336,11 +332,11 @@ BaseServer.prototype = {
    *   testApp.destroy()
    * })
    */
-  destroy: function destroy () {
+  destroy () {
     this.destroing = true
     this.reporter('destroy', this)
     return Promise.all(this.unbind.map(i => i()))
-  },
+  }
 
   /**
    * Load options from command-line arguments and/or environment
@@ -352,7 +348,7 @@ BaseServer.prototype = {
    * @example
    * app.listen(app.loadOptions(process, { port: 31337 }))
    */
-  loadOptions: function loadOptions (process, defaults) {
+  loadOptions (process, defaults) {
     defaults = defaults || { }
 
     var argv = yargs.parse(process.argv)
@@ -364,7 +360,7 @@ BaseServer.prototype = {
       cert: argv.c || env.LOGUX_CERT || defaults.cert,
       key: argv.k || env.LOGUX_KEY || defaults.key
     }
-  },
+  }
 
   /**
    * Define action type’s callbacks.
@@ -388,7 +384,7 @@ BaseServer.prototype = {
    *   }
    * })
    */
-  type: function type (name, callbacks) {
+  type (name, callbacks) {
     if (this.actions[name]) {
       throw new Error(`Action type ${ name } was already defined`)
     }
@@ -399,7 +395,7 @@ BaseServer.prototype = {
       throw new Error(`Action type ${ name } must have process callback`)
     }
     this.actions[name] = callbacks
-  },
+  }
 
   /**
    * Send runtime error stacktrace to all clients.
@@ -411,13 +407,13 @@ BaseServer.prototype = {
    * @example
    * process.on('uncaughtException', app.debugError)
    */
-  debugError: function debugError (error) {
+  debugError (error) {
     for (var i in this.clients) {
       this.clients[i].connection.send(['debug', 'error', error.stack])
     }
-  },
+  }
 
-  unknownAction: function unknownAction (action, meta) {
+  unknownAction (action, meta) {
     if (meta.user) {
       this.log.changeMeta(meta.id, { status: 'error' })
       this.log.add(
@@ -427,6 +423,7 @@ BaseServer.prototype = {
       this.log.changeMeta(meta.id, { status: 'processed' })
     }
   }
+
 }
 
 module.exports = BaseServer

@@ -85,7 +85,7 @@ exports[`shows uncatch rejects 1`] = `
 "
 `;
 
-exports[`use environment constiable for config 1`] = `
+exports[`use environment variables for config 1`] = `
 " INFO   Logux server is listening at 1970-01-01 00:00:00
         Logux server: 0.1.1
         PID:          21384

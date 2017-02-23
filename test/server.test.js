@@ -93,7 +93,7 @@ it('calls debugError on error if env is development', () => {
   return checkError('debug.js')
 })
 
-it('use environment constiable for config', () => {
+it('use environment variables for config', () => {
   process.env.LOGUX_PORT = 31337
   return checkOut('options.js')
 })
