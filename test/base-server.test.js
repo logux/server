@@ -26,6 +26,17 @@ function createServer (options) {
   return created
 }
 
+function createTest () {
+  var created = createServer({
+    subprotocol: '0.0.0',
+    supports: '0.x',
+    nodeId: 'server'
+  })
+  var lastId = 0
+  created.log.generateId = () => [++lastId, 'server', 0]
+  return created
+}
+
 var app, server
 
 function createReporter () {
@@ -37,6 +48,10 @@ function createReporter () {
   app.auth(() => Promise.resolve(true))
   result.app = app
   return result
+}
+
+function entries (log) {
+  return log.store.created.map(i => [i[0], i[1]])
 }
 
 var originArgv = process.argv
@@ -416,6 +431,12 @@ it('marks actions with own node ID', () => {
 
 it('marks actions with start status', () => {
   app = createServer()
+  app.type('A', {
+    access () {
+      return new Promise()
+    },
+    process () { }
+  })
   var statuses = []
   app.log.on('add', (action, meta) => {
     statuses.push(meta.status)
@@ -466,4 +487,54 @@ it('requires process callback for type', () => {
       access () { }
     })
   }).toThrowError(/process callback/)
+})
+
+it('reports about unknown action type', () => {
+  app = createTest()
+  var meta = { reasons: ['test'], user: '10' }
+  return app.log.add({ type: 'UNKNOWN' }, meta).then(() => {
+    expect(entries(app.log)).toEqual([
+      [
+        { type: 'logux/undo', reason: 'unknowType' },
+        {
+          added: 2,
+          id: [2, 'server', 0],
+          time: 2,
+          reasons: ['error'],
+          server: 'server',
+          status: 'processed'
+        }
+      ], [
+        { type: 'UNKNOWN' },
+        {
+          added: 1,
+          id: [1, 'server', 0],
+          time: 1,
+          reasons: ['test'],
+          user: '10',
+          server: 'server',
+          status: 'error'
+        }
+      ]
+    ])
+  })
+})
+
+it('ignores unknown type for own actions', () => {
+  app = createTest()
+  return app.log.add({ type: 'UNKNOWN' }, { reasons: ['test'] }).then(() => {
+    expect(entries(app.log)).toEqual([
+      [
+        { type: 'UNKNOWN' },
+        {
+          added: 1,
+          id: [1, 'server', 0],
+          time: 1,
+          reasons: ['test'],
+          server: 'server',
+          status: 'processed'
+        }
+      ]
+    ])
+  })
 })

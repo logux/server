@@ -233,6 +233,10 @@ it('does not send server credentials in production', () => {
 it('marks all actions with user ID', () => {
   var app = createServer({ nodeId: 'server' })
   app.auth(() => Promise.resolve(true))
+  app.type('A', {
+    access () { },
+    process () { }
+  })
   app.log.on('before', (action, meta) => {
     meta.reasons = ['test']
   })
@@ -246,7 +250,7 @@ it('marks all actions with user ID', () => {
     client.connection.other().send([
       'sync',
       1,
-      { type: 'a' },
+      { type: 'A' },
       { id: [1, '10:uuid', 0], time: 1 }
     ])
     return client.connection.pair.wait('right')

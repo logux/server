@@ -153,6 +153,12 @@ function BaseServer (options, reporter) {
 
   this.log.on('add', (action, meta) => {
     app.reporter('add', this, action, meta)
+
+    if (meta.status === 'waiting') {
+      if (!this.actions[action.type]) {
+        this.unknownAction(action, meta)
+      }
+    }
   })
   this.log.on('clean', (action, meta) => {
     app.reporter('clean', this, action, meta)
@@ -408,6 +414,17 @@ BaseServer.prototype = {
   debugError: function debugError (error) {
     for (var i in this.clients) {
       this.clients[i].connection.send(['debug', 'error', error.stack])
+    }
+  },
+
+  unknownAction: function unknownAction (action, meta) {
+    if (meta.user) {
+      this.log.changeMeta(meta.id, { status: 'error' })
+      this.log.add(
+        { type: 'logux/undo', reason: 'unknowType' },
+        { reasons: ['error'], status: 'processed' })
+    } else {
+      this.log.changeMeta(meta.id, { status: 'processed' })
     }
   }
 }
