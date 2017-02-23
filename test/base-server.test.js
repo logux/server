@@ -522,21 +522,37 @@ it('reports about unknown action type', () => {
   })
 })
 
-it('ignores unknown type for own actions', () => {
+it('ignores unknown type for own and processed actions', () => {
   app = createTest()
-  return app.log.add({ type: 'UNKNOWN' }, { reasons: ['test'] }).then(() => {
-    expect(entries(app.log)).toEqual([
-      [
-        { type: 'UNKNOWN' },
-        {
-          added: 1,
-          id: [1, 'server', 0],
-          time: 1,
-          reasons: ['test'],
-          server: 'server',
-          status: 'processed'
-        }
-      ]
-    ])
-  })
+  return app.log.add({ type: 'UNKNOWN1' }, { reasons: ['test'] })
+    .then(() => app.log.add(
+      { type: 'UNKNOWN2' },
+      { reasons: ['test'], user: '10', status: 'processed' })
+    ).then(() => {
+      expect(entries(app.log)).toEqual([
+        [
+          { type: 'UNKNOWN2' },
+          {
+            added: 2,
+            id: [2, 'server', 0],
+            time: 2,
+            reasons: ['test'],
+            user: '10',
+            server: 'server',
+            status: 'processed'
+          }
+        ],
+        [
+          { type: 'UNKNOWN1' },
+          {
+            added: 1,
+            id: [1, 'server', 0],
+            time: 1,
+            reasons: ['test'],
+            server: 'server',
+            status: 'processed'
+          }
+        ]
+      ])
+    })
 })
