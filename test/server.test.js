@@ -1,7 +1,9 @@
-var spawn = require('child_process').spawn
-var path = require('path')
+'use strict'
 
-var DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
+const spawn = require('child_process').spawn
+const path = require('path')
+
+const DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
 
 function wait (ms) {
   return new Promise(resolve => {
@@ -9,12 +11,12 @@ function wait (ms) {
   })
 }
 
-var started
+let started
 
 function start (name, args) {
   return new Promise(resolve => {
     started = spawn(path.join(__dirname, '/servers/', name), args)
-    var running = false
+    let running = false
     function callback () {
       if (!running) {
         running = true
@@ -28,8 +30,8 @@ function start (name, args) {
 
 function test (name, args) {
   return new Promise(resolve => {
-    var out = ''
-    var server = spawn(path.join(__dirname, '/servers/', name), args)
+    let out = ''
+    const server = spawn(path.join(__dirname, '/servers/', name), args)
     server.stdout.on('data', chank => {
       out += chank
     })
@@ -37,7 +39,7 @@ function test (name, args) {
       out += chank
     })
     server.on('close', exitCode => {
-      var fixed = out.replace(DATE, '1970-01-01 00:00:00')
+      let fixed = out.replace(DATE, '1970-01-01 00:00:00')
                      .replace(/PID:(\s+)\d+/, 'PID:$121384')
       fixed = fixed.replace(/\r\v/g, '\n')
       resolve([fixed, exitCode])
@@ -50,8 +52,8 @@ function test (name, args) {
 
 function checkOut (name, args) {
   return test(name, args).then(result => {
-    var out = result[0]
-    var exit = result[1]
+    const out = result[0]
+    const exit = result[1]
 
     if (exit !== 0) {
       console.error(`${ test } fall with:\n${ out }`)
@@ -63,8 +65,8 @@ function checkOut (name, args) {
 
 function checkError (name, args) {
   return test(name, args).then(result => {
-    var out = result[0]
-    var exit = result[1]
+    const out = result[0]
+    const exit = result[1]
     expect(exit).toEqual(1)
     expect(out).toMatchSnapshot()
   })

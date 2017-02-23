@@ -1,4 +1,6 @@
-var promisify = require('../promisify')
+'use strict'
+
+const promisify = require('../promisify')
 
 it('makes promise from callback function', () => promisify(done => {
   setTimeout(done, 1)

@@ -1,18 +1,18 @@
 'use strict'
 
-var ServerConnection = require('logux-sync').ServerConnection
-var MemoryStore = require('logux-core').MemoryStore
-var WebSocket = require('ws')
-var shortid = require('shortid')
-var https = require('https')
-var yargs = require('yargs')
-var http = require('http')
-var path = require('path')
-var Log = require('logux-core').Log
-var fs = require('fs')
+const ServerConnection = require('logux-sync').ServerConnection
+const MemoryStore = require('logux-core').MemoryStore
+const WebSocket = require('ws')
+const shortid = require('shortid')
+const https = require('https')
+const yargs = require('yargs')
+const http = require('http')
+const path = require('path')
+const Log = require('logux-core').Log
+const fs = require('fs')
 
-var promisify = require('./promisify')
-var Client = require('./client')
+const promisify = require('./promisify')
+const Client = require('./client')
 
 yargs
   .option('h', {
@@ -44,7 +44,7 @@ yargs
   .help()
 yargs.argv
 
-var PEM_PREAMBLE = '-----BEGIN'
+const PEM_PREAMBLE = '-----BEGIN'
 
 function isPem (content) {
   if (typeof content === 'object' && content.pem) {
@@ -136,7 +136,7 @@ class BaseServer {
 
     this.options.root = this.options.root || process.cwd()
 
-    var store = this.options.store || new MemoryStore()
+    const store = this.options.store || new MemoryStore()
 
     /**
      * Server actions log.
@@ -193,7 +193,7 @@ class BaseServer {
     this.lastClient = 0
 
     this.unbind.push(() => {
-      for (var i in this.clients) {
+      for (const i in this.clients) {
         this.clients[i].destroy()
       }
     })
@@ -266,12 +266,12 @@ class BaseServer {
       if (!this.listenOptions.host) this.listenOptions.host = '127.0.0.1'
     }
 
-    var promise = Promise.resolve()
+    let promise = Promise.resolve()
 
     if (this.listenOptions.server) {
       this.ws = new WebSocket.Server({ server: this.listenOptions.server })
     } else {
-      var before = []
+      const before = []
       if (this.listenOptions.key && !isPem(this.listenOptions.key)) {
         before.push(readFile(this.options.root, this.listenOptions.key))
       } else {
@@ -296,7 +296,7 @@ class BaseServer {
 
           this.ws.on('error', reject)
 
-          var opts = this.listenOptions
+          const opts = this.listenOptions
           this.http.listen(opts.port, opts.host, resolve)
         }))
     }
@@ -316,7 +316,8 @@ class BaseServer {
     return promise.then(() => {
       this.ws.on('connection', ws => {
         this.lastClient += 1
-        var client = new Client(this, new ServerConnection(ws), this.lastClient)
+        const connection = new ServerConnection(ws)
+        const client = new Client(this, connection, this.lastClient)
         this.clients[this.lastClient] = client
       })
     }).then(() => {
@@ -353,8 +354,8 @@ class BaseServer {
   loadOptions (process, defaults) {
     defaults = defaults || { }
 
-    var argv = yargs.parse(process.argv)
-    var env = process.env
+    const argv = yargs.parse(process.argv)
+    const env = process.env
 
     return {
       host: argv.h || env.LOGUX_HOST || defaults.host,
@@ -410,7 +411,7 @@ class BaseServer {
    * process.on('uncaughtException', app.debugError)
    */
   debugError (error) {
-    for (var i in this.clients) {
+    for (const i in this.clients) {
       this.clients[i].connection.send(['debug', 'error', error.stack])
     }
   }

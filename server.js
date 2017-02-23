@@ -1,8 +1,8 @@
 'use strict'
 
-var BaseServer = require('./base-server')
-var errorReporter = require('./reporters/human/error')
-var processReporter = require('./reporters/human/process')
+const processReporter = require('./reporters/human/process')
+const errorReporter = require('./reporters/human/error')
+const BaseServer = require('./base-server')
 
 /**
  * End-user API to create Logux server.
@@ -56,9 +56,9 @@ class Server extends BaseServer {
       if (app.silent) return
       process.stderr.write(processReporter.apply(processReporter, arguments))
     })
-    var app = this
+    const app = this
 
-    var onError = e => {
+    const onError = e => {
       this.reporter('runtimeError', this, undefined, e)
       if (this.env === 'development') {
         this.debugError(e)
@@ -70,7 +70,7 @@ class Server extends BaseServer {
     process.on('uncaughtException', onError)
     process.on('unhandledRejection', onError)
 
-    var onExit = () => {
+    const onExit = () => {
       this.destroy().then(() => {
         process.exit(0)
       })
@@ -83,7 +83,7 @@ class Server extends BaseServer {
   }
 
   listen () {
-    var origin = BaseServer.prototype.listen
+    const origin = BaseServer.prototype.listen
     return origin.apply(this, arguments).catch(e => {
       process.stderr.write(errorReporter(e, this))
       process.exit(1)

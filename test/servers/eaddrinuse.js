@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 
-var Server = require('../../server')
+'use strict'
 
-var app = new Server({
+const Server = require('../../server')
+
+const app = new Server({
   nodeId: 'server',
   subprotocol: '1.0.0',
   supports: '1.x'

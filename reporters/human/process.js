@@ -1,20 +1,22 @@
-var common = require('./common.js')
-var pkg = require('../../package.json')
+'use strict'
 
-var reporters = {
+const common = require('./common.js')
+const pkg = require('../../package.json')
+
+const reporters = {
 
   listen: function listen (c, app) {
-    var url
+    let url
     if (app.listenOptions.server) {
       url = 'Custom HTTP server'
     } else {
-      var protocol = app.listenOptions.cert ? 'wss://' : 'ws://'
-      var host = app.listenOptions.host
-      var port = app.listenOptions.port
+      const protocol = app.listenOptions.cert ? 'wss://' : 'ws://'
+      const host = app.listenOptions.host
+      const port = app.listenOptions.port
       url = `${ protocol }${ host }:${ port }`
     }
 
-    var result = [
+    let result = [
       common.info(c, 'Logux server is listening'),
       common.params(c, [
         ['Logux server', pkg.version],
@@ -70,7 +72,7 @@ var reporters = {
   },
 
   disconnect: function disconnect (c, app, client) {
-    var params
+    let params
     if (client.nodeId) {
       params = common.params(c, [
         ['Node ID', client.nodeId]
@@ -93,7 +95,7 @@ var reporters = {
   },
 
   runtimeError: function runtimeError (c, app, client, err) {
-    var prefix = `${ err.name }: ${ err.message }`
+    let prefix = `${ err.name }: ${ err.message }`
     if (err.name === 'Error') prefix = err.message
     return [
       common.error(c, prefix),
@@ -103,7 +105,7 @@ var reporters = {
   },
 
   syncError: function syncError (c, app, client, err) {
-    var prefix
+    let prefix
     if (err.received) {
       prefix = `SyncError from client: ${ err.description }`
     } else {
@@ -145,7 +147,7 @@ var reporters = {
 }
 
 module.exports = function processReporter (type, app) {
-  var c = common.color(app)
-  var args = [c].concat(Array.prototype.slice.call(arguments, 1))
+  const c = common.color(app)
+  const args = [c].concat(Array.prototype.slice.call(arguments, 1))
   return common.message(reporters[type].apply({ }, args))
 }

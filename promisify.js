@@ -1,3 +1,5 @@
+'use strict'
+
 module.exports = function promisify (callback) {
   return new Promise((resolve, reject) => {
     callback((err, result) => {

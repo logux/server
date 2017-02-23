@@ -1,28 +1,30 @@
-var os = require('os')
-var path = require('path')
-var chalk = require('chalk')
-var yyyymmdd = require('yyyy-mm-dd')
-var stripAnsi = require('strip-ansi')
+'use strict'
 
-var INDENT = '  '
-var PADDING = '        '
-var SEPARATOR = os.EOL + os.EOL
-var NEXT_LINE = os.EOL === '\n' ? '\r\v' : os.EOL
+const os = require('os')
+const path = require('path')
+const chalk = require('chalk')
+const yyyymmdd = require('yyyy-mm-dd')
+const stripAnsi = require('strip-ansi')
+
+const INDENT = '  '
+const PADDING = '        '
+const SEPARATOR = os.EOL + os.EOL
+const NEXT_LINE = os.EOL === '\n' ? '\r\v' : os.EOL
 
 function time (c) {
   return c.dim(`at ${ yyyymmdd.withTime(module.exports.now()) }`)
 }
 
 function rightPag (str, length) {
-  var add = length - stripAnsi(str).length
-  for (var i = 0; i < add; i++) str += ' '
+  const add = length - stripAnsi(str).length
+  for (let i = 0; i < add; i++) str += ' '
   return str
 }
 
 function labeled (c, label, color, message) {
-  var labelFormat = c.bold[color].bgBlack.inverse
-  var messageFormat = c.bold[color]
-  var pagged = rightPag(labelFormat(label), 8)
+  const labelFormat = c.bold[color].bgBlack.inverse
+  const messageFormat = c.bold[color]
+  const pagged = rightPag(labelFormat(label), 8)
 
   return `${ pagged }${ messageFormat(message) } ${ time(c) }`
 }
@@ -30,24 +32,23 @@ function labeled (c, label, color, message) {
 module.exports = {
 
   params: function params (c, fields) {
-    var max = 0
-    var current
-    for (var i = 0; i < fields.length; i++) {
-      current = fields[i][0].length + 2
+    let max = 0
+    for (let i = 0; i < fields.length; i++) {
+      const current = fields[i][0].length + 2
       if (current > max) max = current
     }
     return fields.map(field => {
-      var name = field[0]
-      var value = field[1]
+      const name = field[0]
+      let value = field[1]
 
-      var start = PADDING + rightPag(`${ name }: `, max)
+      const start = PADDING + rightPag(`${ name }: `, max)
       if (value instanceof Date) {
         value = yyyymmdd.withTime(value)
       }
 
       if (name === 'Node ID') {
-        var pos = value.indexOf(':')
-        var id, random
+        const pos = value.indexOf(':')
+        let id, random
         if (pos === -1) {
           id = ''
           random = value
@@ -108,7 +109,7 @@ module.exports = {
 
     return err.stack.split('\n').slice(1).map(i => {
       i = i.replace(/^\s*/, PADDING)
-      var match = i.match(/(\s+at [^(]+ \()([^)]+)\)/)
+      const match = i.match(/(\s+at [^(]+ \()([^)]+)\)/)
       if (!match || match[2].indexOf(root) !== 0) {
         return c.red(i)
       } else {

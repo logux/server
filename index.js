@@ -1,5 +1,7 @@
-var BaseServer = require('./base-server')
-var Server = require('./server')
+'use strict'
+
+const BaseServer = require('./base-server')
+const Server = require('./server')
 
 module.exports = {
   BaseServer,

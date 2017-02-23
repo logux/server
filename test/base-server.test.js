@@ -1,48 +1,50 @@
-var MemoryStore = require('logux-core').MemoryStore
-var WebSocket = require('ws')
-var https = require('https')
-var http = require('http')
-var path = require('path')
-var Log = require('logux-core').Log
-var fs = require('fs')
+'use strict'
 
-var BaseServer = require('../base-server')
-var promisify = require('../promisify')
+const MemoryStore = require('logux-core').MemoryStore
+const WebSocket = require('ws')
+const https = require('https')
+const http = require('http')
+const path = require('path')
+const Log = require('logux-core').Log
+const fs = require('fs')
 
-var lastPort = 9111
+const BaseServer = require('../base-server')
+const promisify = require('../promisify')
+
+let lastPort = 9111
 function uniqPort () {
   lastPort += 1
   return lastPort
 }
 
-var defaultOptions = {
+const DEFAULT_OPTIONS = {
   subprotocol: '0.0.0',
   supports: '0.x'
 }
 
 function createServer (options) {
-  var created = new BaseServer(options || defaultOptions)
+  const created = new BaseServer(options || DEFAULT_OPTIONS)
   created.auth(() => Promise.resolve(true))
   return created
 }
 
 function createTest () {
-  var created = createServer({
+  const created = createServer({
     subprotocol: '0.0.0',
     supports: '0.x',
     nodeId: 'server'
   })
-  var lastId = 0
+  let lastId = 0
   created.log.generateId = () => [++lastId, 'server', 0]
   return created
 }
 
-var app, server
+let app, server
 
 function createReporter () {
-  var result = { }
+  const result = { }
   result.reports = []
-  app = new BaseServer(defaultOptions, function () {
+  app = new BaseServer(DEFAULT_OPTIONS, function () {
     result.reports.push(Array.prototype.slice.call(arguments, 0))
   })
   app.auth(() => Promise.resolve(true))
@@ -54,8 +56,8 @@ function entries (log) {
   return log.store.created.map(i => [i[0], i[1]])
 }
 
-var originArgv = process.argv
-var originEnv = process.env.NODE_ENV
+const originArgv = process.argv
+const originEnv = process.env.NODE_ENV
 
 afterEach(() => {
   process.argv = originArgv
@@ -76,7 +78,7 @@ afterEach(() => {
 })
 
 it('saves server options', () => {
-  app = new BaseServer(defaultOptions)
+  app = new BaseServer(DEFAULT_OPTIONS)
   expect(app.options.supports).toEqual('0.x')
 })
 
@@ -92,7 +94,7 @@ it('saves node ID', () => {
 })
 
 it('generates node ID', () => {
-  app = new BaseServer(defaultOptions)
+  app = new BaseServer(DEFAULT_OPTIONS)
   expect(app.nodeId).toMatch(/server:[\w\d]+/)
 })
 
@@ -110,13 +112,13 @@ it('throws on missed supported subprotocols', () => {
 
 it('sets development environment by default', () => {
   delete process.env.NODE_ENV
-  app = new BaseServer(defaultOptions)
+  app = new BaseServer(DEFAULT_OPTIONS)
   expect(app.env).toEqual('development')
 })
 
 it('takes environment from NODE_ENV', () => {
   process.env.NODE_ENV = 'production'
-  app = new BaseServer(defaultOptions)
+  app = new BaseServer(DEFAULT_OPTIONS)
   expect(app.env).toEqual('production')
 })
 
@@ -130,7 +132,7 @@ it('sets environment from user', () => {
 })
 
 it('uses cwd as default root', () => {
-  app = new BaseServer(defaultOptions)
+  app = new BaseServer(DEFAULT_OPTIONS)
   expect(app.options.root).toEqual(process.cwd())
 })
 
@@ -144,13 +146,13 @@ it('uses user root', () => {
 })
 
 it('creates log with default store', () => {
-  app = new BaseServer(defaultOptions)
+  app = new BaseServer(DEFAULT_OPTIONS)
   expect(app.log instanceof Log).toBeTruthy()
   expect(app.log.store instanceof MemoryStore).toBeTruthy()
 })
 
 it('creates log with custom store', () => {
-  var store = new MemoryStore()
+  const store = new MemoryStore()
   app = new BaseServer({
     subprotocol: '0.0.0',
     supports: '0.x',
@@ -160,12 +162,12 @@ it('creates log with custom store', () => {
 })
 
 it('destroys application without runned server', () => {
-  app = new BaseServer(defaultOptions)
+  app = new BaseServer(DEFAULT_OPTIONS)
   return app.destroy().then(() => app.destroy())
 })
 
 it('throws without authenticator', () => {
-  app = new BaseServer(defaultOptions)
+  app = new BaseServer(DEFAULT_OPTIONS)
   expect(() => {
     app.listen()
   }).toThrowError(/authentication/)
@@ -192,10 +194,10 @@ it('uses 127.0.0.1 to bind server by default', () => {
 it('uses cli args for options', () => {
   app = createServer()
 
-  var cliArgs = ['', '--port', '31337', '--host', '192.168.1.1']
+  const cliArgs = ['', '--port', '31337', '--host', '192.168.1.1']
 
   process.argv = process.argv.concat(cliArgs)
-  var options = app.loadOptions(process)
+  const options = app.loadOptions(process)
 
   expect(options.host).toEqual('192.168.1.1')
   expect(options.port).toEqual(31337)
@@ -208,22 +210,22 @@ it('uses env for options', () => {
   process.env.LOGUX_PORT = 31337
 
   app = createServer()
-  var options = app.loadOptions(process)
+  const options = app.loadOptions(process)
 
   expect(options.host).toEqual('127.0.1.1')
   expect(options.port).toEqual(31337)
 })
 
 it('uses combined options', () => {
-  var certPath = path.join(__dirname, 'fixtures/cert.pem')
+  const certPath = path.join(__dirname, 'fixtures/cert.pem')
   process.env.LOGUX_CERT = certPath
 
-  var keyPath = path.join(__dirname, 'fixtures/key.pem')
-  var cliArgs = ['', '--key', keyPath]
+  const keyPath = path.join(__dirname, 'fixtures/key.pem')
+  const cliArgs = ['', '--key', keyPath]
   process.argv = process.argv.concat(cliArgs)
 
   app = createServer()
-  var options = app.loadOptions(process, {
+  const options = app.loadOptions(process, {
     host: '127.0.1.1',
     port: 31337
   })
@@ -237,12 +239,12 @@ it('uses combined options', () => {
 it('uses arg, env, defaults options in given priority', () => {
   app = createServer()
 
-  var cliArgs = ['', '--port', '31337']
+  const cliArgs = ['', '--port', '31337']
   process.argv = process.argv.concat(cliArgs)
 
   process.env.LOGUX_PORT = 21337
 
-  var options = app.loadOptions(process, {
+  const options = app.loadOptions(process, {
     port: 11337
   })
 
@@ -306,7 +308,7 @@ it('loads keys by relative path', () => {
 
 it('supports object in SSL key', () => {
   app = createServer()
-  var key = fs.readFileSync(path.join(__dirname, 'fixtures/key.pem'))
+  const key = fs.readFileSync(path.join(__dirname, 'fixtures/key.pem'))
   return app.listen({
     cert: fs.readFileSync(path.join(__dirname, 'fixtures/cert.pem')),
     key: { pem: key },
@@ -317,9 +319,9 @@ it('supports object in SSL key', () => {
 })
 
 it('reporters on start listening', () => {
-  var test = createReporter()
+  const test = createReporter()
 
-  var promise = test.app.listen({ port: uniqPort() })
+  const promise = test.app.listen({ port: uniqPort() })
   expect(test.reports).toEqual([])
 
   return promise.then(() => {
@@ -328,10 +330,10 @@ it('reporters on start listening', () => {
 })
 
 it('reporters on log events', () => {
-  var test = createReporter()
+  const test = createReporter()
   test.app.log.generateId = () => [1]
   test.app.log.add({ type: 'A' })
-  var nodeId = test.app.nodeId
+  const nodeId = test.app.nodeId
   expect(test.reports).toEqual([
     [
       'add',
@@ -349,9 +351,9 @@ it('reporters on log events', () => {
 })
 
 it('reporters on destroing', () => {
-  var test = createReporter()
+  const test = createReporter()
 
-  var promise = test.app.destroy()
+  const promise = test.app.destroy()
   expect(test.reports).toEqual([['destroy', test.app]])
 
   return promise
@@ -360,14 +362,14 @@ it('reporters on destroing', () => {
 it('creates a client on connection', () => {
   app = createServer()
   return app.listen({ port: uniqPort() }).then(() => {
-    var ws = new WebSocket(`ws://localhost:${ app.listenOptions.port }`)
+    const ws = new WebSocket(`ws://localhost:${ app.listenOptions.port }`)
     return new Promise((resolve, reject) => {
       ws.onopen = resolve
       ws.onerror = reject
     })
   }).then(() => {
     expect(Object.keys(app.clients).length).toBe(1)
-    var client = app.clients[1]
+    const client = app.clients[1]
     expect(client.remoteAddress).toEqual('127.0.0.1')
   })
 })
@@ -376,7 +378,7 @@ it('send debug message to clients on runtimeError', () => {
   app = createServer()
   app.clients[1] = { connection: { send: jest.fn() }, destroy: jest.fn() }
 
-  var error = new Error('Test Error')
+  const error = new Error('Test Error')
   error.stack = `${ error.stack.split('\n')[0] }\nfake stacktrace`
 
   app.debugError(error)
@@ -396,15 +398,15 @@ it('disconnects on clients on destroy', () => {
 })
 
 it('accepts custom HTTP server', () => {
-  var test = createReporter()
+  const test = createReporter()
 
-  var port = uniqPort()
+  const port = uniqPort()
   server = http.createServer()
 
   return promisify(done => {
     server.listen(port, done)
   }).then(() => test.app.listen({ server })).then(() => {
-    var ws = new WebSocket(`ws://localhost:${ port }`)
+    const ws = new WebSocket(`ws://localhost:${ port }`)
     return new Promise((resolve, reject) => {
       ws.onopen = resolve
       ws.onerror = reject
@@ -416,7 +418,7 @@ it('accepts custom HTTP server', () => {
 
 it('marks actions with own node ID', () => {
   app = createServer()
-  var servers = []
+  const servers = []
   app.log.on('add', (action, meta) => {
     servers.push(meta.server)
   })
@@ -437,7 +439,7 @@ it('marks actions with start status', () => {
     },
     process () { }
   })
-  var statuses = []
+  const statuses = []
   app.log.on('add', (action, meta) => {
     statuses.push(meta.status)
   })
@@ -491,7 +493,7 @@ it('requires process callback for type', () => {
 
 it('reports about unknown action type', () => {
   app = createTest()
-  var meta = { reasons: ['test'], user: '10' }
+  const meta = { reasons: ['test'], user: '10' }
   return app.log.add({ type: 'UNKNOWN' }, meta).then(() => {
     expect(entries(app.log)).toEqual([
       [

@@ -1,8 +1,8 @@
 'use strict'
 
-var ServerSync = require('logux-sync').ServerSync
-var SyncError = require('logux-sync').SyncError
-var semver = require('semver')
+const ServerSync = require('logux-sync').ServerSync
+const SyncError = require('logux-sync').SyncError
+const semver = require('semver')
 
 /**
  * Logux client connected to server.
@@ -61,7 +61,7 @@ class Client {
     this.remoteAddress = connection.ws.upgradeReq.headers['x-forwarded-for'] ||
                          connection.ws.upgradeReq.connection.remoteAddress
 
-    var credentials
+    let credentials
     if (this.app.env === 'development') {
       credentials = { env: 'development' }
     }
@@ -144,7 +144,7 @@ class Client {
      */
     this.nodeId = nodeId
 
-    var pos = nodeId.indexOf(':')
+    const pos = nodeId.indexOf(':')
     if (pos !== -1) {
       this.id = nodeId.slice(0, pos)
     }

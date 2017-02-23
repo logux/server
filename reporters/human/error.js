@@ -1,4 +1,6 @@
-var common = require('./common')
+'use strict'
+
+const common = require('./common')
 
 function errorHelp (e) {
   switch (e.code) {
@@ -24,8 +26,8 @@ function errorHelp (e) {
 }
 
 module.exports = function errorReporter (err, app) {
-  var c = common.color(app)
-  var help = errorHelp(err)
+  const c = common.color(app)
+  const help = errorHelp(err)
   return common.message([
     common.error(c, help.description),
     common.hint(c, help.hint)
