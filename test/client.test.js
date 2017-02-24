@@ -144,7 +144,7 @@ it('authenticates user', () => {
     ])
     return client.connection.pair.wait('right')
   }).then(() => {
-    expect(client.id).toEqual('10')
+    expect(client.user).toEqual('10')
     expect(client.nodeId).toEqual('10:random')
     expect(client.sync.authenticated).toBeTruthy()
     expect(test.reports[0][0]).toEqual('connect')

@@ -23,7 +23,7 @@ class Client {
      * User ID. It will be filled from client’s node ID.
      *
      */
-    this.id = undefined
+    this.user = undefined
 
     /**
      * The Logux wrapper to WebSocket connection.
@@ -74,7 +74,7 @@ class Client {
       ping: app.options.ping,
       auth: this.auth.bind(this),
       inMap: (action, meta) => {
-        meta.user = this.id
+        meta.user = this.user
         return [action, meta]
       }
     })
@@ -140,10 +140,10 @@ class Client {
 
     const pos = nodeId.indexOf(':')
     if (pos !== -1) {
-      this.id = nodeId.slice(0, pos)
+      this.user = nodeId.slice(0, pos)
     }
 
-    return this.app.authenticator(this.id, credentials, this)
+    return this.app.authenticator(this.user, credentials, this)
       .then(result => {
         if (result) {
           this.app.reporter('authenticated', this.app, this)
