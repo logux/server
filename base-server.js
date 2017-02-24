@@ -5,7 +5,6 @@ const MemoryStore = require('logux-core').MemoryStore
 const WebSocket = require('ws')
 const shortid = require('shortid')
 const https = require('https')
-const yargs = require('yargs')
 const http = require('http')
 const path = require('path')
 const Log = require('logux-core').Log
@@ -13,36 +12,6 @@ const fs = require('fs')
 
 const promisify = require('./promisify')
 const Client = require('./client')
-
-yargs
-  .option('h', {
-    alias: 'host',
-    describe: 'Host to bind server.',
-    type: 'string'
-  })
-  .option('p', {
-    alias: 'port',
-    describe: 'Port to bind server',
-    type: 'number'
-  })
-  .option('k', {
-    alias: 'key',
-    describe: 'Path to SSL key ',
-    type: 'string'
-  })
-  .option('c', {
-    alias: 'cert',
-    describe: 'Path to SSL certificate',
-    type: 'string'
-  })
-  .epilog(
-    'Corresponding ENV variables: LOGUX_HOST, LOGUX_PORT, LOGUX_KEY, LOGUX_CERT'
-  )
-  .example('$0 --port 31337 --host 127.0.0.1')
-  .example('LOGUX_PORT=1337 $0')
-  .locale('en')
-  .help()
-yargs.argv
 
 const PEM_PREAMBLE = '-----BEGIN'
 
@@ -339,30 +308,6 @@ class BaseServer {
     this.destroing = true
     this.reporter('destroy', this)
     return Promise.all(this.unbind.map(i => i()))
-  }
-
-  /**
-   * Load options from command-line arguments and/or environment
-   *
-   * @param {object} process Current process object.
-   * @param {object} defaults Default options.
-   * @return {object} Parsed options object.
-   *
-   * @example
-   * app.listen(app.loadOptions(process, { port: 31337 }))
-   */
-  loadOptions (process, defaults) {
-    defaults = defaults || { }
-
-    const argv = yargs.parse(process.argv)
-    const env = process.env
-
-    return {
-      host: argv.h || env.LOGUX_HOST || defaults.host,
-      port: parseInt(argv.p || env.LOGUX_PORT || defaults.port, 10),
-      cert: argv.c || env.LOGUX_CERT || defaults.cert,
-      key: argv.k || env.LOGUX_KEY || defaults.key
-    }
   }
 
   /**

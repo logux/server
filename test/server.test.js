@@ -3,6 +3,8 @@
 const spawn = require('child_process').spawn
 const path = require('path')
 
+const Server = require('../server')
+
 const DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
 
 function wait (ms) {
@@ -78,6 +80,53 @@ afterEach(() => {
     started.kill('SIGINT')
     started = undefined
   }
+})
+
+it('uses cli args for options', () => {
+  const options = Server.prototype.loadOptions({
+    argv: ['', '--port', '31337', '--host', '192.168.1.1'],
+    env: { }
+  })
+
+  expect(options.host).toEqual('192.168.1.1')
+  expect(options.port).toEqual(31337)
+  expect(options.cert).toBeUndefined()
+  expect(options.key).toBeUndefined()
+})
+
+it('uses env for options', () => {
+  const options = Server.prototype.loadOptions({
+    argv: [],
+    env: { LOGUX_HOST: '127.0.1.1', LOGUX_PORT: 31337 }
+  })
+
+  expect(options.host).toEqual('127.0.1.1')
+  expect(options.port).toEqual(31337)
+})
+
+it('uses combined options', () => {
+  const options = Server.prototype.loadOptions({
+    env: { LOGUX_CERT: './cert.pem' },
+    argv: ['', '--key', './key.pem']
+  }, { port: 31337 })
+
+  expect(options.port).toEqual(31337)
+  expect(options.cert).toEqual('./cert.pem')
+  expect(options.key).toEqual('./key.pem')
+})
+
+it('uses arg, env, defaults options in given priority', () => {
+  const options1 = Server.prototype.loadOptions({
+    argv: ['', '--port', '31337'],
+    env: { LOGUX_PORT: 21337 }
+  }, { port: 11337 })
+  const options2 = Server.prototype.loadOptions({
+    argv: [],
+    env: { LOGUX_PORT: 21337 }
+  }, { port: 11337 })
+
+  expect(options1.port).toEqual(31337)
+  expect(options2.port).toEqual(21337)
 })
 
 it('destroys everything on exit', () => checkOut('destroy.js'))

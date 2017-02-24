@@ -186,61 +186,6 @@ it('uses 127.0.0.1 to bind server by default', () => {
   expect(app.listenOptions.host).toEqual('127.0.0.1')
 })
 
-it('uses cli args for options', () => {
-  app = createServer()
-
-  const options = app.loadOptions({
-    argv: ['', '--port', '31337', '--host', '192.168.1.1'],
-    env: { }
-  })
-
-  expect(options.host).toEqual('192.168.1.1')
-  expect(options.port).toEqual(31337)
-  expect(options.cert).toBeUndefined()
-  expect(options.key).toBeUndefined()
-})
-
-it('uses env for options', () => {
-  app = createServer()
-
-  const options = app.loadOptions({
-    argv: [],
-    env: { LOGUX_HOST: '127.0.1.1', LOGUX_PORT: 31337 }
-  })
-
-  expect(options.host).toEqual('127.0.1.1')
-  expect(options.port).toEqual(31337)
-})
-
-it('uses combined options', () => {
-  app = createServer()
-
-  const options = app.loadOptions({
-    env: { LOGUX_CERT: CERT },
-    argv: ['', '--key', KEY]
-  }, { port: 31337 })
-
-  expect(options.port).toEqual(31337)
-  expect(options.cert).toEqual(CERT)
-  expect(options.key).toEqual(KEY)
-})
-
-it('uses arg, env, defaults options in given priority', () => {
-  app = createServer()
-
-  const options1 = app.loadOptions({
-    argv: ['', '--port', '31337'],
-    env: { LOGUX_PORT: 21337 }
-  }, { port: 11337 })
-  const options2 = app.loadOptions({
-    argv: [],
-    env: { LOGUX_PORT: 21337 }
-  }, { port: 11337 })
-
-  expect(options1.port).toEqual(31337)
-  expect(options2.port).toEqual(21337)
-})
-
 it('throws a error on key without certificate', () => {
   app = createServer()
   expect(() => {
