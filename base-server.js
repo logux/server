@@ -201,8 +201,7 @@ class BaseServer {
 
   /**
    * Set authenticate function. It will receive client credentials
-   * and node ID. It should return a Promise with `false`
-   * on bad authentication or with any user data on correct credentials.
+   * and node ID. It should return a Promise with `true` or `false`.
    *
    * @param {authenticator} authenticator The authentication callback.
    *
@@ -211,7 +210,7 @@ class BaseServer {
    * @example
    * app.auth(token => {
    *   return findUserByToken(token).then(user => {
-   *     return user.blocked ? false : user
+   *     return !!user
    *   })
    * })
    */
@@ -436,7 +435,7 @@ module.exports = BaseServer
  * @param {string} id User ID.
  * @param {any} credentials The client credentials.
  * @param {Client} client Client object.
- * @return {Promise} Promise with `false` or user data.
+ * @return {Promise} Promise with `true` or `false`.
  */
 
 /**

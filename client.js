@@ -20,12 +20,6 @@ class Client {
     this.app = app
 
     /**
-     * Developer defined user object.
-     * @type {object}
-     */
-    this.user = undefined
-
-    /**
      * User ID. It will be filled from client’s node ID.
      *
      */
@@ -150,15 +144,13 @@ class Client {
     }
 
     return this.app.authenticator(this.id, credentials, this)
-      .then(user => {
-        if (user) {
-          this.user = user
+      .then(result => {
+        if (result) {
           this.app.reporter('authenticated', this.app, this)
-          return true
         } else {
           this.app.reporter('unauthenticated', this.app, this)
-          return false
         }
+        return result
       })
   }
 

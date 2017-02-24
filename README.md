@@ -55,7 +55,7 @@ const app = new Server({
 })
 
 app.auth((userId, token) => {
-  // TODO Check token and return a Promise with user data or false on bad token.
+  // TODO Check token and return a Promise with true or false.
 })
 
 app.log.on('add', (action, meta) => {

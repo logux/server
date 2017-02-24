@@ -133,14 +133,10 @@ it('reports on wrong authentication', () => {
 
 it('authenticates user', () => {
   const test = createReporter()
-  test.app.auth((id, token, who) => {
-    if (token === 'token' && id === '10' && who === client) {
-      return Promise.resolve({ name: 'user' })
-    } else {
-      return Promise.resolve(false)
-    }
-  })
+  test.app.auth((id, token, who) => Promise.resolve(
+    token === 'token' && id === '10' && who === client))
   const client = new Client(test.app, createConnection(), 1)
+
   return client.connection.connect().then(() => {
     const protocol = client.sync.localProtocol
     client.connection.other().send([
@@ -149,7 +145,6 @@ it('authenticates user', () => {
     return client.connection.pair.wait('right')
   }).then(() => {
     expect(client.id).toEqual('10')
-    expect(client.user).toEqual({ name: 'user' })
     expect(client.nodeId).toEqual('10:random')
     expect(client.sync.authenticated).toBeTruthy()
     expect(test.reports[0][0]).toEqual('connect')
@@ -201,7 +196,7 @@ it('has method to check client subprotocol', () => {
 
 it('sends server credentials in development', () => {
   const app = createServer({ env: 'development' })
-  app.auth(() => Promise.resolve({ id: 'user' }))
+  app.auth(() => Promise.resolve(true))
 
   const client = new Client(app, createConnection(), 1)
   return client.connection.connect().then(() => {
@@ -218,7 +213,7 @@ it('sends server credentials in development', () => {
 
 it('does not send server credentials in production', () => {
   const app = createServer({ env: 'production' })
-  app.auth(() => Promise.resolve({ id: 'user' }))
+  app.auth(() => Promise.resolve(true))
 
   const client = new Client(app, createConnection(), 1)
   return client.connection.connect().then(() => {
