@@ -53,10 +53,8 @@ class Server extends BaseServer {
     options.pid = process.pid
 
     super(options, function () {
-      if (app.silent) return
-      process.stderr.write(processReporter.apply(processReporter, arguments))
+      process.stderr.write(processReporter.apply(null, arguments))
     })
-    const app = this
 
     const onError = e => {
       this.reporter('runtimeError', this, undefined, e)
