@@ -11,15 +11,17 @@ const fs = require('fs')
 const BaseServer = require('../base-server')
 const promisify = require('../promisify')
 
+const DEFAULT_OPTIONS = {
+  subprotocol: '0.0.0',
+  supports: '0.x'
+}
+const CERT = path.join(__dirname, 'fixtures/cert.pem')
+const KEY = path.join(__dirname, 'fixtures/key.pem')
+
 let lastPort = 9111
 function uniqPort () {
   lastPort += 1
   return lastPort
-}
-
-const DEFAULT_OPTIONS = {
-  subprotocol: '0.0.0',
-  supports: '0.x'
 }
 
 function createServer (options) {
@@ -56,17 +58,10 @@ function entries (log) {
   return log.store.created.map(i => [i[0], i[1]])
 }
 
-const originArgv = process.argv
 const originEnv = process.env.NODE_ENV
 
 afterEach(() => {
-  process.argv = originArgv
   process.env.NODE_ENV = originEnv
-
-  delete process.env.LOGUX_HOST
-  delete process.env.LOGUX_PORT
-  delete process.env.LOGUX_KEY
-  delete process.env.LOGUX_CERT
 
   return Promise.all([
     app ? app.destroy() : true,
@@ -194,10 +189,10 @@ it('uses 127.0.0.1 to bind server by default', () => {
 it('uses cli args for options', () => {
   app = createServer()
 
-  const cliArgs = ['', '--port', '31337', '--host', '192.168.1.1']
-
-  process.argv = process.argv.concat(cliArgs)
-  const options = app.loadOptions(process)
+  const options = app.loadOptions({
+    argv: ['', '--port', '31337', '--host', '192.168.1.1'],
+    env: { }
+  })
 
   expect(options.host).toEqual('192.168.1.1')
   expect(options.port).toEqual(31337)
@@ -206,56 +201,51 @@ it('uses cli args for options', () => {
 })
 
 it('uses env for options', () => {
-  process.env.LOGUX_HOST = '127.0.1.1'
-  process.env.LOGUX_PORT = 31337
-
   app = createServer()
-  const options = app.loadOptions(process)
+
+  const options = app.loadOptions({
+    argv: [],
+    env: { LOGUX_HOST: '127.0.1.1', LOGUX_PORT: 31337 }
+  })
 
   expect(options.host).toEqual('127.0.1.1')
   expect(options.port).toEqual(31337)
 })
 
 it('uses combined options', () => {
-  const certPath = path.join(__dirname, 'fixtures/cert.pem')
-  process.env.LOGUX_CERT = certPath
-
-  const keyPath = path.join(__dirname, 'fixtures/key.pem')
-  const cliArgs = ['', '--key', keyPath]
-  process.argv = process.argv.concat(cliArgs)
-
   app = createServer()
-  const options = app.loadOptions(process, {
-    host: '127.0.1.1',
-    port: 31337
-  })
 
-  expect(options.host).toEqual('127.0.1.1')
+  const options = app.loadOptions({
+    env: { LOGUX_CERT: CERT },
+    argv: ['', '--key', KEY]
+  }, { port: 31337 })
+
   expect(options.port).toEqual(31337)
-  expect(options.cert).toEqual(certPath)
-  expect(options.key).toEqual(keyPath)
+  expect(options.cert).toEqual(CERT)
+  expect(options.key).toEqual(KEY)
 })
 
 it('uses arg, env, defaults options in given priority', () => {
   app = createServer()
 
-  const cliArgs = ['', '--port', '31337']
-  process.argv = process.argv.concat(cliArgs)
+  const options1 = app.loadOptions({
+    argv: ['', '--port', '31337'],
+    env: { LOGUX_PORT: 21337 }
+  }, { port: 11337 })
+  const options2 = app.loadOptions({
+    argv: [],
+    env: { LOGUX_PORT: 21337 }
+  }, { port: 11337 })
 
-  process.env.LOGUX_PORT = 21337
-
-  const options = app.loadOptions(process, {
-    port: 11337
-  })
-
-  expect(options.port).toEqual(31337)
+  expect(options1.port).toEqual(31337)
+  expect(options2.port).toEqual(21337)
 })
 
 it('throws a error on key without certificate', () => {
   app = createServer()
   expect(() => {
     app.listen({
-      key: fs.readFileSync(path.join(__dirname, 'fixtures/key.pem'))
+      key: fs.readFileSync(KEY)
     })
   }).toThrowError(/set cert option/)
 })
@@ -264,7 +254,7 @@ it('throws a error on certificate without key', () => {
   app = createServer()
   expect(() => {
     app.listen({
-      cert: fs.readFileSync(path.join(__dirname, 'fixtures/cert.pem'))
+      cert: fs.readFileSync(CERT)
     })
   }).toThrowError(/set key option/)
 })
@@ -273,8 +263,8 @@ it('uses HTTPS', () => {
   app = createServer()
   return app.listen({
     port: uniqPort(),
-    cert: fs.readFileSync(path.join(__dirname, 'fixtures/cert.pem')),
-    key: fs.readFileSync(path.join(__dirname, 'fixtures/key.pem'))
+    cert: fs.readFileSync(CERT),
+    key: fs.readFileSync(KEY)
   }).then(() => {
     expect(app.http instanceof https.Server).toBeTruthy()
   })
@@ -282,11 +272,7 @@ it('uses HTTPS', () => {
 
 it('loads keys by absolute path', () => {
   app = createServer()
-  return app.listen({
-    cert: path.join(__dirname, 'fixtures/cert.pem'),
-    key: path.join(__dirname, 'fixtures/key.pem'),
-    port: uniqPort()
-  }).then(() => {
+  return app.listen({ cert: CERT, key: KEY, port: uniqPort() }).then(() => {
     expect(app.http instanceof https.Server).toBeTruthy()
   })
 })
@@ -308,10 +294,9 @@ it('loads keys by relative path', () => {
 
 it('supports object in SSL key', () => {
   app = createServer()
-  const key = fs.readFileSync(path.join(__dirname, 'fixtures/key.pem'))
   return app.listen({
-    cert: fs.readFileSync(path.join(__dirname, 'fixtures/cert.pem')),
-    key: { pem: key },
+    cert: fs.readFileSync(CERT),
+    key: { pem: fs.readFileSync(KEY) },
     port: uniqPort()
   }).then(() => {
     expect(app.http instanceof https.Server).toBeTruthy()
