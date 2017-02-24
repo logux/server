@@ -208,9 +208,9 @@ class BaseServer {
    * @return {undefined}
    *
    * @example
-   * app.auth(token => {
+   * app.auth((userId, token) => {
    *   return findUserByToken(token).then(user => {
-   *     return !!user
+   *     return !!user && userId === user.id
    *   })
    * })
    */
