@@ -76,11 +76,14 @@ it('removes itself on destroy', () => {
   const test = createReporter()
 
   const client = new Client(test.app, createConnection(), 1)
+  client.user = '10'
   test.app.clients[1] = client
+  test.app.users['10'] = client
 
   return client.connection.connect().then(() => {
     client.destroy()
     expect(test.app.clients).toEqual({ })
+    expect(test.app.users).toEqual({ })
     expect(client.connection.connected).toBeFalsy()
     expect(test.reports[0][0]).toEqual('connect')
     expect(test.reports[1]).toEqual(['disconnect', test.app, client])
@@ -144,6 +147,7 @@ it('authenticates user', () => {
     ])
     return client.connection.pair.wait('right')
   }).then(() => {
+    expect(test.app.users).toEqual({ 10: client })
     expect(client.user).toEqual('10')
     expect(client.nodeId).toEqual('10:random')
     expect(client.sync.authenticated).toBeTruthy()

@@ -189,6 +189,7 @@ class BaseServer {
      */
     this.clients = { }
     this.actions = { }
+    this.users = { }
 
     this.lastClient = 0
 
@@ -376,8 +377,8 @@ class BaseServer {
    *
    * @example
    * app.type('CHANGE_NAME', {
-   *   access (action, meta, user) {
-   *     return Promise.resolve(action.user === user.id)
+   *   access (action, meta) {
+   *     return Promise.resolve(action.user === meta.user)
    *   },
    *   process (action, meta) {
    *     if (isFirstOlder(lastNameChange(action.user), meta)) {
@@ -441,8 +442,7 @@ module.exports = BaseServer
 /**
  * @callback authorizer
  * @param {Action} action The action data.
- * @param {Meta} action The action metadata.
- * @param {Client} client The client object.
+ * @param {Meta} meta The action metadata.
  * @return {Promise} Promise with `true` if client are allowed
  *                   to use this action.
  */
@@ -450,7 +450,6 @@ module.exports = BaseServer
 /**
  * @callback processor
  * @param {Action} action The action data.
- * @param {Meta} action The action metadata.
- * @param {Client} client The client object.
+ * @param {Meta} meta The action metadata.
  * @return {Promise|undefined} Promise when processing will be finished.
  */

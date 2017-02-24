@@ -128,6 +128,7 @@ class Client {
     this.destroyed = true
     if (!this.app.destroing) this.app.reporter('disconnect', this.app, this)
     if (this.sync.connected) this.sync.destroy()
+    if (this.user) delete this.app.users[this.user]
     delete this.app.clients[this.key]
   }
 
@@ -141,6 +142,7 @@ class Client {
     const pos = nodeId.indexOf(':')
     if (pos !== -1) {
       this.user = nodeId.slice(0, pos)
+      this.app.users[this.user] = this
     }
 
     return this.app.authenticator(this.user, credentials, this)
