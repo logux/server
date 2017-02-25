@@ -5,7 +5,7 @@ const pkg = require('../../package.json')
 
 const reporters = {
 
-  listen: function listen (c, app) {
+  listen (c, app) {
     let url
     if (app.listenOptions.server) {
       url = 'Custom HTTP server'
@@ -39,7 +39,7 @@ const reporters = {
     return result
   },
 
-  connect: function connect (c, app, client) {
+  connect (c, app, client) {
     return [
       common.info(c, 'Client was connected'),
       common.params(c, [
@@ -49,7 +49,7 @@ const reporters = {
     ]
   },
 
-  unauthenticated: function unauthenticated (c, app, client) {
+  unauthenticated (c, app, client) {
     return [
       common.warn(c, 'Bad authentication'),
       common.params(c, [
@@ -60,7 +60,7 @@ const reporters = {
     ]
   },
 
-  authenticated: function authenticated (c, app, client) {
+  authenticated (c, app, client) {
     return [
       common.info(c, 'User was authenticated'),
       common.params(c, [
@@ -71,7 +71,7 @@ const reporters = {
     ]
   },
 
-  disconnect: function disconnect (c, app, client) {
+  disconnect (c, app, client) {
     let params
     if (client.nodeId) {
       params = common.params(c, [
@@ -88,13 +88,13 @@ const reporters = {
     ]
   },
 
-  destroy: function destroy (c) {
+  destroy (c) {
     return [
       common.info(c, 'Shutting down Logux server')
     ]
   },
 
-  runtimeError: function runtimeError (c, app, client, err) {
+  runtimeError (c, app, client, err) {
     let prefix = `${ err.name }: ${ err.message }`
     if (err.name === 'Error') prefix = err.message
     return [
@@ -104,7 +104,7 @@ const reporters = {
     ]
   },
 
-  syncError: function syncError (c, app, client, err) {
+  syncError (c, app, client, err) {
     let prefix
     if (err.received) {
       prefix = `SyncError from client: ${ err.description }`
@@ -117,14 +117,14 @@ const reporters = {
     ]
   },
 
-  clientError: function clientError (c, app, client, err) {
+  clientError (c, app, client, err) {
     return [
       common.warn(c, `Client error: ${ err.description }`),
       common.errorParams(c, client)
     ]
   },
 
-  add: function add (c, app, action, meta) {
+  add (c, app, action, meta) {
     return [
       common.info(c, 'Action was added'),
       common.params(c, [
@@ -135,7 +135,7 @@ const reporters = {
     ]
   },
 
-  clean: function clean (c, app, action, meta) {
+  clean (c, app, action, meta) {
     return [
       common.info(c, 'Action was cleaned'),
       common.params(c, [

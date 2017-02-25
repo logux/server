@@ -31,7 +31,7 @@ function labeled (c, label, color, message) {
 
 module.exports = {
 
-  params: function params (c, fields) {
+  params (c, fields) {
     let max = 0
     for (let i = 0; i < fields.length; i++) {
       const current = fields[i][0].length + 2
@@ -70,23 +70,23 @@ module.exports = {
     }).join(NEXT_LINE)
   },
 
-  info: function info (c, str) {
+  info (c, str) {
     return labeled(c, ' INFO ', 'green', str)
   },
 
-  warn: function warn (c, str) {
+  warn (c, str) {
     return labeled(c, ' WARN ', 'yellow', str)
   },
 
-  error: function error (c, str) {
+  error (c, str) {
     return labeled(c, ' ERROR ', 'red', str)
   },
 
-  hint: function hint (c, strings) {
+  hint (c, strings) {
     return strings.map(i => PADDING + i).join(NEXT_LINE)
   },
 
-  errorParams: function errorParams (c, client) {
+  errorParams (c, client) {
     if (!client) {
       return ''
     } else if (client.nodeId) {
@@ -100,11 +100,11 @@ module.exports = {
     }
   },
 
-  note: function note (c, str) {
+  note (c, str) {
     return PADDING + c.grey(str)
   },
 
-  prettyStackTrace: function prettyStackTrace (c, err, root) {
+  prettyStackTrace (c, err, root) {
     if (root.slice(-1) !== path.sep) root += path.sep
 
     return err.stack.split('\n').slice(1).map(i => {
@@ -123,7 +123,7 @@ module.exports = {
     }).join(NEXT_LINE)
   },
 
-  color: function color (app) {
+  color (app) {
     if (app.env !== 'development') {
       return new chalk.constructor({ enabled: false })
     } else {
@@ -131,11 +131,11 @@ module.exports = {
     }
   },
 
-  message: function message (strings) {
+  message (strings) {
     return strings.filter(i => i !== '').join(NEXT_LINE) + SEPARATOR
   },
 
-  now: function now () {
+  now () {
     return new Date()
   }
 }
