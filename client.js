@@ -21,9 +21,24 @@ class Client {
 
     /**
      * User ID. It will be filled from client’s node ID.
-     *
+     * @type {string}
      */
-    this.user = undefined
+    this.user
+
+    /**
+     * Unique client’s node ID.
+     * @type {string}
+     */
+    this.nodeId
+
+    /**
+     * Does server process some action from client.
+     * @type {boolean}
+     *
+     * @example
+     * console.log('Clients in processing:', clients.map(i => i.processing))
+     */
+    this.processing = false
 
     /**
      * The Logux wrapper to WebSocket connection.
@@ -128,26 +143,22 @@ class Client {
     this.destroyed = true
     if (!this.app.destroing) this.app.reporter('disconnect', this.app, this)
     if (this.sync.connected) this.sync.destroy()
-    if (this.user) delete this.app.users[this.user]
+    if (this.nodeId) delete this.app.nodeIds[this.nodeId]
     delete this.app.clients[this.key]
   }
 
   auth (credentials, nodeId) {
-    /**
-     * Unique node name.
-     * @type {string|number}
-     */
     this.nodeId = nodeId
 
     const pos = nodeId.indexOf(':')
     if (pos !== -1) {
       this.user = nodeId.slice(0, pos)
-      this.app.users[this.user] = this
     }
 
     return this.app.authenticator(this.user, credentials, this)
       .then(result => {
         if (result) {
+          this.app.nodeIds[this.nodeId] = this
           this.app.reporter('authenticated', this.app, this)
         } else {
           this.app.reporter('unauthenticated', this.app, this)

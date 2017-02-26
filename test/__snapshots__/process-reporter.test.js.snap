@@ -67,6 +67,13 @@ exports[`reports connect 1`] = `
 "
 `;
 
+exports[`reports denied 1`] = `
+"[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mAction was denied[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Action ID: [[1m1487805099387[22m, [1m100:H10Nf5stl[22m, [1m0[22m]
+
+"
+`;
+
 exports[`reports destroy 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mShutting down Logux server[39m[22m [2mat 1970-01-01 00:00:00[22m
 
@@ -130,6 +137,14 @@ exports[`reports listen 1`] = `
         Listen:       [1mws://127.0.0.1:1337[22m
         [90mServer was started in non-secure development mode[39m
         [90mPress Ctrl-C to shutdown server[39m
+
+"
+`;
+
+exports[`reports processed 1`] = `
+"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mAction was processed[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Action ID: [[1m1487805099387[22m, [1m100:H10Nf5stl[22m, [1m0[22m]
+        Duration:  [1m500 ms[22m
 
 "
 `;

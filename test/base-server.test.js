@@ -58,6 +58,12 @@ function entries (log) {
   return log.store.created.map(i => [i[0], i[1]])
 }
 
+function wait (ms) {
+  return new Promise(resolve => {
+    setTimeout(resolve, ms)
+  })
+}
+
 const originEnv = process.env.NODE_ENV
 
 afterEach(() => {
@@ -365,7 +371,7 @@ it('marks actions with start status', () => {
   app = createServer()
   app.type('A', {
     access () {
-      return new Promise()
+      return new Promise(() => { })
     },
     process () { }
   })
@@ -388,7 +394,7 @@ it('defines actions types', () => {
     access () { },
     process () { }
   })
-  expect(app.actions.FOO).not.toBeUndefined()
+  expect(app.types.FOO).not.toBeUndefined()
 })
 
 it('does not allow to define type twice', () => {
@@ -485,4 +491,125 @@ it('ignores unknown type for own and processed actions', () => {
         ]
       ])
     })
+})
+
+it('checks that user allow to send this action', () => {
+  const test = createReporter()
+  let deniedMeta
+  test.app.type('FOO', {
+    access (action, meta) {
+      expect(action).toEqual({ type: 'FOO' })
+      expect(meta.added).toEqual(1)
+      deniedMeta = meta
+      return false
+    },
+    process () {
+      throw new Error('Should not be called')
+    }
+  })
+
+  return test.app.log.add({ type: 'FOO' }, { reasons: ['test'] }).then(() => {
+    expect(test.reports.length).toEqual(2)
+    expect(test.reports[0][0]).toEqual('add')
+    expect(test.reports[1]).toEqual([
+      'denied', test.app, { type: 'FOO' }, deniedMeta
+    ])
+  })
+})
+
+it('supports Promise in access', () => {
+  const test = createReporter()
+  test.app.type('FOO', {
+    access () {
+      return Promise.resolve(false)
+    },
+    process () {
+      throw new Error('Should not be called')
+    }
+  })
+
+  return test.app.log.add({ type: 'FOO' }, { reasons: ['test'] }).then(() => {
+    expect(test.reports.length).toEqual(2)
+    expect(test.reports[0][0]).toEqual('add')
+    expect(test.reports[1][0]).toEqual('denied')
+  })
+})
+
+it('processes actions', () => {
+  const test = createReporter()
+  const processed = []
+  const fired = []
+
+  test.app.type('FOO', {
+    access () {
+      return true
+    },
+    process (action, meta) {
+      expect(meta.added).toEqual(1)
+      processed.push(action)
+    }
+  })
+  test.app.on('processed', (action, meta) => {
+    expect(meta.added).toEqual(1)
+    fired.push(action)
+  })
+
+  return test.app.log.add({ type: 'FOO' }, { reasons: ['test'] })
+    .then(() => wait(1))
+    .then(() => {
+      expect(processed).toEqual([{ type: 'FOO' }])
+      expect(fired).toEqual([{ type: 'FOO' }])
+      expect(test.reports.length).toEqual(2)
+      expect(test.reports[0][0]).toEqual('add')
+      expect(test.reports[1][0]).toEqual('processed')
+      expect(test.reports[1][1]).toEqual(test.app)
+      expect(test.reports[1][2]).toEqual({ type: 'FOO' })
+      expect(test.reports[1][3].added).toEqual(1)
+      expect(test.reports[1][4]).toBeCloseTo(0, -1)
+    })
+})
+
+it('supports Promise in process', () => {
+  const test = createReporter()
+  const processed = []
+  test.app.type('FOO', {
+    access () {
+      return wait(25).then(() => true)
+    },
+    process (action) {
+      return wait(25).then(() => {
+        processed.push(action)
+      })
+    }
+  })
+
+  return test.app.log.add({ type: 'FOO' }, { reasons: ['test'] })
+    .then(() => wait(60))
+    .then(() => {
+      expect(processed).toEqual([{ type: 'FOO' }])
+      expect(test.reports.length).toEqual(2)
+      expect(test.reports[1][0]).toEqual('processed')
+      expect(test.reports[1][4]).toBeCloseTo(50, -1)
+    })
+})
+
+it('has full events API', () => {
+  app = createServer()
+
+  let always = 0
+  const unbind = app.on('processed', () => {
+    always += 1
+  })
+  let once = 0
+  app.once('processed', () => {
+    once += 1
+  })
+
+  app.emitter.emit('processed')
+  app.emitter.emit('processed')
+  unbind()
+  app.emitter.emit('processed')
+
+  expect(always).toEqual(2)
+  expect(once).toEqual(1)
 })

@@ -28,6 +28,7 @@
     "Wintermute",
     "loadOptions",
     "stacktrace",
-    "debugError"
+    "debugError",
+    "nanoevents"
   ]
 }

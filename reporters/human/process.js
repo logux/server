@@ -142,6 +142,25 @@ const reporters = {
         ['Action ID', meta.id]
       ])
     ]
+  },
+
+  denied (c, app, action, meta) {
+    return [
+      common.warn(c, 'Action was denied'),
+      common.params(c, [
+        ['Action ID', meta.id]
+      ])
+    ]
+  },
+
+  processed (c, app, action, meta, duration) {
+    return [
+      common.info(c, 'Action was processed'),
+      common.params(c, [
+        ['Action ID', meta.id],
+        ['Duration', `${ duration } ms`]
+      ])
+    ]
   }
 
 }

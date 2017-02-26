@@ -130,6 +130,14 @@ it('reports clean', () => {
   expect(reportersOut('clean', app, action, meta)).toMatchSnapshot()
 })
 
+it('reports denied', () => {
+  expect(reportersOut('denied', app, action, meta)).toMatchSnapshot()
+})
+
+it('reports processed', () => {
+  expect(reportersOut('processed', app, action, meta, 500)).toMatchSnapshot()
+})
+
 it('reports disconnect', () => {
   expect(reportersOut('disconnect', app, authed)).toMatchSnapshot()
 })

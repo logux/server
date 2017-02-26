@@ -2,6 +2,7 @@
 
 const ServerConnection = require('logux-sync').ServerConnection
 const MemoryStore = require('logux-core').MemoryStore
+const NanoEvents = require('nanoevents')
 const WebSocket = require('ws')
 const shortid = require('shortid')
 const https = require('https')
@@ -31,6 +32,14 @@ function readFile (root, file) {
   return promisify(done => {
     fs.readFile(file, done)
   })
+}
+
+function forcePromise (result) {
+  if (typeof result !== 'object' || typeof result.then !== 'function') {
+    return Promise.resolve(result)
+  } else {
+    return result
+  }
 }
 
 /**
@@ -124,10 +133,13 @@ class BaseServer {
     this.log.on('add', (action, meta) => {
       this.reporter('add', this, action, meta)
 
-      if (meta.status === 'waiting') {
-        if (!this.actions[action.type]) {
-          this.unknownAction(action, meta)
-        }
+      if (this.destroing) return
+      if (meta.status !== 'waiting') return
+
+      if (!this.types[action.type]) {
+        this.unknownAction(action, meta)
+      } else {
+        this.process(action, meta)
       }
     })
     this.log.on('clean', (action, meta) => {
@@ -145,6 +157,7 @@ class BaseServer {
      */
     this.env = this.options.env || process.env.NODE_ENV || 'development'
 
+    this.emitter = new NanoEvents()
     this.unbind = []
 
     /**
@@ -157,16 +170,27 @@ class BaseServer {
      * }
      */
     this.clients = { }
-    this.actions = { }
-    this.users = { }
+    this.nodeIds = { }
+    this.types = { }
+    this.processing = 0
 
     this.lastClient = 0
 
     this.unbind.push(() => {
       for (const i in this.clients) {
-        this.clients[i].destroy()
+        const client = this.clients[i]
+        if (!client.processing) client.destroy()
       }
     })
+    this.unbind.push(() => new Promise(resolve => {
+      if (this.processing === 0) {
+        resolve()
+      } else {
+        this.on('processed', () => {
+          if (this.processing === 0) resolve()
+        })
+      }
+    }))
   }
 
   /**
@@ -295,6 +319,44 @@ class BaseServer {
   }
 
   /**
+   * Subscribe for synchronization events. It implements nanoevents API.
+   * Supported events:
+   *
+   * * `processed`: action processing was finished.
+   *
+   * @param {"processed"} event The event name.
+   * @param {listener} listener The listener function.
+   *
+   * @return {function} Unbind listener from event.
+   *
+   * @example
+   * sync.on('processed', error => {
+   *   finished += 1
+   * })
+   */
+  on (event, listener) {
+    return this.emitter.on(event, listener)
+  }
+
+  /**
+   * Add one-time listener for synchronization events.
+   * See {@link BaseServer#on} for supported events.
+   *
+   * @param {"processed"} event The event name.
+   * @param {listener} listener The listener function.
+   *
+   * @return {function} Unbind listener from event.
+   *
+   * @example
+   * sync.once('processed', () => {
+   *   console.log('First work done')
+   * })
+   */
+  once (event, listener) {
+    return this.emitter.once(event, listener)
+  }
+
+  /**
    * Stop server and unbind all listeners.
    *
    * @return {Promise} Promise when all listeners will be removed.
@@ -333,7 +395,7 @@ class BaseServer {
    * })
    */
   type (name, callbacks) {
-    if (this.actions[name]) {
+    if (this.types[name]) {
       throw new Error(`Action type ${ name } was already defined`)
     }
     if (!callbacks || !callbacks.access) {
@@ -342,7 +404,7 @@ class BaseServer {
     if (!callbacks.process) {
       throw new Error(`Action type ${ name } must have process callback`)
     }
-    this.actions[name] = callbacks
+    this.types[name] = callbacks
   }
 
   /**
@@ -363,13 +425,49 @@ class BaseServer {
 
   unknownAction (action, meta) {
     if (meta.user) {
-      this.log.changeMeta(meta.id, { status: 'error' })
-      this.log.add(
-        { type: 'logux/undo', reason: 'unknowType' },
-        { reasons: ['error'], status: 'processed' })
+      this.badAction(meta.id, 'error', 'unknowType')
     } else {
       this.log.changeMeta(meta.id, { status: 'processed' })
     }
+  }
+
+  process (action, meta) {
+    const type = this.types[action.type]
+    const start = Date.now()
+
+    forcePromise(type.access(action, meta)).then(result => {
+      if (!result) {
+        this.reporter('denied', this, action, meta)
+        this.badAction(meta.id, 'denied', 'denied')
+        return false
+      }
+      if (this.destroing) {
+        return false
+      }
+
+      const client = this.nodeIds[meta.id[1]]
+
+      this.processing += 1
+      if (client) client.processing = true
+
+      return forcePromise(type.process(action, meta)).then(() => {
+        this.processing -= 1
+        if (client) {
+          client.processing = false
+          if (this.destroing) client.destroy()
+        }
+
+        this.reporter('processed', this, action, meta, Date.now() - start)
+        this.emitter.emit('processed', action, meta)
+      })
+    })
+  }
+
+  badAction (id, status, reason) {
+    this.log.changeMeta(id, { status })
+    this.log.add(
+      { type: 'logux/undo', reason },
+      { reasons: ['error'], status: 'processed' })
   }
 
 }

@@ -33,6 +33,12 @@ function createReporter () {
   return { app, reports }
 }
 
+function wait (ms) {
+  return new Promise(resolve => {
+    setTimeout(resolve, ms)
+  })
+}
+
 it('uses server options', () => {
   const app = createServer({
     nodeId: 'server',
@@ -76,21 +82,21 @@ it('removes itself on destroy', () => {
   const test = createReporter()
 
   const client = new Client(test.app, createConnection(), 1)
-  client.user = '10'
+  client.nodeId = '10:random'
   test.app.clients[1] = client
-  test.app.users['10'] = client
+  test.app.nodeIds['10:random'] = client
 
   return client.connection.connect().then(() => {
     client.destroy()
     expect(test.app.clients).toEqual({ })
-    expect(test.app.users).toEqual({ })
+    expect(test.app.nodeIds).toEqual({ })
     expect(client.connection.connected).toBeFalsy()
     expect(test.reports[0][0]).toEqual('connect')
     expect(test.reports[1]).toEqual(['disconnect', test.app, client])
   })
 })
 
-it('does not report users disconnects on server destory', () => {
+it('does not report users disconnects on server destroy', () => {
   const test = createReporter()
 
   const client = new Client(test.app, createConnection(), 1)
@@ -147,7 +153,7 @@ it('authenticates user', () => {
     ])
     return client.connection.pair.wait('right')
   }).then(() => {
-    expect(test.app.users).toEqual({ 10: client })
+    expect(test.app.nodeIds).toEqual({ '10:random': client })
     expect(client.user).toEqual('10')
     expect(client.nodeId).toEqual('10:random')
     expect(client.sync.authenticated).toBeTruthy()
@@ -235,7 +241,9 @@ it('marks all actions with user ID', () => {
   const app = createServer({ nodeId: 'server' })
   app.auth(() => Promise.resolve(true))
   app.type('A', {
-    access () { },
+    access () {
+      return true
+    },
     process () { }
   })
   app.log.on('before', (action, meta) => {
@@ -257,5 +265,66 @@ it('marks all actions with user ID', () => {
     return client.connection.pair.wait('right')
   }).then(() => {
     expect(app.log.store.created[0][1].user).toEqual('10')
+  })
+})
+
+it('waits for last processing before destroy', () => {
+  const app = createServer()
+
+  const client = new Client(app, createConnection(), 1)
+  client.nodeId = '10:r'
+  app.clients[1] = client
+  app.nodeIds['10:r'] = client
+
+  const processed = []
+  const started = []
+  let process
+  let approve
+
+  app.type('FOO', {
+    access (action, meta) {
+      started.push(meta.id[0])
+      return new Promise(resolve => {
+        approve = resolve
+      })
+    },
+    process (action, meta) {
+      processed.push(meta.id[0])
+      return new Promise(resolve => {
+        process = resolve
+      })
+    }
+  })
+
+  let destroyed = false
+  return app.clients[1].sync.connection.connect().then(() => {
+    const meta1 = { id: [1, '10:r', 0], reasons: ['test'] }
+    return app.log.add({ type: 'FOO' }, meta1)
+  }).then(() => {
+    approve(true)
+    const meta2 = { id: [2, '10:r', 0], reasons: ['test'] }
+    return app.log.add({ type: 'FOO' }, meta2)
+  }).then(() => {
+    app.destroy().then(() => {
+      destroyed = true
+    })
+    return wait(1)
+  }).then(() => {
+    expect(destroyed).toBeFalsy()
+    expect(app.processing).toEqual(1)
+    expect(app.clients[1].processing).toBeTruthy()
+
+    const meta3 = { id: [3, '10:r', 0], reasons: ['test'] }
+    return app.log.add({ type: 'FOO' }, meta3)
+  }).then(() => {
+    expect(started).toEqual([1, 2])
+    approve(true)
+    return wait(1)
+  }).then(() => {
+    expect(processed).toEqual([1])
+    process()
+    return wait(1)
+  }).then(() => {
+    expect(destroyed).toBeTruthy()
   })
 })
