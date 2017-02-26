@@ -34,7 +34,7 @@
     "jsdoc": "^3.4.3",
     "lint-staged": "^3.3.1",
     "pre-commit": "^1.2.2",
-    "rimraf": "^2.6.0",
+    "rimraf": "^2.6.1",
     "yaspeller": "^3.0.0"
   },
   "scripts": {
