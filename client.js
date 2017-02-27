@@ -171,7 +171,9 @@ class Client {
   }
 
   filter (action, meta) {
-    if (this.user && this.user !== this.app.getUser(meta.id[1])) {
+    const wrongUser = this.user && this.user !== this.app.getUser(meta.id[1])
+    const wrongMeta = Object.keys(meta).some(i => i !== 'id' && i !== 'time')
+    if (wrongUser || wrongMeta) {
       this.app.reporter('denied', this.app, action, meta)
       return Promise.resolve(false)
     } else {
