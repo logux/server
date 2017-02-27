@@ -429,10 +429,11 @@ class BaseServer {
   }
 
   process (action, meta) {
-    const type = this.types[action.type]
     const start = Date.now()
+    const type = this.types[action.type]
+    const user = this.getUser(meta.id[1])
 
-    forcePromise(type.access(action, meta)).then(result => {
+    forcePromise(type.access(action, meta, user)).then(result => {
       if (!result) {
         this.reporter('denied', this, action, meta)
         this.badAction(meta.id, 'denied', 'denied')
@@ -443,7 +444,7 @@ class BaseServer {
       }
 
       this.processing += 1
-      return forcePromise(type.process(action, meta)).then(() => {
+      return forcePromise(type.process(action, meta, user)).then(() => {
         this.processing -= 1
         this.reporter('processed', this, action, meta, Date.now() - start)
         this.emitter.emit('processed', action, meta)
@@ -484,6 +485,8 @@ module.exports = BaseServer
  * @callback authorizer
  * @param {Action} action The action data.
  * @param {Meta} meta The action metadata.
+ * @param {string|"server"} user User ID of action author. It will be `"server"`
+ *                               if user was created by server.
  * @return {boolean|Promise} `true` or Promise with `true` if client are allowed
  *                           to use this action.
  */
@@ -492,5 +495,7 @@ module.exports = BaseServer
  * @callback processor
  * @param {Action} action The action data.
  * @param {Meta} meta The action metadata.
+ * @param {string|"server"} user User ID of action author. It will be `"server"`
+ *                               if user was created by server.
  * @return {Promise|undefined} Promise when processing will be finished.
  */

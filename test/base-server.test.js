@@ -497,9 +497,10 @@ it('checks that user allow to send this action', () => {
   const test = createReporter()
   let deniedMeta
   test.app.type('FOO', {
-    access (action, meta) {
+    access (action, meta, user) {
       expect(action).toEqual({ type: 'FOO' })
       expect(meta.added).toEqual(1)
+      expect(user).toEqual('server')
       deniedMeta = meta
       return false
     },
@@ -544,8 +545,9 @@ it('processes actions', () => {
     access () {
       return true
     },
-    process (action, meta) {
+    process (action, meta, user) {
       expect(meta.added).toEqual(1)
+      expect(user).toEqual('server')
       processed.push(action)
     }
   })
@@ -567,6 +569,24 @@ it('processes actions', () => {
       expect(test.reports[1][3].added).toEqual(1)
       expect(test.reports[1][4]).toBeCloseTo(0, -2)
     })
+})
+
+it('sends user ID to action callbacks', () => {
+  const test = createReporter()
+
+  test.app.type('FOO', {
+    access (action, meta, user) {
+      expect(user).toEqual('10')
+    },
+    process (action, meta, user) {
+      expect(user).toEqual('10')
+    }
+  })
+
+  return test.app.log.add({ type: 'FOO' }, {
+    reasons: ['test'],
+    id: [1, '10:uuid', 0]
+  })
 })
 
 it('supports Promise in process', () => {
