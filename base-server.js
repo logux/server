@@ -34,7 +34,13 @@ function readFile (root, file) {
   })
 }
 
-function forcePromise (result) {
+function forcePromise (callback) {
+  let result
+  try {
+    result = callback()
+  } catch (e) {
+    return Promise.reject(e)
+  }
   if (typeof result !== 'object' || typeof result.then !== 'function') {
     return Promise.resolve(result)
   } else {
@@ -158,8 +164,8 @@ class BaseServer {
     this.env = this.options.env || process.env.NODE_ENV || 'development'
 
     this.emitter = new NanoEvents()
-    this.on('error', e => {
-      this.reporter('runtimeError', this, undefined, e)
+    this.on('error', (e, action, meta) => {
+      this.reporter('runtimeError', this, e, action, meta)
       if (this.env === 'development') this.debugError(e)
     })
 
@@ -211,7 +217,9 @@ class BaseServer {
    * })
    */
   auth (authenticator) {
-    this.authenticator = (a, b, c) => forcePromise(authenticator(a, b, c))
+    this.authenticator = function () {
+      return forcePromise(() => authenticator.apply(this, arguments))
+    }
   }
 
   /**
@@ -439,7 +447,7 @@ class BaseServer {
     const type = this.types[action.type]
     const user = this.getUser(meta.id[1])
 
-    forcePromise(type.access(action, meta, user)).then(result => {
+    forcePromise(() => type.access(action, meta, user)).then(result => {
       if (!result) {
         this.reporter('denied', this, action, meta)
         this.badAction(meta.id, 'denied', 'denied')
@@ -450,18 +458,26 @@ class BaseServer {
       }
 
       this.processing += 1
-      return forcePromise(type.process(action, meta, user)).then(() => {
-        this.processing -= 1
+      return forcePromise(() => type.process(action, meta, user)).then(() => {
         this.reporter('processed', this, action, meta, Date.now() - start)
+        this.processing -= 1
+        this.emitter.emit('processed', action, meta)
+      }).catch(e => {
+        this.badAction(meta.id, 'error', 'error')
+        this.emitter.emit('error', e, action, meta)
+        this.processing -= 1
         this.emitter.emit('processed', action, meta)
       })
+    }).catch(e => {
+      this.badAction(meta.id, 'error', 'error')
+      this.emitter.emit('error', e, action, meta)
     })
   }
 
   badAction (id, status, reason) {
     this.log.changeMeta(id, { status })
     this.log.add(
-      { type: 'logux/undo', reason },
+      { type: 'logux/undo', reason, id },
       { reasons: ['error'], status: 'processed' })
   }
 

@@ -100,6 +100,7 @@ exports[`reports error 1`] = `
 [31m        at Module._compile (module.js:573:32)[39m
 [31m        at at runTest (node_modules/jest/index.js:50:10)[39m
 [31m        at process._tickCallback (internal/process/next_tick.js:103:7)[39m
+        Action ID: [[1m1487805099387[22m, [1m100:H10Nf5stl[22m, [1m0[22m]
 
 "
 `;

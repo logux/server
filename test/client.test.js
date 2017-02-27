@@ -23,7 +23,7 @@ function createServer (opts, reporter) {
   opts.subprotocol = '0.0.0'
   opts.supports = '0.x'
   const server = new BaseServer(opts, reporter)
-  server.auth(() => Promise.resolve(true))
+  server.auth(() => true)
   return server
 }
 
@@ -43,12 +43,6 @@ function createClient (app) {
   const client = new Client(app, createConnection(), lastClient)
   app.clients[lastClient] = client
   return client
-}
-
-function wait (ms) {
-  return new Promise(resolve => {
-    setTimeout(resolve, ms)
-  })
 }
 
 it('uses server options', () => {
@@ -255,65 +249,6 @@ it('does not send server credentials in production', () => {
     expect(client.connection.pair.leftSent[0][4]).toEqual({
       subprotocol: '0.0.0'
     })
-  })
-})
-
-it('waits for last processing before destroy', () => {
-  const app = createServer()
-
-  const client = createClient(app)
-
-  const processed = []
-  const started = []
-  let process
-  let approve
-
-  app.type('FOO', {
-    access (action, meta) {
-      started.push(meta.id[0])
-      return new Promise(resolve => {
-        approve = resolve
-      })
-    },
-    process (action, meta) {
-      processed.push(meta.id[0])
-      return new Promise(resolve => {
-        process = resolve
-      })
-    }
-  })
-
-  let destroyed = false
-  return client.sync.connection.connect().then(() => {
-    client.auth({ }, '10:r')
-    const meta1 = { id: [1, '10:r', 0], reasons: ['test'] }
-    return app.log.add({ type: 'FOO' }, meta1)
-  }).then(() => {
-    approve(true)
-    const meta2 = { id: [2, '10:r', 0], reasons: ['test'] }
-    return app.log.add({ type: 'FOO' }, meta2)
-  }).then(() => {
-    app.destroy().then(() => {
-      destroyed = true
-    })
-    return wait(1)
-  }).then(() => {
-    expect(destroyed).toBeFalsy()
-    expect(app.processing).toEqual(1)
-    expect(Object.keys(app.clients)).toEqual([])
-
-    const meta3 = { id: [3, '10:r', 0], reasons: ['test'] }
-    return app.log.add({ type: 'FOO' }, meta3)
-  }).then(() => {
-    expect(started).toEqual([1, 2])
-    approve(true)
-    return wait(1)
-  }).then(() => {
-    expect(processed).toEqual([1])
-    process()
-    return wait(1)
-  }).then(() => {
-    expect(destroyed).toBeTruthy()
   })
 })
 

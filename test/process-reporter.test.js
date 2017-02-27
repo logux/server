@@ -159,7 +159,7 @@ it('reports error', () => {
   ]
   error.stack = errorStack.join('\n')
 
-  const out = reportersOut('runtimeError', app, undefined, error)
+  const out = reportersOut('runtimeError', app, error, action, meta)
   expect(out).toMatchSnapshot()
 })
 

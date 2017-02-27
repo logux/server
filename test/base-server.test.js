@@ -26,7 +26,7 @@ function uniqPort () {
 
 function createServer (options, reporter) {
   const created = new BaseServer(options || DEFAULT_OPTIONS, reporter)
-  created.auth(() => Promise.resolve(true))
+  created.auth(() => true)
   return created
 }
 
@@ -434,7 +434,7 @@ it('reports about unknown action type', () => {
   return app.log.add({ type: 'UNKNOWN' }, meta).then(() => {
     expect(entries(app.log)).toEqual([
       [
-        { type: 'logux/undo', reason: 'unknowType' },
+        { type: 'logux/undo', reason: 'unknowType', id: [1, 'server', 0] },
         {
           added: 2,
           id: [2, 'server', 0],
@@ -642,7 +642,7 @@ it('shows error', () => {
   test.app.emitter.emit('error', error)
 
   expect(test.reports).toEqual([
-    ['runtimeError', test.app, undefined, error]
+    ['runtimeError', test.app, error, undefined, undefined]
   ])
   expect(test.app.debugError).toHaveBeenCalledWith(error)
 })
@@ -653,4 +653,102 @@ it('does not send errors in non-development mode', () => {
   const error = new Error('Test')
   test.app.emitter.emit('error', error)
   expect(test.app.debugError).not.toHaveBeenCalledWith(error)
+})
+
+it('waits for last processing before destroy', () => {
+  app = createServer()
+
+  let processed = 0
+  let started = 0
+  let process
+  let approve
+
+  app.type('FOO', {
+    access () {
+      started += 1
+      return new Promise(resolve => {
+        approve = resolve
+      })
+    },
+    process () {
+      processed += 1
+      return new Promise(resolve => {
+        process = resolve
+      })
+    }
+  })
+
+  let destroyed = false
+  return app.log.add({ type: 'FOO' }, { reasons: ['test'] }).then(() => {
+    approve(true)
+    return app.log.add({ type: 'FOO' }, { reasons: ['test'] })
+  }).then(() => {
+    app.destroy().then(() => {
+      destroyed = true
+    })
+    return wait(1)
+  }).then(() => {
+    expect(destroyed).toBeFalsy()
+    expect(app.processing).toEqual(1)
+    return app.log.add({ type: 'FOO' }, { reasons: ['test'] })
+  }).then(() => {
+    expect(started).toEqual(2)
+    approve(true)
+    return wait(1)
+  }).then(() => {
+    expect(processed).toEqual(1)
+    process()
+    return wait(1)
+  }).then(() => {
+    expect(destroyed).toBeTruthy()
+  })
+})
+
+it('reports about error during action processing', () => {
+  const test = createReporter()
+
+  const error = new Error('Test')
+  app.type('FOO', {
+    access (action) {
+      if (action.auth) {
+        throw error
+      } else {
+        return true
+      }
+    },
+    process () {
+      return new Promise((resolve, reject) => {
+        reject(error)
+      })
+    }
+  })
+
+  let processed = 0
+  app.on('processed', (action, meta) => {
+    processed += 1
+    expect(action).toEqual({ type: 'FOO' })
+    expect(meta.added).toEqual(1)
+  })
+
+  return app.log.add({ type: 'FOO' }, { id: [1, 's', 0], reasons: ['test'] })
+    .then(() => app.log.add({ type: 'FOO', auth: true },
+                            { id: [2, 's', 0], reasons: ['test'] }))
+    .then(() => wait(1))
+    .then(() => {
+      expect(processed).toEqual(1)
+      expect(test.names).toEqual([
+        'add', 'add', 'runtimeError',
+        'add', 'runtimeError', 'add'
+      ])
+      expect(test.reports[2][2]).toEqual(error)
+      expect(test.reports[2][3]).toEqual({ type: 'FOO' })
+      expect(test.reports[2][4].added).toEqual(1)
+      expect(test.reports[3][2]).toEqual({
+        type: 'logux/undo', reason: 'error', id: [1, 's', 0]
+      })
+      expect(test.reports[4][2]).toEqual(error)
+      expect(test.reports[5][2]).toEqual({
+        type: 'logux/undo', reason: 'error', id: [2, 's', 0]
+      })
+    })
 })

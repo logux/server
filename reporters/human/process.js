@@ -3,6 +3,18 @@
 const common = require('./common.js')
 const pkg = require('../../package.json')
 
+function clientParams (c, client) {
+  if (client.nodeId) {
+    return common.params(c, [
+      ['Node ID', client.nodeId]
+    ])
+  } else {
+    return common.params(c, [
+      ['Client ID', client.key]
+    ])
+  }
+}
+
 const reporters = {
 
   listen (c, app) {
@@ -72,19 +84,9 @@ const reporters = {
   },
 
   disconnect (c, app, client) {
-    let params
-    if (client.nodeId) {
-      params = common.params(c, [
-        ['Node ID', client.nodeId]
-      ])
-    } else {
-      params = common.params(c, [
-        ['Client ID', client.key]
-      ])
-    }
     return [
       common.info(c, 'Client was disconnected'),
-      params
+      clientParams(c, client)
     ]
   },
 
@@ -94,13 +96,17 @@ const reporters = {
     ]
   },
 
-  runtimeError (c, app, client, err) {
+  runtimeError (c, app, err, action, meta) {
     let prefix = `${ err.name }: ${ err.message }`
     if (err.name === 'Error') prefix = err.message
+
+    let extra = ''
+    if (meta) extra = common.params(c, [['Action ID', meta.id]])
+
     return [
       common.error(c, prefix),
       common.prettyStackTrace(c, err, app.options.root),
-      common.errorParams(c, client)
+      extra
     ]
   },
 
@@ -113,14 +119,14 @@ const reporters = {
     }
     return [
       common.error(c, prefix),
-      common.errorParams(c, client)
+      clientParams(c, client)
     ]
   },
 
   clientError (c, app, client, err) {
     return [
       common.warn(c, `Client error: ${ err.description }`),
-      common.errorParams(c, client)
+      clientParams(c, client)
     ]
   },
 
