@@ -158,6 +158,11 @@ class Client {
     return this.app.authenticator(this.user, credentials, this)
       .then(result => {
         if (result) {
+          const zombie = this.app.nodeIds[this.nodeId]
+          if (zombie) {
+            this.app.reporter('zombie', this.app, zombie)
+            zombie.destroy()
+          }
           this.app.nodeIds[this.nodeId] = this
           this.app.reporter('authenticated', this.app, this)
         } else {
