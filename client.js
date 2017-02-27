@@ -87,11 +87,7 @@ class Client {
       subprotocol: app.options.subprotocol,
       timeout: app.options.timeout,
       ping: app.options.ping,
-      auth: this.auth.bind(this),
-      inMap: (action, meta) => {
-        meta.user = this.user
-        return [action, meta]
-      }
+      auth: this.auth.bind(this)
     })
 
     this.sync.catch(err => {

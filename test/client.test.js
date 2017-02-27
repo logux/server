@@ -245,37 +245,6 @@ it('does not send server credentials in production', () => {
   })
 })
 
-it('marks all actions with user ID', () => {
-  const app = createServer({ nodeId: 'server' })
-  app.auth(() => Promise.resolve(true))
-  app.type('A', {
-    access () {
-      return true
-    },
-    process () { }
-  })
-  app.log.on('before', (action, meta) => {
-    meta.reasons = ['test']
-  })
-
-  const client = createClient(app)
-  return client.connection.connect().then(() => {
-    const protocol = client.sync.localProtocol
-    client.connection.other().send(['connect', protocol, '10:uuid', 0])
-    return client.connection.pair.wait('right')
-  }).then(() => {
-    client.connection.other().send([
-      'sync',
-      1,
-      { type: 'A' },
-      { id: [1, '10:uuid', 0], time: 1 }
-    ])
-    return client.connection.pair.wait('right')
-  }).then(() => {
-    expect(app.log.store.created[0][1].user).toEqual('10')
-  })
-})
-
 it('waits for last processing before destroy', () => {
   const app = createServer()
 
