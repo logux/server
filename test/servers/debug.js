@@ -10,11 +10,8 @@ const app = new Server({
   supports: '1.x'
 })
 
-app.debugError = error => {
-  process.stderr.write(
-    `debugError was called with error '${ error }' ` +
-    `and stacktrace '${ error.stack }'\n`
-  )
+app.debugError = e => {
+  console.error(`debugError: ${ e.stack }`)
 }
 
 setTimeout(() => {
