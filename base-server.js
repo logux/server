@@ -209,7 +209,7 @@ class BaseServer {
    * })
    */
   auth (authenticator) {
-    this.authenticator = authenticator
+    this.authenticator = (a, b, c) => forcePromise(authenticator(a, b, c))
   }
 
   /**
@@ -479,15 +479,16 @@ module.exports = BaseServer
  * @param {string} id User ID.
  * @param {any} credentials The client credentials.
  * @param {Client} client Client object.
- * @return {Promise} Promise with `true` or `false`.
+ * @return {boolean|Promise} `true` or Promise with `true`
+ *                           if credentials was correct
  */
 
 /**
  * @callback authorizer
  * @param {Action} action The action data.
  * @param {Meta} meta The action metadata.
- * @return {Promise} Promise with `true` if client are allowed
- *                   to use this action.
+ * @return {boolean|Promise} `true` or Promise with `true` if client are allowed
+ *                           to use this action.
  */
 
 /**

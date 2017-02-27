@@ -150,7 +150,8 @@ it('reports on wrong authentication', () => {
 it('authenticates user', () => {
   const test = createReporter()
   test.app.auth((id, token, who) => Promise.resolve(
-    token === 'token' && id === '10' && who === client))
+    token === 'token' && id === '10' && who === client
+  ))
   const client = createClient(test.app)
 
   return client.connection.connect().then(() => {
@@ -160,12 +161,28 @@ it('authenticates user', () => {
     ])
     return client.connection.pair.wait('right')
   }).then(() => {
-    expect(test.app.nodeIds).toEqual({ '10:random': client })
     expect(client.user).toEqual('10')
     expect(client.nodeId).toEqual('10:random')
     expect(client.sync.authenticated).toBeTruthy()
+    expect(test.app.nodeIds).toEqual({ '10:random': client })
     expect(test.names).toEqual(['connect', 'authenticated'])
     expect(test.reports[1]).toEqual(['authenticated', test.app, client])
+  })
+})
+
+it('supports non-promise authenticator', () => {
+  const test = createReporter()
+  test.app.auth((id, token) => token === 'token')
+  const client = createClient(test.app)
+
+  return client.connection.connect().then(() => {
+    const protocol = client.sync.localProtocol
+    client.connection.other().send([
+      'connect', protocol, '10:random', 0, { credentials: 'token' }
+    ])
+    return client.connection.pair.wait('right')
+  }).then(() => {
+    expect(client.sync.authenticated).toBeTruthy()
   })
 })
 
