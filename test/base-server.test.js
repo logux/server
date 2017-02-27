@@ -565,7 +565,7 @@ it('processes actions', () => {
       expect(test.reports[1][1]).toEqual(test.app)
       expect(test.reports[1][2]).toEqual({ type: 'FOO' })
       expect(test.reports[1][3].added).toEqual(1)
-      expect(test.reports[1][4]).toBeCloseTo(0, -1)
+      expect(test.reports[1][4]).toBeCloseTo(0, -2)
     })
 })
 
