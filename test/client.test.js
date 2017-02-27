@@ -29,10 +29,12 @@ function createServer (opts, reporter) {
 
 function createReporter () {
   const reports = []
+  const names = []
   const app = createServer({ }, function () {
+    names.push(arguments[0])
     reports.push(Array.prototype.slice.call(arguments, 0))
   })
-  return { app, reports }
+  return { app, reports, names }
 }
 
 let lastClient = 0
@@ -100,8 +102,7 @@ it('removes itself on destroy', () => {
       expect(test.app.clients).toEqual({ })
       expect(test.app.nodeIds).toEqual({ })
       expect(client.connection.connected).toBeFalsy()
-      expect(test.reports[0][0]).toEqual('connect')
-      expect(test.reports[1][0]).toEqual('authenticated')
+      expect(test.names).toEqual(['connect', 'authenticated', 'disconnect'])
       expect(test.reports[2]).toEqual(['disconnect', test.app, client])
     })
 })
@@ -115,7 +116,7 @@ it('does not report users disconnects on server destroy', () => {
     test.app.destroy()
     expect(test.app.clients).toEqual({ })
     expect(client.connection.connected).toBeFalsy()
-    expect(test.reports[0][0]).toEqual('connect')
+    expect(test.names).toEqual(['connect', 'destroy'])
     expect(test.reports[1]).toEqual(['destroy', test.app])
   })
 })
@@ -140,12 +141,9 @@ it('reports on wrong authentication', () => {
     client.connection.other().send(['connect', protocol, 'client', 0])
     return client.connection.pair.wait('right')
   }).then(() => {
-    expect(test.reports.length).toEqual(3)
-    expect(test.reports[0][0]).toEqual('connect')
-    expect(test.reports[1][0]).toEqual('unauthenticated')
+    expect(test.names).toEqual(['connect', 'unauthenticated', 'disconnect'])
     expect(test.reports[1][1]).toEqual(test.app)
     expect(test.reports[1][2]).toEqual(client)
-    expect(test.reports[2][0]).toEqual('disconnect')
   })
 })
 
@@ -166,7 +164,7 @@ it('authenticates user', () => {
     expect(client.user).toEqual('10')
     expect(client.nodeId).toEqual('10:random')
     expect(client.sync.authenticated).toBeTruthy()
-    expect(test.reports[0][0]).toEqual('connect')
+    expect(test.names).toEqual(['connect', 'authenticated'])
     expect(test.reports[1]).toEqual(['authenticated', test.app, client])
   })
 })
@@ -178,7 +176,7 @@ it('reports about synchronization errors', () => {
     client.connection.other().send(['error', 'wrong-format'])
     return client.connection.pair.wait()
   }).then(() => {
-    expect(test.reports[0][0]).toEqual('connect')
+    expect(test.names).toEqual(['connect', 'syncError'])
     expect(test.reports[1][0]).toEqual('syncError')
     expect(test.reports[1][1]).toEqual(test.app)
     expect(test.reports[1][2]).toEqual(client)
@@ -196,9 +194,7 @@ it('checks subprotocol', () => {
     ])
     return client.connection.pair.wait('right')
   }).then(() => {
-    expect(test.reports.length).toEqual(3)
-    expect(test.reports[0][0]).toEqual('connect')
-    expect(test.reports[1][0]).toEqual('clientError')
+    expect(test.names).toEqual(['connect', 'clientError', 'disconnect'])
     expect(test.reports[1][3].message).toEqual(
       'Only 0.x application subprotocols are supported, but you use 1.0.0')
     expect(test.reports[2][0]).toEqual('disconnect')
@@ -317,5 +313,13 @@ it('disconnects zombie', () => {
     client2.auth({ }, '10:random')
   }).then(() => {
     expect(Object.keys(test.app.clients)).toEqual([client2.key])
+    expect(test.names).toEqual([
+      'connect',
+      'connect',
+      'authenticated',
+      'zombie',
+      'authenticated'
+    ])
+    expect(test.reports[3]).toEqual(['zombie', test.app, client1])
   })
 })

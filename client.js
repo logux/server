@@ -137,7 +137,9 @@ class Client {
    */
   destroy () {
     this.destroyed = true
-    if (!this.app.destroing) this.app.reporter('disconnect', this.app, this)
+    if (!this.app.destroing && !this.zombie) {
+      this.app.reporter('disconnect', this.app, this)
+    }
     if (this.sync.connected) this.sync.destroy()
     if (this.nodeId) delete this.app.nodeIds[this.nodeId]
     delete this.app.clients[this.key]
@@ -156,6 +158,7 @@ class Client {
         if (result) {
           const zombie = this.app.nodeIds[this.nodeId]
           if (zombie) {
+            zombie.zombie = true
             this.app.reporter('zombie', this.app, zombie)
             zombie.destroy()
           }

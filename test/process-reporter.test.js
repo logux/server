@@ -178,6 +178,10 @@ it('reports error from unautheficated user', () => {
   expect(out).toMatchSnapshot()
 })
 
+it('reports zombie', () => {
+  expect(reportersOut('zombie', app, authed)).toMatchSnapshot()
+})
+
 it('reports destroy', () => {
   expect(reportersOut('destroy', app)).toMatchSnapshot()
 })

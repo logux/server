@@ -161,6 +161,15 @@ const reporters = {
         ['Duration', `${ duration } ms`]
       ])
     ]
+  },
+
+  zombie (c, app, client) {
+    return [
+      common.warn(c, 'Zombie client was disconnected'),
+      common.params(c, [
+        ['Node ID', client.nodeId]
+      ])
+    ]
   }
 
 }

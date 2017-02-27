@@ -168,3 +168,10 @@ exports[`reports synchroniation error 1`] = `
 
 "
 `;
+
+exports[`reports zombie 1`] = `
+"[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mZombie client was disconnected[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Node ID: [1m100[22m:H10Nf5stl
+
+"
+`;
