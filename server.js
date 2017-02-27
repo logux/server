@@ -89,6 +89,7 @@ class Server extends BaseServer {
     })
 
     const onError = e => {
+      this.emitter.emit('error', e)
       this.reporter('runtimeError', this, undefined, e)
       if (this.env === 'development') {
         this.debugError(e)

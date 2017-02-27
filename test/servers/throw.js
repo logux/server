@@ -4,11 +4,13 @@
 
 const Server = require('../../server')
 
-new Server({
+const app = new Server({
   nodeId: 'server',
   subprotocol: '1.0.0',
   supports: '1.x'
 })
+
+app.on('error', e => console.log(`Error event: ${ e.message }`))
 
 setTimeout(() => {
   const error = new Error('Test Error')

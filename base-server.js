@@ -319,16 +319,17 @@ class BaseServer {
    * Subscribe for synchronization events. It implements nanoevents API.
    * Supported events:
    *
+   * * `error`: server error.
    * * `processed`: action processing was finished.
    *
-   * @param {"processed"} event The event name.
+   * @param {"error"|"processed"} event The event name.
    * @param {listener} listener The listener function.
    *
    * @return {function} Unbind listener from event.
    *
    * @example
-   * sync.on('processed', error => {
-   *   finished += 1
+   * sync.on('error', error => {
+   *   trackError(error)
    * })
    */
   on (event, listener) {
@@ -339,7 +340,7 @@ class BaseServer {
    * Add one-time listener for synchronization events.
    * See {@link BaseServer#on} for supported events.
    *
-   * @param {"processed"} event The event name.
+   * @param {"error"|"processed"} event The event name.
    * @param {listener} listener The listener function.
    *
    * @return {function} Unbind listener from event.
