@@ -300,7 +300,7 @@ it('waits for last processing before destroy', () => {
   }).then(() => {
     expect(destroyed).toBeFalsy()
     expect(app.processing).toEqual(1)
-    expect(client.processing).toBeTruthy()
+    expect(Object.keys(app.clients)).toEqual([])
 
     const meta3 = { id: [3, '10:r', 0], reasons: ['test'] }
     return app.log.add({ type: 'FOO' }, meta3)

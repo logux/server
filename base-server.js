@@ -177,10 +177,7 @@ class BaseServer {
     this.lastClient = 0
 
     this.unbind.push(() => {
-      for (const i in this.clients) {
-        const client = this.clients[i]
-        if (!client.processing) client.destroy()
-      }
+      for (const i in this.clients) this.clients[i].destroy()
     })
     this.unbind.push(() => new Promise(resolve => {
       if (this.processing === 0) {
@@ -445,18 +442,9 @@ class BaseServer {
         return false
       }
 
-      const client = this.nodeIds[meta.id[1]]
-
       this.processing += 1
-      if (client) client.processing = true
-
       return forcePromise(type.process(action, meta)).then(() => {
         this.processing -= 1
-        if (client) {
-          client.processing = false
-          if (this.destroing) client.destroy()
-        }
-
         this.reporter('processed', this, action, meta, Date.now() - start)
         this.emitter.emit('processed', action, meta)
       })
