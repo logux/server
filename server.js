@@ -89,7 +89,6 @@ class Server extends BaseServer {
     })
 
     const onError = e => {
-      this.reporter('runtimeError', this, undefined, e)
       this.emitter.emit('error', e)
       this.destroy().then(() => {
         process.exit(1)

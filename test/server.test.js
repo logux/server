@@ -141,13 +141,6 @@ it('shows uncatch errors', () => checkError('throw.js'))
 
 it('shows uncatch rejects', () => checkError('uncatch.js'))
 
-it('calls debugError on error in development', () => {
-  process.env.NODE_ENV = 'development'
-  return checkError('debug.js')
-})
-
-it('does not call debugError in non-development', () => checkError('debug.js'))
-
 it('use environment variables for config', () => {
   process.env.LOGUX_PORT = 31337
   return checkOut('options.js')

@@ -24,8 +24,8 @@ function uniqPort () {
   return lastPort
 }
 
-function createServer (options) {
-  const created = new BaseServer(options || DEFAULT_OPTIONS)
+function createServer (options, reporter) {
+  const created = new BaseServer(options || DEFAULT_OPTIONS, reporter)
   created.auth(() => Promise.resolve(true))
   return created
 }
@@ -43,13 +43,14 @@ function createTest () {
 
 let app, server
 
-function createReporter () {
+function createReporter (opts) {
   const result = { }
   result.reports = []
-  app = new BaseServer(DEFAULT_OPTIONS, function () {
+  result.names = []
+  app = createServer(opts, function () {
+    result.names.push(arguments[0])
     result.reports.push(Array.prototype.slice.call(arguments, 0))
   })
-  app.auth(() => Promise.resolve(true))
   result.app = app
   return result
 }
@@ -510,8 +511,7 @@ it('checks that user allow to send this action', () => {
   })
 
   return test.app.log.add({ type: 'FOO' }, { reasons: ['test'] }).then(() => {
-    expect(test.reports.length).toEqual(2)
-    expect(test.reports[0][0]).toEqual('add')
+    expect(test.names).toEqual(['add', 'denied'])
     expect(test.reports[1]).toEqual([
       'denied', test.app, { type: 'FOO' }, deniedMeta
     ])
@@ -530,9 +530,7 @@ it('supports Promise in access', () => {
   })
 
   return test.app.log.add({ type: 'FOO' }, { reasons: ['test'] }).then(() => {
-    expect(test.reports.length).toEqual(2)
-    expect(test.reports[0][0]).toEqual('add')
-    expect(test.reports[1][0]).toEqual('denied')
+    expect(test.names).toEqual(['add', 'denied'])
   })
 })
 
@@ -561,9 +559,7 @@ it('processes actions', () => {
     .then(() => {
       expect(processed).toEqual([{ type: 'FOO' }])
       expect(fired).toEqual([{ type: 'FOO' }])
-      expect(test.reports.length).toEqual(2)
-      expect(test.reports[0][0]).toEqual('add')
-      expect(test.reports[1][0]).toEqual('processed')
+      expect(test.names).toEqual(['add', 'processed'])
       expect(test.reports[1][1]).toEqual(test.app)
       expect(test.reports[1][2]).toEqual({ type: 'FOO' })
       expect(test.reports[1][3].added).toEqual(1)
@@ -607,9 +603,8 @@ it('supports Promise in process', () => {
     .then(() => wait(60))
     .then(() => {
       expect(processed).toEqual([{ type: 'FOO' }])
-      expect(test.reports.length).toEqual(2)
-      expect(test.reports[1][0]).toEqual('processed')
-      expect(test.reports[1][4]).toBeCloseTo(50, -1)
+      expect(test.names).toEqual(['add', 'processed'])
+      expect(test.reports[1][4]).toBeCloseTo(50, -2)
     })
 })
 
@@ -632,4 +627,30 @@ it('has full events API', () => {
 
   expect(always).toEqual(2)
   expect(once).toEqual(1)
+})
+
+it('shows error', () => {
+  const test = createReporter({
+    subprotocol: '0.0.0',
+    supports: '0.x',
+    nodeId: 'server',
+    env: 'development'
+  })
+  test.app.debugError = jest.fn()
+
+  const error = new Error('Test')
+  test.app.emitter.emit('error', error)
+
+  expect(test.reports).toEqual([
+    ['runtimeError', test.app, undefined, error]
+  ])
+  expect(test.app.debugError).toHaveBeenCalledWith(error)
+})
+
+it('does not send errors in non-development mode', () => {
+  const test = createReporter()
+  test.app.debugError = jest.fn()
+  const error = new Error('Test')
+  test.app.emitter.emit('error', error)
+  expect(test.app.debugError).not.toHaveBeenCalledWith(error)
 })

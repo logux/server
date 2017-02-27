@@ -158,11 +158,10 @@ class BaseServer {
     this.env = this.options.env || process.env.NODE_ENV || 'development'
 
     this.emitter = new NanoEvents()
-    if (this.env === 'development') {
-      this.on('error', e => {
-        this.debugError(e)
-      })
-    }
+    this.on('error', e => {
+      this.reporter('runtimeError', this, undefined, e)
+      if (this.env === 'development') this.debugError(e)
+    })
 
     this.unbind = []
 
