@@ -340,3 +340,27 @@ it('disconnects zombie', () => {
     expect(test.reports[3]).toEqual(['zombie', test.app, client1])
   })
 })
+
+it('checks action creator', () => {
+  const test = createReporter()
+  test.app.log.on('before', (action, meta) => {
+    meta.reasons.push('test')
+  })
+
+  const client = createClient(test.app)
+  return client.connection.connect().then(() => {
+    const protocol = client.sync.localProtocol
+    client.connection.other().send(['connect', protocol, '10:uuid', 0])
+    return client.connection.pair.wait('right')
+  }).then(() => {
+    client.connection.other().send(['sync', 2,
+      { type: 'FOO' }, { id: [1, '10:uuid', 0] },
+      { type: 'FOO' }, { id: [2, '1:uuid', 0] }
+    ])
+    return client.connection.pair.wait('right')
+  }).then(() => {
+    expect(test.names).toEqual(['connect', 'authenticated', 'denied', 'add'])
+    expect(test.reports[2][3].id).toEqual([2, '1:uuid', 0])
+    expect(test.reports[3][3].id).toEqual([1, '10:uuid', 0])
+  })
+})

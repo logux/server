@@ -458,6 +458,15 @@ class BaseServer {
       { reasons: ['error'], status: 'processed' })
   }
 
+  getUser (nodeId) {
+    const pos = nodeId.indexOf(':')
+    if (pos !== -1) {
+      return nodeId.slice(0, pos)
+    } else {
+      return false
+    }
+  }
+
 }
 
 module.exports = BaseServer

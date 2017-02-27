@@ -85,6 +85,7 @@ class Client {
     this.sync = new ServerSync(app.nodeId, app.log, connection, {
       credentials,
       subprotocol: app.options.subprotocol,
+      inFilter: this.filter.bind(this),
       timeout: app.options.timeout,
       ping: app.options.ping,
       auth: this.auth.bind(this)
@@ -148,10 +149,8 @@ class Client {
   auth (credentials, nodeId) {
     this.nodeId = nodeId
 
-    const pos = nodeId.indexOf(':')
-    if (pos !== -1) {
-      this.user = nodeId.slice(0, pos)
-    }
+    const user = this.app.getUser(nodeId)
+    if (user !== false) this.user = user
 
     return this.app.authenticator(this.user, credentials, this)
       .then(result => {
@@ -169,6 +168,15 @@ class Client {
         }
         return result
       })
+  }
+
+  filter (action, meta) {
+    if (this.user && this.user !== this.app.getUser(meta.id[1])) {
+      this.app.reporter('denied', this.app, action, meta)
+      return Promise.resolve(false)
+    } else {
+      return Promise.resolve(true)
+    }
   }
 
 }
