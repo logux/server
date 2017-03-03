@@ -395,7 +395,7 @@ class BaseServer {
    * @example
    * app.type('CHANGE_NAME', {
    *   access (action, meta) {
-   *     return Promise.resolve(action.user === meta.user)
+   *     return action.user === meta.user
    *   },
    *   process (action, meta) {
    *     if (isFirstOlder(lastNameChange(action.user), meta)) {
