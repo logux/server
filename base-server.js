@@ -86,7 +86,6 @@ function forcePromise (callback) {
  * }
  */
 class BaseServer {
-
   constructor (options, reporter) {
     /**
      * Server options.
@@ -489,7 +488,6 @@ class BaseServer {
       return false
     }
   }
-
 }
 
 module.exports = BaseServer

@@ -15,21 +15,22 @@ const semver = require('semver')
  * const client = app.clients[0]
  */
 class Client {
-
   constructor (app, connection, key) {
     this.app = app
 
     /**
      * User ID. It will be filled from client’s node ID.
-     * @type {string}
+     * It will be undefined before correct authentication.
+     * @type {string|undefined}
      */
-    this.user
+    this.user = undefined
 
     /**
      * Unique client’s node ID.
-     * @type {string}
+     * It will be undefined before correct authentication.
+     * @type {string|undefined}
      */
-    this.nodeId
+    this.nodeId = undefined
 
     /**
      * Does server process some action from client.
@@ -180,7 +181,6 @@ class Client {
       return Promise.resolve(true)
     }
   }
-
 }
 
 module.exports = Client

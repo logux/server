@@ -34,7 +34,6 @@ yargs
   .example('LOGUX_PORT=1337 $0')
   .locale('en')
   .help()
-yargs.argv
 
 /**
  * End-user API to create Logux server.
@@ -80,7 +79,6 @@ yargs.argv
  * @extends BaseServer
  */
 class Server extends BaseServer {
-
   constructor (options) {
     options.pid = process.pid
 
@@ -140,7 +138,6 @@ class Server extends BaseServer {
       key: argv.k || env.LOGUX_KEY || defaults.key
     }
   }
-
 }
 
 module.exports = Server
