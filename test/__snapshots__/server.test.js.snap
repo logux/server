@@ -31,8 +31,7 @@ exports[`shows help 1`] = `
   --help      Show help                                                [boolean]
 
 Examples:
-  test/servers/options.js --port 31337
-  --host 127.0.0.1
+  test/servers/options.js --port 31337 --host 127.0.0.1
   LOGUX_PORT=1337 test/servers/options.js
 
 Corresponding ENV variables: LOGUX_HOST, LOGUX_PORT, LOGUX_KEY, LOGUX_CERT
