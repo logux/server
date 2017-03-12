@@ -19,7 +19,8 @@
     "strip-ansi": "^3.0.1",
     "ws": "^2.2.0",
     "yargs": "^7.0.1",
-    "yyyy-mm-dd": "^1.0.1"
+    "yyyy-mm-dd": "^1.0.1",
+    "sequelize": "^3.30.2"
   },
   "devDependencies": {
     "docdash": "^0.4.0",
@@ -35,7 +36,10 @@
     "lint-staged": "^3.3.1",
     "pre-commit": "^1.2.2",
     "rimraf": "^2.6.1",
-    "yaspeller-ci": "^0.2.0"
+    "yaspeller-ci": "^0.2.0",
+    "sqlite3": "^3.1.8",
+    "pg": "^6.1.4",
+    "pg-hstore": "^2.3.2"
   },
   "scripts": {
     "lint-staged": "lint-staged",
