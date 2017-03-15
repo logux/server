@@ -1,20 +1,21 @@
 var VERSION = 1
 
-function nextEntry (request) {
-  return function (cursor) {
-    if (cursor) {
-      cursor.value.meta.added = cursor.value.added
+function nextEntry (store, order, offset) {
+  opts = {
+    order: (order + ' DESC'),
+    offset: offset,
+    limit: 100
+  }
+  return store.Log.findAll(opts).then(function (entries) {
+    if (entries.size > 0) {
       return {
-        entries: [[cursor.value.action, cursor.value.meta]],
-        next: function () {
-          cursor.continue()
-          return promisify(request).then(nextEntry(request))
-        }
+        entries: entries,
+        next: nextEntry(store, order, offset + 100)
       }
     } else {
       return { entries: [] }
     }
-  }
+  })
 }
 
 /**
@@ -55,9 +56,9 @@ function SQLStore (db, username, password, opts) {
   }
 
   if (typeof db === 'string') {
-    this.connection = new Sequelize(db, username, password, opts)
+    this.db = new Sequelize(db, username, password, opts)
   } else if (db instanceof Sequelize) {
-    this.connection = db
+    this.db = db
   } else {
     throw new Error('Expected database name or connection object for SQLStore')
   }
@@ -71,7 +72,7 @@ SQLStore.prototype = {
   init: function init () {
     if (this.initing) return this.initing
 
-    this.Log = this.connection.define(this.prefix + '_logs', {
+    this.Log = this.db.define(this.prefix + '_logs', {
       added: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -98,7 +99,7 @@ SQLStore.prototype = {
       ]
     })
 
-    this.Reason = this.connection.define(this.prefix + '_reasons', {
+    this.Reason = this.db.define(this.prefix + '_reasons', {
       logAdded: { type: Sequelize.INTEGER },
       name: { type: Sequelize.TEXT }
     }, {
@@ -114,7 +115,7 @@ SQLStore.prototype = {
       ]
     })
 
-    this.Extra = this.connection.define(this.prefix + '_extras', {
+    this.Extra = this.db.define(this.prefix + '_extras', {
       key: { type: Sequelize.TEXT },
       data: { type: Sequelize.TEXT }
     }, {
@@ -122,15 +123,17 @@ SQLStore.prototype = {
       underscored: true,
       freezeTableName: true,
       indexes: [
-        type: 'UNIQUE',
-        unique: true,
-        fields: ['key']
+        {
+          type: 'UNIQUE',
+          unique: true,
+          fields: ['key']
+        }
       ]
     })
 
     var store = this
 
-    this.initing = this.connection.sync().then(function () {
+    this.initing = this.db.sync().then(function () {
       return this.Extra.create({
         key: 'lastSynced',
         data: JSON.stringify({ sent: 0, received: 0 })
@@ -145,21 +148,18 @@ SQLStore.prototype = {
   get: function get (opts) {
     var request
     return this.init().then(function (store) {
-      var log = store.os('log')
-      if (opts.order === 'created') {
-        request = log.index('created').openCursor(null, 'prev')
-      } else {
-        request = log.openCursor(null, 'prev')
-      }
-      return promisify(request).then(nextEntry(request))
+      if (!opts) opts = { }
+      if (!opts.order) opts.order = 'added'
+      return nextEntry(store, opts.order, 0)
     })
   },
 
   has: function has (id) {
     return this.init().then(function (store) {
-      return promisify(store.os('log').index('id').get(id))
-    }).then(function (result) {
-      return !!result
+      return store.Log.findOne(
+        { where: { logId: id } }).then(function (result) {
+        return !!result
+      })
     })
   },
 
