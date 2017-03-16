@@ -1,7 +1,7 @@
 'use strict'
 
-const processReporter = require('../reporters/human/process')
-const common = require('../reporters/human/common')
+const processReporter = require('../../../reporters/human/process')
+const common = require('../../../reporters/human/common')
 
 const ServerConnection = require('logux-sync').ServerConnection
 const createServer = require('http').createServer
@@ -9,8 +9,8 @@ const SyncError = require('logux-sync').SyncError
 const yyyymmdd = require('yyyy-mm-dd')
 const path = require('path')
 
-const BaseServer = require('../base-server')
-const Client = require('../client')
+const BaseServer = require('../../../base-server')
+const Client = require('../../../client')
 
 function reportersOut () {
   return processReporter.apply({}, arguments)

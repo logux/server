@@ -1,9 +1,9 @@
 'use strict'
 
-const errorReporter = require('../reporters/human/error')
-const common = require('../reporters/human/common')
+const errorReporter = require('../../../reporters/human/error')
+const common = require('../../../reporters/human/common')
 
-const BaseServer = require('../base-server')
+const BaseServer = require('../../../base-server')
 
 function errorHelperOut () {
   return errorReporter.apply({}, arguments).replace(/\r\v/g, '\n')
