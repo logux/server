@@ -1,5 +1,6 @@
 'use strict'
 
+const reportersCommon = require('../common')
 const pkg = require('../../package.json')
 
 function clientParams (client) {
@@ -13,16 +14,6 @@ function clientParams (client) {
 const reporters = {
 
   listen (app) {
-    let url
-    if (app.listenOptions.server) {
-      url = 'Custom HTTP server'
-    } else {
-      const protocol = app.listenOptions.cert ? 'wss://' : 'ws://'
-      const host = app.listenOptions.host
-      const port = app.listenOptions.port
-      url = `${ protocol }${ host }:${ port }`
-    }
-
     let msg
     if (app.env === 'development') {
       msg = 'Logux server is listening in non-secure development mode'
@@ -39,7 +30,7 @@ const reporters = {
         environment: app.env,
         subprotocol: app.options.subprotocol,
         supports: app.options.supports,
-        listen: url
+        listen: reportersCommon.getAppUrl(app)
       }
     }
   },

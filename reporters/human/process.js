@@ -1,5 +1,6 @@
 'use strict'
 
+const reportersCommon = require('../common')
 const common = require('./common.js')
 const pkg = require('../../package.json')
 
@@ -18,16 +19,6 @@ function clientParams (c, client) {
 const reporters = {
 
   listen (c, app) {
-    let url
-    if (app.listenOptions.server) {
-      url = 'Custom HTTP server'
-    } else {
-      const protocol = app.listenOptions.cert ? 'wss://' : 'ws://'
-      const host = app.listenOptions.host
-      const port = app.listenOptions.port
-      url = `${ protocol }${ host }:${ port }`
-    }
-
     let result = [
       common.info(c, 'Logux server is listening'),
       common.params(c, [
@@ -37,7 +28,7 @@ const reporters = {
         ['Environment', app.env],
         ['Subprotocol', app.options.subprotocol],
         ['Supports', app.options.supports],
-        ['Listen', url]
+        ['Listen', reportersCommon.getAppUrl(app)]
       ])
     ]
 
