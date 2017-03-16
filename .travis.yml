@@ -7,5 +7,9 @@ node_js:
   - "6"
 services:
   - redis-server
+addons:
+  postgresql: '9.4'
+before_script:
+  - psql -c 'create database logux_test;' -U postgres
 git:
   depth: 5
