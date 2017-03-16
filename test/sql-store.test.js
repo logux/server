@@ -55,7 +55,7 @@ function check (indexed, created, added) {
 function nope () { }
 
 it('fails without connection info', () => {
-  expect(() => { new SQLStore() }).toThrowError()
+  expect(() => { new SQLStore({}) }).toThrowError(/connection/)
 })
 
 it('connects to db with Sequelize connection', () => {
