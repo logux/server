@@ -148,7 +148,13 @@ it('reports disconnect from unauthenticated user', () => {
 
 it('reports error', () => {
   const file = __filename
-  const jest = path.join(__dirname, '..', 'node_modules', 'jest', 'index.js')
+  const jest = path.join(
+    __dirname,
+    '../../..',
+    'node_modules',
+    'jest',
+    'index.js'
+  )
   const error = new Error('Some mistake')
   const errorStack = [
     `${ error.name }: ${ error.message }`,
