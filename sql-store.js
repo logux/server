@@ -1,7 +1,5 @@
 'use strict'
 
-const VERSION = 1
-
 const Sequelize = require('sequelize')
 
 function nextEntry (store, order, currentOffset) {
@@ -235,15 +233,16 @@ SQLStore.prototype = {
   changeMeta: function changeMeta (id, diff) {
     return this.init().then(store => store.Log.findOne({
       where: { logId: id.toString() }
-    }).then(exist => {
-      if (exist) {
-        const meta = JSON.parse(exist.meta)
+    }).then(entry => {
+      if (entry) {
+        const meta = JSON.parse(entry.meta)
         for (const key in diff) meta[key] = diff[key]
+        if (diff.reasons) meta.reasons = diff.reasons
         return store.Log.update({
           meta: JSON.stringify(meta)
         }, {
-          where: { added: exist.added }
-        }).then(entry => {
+          where: { added: entry.added }
+        }).then(() => {
           if (diff.reasons) {
             return store.Reason.destroy({
               where: { logAdded: entry.added }
@@ -252,60 +251,58 @@ SQLStore.prototype = {
                 const reasonAttrs = { logAdded: entry.added, name: reason }
                 return reasonAttrs
               })
-              return store.Reason.bulkCreate(reasons).then(() => true)
+              return store.Reason.bulkCreate(reasons)
             })
           } else {
-            return true
+            return Promise.resolve(true)
           }
         })
       } else {
-        return false
+        return Promise.resolve(false)
       }
     }))
   },
 
   removeReason: function removeReason (reason, criteria, callback) {
-    return this.init().then(store => {
-      const log = store.os('log', 'write')
-      const request = log.index('reasons').openCursor(reason)
-      return new Promise((resolve, reject) => {
-        rejectify(request, reject)
-        request.onsuccess = e => {
-          if (!e.target.result) {
-            resolve()
-            return
-          }
-
-          const entry = e.target.result.value
-          const c = criteria
-          if (typeof c.minAdded !== 'undefined' && entry.added < c.minAdded) {
-            e.target.result.continue()
-            return
-          }
-          if (typeof c.maxAdded !== 'undefined' && entry.added > c.maxAdded) {
-            e.target.result.continue()
-            return
-          }
-
-          let process
-          if (entry.reasons.length === 1) {
-            entry.meta.reasons = []
-            entry.meta.added = entry.added
-            callback(entry.action, entry.meta)
-            process = log.delete(entry.added)
-          } else {
-            entry.reasons.splice(entry.reasons.indexOf(reason), 1)
-            entry.meta.reasons = entry.reasons
-            process = log.put(entry)
-          }
-
-          rejectify(process, reject)
-          process.onsuccess = () => {
-            e.target.result.continue()
-          }
-        }
+    const c = criteria
+    return this.init().then(store => store.Reason
+      .findAll({ where: { name: reason } })
+      .then(reasons => {
+        const entriesAdded = reasons.map(r => r.logAdded)
+        return store.Log.findAll({ where: { added: { in: entriesAdded } } })
+        .then(entries => {
+          const reasonsToDelete = []
+          return Promise.all(entries.map(entry => {
+            if (typeof c.minAdded !== 'undefined' && entry.added < c.minAdded) {
+              return Promise.resolve()
+            }
+            if (typeof c.maxAdded !== 'undefined' && entry.added > c.maxAdded) {
+              return Promise.resolve()
+            }
+            reasonsToDelete.push(entry.added)
+            const meta = JSON.parse(entry.meta)
+            if (meta.reasons.length === 1) {
+              meta.reasons = []
+              meta.added = entry.added
+              callback(JSON.parse(entry.action), meta)
+              return store.Log.destroy({
+                where: { added: entry.added }
+              })
+            } else {
+              meta.reasons.splice(meta.reasons.indexOf(reason), 1)
+              return store.Log.update({
+                meta: JSON.stringify(meta)
+              }, {
+                where: { added: entry.added }
+              })
+            }
+          }))
+          .then(() => store.Reason.destroy({
+            where: { logAdded: reasonsToDelete }
+          }))
+        })
       })
-    })
+    )
   },
 
   getLastAdded: function getLastAdded () {
