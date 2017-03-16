@@ -58,10 +58,6 @@ function nextEntry (store, order, currentOffset) {
  * var log = new Log({ store: new SQLStore(dbConnection), nodeId })
  */
 function SQLStore (db, username, password, options) {
-  if (typeof db === 'undefined') {
-    throw new Error('Expected database name or connection object for SQLStore')
-  }
-
   if (typeof db === 'string') {
     this.db = new Sequelize(db, username, password, options)
   } else if (db instanceof Sequelize) {
