@@ -23,13 +23,13 @@ function errorHelp (e) {
   }
 }
 
-module.exports = function errorReporter (err, app) {
-  const log = app.options.bunyanLogger
+module.exports = function errorReporter (err) {
   const help = errorHelp(err)
-  // TODO: maybe hint should be in error message?
-  log.error({
+  return {
+    level: 'error',
+    msg: help.description,
     details: {
       hint: help.hint
     }
-  }, help.description)
+  }
 }

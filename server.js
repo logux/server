@@ -86,7 +86,9 @@ class Server extends BaseServer {
 
     super(options, function () {
       if (options.reporter === 'bunyan') {
-        bunyanProcessReporter.apply(null, arguments)
+        const x = bunyanProcessReporter.apply(null, arguments)
+        const log = options.bunyanLogger
+        log[x.level](x.details, x.msg)
       } else {
         process.stderr.write(humanProcessReporter.apply(null, arguments))
       }
@@ -117,7 +119,9 @@ class Server extends BaseServer {
     const origin = BaseServer.prototype.listen
     return origin.apply(this, arguments).catch(e => {
       if (arguments[0].reporter === 'bunyan') {
-        bunyanErrorReporter(e, this)
+        const x = bunyanErrorReporter(e, this)
+        const log = arguments[0].bunyanLogger
+        log[x.level](x.details, x.msg)
       } else {
         process.stderr.write(humanErrorReporter(e, this))
       }

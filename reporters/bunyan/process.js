@@ -12,7 +12,7 @@ function clientParams (client) {
 
 const reporters = {
 
-  listen (log, app) {
+  listen (app) {
     let url
     if (app.listenOptions.server) {
       url = 'Custom HTTP server'
@@ -30,7 +30,9 @@ const reporters = {
       msg = 'Logux server is listening'
     }
 
-    log.info({
+    return {
+      level: 'info',
+      msg,
       details: {
         loguxServer: pkg.version,
         nodeId: app.nodeId,
@@ -39,126 +41,149 @@ const reporters = {
         supports: app.options.supports,
         listen: url
       }
-    }, msg)
+    }
   },
 
-  connect (log, app, client) {
-    log.info({
+  connect (app, client) {
+    return {
+      level: 'info',
+      msg: 'Client was connected',
       details: {
         clientId: client.key,
         ipAddress: client.remoteAddress
       }
-    }, 'Client was connected')
+    }
   },
 
-  unauthenticated (log, app, client) {
-    log.warn({
+  unauthenticated (app, client) {
+    return {
+      level: 'warn',
+      msg: 'Bad authentication',
       details: {
         nodeId: client.nodeId,
         subprotocol: client.sync.remoteSubprotocol,
         clientId: client.key
       }
-    }, 'Bad authentication')
+    }
   },
 
-  authenticated (log, app, client) {
-    log.info({
+  authenticated (app, client) {
+    return {
+      level: 'info',
+      msg: 'User was authenticated',
       details: {
         nodeId: client.nodeId,
         subprotocol: client.sync.remoteSubprotocol,
         clientId: client.key
       }
-    }, 'User was authenticated')
+    }
   },
 
-  disconnect (log, app, client) {
-    log.info({
+  disconnect (app, client) {
+    return {
+      level: 'info',
+      msg: 'Client was disconnected',
       details: clientParams(client)
-    }, 'Client was disconnected')
+    }
   },
 
-  destroy (log) {
-    log.info('Shutting down Logux server')
+  destroy () {
+    return {
+      level: 'info',
+      msg: 'Shutting down Logux server'
+    }
   },
 
-  runtimeError (log, app, err, action, meta) {
+  runtimeError (app, err, action, meta) {
     const details = {}
     if (meta) {
       details['actionID'] = meta.id
     }
-    // TODO: should we parse user details and provide it as object?
-    log.error({
+    return {
+      level: 'error',
+      msg: err,
       details
-    }, err)
+    }
   },
 
-  syncError (log, app, client, err) {
+  syncError (app, client, err) {
     let prefix
     if (err.received) {
       prefix = `SyncError from client: ${ err.description }`
     } else {
       prefix = `SyncError: ${ err.description }`
     }
-    // TODO: should we parse user details and provide it as object?
-    log.error({
+    return {
+      level: 'error',
+      msg: prefix,
       details: clientParams(client)
-    }, prefix)
+    }
   },
 
-  clientError (log, app, client, err) {
-    // TODO: should we parse user details and provide it as object?
-    log.warn({
+  clientError (app, client, err) {
+    return {
+      level: 'warn',
+      msg: `Client error: ${ err.description }`,
       details: clientParams(client)
-    }, `Client error: ${ err.description }`)
+    }
   },
 
-  add (log, app, action, meta) {
-    log.info({
+  add (app, action, meta) {
+    return {
+      level: 'info',
+      msg: 'Action was added',
       details: {
         time: new Date(meta.time),
         action,
         meta
       }
-    }, 'Action was added')
+    }
   },
 
-  clean (log, app, action, meta) {
-    log.info({
+  clean (app, action, meta) {
+    return {
+      level: 'info',
+      msg: 'Action was cleaned',
       details: {
         actionId: meta.id
       }
-    }, 'Action was cleaned')
+    }
   },
 
-  denied (log, app, action, meta) {
-    log.info({
+  denied (app, action, meta) {
+    return {
+      level: 'info',
+      msg: 'Action was denied',
       details: {
         actionId: meta.id
       }
-    }, 'Action was denied')
+    }
   },
 
-  processed (log, app, action, meta, duration) {
-    log.info({
+  processed (app, action, meta, duration) {
+    return {
+      level: 'info',
+      msg: 'Action was processed',
       details: {
         actionId: meta.id,
         duration
       }
-    }, 'Action was processed')
+    }
   },
 
-  zombie (log, app, client) {
-    log.info({
+  zombie (app, client) {
+    return {
+      level: 'info',
+      msg: 'Zombie client was disconnected',
       details: {
         nodeId: client.nodeId
       }
-    }, 'Zombie client was disconnected')
+    }
   }
 
 }
 
-module.exports = function processReporter (type, app) {
-  const log = app.options.bunyanLogger
-  const args = [log].concat(Array.prototype.slice.call(arguments, 1))
-  reporters[type].apply({ }, args)
+module.exports = function processReporter (type) {
+  const args = Array.prototype.slice.call(arguments, 1)
+  return reporters[type].apply({ }, args)
 }
