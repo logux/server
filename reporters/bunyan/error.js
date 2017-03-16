@@ -1,7 +1,5 @@
 'use strict'
 
-const common = require('./common')
-
 function errorHelp (e) {
   switch (e.code) {
     case 'EADDRINUSE':
@@ -26,10 +24,12 @@ function errorHelp (e) {
 }
 
 module.exports = function errorReporter (err, app) {
-  const c = common.color(app)
+  const log = app.options.bunyanLogger
   const help = errorHelp(err)
-  return common.message([
-    common.error(c, help.description),
-    common.hint(c, help.hint)
-  ])
+  // TODO: maybe hint should be in error message?
+  log.error({
+    details: {
+      hint: help.hint
+    }
+  }, help.description)
 }

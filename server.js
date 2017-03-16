@@ -2,8 +2,10 @@
 
 const yargs = require('yargs')
 
-const processReporter = require('./reporters/human/process')
-const errorReporter = require('./reporters/human/error')
+const humanProcessReporter = require('./reporters/human/process')
+const humanErrorReporter = require('./reporters/human/error')
+const bunyanProcessReporter = require('./reporters/bunyan/process')
+const bunyanErrorReporter = require('./reporters/bunyan/error')
 const BaseServer = require('./base-server')
 
 yargs
@@ -83,7 +85,11 @@ class Server extends BaseServer {
     options.pid = process.pid
 
     super(options, function () {
-      process.stderr.write(processReporter.apply(null, arguments))
+      if (options.reporter === 'bunyan') {
+        bunyanProcessReporter.apply(null, arguments)
+      } else {
+        process.stderr.write(humanProcessReporter.apply(null, arguments))
+      }
     })
 
     const onError = e => {
@@ -110,7 +116,12 @@ class Server extends BaseServer {
   listen () {
     const origin = BaseServer.prototype.listen
     return origin.apply(this, arguments).catch(e => {
-      process.stderr.write(errorReporter(e, this))
+      if (arguments[0].reporter === 'bunyan') {
+        bunyanErrorReporter(e, this)
+      } else {
+        process.stderr.write(humanErrorReporter(e, this))
+      }
+
       process.exit(1)
     })
   }

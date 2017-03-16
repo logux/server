@@ -1,23 +1,18 @@
 'use strict'
 
-const common = require('./common.js')
 const pkg = require('../../package.json')
 
-function clientParams (c, client) {
+function clientParams (client) {
   if (client.nodeId) {
-    return common.params(c, [
-      ['Node ID', client.nodeId]
-    ])
+    return { 'nodeId': client.nodeId }
   } else {
-    return common.params(c, [
-      ['Client ID', client.key]
-    ])
+    return { 'clientId': client.key }
   }
 }
 
 const reporters = {
 
-  listen (c, app) {
+  listen (log, app) {
     let url
     if (app.listenOptions.server) {
       url = 'Custom HTTP server'
@@ -28,160 +23,142 @@ const reporters = {
       url = `${ protocol }${ host }:${ port }`
     }
 
-    let result = [
-      common.info(c, 'Logux server is listening'),
-      common.params(c, [
-        ['Logux server', pkg.version],
-        ['PID', app.options.pid],
-        ['Node ID', app.nodeId],
-        ['Environment', app.env],
-        ['Subprotocol', app.options.subprotocol],
-        ['Supports', app.options.supports],
-        ['Listen', url]
-      ])
-    ]
-
+    let msg
     if (app.env === 'development') {
-      result = result.concat([
-        common.note(c, 'Server was started in non-secure development mode'),
-        common.note(c, 'Press Ctrl-C to shutdown server')
-      ])
+      msg = 'Logux server is listening in non-secure development mode'
+    } else {
+      msg = 'Logux server is listening'
     }
 
-    return result
+    log.info({
+      details: {
+        loguxServer: pkg.version,
+        nodeId: app.nodeId,
+        environment: app.env,
+        subprotocol: app.options.subprotocol,
+        supports: app.options.supports,
+        listen: url
+      }
+    }, msg)
   },
 
-  connect (c, app, client) {
-    return [
-      common.info(c, 'Client was connected'),
-      common.params(c, [
-        ['Client ID', client.key],
-        ['IP address', client.remoteAddress]
-      ])
-    ]
+  connect (log, app, client) {
+    log.info({
+      details: {
+        clientId: client.key,
+        ipAddress: client.remoteAddress
+      }
+    }, 'Client was connected')
   },
 
-  unauthenticated (c, app, client) {
-    return [
-      common.warn(c, 'Bad authentication'),
-      common.params(c, [
-        ['Node ID', client.nodeId],
-        ['Subprotocol', client.sync.remoteSubprotocol],
-        ['Client ID', client.key]
-      ])
-    ]
+  unauthenticated (log, app, client) {
+    log.warn({
+      details: {
+        nodeId: client.nodeId,
+        subprotocol: client.sync.remoteSubprotocol,
+        clientId: client.key
+      }
+    }, 'Bad authentication')
   },
 
-  authenticated (c, app, client) {
-    return [
-      common.info(c, 'User was authenticated'),
-      common.params(c, [
-        ['Node ID', client.nodeId],
-        ['Subprotocol', client.sync.remoteSubprotocol],
-        ['Client ID', client.key]
-      ])
-    ]
+  authenticated (log, app, client) {
+    log.info({
+      details: {
+        nodeId: client.nodeId,
+        subprotocol: client.sync.remoteSubprotocol,
+        clientId: client.key
+      }
+    }, 'User was authenticated')
   },
 
-  disconnect (c, app, client) {
-    return [
-      common.info(c, 'Client was disconnected'),
-      clientParams(c, client)
-    ]
+  disconnect (log, app, client) {
+    log.info({
+      details: clientParams(client)
+    }, 'Client was disconnected')
   },
 
-  destroy (c) {
-    return [
-      common.info(c, 'Shutting down Logux server')
-    ]
+  destroy (log) {
+    log.info('Shutting down Logux server')
   },
 
-  runtimeError (c, app, err, action, meta) {
-    let prefix = `${ err.name }: ${ err.message }`
-    if (err.name === 'Error') prefix = err.message
-
-    let extra = ''
-    if (meta) extra = common.params(c, [['Action ID', meta.id]])
-
-    return [
-      common.error(c, prefix),
-      common.prettyStackTrace(c, err, app.options.root),
-      extra
-    ]
+  runtimeError (log, app, err, action, meta) {
+    const details = {}
+    if (meta) {
+      details['actionID'] = meta.id
+    }
+    // TODO: should we parse user details and provide it as object?
+    log.error({
+      details
+    }, err)
   },
 
-  syncError (c, app, client, err) {
+  syncError (log, app, client, err) {
     let prefix
     if (err.received) {
       prefix = `SyncError from client: ${ err.description }`
     } else {
       prefix = `SyncError: ${ err.description }`
     }
-    return [
-      common.error(c, prefix),
-      clientParams(c, client)
-    ]
+    // TODO: should we parse user details and provide it as object?
+    log.error({
+      details: clientParams(client)
+    }, prefix)
   },
 
-  clientError (c, app, client, err) {
-    return [
-      common.warn(c, `Client error: ${ err.description }`),
-      clientParams(c, client)
-    ]
+  clientError (log, app, client, err) {
+    // TODO: should we parse user details and provide it as object?
+    log.warn({
+      details: clientParams(client)
+    }, `Client error: ${ err.description }`)
   },
 
-  add (c, app, action, meta) {
-    return [
-      common.info(c, 'Action was added'),
-      common.params(c, [
-        ['Time', new Date(meta.time)],
-        ['Action', action],
-        ['Meta', meta]
-      ])
-    ]
+  add (log, app, action, meta) {
+    log.info({
+      details: {
+        time: new Date(meta.time),
+        action,
+        meta
+      }
+    }, 'Action was added')
   },
 
-  clean (c, app, action, meta) {
-    return [
-      common.info(c, 'Action was cleaned'),
-      common.params(c, [
-        ['Action ID', meta.id]
-      ])
-    ]
+  clean (log, app, action, meta) {
+    log.info({
+      details: {
+        actionId: meta.id
+      }
+    }, 'Action was cleaned')
   },
 
-  denied (c, app, action, meta) {
-    return [
-      common.warn(c, 'Action was denied'),
-      common.params(c, [
-        ['Action ID', meta.id]
-      ])
-    ]
+  denied (log, app, action, meta) {
+    log.info({
+      details: {
+        actionId: meta.id
+      }
+    }, 'Action was denied')
   },
 
-  processed (c, app, action, meta, duration) {
-    return [
-      common.info(c, 'Action was processed'),
-      common.params(c, [
-        ['Action ID', meta.id],
-        ['Duration', `${ duration } ms`]
-      ])
-    ]
+  processed (log, app, action, meta, duration) {
+    log.info({
+      details: {
+        actionId: meta.id,
+        duration
+      }
+    }, 'Action was processed')
   },
 
-  zombie (c, app, client) {
-    return [
-      common.warn(c, 'Zombie client was disconnected'),
-      common.params(c, [
-        ['Node ID', client.nodeId]
-      ])
-    ]
+  zombie (log, app, client) {
+    log.info({
+      details: {
+        nodeId: client.nodeId
+      }
+    }, 'Zombie client was disconnected')
   }
 
 }
 
 module.exports = function processReporter (type, app) {
-  const c = common.color(app)
-  const args = [c].concat(Array.prototype.slice.call(arguments, 1))
-  return common.message(reporters[type].apply({ }, args))
+  const log = app.options.bunyanLogger
+  const args = [log].concat(Array.prototype.slice.call(arguments, 1))
+  reporters[type].apply({ }, args)
 }
