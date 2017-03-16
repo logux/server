@@ -38,8 +38,7 @@
     "rimraf": "^2.6.1",
     "yaspeller-ci": "^0.2.0",
     "sqlite3": "^3.1.8",
-    "pg": "^6.1.4",
-    "pg-hstore": "^2.3.2"
+    "pg": "^6.1.4"
   },
   "scripts": {
     "lint-staged": "lint-staged",
