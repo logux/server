@@ -33,6 +33,12 @@
     "stacktrace",
     "debugError",
     "nanoevents",
-    "SQLStore"
+    "SQLStore",
+    "precreated",
+    "postgres",
+    "sqlite",
+    "mssql",
+    "logux",
+    "sequelize"
   ]
 }
