@@ -4,3 +4,8 @@ node_js:
   - stable
   - "6"
   - "4"
+
+addons:
+  postgresql: '9.4'
+before_script:
+  - psql -c 'create database logux_test;' -U postgres
