@@ -171,7 +171,13 @@
       "authenticator",
       "Example sendAction",
       "clientId",
-      "Redis"
+      "Redis",
+      "SQLStore",
+      "precreated",
+      "postgres",
+      "sqlite",
+      "mssql",
+      "sequelize"
     ]
   }
 }
