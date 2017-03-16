@@ -32,6 +32,7 @@
     "loadOptions",
     "stacktrace",
     "debugError",
-    "nanoevents"
+    "nanoevents",
+    "SQLStore"
   ]
 }
