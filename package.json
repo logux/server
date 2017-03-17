@@ -54,8 +54,7 @@
     },
     "coveragePathIgnorePatterns": [
       "/node_modules/",
-      "/server.js",
-      "/reporters/reporter.js"
+      "/server.js"
     ]
   },
   "engines": {

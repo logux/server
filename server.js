@@ -2,8 +2,41 @@
 
 const yargs = require('yargs')
 
-const reporter = require('./reporters/reporter')
 const BaseServer = require('./base-server')
+const humanProcessReporter = require('./reporters/human/process')
+const humanErrorReporter = require('./reporters/human/error')
+const bunyanProcessReporter = require('./reporters/bunyan/process')
+const bunyanErrorReporter = require('./reporters/bunyan/error')
+
+function writeBunyanLog (logger, payload) {
+  const details = payload.details || {}
+  logger[payload.level](details, payload.msg)
+}
+
+function reportProcess () {
+  const app = arguments[1]
+  if (app.options.reporter === 'bunyan') {
+    if (!app.options.bunyanLogger) {
+      throw new Error('Missed bunyan logger')
+    }
+    const payload = bunyanProcessReporter.apply(null, arguments)
+    writeBunyanLog(app.options.bunyanLogger, payload)
+  } else {
+    process.stderr.write(humanProcessReporter.apply(null, arguments))
+  }
+}
+
+function reportRuntimeError (e, app) {
+  if (app.options.reporter === 'bunyan') {
+    if (!app.options.bunyanLogger) {
+      throw new Error('Missed bunyan logger')
+    }
+    const payload = bunyanErrorReporter(e)
+    writeBunyanLog(app.options.bunyanLogger, payload)
+  } else {
+    process.stderr.write(humanErrorReporter(e, app))
+  }
+}
 
 yargs
   .option('h', {
@@ -82,8 +115,7 @@ class Server extends BaseServer {
     options.pid = process.pid
 
     super(options, function () {
-      const args = [options].concat(Array.prototype.slice.call(arguments))
-      reporter.reportProcess.apply(null, args)
+      reportProcess.apply(null, arguments)
     })
 
     const onError = e => {
@@ -110,7 +142,7 @@ class Server extends BaseServer {
   listen () {
     const origin = BaseServer.prototype.listen
     return origin.apply(this, arguments).catch(e => {
-      reporter.reportRuntimeError(arguments[0], e)
+      reportRuntimeError(e, this)
       process.exit(1)
     })
   }
