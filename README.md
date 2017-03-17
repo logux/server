@@ -57,10 +57,6 @@ app.auth((userId, token) => {
   // TODO Check token and return a Promise with true or false.
 })
 
-app.log.on('add', (action, meta) => {
-  // TODO Do something on client action. Write to database, ask other service.
-})
-
 app.listen(app.loadOptions(process))
 ```
 
