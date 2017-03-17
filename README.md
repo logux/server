@@ -45,7 +45,6 @@ npm install --save logux-server logux-core
 Create `server.js` with this boilerplate:
 
 ```js
-const cleanEvery = require('logux-core').cleanEvery
 const Server = require('logux-server').Server
 
 const app = new Server({
@@ -62,11 +61,6 @@ app.log.on('add', (action, meta) => {
   // TODO Do something on client action. Write to database, ask other service.
 })
 
-cleanEvery(app.log, 1000)
-app.log.keep((action, meta) => {
-  // TODO return true if action should not be removed yet from log
-})
-
 app.listen(app.loadOptions(process))
 ```
 
@@ -77,8 +71,11 @@ Logux is a communication protocol. It doesn’t know anything about your databas
 You need to write custom logic inside your action callbacks.
 
 ```js
-app.log.on('add', (action, meta) => {
-  if (action.type === 'CHANGE_NAME') {
+app.type('CHANGE_NAME', {
+  access (action, meta, userId) {
+    return action.user === userId
+  }
+  process (action) {
     users.find({ id: action.user }).then(user => {
       user.update({ name: action.name })
     })
@@ -93,11 +90,11 @@ You can do whatever you want in the action listener.
 For one, you may just call the legacy REST API:
 
 ```js
-if (action.type === 'CHANGE_NAME') {
-  request.put(`http://example.com/users/${action.user}`).form({
-    name: action.name
-  })
-}
+  process (action) {
+    request.put(`http://example.com/users/${action.user}`).form({
+      name: action.name
+    })
+  }
 ```
 
 [`logux-core`]: https://github.com/logux/logux-core
