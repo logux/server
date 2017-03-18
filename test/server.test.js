@@ -43,6 +43,15 @@ function test (name, args) {
     server.on('close', exitCode => {
       let fixed = out.replace(DATE, '1970-01-01 00:00:00')
                      .replace(/PID:(\s+)\d+/, 'PID:$121384')
+                     .replace(/"pid":\d+,/g, '"pid":21384,')
+                     .replace(
+                       /"hostname":"[-.\w]+",/g,
+                       '"hostname":"MacBook-Pro",'
+                     )
+                     .replace(
+                       /"time":"[-.:\dTZ]+",/g,
+                       '"time":"1970-01-01T00:00:00.000Z",'
+                     )
       fixed = fixed.replace(/\r\v/g, '\n')
       resolve([fixed, exitCode])
     })
@@ -154,3 +163,5 @@ it('shows help about port in use', () => start('eaddrinuse.js')
   }))
 
 it('shows help about privileged port', () => checkError('eacces.js'))
+
+it('reports to bunyan log', () => checkOut('bunyan.js'))
