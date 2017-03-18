@@ -165,3 +165,5 @@ it('shows help about port in use', () => start('eaddrinuse.js')
 it('shows help about privileged port', () => checkError('eacces.js'))
 
 it('reports to bunyan log', () => checkOut('bunyan.js'))
+
+it('reports to custom bunyan log', () => checkOut('bunyan-custom.js'))

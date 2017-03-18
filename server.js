@@ -1,6 +1,7 @@
 'use strict'
 
 const yargs = require('yargs')
+const bunyan = require('bunyan')
 
 const BaseServer = require('./base-server')
 const humanProcessReporter = require('./reporters/human/process')
@@ -15,9 +16,6 @@ function writeBunyanLog (logger, payload) {
 
 function reportRuntimeError (e, app) {
   if (app.options.reporter === 'bunyan') {
-    if (!app.options.bunyanLogger) {
-      throw new Error('Missed bunyan logger')
-    }
     const payload = bunyanErrorReporter(e)
     writeBunyanLog(app.options.bunyanLogger, payload)
   } else {
@@ -27,9 +25,6 @@ function reportRuntimeError (e, app) {
 
 function pickReporter (options) {
   if (options.reporter === 'bunyan') {
-    if (!options.bunyanLogger) {
-      throw new Error('Missed bunyan logger')
-    }
     return function () {
       const app = arguments[1]
       const payload = bunyanProcessReporter.apply(null, arguments)
@@ -117,6 +112,9 @@ yargs
 class Server extends BaseServer {
   constructor (options) {
     options.pid = process.pid
+    if (options.reporter === 'bunyan' && !options.bunyanLogger) {
+      options.bunyanLogger = bunyan.createLogger({ name: 'logux-server' })
+    }
 
     super(options, pickReporter(options))
 
