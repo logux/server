@@ -84,6 +84,10 @@ yargs
  *                                      connection by sending ping.
  * @param {function} [options.timer] Timer to use in log. Will be default
  *                                   timer with server `nodeId`, by default.
+ * @param {"cli"|"bunyan"} [options.reporter="cli"] Report process/errors to
+ *                                                  CLI in text or bunyan
+ *                                                  logger in JSON.
+ * @param {Logger} [options.bunyanLogger] Bunyan logger with custom settings
  * @param {Store} [options.store] Store to save log. Will be `MemoryStore`,
  *                                by default.
  * @param {"production"|"development"} [options.env] Development or production
@@ -112,6 +116,7 @@ yargs
 class Server extends BaseServer {
   constructor (options) {
     options.pid = process.pid
+    options.reporter = options.reporter || 'cli'
     if (options.reporter === 'bunyan' && !options.bunyanLogger) {
       options.bunyanLogger = bunyan.createLogger({ name: 'logux-server' })
     }
