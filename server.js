@@ -13,19 +13,6 @@ function writeBunyanLog (logger, payload) {
   logger[payload.level](details, payload.msg)
 }
 
-function reportProcess () {
-  const app = arguments[1]
-  if (app.options.reporter === 'bunyan') {
-    if (!app.options.bunyanLogger) {
-      throw new Error('Missed bunyan logger')
-    }
-    const payload = bunyanProcessReporter.apply(null, arguments)
-    writeBunyanLog(app.options.bunyanLogger, payload)
-  } else {
-    process.stderr.write(humanProcessReporter.apply(null, arguments))
-  }
-}
-
 function reportRuntimeError (e, app) {
   if (app.options.reporter === 'bunyan') {
     if (!app.options.bunyanLogger) {
@@ -35,6 +22,23 @@ function reportRuntimeError (e, app) {
     writeBunyanLog(app.options.bunyanLogger, payload)
   } else {
     process.stderr.write(humanErrorReporter(e, app))
+  }
+}
+
+function pickReporter (options) {
+  if (options.reporter === 'bunyan') {
+    if (!options.bunyanLogger) {
+      throw new Error('Missed bunyan logger')
+    }
+    return function () {
+      const app = arguments[1]
+      const payload = bunyanProcessReporter.apply(null, arguments)
+      writeBunyanLog(app.options.bunyanLogger, payload)
+    }
+  } else {
+    return function () {
+      process.stderr.write(humanProcessReporter.apply(null, arguments))
+    }
   }
 }
 
@@ -114,9 +118,7 @@ class Server extends BaseServer {
   constructor (options) {
     options.pid = process.pid
 
-    super(options, function () {
-      reportProcess.apply(null, arguments)
-    })
+    super(options, pickReporter(options))
 
     const onError = e => {
       this.emitter.emit('error', e)
