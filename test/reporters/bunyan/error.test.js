@@ -1,30 +1,30 @@
 'use strict'
 
-const errorReporter = require('../reporters/human/error')
-const common = require('../reporters/human/common')
+const bunyan = require('bunyan')
 
-const BaseServer = require('../base-server')
+const errorReporter = require('../../../reporters/bunyan/error')
+
+const BaseServer = require('../../../base-server')
 
 function errorHelperOut () {
-  return errorReporter.apply({}, arguments).replace(/\r\v/g, '\n')
+  return errorReporter.apply({}, arguments)
 }
+
+const log = bunyan.createLogger({
+  name: 'logux-server-test',
+  streams: []
+})
 
 const app = new BaseServer({
   env: 'development',
   pid: 21384,
   nodeId: 'server:H1f8LAyzl',
   subprotocol: '2.5.0',
-  supports: '2.x || 1.x'
+  supports: '2.x || 1.x',
+  reporter: 'bunyan',
+  bunyanLogger: log
 })
 app.listenOptions = { host: '127.0.0.1', port: 1337 }
-
-const originNow = common.now
-beforeAll(() => {
-  common.now = () => new Date((new Date()).getTimezoneOffset() * 60000)
-})
-afterAll(() => {
-  common.now = originNow
-})
 
 it('handles EACCESS error', () => {
   expect(errorHelperOut({ code: 'EACCES' }, app)).toMatchSnapshot()
@@ -36,7 +36,9 @@ it('handles error in production', () => {
     pid: 21384,
     nodeId: 'server:H1f8LAyzl',
     subprotocol: '2.5.0',
-    supports: '2.x || 1.x'
+    supports: '2.x || 1.x',
+    reporter: 'bunyan',
+    bunyanLogger: log
   })
   http.listenOptions = { host: '127.0.0.1', port: 1000 }
 

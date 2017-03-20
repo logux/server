@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`handles EACCESS error 1`] = `
+Object {
+  "details": Object {
+    "hint": Array [
+      "Try to change user (e.g. root) or use port >= 1024",
+    ],
+  },
+  "level": "error",
+  "msg": "You are not allowed to run server on this port",
+}
+`;
+
+exports[`handles EADDRINUSE error 1`] = `
+Object {
+  "details": Object {
+    "hint": Array [
+      "Another Logux server or other app already running on this port",
+      "Maybe you didn’t not stop server from other project",
+      "or previous version of this server was not killed.",
+    ],
+  },
+  "level": "error",
+  "msg": "Port :1337 already in use",
+}
+`;
+
+exports[`handles error in production 1`] = `
+Object {
+  "details": Object {
+    "hint": Array [
+      "Try to change user (e.g. root) or use port >= 1024",
+    ],
+  },
+  "level": "error",
+  "msg": "You are not allowed to run server on this port",
+}
+`;

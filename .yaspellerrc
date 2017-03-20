@@ -32,6 +32,9 @@
     "loadOptions",
     "stacktrace",
     "debugError",
-    "nanoevents"
+    "nanoevents",
+    "cli",
+    "CLI",
+    "bunyan"
   ]
 }

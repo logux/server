@@ -1,10 +1,41 @@
 'use strict'
 
 const yargs = require('yargs')
+const bunyan = require('bunyan')
 
-const processReporter = require('./reporters/human/process')
-const errorReporter = require('./reporters/human/error')
 const BaseServer = require('./base-server')
+const humanProcessReporter = require('./reporters/human/process')
+const humanErrorReporter = require('./reporters/human/error')
+const bunyanProcessReporter = require('./reporters/bunyan/process')
+const bunyanErrorReporter = require('./reporters/bunyan/error')
+
+function writeBunyanLog (logger, payload) {
+  const details = payload.details || {}
+  logger[payload.level](details, payload.msg)
+}
+
+function reportRuntimeError (e, app) {
+  if (app.options.reporter === 'bunyan') {
+    const payload = bunyanErrorReporter(e)
+    writeBunyanLog(app.options.bunyanLogger, payload)
+  } else {
+    process.stderr.write(humanErrorReporter(e, app))
+  }
+}
+
+function pickReporter (options) {
+  if (options.reporter === 'bunyan') {
+    return function () {
+      const app = arguments[1]
+      const payload = bunyanProcessReporter.apply(null, arguments)
+      writeBunyanLog(app.options.bunyanLogger, payload)
+    }
+  } else {
+    return function () {
+      process.stderr.write(humanProcessReporter.apply(null, arguments))
+    }
+  }
+}
 
 yargs
   .option('h', {
@@ -53,6 +84,10 @@ yargs
  *                                      connection by sending ping.
  * @param {function} [options.timer] Timer to use in log. Will be default
  *                                   timer with server `nodeId`, by default.
+ * @param {"cli"|"bunyan"} [options.reporter="cli"] Report process/errors to
+ *                                                  CLI in text or bunyan
+ *                                                  logger in JSON.
+ * @param {Logger} [options.bunyanLogger] Bunyan logger with custom settings
  * @param {Store} [options.store] Store to save log. Will be `MemoryStore`,
  *                                by default.
  * @param {"production"|"development"} [options.env] Development or production
@@ -81,10 +116,12 @@ yargs
 class Server extends BaseServer {
   constructor (options) {
     options.pid = process.pid
+    options.reporter = options.reporter || 'cli'
+    if (options.reporter === 'bunyan' && !options.bunyanLogger) {
+      options.bunyanLogger = bunyan.createLogger({ name: 'logux-server' })
+    }
 
-    super(options, function () {
-      process.stderr.write(processReporter.apply(null, arguments))
-    })
+    super(options, pickReporter(options))
 
     const onError = e => {
       this.emitter.emit('error', e)
@@ -110,7 +147,7 @@ class Server extends BaseServer {
   listen () {
     const origin = BaseServer.prototype.listen
     return origin.apply(this, arguments).catch(e => {
-      process.stderr.write(errorReporter(e, this))
+      reportRuntimeError(e, this)
       process.exit(1)
     })
   }
