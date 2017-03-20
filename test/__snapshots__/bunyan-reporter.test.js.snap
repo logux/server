@@ -1,0 +1,330 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`handles EACCESS error 1`] = `
+"{
+  \\"level\\": \\"error\\",
+  \\"msg\\": \\"You are not allowed to run server on this port\\",
+  \\"details\\": {
+    \\"hint\\": [
+      \\"Try to change user (e.g. root) or use port >= 1024\\"
+    ]
+  }
+}
+
+"
+`;
+
+exports[`handles EADDRINUSE error 1`] = `
+"{
+  \\"level\\": \\"error\\",
+  \\"msg\\": \\"Port :1337 already in use\\",
+  \\"details\\": {
+    \\"hint\\": [
+      \\"Another Logux server or other app already running on this port\\",
+      \\"Maybe you didn’t not stop server from other project\\",
+      \\"or previous version of this server was not killed.\\"
+    ]
+  }
+}
+
+"
+`;
+
+exports[`handles error in production 1`] = `
+"{
+  \\"level\\": \\"error\\",
+  \\"msg\\": \\"You are not allowed to run server on this port\\",
+  \\"details\\": {
+    \\"hint\\": [
+      \\"Try to change user (e.g. root) or use port >= 1024\\"
+    ]
+  }
+}
+
+"
+`;
+
+exports[`reports action 1`] = `
+"{
+  \\"level\\": \\"info\\",
+  \\"msg\\": \\"Action was added\\",
+  \\"details\\": {
+    \\"time\\": \\"2017-02-22T23:11:39.387Z\\",
+    \\"action\\": {
+      \\"type\\": \\"CHANGE_USER\\",
+      \\"id\\": 100,
+      \\"data\\": {
+        \\"name\\": \\"John\\"
+      }
+    },
+    \\"meta\\": {
+      \\"id\\": [
+        1487805099387,
+        \\"100:H10Nf5stl\\",
+        0
+      ],
+      \\"time\\": 1487805099387,
+      \\"reasons\\": [
+        \\"lastValue\\",
+        \\"debug\\"
+      ],
+      \\"user\\": \\"100:H10Nf5stl\\",
+      \\"server\\": \\"server:H1f8LAyzl\\"
+    }
+  }
+}
+
+"
+`;
+
+exports[`reports authenticated 1`] = `
+"{
+  \\"level\\": \\"info\\",
+  \\"msg\\": \\"User was authenticated\\",
+  \\"details\\": {
+    \\"nodeId\\": \\"100:H10Nf5stl\\",
+    \\"subprotocol\\": \\"1.0.0\\",
+    \\"clientId\\": \\"1\\"
+  }
+}
+
+"
+`;
+
+exports[`reports authenticated without user ID 1`] = `
+"{
+  \\"level\\": \\"info\\",
+  \\"msg\\": \\"User was authenticated\\",
+  \\"details\\": {
+    \\"nodeId\\": \\"H10Nf5stl\\",
+    \\"subprotocol\\": \\"1.0.0\\",
+    \\"clientId\\": \\"1\\"
+  }
+}
+
+"
+`;
+
+exports[`reports bad authenticated 1`] = `
+"{
+  \\"level\\": \\"warn\\",
+  \\"msg\\": \\"Bad authentication\\",
+  \\"details\\": {
+    \\"nodeId\\": \\"100:H10Nf5stl\\",
+    \\"subprotocol\\": \\"1.0.0\\",
+    \\"clientId\\": \\"1\\"
+  }
+}
+
+"
+`;
+
+exports[`reports clean 1`] = `
+"{
+  \\"level\\": \\"info\\",
+  \\"msg\\": \\"Action was cleaned\\",
+  \\"details\\": {
+    \\"actionId\\": [
+      1487805099387,
+      \\"100:H10Nf5stl\\",
+      0
+    ]
+  }
+}
+
+"
+`;
+
+exports[`reports client error 1`] = `
+"{
+  \\"level\\": \\"warn\\",
+  \\"msg\\": \\"Client error: A timeout was reached (5000ms)\\",
+  \\"details\\": {
+    \\"nodeId\\": \\"100:H10Nf5stl\\"
+  }
+}
+
+"
+`;
+
+exports[`reports connect 1`] = `
+"{
+  \\"level\\": \\"info\\",
+  \\"msg\\": \\"Client was connected\\",
+  \\"details\\": {
+    \\"clientId\\": \\"1\\",
+    \\"ipAddress\\": \\"127.0.0.1\\"
+  }
+}
+
+"
+`;
+
+exports[`reports denied 1`] = `
+"{
+  \\"level\\": \\"info\\",
+  \\"msg\\": \\"Action was denied\\",
+  \\"details\\": {
+    \\"actionId\\": [
+      1487805099387,
+      \\"100:H10Nf5stl\\",
+      0
+    ]
+  }
+}
+
+"
+`;
+
+exports[`reports destroy 1`] = `
+"{
+  \\"level\\": \\"info\\",
+  \\"msg\\": \\"Shutting down Logux server\\"
+}
+
+"
+`;
+
+exports[`reports disconnect 1`] = `
+"{
+  \\"level\\": \\"info\\",
+  \\"msg\\": \\"Client was disconnected\\",
+  \\"details\\": {
+    \\"nodeId\\": \\"100:H10Nf5stl\\"
+  }
+}
+
+"
+`;
+
+exports[`reports disconnect from unauthenticated user 1`] = `
+"{
+  \\"level\\": \\"info\\",
+  \\"msg\\": \\"Client was disconnected\\",
+  \\"details\\": {
+    \\"clientId\\": \\"1\\"
+  }
+}
+
+"
+`;
+
+exports[`reports error 1`] = `
+"{
+  \\"level\\": \\"error\\",
+  \\"msg\\": {},
+  \\"details\\": {
+    \\"actionID\\": [
+      1487805099387,
+      \\"100:H10Nf5stl\\",
+      0
+    ]
+  }
+}
+
+"
+`;
+
+exports[`reports error from unautheficated user 1`] = `
+"{
+  \\"level\\": \\"error\\",
+  \\"msg\\": \\"SyncError from client: A timeout was reached (5000ms)\\",
+  \\"details\\": {
+    \\"clientId\\": \\"1\\"
+  }
+}
+
+"
+`;
+
+exports[`reports http 1`] = `
+"{
+  \\"level\\": \\"info\\",
+  \\"msg\\": \\"Logux server is listening in non-secure development mode\\",
+  \\"details\\": {
+    \\"loguxServer\\": \\"0.1.1\\",
+    \\"nodeId\\": \\"server:H1f8LAyzl\\",
+    \\"environment\\": \\"development\\",
+    \\"subprotocol\\": \\"1.0.0\\",
+    \\"supports\\": \\"1.x\\",
+    \\"listen\\": \\"Custom HTTP server\\"
+  }
+}
+
+"
+`;
+
+exports[`reports listen 1`] = `
+"{
+  \\"level\\": \\"info\\",
+  \\"msg\\": \\"Logux server is listening in non-secure development mode\\",
+  \\"details\\": {
+    \\"loguxServer\\": \\"0.1.1\\",
+    \\"nodeId\\": \\"server:H1f8LAyzl\\",
+    \\"environment\\": \\"development\\",
+    \\"subprotocol\\": \\"2.5.0\\",
+    \\"supports\\": \\"2.x || 1.x\\",
+    \\"listen\\": \\"ws://127.0.0.1:1337\\"
+  }
+}
+
+"
+`;
+
+exports[`reports processed 1`] = `
+"{
+  \\"level\\": \\"info\\",
+  \\"msg\\": \\"Action was processed\\",
+  \\"details\\": {
+    \\"actionId\\": [
+      1487805099387,
+      \\"100:H10Nf5stl\\",
+      0
+    ],
+    \\"duration\\": 500
+  }
+}
+
+"
+`;
+
+exports[`reports production 1`] = `
+"{
+  \\"level\\": \\"info\\",
+  \\"msg\\": \\"Logux server is listening\\",
+  \\"details\\": {
+    \\"loguxServer\\": \\"0.1.1\\",
+    \\"nodeId\\": \\"server:H1f8LAyzl\\",
+    \\"environment\\": \\"production\\",
+    \\"subprotocol\\": \\"1.0.0\\",
+    \\"supports\\": \\"1.x\\",
+    \\"listen\\": \\"wss://0.0.0.0:1337\\"
+  }
+}
+
+"
+`;
+
+exports[`reports synchroniation error 1`] = `
+"{
+  \\"level\\": \\"error\\",
+  \\"msg\\": \\"SyncError: A timeout was reached (5000ms)\\",
+  \\"details\\": {
+    \\"nodeId\\": \\"100:H10Nf5stl\\"
+  }
+}
+
+"
+`;
+
+exports[`reports zombie 1`] = `
+"{
+  \\"level\\": \\"info\\",
+  \\"msg\\": \\"Zombie client was disconnected\\",
+  \\"details\\": {
+    \\"nodeId\\": \\"100:H10Nf5stl\\"
+  }
+}
+
+"
+`;

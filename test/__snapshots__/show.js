@@ -16,10 +16,10 @@ function show (result) {
       .filter(str => !filter || str.indexOf(filter) !== -1)
       .forEach(str => {
         if (str.trim().length === 0) return
-        const parts = str.replace(/"\s*`;\s*$/, '').split(/`] = `\s*"/)
+        const parts = str.replace(/"\s*`;\s*$/, '').split(/`] = `\s*"?/)
         process.stdout.write(
           chalk.gray(`${ test } ${ parts[0].replace(/ 1$/, '') }:\n\n`))
-        process.stdout.write(parts[1])
+        process.stdout.write(parts[1].replace(/\\\\"/g, '"'))
       })
   })
 }

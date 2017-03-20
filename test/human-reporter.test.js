@@ -1,33 +1,29 @@
 'use strict'
 
-const processReporter = require('../../../reporters/bunyan/process')
+const processReporter = require('../reporters/human/process')
+const helpers = require('../reporters/human/helpers')
 
 const ServerConnection = require('logux-sync').ServerConnection
 const createServer = require('http').createServer
 const SyncError = require('logux-sync').SyncError
+const yyyymmdd = require('yyyy-mm-dd')
 const path = require('path')
-const bunyan = require('bunyan')
 
-const BaseServer = require('../../../base-server')
-const Client = require('../../../client')
+const BaseServer = require('../base-server')
+const Client = require('../client')
 
 function reportersOut () {
   return processReporter.apply({}, arguments)
+    .replace(/\r\v/g, '\n')
+    .replace(yyyymmdd.withTime(new Date(1487805099387)), '2017-02-22 23:11:39')
 }
-
-const log = bunyan.createLogger({
-  name: 'logux-server-test',
-  streams: []
-})
 
 const app = new BaseServer({
   env: 'development',
   pid: 21384,
   nodeId: 'server:H1f8LAyzl',
   subprotocol: '2.5.0',
-  supports: '2.x || 1.x',
-  reporter: 'bunyan',
-  bunyanLogger: log
+  supports: '2.x || 1.x'
 })
 app.listenOptions = { host: '127.0.0.1', port: 1337 }
 
@@ -59,6 +55,14 @@ const unauthed = new Client(app, new ServerConnection(ws), 1)
 const ownError = new SyncError(authed.sync, 'timeout', 5000, false)
 const clientError = new SyncError(authed.sync, 'timeout', 5000, true)
 
+const originNow = helpers.now
+beforeAll(() => {
+  helpers.now = () => new Date((new Date()).getTimezoneOffset() * 60000)
+})
+afterAll(() => {
+  helpers.now = originNow
+})
+
 const action = {
   type: 'CHANGE_USER',
   id: 100,
@@ -82,9 +86,7 @@ it('reports production', () => {
     pid: 21384,
     nodeId: 'server:H1f8LAyzl',
     subprotocol: '1.0.0',
-    supports: '1.x',
-    reporter: 'bunyan',
-    bunyanLogger: log
+    supports: '1.x'
   })
   wss.listenOptions = { cert: 'A', host: '0.0.0.0', port: 1337 }
 
@@ -97,9 +99,7 @@ it('reports http', () => {
     pid: 21384,
     nodeId: 'server:H1f8LAyzl',
     subprotocol: '1.0.0',
-    supports: '1.x',
-    reporter: 'bunyan',
-    bunyanLogger: log
+    supports: '1.x'
   })
   http.listenOptions = { server: createServer() }
 
@@ -148,7 +148,7 @@ it('reports disconnect from unauthenticated user', () => {
 
 it('reports error', () => {
   const file = __filename
-  const jest = path.join(__dirname, '..', 'node_modules', 'jest', 'index.js')
+  const jest = path.join(__dirname, '../node_modules/jest/index.js')
   const error = new Error('Some mistake')
   const errorStack = [
     `${ error.name }: ${ error.message }`,
@@ -184,4 +184,40 @@ it('reports zombie', () => {
 
 it('reports destroy', () => {
   expect(reportersOut('destroy', app)).toMatchSnapshot()
+})
+
+it('handles EACCESS error', () => {
+  expect(reportersOut('error', app, { code: 'EACCES' }, app)).toMatchSnapshot()
+})
+
+it('handles error in production', () => {
+  const http = new BaseServer({
+    env: 'production',
+    pid: 21384,
+    nodeId: 'server:H1f8LAyzl',
+    subprotocol: '2.5.0',
+    supports: '2.x || 1.x'
+  })
+  http.listenOptions = { host: '127.0.0.1', port: 1000 }
+
+  expect(reportersOut('error', app, { code: 'EACCES', port: 1000 }, http))
+    .toMatchSnapshot()
+})
+
+it('handles EADDRINUSE error', () => {
+  expect(reportersOut('error', app, {
+    code: 'EADDRINUSE',
+    port: 1337
+  }, app)).toMatchSnapshot()
+})
+
+it('throws on undefined error', () => {
+  const e = {
+    code: 'EAGAIN',
+    message: 'resource temporarily unavailable'
+  }
+  function errorHelperThrow () {
+    reportersOut('error', app, e)
+  }
+  expect(errorHelperThrow).toThrowError(/resource temporarily unavailable/)
 })

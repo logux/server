@@ -1,16 +1,16 @@
 'use strict'
 
-const reportersCommon = require('../common')
-const common = require('./common.js')
+const helpers = require('./helpers')
+const common = require('../common')
 const pkg = require('../../package.json')
 
 function clientParams (c, client) {
   if (client.nodeId) {
-    return common.params(c, [
+    return helpers.params(c, [
       ['Node ID', client.nodeId]
     ])
   } else {
-    return common.params(c, [
+    return helpers.params(c, [
       ['Client ID', client.key]
     ])
   }
@@ -20,22 +20,22 @@ const reporters = {
 
   listen (c, app) {
     let result = [
-      common.info(c, 'Logux server is listening'),
-      common.params(c, [
+      helpers.info(c, 'Logux server is listening'),
+      helpers.params(c, [
         ['Logux server', pkg.version],
         ['PID', app.options.pid],
         ['Node ID', app.nodeId],
         ['Environment', app.env],
         ['Subprotocol', app.options.subprotocol],
         ['Supports', app.options.supports],
-        ['Listen', reportersCommon.getAppUrl(app)]
+        ['Listen', common.getAppUrl(app)]
       ])
     ]
 
     if (app.env === 'development') {
       result = result.concat([
-        common.note(c, 'Server was started in non-secure development mode'),
-        common.note(c, 'Press Ctrl-C to shutdown server')
+        helpers.note(c, 'Server was started in non-secure development mode'),
+        helpers.note(c, 'Press Ctrl-C to shutdown server')
       ])
     }
 
@@ -44,8 +44,8 @@ const reporters = {
 
   connect (c, app, client) {
     return [
-      common.info(c, 'Client was connected'),
-      common.params(c, [
+      helpers.info(c, 'Client was connected'),
+      helpers.params(c, [
         ['Client ID', client.key],
         ['IP address', client.remoteAddress]
       ])
@@ -54,8 +54,8 @@ const reporters = {
 
   unauthenticated (c, app, client) {
     return [
-      common.warn(c, 'Bad authentication'),
-      common.params(c, [
+      helpers.warn(c, 'Bad authentication'),
+      helpers.params(c, [
         ['Node ID', client.nodeId],
         ['Subprotocol', client.sync.remoteSubprotocol],
         ['Client ID', client.key]
@@ -65,8 +65,8 @@ const reporters = {
 
   authenticated (c, app, client) {
     return [
-      common.info(c, 'User was authenticated'),
-      common.params(c, [
+      helpers.info(c, 'User was authenticated'),
+      helpers.params(c, [
         ['Node ID', client.nodeId],
         ['Subprotocol', client.sync.remoteSubprotocol],
         ['Client ID', client.key]
@@ -76,14 +76,22 @@ const reporters = {
 
   disconnect (c, app, client) {
     return [
-      common.info(c, 'Client was disconnected'),
+      helpers.info(c, 'Client was disconnected'),
       clientParams(c, client)
     ]
   },
 
   destroy (c) {
     return [
-      common.info(c, 'Shutting down Logux server')
+      helpers.info(c, 'Shutting down Logux server')
+    ]
+  },
+
+  error (c, app, error) {
+    const help = common.errorHelp(error)
+    return [
+      helpers.error(c, help.description),
+      helpers.hint(c, help.hint)
     ]
   },
 
@@ -92,11 +100,11 @@ const reporters = {
     if (err.name === 'Error') prefix = err.message
 
     let extra = ''
-    if (meta) extra = common.params(c, [['Action ID', meta.id]])
+    if (meta) extra = helpers.params(c, [['Action ID', meta.id]])
 
     return [
-      common.error(c, prefix),
-      common.prettyStackTrace(c, err, app.options.root),
+      helpers.error(c, prefix),
+      helpers.prettyStackTrace(c, err, app.options.root),
       extra
     ]
   },
@@ -109,22 +117,22 @@ const reporters = {
       prefix = `SyncError: ${ err.description }`
     }
     return [
-      common.error(c, prefix),
+      helpers.error(c, prefix),
       clientParams(c, client)
     ]
   },
 
   clientError (c, app, client, err) {
     return [
-      common.warn(c, `Client error: ${ err.description }`),
+      helpers.warn(c, `Client error: ${ err.description }`),
       clientParams(c, client)
     ]
   },
 
   add (c, app, action, meta) {
     return [
-      common.info(c, 'Action was added'),
-      common.params(c, [
+      helpers.info(c, 'Action was added'),
+      helpers.params(c, [
         ['Time', new Date(meta.time)],
         ['Action', action],
         ['Meta', meta]
@@ -134,8 +142,8 @@ const reporters = {
 
   clean (c, app, action, meta) {
     return [
-      common.info(c, 'Action was cleaned'),
-      common.params(c, [
+      helpers.info(c, 'Action was cleaned'),
+      helpers.params(c, [
         ['Action ID', meta.id]
       ])
     ]
@@ -143,8 +151,8 @@ const reporters = {
 
   denied (c, app, action, meta) {
     return [
-      common.warn(c, 'Action was denied'),
-      common.params(c, [
+      helpers.warn(c, 'Action was denied'),
+      helpers.params(c, [
         ['Action ID', meta.id]
       ])
     ]
@@ -152,8 +160,8 @@ const reporters = {
 
   processed (c, app, action, meta, duration) {
     return [
-      common.info(c, 'Action was processed'),
-      common.params(c, [
+      helpers.info(c, 'Action was processed'),
+      helpers.params(c, [
         ['Action ID', meta.id],
         ['Duration', `${ duration } ms`]
       ])
@@ -162,8 +170,8 @@ const reporters = {
 
   zombie (c, app, client) {
     return [
-      common.warn(c, 'Zombie client was disconnected'),
-      common.params(c, [
+      helpers.warn(c, 'Zombie client was disconnected'),
+      helpers.params(c, [
         ['Node ID', client.nodeId]
       ])
     ]
@@ -172,7 +180,7 @@ const reporters = {
 }
 
 module.exports = function processReporter (type, app) {
-  const c = common.color(app)
+  const c = helpers.color(app)
   const args = [c].concat(Array.prototype.slice.call(arguments, 1))
-  return common.message(reporters[type].apply({ }, args))
+  return helpers.message(reporters[type].apply({ }, args))
 }

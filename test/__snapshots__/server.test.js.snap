@@ -17,14 +17,14 @@ exports[`destroys everything on exit 1`] = `
 `;
 
 exports[`reports to bunyan log 1`] = `
-"{\\"name\\":\\"logux-server\\",\\"hostname\\":\\"MacBook-Pro\\",\\"pid\\":21384,\\"level\\":30,\\"loguxServer\\":\\"0.1.1\\",\\"nodeId\\":\\"server\\",\\"environment\\":\\"test\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"listen\\":\\"ws://127.0.0.1:2000\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
-{\\"name\\":\\"logux-server\\",\\"hostname\\":\\"MacBook-Pro\\",\\"pid\\":21384,\\"level\\":30,\\"msg\\":\\"Shutting down Logux server\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"loguxServer\\":\\"0.1.1\\",\\"nodeId\\":\\"server\\",\\"environment\\":\\"test\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"listen\\":\\"ws://127.0.0.1:2000\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+{\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"msg\\":\\"Shutting down Logux server\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
 exports[`reports to custom bunyan log 1`] = `
-"{\\"name\\":\\"logux-server-custom\\",\\"customProp\\":\\"42\\",\\"hostname\\":\\"MacBook-Pro\\",\\"pid\\":21384,\\"level\\":30,\\"loguxServer\\":\\"0.1.1\\",\\"nodeId\\":\\"server\\",\\"environment\\":\\"test\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"listen\\":\\"ws://127.0.0.1:2000\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
-{\\"name\\":\\"logux-server-custom\\",\\"customProp\\":\\"42\\",\\"hostname\\":\\"MacBook-Pro\\",\\"pid\\":21384,\\"level\\":30,\\"msg\\":\\"Shutting down Logux server\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"logux-server-custom\\",\\"customProp\\":\\"42\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"loguxServer\\":\\"0.1.1\\",\\"nodeId\\":\\"server\\",\\"environment\\":\\"test\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"listen\\":\\"ws://127.0.0.1:2000\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+{\\"name\\":\\"logux-server-custom\\",\\"customProp\\":\\"42\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"msg\\":\\"Shutting down Logux server\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 

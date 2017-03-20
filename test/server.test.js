@@ -46,7 +46,7 @@ function test (name, args) {
                      .replace(/"pid":\d+,/g, '"pid":21384,')
                      .replace(
                        /"hostname":"[-.\w]+",/g,
-                       '"hostname":"MacBook-Pro",'
+                       '"hostname":"localhost",'
                      )
                      .replace(
                        /"time":"[-.:\dTZ]+",/g,

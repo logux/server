@@ -85,6 +85,17 @@ const reporters = {
     }
   },
 
+  error (app, error) {
+    const help = reportersCommon.errorHelp(error)
+    return {
+      level: 'error',
+      msg: help.description,
+      details: {
+        hint: help.hint
+      }
+    }
+  },
+
   runtimeError (app, err, action, meta) {
     const details = {}
     if (meta) {
@@ -98,15 +109,15 @@ const reporters = {
   },
 
   syncError (app, client, err) {
-    let prefix
+    let msg
     if (err.received) {
-      prefix = `SyncError from client: ${ err.description }`
+      msg = `SyncError from client: ${ err.description }`
     } else {
-      prefix = `SyncError: ${ err.description }`
+      msg = `SyncError: ${ err.description }`
     }
     return {
       level: 'error',
-      msg: prefix,
+      msg,
       details: clientParams(client)
     }
   },

@@ -4,10 +4,8 @@ const yargs = require('yargs')
 const bunyan = require('bunyan')
 
 const BaseServer = require('./base-server')
-const humanProcessReporter = require('./reporters/human/process')
-const humanErrorReporter = require('./reporters/human/error')
-const bunyanProcessReporter = require('./reporters/bunyan/process')
-const bunyanErrorReporter = require('./reporters/bunyan/error')
+const humanReporter = require('./reporters/human/process')
+const bunyanReporter = require('./reporters/bunyan/process')
 
 function writeBunyanLog (logger, payload) {
   const details = payload.details || {}
@@ -16,10 +14,10 @@ function writeBunyanLog (logger, payload) {
 
 function reportRuntimeError (e, app) {
   if (app.options.reporter === 'bunyan') {
-    const payload = bunyanErrorReporter(e)
+    const payload = bunyanReporter('error', app, e)
     writeBunyanLog(app.options.bunyanLogger, payload)
   } else {
-    process.stderr.write(humanErrorReporter(e, app))
+    process.stderr.write(humanReporter('error', app, e))
   }
 }
 
@@ -27,12 +25,12 @@ function pickReporter (options) {
   if (options.reporter === 'bunyan') {
     return function () {
       const app = arguments[1]
-      const payload = bunyanProcessReporter.apply(null, arguments)
+      const payload = bunyanReporter.apply(null, arguments)
       writeBunyanLog(app.options.bunyanLogger, payload)
     }
   } else {
     return function () {
-      process.stderr.write(humanProcessReporter.apply(null, arguments))
+      process.stderr.write(humanReporter.apply(null, arguments))
     }
   }
 }
