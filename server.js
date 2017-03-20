@@ -7,31 +7,16 @@ const BaseServer = require('./base-server')
 const humanReporter = require('./reporters/human/process')
 const bunyanReporter = require('./reporters/bunyan/process')
 
-function writeBunyanLog (logger, payload) {
+function bunyanLog (logger, payload) {
   const details = payload.details || {}
   logger[payload.level](details, payload.msg)
 }
 
 function reportRuntimeError (e, app) {
   if (app.options.reporter === 'bunyan') {
-    const payload = bunyanReporter('error', app, e)
-    writeBunyanLog(app.options.bunyanLogger, payload)
+    bunyanLog(app.options.bunyanLogger, bunyanReporter('error', app, e))
   } else {
     process.stderr.write(humanReporter('error', app, e))
-  }
-}
-
-function pickReporter (options) {
-  if (options.reporter === 'bunyan') {
-    return function () {
-      const app = arguments[1]
-      const payload = bunyanReporter.apply(null, arguments)
-      writeBunyanLog(app.options.bunyanLogger, payload)
-    }
-  } else {
-    return function () {
-      process.stderr.write(humanReporter.apply(null, arguments))
-    }
   }
 }
 
@@ -114,12 +99,22 @@ yargs
 class Server extends BaseServer {
   constructor (options) {
     options.pid = process.pid
-    options.reporter = options.reporter || 'cli'
+    options.reporter = options.reporter || 'text'
     if (options.reporter === 'bunyan' && !options.bunyanLogger) {
       options.bunyanLogger = bunyan.createLogger({ name: 'logux-server' })
     }
 
-    super(options, pickReporter(options))
+    let reporter
+    if (options.reporter === 'bunyan') {
+      reporter = function () {
+        bunyanLog(options.bunyanLogger, bunyanReporter.apply(null, arguments))
+      }
+    } else {
+      reporter = function () {
+        process.stderr.write(humanReporter.apply(null, arguments))
+      }
+    }
+    super(options, reporter)
 
     const onError = e => {
       this.emitter.emit('error', e)
