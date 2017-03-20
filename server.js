@@ -98,16 +98,23 @@ yargs
  *
  * @example
  * import { Server } from 'logux-server'
- * const app = new Server({
+ *
+ * let env = process.env.NODE_ENV || 'development'
+ * let envOptions = {}
+ * if (env === 'production') {
+ *   envOptions = {
+ *     cert: 'cert.pem',
+ *     key: 'key.pem'
+ *   }
+ * }
+ *
+ * const app = new Server(Object.assign({
  *   subprotocol: '1.0.0',
  *   supports: '1.x || 0.x',
  *   root: __dirname
- * })
- * if (app.env === 'production') {
- *   app.listen({ cert: 'cert.pem', key: 'key.pem' })
- * } else {
- *   app.listen()
- * }
+ * }, envOptions))
+ *
+ * app.listen()
  *
  * @extends BaseServer
  */
@@ -158,7 +165,12 @@ class Server extends BaseServer {
    * @return {object} Parsed options object.
    *
    * @example
-   * app.listen(app.loadOptions(process, { port: 31337 }))
+   * const app = new Server(Server.loadOptions(process, {
+   *   subprotocol: '1.0.0',
+   *   supports: '1.x',
+   *   root: __dirname,
+   *   port: 31337
+   * }))
    */
   static loadOptions (process, options) {
     options = options || { }
