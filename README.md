@@ -47,17 +47,19 @@ Create `server.js` with this boilerplate:
 ```js
 const Server = require('logux-server').Server
 
-const app = new Server({
-  subprotocol: '1.0.0',
-  supports: '1.x',
-  root: __dirname
-})
+const app = new Server(
+  Server.loadOptions(process, {
+    subprotocol: '1.0.0',
+    supports: '1.x',
+    root: __dirname
+  })
+)
 
 app.auth((userId, token) => {
   // TODO Check token and return a Promise with true or false.
 })
 
-app.listen(app.loadOptions(process))
+app.listen()
 ```
 
 

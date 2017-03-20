@@ -14,10 +14,11 @@ const app = new Server({
   nodeId: 'server',
   subprotocol: '1.0.0',
   supports: '1.x',
+  port: 2000,
   reporter: 'bunyan',
   bunyanLogger: logger
 })
 
 app.auth(() => Promise.resolve(true))
 
-app.listen({ port: 2000 })
+app.listen()

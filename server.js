@@ -154,24 +154,23 @@ class Server extends BaseServer {
    * Load options from command-line arguments and/or environment
    *
    * @param {object} process Current process object.
-   * @param {object} defaults Default options.
+   * @param {object} options Server options.
    * @return {object} Parsed options object.
    *
    * @example
    * app.listen(app.loadOptions(process, { port: 31337 }))
    */
-  loadOptions (process, defaults) {
-    defaults = defaults || { }
+  static loadOptions (process, options) {
+    options = options || { }
 
     const argv = yargs.parse(process.argv)
     const env = process.env
 
-    return {
-      host: argv.h || env.LOGUX_HOST || defaults.host,
-      port: parseInt(argv.p || env.LOGUX_PORT || defaults.port, 10),
-      cert: argv.c || env.LOGUX_CERT || defaults.cert,
-      key: argv.k || env.LOGUX_KEY || defaults.key
-    }
+    options.host = options.host || argv.h || env.LOGUX_HOST
+    options.port = parseInt(options.port || argv.p || env.LOGUX_PORT, 10)
+    options.cert = options.cert || argv.c || env.LOGUX_CERT
+    options.key = options.key || argv.k || env.LOGUX_KEY
+    return options
   }
 }
 

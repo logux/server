@@ -94,7 +94,7 @@ afterEach(() => {
 })
 
 it('uses cli args for options', () => {
-  const options = Server.prototype.loadOptions({
+  const options = Server.loadOptions({
     argv: ['', '--port', '31337', '--host', '192.168.1.1'],
     env: { }
   })
@@ -106,7 +106,7 @@ it('uses cli args for options', () => {
 })
 
 it('uses env for options', () => {
-  const options = Server.prototype.loadOptions({
+  const options = Server.loadOptions({
     argv: [],
     env: { LOGUX_HOST: '127.0.1.1', LOGUX_PORT: 31337 }
   })
@@ -116,7 +116,7 @@ it('uses env for options', () => {
 })
 
 it('uses combined options', () => {
-  const options = Server.prototype.loadOptions({
+  const options = Server.loadOptions({
     env: { LOGUX_CERT: './cert.pem' },
     argv: ['', '--key', './key.pem']
   }, { port: 31337 })
@@ -126,18 +126,23 @@ it('uses combined options', () => {
   expect(options.key).toEqual('./key.pem')
 })
 
-it('uses arg, env, defaults options in given priority', () => {
-  const options1 = Server.prototype.loadOptions({
+it('uses arg, env, options in given priority', () => {
+  const options1 = Server.loadOptions({
     argv: ['', '--port', '31337'],
     env: { LOGUX_PORT: 21337 }
   }, { port: 11337 })
-  const options2 = Server.prototype.loadOptions({
+  const options2 = Server.loadOptions({
+    argv: ['', '--port', '31337'],
+    env: { LOGUX_PORT: 21337 }
+  })
+  const options3 = Server.loadOptions({
     argv: [],
     env: { LOGUX_PORT: 21337 }
-  }, { port: 11337 })
+  })
 
-  expect(options1.port).toEqual(31337)
-  expect(options2.port).toEqual(21337)
+  expect(options1.port).toEqual(11337)
+  expect(options2.port).toEqual(31337)
+  expect(options3.port).toEqual(21337)
 })
 
 it('destroys everything on exit', () => checkOut('destroy.js'))

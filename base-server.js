@@ -77,6 +77,20 @@ function forcePromise (callback) {
  *                                                   `NODE_ENV` it will
  *                                                   be `"development"`.
  * @param {number} [options.pid] Process ID, to display in reporter.
+ * @param {http.Server} [options.server] HTTP server to connect WebSocket
+ *                                       server to it.
+ *                                       Same as in ws.WebSocketServer.
+ * @param {number} [option.port=1337] Port to bind server. It will create
+ *                                    HTTP server manually to connect
+ *                                    WebSocket server to it.
+ * @param {string} [option.host="127.0.0.1"] IP-address to bind server.
+ * @param {string} [option.key] SSL key or path to it. Path could be relative
+ *                              from server root. It is required in production
+ *                              mode, because WSS is highly recommended.
+ * @param {string} [option.cert] SSL certificate or path to it. Path could
+ *                               be relative from server root. It is required
+ *                               in production mode, because WSS
+ *                               is highly recommended.
  * @param {function} [reporter] Function to show current server status.
  *
  * @example
@@ -106,6 +120,23 @@ class BaseServer {
     }
     if (typeof this.options.nodeId === 'undefined') {
       this.options.nodeId = `server:${ shortid.generate() }`
+    }
+
+    /**
+     * Options used to start server.
+     * @type {object}
+     */
+
+    if (this.options.key && !this.options.cert) {
+      throw new Error('You must set cert option too if you use key option')
+    }
+    if (!this.options.key && this.options.cert) {
+      throw new Error('You must set key option too if you use cert option')
+    }
+
+    if (!this.options.server) {
+      if (!this.options.port) this.options.port = 1337
+      if (!this.options.host) this.options.host = '127.0.0.1'
     }
 
     /**
@@ -224,65 +255,28 @@ class BaseServer {
   /**
    * Start WebSocket server and listen for clients.
    *
-   * @param {object} options Connection options.
-   * @param {http.Server} [options.server] HTTP server to connect WebSocket
-   *                                       server to it.
-   *                                       Same as in ws.WebSocketServer.
-   * @param {number} [option.port=1337] Port to bind server. It will create
-   *                                    HTTP server manually to connect
-   *                                    WebSocket server to it.
-   * @param {string} [option.host="127.0.0.1"] IP-address to bind server.
-   * @param {string} [option.key] SSL key or path to it. Path could be relative
-   *                              from server root. It is required in production
-   *                              mode, because WSS is highly recommended.
-   * @param {string} [option.cert] SSL certificate or path to it. Path could
-   *                               be relative from server root. It is required
-   *                               in production mode, because WSS
-   *                               is highly recommended.
-   *
    * @return {Promise} When the server has been bound.
-   *
-   * @example
-   * app.listen({ cert: 'cert.pem', key: 'key.pem' })
    */
-  listen (options) {
-    /**
-     * Options used to start server.
-     * @type {object}
-     */
-    this.listenOptions = options || { }
-
-    if (this.listenOptions.key && !this.listenOptions.cert) {
-      throw new Error('You must set cert option too if you use key option')
-    }
-    if (!this.listenOptions.key && this.listenOptions.cert) {
-      throw new Error('You must set key option too if you use cert option')
-    }
-
+  listen () {
     if (!this.authenticator) {
       throw new Error('You must set authentication callback by app.auth()')
     }
 
-    if (!this.listenOptions.server) {
-      if (!this.listenOptions.port) this.listenOptions.port = 1337
-      if (!this.listenOptions.host) this.listenOptions.host = '127.0.0.1'
-    }
-
     let promise = Promise.resolve()
 
-    if (this.listenOptions.server) {
-      this.ws = new WebSocket.Server({ server: this.listenOptions.server })
+    if (this.options.server) {
+      this.ws = new WebSocket.Server({ server: this.options.server })
     } else {
       const before = []
-      if (this.listenOptions.key && !isPem(this.listenOptions.key)) {
-        before.push(readFile(this.options.root, this.listenOptions.key))
+      if (this.options.key && !isPem(this.options.key)) {
+        before.push(readFile(this.options.root, this.options.key))
       } else {
-        before.push(Promise.resolve(this.listenOptions.key))
+        before.push(Promise.resolve(this.options.key))
       }
-      if (this.listenOptions.cert && !isPem(this.listenOptions.cert)) {
-        before.push(readFile(this.options.root, this.listenOptions.cert))
+      if (this.options.cert && !isPem(this.options.cert)) {
+        before.push(readFile(this.options.root, this.options.cert))
       } else {
-        before.push(Promise.resolve(this.listenOptions.cert))
+        before.push(Promise.resolve(this.options.cert))
       }
 
       promise = promise
@@ -298,8 +292,7 @@ class BaseServer {
 
           this.ws.on('error', reject)
 
-          const opts = this.listenOptions
-          this.http.listen(opts.port, opts.host, resolve)
+          this.http.listen(this.options.port, this.options.host, resolve)
         }))
     }
 
