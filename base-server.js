@@ -122,11 +122,6 @@ class BaseServer {
       this.options.nodeId = `server:${ shortid.generate() }`
     }
 
-    /**
-     * Options used to start server.
-     * @type {object}
-     */
-
     if (this.options.key && !this.options.cert) {
       throw new Error('You must set cert option too if you use key option')
     }
