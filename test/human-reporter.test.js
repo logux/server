@@ -23,9 +23,10 @@ const app = new BaseServer({
   pid: 21384,
   nodeId: 'server:H1f8LAyzl',
   subprotocol: '2.5.0',
-  supports: '2.x || 1.x'
+  supports: '2.x || 1.x',
+  host: '127.0.0.1',
+  port: 1337
 })
-app.listenOptions = { host: '127.0.0.1', port: 1337 }
 
 const ws = {
   upgradeReq: {
@@ -86,9 +87,12 @@ it('reports production', () => {
     pid: 21384,
     nodeId: 'server:H1f8LAyzl',
     subprotocol: '1.0.0',
-    supports: '1.x'
+    supports: '1.x',
+    cert: 'A',
+    key: 'B',
+    host: '0.0.0.0',
+    port: 1337
   })
-  wss.listenOptions = { cert: 'A', host: '0.0.0.0', port: 1337 }
 
   expect(reportersOut('listen', wss)).toMatchSnapshot()
 })
@@ -99,9 +103,9 @@ it('reports http', () => {
     pid: 21384,
     nodeId: 'server:H1f8LAyzl',
     subprotocol: '1.0.0',
-    supports: '1.x'
+    supports: '1.x',
+    server: createServer()
   })
-  http.listenOptions = { server: createServer() }
 
   expect(reportersOut('listen', http)).toMatchSnapshot()
 })
@@ -196,9 +200,10 @@ it('handles error in production', () => {
     pid: 21384,
     nodeId: 'server:H1f8LAyzl',
     subprotocol: '2.5.0',
-    supports: '2.x || 1.x'
+    supports: '2.x || 1.x',
+    host: '127.0.0.1',
+    port: 1000
   })
-  http.listenOptions = { host: '127.0.0.1', port: 1000 }
 
   expect(reportersOut('error', app, { code: 'EACCES', port: 1000 }, http))
     .toMatchSnapshot()

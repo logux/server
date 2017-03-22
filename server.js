@@ -83,16 +83,23 @@ yargs
  *
  * @example
  * import { Server } from 'logux-server'
- * const app = new Server({
+ *
+ * let env = process.env.NODE_ENV || 'development'
+ * let envOptions = {}
+ * if (env === 'production') {
+ *   envOptions = {
+ *     cert: 'cert.pem',
+ *     key: 'key.pem'
+ *   }
+ * }
+ *
+ * const app = new Server(Object.assign({
  *   subprotocol: '1.0.0',
  *   supports: '1.x || 0.x',
  *   root: __dirname
- * })
- * if (app.env === 'production') {
- *   app.listen({ cert: 'cert.pem', key: 'key.pem' })
- * } else {
- *   app.listen()
- * }
+ * }, envOptions))
+ *
+ * app.listen()
  *
  * @extends BaseServer
  */
@@ -149,24 +156,28 @@ class Server extends BaseServer {
    * Load options from command-line arguments and/or environment
    *
    * @param {object} process Current process object.
-   * @param {object} defaults Default options.
+   * @param {object} options Server options.
    * @return {object} Parsed options object.
    *
    * @example
-   * app.listen(app.loadOptions(process, { port: 31337 }))
+   * const app = new Server(Server.loadOptions(process, {
+   *   subprotocol: '1.0.0',
+   *   supports: '1.x',
+   *   root: __dirname,
+   *   port: 31337
+   * }))
    */
-  loadOptions (process, defaults) {
-    defaults = defaults || { }
+  static loadOptions (process, options) {
+    options = options || { }
 
     const argv = yargs.parse(process.argv)
     const env = process.env
 
-    return {
-      host: argv.h || env.LOGUX_HOST || defaults.host,
-      port: parseInt(argv.p || env.LOGUX_PORT || defaults.port, 10),
-      cert: argv.c || env.LOGUX_CERT || defaults.cert,
-      key: argv.k || env.LOGUX_KEY || defaults.key
-    }
+    options.host = options.host || argv.h || env.LOGUX_HOST
+    options.port = parseInt(options.port || argv.p || env.LOGUX_PORT, 10)
+    options.cert = options.cert || argv.c || env.LOGUX_CERT
+    options.key = options.key || argv.k || env.LOGUX_KEY
+    return options
   }
 }
 

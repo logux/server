@@ -26,12 +26,12 @@ module.exports = {
 
   getAppUrl (app) {
     let url
-    if (app.listenOptions.server) {
+    if (app.options.server) {
       url = 'Custom HTTP server'
     } else {
-      const protocol = app.listenOptions.cert ? 'wss://' : 'ws://'
-      const host = app.listenOptions.host
-      const port = app.listenOptions.port
+      const protocol = app.options.cert ? 'wss://' : 'ws://'
+      const host = app.options.host
+      const port = app.options.port
       url = `${ protocol }${ host }:${ port }`
     }
     return url

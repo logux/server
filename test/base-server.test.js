@@ -177,54 +177,69 @@ it('throws without authenticator', () => {
 
 it('uses 1337 port by default', () => {
   app = createServer()
-  app.listen()
-  expect(app.listenOptions.port).toEqual(1337)
+  expect(app.options.port).toEqual(1337)
 })
 
 it('uses user port', () => {
-  app = createServer()
-  app.listen({ port: 31337 })
-  expect(app.listenOptions.port).toEqual(31337)
+  app = createServer({
+    subprotocol: '0.0.0',
+    supports: '0.x',
+    port: 31337
+  })
+  expect(app.options.port).toEqual(31337)
 })
 
 it('uses 127.0.0.1 to bind server by default', () => {
-  app = createServer()
-  app.listen({ port: uniqPort() })
-  expect(app.listenOptions.host).toEqual('127.0.0.1')
+  app = createServer({
+    subprotocol: '0.0.0',
+    supports: '0.x',
+    port: uniqPort()
+  })
+  expect(app.options.host).toEqual('127.0.0.1')
 })
 
 it('throws a error on key without certificate', () => {
-  app = createServer()
   expect(() => {
-    app.listen({
+    app = createServer({
+      subprotocol: '0.0.0',
+      supports: '0.x',
       key: fs.readFileSync(KEY)
     })
   }).toThrowError(/set cert option/)
 })
 
 it('throws a error on certificate without key', () => {
-  app = createServer()
   expect(() => {
-    app.listen({
+    app = createServer({
+      subprotocol: '0.0.0',
+      supports: '0.x',
       cert: fs.readFileSync(CERT)
     })
   }).toThrowError(/set key option/)
 })
 
 it('uses HTTPS', () => {
-  app = createServer()
-  return app.listen({
+  app = createServer({
+    subprotocol: '0.0.0',
+    supports: '0.x',
     port: uniqPort(),
     cert: fs.readFileSync(CERT),
     key: fs.readFileSync(KEY)
-  }).then(() => {
+  })
+  return app.listen().then(() => {
     expect(app.http instanceof https.Server).toBeTruthy()
   })
 })
 
 it('loads keys by absolute path', () => {
-  app = createServer()
-  return app.listen({ cert: CERT, key: KEY, port: uniqPort() }).then(() => {
+  app = createServer({
+    subprotocol: '0.0.0',
+    supports: '0.x',
+    cert: CERT,
+    key: KEY,
+    port: uniqPort()
+  })
+  return app.listen().then(() => {
     expect(app.http instanceof https.Server).toBeTruthy()
   })
 })
@@ -233,32 +248,37 @@ it('loads keys by relative path', () => {
   app = createServer({
     subprotocol: '0.0.0',
     supports: '0.x',
-    root: __dirname
-  })
-  return app.listen({
+    root: __dirname,
     cert: 'fixtures/cert.pem',
     key: 'fixtures/key.pem',
     port: uniqPort()
-  }).then(() => {
+  })
+  return app.listen().then(() => {
     expect(app.http instanceof https.Server).toBeTruthy()
   })
 })
 
 it('supports object in SSL key', () => {
-  app = createServer()
-  return app.listen({
+  app = createServer({
+    subprotocol: '0.0.0',
+    supports: '0.x',
     cert: fs.readFileSync(CERT),
     key: { pem: fs.readFileSync(KEY) },
     port: uniqPort()
-  }).then(() => {
+  })
+  return app.listen().then(() => {
     expect(app.http instanceof https.Server).toBeTruthy()
   })
 })
 
 it('reporters on start listening', () => {
-  const test = createReporter()
+  const test = createReporter({
+    subprotocol: '0.0.0',
+    supports: '0.x',
+    port: uniqPort()
+  })
 
-  const promise = test.app.listen({ port: uniqPort() })
+  const promise = test.app.listen()
   expect(test.reports).toEqual([])
 
   return promise.then(() => {
@@ -297,9 +317,13 @@ it('reporters on destroing', () => {
 })
 
 it('creates a client on connection', () => {
-  app = createServer()
-  return app.listen({ port: uniqPort() }).then(() => {
-    const ws = new WebSocket(`ws://localhost:${ app.listenOptions.port }`)
+  app = createServer({
+    subprotocol: '0.0.0',
+    supports: '0.x',
+    port: uniqPort()
+  })
+  return app.listen().then(() => {
+    const ws = new WebSocket(`ws://localhost:${ app.options.port }`)
     return new Promise((resolve, reject) => {
       ws.onopen = resolve
       ws.onerror = reject
@@ -335,14 +359,18 @@ it('disconnects on clients on destroy', () => {
 })
 
 it('accepts custom HTTP server', () => {
-  const test = createReporter()
+  server = http.createServer()
+  const test = createReporter({
+    subprotocol: '0.0.0',
+    supports: '0.x',
+    server
+  })
 
   const port = uniqPort()
-  server = http.createServer()
 
   return promisify(done => {
     server.listen(port, done)
-  }).then(() => test.app.listen({ server })).then(() => {
+  }).then(() => test.app.listen()).then(() => {
     const ws = new WebSocket(`ws://localhost:${ port }`)
     return new Promise((resolve, reject) => {
       ws.onopen = resolve
