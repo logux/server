@@ -41,10 +41,17 @@ yargs
     describe: 'Path to SSL certificate',
     type: 'string'
   })
+  .option('r', {
+    alias: 'reporter',
+    describe: 'Reporter type',
+    type: 'string'
+  })
   .epilog(
-    'Corresponding ENV variables: LOGUX_HOST, LOGUX_PORT, LOGUX_KEY, LOGUX_CERT'
+    'Corresponding ENV variables: LOGUX_HOST, LOGUX_PORT, LOGUX_KEY, ' +
+    'LOGUX_CERT, LOGUX_REPORTER'
   )
   .example('$0 --port 31337 --host 127.0.0.1')
+  .example('$0 --reporter bunyan')
   .example('LOGUX_PORT=1337 $0')
   .locale('en')
   .help()
@@ -67,9 +74,9 @@ yargs
  *                                      connection by sending ping.
  * @param {function} [options.timer] Timer to use in log. Will be default
  *                                   timer with server `nodeId`, by default.
- * @param {"cli"|"bunyan"} [options.reporter="cli"] Report process/errors to
- *                                                  CLI in text or bunyan
- *                                                  logger in JSON.
+ * @param {"text"|"bunyan"} [options.reporter="text"] Report process/errors to
+ *                                                    CLI in text or bunyan
+ *                                                    logger in JSON.
  * @param {Logger} [options.bunyanLogger] Bunyan logger with custom settings
  * @param {Store} [options.store] Store to save log. Will be `MemoryStore`,
  *                                by default.
@@ -177,6 +184,7 @@ class Server extends BaseServer {
     options.port = parseInt(options.port || argv.p || env.LOGUX_PORT, 10)
     options.cert = options.cert || argv.c || env.LOGUX_CERT
     options.key = options.key || argv.k || env.LOGUX_KEY
+    options.reporter = options.reporter || argv.r || env.LOGUX_REPORTER
     return options
   }
 }
