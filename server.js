@@ -47,11 +47,10 @@ yargs
     type: 'string'
   })
   .epilog(
-    'Corresponding ENV variables: LOGUX_HOST, LOGUX_PORT, LOGUX_KEY, ' +
-    'LOGUX_CERT, LOGUX_REPORTER'
+    'Environment variables: ' +
+    '\n  LOGUX_HOST, LOGUX_PORT, LOGUX_KEY, LOGUX_CERT, LOGUX_REPORTER'
   )
   .example('$0 --port 31337 --host 127.0.0.1')
-  .example('$0 --reporter bunyan')
   .example('LOGUX_PORT=1337 $0')
   .locale('en')
   .help()
