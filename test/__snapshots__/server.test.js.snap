@@ -81,9 +81,9 @@ exports[`shows uncatch rejects 1`] = `
 " ERROR  Test Error at 1970-01-01 00:00:00
         fake stacktrace
 
-Error event: Test Error
  INFO   Shutting down Logux server at 1970-01-01 00:00:00
 
+Error event: Test Error
 "
 `;
 
