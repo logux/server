@@ -95,12 +95,17 @@ afterEach(() => {
 
 it('uses cli args for options', () => {
   const options = Server.loadOptions({
-    argv: ['', '--port', '31337', '--host', '192.168.1.1'],
+    argv: [
+      '', '--port', '31337',
+      '--host', '192.168.1.1',
+      '--reporter', 'bunyan'
+    ],
     env: { }
   })
 
   expect(options.host).toEqual('192.168.1.1')
   expect(options.port).toEqual(31337)
+  expect(options.reporter).toEqual('bunyan')
   expect(options.cert).toBeUndefined()
   expect(options.key).toBeUndefined()
 })
@@ -108,11 +113,16 @@ it('uses cli args for options', () => {
 it('uses env for options', () => {
   const options = Server.loadOptions({
     argv: [],
-    env: { LOGUX_HOST: '127.0.1.1', LOGUX_PORT: 31337 }
+    env: {
+      LOGUX_HOST: '127.0.1.1',
+      LOGUX_PORT: 31337,
+      LOGUX_REPORTER: 'bunyan'
+    }
   })
 
   expect(options.host).toEqual('127.0.1.1')
   expect(options.port).toEqual(31337)
+  expect(options.reporter).toEqual('bunyan')
 })
 
 it('uses combined options', () => {
@@ -157,8 +167,11 @@ it('shows uncatch rejects', () => checkError('uncatch.js'))
 
 it('use environment variables for config', () => {
   process.env.LOGUX_PORT = 31337
+  process.env.LOGUX_REPORTER = 'bunyan'
   return checkOut('options.js')
 })
+
+it('uses reporter param', () => checkOut('options.js', ['', '--r', 'bunyan']))
 
 it('shows help', () => checkOut('options.js', ['', '--help']))
 
