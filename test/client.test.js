@@ -278,7 +278,7 @@ it('disconnects zombie', () => {
 
 it('checks action creator', () => {
   const test = createReporter()
-  test.app.log.on('before', (action, meta) => {
+  test.app.log.on('preadd', (action, meta) => {
     meta.reasons.push('test')
   })
 
@@ -302,7 +302,7 @@ it('checks action creator', () => {
 
 it('checks action meta', () => {
   const test = createReporter()
-  test.app.log.on('before', (action, meta) => {
+  test.app.log.on('preadd', (action, meta) => {
     meta.reasons.push('test')
   })
 

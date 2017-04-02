@@ -156,7 +156,7 @@ class BaseServer {
      */
     this.log = new Log({ store, nodeId: this.nodeId })
 
-    this.log.on('before', (action, meta) => {
+    this.log.on('preadd', (action, meta) => {
       if (!meta.server) meta.server = this.nodeId
       if (!meta.status) meta.status = 'waiting'
     })
