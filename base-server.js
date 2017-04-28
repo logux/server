@@ -3,7 +3,7 @@
 const ServerConnection = require('logux-sync').ServerConnection
 const MemoryStore = require('logux-core').MemoryStore
 const NanoEvents = require('nanoevents')
-const WebSocket = require('ws')
+const WebSocket = require('uws')
 const shortid = require('shortid')
 const https = require('https')
 const http = require('http')
@@ -293,13 +293,12 @@ class BaseServer {
 
     this.unbind.push(() => promisify(done => {
       promise.then(() => {
-        this.ws.close(() => {
-          if (this.http) {
-            this.http.close(done)
-          } else {
-            done()
-          }
-        })
+        this.ws.close()
+        if (this.http) {
+          this.http.close(done)
+        } else {
+          done()
+        }
       })
     }))
 
