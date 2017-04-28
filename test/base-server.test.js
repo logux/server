@@ -331,7 +331,7 @@ it('creates a client on connection', () => {
   }).then(() => {
     expect(Object.keys(app.clients).length).toBe(1)
     const client = app.clients[1]
-    expect(client.app.options.host).toEqual('127.0.0.1')
+    expect(client.remoteAddress).toEqual('127.0.0.1')
   })
 })
 
