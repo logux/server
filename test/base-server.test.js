@@ -323,7 +323,7 @@ it('creates a client on connection', () => {
     port: uniqPort()
   })
   return app.listen().then(() => {
-    const ws = new WebSocket(`ws://localhost:${ app.options.port }`)
+    const ws = new WebSocket(`ws://127.0.0.1:${ app.options.port }`)
     return new Promise((resolve, reject) => {
       ws.internalOnOpen = resolve
       ws.internalOnError = reject
@@ -331,7 +331,6 @@ it('creates a client on connection', () => {
   }).then(() => {
     expect(Object.keys(app.clients).length).toBe(1)
     const client = app.clients[1]
-    console.log('client.remoteAddress:', client.remoteAddress)
     expect(client.remoteAddress).toEqual('127.0.0.1')
   })
 })
