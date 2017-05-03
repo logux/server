@@ -1,7 +1,7 @@
 'use strict'
 
 const MemoryStore = require('logux-core').MemoryStore
-const WebSocket = require('ws')
+const WebSocket = require('uws')
 const https = require('https')
 const http = require('http')
 const path = require('path')
@@ -323,10 +323,10 @@ it('creates a client on connection', () => {
     port: uniqPort()
   })
   return app.listen().then(() => {
-    const ws = new WebSocket(`ws://localhost:${ app.options.port }`)
+    const ws = new WebSocket(`ws://127.0.0.1:${ app.options.port }`)
     return new Promise((resolve, reject) => {
-      ws.onopen = resolve
-      ws.onerror = reject
+      ws.internalOnOpen = resolve
+      ws.internalOnError = reject
     })
   }).then(() => {
     expect(Object.keys(app.clients).length).toBe(1)
