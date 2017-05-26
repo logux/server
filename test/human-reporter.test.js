@@ -1,21 +1,21 @@
 'use strict'
 
 const processReporter = require('../reporters/human/process')
-const helpers = require('../reporters/human/helpers')
 
 const ServerConnection = require('logux-sync').ServerConnection
 const createServer = require('http').createServer
 const SyncError = require('logux-sync').SyncError
-const yyyymmdd = require('yyyy-mm-dd')
 const path = require('path')
 
 const BaseServer = require('../base-server')
 const Client = require('../client')
 
+const DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
+
 function reportersOut () {
   return processReporter.apply({}, arguments)
     .replace(/\r\v/g, '\n')
-    .replace(yyyymmdd.withTime(new Date(1487805099387)), '2017-02-22 23:11:39')
+    .replace(DATE, '1970-01-01 00:00:00')
 }
 
 const app = new BaseServer({
@@ -55,14 +55,6 @@ const unauthed = new Client(app, new ServerConnection(ws), 1)
 
 const ownError = new SyncError(authed.sync, 'timeout', 5000, false)
 const clientError = new SyncError(authed.sync, 'timeout', 5000, true)
-
-const originNow = helpers.now
-beforeAll(() => {
-  helpers.now = () => new Date((new Date()).getTimezoneOffset() * 60000)
-})
-afterAll(() => {
-  helpers.now = originNow
-})
 
 const action = {
   type: 'CHANGE_USER',

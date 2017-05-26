@@ -25,7 +25,7 @@ exports[`handles error in production 1`] = `
 
 exports[`reports action 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mAction was added[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Time:   [1m2017-02-22 23:11:39[22m
+        Time:   [1m1970-01-01 00:00:00[22m
         Action: 
           type: [1mCHANGE_USER[22m
           id:   [1m100[22m

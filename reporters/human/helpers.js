@@ -12,7 +12,7 @@ const SEPARATOR = os.EOL + os.EOL
 const NEXT_LINE = os.EOL === '\n' ? '\r\v' : os.EOL
 
 function time (c) {
-  return c.dim(`at ${ yyyymmdd.withTime(module.exports.now()) }`)
+  return c.dim(`at ${ yyyymmdd.withTime(new Date()) }`)
 }
 
 function rightPag (str, length) {
@@ -119,9 +119,5 @@ module.exports = {
 
   message (strings) {
     return strings.filter(i => i !== '').join(NEXT_LINE) + SEPARATOR
-  },
-
-  now () {
-    return new Date()
   }
 }
