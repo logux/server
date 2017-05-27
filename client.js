@@ -68,9 +68,7 @@ class Client {
      * @example
      * const clientCity = detectLocation(client.remoteAddress)
      */
-    this.remoteAddress = connection.ws.upgradeReq.headers['x-forwarded-for'] ||
-                         connection.ws.upgradeReq.connection.remoteAddress ||
-                         connection.ws._socket.remoteAddress
+    this.remoteAddress = connection.ws._socket.remoteAddress
 
     let credentials
     if (this.app.env === 'development') {

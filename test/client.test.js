@@ -8,11 +8,8 @@ const Client = require('../client')
 function createConnection () {
   const pair = new TestPair()
   pair.left.ws = {
-    upgradeReq: {
-      headers: { },
-      connection: {
-        remoteAddress: '127.0.0.1'
-      }
+    _socket: {
+      remoteAddress: '127.0.0.1'
     }
   }
   return pair.left

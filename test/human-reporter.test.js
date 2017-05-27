@@ -29,11 +29,8 @@ const app = new BaseServer({
 })
 
 const ws = {
-  upgradeReq: {
-    headers: { },
-    connection: {
-      remoteAddress: '127.0.0.1'
-    }
+  _socket: {
+    remoteAddress: '127.0.0.1'
   },
   on: () => { }
 }
