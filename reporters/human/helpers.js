@@ -62,8 +62,8 @@ module.exports = {
       } else if (typeof value === 'object') {
         return start + NEXT_LINE + INDENT +
           module.exports.params(c,
-            Object.keys(value).map(key => [key, value[key]]
-          )).split(NEXT_LINE).join(NEXT_LINE + INDENT)
+            Object.keys(value).map(key => [key, value[key]])
+          ).split(NEXT_LINE).join(NEXT_LINE + INDENT)
       } else {
         return start + c.bold(value)
       }
