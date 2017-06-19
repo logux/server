@@ -11,6 +11,7 @@ const path = require('path')
 const Log = require('logux-core').Log
 const fs = require('fs')
 
+const forcePromise = require('./force-promise')
 const promisify = require('./promisify')
 const Client = require('./client')
 
@@ -32,20 +33,6 @@ function readFile (root, file) {
   return promisify(done => {
     fs.readFile(file, done)
   })
-}
-
-function forcePromise (callback) {
-  let result
-  try {
-    result = callback()
-  } catch (e) {
-    return Promise.reject(e)
-  }
-  if (typeof result !== 'object' || typeof result.then !== 'function') {
-    return Promise.resolve(result)
-  } else {
-    return result
-  }
 }
 
 /**
