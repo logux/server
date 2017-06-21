@@ -17,7 +17,7 @@
     "nanoevents": "^0.3.0",
     "semver": "^5.3.0",
     "shortid": "^2.2.8",
-    "strip-ansi": "^3.0.1",
+    "strip-ansi": "^4.0.0",
     "uws": "^0.14.5",
     "yargs": "^8.0.2",
     "yyyy-mm-dd": "^1.0.1"
@@ -25,7 +25,7 @@
   "devDependencies": {
     "docdash": "^0.4.0",
     "eslint": "^4.0.0",
-    "eslint-config-logux": "^13.0.0",
+    "eslint-config-logux": "^13.1.0",
     "eslint-config-standard": "^10.2.1",
     "eslint-plugin-import": "^2.3.0",
     "eslint-plugin-jest": "^20.0.3",
