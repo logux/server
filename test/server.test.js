@@ -41,17 +41,18 @@ function test (name, args) {
       out += chank
     })
     server.on('close', exitCode => {
-      let fixed = out.replace(DATE, '1970-01-01 00:00:00')
-                     .replace(/PID:(\s+)\d+/, 'PID:$121384')
-                     .replace(/"pid":\d+,/g, '"pid":21384,')
-                     .replace(
-                       /"hostname":"[-.\w]+",/g,
-                       '"hostname":"localhost",'
-                     )
-                     .replace(
-                       /"time":"[-.:\dTZ]+",/g,
-                       '"time":"1970-01-01T00:00:00.000Z",'
-                     )
+      let fixed = out
+        .replace(DATE, '1970-01-01 00:00:00')
+        .replace(/PID:(\s+)\d+/, 'PID:$121384')
+        .replace(/"pid":\d+,/g, '"pid":21384,')
+        .replace(
+          /"hostname":"[-.\w]+",/g,
+          '"hostname":"localhost",'
+        )
+        .replace(
+          /"time":"[-.:\dTZ]+",/g,
+          '"time":"1970-01-01T00:00:00.000Z",'
+        )
       fixed = fixed.replace(/\r\v/g, '\n')
       resolve([fixed, exitCode])
     })
@@ -157,9 +158,11 @@ it('uses arg, env, options in given priority', () => {
 
 it('destroys everything on exit', () => checkOut('destroy.js'))
 
-it('reports unbind', () => test('unbind.js').then(result => {
-  expect(result[0]).toMatchSnapshot()
-}))
+it('reports unbind', () => {
+  return test('unbind.js').then(result => {
+    expect(result[0]).toMatchSnapshot()
+  })
+})
 
 it('shows uncatch errors', () => checkError('throw.js'))
 
@@ -175,10 +178,13 @@ it('uses reporter param', () => checkOut('options.js', ['', '--r', 'bunyan']))
 
 it('shows help', () => checkOut('options.js', ['', '--help']))
 
-it('shows help about port in use', () => start('eaddrinuse.js')
-  .then(() => test('eaddrinuse.js')).then(result => {
+it('shows help about port in use', () => {
+  return start('eaddrinuse.js').then(() => {
+    return test('eaddrinuse.js')
+  }).then(result => {
     expect(result[0]).toMatchSnapshot()
-  }))
+  })
+})
 
 it('shows help about privileged port', () => checkError('eacces.js'))
 
