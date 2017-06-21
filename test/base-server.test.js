@@ -759,8 +759,10 @@ it('reports about error during action processing', () => {
   })
 
   return app.log.add({ type: 'FOO' }, { id: [1, 's', 0], reasons: ['test'] })
-    .then(() => app.log.add({ type: 'FOO', auth: true },
-                            { id: [2, 's', 0], reasons: ['test'] }))
+    .then(() => app.log.add(
+      { type: 'FOO', auth: true },
+      { id: [2, 's', 0], reasons: ['test'] })
+    )
     .then(() => wait(1))
     .then(() => {
       expect(processed).toEqual(1)
