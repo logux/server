@@ -44,7 +44,7 @@
     "lint-staged": "lint-staged",
     "spellcheck": "yarn run docs && yaspeller-ci *.md docs/*.html",
     "clean": "rimraf docs/ coverage/",
-    "lint": "eslint *.js test/**/*.js reporters/**/*.js",
+    "lint": "eslint *.js test/{**/,}*.js reporters/{**/,*}.js",
     "docs": "jsdoc --configure .jsdocrc *.js",
     "test": "jest --coverage && yarn run lint && yarn run spellcheck"
   },
