@@ -715,9 +715,9 @@ escodegen@^1.6.1:
   optionalDependencies:
     source-map "~0.2.0"
 
-eslint-config-logux@^13.1.0:
-  version "13.1.0"
-  resolved "https://registry.yarnpkg.com/eslint-config-logux/-/eslint-config-logux-13.1.0.tgz#66516b9d5d1e42420dfe23cd26c56e9ebdd6bc07"
+eslint-config-logux@^13.2.0:
+  version "13.2.0"
+  resolved "https://registry.yarnpkg.com/eslint-config-logux/-/eslint-config-logux-13.2.0.tgz#1d4cebeb9252a85d34e2f2596e49f43438717602"
 
 eslint-config-standard@^10.2.1:
   version "10.2.1"
@@ -1968,13 +1968,13 @@ log-update@^1.0.2:
 
 logux-core@logux/logux-core:
   version "0.1.0"
-  resolved "https://codeload.github.com/logux/logux-core/tar.gz/fd4dc4c2f77a9e14c1071cd8452fb93b0270dbac"
+  resolved "https://codeload.github.com/logux/logux-core/tar.gz/4ea60eee8a5a041cd093d938490dea33d040312a"
   dependencies:
     nanoevents "^0.3.0"
 
 logux-sync@logux/logux-sync:
   version "0.1.2"
-  resolved "https://codeload.github.com/logux/logux-sync/tar.gz/1af943b246628e49785a0b67e0d753691721cad1"
+  resolved "https://codeload.github.com/logux/logux-sync/tar.gz/a49b499c3e224cf3a0e9f0f0ad6f0d2b9aa531bf"
   dependencies:
     nanoevents "^0.3.0"
 
