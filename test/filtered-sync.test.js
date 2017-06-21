@@ -35,7 +35,8 @@ it('does not sync actions on add', () => {
   }).then(() => {
     return test.server.log.add({ type: 'A' })
   }).then(() => {
-    expect(test.server.state).toEqual('synchronized')
+    return test.server.waitFor('synchronized')
+  }).then(() => {
     expect(actions(test.client)).toEqual([])
   })
 })
