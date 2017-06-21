@@ -55,3 +55,17 @@ it('synchronizes only node-specific actions on connection', () => {
     expect(actions(test.client)).toEqual([{ type: 'B' }])
   })
 })
+
+it('still sends only new actions', () => {
+  const test = createTest()
+  return test.server.log.add({ type: 'A' }, { nodes: ['1:a'] }).then(() => {
+    return test.server.log.add({ type: 'B' }, { nodes: ['1:a'] })
+  }).then(() => {
+    test.client.lastReceived = 1
+    return test.client.connection.connect()
+  }).then(() => {
+    return test.server.waitFor('synchronized')
+  }).then(() => {
+    expect(actions(test.client)).toEqual([{ type: 'B' }])
+  })
+})
