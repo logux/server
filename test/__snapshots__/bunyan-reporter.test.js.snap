@@ -162,7 +162,7 @@ exports[`reports connect 1`] = `
 
 exports[`reports denied 1`] = `
 "{
-  \\"level\\": \\"info\\",
+  \\"level\\": \\"warn\\",
   \\"msg\\": \\"Action was denied\\",
   \\"details\\": {
     \\"actionId\\": [
@@ -319,7 +319,7 @@ exports[`reports synchroniation error 1`] = `
 
 exports[`reports zombie 1`] = `
 "{
-  \\"level\\": \\"info\\",
+  \\"level\\": \\"warn\\",
   \\"msg\\": \\"Zombie client was disconnected\\",
   \\"details\\": {
     \\"nodeId\\": \\"100:H10Nf5stl\\"

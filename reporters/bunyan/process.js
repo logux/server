@@ -154,7 +154,7 @@ const reporters = {
 
   denied (app, action, meta) {
     return {
-      level: 'info',
+      level: 'warn',
       msg: 'Action was denied',
       details: {
         actionId: meta.id
@@ -175,7 +175,7 @@ const reporters = {
 
   zombie (app, client) {
     return {
-      level: 'info',
+      level: 'warn',
       msg: 'Zombie client was disconnected',
       details: {
         nodeId: client.nodeId
