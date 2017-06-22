@@ -1,8 +1,10 @@
 'use strict'
 
-const ServerSync = require('logux-sync').ServerSync
 const SyncError = require('logux-sync').SyncError
 const semver = require('semver')
+
+const FilteredSync = require('./filtered-sync')
+const forcePromise = require('./force-promise')
 
 /**
  * Logux client connected to server.
@@ -82,7 +84,7 @@ class Client {
      * @example
      * if (client.sync.state === 'synchronized')
      */
-    this.sync = new ServerSync(app.nodeId, app.log, connection, {
+    this.sync = new FilteredSync(this, app.nodeId, app.log, connection, {
       credentials,
       subprotocol: app.options.subprotocol,
       inFilter: this.filter.bind(this),
@@ -171,14 +173,31 @@ class Client {
   }
 
   filter (action, meta) {
-    const wrongUser = this.user && this.user !== this.app.getUser(meta.id[1])
+    const user = this.app.getUser(meta.id[1])
+
+    const wrongUser = this.user && this.user !== user
     const wrongMeta = Object.keys(meta).some(i => i !== 'id' && i !== 'time')
     if (wrongUser || wrongMeta) {
       this.app.reporter('denied', this.app, action, meta)
       return Promise.resolve(false)
-    } else {
-      return Promise.resolve(true)
     }
+
+    const type = this.app.types[action.type]
+    if (!type) {
+      this.app.unknowType(action, meta)
+      return Promise.resolve(false)
+    }
+
+    return forcePromise(() => type.access(action, meta, user)).then(result => {
+      if (!result) {
+        this.app.reporter('denied', this.app, action, meta)
+        this.app.undo(meta.id, 'denied')
+      }
+      return result
+    }).catch(e => {
+      this.app.undo(meta.id, 'error')
+      this.app.emitter.emit('error', e, action, meta)
+    })
   }
 }
 

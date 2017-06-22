@@ -19,8 +19,13 @@ function createServer (opts, reporter) {
   if (!opts) opts = { }
   opts.subprotocol = '0.0.0'
   opts.supports = '0.x'
+
   const server = new BaseServer(opts, reporter)
   server.auth(() => true)
+  server.log.on('preadd', (action, meta) => {
+    meta.reasons.push('test')
+  })
+
   return server
 }
 
@@ -40,6 +45,21 @@ function createClient (app) {
   const client = new Client(app, createConnection(), lastClient)
   app.clients[lastClient] = client
   return client
+}
+
+function connectClient (server) {
+  const client = createClient(server)
+  return client.connection.connect().then(() => {
+    const protocol = client.sync.localProtocol
+    client.connection.other().send(['connect', protocol, '10:uuid', 0])
+    return client.connection.pair.wait('right')
+  }).then(() => {
+    return client
+  })
+}
+
+function actions (app) {
+  return app.log.store.created.map(i => i[0])
 }
 
 it('uses server options', () => {
@@ -219,13 +239,7 @@ it('has method to check client subprotocol', () => {
 
 it('sends server credentials in development', () => {
   const app = createServer({ env: 'development' })
-
-  const client = createClient(app)
-  return client.connection.connect().then(() => {
-    const protocol = client.sync.localProtocol
-    client.connection.other().send(['connect', protocol, 'client', 0])
-    return client.connection.pair.wait('right')
-  }).then(() => {
+  return connectClient(app).then(client => {
     expect(client.connection.pair.leftSent[0][4]).toEqual({
       credentials: { env: 'development' },
       subprotocol: '0.0.0'
@@ -237,12 +251,7 @@ it('does not send server credentials in production', () => {
   const app = createServer({ env: 'production' })
   app.auth(() => Promise.resolve(true))
 
-  const client = createClient(app)
-  return client.connection.connect().then(() => {
-    const protocol = client.sync.localProtocol
-    client.connection.other().send(['connect', protocol, 'client', 0])
-    return client.connection.pair.wait('right')
-  }).then(() => {
+  return connectClient(app).then(client => {
     expect(client.connection.pair.leftSent[0][4]).toEqual({
       subprotocol: '0.0.0'
     })
@@ -275,22 +284,17 @@ it('disconnects zombie', () => {
 
 it('checks action creator', () => {
   const test = createReporter()
-  test.app.log.on('preadd', (action, meta) => {
-    meta.reasons.push('test')
-  })
+  test.app.type('GOOD', { access: () => true })
+  test.app.type('BAD', { access: () => true })
 
-  const client = createClient(test.app)
-  return client.connection.connect().then(() => {
-    const protocol = client.sync.localProtocol
-    client.connection.other().send(['connect', protocol, '10:uuid', 0])
-    return client.connection.pair.wait('right')
-  }).then(() => {
+  return connectClient(test.app).then(client => {
     client.connection.other().send(['sync', 2,
-      { type: 'FOO' }, { id: [1, '10:uuid', 0] },
-      { type: 'FOO' }, { id: [2, '1:uuid', 0] }
+      { type: 'GOOD' }, { id: [1, '10:uuid', 0] },
+      { type: 'BAD' }, { id: [2, '1:uuid', 0] }
     ])
     return client.connection.pair.wait('right')
   }).then(() => {
+    expect(actions(test.app)).toEqual([{ type: 'GOOD' }])
     expect(test.names).toEqual(['connect', 'authenticated', 'denied', 'add'])
     expect(test.reports[2][3].id).toEqual([2, '1:uuid', 0])
     expect(test.reports[3][3].id).toEqual([1, '10:uuid', 0])
@@ -299,24 +303,171 @@ it('checks action creator', () => {
 
 it('checks action meta', () => {
   const test = createReporter()
-  test.app.log.on('preadd', (action, meta) => {
-    meta.reasons.push('test')
-  })
+  test.app.type('GOOD', { access: () => true })
+  test.app.type('BAD', { access: () => true })
 
-  const client = createClient(test.app)
-  return client.connection.connect().then(() => {
-    const protocol = client.sync.localProtocol
-    client.connection.other().send(['connect', protocol, '10:uuid', 0])
-    return client.connection.pair.wait('right')
-  }).then(() => {
+  return connectClient(test.app).then(client => {
     client.connection.other().send(['sync', 2,
-      { type: 'FOO' }, { id: [1, '10:uuid', 0], status: 'processed' },
-      { type: 'FOO' }, { id: [2, '10:uuid', 0], time: 3 }
+      { type: 'BAD' }, { id: [1, '10:uuid', 0], status: 'processed' },
+      { type: 'GOOD' }, { id: [2, '10:uuid', 0], time: 3 }
     ])
     return client.connection.pair.wait('right')
   }).then(() => {
+    expect(actions(test.app)).toEqual([{ type: 'GOOD' }])
     expect(test.names).toEqual(['connect', 'authenticated', 'denied', 'add'])
     expect(test.reports[2][3].id).toEqual([1, '10:uuid', 0])
     expect(test.reports[3][3].id).toEqual([2, '10:uuid', 0])
+  })
+})
+
+it('ignores unknown action types', () => {
+  const test = createReporter()
+
+  return connectClient(test.app).then(client => {
+    client.connection.other().send(['sync', 2,
+      { type: 'UNKNOWN' }, { id: [1, '10:uuid', 0] }
+    ])
+    return client.connection.pair.wait('right')
+  }).then(() => {
+    expect(actions(test.app)).toEqual([
+      { type: 'logux/undo', reason: 'unknowType', id: [1, '10:uuid', 0] }
+    ])
+    expect(test.names).toEqual([
+      'connect', 'authenticated', 'unknowType', 'add'])
+    expect(test.reports[2][1]).toBe(test.app)
+    expect(test.reports[2][2].type).toEqual('UNKNOWN')
+    expect(test.reports[2][3].id).toEqual([1, '10:uuid', 0])
+  })
+})
+
+it('checks user access for action', () => {
+  const test = createReporter()
+  test.app.type('FOO', {
+    access (action, meta, user) {
+      expect(user).toEqual('10')
+      expect(meta.id).toBeDefined()
+      return Promise.resolve(!!action.bar)
+    }
+  })
+
+  return connectClient(test.app).then(client => {
+    client.connection.other().send(['sync', 2,
+      { type: 'FOO' }, { id: [1, '10:uuid', 0] },
+      { type: 'FOO', bar: true }, { id: [1, '10:uuid', 1] }
+    ])
+    return client.connection.pair.wait('right')
+  }).then(() => {
+    expect(actions(test.app)).toEqual([
+      { type: 'logux/undo', reason: 'denied', id: [1, '10:uuid', 0] },
+      { type: 'FOO', bar: true }
+    ])
+    expect(test.names).toEqual([
+      'connect', 'authenticated', 'denied', 'add', 'add'])
+    expect(test.reports[2][1]).toBe(test.app)
+    expect(test.reports[2][2].type).toEqual('FOO')
+    expect(test.reports[2][3].id).toEqual([1, '10:uuid', 0])
+  })
+})
+
+it('reports about errors in access callback', () => {
+  const error = new Error('test')
+
+  const test = createReporter()
+  test.app.type('FOO', {
+    access () {
+      throw error
+    }
+  })
+
+  let throwed
+  test.app.on('error', e => {
+    throwed = e
+  })
+
+  return connectClient(test.app).then(client => {
+    client.connection.other().send(['sync', 2,
+      { type: 'FOO', bar: true }, { id: [1, '10:uuid', 0] }
+    ])
+    return client.connection.pair.wait('right')
+  }).then(() => {
+    expect(actions(test.app)).toEqual([
+      { type: 'logux/undo', reason: 'error', id: [1, '10:uuid', 0] }
+    ])
+    expect(test.names).toEqual([
+      'connect', 'authenticated', 'runtimeError', 'add'])
+    expect(throwed).toEqual(error)
+  })
+})
+
+it('sends only specific actions to client', () => {
+  const app = createServer()
+  app.type('FOO', { access: () => true })
+
+  return Promise.all([
+    app.log.add({ type: 'FOO' }, { id: [0, 'server', 0], time: 0 }),
+    app.log.add({ type: 'FOO' }, {
+      id: [1, 'server', 0], time: 1, nodes: ['10:uuid']
+    })
+  ]).then(() => {
+    return connectClient(app)
+  }).then(client => {
+    client.connection.other().send(['synced', 2])
+    return client.sync.waitFor('synchronized').then(() => {
+      const sent = client.sync.connection.pair.leftSent
+      expect(sent.map(i => i[0])).toEqual(['connected', 'sync'])
+      expect(sent[1]).toEqual([
+        'sync', 2, { type: 'FOO' }, { id: [1, 'server', 0], time: 1 }
+      ])
+    })
+  })
+})
+
+it('resends only specific actions to client before processing end', () => {
+  const app = createServer()
+  app.type('FOO', {
+    access: () => true,
+    process: () => new Promise()
+  })
+
+  return connectClient(app).then(client => {
+    return Promise.all([
+      app.log.add({ type: 'FOO' }, { id: [1, 'server', 0], time: 0 }),
+      app.log.add({ type: 'FOO' }, {
+        id: [2, 'server', 0], time: 1, nodes: ['10:uuid']
+      })
+    ]).then(() => {
+      client.connection.other().send(['synced', 2])
+      return client.sync.waitFor('synchronized')
+    }).then(() => {
+      const sent = client.sync.connection.pair.leftSent
+      expect(sent.map(i => i[0])).toEqual(['connected', 'sync'])
+      expect(sent[1]).toEqual([
+        'sync', 2, { type: 'FOO' }, { id: [2, 'server', 0], time: 1 }
+      ])
+    })
+  })
+})
+
+it('does not resent unknown types before processing', () => {
+  const app = createServer()
+
+  return connectClient(app).then(client => {
+    return Promise.all([
+      app.log.add({ type: 'UNKNOWN' }, {
+        id: [1, 'server', 0], time: 1, nodes: ['10:uuid']
+      }),
+      app.log.add({ type: 'UNKNOWN' }, {
+        id: [2, 'server', 0], time: 1, nodes: ['10:uuid'], status: 'processed'
+      })
+    ]).then(() => {
+      client.connection.other().send(['synced', 2])
+      return client.sync.waitFor('synchronized')
+    }).then(() => {
+      const sent = client.sync.connection.pair.leftSent
+      expect(sent.map(i => i[0])).toEqual(['connected', 'sync'])
+      expect(sent[1]).toEqual([
+        'sync', 2, { type: 'UNKNOWN' }, { id: [2, 'server', 0], time: 1 }
+      ])
+    })
   })
 })

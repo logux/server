@@ -141,6 +141,15 @@ it('reports processed', () => {
   expect(reportersOut('processed', app, action, meta, 500)).toMatchSnapshot()
 })
 
+it('reports unknowType', () => {
+  expect(reportersOut('unknowType', app, action, meta)).toMatchSnapshot()
+})
+
+it('reports unknowType from server', () => {
+  const serverMeta = { id: [1, 'server', 0] }
+  expect(reportersOut('unknowType', app, action, serverMeta)).toMatchSnapshot()
+})
+
 it('reports disconnect', () => {
   expect(reportersOut('disconnect', app, authed)).toMatchSnapshot()
 })

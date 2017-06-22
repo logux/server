@@ -35,5 +35,9 @@ module.exports = {
       url = `${ protocol }${ host }:${ port }`
     }
     return url
+  },
+
+  isServer (id) {
+    return /^server(:|$)/.test(id[1])
   }
 }

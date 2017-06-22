@@ -317,6 +317,38 @@ exports[`reports synchroniation error 1`] = `
 "
 `;
 
+exports[`reports unknowType 1`] = `
+"{
+  \\"level\\": \\"warn\\",
+  \\"msg\\": \\"Action with unknown type CHANGE_USER\\",
+  \\"details\\": {
+    \\"actionId\\": [
+      1487805099387,
+      \\"100:H10Nf5stl\\",
+      0
+    ]
+  }
+}
+
+"
+`;
+
+exports[`reports unknowType from server 1`] = `
+"{
+  \\"level\\": \\"error\\",
+  \\"msg\\": \\"Action with unknown type CHANGE_USER\\",
+  \\"details\\": {
+    \\"actionId\\": [
+      1,
+      \\"server\\",
+      0
+    ]
+  }
+}
+
+"
+`;
+
 exports[`reports zombie 1`] = `
 "{
   \\"level\\": \\"warn\\",

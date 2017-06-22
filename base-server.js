@@ -152,12 +152,17 @@ class BaseServer {
       this.reporter('add', this, action, meta)
 
       if (this.destroing) return
-      if (meta.status !== 'waiting') return
 
-      if (!this.types[action.type]) {
-        this.unknownAction(action, meta)
-      } else {
-        this.process(action, meta)
+      const type = this.types[action.type]
+      if (type || meta.status !== 'waiting') {
+        this.sendAction(action, meta)
+      }
+      if (meta.status === 'waiting') {
+        if (!type) {
+          this.unknowType(action, meta)
+          return
+        }
+        if (type.process) this.process(type, action, meta)
       }
     })
     this.log.on('clean', (action, meta) => {
@@ -362,14 +367,14 @@ class BaseServer {
    * @param {string} name The action’s type.
    * @param {object} callbacks Callbacks for actions with this type.
    * @param {authorizer} callback.access Check does user can do this action.
-   * @param {processor} callback.process Action business logic.
+   * @param {processor} [callback.process] Action business logic.
    *
    * @return {undefined}
    *
    * @example
    * app.type('CHANGE_NAME', {
-   *   access (action, meta) {
-   *     return action.user === meta.user
+   *   access (action, meta, user) {
+   *     return action.user === user
    *   },
    *   process (action, meta) {
    *     if (isFirstOlder(lastNameChange(action.user), meta)) {
@@ -385,10 +390,27 @@ class BaseServer {
     if (!callbacks || !callbacks.access) {
       throw new Error(`Action type ${ name } must have access callback`)
     }
-    if (!callbacks.process) {
-      throw new Error(`Action type ${ name } must have process callback`)
-    }
     this.types[name] = callbacks
+  }
+
+  /**
+   * Undo action from client.
+   *
+   * @param {ID} id The action ID from metadata.
+   * @param {string} [reason] Optional code for reason.
+   *
+   * @return {undefined}
+   *
+   * @example
+   * if (couldNotFixConflict(action, meta)) {
+   *   app.undo(meta.id)
+   * }
+   */
+  undo (id, reason) {
+    const nodeId = id[1]
+    this.log.add(
+      { type: 'logux/undo', reason, id },
+      { reasons: ['error'], status: 'processed', nodes: [nodeId] })
   }
 
   /**
@@ -407,51 +429,40 @@ class BaseServer {
     }
   }
 
-  unknownAction (action, meta) {
-    if (meta.user) {
-      this.badAction(meta.id, 'error', 'unknowType')
-    } else {
-      this.log.changeMeta(meta.id, { status: 'processed' })
-    }
-  }
-
-  process (action, meta) {
+  process (type, action, meta) {
     const start = Date.now()
-    const type = this.types[action.type]
     const user = this.getUser(meta.id[1])
 
-    forcePromise(() => type.access(action, meta, user)).then(result => {
-      if (!result) {
-        this.reporter('denied', this, action, meta)
-        this.badAction(meta.id, 'denied', 'denied')
-        return false
-      }
-      if (this.destroing) {
-        return false
-      }
-
-      this.processing += 1
-      return forcePromise(() => type.process(action, meta, user)).then(() => {
-        this.reporter('processed', this, action, meta, Date.now() - start)
-        this.processing -= 1
-        this.emitter.emit('processed', action, meta)
-      }).catch(e => {
-        this.badAction(meta.id, 'error', 'error')
-        this.emitter.emit('error', e, action, meta)
-        this.processing -= 1
-        this.emitter.emit('processed', action, meta)
-      })
+    this.processing += 1
+    forcePromise(() => type.process(action, meta, user)).then(() => {
+      this.reporter('processed', this, action, meta, Date.now() - start)
+      this.processing -= 1
+      this.emitter.emit('processed', action, meta)
     }).catch(e => {
-      this.badAction(meta.id, 'error', 'error')
+      this.log.changeMeta(meta.id, { status: 'error' })
+      this.undo(meta.id, 'error')
       this.emitter.emit('error', e, action, meta)
+      this.processing -= 1
+      this.emitter.emit('processed', action, meta)
     })
   }
 
-  badAction (id, status, reason) {
-    this.log.changeMeta(id, { status })
-    this.log.add(
-      { type: 'logux/undo', reason, id },
-      { reasons: ['error'], status: 'processed' })
+  sendAction (action, meta) {
+    if (meta.nodes) {
+      for (const id of meta.nodes) {
+        if (this.nodeIds[id]) {
+          this.nodeIds[id].sync.onAdd(action, meta)
+        }
+      }
+    }
+  }
+
+  unknowType (action, meta) {
+    this.log.changeMeta(meta.id, { status: 'error' })
+    this.reporter('unknowType', this, action, meta)
+    if (this.getUser(meta.id[1]) !== 'server') {
+      this.undo(meta.id, 'unknowType')
+    }
   }
 
   getUser (nodeId) {
@@ -459,7 +470,7 @@ class BaseServer {
     if (pos !== -1) {
       return nodeId.slice(0, pos)
     } else {
-      return false
+      return nodeId
     }
   }
 }

@@ -13,31 +13,30 @@ const promisify = require('../promisify')
 
 const DEFAULT_OPTIONS = {
   subprotocol: '0.0.0',
-  supports: '0.x'
+  supports: '0.x',
+  nodeId: 'server'
 }
 const CERT = path.join(__dirname, 'fixtures/cert.pem')
 const KEY = path.join(__dirname, 'fixtures/key.pem')
 
 let lastPort = 9111
-function uniqPort () {
-  lastPort += 1
-  return lastPort
-}
-
 function createServer (options, reporter) {
-  const created = new BaseServer(options || DEFAULT_OPTIONS, reporter)
-  created.auth(() => true)
-  return created
-}
+  if (!options) options = { }
+  for (const i in DEFAULT_OPTIONS) {
+    if (typeof options[i] === 'undefined') {
+      options[i] = DEFAULT_OPTIONS[i]
+    }
+  }
+  if (typeof options.port === 'undefined') {
+    lastPort += 1
+    options.port = lastPort
+  }
 
-function createTest () {
-  const created = createServer({
-    subprotocol: '0.0.0',
-    supports: '0.x',
-    nodeId: 'server'
-  })
+  const created = new BaseServer(options, reporter)
+  created.auth(() => true)
   let lastId = 0
   created.log.generateId = () => [++lastId, 'server', 0]
+
   return created
 }
 
@@ -55,10 +54,6 @@ function createReporter (opts) {
   return result
 }
 
-function entries (log) {
-  return log.store.created.map(i => [i[0], i[1]])
-}
-
 function wait (ms) {
   return new Promise(resolve => {
     setTimeout(resolve, ms)
@@ -69,7 +64,6 @@ const originEnv = process.env.NODE_ENV
 
 afterEach(() => {
   process.env.NODE_ENV = originEnv
-
   return Promise.all([
     app ? app.destroy() : true,
     server ? promisify(done => server.close(done)) : true
@@ -80,7 +74,11 @@ afterEach(() => {
 })
 
 it('saves server options', () => {
-  app = new BaseServer(DEFAULT_OPTIONS)
+  app = new BaseServer({
+    subprotocol: '0.0.0',
+    supports: '0.x',
+    nodeId: 'server'
+  })
   expect(app.options.supports).toEqual('0.x')
 })
 
@@ -96,7 +94,10 @@ it('saves node ID', () => {
 })
 
 it('generates node ID', () => {
-  app = new BaseServer(DEFAULT_OPTIONS)
+  app = new BaseServer({
+    subprotocol: '0.0.0',
+    supports: '0.x'
+  })
   expect(app.nodeId).toMatch(/server:[\w\d]+/)
 })
 
@@ -126,9 +127,9 @@ it('takes environment from NODE_ENV', () => {
 
 it('sets environment from user', () => {
   app = new BaseServer({
-    env: 'production',
     subprotocol: '0.0.0',
-    supports: '0.x'
+    supports: '0.x',
+    env: 'production'
   })
   expect(app.env).toEqual('production')
 })
@@ -181,48 +182,29 @@ it('uses 1337 port by default', () => {
 })
 
 it('uses user port', () => {
-  app = createServer({
-    subprotocol: '0.0.0',
-    supports: '0.x',
-    port: 31337
-  })
+  app = createServer({ port: 31337 })
   expect(app.options.port).toEqual(31337)
 })
 
 it('uses 127.0.0.1 to bind server by default', () => {
-  app = createServer({
-    subprotocol: '0.0.0',
-    supports: '0.x',
-    port: uniqPort()
-  })
+  app = createServer()
   expect(app.options.host).toEqual('127.0.0.1')
 })
 
 it('throws a error on key without certificate', () => {
   expect(() => {
-    app = createServer({
-      subprotocol: '0.0.0',
-      supports: '0.x',
-      key: fs.readFileSync(KEY)
-    })
+    app = createServer({ key: fs.readFileSync(KEY) })
   }).toThrowError(/set cert option/)
 })
 
 it('throws a error on certificate without key', () => {
   expect(() => {
-    app = createServer({
-      subprotocol: '0.0.0',
-      supports: '0.x',
-      cert: fs.readFileSync(CERT)
-    })
+    app = createServer({ cert: fs.readFileSync(CERT) })
   }).toThrowError(/set key option/)
 })
 
 it('uses HTTPS', () => {
   app = createServer({
-    subprotocol: '0.0.0',
-    supports: '0.x',
-    port: uniqPort(),
     cert: fs.readFileSync(CERT),
     key: fs.readFileSync(KEY)
   })
@@ -233,11 +215,8 @@ it('uses HTTPS', () => {
 
 it('loads keys by absolute path', () => {
   app = createServer({
-    subprotocol: '0.0.0',
-    supports: '0.x',
     cert: CERT,
-    key: KEY,
-    port: uniqPort()
+    key: KEY
   })
   return app.listen().then(() => {
     expect(app.http instanceof https.Server).toBeTruthy()
@@ -246,12 +225,9 @@ it('loads keys by absolute path', () => {
 
 it('loads keys by relative path', () => {
   app = createServer({
-    subprotocol: '0.0.0',
-    supports: '0.x',
     root: __dirname,
     cert: 'fixtures/cert.pem',
-    key: 'fixtures/key.pem',
-    port: uniqPort()
+    key: 'fixtures/key.pem'
   })
   return app.listen().then(() => {
     expect(app.http instanceof https.Server).toBeTruthy()
@@ -260,11 +236,8 @@ it('loads keys by relative path', () => {
 
 it('supports object in SSL key', () => {
   app = createServer({
-    subprotocol: '0.0.0',
-    supports: '0.x',
     cert: fs.readFileSync(CERT),
-    key: { pem: fs.readFileSync(KEY) },
-    port: uniqPort()
+    key: { pem: fs.readFileSync(KEY) }
   })
   return app.listen().then(() => {
     expect(app.http instanceof https.Server).toBeTruthy()
@@ -272,11 +245,7 @@ it('supports object in SSL key', () => {
 })
 
 it('reporters on start listening', () => {
-  const test = createReporter({
-    subprotocol: '0.0.0',
-    supports: '0.x',
-    port: uniqPort()
-  })
+  const test = createReporter()
 
   const promise = test.app.listen()
   expect(test.reports).toEqual([])
@@ -288,40 +257,30 @@ it('reporters on start listening', () => {
 
 it('reporters on log events', () => {
   const test = createReporter()
-  test.app.log.generateId = () => [1]
+  test.app.type('A', { access: () => true })
   test.app.log.add({ type: 'A' })
-  const nodeId = test.app.nodeId
+  const meta = {
+    id: [1, 'server', 0],
+    reasons: [],
+    status: 'waiting',
+    server: 'server',
+    time: 1
+  }
   expect(test.reports).toEqual([
-    [
-      'add',
-      test.app,
-      { type: 'A' },
-      { id: [1], reasons: [], status: 'waiting', server: nodeId, time: 1 }
-    ],
-    [
-      'clean',
-      test.app,
-      { type: 'A' },
-      { id: [1], reasons: [], status: 'waiting', server: nodeId, time: 1 }
-    ]
+    ['add', test.app, { type: 'A' }, meta],
+    ['clean', test.app, { type: 'A' }, meta]
   ])
 })
 
 it('reporters on destroing', () => {
   const test = createReporter()
-
   const promise = test.app.destroy()
   expect(test.reports).toEqual([['destroy', test.app]])
-
   return promise
 })
 
 it('creates a client on connection', () => {
-  app = createServer({
-    subprotocol: '0.0.0',
-    supports: '0.x',
-    port: uniqPort()
-  })
+  app = createServer()
   return app.listen().then(() => {
     const ws = new WebSocket(`ws://127.0.0.1:${ app.options.port }`)
     return new Promise((resolve, reject) => {
@@ -330,14 +289,13 @@ it('creates a client on connection', () => {
     })
   }).then(() => {
     expect(Object.keys(app.clients).length).toBe(1)
-    const client = app.clients[1]
-    expect(client.remoteAddress).toEqual('127.0.0.1')
+    expect(app.clients[1].remoteAddress).toEqual('127.0.0.1')
   })
 })
 
 it('send debug message to clients on runtimeError', () => {
   app = createServer()
-  app.clients[1] = { connection: { send: jest.fn() }, destroy: jest.fn() }
+  app.clients[1] = { connection: { send: jest.fn() }, destroy: () => false }
 
   const error = new Error('Test Error')
   error.stack = `${ error.stack.split('\n')[0] }\nfake stacktrace`
@@ -351,7 +309,7 @@ it('send debug message to clients on runtimeError', () => {
   ])
 })
 
-it('disconnects on clients on destroy', () => {
+it('disconnects client on destroy', () => {
   app = createServer()
   app.clients[1] = { destroy: jest.fn() }
   app.destroy()
@@ -360,18 +318,12 @@ it('disconnects on clients on destroy', () => {
 
 it('accepts custom HTTP server', () => {
   server = http.createServer()
-  const test = createReporter({
-    subprotocol: '0.0.0',
-    supports: '0.x',
-    server
-  })
-
-  const port = uniqPort()
+  const test = createReporter({ server })
 
   return promisify(done => {
-    server.listen(port, done)
+    server.listen(test.app.options.port, done)
   }).then(() => test.app.listen()).then(() => {
-    const ws = new WebSocket(`ws://localhost:${ port }`)
+    const ws = new WebSocket(`ws://localhost:${ test.app.options.port }`)
     return new Promise((resolve, reject) => {
       ws.onopen = resolve
       ws.onerror = reject
@@ -383,35 +335,33 @@ it('accepts custom HTTP server', () => {
 
 it('marks actions with own node ID', () => {
   app = createServer()
+  app.type('A', { access: () => true })
+
   const servers = []
   app.log.on('add', (action, meta) => {
     servers.push(meta.server)
   })
 
   return Promise.all([
-    app.log.add({ type: 'A' }, { reasons: ['test'] }),
-    app.log.add({ type: 'B' }, { reasons: ['test'], server: 'server2' })
+    app.log.add({ type: 'A' }),
+    app.log.add({ type: 'A' }, { server: 'server2' })
   ]).then(() => {
     expect(servers).toEqual([app.nodeId, 'server2'])
   })
 })
 
-it('marks actions with start status', () => {
+it('marks actions with waiting status', () => {
   app = createServer()
-  app.type('A', {
-    access () {
-      return new Promise(() => { })
-    },
-    process () { }
-  })
+  app.type('A', { access: () => true })
+
   const statuses = []
   app.log.on('add', (action, meta) => {
     statuses.push(meta.status)
   })
 
   return Promise.all([
-    app.log.add({ type: 'A' }, { reasons: ['test'] }),
-    app.log.add({ type: 'B' }, { reasons: ['test'], status: 'processed' })
+    app.log.add({ type: 'A' }),
+    app.log.add({ type: 'A' }, { status: 'processed' })
   ]).then(() => {
     expect(statuses).toEqual(['waiting', 'processed'])
   })
@@ -419,24 +369,15 @@ it('marks actions with start status', () => {
 
 it('defines actions types', () => {
   app = createServer()
-  app.type('FOO', {
-    access () { },
-    process () { }
-  })
+  app.type('FOO', { access: () => true })
   expect(app.types.FOO).not.toBeUndefined()
 })
 
 it('does not allow to define type twice', () => {
   app = createServer()
-  app.type('FOO', {
-    access () { },
-    process () { }
-  })
+  app.type('FOO', { access: () => true })
   expect(() => {
-    app.type('FOO', {
-      access () { },
-      process () { }
-    })
+    app.type('FOO', { access: () => true })
   }).toThrowError(/already/)
 })
 
@@ -447,119 +388,50 @@ it('requires access callback for type', () => {
   }).toThrowError(/access callback/)
 })
 
-it('requires process callback for type', () => {
-  app = createServer()
-  expect(() => {
-    app.type('FOO', {
-      access () { }
-    })
-  }).toThrowError(/process callback/)
-})
-
 it('reports about unknown action type', () => {
-  app = createTest()
-  const meta = { reasons: ['test'], user: '10' }
-  return app.log.add({ type: 'UNKNOWN' }, meta).then(() => {
-    expect(entries(app.log)).toEqual([
-      [
-        { type: 'logux/undo', reason: 'unknowType', id: [1, 'server', 0] },
-        {
-          added: 2,
-          id: [2, 'server', 0],
-          time: 2,
-          reasons: ['error'],
-          server: 'server',
-          status: 'processed'
-        }
-      ], [
-        { type: 'UNKNOWN' },
-        {
-          added: 1,
-          id: [1, 'server', 0],
-          time: 1,
-          reasons: ['test'],
-          user: '10',
-          server: 'server',
-          status: 'error'
-        }
-      ]
-    ])
-  })
-})
-
-it('ignores unknown type for own and processed actions', () => {
-  app = createTest()
-  return app.log.add({ type: 'UNKNOWN1' }, { reasons: ['test'] })
-    .then(() => app.log.add(
-      { type: 'UNKNOWN2' },
-      { reasons: ['test'], user: '10', status: 'processed' })
-    ).then(() => {
-      expect(entries(app.log)).toEqual([
-        [
-          { type: 'UNKNOWN2' },
-          {
-            added: 2,
-            id: [2, 'server', 0],
-            time: 2,
-            reasons: ['test'],
-            user: '10',
-            server: 'server',
-            status: 'processed'
-          }
-        ],
-        [
-          { type: 'UNKNOWN1' },
-          {
-            added: 1,
-            id: [1, 'server', 0],
-            time: 1,
-            reasons: ['test'],
-            server: 'server',
-            status: 'processed'
-          }
-        ]
-      ])
-    })
-})
-
-it('checks that user allow to send this action', () => {
   const test = createReporter()
-  let deniedMeta
-  test.app.type('FOO', {
-    access (action, meta, user) {
-      expect(action).toEqual({ type: 'FOO' })
-      expect(meta.added).toEqual(1)
-      expect(user).toEqual('server')
-      deniedMeta = meta
-      return false
-    },
-    process () {
-      throw new Error('Should not be called')
-    }
-  })
-
-  return test.app.log.add({ type: 'FOO' }, { reasons: ['test'] }).then(() => {
-    expect(test.names).toEqual(['add', 'denied'])
-    expect(test.reports[1]).toEqual([
-      'denied', test.app, { type: 'FOO' }, deniedMeta
-    ])
+  return test.app.log.add({ type: 'UNKNOWN' }).then(() => {
+    expect(test.names).toEqual(['add', 'unknowType', 'clean'])
+    expect(test.reports[1][1]).toEqual(test.app)
+    expect(test.reports[1][2]).toEqual({ type: 'UNKNOWN' })
+    expect(test.reports[1][3].id).toEqual([1, 'server', 0])
   })
 })
 
-it('supports Promise in access', () => {
+it('ignores unknown type for processed actions', () => {
   const test = createReporter()
-  test.app.type('FOO', {
-    access () {
-      return Promise.resolve(false)
-    },
-    process () {
-      throw new Error('Should not be called')
-    }
+  return test.app.log.add({ type: 'A' }, { status: 'processed' }).then(() => {
+    expect(test.names).toEqual(['add', 'clean'])
   })
+})
 
-  return test.app.log.add({ type: 'FOO' }, { reasons: ['test'] }).then(() => {
-    expect(test.names).toEqual(['add', 'denied'])
-  })
+it('sends errors to clients in development', () => {
+  const test = createReporter({ env: 'development' })
+  test.app.clients[0] = {
+    connection: { send: jest.fn() },
+    destroy: () => false
+  }
+
+  const error = new Error('Test')
+  error.stack = 'stack'
+  test.app.emitter.emit('error', error)
+
+  expect(test.reports).toEqual([
+    ['runtimeError', test.app, error, undefined, undefined]
+  ])
+  expect(test.app.clients[0].connection.send).toHaveBeenCalledWith(
+    ['debug', 'error', 'stack']
+  )
+})
+
+it('does not send errors in non-development mode', () => {
+  const test = createReporter({ env: 'production' })
+  test.app.clients[0] = {
+    connection: { send: jest.fn() },
+    destroy: () => false
+  }
+  test.app.emitter.emit('error', new Error('Test'))
+  expect(test.app.clients[0].connection.send).not.toHaveBeenCalled()
 })
 
 it('processes actions', () => {
@@ -568,13 +440,13 @@ it('processes actions', () => {
   const fired = []
 
   test.app.type('FOO', {
-    access () {
-      return true
-    },
+    access: () => true,
     process (action, meta, user) {
       expect(meta.added).toEqual(1)
       expect(user).toEqual('server')
-      processed.push(action)
+      return wait(25).then(() => {
+        processed.push(action)
+      })
     }
   })
   test.app.on('processed', (action, meta) => {
@@ -585,54 +457,16 @@ it('processes actions', () => {
   return test.app.log.add({ type: 'FOO' }, { reasons: ['test'] })
     .then(() => wait(1))
     .then(() => {
+      expect(fired).toEqual([])
+      return wait(30)
+    }).then(() => {
       expect(processed).toEqual([{ type: 'FOO' }])
       expect(fired).toEqual([{ type: 'FOO' }])
       expect(test.names).toEqual(['add', 'processed'])
       expect(test.reports[1][1]).toEqual(test.app)
       expect(test.reports[1][2]).toEqual({ type: 'FOO' })
       expect(test.reports[1][3].added).toEqual(1)
-      expect(test.reports[1][4]).toBeCloseTo(0, -2)
-    })
-})
-
-it('sends user ID to action callbacks', () => {
-  const test = createReporter()
-
-  test.app.type('FOO', {
-    access (action, meta, user) {
-      expect(user).toEqual('10')
-    },
-    process (action, meta, user) {
-      expect(user).toEqual('10')
-    }
-  })
-
-  return test.app.log.add({ type: 'FOO' }, {
-    reasons: ['test'],
-    id: [1, '10:uuid', 0]
-  })
-})
-
-it('supports Promise in process', () => {
-  const test = createReporter()
-  const processed = []
-  test.app.type('FOO', {
-    access () {
-      return wait(25).then(() => true)
-    },
-    process (action) {
-      return wait(25).then(() => {
-        processed.push(action)
-      })
-    }
-  })
-
-  return test.app.log.add({ type: 'FOO' }, { reasons: ['test'] })
-    .then(() => wait(60))
-    .then(() => {
-      expect(processed).toEqual([{ type: 'FOO' }])
-      expect(test.names).toEqual(['add', 'processed'])
-      expect(test.reports[1][4]).toBeCloseTo(50, -2)
+      expect(test.reports[1][4]).toBeCloseTo(25, -2)
     })
 })
 
@@ -657,49 +491,16 @@ it('has full events API', () => {
   expect(once).toEqual(1)
 })
 
-it('shows error', () => {
-  const test = createReporter({
-    subprotocol: '0.0.0',
-    supports: '0.x',
-    nodeId: 'server',
-    env: 'development'
-  })
-  test.app.debugError = jest.fn()
-
-  const error = new Error('Test')
-  test.app.emitter.emit('error', error)
-
-  expect(test.reports).toEqual([
-    ['runtimeError', test.app, error, undefined, undefined]
-  ])
-  expect(test.app.debugError).toHaveBeenCalledWith(error)
-})
-
-it('does not send errors in non-development mode', () => {
-  const test = createReporter()
-  test.app.debugError = jest.fn()
-  const error = new Error('Test')
-  test.app.emitter.emit('error', error)
-  expect(test.app.debugError).not.toHaveBeenCalledWith(error)
-})
-
 it('waits for last processing before destroy', () => {
   app = createServer()
 
-  let processed = 0
   let started = 0
   let process
-  let approve
 
   app.type('FOO', {
-    access () {
-      started += 1
-      return new Promise(resolve => {
-        approve = resolve
-      })
-    },
+    access: () => true,
     process () {
-      processed += 1
+      started += 1
       return new Promise(resolve => {
         process = resolve
       })
@@ -707,10 +508,7 @@ it('waits for last processing before destroy', () => {
   })
 
   let destroyed = false
-  return app.log.add({ type: 'FOO' }, { reasons: ['test'] }).then(() => {
-    approve(true)
-    return app.log.add({ type: 'FOO' }, { reasons: ['test'] })
-  }).then(() => {
+  return app.log.add({ type: 'FOO' }).then(() => {
     app.destroy().then(() => {
       destroyed = true
     })
@@ -718,13 +516,9 @@ it('waits for last processing before destroy', () => {
   }).then(() => {
     expect(destroyed).toBeFalsy()
     expect(app.processing).toEqual(1)
-    return app.log.add({ type: 'FOO' }, { reasons: ['test'] })
+    return app.log.add({ type: 'FOO' })
   }).then(() => {
-    expect(started).toEqual(2)
-    approve(true)
-    return wait(1)
-  }).then(() => {
-    expect(processed).toEqual(1)
+    expect(started).toEqual(1)
     process()
     return wait(1)
   }).then(() => {
@@ -737,48 +531,22 @@ it('reports about error during action processing', () => {
 
   const error = new Error('Test')
   app.type('FOO', {
-    access (action) {
-      if (action.auth) {
-        throw error
-      } else {
-        return true
-      }
-    },
+    access: () => true,
     process () {
-      return new Promise((resolve, reject) => {
-        reject(error)
-      })
+      throw error
     }
   })
 
-  let processed = 0
-  app.on('processed', (action, meta) => {
-    processed += 1
-    expect(action).toEqual({ type: 'FOO' })
-    expect(meta.added).toEqual(1)
-  })
-
-  return app.log.add({ type: 'FOO' }, { id: [1, 's', 0], reasons: ['test'] })
-    .then(() => app.log.add(
-      { type: 'FOO', auth: true },
-      { id: [2, 's', 0], reasons: ['test'] })
-    )
-    .then(() => wait(1))
-    .then(() => {
-      expect(processed).toEqual(1)
-      expect(test.names).toEqual([
-        'add', 'add', 'runtimeError',
-        'add', 'runtimeError', 'add'
-      ])
-      expect(test.reports[2][2]).toEqual(error)
-      expect(test.reports[2][3]).toEqual({ type: 'FOO' })
-      expect(test.reports[2][4].added).toEqual(1)
-      expect(test.reports[3][2]).toEqual({
-        type: 'logux/undo', reason: 'error', id: [1, 's', 0]
-      })
-      expect(test.reports[4][2]).toEqual(error)
-      expect(test.reports[5][2]).toEqual({
-        type: 'logux/undo', reason: 'error', id: [2, 's', 0]
-      })
+  return app.log.add({ type: 'FOO' }).then(() => {
+    return wait(1)
+  }).then(() => {
+    expect(test.names).toEqual(['add', 'clean', 'runtimeError', 'add'])
+    expect(test.reports[2][1]).toEqual(test.app)
+    expect(test.reports[2][2]).toEqual(error)
+    expect(test.reports[2][3]).toEqual({ type: 'FOO' })
+    expect(test.reports[2][4].id).toEqual([1, 'server', 0])
+    expect(test.reports[3][2]).toEqual({
+      type: 'logux/undo', reason: 'error', id: [1, 'server', 0]
     })
+  })
 })
