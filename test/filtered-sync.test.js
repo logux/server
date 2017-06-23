@@ -22,9 +22,10 @@ function createTest () {
     meta.reasons.push('test')
   })
 
+  const data = { nodeId: '1:a', user: '1' }
   const pair = new TestPair()
   const client = new ClientSync('1:a', log1, pair.left)
-  const server = new FilteredSync({ nodeId: '1:a' }, 'server', log2, pair.right)
+  const server = new FilteredSync(data, 'server', log2, pair.right)
   return { client, server }
 }
 
@@ -46,6 +47,21 @@ it('synchronizes only node-specific actions on connection', () => {
   return Promise.all([
     test.server.log.add({ type: 'A' }, { nodes: ['1:b'] }),
     test.server.log.add({ type: 'B' }, { nodes: ['1:a'] }),
+    test.server.log.add({ type: 'C' })
+  ]).then(() => {
+    return test.client.connection.connect()
+  }).then(() => {
+    return test.server.waitFor('synchronized')
+  }).then(() => {
+    expect(actions(test.client)).toEqual([{ type: 'B' }])
+  })
+})
+
+it('synchronizes only user-specific actions on connection', () => {
+  const test = createTest()
+  return Promise.all([
+    test.server.log.add({ type: 'A' }, { users: ['2'] }),
+    test.server.log.add({ type: 'B' }, { users: ['1'] }),
     test.server.log.add({ type: 'C' })
   ]).then(() => {
     return test.client.connection.connect()

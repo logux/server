@@ -20,6 +20,11 @@ class FilteredSync extends ServerSync {
       } else {
         if (meta.nodes && meta.nodes.indexOf(this.client.nodeId) !== -1) {
           data.push(action, meta)
+          return true
+        }
+        if (meta.users && meta.users.indexOf(this.client.user) !== -1) {
+          data.push(action, meta)
+          return true
         }
         return true
       }

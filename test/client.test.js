@@ -409,7 +409,7 @@ it('reports about errors in access callback', () => {
   })
 })
 
-it('sends only specific actions to client', () => {
+it('sends old actions by node ID', () => {
   const app = createServer()
   app.type('FOO', { access: () => true })
 
@@ -432,7 +432,7 @@ it('sends only specific actions to client', () => {
   })
 })
 
-it('resends only specific actions to client before processing end', () => {
+it('sends new actions by node ID', () => {
   const app = createServer()
   app.type('FOO', {
     access: () => true,
@@ -453,6 +453,80 @@ it('resends only specific actions to client before processing end', () => {
       expect(sent.map(i => i[0])).toEqual(['connected', 'sync'])
       expect(sent[1]).toEqual([
         'sync', 2, { type: 'FOO' }, { id: [2, 'server:uuid', 0], time: 1 }
+      ])
+    })
+  })
+})
+
+it('sends old actions by user', () => {
+  const app = createServer()
+  app.type('FOO', { access: () => true })
+
+  return Promise.all([
+    app.log.add({ type: 'FOO' }, { id: [0, 'server:uuid', 0], time: 0 }),
+    app.log.add({ type: 'FOO' }, {
+      id: [1, 'server:uuid', 0], time: 1, users: ['10']
+    })
+  ]).then(() => {
+    return connectClient(app)
+  }).then(client => {
+    client.connection.other().send(['synced', 2])
+    return client.sync.waitFor('synchronized').then(() => {
+      const sent = client.sync.connection.pair.leftSent
+      expect(sent.map(i => i[0])).toEqual(['connected', 'sync'])
+      expect(sent[1]).toEqual([
+        'sync', 2, { type: 'FOO' }, { id: [1, 'server:uuid', 0], time: 1 }
+      ])
+    })
+  })
+})
+
+it('sends new actions by user', () => {
+  const app = createServer()
+  app.type('FOO', {
+    access: () => true,
+    process: () => new Promise()
+  })
+
+  return connectClient(app).then(client => {
+    return Promise.all([
+      app.log.add({ type: 'FOO' }, { id: [1, 'server:uuid', 0], time: 0 }),
+      app.log.add({ type: 'FOO' }, {
+        id: [2, 'server:uuid', 0], time: 1, users: ['10']
+      })
+    ]).then(() => {
+      client.connection.other().send(['synced', 2])
+      return client.sync.waitFor('synchronized')
+    }).then(() => {
+      const sent = client.sync.connection.pair.leftSent
+      expect(sent.map(i => i[0])).toEqual(['connected', 'sync'])
+      expect(sent[1]).toEqual([
+        'sync', 2, { type: 'FOO' }, { id: [2, 'server:uuid', 0], time: 1 }
+      ])
+    })
+  })
+})
+
+it('sends old action only once', () => {
+  const app = createServer()
+  app.type('FOO', { access: () => true })
+
+  return Promise.all([
+    app.log.add({ type: 'FOO' }, {
+      id: [1, 'server:uuid', 0],
+      time: 1,
+      users: ['10', '10'],
+      nodes: ['10:uuid', '10:uuid']
+    })
+  ]).then(() => {
+    return connectClient(app)
+  }).then(client => {
+    client.connection.other().send(['synced', 2])
+    return client.sync.waitFor('synchronized').then(() => {
+      const sent = client.sync.connection.pair.leftSent
+      expect(sent.map(i => i[0])).toEqual(['connected', 'sync'])
+      expect(sent[1]).toEqual([
+        'sync', 1, { type: 'FOO' }, { id: [1, 'server:uuid', 0], time: 1 }
       ])
     })
   })

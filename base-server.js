@@ -456,6 +456,16 @@ class BaseServer {
         }
       }
     }
+
+    if (meta.users) {
+      for (const user of meta.users) {
+        if (this.users[user]) {
+          for (const client of this.users[user]) {
+            client.sync.onAdd(action, meta)
+          }
+        }
+      }
+    }
   }
 
   unknowType (action, meta) {
