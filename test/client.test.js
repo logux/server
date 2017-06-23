@@ -47,11 +47,12 @@ function createClient (app) {
   return client
 }
 
-function connectClient (server) {
+function connectClient (server, nodeId) {
+  if (!nodeId) nodeId = '10:uuid'
   const client = createClient(server)
   return client.connection.connect().then(() => {
     const protocol = client.sync.localProtocol
-    client.connection.other().send(['connect', protocol, '10:uuid', 0])
+    client.connection.other().send(['connect', protocol, nodeId, 0])
     return client.connection.pair.wait('right')
   }).then(() => {
     return client
@@ -581,6 +582,40 @@ it('does not resent unknown types before processing', () => {
       expect(sent[1]).toEqual([
         'sync', 2, { type: 'UNKNOWN' }, { id: [2, 'server:uuid', 0], time: 1 }
       ])
+    })
+  })
+})
+
+it('sends debug back on unknown type', () => {
+  const app = createServer({ env: 'development' })
+  return Promise.all([
+    connectClient(app),
+    connectClient(app, '20:uuid')
+  ]).then(clients => {
+    return Promise.all([
+      app.log.add({ type: 'UNKNOWN' }, { id: [1, 'server:uuid', 0] }),
+      app.log.add({ type: 'UNKNOWN' }, { id: [2, '10:uuid', 0] })
+    ]).then(() => {
+      return clients[0].sync.connection.pair.wait('right')
+    }).then(() => {
+      const sent0 = clients[0].sync.connection.pair.leftSent
+      expect(sent0[1]).toEqual([
+        'debug', 'error', 'Action with unknown type UNKNOWN'
+      ])
+      const sent1 = clients[1].sync.connection.pair.leftSent
+      expect(sent1.map(i => i[0])).toEqual(['connected'])
+    })
+  })
+})
+
+it('does not send debug back on unknown type in production', () => {
+  const app = createServer({ env: 'production' })
+  return connectClient(app).then(client => {
+    return app.log.add({ type: 'U' }, { id: [1, '10:uuid', 0] }).then(() => {
+      return client.sync.connection.pair.wait('right')
+    }).then(() => {
+      const sent = client.sync.connection.pair.leftSent
+      expect(sent.map(i => i[0])).toEqual(['connected', 'sync'])
     })
   })
 })

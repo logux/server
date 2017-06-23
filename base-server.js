@@ -473,8 +473,20 @@ class BaseServer {
   unknowType (action, meta) {
     this.log.changeMeta(meta.id, { status: 'error' })
     this.reporter('unknowType', this, action, meta)
+
     if (this.getUser(meta.id[1]) !== 'server') {
       this.undo(meta, 'unknowType')
+    }
+
+    const nodeId = meta.id[1]
+    if (this.env === 'development' && this.getUser(nodeId) !== 'server') {
+      if (this.nodeIds[nodeId]) {
+        this.nodeIds[nodeId].connection.send([
+          'debug',
+          'error',
+          `Action with unknown type ${ action.type }`
+        ])
+      }
     }
   }
 
