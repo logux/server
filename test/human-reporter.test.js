@@ -214,6 +214,17 @@ it('handles EADDRINUSE error', () => {
   }, app)).toMatchSnapshot()
 })
 
+it('handles Logux initialization error', () => {
+  expect(reportersOut('error', app, {
+    code: 'LOGUX_UNKNOWN_OPTION',
+    option: 'test'
+  }, app)).toMatchSnapshot()
+  expect(reportersOut('error', app, {
+    code: 'LOGUX_WRONG_OPTIONS',
+    message: 'Missed client subprotocol requirements'
+  }, app)).toMatchSnapshot()
+})
+
 it('throws on undefined error', () => {
   const e = {
     code: 'EAGAIN',

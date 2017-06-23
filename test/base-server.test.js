@@ -98,7 +98,7 @@ it('throws on missed subprotocol', () => {
 it('throws on missed supported subprotocols', () => {
   expect(() => {
     new BaseServer({ subprotocol: '0.0.0' })
-  }).toThrowError(/supported subprotocol/)
+  }).toThrowError(/client subprotocol/)
 })
 
 it('sets development environment by default', () => {

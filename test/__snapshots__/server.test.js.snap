@@ -16,6 +16,13 @@ exports[`destroys everything on exit 1`] = `
 "
 `;
 
+exports[`disables colors for constructor errors 1`] = `
+" ERROR  Missed client subprotocol requirements at 1970-01-01 00:00:00
+        Check server constructor and Logux Server documentation
+
+"
+`;
+
 exports[`reports to bunyan log 1`] = `
 "{\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"loguxServer\\":\\"0.1.1\\",\\"nodeId\\":\\"server:r1CJmycQW\\",\\"environment\\":\\"test\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"listen\\":\\"ws://127.0.0.1:2000\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 {\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"msg\\":\\"Shutting down Logux server\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
@@ -53,11 +60,18 @@ Environment variables:
 "
 `;
 
+exports[`shows help about missed option 1`] = `
+" ERROR  Missed client subprotocol requirements at 1970-01-01 00:00:00
+        Check server constructor and Logux Server documentation
+
+"
+`;
+
 exports[`shows help about port in use 1`] = `
 " ERROR  Port :2001 already in use at 1970-01-01 00:00:00
         Another Logux server or other app already running on this port
         Maybe you didn’t not stop server from other project
-        or previous version of this server was not killed.
+        or previous version of this server was not killed
 
 "
 `;
@@ -65,6 +79,14 @@ exports[`shows help about port in use 1`] = `
 exports[`shows help about privileged port 1`] = `
 " ERROR  You are not allowed to run server on this port at 1970-01-01 00:00:00
         Try to change user (e.g. root) or use port >= 1024
+
+"
+`;
+
+exports[`shows help about unknown option 1`] = `
+" ERROR  Unknown option \`support\` in server constructor at 1970-01-01 00:00:00
+        Maybe there is a mistake in option name or this version
+        of Logux Server doesn’t support this option
 
 "
 `;
@@ -98,5 +120,10 @@ exports[`use environment variables for config 1`] = `
 exports[`uses reporter param 1`] = `
 "{\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"loguxServer\\":\\"0.1.1\\",\\"nodeId\\":\\"server:r1CJmycQW\\",\\"environment\\":\\"test\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"listen\\":\\"ws://127.0.0.1:1337\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 {\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"msg\\":\\"Shutting down Logux server\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`uses reporter param for constructor errors 1`] = `
+"{\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":50,\\"hint\\":[\\"Check server constructor and Logux Server documentation\\"],\\"msg\\":\\"Missed client subprotocol requirements\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;

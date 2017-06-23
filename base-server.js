@@ -35,6 +35,12 @@ function readFile (root, file) {
   })
 }
 
+function optionError (msg) {
+  const error = new Error(msg)
+  error.code = 'LOGUX_WRONG_OPTIONS'
+  throw error
+}
+
 /**
  * Basic Logux Server API without good UI. Use it only if you need
  * to create some special hacks on top of Logux Server.
@@ -97,18 +103,29 @@ class BaseServer {
 
     this.reporter = reporter || function () { }
 
+    /**
+     * Production or development mode.
+     * @type {"production"|"development"}
+     *
+     * @example
+     * if (app.env === 'development') {
+     *   logDebugData()
+     * }
+     */
+    this.env = this.options.env || process.env.NODE_ENV || 'development'
+
     if (typeof this.options.subprotocol === 'undefined') {
-      throw new Error('Missed subprotocol version')
+      throw optionError('Missed subprotocol version')
     }
     if (typeof this.options.supports === 'undefined') {
-      throw new Error('Missed supported subprotocol major versions')
+      throw optionError('Missed client subprotocol requirements')
     }
 
     if (this.options.key && !this.options.cert) {
-      throw new Error('You must set cert option too if you use key option')
+      throw optionError('You must set cert option too if you use key option')
     }
     if (!this.options.key && this.options.cert) {
-      throw new Error('You must set key option too if you use cert option')
+      throw optionError('You must set key option too if you use cert option')
     }
 
     if (!this.options.server) {
@@ -163,17 +180,6 @@ class BaseServer {
     this.log.on('clean', (action, meta) => {
       this.reporter('clean', this, action, meta)
     })
-
-    /**
-     * Production or development mode.
-     * @type {"production"|"development"}
-     *
-     * @example
-     * if (app.env === 'development') {
-     *   logDebugData()
-     * }
-     */
-    this.env = this.options.env || process.env.NODE_ENV || 'development'
 
     this.emitter = new NanoEvents()
     this.on('error', (e, action, meta) => {

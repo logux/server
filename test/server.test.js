@@ -88,6 +88,7 @@ const originEnv = process.env.NODE_ENV
 afterEach(() => {
   process.env.NODE_ENV = originEnv
   delete process.env.LOGUX_PORT
+  delete process.env.LOGUX_REPORTER
   if (started) {
     started.kill('SIGINT')
     started = undefined
@@ -187,6 +188,19 @@ it('shows help about port in use', () => {
 })
 
 it('shows help about privileged port', () => checkError('eacces.js'))
+
+it('shows help about unknown option', () => checkError('unknown.js'))
+
+it('shows help about missed option', () => checkError('missed.js'))
+
+it('disables colors for constructor errors', () => {
+  process.env.NODE_ENV = 'production'
+  return checkError('missed.js')
+})
+
+it('uses reporter param for constructor errors', () => {
+  return checkError('missed.js', ['', '--r', 'bunyan'])
+})
 
 it('reports to bunyan log', () => checkOut('bunyan.js'))
 

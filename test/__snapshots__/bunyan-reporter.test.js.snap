@@ -22,7 +22,7 @@ exports[`handles EADDRINUSE error 1`] = `
     \\"hint\\": [
       \\"Another Logux server or other app already running on this port\\",
       \\"Maybe you didn’t not stop server from other project\\",
-      \\"or previous version of this server was not killed.\\"
+      \\"or previous version of this server was not killed\\"
     ]
   }
 }

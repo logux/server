@@ -20,6 +20,11 @@ function reportRuntimeError (e, app) {
   }
 }
 
+const AVAILABLE_OPTIONS = [
+  'subprotocol', 'supports', 'timeout', 'ping', 'root', 'store', 'server',
+  'port', 'host', 'key', 'cert', 'env', 'bunyanLogger', 'reporter'
+]
+
 yargs
   .option('h', {
     alias: 'host',
@@ -69,8 +74,6 @@ yargs
  *                                         to disconnect connection.
  * @param {number} [options.ping=10000] Milliseconds since last message to test
  *                                      connection by sending ping.
- * @param {function} [options.timer] Timer to use in log. Will be default
- *                                   timer with server `nodeId`, by default.
  * @param {"text"|"bunyan"} [options.reporter="text"] Report process/errors to
  *                                                    CLI in text or bunyan
  *                                                    logger in JSON.
@@ -84,6 +87,20 @@ yargs
  *                                                   variable. On empty
  *                                                   `NODE_ENV` it will
  *                                                   be `"development"`.
+ * @param {http.Server} [options.server] HTTP server to connect WebSocket
+ *                                       server to it.
+ *                                       Same as in ws.WebSocketServer.
+ * @param {number} [option.port=1337] Port to bind server. It will create
+ *                                    HTTP server manually to connect
+ *                                    WebSocket server to it.
+ * @param {string} [option.host="127.0.0.1"] IP-address to bind server.
+ * @param {string} [option.key] SSL key or path to it. Path could be relative
+ *                              from server root. It is required in production
+ *                              mode, because WSS is highly recommended.
+ * @param {string} [option.cert] SSL certificate or path to it. Path could
+ *                               be relative from server root. It is required
+ *                               in production mode, because WSS
+ *                               is highly recommended.
  *
  * @example
  * import { Server } from 'logux-server'
@@ -109,7 +126,8 @@ yargs
  */
 class Server extends BaseServer {
   constructor (options) {
-    options.pid = process.pid
+    if (!options) options = { }
+
     options.reporter = options.reporter || 'text'
     if (options.reporter === 'bunyan' && !options.bunyanLogger) {
       options.bunyanLogger = bunyan.createLogger({ name: 'logux-server' })
@@ -125,16 +143,38 @@ class Server extends BaseServer {
         process.stderr.write(humanReporter.apply(null, arguments))
       }
     }
-    super(options, reporter)
 
+    let initialized = false
     const onError = e => {
-      this.emitter.emit('error', e)
-      this.destroy().then(() => {
+      if (initialized) {
+        this.emitter.emit('error', e)
+        this.destroy().then(() => {
+          process.exit(1)
+        })
+      } else {
+        reportRuntimeError(e, {
+          env: options.env || process.env.NODE_ENV || 'development',
+          options
+        })
         process.exit(1)
-      })
+      }
     }
     process.on('uncaughtException', onError)
     process.on('unhandledRejection', onError)
+
+    for (const name in options) {
+      if (AVAILABLE_OPTIONS.indexOf(name) === -1) {
+        const error = new Error(`Unknown option ${ name }`)
+        error.code = 'LOGUX_UNKNOWN_OPTION'
+        error.option = name
+        throw error
+      }
+    }
+
+    options.pid = process.pid
+
+    super(options, reporter)
+    initialized = true
 
     const onExit = () => {
       this.destroy().then(() => {
