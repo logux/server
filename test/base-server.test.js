@@ -13,8 +13,7 @@ const promisify = require('../promisify')
 
 const DEFAULT_OPTIONS = {
   subprotocol: '0.0.0',
-  supports: '0.x',
-  nodeId: 'server:uuid'
+  supports: '0.x'
 }
 const CERT = path.join(__dirname, 'fixtures/cert.pem')
 const KEY = path.join(__dirname, 'fixtures/key.pem')
@@ -33,6 +32,7 @@ function createServer (options, reporter) {
   }
 
   const created = new BaseServer(options, reporter)
+  created.nodeId = 'server:uuid'
   created.auth(() => true)
   let lastId = 0
   created.log.generateId = () => [++lastId, 'server:uuid', 0]
@@ -76,21 +76,9 @@ afterEach(() => {
 it('saves server options', () => {
   app = new BaseServer({
     subprotocol: '0.0.0',
-    supports: '0.x',
-    nodeId: 'server:uuid'
+    supports: '0.x'
   })
   expect(app.options.supports).toEqual('0.x')
-})
-
-it('saves node ID', () => {
-  app = new BaseServer({
-    subprotocol: '0.0.0',
-    supports: '0.x',
-    nodeId: 'server:uuid'
-  })
-  expect(app.nodeId).toEqual('server:uuid')
-  expect(app.nodeId).toEqual(app.options.nodeId)
-  expect(app.nodeId).toEqual(app.log.nodeId)
 })
 
 it('generates node ID', () => {

@@ -21,12 +21,12 @@ function reportersOut () {
 const app = new BaseServer({
   env: 'development',
   pid: 21384,
-  nodeId: 'server:H1f8LAyzl',
   subprotocol: '2.5.0',
   supports: '2.x || 1.x',
   host: '127.0.0.1',
   port: 1337
 })
+app.nodeId = 'server:H1f8LAyzl'
 
 const ws = {
   _socket: {
@@ -74,7 +74,6 @@ it('reports production', () => {
   const wss = new BaseServer({
     env: 'production',
     pid: 21384,
-    nodeId: 'server:H1f8LAyzl',
     subprotocol: '1.0.0',
     supports: '1.x',
     cert: 'A',
@@ -82,6 +81,7 @@ it('reports production', () => {
     host: '0.0.0.0',
     port: 1337
   })
+  wss.nodeId = 'server:H1f8LAyzl'
 
   expect(reportersOut('listen', wss)).toMatchSnapshot()
 })
@@ -90,11 +90,11 @@ it('reports http', () => {
   const http = new BaseServer({
     env: 'development',
     pid: 21384,
-    nodeId: 'server:H1f8LAyzl',
     subprotocol: '1.0.0',
     supports: '1.x',
     server: createServer()
   })
+  http.nodeId = 'server:H1f8LAyzl'
 
   expect(reportersOut('listen', http)).toMatchSnapshot()
 })
@@ -196,12 +196,12 @@ it('handles error in production', () => {
   const http = new BaseServer({
     env: 'production',
     pid: 21384,
-    nodeId: 'server:H1f8LAyzl',
     subprotocol: '2.5.0',
     supports: '2.x || 1.x',
     host: '127.0.0.1',
     port: 1000
   })
+  http.nodeId = 'server:H1f8LAyzl'
 
   expect(reportersOut('error', app, { code: 'EACCES', port: 1000 }, http))
     .toMatchSnapshot()

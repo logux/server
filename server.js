@@ -63,8 +63,6 @@ yargs
  *                                     subprotocol version in SemVer format.
  * @param {string} options.supports npm’s version requirements for client
  *                                  subprotocol version.
- * @param {string|number} [options.nodeId] Unique server ID. Be default,
- *                                         `server:` with compacted UUID.
  * @param {string} [options.root=process.cwd()] Application root to load files
  *                                              and show errors.
  * @param {number} [options.timeout=20000] Timeout in milliseconds

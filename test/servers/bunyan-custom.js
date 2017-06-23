@@ -11,13 +11,13 @@ const logger = bunyan.createLogger({
 })
 
 const app = new Server({
-  nodeId: 'server',
   subprotocol: '1.0.0',
   supports: '1.x',
   port: 2000,
   reporter: 'bunyan',
   bunyanLogger: logger
 })
+app.nodeId = 'server:r1CJmycQW'
 
 app.auth(() => Promise.resolve(true))
 

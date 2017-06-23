@@ -64,12 +64,12 @@ function actions (app) {
 
 it('uses server options', () => {
   const app = createServer({
-    nodeId: 'server:uuid',
     subprotocol: '0.0.0',
     supports: '0.x',
     timeout: 16000,
     ping: 8000
   })
+  app.nodeId = 'server:uuid'
   const client = new Client(app, createConnection(), 1)
 
   expect(client.sync.options.subprotocol).toEqual('0.0.0')

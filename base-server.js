@@ -46,8 +46,6 @@ function readFile (root, file) {
  *                                     subprotocol version in SemVer format.
  * @param {string} options.supports npm’s version requirements for client
  *                                  subprotocol version.
- * @param {string|number} [options.nodeId] Unique server ID. Be default,
- *                                         `server:` with compacted UUID.
  * @param {string} [options.root=process.cwd()] Application root to load files
  *                                              and show errors.
  * @param {number} [options.timeout=20000] Timeout in milliseconds
@@ -93,7 +91,7 @@ class BaseServer {
      * @type {object}
      *
      * @example
-     * console.log(app.options.nodeId + ' was started')
+     * console.log('Server options', app.options.subprotocol)
      */
     this.options = options || { }
 
@@ -104,9 +102,6 @@ class BaseServer {
     }
     if (typeof this.options.supports === 'undefined') {
       throw new Error('Missed supported subprotocol major versions')
-    }
-    if (typeof this.options.nodeId === 'undefined') {
-      this.options.nodeId = `server:${ shortid.generate() }`
     }
 
     if (this.options.key && !this.options.cert) {
@@ -128,7 +123,7 @@ class BaseServer {
      * @example
      * console.log('Error was raised on ' + app.nodeId)
      */
-    this.nodeId = this.options.nodeId
+    this.nodeId = `server:${ shortid.generate() }`
 
     this.options.root = this.options.root || process.cwd()
 
