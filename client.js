@@ -144,6 +144,17 @@ class Client {
       this.app.reporter('disconnect', this.app, this)
     }
     if (this.sync.connected) this.sync.destroy()
+    if (this.user) {
+      let users = this.app.users[this.user]
+      if (users) {
+        users = users.filter(i => i !== this)
+        if (users.length === 0) {
+          delete this.app.users[this.user]
+        } else {
+          this.app.users[this.user] = users
+        }
+      }
+    }
     if (this.nodeId) delete this.app.nodeIds[this.nodeId]
     delete this.app.clients[this.key]
   }
@@ -164,6 +175,10 @@ class Client {
             zombie.destroy()
           }
           this.app.nodeIds[this.nodeId] = this
+          if (this.user) {
+            if (!this.app.users[this.user]) this.app.users[this.user] = []
+            this.app.users[this.user].push(this)
+          }
           this.app.reporter('authenticated', this.app, this)
         } else {
           this.app.reporter('unauthenticated', this.app, this)

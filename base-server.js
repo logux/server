@@ -199,6 +199,7 @@ class BaseServer {
      */
     this.clients = { }
     this.nodeIds = { }
+    this.users = { }
     this.types = { }
     this.processing = 0
 

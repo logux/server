@@ -104,18 +104,27 @@ it('reports about connection', () => {
 it('removes itself on destroy', () => {
   const test = createReporter()
 
-  const client = createClient(test.app)
+  const client1 = createClient(test.app)
+  const client2 = createClient(test.app)
 
-  return client.connection.connect()
-    .then(() => client.auth({ }, '10:random'))
-    .then(() => {
-      client.destroy()
-      expect(test.app.clients).toEqual({ })
-      expect(test.app.nodeIds).toEqual({ })
-      expect(client.connection.connected).toBeFalsy()
-      expect(test.names).toEqual(['connect', 'authenticated', 'disconnect'])
-      expect(test.reports[2]).toEqual(['disconnect', test.app, client])
-    })
+  return Promise.all([
+    client1.connection.connect(),
+    client2.connection.connect()
+  ]).then(() => {
+    client1.auth({ }, '10:random')
+    client2.auth({ }, '10:other')
+  }).then(() => {
+    client1.destroy()
+    expect(test.app.users).toEqual({ 10: [client2] })
+    expect(client1.connection.connected).toBeFalsy()
+    expect(test.names).toEqual([
+      'connect', 'connect', 'authenticated', 'authenticated', 'disconnect'])
+    expect(test.reports[4]).toEqual(['disconnect', test.app, client1])
+    client2.destroy()
+    expect(test.app.clients).toEqual({ })
+    expect(test.app.nodeIds).toEqual({ })
+    expect(test.app.users).toEqual({ })
+  })
 })
 
 it('does not report users disconnects on server destroy', () => {
@@ -176,6 +185,7 @@ it('authenticates user', () => {
     expect(client.nodeId).toEqual('10:random')
     expect(client.sync.authenticated).toBeTruthy()
     expect(test.app.nodeIds).toEqual({ '10:random': client })
+    expect(test.app.users).toEqual({ '10': [client] })
     expect(test.names).toEqual(['connect', 'authenticated'])
     expect(test.reports[1]).toEqual(['authenticated', test.app, client])
   })
