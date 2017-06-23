@@ -111,7 +111,7 @@ it('removes itself on destroy', () => {
     client1.connection.connect(),
     client2.connection.connect()
   ]).then(() => {
-    client1.auth({ }, '10:random')
+    client1.auth({ }, '10:uuid')
     client2.auth({ }, '10:other')
   }).then(() => {
     client1.destroy()
@@ -158,7 +158,22 @@ it('reports on wrong authentication', () => {
   const client = new Client(test.app, createConnection(), 1)
   return client.connection.connect().then(() => {
     const protocol = client.sync.localProtocol
-    client.connection.other().send(['connect', protocol, 'client', 0])
+    client.connection.other().send(['connect', protocol, '10:uuid', 0])
+    return client.connection.pair.wait('right')
+  }).then(() => {
+    expect(test.names).toEqual(['connect', 'unauthenticated', 'disconnect'])
+    expect(test.reports[1][1]).toEqual(test.app)
+    expect(test.reports[1][2]).toEqual(client)
+  })
+})
+
+it('reports on server in user name', () => {
+  const test = createReporter()
+  test.app.auth(() => Promise.resolve(true))
+  const client = new Client(test.app, createConnection(), 1)
+  return client.connection.connect().then(() => {
+    const protocol = client.sync.localProtocol
+    client.connection.other().send(['connect', protocol, 'server:uuid', 0])
     return client.connection.pair.wait('right')
   }).then(() => {
     expect(test.names).toEqual(['connect', 'unauthenticated', 'disconnect'])
@@ -177,15 +192,15 @@ it('authenticates user', () => {
   return client.connection.connect().then(() => {
     const protocol = client.sync.localProtocol
     client.connection.other().send([
-      'connect', protocol, '10:random', 0, { credentials: 'token' }
+      'connect', protocol, '10:uuid', 0, { credentials: 'token' }
     ])
     return client.connection.pair.wait('right')
   }).then(() => {
     expect(client.user).toEqual('10')
-    expect(client.nodeId).toEqual('10:random')
+    expect(client.nodeId).toEqual('10:uuid')
     expect(client.sync.authenticated).toBeTruthy()
-    expect(test.app.nodeIds).toEqual({ '10:random': client })
-    expect(test.app.users).toEqual({ '10': [client] })
+    expect(test.app.nodeIds).toEqual({ '10:uuid': client })
+    expect(test.app.users).toEqual({ 10: [client] })
     expect(test.names).toEqual(['connect', 'authenticated'])
     expect(test.reports[1]).toEqual(['authenticated', test.app, client])
   })
@@ -199,11 +214,26 @@ it('supports non-promise authenticator', () => {
   return client.connection.connect().then(() => {
     const protocol = client.sync.localProtocol
     client.connection.other().send([
-      'connect', protocol, '10:random', 0, { credentials: 'token' }
+      'connect', protocol, '10:uuid', 0, { credentials: 'token' }
     ])
     return client.connection.pair.wait('right')
   }).then(() => {
     expect(client.sync.authenticated).toBeTruthy()
+  })
+})
+
+it('authenticates user without user name', () => {
+  const test = createReporter()
+  test.app.auth(() => true)
+  const client = createClient(test.app)
+
+  return client.connection.connect().then(() => {
+    const protocol = client.sync.localProtocol
+    client.connection.other().send(['connect', protocol, 'uuid', 0])
+    return client.connection.pair.wait('right')
+  }).then(() => {
+    expect(client.user).not.toBeDefined()
+    expect(test.app.users).toEqual({ })
   })
 })
 
@@ -228,7 +258,7 @@ it('checks subprotocol', () => {
   return client.connection.connect().then(() => {
     const protocol = client.sync.localProtocol
     client.connection.other().send([
-      'connect', protocol, 'client', 0, { subprotocol: '1.0.0' }
+      'connect', protocol, '10:uuid', 0, { subprotocol: '1.0.0' }
     ])
     return client.connection.pair.wait('right')
   }).then(() => {
@@ -275,10 +305,10 @@ it('disconnects zombie', () => {
   const client2 = createClient(test.app)
 
   return client1.connection.connect().then(() => {
-    client1.auth({ }, '10:random')
+    client1.auth({ }, '10:uuid')
     client2.connection.connect()
   }).then(() => {
-    client2.auth({ }, '10:random')
+    client2.auth({ }, '10:uuid')
   }).then(() => {
     expect(Object.keys(test.app.clients)).toEqual([client2.key])
     expect(test.names).toEqual([

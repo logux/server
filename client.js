@@ -163,7 +163,11 @@ class Client {
     this.nodeId = nodeId
 
     const user = this.app.getUser(nodeId)
-    if (user !== false) this.user = user
+    if (user === 'server') {
+      this.app.reporter('unauthenticated', this.app, this)
+      return Promise.resolve(false)
+    }
+    if (typeof user !== 'undefined') this.user = user
 
     return this.app.authenticator(this.user, credentials, this)
       .then(result => {
