@@ -470,7 +470,7 @@ class BaseServer {
     if (pos !== -1) {
       return nodeId.slice(0, pos)
     } else {
-      return nodeId
+      return false
     }
   }
 }

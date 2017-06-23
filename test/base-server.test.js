@@ -14,7 +14,7 @@ const promisify = require('../promisify')
 const DEFAULT_OPTIONS = {
   subprotocol: '0.0.0',
   supports: '0.x',
-  nodeId: 'server'
+  nodeId: 'server:uuid'
 }
 const CERT = path.join(__dirname, 'fixtures/cert.pem')
 const KEY = path.join(__dirname, 'fixtures/key.pem')
@@ -35,7 +35,7 @@ function createServer (options, reporter) {
   const created = new BaseServer(options, reporter)
   created.auth(() => true)
   let lastId = 0
-  created.log.generateId = () => [++lastId, 'server', 0]
+  created.log.generateId = () => [++lastId, 'server:uuid', 0]
 
   return created
 }
@@ -77,7 +77,7 @@ it('saves server options', () => {
   app = new BaseServer({
     subprotocol: '0.0.0',
     supports: '0.x',
-    nodeId: 'server'
+    nodeId: 'server:uuid'
   })
   expect(app.options.supports).toEqual('0.x')
 })
@@ -86,9 +86,9 @@ it('saves node ID', () => {
   app = new BaseServer({
     subprotocol: '0.0.0',
     supports: '0.x',
-    nodeId: 'server'
+    nodeId: 'server:uuid'
   })
-  expect(app.nodeId).toEqual('server')
+  expect(app.nodeId).toEqual('server:uuid')
   expect(app.nodeId).toEqual(app.options.nodeId)
   expect(app.nodeId).toEqual(app.log.nodeId)
 })
@@ -260,10 +260,10 @@ it('reporters on log events', () => {
   test.app.type('A', { access: () => true })
   test.app.log.add({ type: 'A' })
   const meta = {
-    id: [1, 'server', 0],
+    id: [1, 'server:uuid', 0],
     reasons: [],
     status: 'waiting',
-    server: 'server',
+    server: 'server:uuid',
     time: 1
   }
   expect(test.reports).toEqual([
@@ -394,7 +394,7 @@ it('reports about unknown action type', () => {
     expect(test.names).toEqual(['add', 'unknowType', 'clean'])
     expect(test.reports[1][1]).toEqual(test.app)
     expect(test.reports[1][2]).toEqual({ type: 'UNKNOWN' })
-    expect(test.reports[1][3].id).toEqual([1, 'server', 0])
+    expect(test.reports[1][3].id).toEqual([1, 'server:uuid', 0])
   })
 })
 
@@ -544,9 +544,9 @@ it('reports about error during action processing', () => {
     expect(test.reports[2][1]).toEqual(test.app)
     expect(test.reports[2][2]).toEqual(error)
     expect(test.reports[2][3]).toEqual({ type: 'FOO' })
-    expect(test.reports[2][4].id).toEqual([1, 'server', 0])
+    expect(test.reports[2][4].id).toEqual([1, 'server:uuid', 0])
     expect(test.reports[3][2]).toEqual({
-      type: 'logux/undo', reason: 'error', id: [1, 'server', 0]
+      type: 'logux/undo', reason: 'error', id: [1, 'server:uuid', 0]
     })
   })
 })

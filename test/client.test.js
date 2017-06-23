@@ -64,7 +64,7 @@ function actions (app) {
 
 it('uses server options', () => {
   const app = createServer({
-    nodeId: 'server',
+    nodeId: 'server:uuid',
     subprotocol: '0.0.0',
     supports: '0.x',
     timeout: 16000,
@@ -75,7 +75,7 @@ it('uses server options', () => {
   expect(client.sync.options.subprotocol).toEqual('0.0.0')
   expect(client.sync.options.timeout).toEqual(16000)
   expect(client.sync.options.ping).toEqual(8000)
-  expect(client.sync.localNodeId).toEqual('server')
+  expect(client.sync.localNodeId).toEqual('server:uuid')
 })
 
 it('saves connection', () => {
@@ -404,9 +404,9 @@ it('sends only specific actions to client', () => {
   app.type('FOO', { access: () => true })
 
   return Promise.all([
-    app.log.add({ type: 'FOO' }, { id: [0, 'server', 0], time: 0 }),
+    app.log.add({ type: 'FOO' }, { id: [0, 'server:uuid', 0], time: 0 }),
     app.log.add({ type: 'FOO' }, {
-      id: [1, 'server', 0], time: 1, nodes: ['10:uuid']
+      id: [1, 'server:uuid', 0], time: 1, nodes: ['10:uuid']
     })
   ]).then(() => {
     return connectClient(app)
@@ -416,7 +416,7 @@ it('sends only specific actions to client', () => {
       const sent = client.sync.connection.pair.leftSent
       expect(sent.map(i => i[0])).toEqual(['connected', 'sync'])
       expect(sent[1]).toEqual([
-        'sync', 2, { type: 'FOO' }, { id: [1, 'server', 0], time: 1 }
+        'sync', 2, { type: 'FOO' }, { id: [1, 'server:uuid', 0], time: 1 }
       ])
     })
   })
@@ -431,9 +431,9 @@ it('resends only specific actions to client before processing end', () => {
 
   return connectClient(app).then(client => {
     return Promise.all([
-      app.log.add({ type: 'FOO' }, { id: [1, 'server', 0], time: 0 }),
+      app.log.add({ type: 'FOO' }, { id: [1, 'server:uuid', 0], time: 0 }),
       app.log.add({ type: 'FOO' }, {
-        id: [2, 'server', 0], time: 1, nodes: ['10:uuid']
+        id: [2, 'server:uuid', 0], time: 1, nodes: ['10:uuid']
       })
     ]).then(() => {
       client.connection.other().send(['synced', 2])
@@ -442,7 +442,7 @@ it('resends only specific actions to client before processing end', () => {
       const sent = client.sync.connection.pair.leftSent
       expect(sent.map(i => i[0])).toEqual(['connected', 'sync'])
       expect(sent[1]).toEqual([
-        'sync', 2, { type: 'FOO' }, { id: [2, 'server', 0], time: 1 }
+        'sync', 2, { type: 'FOO' }, { id: [2, 'server:uuid', 0], time: 1 }
       ])
     })
   })
@@ -454,10 +454,15 @@ it('does not resent unknown types before processing', () => {
   return connectClient(app).then(client => {
     return Promise.all([
       app.log.add({ type: 'UNKNOWN' }, {
-        id: [1, 'server', 0], time: 1, nodes: ['10:uuid']
+        id: [1, 'server:uuid', 0],
+        time: 1,
+        nodes: ['10:uuid']
       }),
       app.log.add({ type: 'UNKNOWN' }, {
-        id: [2, 'server', 0], time: 1, nodes: ['10:uuid'], status: 'processed'
+        id: [2, 'server:uuid', 0],
+        time: 1,
+        nodes: ['10:uuid'],
+        status: 'processed'
       })
     ]).then(() => {
       client.connection.other().send(['synced', 2])
@@ -466,7 +471,7 @@ it('does not resent unknown types before processing', () => {
       const sent = client.sync.connection.pair.leftSent
       expect(sent.map(i => i[0])).toEqual(['connected', 'sync'])
       expect(sent[1]).toEqual([
-        'sync', 2, { type: 'UNKNOWN' }, { id: [2, 'server', 0], time: 1 }
+        'sync', 2, { type: 'UNKNOWN' }, { id: [2, 'server:uuid', 0], time: 1 }
       ])
     })
   })
