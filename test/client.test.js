@@ -464,10 +464,7 @@ it('sends old actions by node ID', () => {
 
 it('sends new actions by node ID', () => {
   const app = createServer()
-  app.type('FOO', {
-    access: () => true,
-    process: () => new Promise()
-  })
+  app.type('FOO', { access: () => true })
 
   return connectClient(app).then(client => {
     return Promise.all([
@@ -513,10 +510,7 @@ it('sends old actions by user', () => {
 
 it('sends new actions by user', () => {
   const app = createServer()
-  app.type('FOO', {
-    access: () => true,
-    process: () => new Promise()
-  })
+  app.type('FOO', { access: () => true })
 
   return connectClient(app).then(client => {
     return Promise.all([
