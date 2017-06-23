@@ -18,7 +18,7 @@ class FilteredSync extends ServerSync {
       if (meta.added <= lastSynced) {
         return false
       } else {
-        if (meta.nodes && meta.nodes.indexOf(this.client.nodeId) !== -1) {
+        if (meta.nodeIds && meta.nodeIds.indexOf(this.client.nodeId) !== -1) {
           data.push(action, meta)
           return true
         }

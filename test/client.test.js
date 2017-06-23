@@ -446,7 +446,7 @@ it('sends old actions by node ID', () => {
   return Promise.all([
     app.log.add({ type: 'FOO' }, { id: [0, 'server:uuid', 0], time: 0 }),
     app.log.add({ type: 'FOO' }, {
-      id: [1, 'server:uuid', 0], time: 1, nodes: ['10:uuid']
+      id: [1, 'server:uuid', 0], time: 1, nodeIds: ['10:uuid']
     })
   ]).then(() => {
     return connectClient(app)
@@ -473,7 +473,7 @@ it('sends new actions by node ID', () => {
     return Promise.all([
       app.log.add({ type: 'FOO' }, { id: [1, 'server:uuid', 0], time: 0 }),
       app.log.add({ type: 'FOO' }, {
-        id: [2, 'server:uuid', 0], time: 1, nodes: ['10:uuid']
+        id: [2, 'server:uuid', 0], time: 1, nodeIds: ['10:uuid']
       })
     ]).then(() => {
       client.connection.other().send(['synced', 2])
@@ -546,7 +546,7 @@ it('sends old action only once', () => {
       id: [1, 'server:uuid', 0],
       time: 1,
       users: ['10', '10'],
-      nodes: ['10:uuid', '10:uuid']
+      nodeIds: ['10:uuid', '10:uuid']
     })
   ]).then(() => {
     return connectClient(app)
@@ -570,12 +570,12 @@ it('does not resent unknown types before processing', () => {
       app.log.add({ type: 'UNKNOWN' }, {
         id: [1, 'server:uuid', 0],
         time: 1,
-        nodes: ['10:uuid']
+        nodeIds: ['10:uuid']
       }),
       app.log.add({ type: 'UNKNOWN' }, {
         id: [2, 'server:uuid', 0],
         time: 1,
-        nodes: ['10:uuid'],
+        nodeIds: ['10:uuid'],
         status: 'processed'
       })
     ]).then(() => {

@@ -409,10 +409,10 @@ class BaseServer {
    * }
    */
   undo (id, reason) {
-    const nodeId = id[1]
+    const nodeIds = [id[1]]
     this.log.add(
       { type: 'logux/undo', reason, id },
-      { reasons: ['error'], status: 'processed', nodes: [nodeId] })
+      { reasons: ['error'], status: 'processed', nodeIds })
   }
 
   /**
@@ -450,8 +450,8 @@ class BaseServer {
   }
 
   sendAction (action, meta) {
-    if (meta.nodes) {
-      for (const id of meta.nodes) {
+    if (meta.nodeIds) {
+      for (const id of meta.nodeIds) {
         if (this.nodeIds[id]) {
           this.nodeIds[id].sync.onAdd(action, meta)
         }
