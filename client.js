@@ -210,11 +210,11 @@ class Client {
     return forcePromise(() => type.access(action, meta, user)).then(result => {
       if (!result) {
         this.app.reporter('denied', this.app, action, meta)
-        this.app.undo(meta.id, 'denied')
+        this.app.undo(meta, 'denied')
       }
       return result
     }).catch(e => {
-      this.app.undo(meta.id, 'error')
+      this.app.undo(meta, 'error')
       this.app.emitter.emit('error', e, action, meta)
     })
   }

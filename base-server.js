@@ -398,20 +398,20 @@ class BaseServer {
   /**
    * Undo action from client.
    *
-   * @param {ID} id The action ID from metadata.
+   * @param {Meta} meta The action’s metadata.
    * @param {string} [reason] Optional code for reason.
    *
    * @return {undefined}
    *
    * @example
    * if (couldNotFixConflict(action, meta)) {
-   *   app.undo(meta.id)
+   *   app.undo(meta)
    * }
    */
-  undo (id, reason) {
-    const nodeIds = [id[1]]
+  undo (meta, reason) {
+    const nodeIds = [meta.id[1]]
     this.log.add(
-      { type: 'logux/undo', reason, id },
+      { type: 'logux/undo', id: meta.id, reason },
       { reasons: ['error'], status: 'processed', nodeIds })
   }
 
@@ -442,7 +442,7 @@ class BaseServer {
       this.emitter.emit('processed', action, meta)
     }).catch(e => {
       this.log.changeMeta(meta.id, { status: 'error' })
-      this.undo(meta.id, 'error')
+      this.undo(meta, 'error')
       this.emitter.emit('error', e, action, meta)
       this.processing -= 1
       this.emitter.emit('processed', action, meta)
@@ -473,7 +473,7 @@ class BaseServer {
     this.log.changeMeta(meta.id, { status: 'error' })
     this.reporter('unknowType', this, action, meta)
     if (this.getUser(meta.id[1]) !== 'server') {
-      this.undo(meta.id, 'unknowType')
+      this.undo(meta, 'unknowType')
     }
   }
 
