@@ -12,8 +12,8 @@ const Log = require('logux-core').Log
 const fs = require('fs')
 
 const forcePromise = require('./force-promise')
+const ServerClient = require('./server-client')
 const promisify = require('./promisify')
-const Client = require('./client')
 
 const PEM_PREAMBLE = '-----BEGIN'
 
@@ -191,11 +191,11 @@ class BaseServer {
 
     /**
      * Connected clients.
-     * @type {Client[]}
+     * @type {ServerClient[]}
      *
      * @example
-     * for (let nodeId in app.clients) {
-     *   console.log(app.clients[nodeId].remoteAddress)
+     * for (let i in app.clients) {
+     *   console.log(app.clients[i].remoteAddress)
      * }
      */
     this.clients = { }
@@ -300,8 +300,8 @@ class BaseServer {
       this.ws.on('connection', ws => {
         this.lastClient += 1
         const connection = new ServerConnection(ws)
-        const client = new Client(this, connection, this.lastClient)
-        this.clients[this.lastClient] = client
+        const node = new ServerClient(this, connection, this.lastClient)
+        this.clients[this.lastClient] = node
       })
     }).then(() => {
       this.reporter('listen', this)

@@ -7,8 +7,8 @@ const createServer = require('http').createServer
 const SyncError = require('logux-sync').SyncError
 const path = require('path')
 
+const ServerClient = require('../server-client')
 const BaseServer = require('../base-server')
-const Client = require('../client')
 
 const DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
 
@@ -35,20 +35,20 @@ const ws = {
   on: () => { }
 }
 
-const authed = new Client(app, new ServerConnection(ws), 1)
+const authed = new ServerClient(app, new ServerConnection(ws), 1)
 authed.sync.remoteSubprotocol = '1.0.0'
 authed.sync.remoteProtocol = [0, 0]
 authed.id = '100'
 authed.user = { }
 authed.nodeId = '100:H10Nf5stl'
 
-const noUserId = new Client(app, new ServerConnection(ws), 1)
+const noUserId = new ServerClient(app, new ServerConnection(ws), 1)
 noUserId.sync.remoteSubprotocol = '1.0.0'
 noUserId.sync.remoteProtocol = [0, 0]
 noUserId.user = { }
 noUserId.nodeId = 'H10Nf5stl'
 
-const unauthed = new Client(app, new ServerConnection(ws), 1)
+const unauthed = new ServerClient(app, new ServerConnection(ws), 1)
 
 const ownError = new SyncError(authed.sync, 'timeout', 5000, false)
 const clientError = new SyncError(authed.sync, 'timeout', 5000, true)

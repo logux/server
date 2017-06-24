@@ -16,7 +16,7 @@ const forcePromise = require('./force-promise')
  * @example
  * const client = app.clients[0]
  */
-class Client {
+class ServerClient {
   constructor (app, connection, key) {
     this.app = app
 
@@ -220,4 +220,4 @@ class Client {
   }
 }
 
-module.exports = Client
+module.exports = ServerClient

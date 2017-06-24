@@ -2,8 +2,8 @@
 
 const TestPair = require('logux-sync').TestPair
 
+const ServerClient = require('../server-client')
 const BaseServer = require('../base-server')
-const Client = require('../client')
 
 function createConnection () {
   const pair = new TestPair()
@@ -39,11 +39,10 @@ function createReporter () {
   return { app, reports, names }
 }
 
-let lastClient = 0
 function createClient (app) {
-  lastClient += 1
-  const client = new Client(app, createConnection(), lastClient)
-  app.clients[lastClient] = client
+  app.lastClient += 1
+  const client = new ServerClient(app, createConnection(), app.lastClient)
+  app.clients[app.lastClient] = client
   return client
 }
 
@@ -79,7 +78,7 @@ it('uses server options', () => {
     ping: 8000
   })
   app.nodeId = 'server:uuid'
-  const client = new Client(app, createConnection(), 1)
+  const client = new ServerClient(app, createConnection(), 1)
 
   expect(client.sync.options.subprotocol).toEqual('0.0.0')
   expect(client.sync.options.timeout).toEqual(16000)
@@ -89,24 +88,24 @@ it('uses server options', () => {
 
 it('saves connection', () => {
   const connection = createConnection()
-  const client = new Client(createServer(), connection, 1)
+  const client = new ServerClient(createServer(), connection, 1)
   expect(client.connection).toBe(connection)
 })
 
 it('use string key', () => {
-  const client = new Client(createServer(), createConnection(), 1)
+  const client = new ServerClient(createServer(), createConnection(), 1)
   expect(client.key).toEqual('1')
   expect(typeof client.key).toEqual('string')
 })
 
 it('has remote address shortcut', () => {
-  const client = new Client(createServer(), createConnection(), 1)
+  const client = new ServerClient(createServer(), createConnection(), 1)
   expect(client.remoteAddress).toEqual('127.0.0.1')
 })
 
 it('reports about connection', () => {
   const test = createReporter()
-  const client = new Client(test.app, createConnection(), 1)
+  const client = new ServerClient(test.app, createConnection(), 1)
   expect(test.reports).toEqual([['connect', test.app, client]])
 })
 
@@ -164,7 +163,7 @@ it('destroys on disconnect', () => {
 it('reports on wrong authentication', () => {
   const test = createReporter()
   test.app.auth(() => Promise.resolve(false))
-  const client = new Client(test.app, createConnection(), 1)
+  const client = new ServerClient(test.app, createConnection(), 1)
   return client.connection.connect().then(() => {
     const protocol = client.sync.localProtocol
     client.connection.other().send(['connect', protocol, '10:uuid', 0])
@@ -179,7 +178,7 @@ it('reports on wrong authentication', () => {
 it('reports on server in user name', () => {
   const test = createReporter()
   test.app.auth(() => Promise.resolve(true))
-  const client = new Client(test.app, createConnection(), 1)
+  const client = new ServerClient(test.app, createConnection(), 1)
   return client.connection.connect().then(() => {
     const protocol = client.sync.localProtocol
     client.connection.other().send(['connect', protocol, 'server:uuid', 0])
