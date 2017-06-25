@@ -379,7 +379,7 @@ it('requires access callback for type', () => {
 it('reports about unknown action type', () => {
   const test = createReporter()
   return test.app.log.add({ type: 'UNKNOWN' }).then(() => {
-    expect(test.names).toEqual(['add', 'unknowType', 'clean'])
+    expect(test.names).toEqual(['add', 'unknownType', 'clean'])
     expect(test.reports[1][1]).toEqual(test.app)
     expect(test.reports[1][2]).toEqual({ type: 'UNKNOWN' })
     expect(test.reports[1][3].id).toEqual([1, 'server:uuid', 0])

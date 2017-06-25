@@ -203,7 +203,7 @@ class ServerClient {
 
     const type = this.app.types[action.type]
     if (!type) {
-      this.app.unknowType(action, meta)
+      this.app.unknownType(action, meta)
       return Promise.resolve(false)
     }
 

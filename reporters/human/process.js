@@ -168,7 +168,7 @@ const reporters = {
     ]
   },
 
-  unknowType (c, app, action, meta) {
+  unknownType (c, app, action, meta) {
     const type = common.isServer(meta.id) ? helpers.error : helpers.warn
     return [
       type(c, `Action with unknown type ${ action.type }`),

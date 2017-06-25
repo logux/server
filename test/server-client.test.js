@@ -376,10 +376,10 @@ it('ignores unknown action types', () => {
     return client.connection.pair.wait('right')
   }).then(() => {
     expect(actions(test.app)).toEqual([
-      { type: 'logux/undo', reason: 'unknowType', id: [1, '10:uuid', 0] }
+      { type: 'logux/undo', reason: 'unknownType', id: [1, '10:uuid', 0] }
     ])
     expect(test.names).toEqual([
-      'connect', 'authenticated', 'unknowType', 'add'])
+      'connect', 'authenticated', 'unknownType', 'add'])
     expect(test.reports[2][1]).toBe(test.app)
     expect(test.reports[2][2].type).toEqual('UNKNOWN')
     expect(test.reports[2][3].id).toEqual([1, '10:uuid', 0])

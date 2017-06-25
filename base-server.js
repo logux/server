@@ -171,7 +171,7 @@ class BaseServer {
       }
       if (meta.status === 'waiting') {
         if (!type) {
-          this.unknowType(action, meta)
+          this.unknownType(action, meta)
           return
         }
         if (type.process) this.process(type, action, meta)
@@ -470,12 +470,12 @@ class BaseServer {
     }
   }
 
-  unknowType (action, meta) {
+  unknownType (action, meta) {
     this.log.changeMeta(meta.id, { status: 'error' })
-    this.reporter('unknowType', this, action, meta)
+    this.reporter('unknownType', this, action, meta)
 
     if (this.getUser(meta.id[1]) !== 'server') {
-      this.undo(meta, 'unknowType')
+      this.undo(meta, 'unknownType')
     }
 
     const nodeId = meta.id[1]

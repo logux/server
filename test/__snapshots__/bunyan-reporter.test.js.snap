@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`handles EACCESS error 1`] = `
+exports[`handles EACCES error 1`] = `
 "{
   \\"level\\": \\"error\\",
   \\"msg\\": \\"You are not allowed to run server on this port\\",
@@ -305,7 +305,7 @@ exports[`reports production 1`] = `
 "
 `;
 
-exports[`reports synchroniation error 1`] = `
+exports[`reports synchronization error 1`] = `
 "{
   \\"level\\": \\"error\\",
   \\"msg\\": \\"SyncError: A timeout was reached (5000ms)\\",
@@ -317,7 +317,7 @@ exports[`reports synchroniation error 1`] = `
 "
 `;
 
-exports[`reports unknowType 1`] = `
+exports[`reports unknownType 1`] = `
 "{
   \\"level\\": \\"warn\\",
   \\"msg\\": \\"Action with unknown type CHANGE_USER\\",
@@ -333,7 +333,7 @@ exports[`reports unknowType 1`] = `
 "
 `;
 
-exports[`reports unknowType from server 1`] = `
+exports[`reports unknownType from server 1`] = `
 "{
   \\"level\\": \\"error\\",
   \\"msg\\": \\"Action with unknown type CHANGE_USER\\",

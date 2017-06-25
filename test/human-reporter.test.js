@@ -131,13 +131,13 @@ it('reports processed', () => {
   expect(reportersOut('processed', app, action, meta, 500)).toMatchSnapshot()
 })
 
-it('reports unknowType', () => {
-  expect(reportersOut('unknowType', app, action, meta)).toMatchSnapshot()
+it('reports unknownType', () => {
+  expect(reportersOut('unknownType', app, action, meta)).toMatchSnapshot()
 })
 
-it('reports unknowType from server', () => {
+it('reports unknownType from server', () => {
   const serverMeta = { id: [1, 'server:hfeb5', 0] }
-  expect(reportersOut('unknowType', app, action, serverMeta)).toMatchSnapshot()
+  expect(reportersOut('unknownType', app, action, serverMeta)).toMatchSnapshot()
 })
 
 it('reports disconnect', () => {
@@ -170,7 +170,7 @@ it('reports client error', () => {
   expect(out).toMatchSnapshot()
 })
 
-it('reports synchroniation error', () => {
+it('reports synchronization error', () => {
   const out = reportersOut('syncError', app, authed, ownError)
   expect(out).toMatchSnapshot()
 })
@@ -188,7 +188,7 @@ it('reports destroy', () => {
   expect(reportersOut('destroy', app)).toMatchSnapshot()
 })
 
-it('handles EACCESS error', () => {
+it('handles EACCES error', () => {
   expect(reportersOut('error', app, { code: 'EACCES' }, app)).toMatchSnapshot()
 })
 

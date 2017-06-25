@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`handles EACCESS error 1`] = `
+exports[`handles EACCES error 1`] = `
 "[1m[31m[40m[7m ERROR [27m[49m[39m[22m [1m[31mYou are not allowed to run server on this port[39m[22m [2mat 1970-01-01 00:00:00[22m
         Try to change user (e.g. root) or use port >= 1024
 
@@ -201,21 +201,21 @@ exports[`reports production 1`] = `
 "
 `;
 
-exports[`reports synchroniation error 1`] = `
+exports[`reports synchronization error 1`] = `
 "[1m[31m[40m[7m ERROR [27m[49m[39m[22m [1m[31mSyncError: A timeout was reached (5000ms)[39m[22m [2mat 1970-01-01 00:00:00[22m
         Node ID: [1m100[22m:H10Nf5stl
 
 "
 `;
 
-exports[`reports unknowType 1`] = `
+exports[`reports unknownType 1`] = `
 "[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mAction with unknown type CHANGE_USER[39m[22m [2mat 1970-01-01 00:00:00[22m
         Action ID: [[1m1487805099387[22m, [1m100:H10Nf5stl[22m, [1m0[22m]
 
 "
 `;
 
-exports[`reports unknowType from server 1`] = `
+exports[`reports unknownType from server 1`] = `
 "[1m[31m[40m[7m ERROR [27m[49m[39m[22m [1m[31mAction with unknown type CHANGE_USER[39m[22m [2mat 1970-01-01 00:00:00[22m
         Action ID: [[1m1[22m, [1mserver:hfeb5[22m, [1m0[22m]
 

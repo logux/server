@@ -173,7 +173,7 @@ const reporters = {
     }
   },
 
-  unknowType (app, action, meta) {
+  unknownType (app, action, meta) {
     return {
       level: reportersCommon.isServer(meta.id) ? 'error' : 'warn',
       msg: `Action with unknown type ${ action.type }`,
