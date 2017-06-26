@@ -14,6 +14,7 @@ const fs = require('fs')
 const forcePromise = require('./force-promise')
 const ServerClient = require('./server-client')
 const promisify = require('./promisify')
+const Creator = require('./creator')
 
 const PEM_PREAMBLE = '-----BEGIN'
 
@@ -375,8 +376,8 @@ class BaseServer {
    *
    * @example
    * app.type('CHANGE_NAME', {
-   *   access (action, meta, user) {
-   *     return action.user === user
+   *   access (action, meta, creator) {
+   *     return action.user === creator.user
    *   },
    *   process (action, meta) {
    *     if (isFirstOlder(lastNameChange(action.user), meta)) {
@@ -434,10 +435,10 @@ class BaseServer {
 
   process (type, action, meta) {
     const start = Date.now()
-    const user = this.getUser(meta.id[1])
+    const creator = this.createCreator(meta)
 
     this.processing += 1
-    forcePromise(() => type.process(action, meta, user)).then(() => {
+    forcePromise(() => type.process(action, meta, creator)).then(() => {
       this.reporter('processed', this, action, meta, Date.now() - start)
       this.processing -= 1
       this.emitter.emit('processed', action, meta)
@@ -498,13 +499,23 @@ class BaseServer {
       return undefined
     }
   }
+
+  createCreator (meta) {
+    const nodeId = meta.id[1]
+    const user = this.getUser(nodeId)
+
+    const client = this.nodeIds[nodeId]
+    const subprotocol = client ? client.sync.remoteSubprotocol : undefined
+
+    return new Creator(nodeId, user, subprotocol)
+  }
 }
 
 module.exports = BaseServer
 
 /**
  * @callback authenticator
- * @param {string} id User ID.
+ * @param {string} user User ID.
  * @param {any} credentials The client credentials.
  * @param {Client} client Client object.
  * @return {boolean|Promise} `true` or Promise with `true`
@@ -515,8 +526,7 @@ module.exports = BaseServer
  * @callback authorizer
  * @param {Action} action The action data.
  * @param {Meta} meta The action metadata.
- * @param {string|"server"} user User ID of action author. It will be `"server"`
- *                               if user was created by server.
+ * @param {Creator} creator Information about node, who create this action.
  * @return {boolean|Promise} `true` or Promise with `true` if client are allowed
  *                           to use this action.
  */
@@ -525,7 +535,6 @@ module.exports = BaseServer
  * @callback processor
  * @param {Action} action The action data.
  * @param {Meta} meta The action metadata.
- * @param {string|"server"} user User ID of action author. It will be `"server"`
- *                               if user was created by server.
+ * @param {Creator} creator Information about node, who create this action.
  * @return {Promise|undefined} Promise when processing will be finished.
  */

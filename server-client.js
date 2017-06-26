@@ -192,9 +192,9 @@ class ServerClient {
   }
 
   filter (action, meta) {
-    const user = this.app.getUser(meta.id[1])
+    const creator = this.app.createCreator(meta)
 
-    const wrongUser = this.user && this.user !== user
+    const wrongUser = this.user && this.user !== creator.user
     const wrongMeta = Object.keys(meta).some(i => i !== 'id' && i !== 'time')
     if (wrongUser || wrongMeta) {
       this.app.reporter('denied', this.app, action, meta)
@@ -207,16 +207,17 @@ class ServerClient {
       return Promise.resolve(false)
     }
 
-    return forcePromise(() => type.access(action, meta, user)).then(result => {
-      if (!result) {
-        this.app.reporter('denied', this.app, action, meta)
-        this.app.undo(meta, 'denied')
-      }
-      return result
-    }).catch(e => {
-      this.app.undo(meta, 'error')
-      this.app.emitter.emit('error', e, action, meta)
-    })
+    return forcePromise(() => type.access(action, meta, creator))
+      .then(result => {
+        if (!result) {
+          this.app.reporter('denied', this.app, action, meta)
+          this.app.undo(meta, 'denied')
+        }
+        return result
+      }).catch(e => {
+        this.app.undo(meta, 'error')
+        this.app.emitter.emit('error', e, action, meta)
+      })
   }
 }
 

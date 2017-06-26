@@ -35,6 +35,7 @@
     "nanoevents",
     "cli",
     "CLI",
-    "bunyan"
+    "bunyan",
+    "isServer"
   ]
 }

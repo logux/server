@@ -429,9 +429,9 @@ it('processes actions', () => {
 
   test.app.type('FOO', {
     access: () => true,
-    process (action, meta, user) {
+    process (action, meta, creator) {
       expect(meta.added).toEqual(1)
-      expect(user).toEqual('server')
+      expect(creator.isServer).toBeTruthy()
       return wait(25).then(() => {
         processed.push(action)
       })

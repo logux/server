@@ -17,7 +17,7 @@ function createConnection () {
 
 function createServer (opts, reporter) {
   if (!opts) opts = { }
-  opts.subprotocol = '0.0.0'
+  opts.subprotocol = '0.0.1'
   opts.supports = '0.x'
 
   const server = new BaseServer(opts, reporter)
@@ -72,7 +72,7 @@ function sentNames (client) {
 
 it('uses server options', () => {
   const app = createServer({
-    subprotocol: '0.0.0',
+    subprotocol: '0.0.1',
     supports: '0.x',
     timeout: 16000,
     ping: 8000
@@ -80,7 +80,7 @@ it('uses server options', () => {
   app.nodeId = 'server:uuid'
   const client = new ServerClient(app, createConnection(), 1)
 
-  expect(client.sync.options.subprotocol).toEqual('0.0.0')
+  expect(client.sync.options.subprotocol).toEqual('0.0.1')
   expect(client.sync.options.timeout).toEqual(16000)
   expect(client.sync.options.ping).toEqual(8000)
   expect(client.sync.localNodeId).toEqual('server:uuid')
@@ -290,7 +290,7 @@ it('sends server credentials in development', () => {
   return connectClient(app).then(client => {
     expect(sent(client)[0][4]).toEqual({
       credentials: { env: 'development' },
-      subprotocol: '0.0.0'
+      subprotocol: '0.0.1'
     })
   })
 })
@@ -300,7 +300,7 @@ it('does not send server credentials in production', () => {
   app.auth(() => Promise.resolve(true))
 
   return connectClient(app).then(client => {
-    expect(sent(client)[0][4]).toEqual({ subprotocol: '0.0.0' })
+    expect(sent(client)[0][4]).toEqual({ subprotocol: '0.0.1' })
   })
 })
 
@@ -389,8 +389,9 @@ it('ignores unknown action types', () => {
 it('checks user access for action', () => {
   const test = createReporter()
   test.app.type('FOO', {
-    access (action, meta, user) {
-      expect(user).toEqual('10')
+    access (action, meta, creator) {
+      expect(creator.user).toEqual('10')
+      expect(creator.subprotocol).toEqual('0.0.0')
       expect(meta.id).toBeDefined()
       return Promise.resolve(!!action.bar)
     }
