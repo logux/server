@@ -49,6 +49,7 @@ yargs
   .option('r', {
     alias: 'reporter',
     describe: 'Reporter type',
+    choices: ['human', 'bunyan'],
     type: 'string'
   })
   .epilog(

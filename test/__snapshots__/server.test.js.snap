@@ -47,7 +47,7 @@ exports[`shows help 1`] = `
   -p, --port      Port to bind server                                   [number]
   -k, --key       Path to SSL key                                       [string]
   -c, --cert      Path to SSL certificate                               [string]
-  -r, --reporter  Reporter type                                         [string]
+  -r, --reporter  Reporter type            [string] [choices: \\"human\\", \\"bunyan\\"]
   --help          Show help                                            [boolean]
 
 Examples:
