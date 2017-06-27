@@ -212,9 +212,10 @@ exports[`reports disconnect from unauthenticated user 1`] = `
 exports[`reports error 1`] = `
 "{
   \\"level\\": \\"error\\",
-  \\"msg\\": {},
+  \\"msg\\": \\"Some mistake\\",
   \\"details\\": {
-    \\"actionID\\": [
+    \\"stacktrace\\": \\"Error: Some mistake\\\\n    at Object.<anonymous> (/fake-path/test/bunyan-reporter.test.js:28:13)\\\\n    at Module._compile (module.js:573:32)\\\\n    at runTest (/fake-path/node_modules/jest/index.js:50:10)\\\\n    at process._tickCallback (internal/process/next_tick.js:103:7)\\",
+    \\"actionId\\": [
       1487805099387,
       \\"100:H10Nf5stl\\",
       0
@@ -240,14 +241,18 @@ exports[`reports error from unautheficated user 1`] = `
 exports[`reports http 1`] = `
 "{
   \\"level\\": \\"info\\",
-  \\"msg\\": \\"Logux server is listening in non-secure development mode\\",
+  \\"msg\\": \\"Logux server is listening\\",
   \\"details\\": {
     \\"loguxServer\\": \\"0.1.1\\",
     \\"nodeId\\": \\"server:H1f8LAyzl\\",
     \\"environment\\": \\"development\\",
     \\"subprotocol\\": \\"1.0.0\\",
     \\"supports\\": \\"1.x\\",
-    \\"listen\\": \\"Custom HTTP server\\"
+    \\"listen\\": \\"Custom HTTP server\\",
+    \\"note\\": [
+      \\"Server was started in non-secure development mode\\",
+      \\"Press Ctrl-C to shutdown server\\"
+    ]
   }
 }
 
@@ -257,14 +262,18 @@ exports[`reports http 1`] = `
 exports[`reports listen 1`] = `
 "{
   \\"level\\": \\"info\\",
-  \\"msg\\": \\"Logux server is listening in non-secure development mode\\",
+  \\"msg\\": \\"Logux server is listening\\",
   \\"details\\": {
     \\"loguxServer\\": \\"0.1.1\\",
     \\"nodeId\\": \\"server:H1f8LAyzl\\",
     \\"environment\\": \\"development\\",
     \\"subprotocol\\": \\"2.5.0\\",
     \\"supports\\": \\"2.x || 1.x\\",
-    \\"listen\\": \\"ws://127.0.0.1:1337\\"
+    \\"listen\\": \\"ws://127.0.0.1:1337\\",
+    \\"note\\": [
+      \\"Server was started in non-secure development mode\\",
+      \\"Press Ctrl-C to shutdown server\\"
+    ]
   }
 }
 

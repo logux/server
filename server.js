@@ -4,20 +4,12 @@ const yargs = require('yargs')
 const bunyan = require('bunyan')
 
 const BaseServer = require('./base-server')
-const humanReporter = require('./reporters/human/process')
 const bunyanReporter = require('./reporters/bunyan/process')
+const bunyanFormatStream = require('./reporters/human/format')
 
 function bunyanLog (logger, payload) {
   const details = payload.details || {}
   logger[payload.level](details, payload.msg)
-}
-
-function reportRuntimeError (e, app) {
-  if (app.options.reporter === 'bunyan') {
-    bunyanLog(app.options.bunyanLogger, bunyanReporter('error', app, e))
-  } else {
-    process.stderr.write(humanReporter('error', app, e))
-  }
 }
 
 const AVAILABLE_OPTIONS = [
@@ -130,18 +122,25 @@ class Server extends BaseServer {
     if (!options) options = { }
 
     options.reporter = options.reporter || 'text'
-    if (options.reporter === 'bunyan' && !options.bunyanLogger) {
-      options.bunyanLogger = bunyan.createLogger({ name: 'logux-server' })
-    }
 
     let reporter
     if (options.reporter === 'bunyan') {
+      if (!options.bunyanLogger) {
+        options.bunyanLogger = bunyan.createLogger({
+          name: 'logux-server'
+        })
+      }
       reporter = function () {
         bunyanLog(options.bunyanLogger, bunyanReporter.apply(null, arguments))
       }
     } else {
       reporter = function () {
-        process.stderr.write(humanReporter.apply(null, arguments))
+        const formatOut = bunyanFormatStream(arguments[1])
+        options.bunyanLogger = bunyan.createLogger({
+          name: 'logux-server',
+          stream: formatOut
+        })
+        bunyanLog(options.bunyanLogger, bunyanReporter.apply(null, arguments))
       }
     }
 
@@ -153,10 +152,10 @@ class Server extends BaseServer {
           process.exit(1)
         })
       } else {
-        reportRuntimeError(e, {
+        reporter('error', {
           env: options.env || process.env.NODE_ENV || 'development',
           options
-        })
+        }, e)
         process.exit(1)
       }
     }
@@ -192,7 +191,7 @@ class Server extends BaseServer {
   listen () {
     const origin = BaseServer.prototype.listen
     return origin.apply(this, arguments).catch(e => {
-      reportRuntimeError(e, this)
+      this.reporter('error', this, e)
       process.exit(1)
     })
   }

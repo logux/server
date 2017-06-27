@@ -39,12 +39,9 @@ module.exports = {
     }
     return fields.map(field => {
       const name = field[0]
-      let value = field[1]
+      const value = field[1]
 
       const start = PADDING + rightPag(`${ name }: `, max)
-      if (value instanceof Date) {
-        value = yyyymmdd.withTime(value)
-      }
 
       if (name === 'Node ID') {
         const pos = value.indexOf(':')
@@ -87,13 +84,13 @@ module.exports = {
   },
 
   note (c, str) {
-    return PADDING + c.grey(str)
+    return str.map(i => PADDING + c.grey(i)).join(NEXT_LINE)
   },
 
-  prettyStackTrace (c, err, root) {
+  prettyStackTrace (c, stacktrace, root) {
     if (root.slice(-1) !== path.sep) root += path.sep
 
-    return err.stack.split('\n').slice(1).map(i => {
+    return stacktrace.split('\n').slice(1).map(i => {
       i = i.replace(/^\s*/, PADDING)
       const match = i.match(/(\s+at [^(]+ \()([^)]+)\)/)
       if (!match || match[2].indexOf(root) !== 0) {
