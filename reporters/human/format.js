@@ -12,14 +12,13 @@ const ERROR = 50
 const FATAL = 60
 
 /**
- * Creates a writable stream that formats bunyan records written to it.
- *
- * @name BunyanFormatWritable
- * @param {Server} app application object
- * @param {Stream} out (process.stdout) writable stream to write
- * @return {WritableStream} that you can pipe bunyan output into
+ * Writable stream that formats bunyan records written to human readable.
  */
 class BunyanFormatWritable extends stream.Writable {
+  /**
+  * @param {Server} app application object
+  * @param {Stream} out (process.stdout) writable stream to write
+  */
   constructor (app, out) {
     super()
     this.out = out || process.stdout
@@ -57,7 +56,6 @@ class BunyanFormatWritable extends stream.Writable {
     const c = helpers.color(app)
 
     delete rec.v
-    delete rec.pid
     delete rec.name
     delete rec.component
     delete rec.hostname
@@ -85,8 +83,13 @@ class BunyanFormatWritable extends stream.Writable {
       delete rec.note
     }
 
-    const leftover = Object.keys(rec)
     const params = []
+    if (rec.listen) {
+      params.push(['PID', rec.pid])
+    }
+    delete rec.pid
+
+    const leftover = Object.keys(rec)
     for (let i = 0; i < leftover.length; i++) {
       const key = leftover[i]
       const value = rec[key]

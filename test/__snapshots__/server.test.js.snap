@@ -2,6 +2,7 @@
 
 exports[`destroys everything on exit 1`] = `
 " INFO   Logux server is listening at 1970-01-01 00:00:00
+        PID:          21384
         Logux server: 0.1.1
         Node ID:      server:r1CJmycQW
         Environment:  test

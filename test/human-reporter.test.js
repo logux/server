@@ -38,6 +38,7 @@ function reportersOut (type, app) {
         .toString()
         .replace(/\r\v/g, '\n')
         .replace(DATE, '1970-01-01 00:00:00')
+        .replace(/PID:.+\n/g, 'PID:          21384\n')
       resolve(result)
     }, 50)
   })
@@ -98,16 +99,13 @@ const meta = {
   server: 'server:H1f8LAyzl'
 }
 
-it('reports listen', done => {
-  expect.assertions(1)
+it('reports listen', () => {
   return reportersOut('listen', app).then(data => {
     expect(data).toMatchSnapshot()
-    done()
   })
 })
 
-it('reports bad log info', done => {
-  expect.assertions(1)
+it('reports bad log info', () => {
   const memStream = new MemoryStream()
   const formatOut = new BunyanFormatStream(
     { outputMode: 'logux' }, memStream, app
@@ -115,7 +113,7 @@ it('reports bad log info', done => {
 
   formatOut.write('Simple text payload')
 
-  new Promise(resolve => {
+  return new Promise(resolve => {
     setTimeout(() => {
       const result = memStream
         .toString()
@@ -125,11 +123,10 @@ it('reports bad log info', done => {
     }, 50)
   }).then(data => {
     expect(data).toMatchSnapshot()
-    done()
   })
 })
 
-it('reports production', done => {
+it('reports production', () => {
   const wss = new BaseServer({
     env: 'production',
     pid: 21384,
@@ -142,14 +139,12 @@ it('reports production', done => {
   })
   wss.nodeId = 'server:H1f8LAyzl'
 
-  expect.assertions(1)
-  reportersOut('listen', wss).then(data => {
+  return reportersOut('listen', wss).then(data => {
     expect(data).toMatchSnapshot()
-    done()
   })
 })
 
-it('reports http', done => {
+it('reports http', () => {
   const http = new BaseServer({
     env: 'development',
     pid: 21384,
@@ -159,111 +154,85 @@ it('reports http', done => {
   })
   http.nodeId = 'server:H1f8LAyzl'
 
-  expect.assertions(1)
-  reportersOut('listen', http).then(data => {
+  return reportersOut('listen', http).then(data => {
     expect(data).toMatchSnapshot()
-    done()
   })
 })
 
-it('reports connect', done => {
-  expect.assertions(1)
-  reportersOut('connect', app, authed).then(data => {
+it('reports connect', () => {
+  return reportersOut('connect', app, authed).then(data => {
     expect(data).toMatchSnapshot()
-    done()
   })
 })
 
-it('reports authenticated', done => {
-  expect.assertions(1)
-  reportersOut('authenticated', app, authed).then(data => {
+it('reports authenticated', () => {
+  return reportersOut('authenticated', app, authed).then(data => {
     expect(data).toMatchSnapshot()
-    done()
   })
 })
 
-it('reports authenticated without user ID', done => {
-  expect.assertions(1)
-  reportersOut('authenticated', app, noUserId).then(data => {
+it('reports authenticated without user ID', () => {
+  return reportersOut('authenticated', app, noUserId).then(data => {
     expect(data).toMatchSnapshot()
-    done()
   })
 })
 
-it('reports bad authenticated', done => {
-  expect.assertions(1)
-  reportersOut('unauthenticated', app, authed).then(data => {
+it('reports bad authenticated', () => {
+  return reportersOut('unauthenticated', app, authed).then(data => {
     expect(data).toMatchSnapshot()
-    done()
   })
 })
 
-it('reports action', done => {
-  expect.assertions(1)
-  reportersOut('add', app, action, meta).then(data => {
+it('reports action', () => {
+  return reportersOut('add', app, action, meta).then(data => {
     expect(data).toMatchSnapshot()
-    done()
   })
 })
 
-it('reports clean', done => {
-  expect.assertions(1)
-  reportersOut('clean', app, action, meta).then(data => {
+it('reports clean', () => {
+  return reportersOut('clean', app, action, meta).then(data => {
     expect(data).toMatchSnapshot()
-    done()
   })
 })
 
-it('reports denied', done => {
-  expect.assertions(1)
-  reportersOut('denied', app, action, meta).then(data => {
+it('reports denied', () => {
+  return reportersOut('denied', app, action, meta).then(data => {
     expect(data).toMatchSnapshot()
-    done()
   })
 })
 
-it('reports processed', done => {
-  expect.assertions(1)
-  reportersOut('processed', app, action, meta, 500).then(data => {
+it('reports processed', () => {
+  return reportersOut('processed', app, action, meta, 500).then(data => {
     expect(data).toMatchSnapshot()
-    done()
   })
 })
 
-it('reports unknownType', done => {
-  expect.assertions(1)
-  reportersOut('unknownType', app, action, meta).then(data => {
+it('reports unknownType', () => {
+  return reportersOut('unknownType', app, action, meta).then(data => {
     expect(data).toMatchSnapshot()
-    done()
   })
 })
 
-it('reports unknownType from server', done => {
+it('reports unknownType from server', () => {
   const serverMeta = { id: [1, 'server:hfeb5', 0] }
-  expect.assertions(1)
-  reportersOut('unknownType', app, action, serverMeta).then(data => {
+  return reportersOut('unknownType', app, action, serverMeta).then(data => {
     expect(data).toMatchSnapshot()
-    done()
   })
 })
 
-it('reports disconnect', done => {
-  expect.assertions(1)
-  reportersOut('disconnect', app, authed).then(data => {
+it('reports disconnect', () => {
+  return reportersOut('disconnect', app, authed).then(data => {
     expect(data).toMatchSnapshot()
-    done()
   })
 })
 
-it('reports disconnect from unauthenticated user', done => {
-  expect.assertions(1)
-  reportersOut('disconnect', app, unauthed).then(data => {
+it('reports disconnect from unauthenticated user', () => {
+  return reportersOut('disconnect', app, unauthed).then(data => {
     expect(data).toMatchSnapshot()
-    done()
   })
 })
 
-it('reports error', done => {
+it('reports error', () => {
   const file = __filename
   const jest = path.join(__dirname, '../node_modules/jest/index.js')
   const error = new Error('Some mistake')
@@ -277,65 +246,51 @@ it('reports error', done => {
   error.stack = errorStack.join('\n')
 
   const out = reportersOut('runtimeError', app, error, action, meta)
-  expect.assertions(1)
-  out.then(data => {
+  return out.then(data => {
     expect(data).toMatchSnapshot()
-    done()
   })
 })
 
-it('reports client error', done => {
+it('reports client error', () => {
   const out = reportersOut('clientError', app, authed, clientError)
-  expect.assertions(1)
-  out.then(data => {
+  return out.then(data => {
     expect(data).toMatchSnapshot()
-    done()
   })
 })
 
-it('reports synchronization error', done => {
+it('reports synchronization error', () => {
   const out = reportersOut('syncError', app, authed, ownError)
-  expect.assertions(1)
-  out.then(data => {
+  return out.then(data => {
     expect(data).toMatchSnapshot()
-    done()
   })
 })
 
-it('reports error from unautheficated user', done => {
+it('reports error from unautheficated user', () => {
   const out = reportersOut('syncError', app, unauthed, clientError)
-  expect.assertions(1)
-  out.then(data => {
+  return out.then(data => {
     expect(data).toMatchSnapshot()
-    done()
   })
 })
 
-it('reports zombie', done => {
-  expect.assertions(1)
-  reportersOut('zombie', app, authed).then(data => {
+it('reports zombie', () => {
+  return reportersOut('zombie', app, authed).then(data => {
     expect(data).toMatchSnapshot()
-    done()
   })
 })
 
-it('reports destroy', done => {
-  expect.assertions(1)
-  reportersOut('destroy', app).then(data => {
+it('reports destroy', () => {
+  return reportersOut('destroy', app).then(data => {
     expect(data).toMatchSnapshot()
-    done()
   })
 })
 
-it('handles EACCES error', done => {
-  expect.assertions(1)
-  reportersOut('error', app, { code: 'EACCES' }, app).then(data => {
+it('handles EACCES error', () => {
+  return reportersOut('error', app, { code: 'EACCES' }, app).then(data => {
     expect(data).toMatchSnapshot()
-    done()
   })
 })
 
-it('handles error in production', done => {
+it('handles error in production', () => {
   const http = new BaseServer({
     env: 'production',
     pid: 21384,
@@ -346,45 +301,37 @@ it('handles error in production', done => {
   })
   http.nodeId = 'server:H1f8LAyzl'
 
-  expect.assertions(1)
-  reportersOut('error', app, { code: 'EACCES', port: 1000 }, http)
+  return reportersOut('error', app, { code: 'EACCES', port: 1000 }, http)
     .then(data => {
       expect(data).toMatchSnapshot()
-      done()
     })
 })
 
-it('handles EADDRINUSE error', done => {
-  expect.assertions(1)
-  reportersOut(
+it('handles EADDRINUSE error', () => {
+  return reportersOut(
     'error', app, {
       code: 'EADDRINUSE',
       port: 1337
     }, app).then(data => {
     expect(data).toMatchSnapshot()
-    done()
   })
 })
 
-it('handles Logux initialization error: unknown option', done => {
-  expect.assertions(1)
-  reportersOut('error', app, {
+it('handles Logux initialization error: unknown option', () => {
+  return reportersOut('error', app, {
     code: 'LOGUX_UNKNOWN_OPTION',
     option: 'test'
   }, app).then(data => {
     expect(data).toMatchSnapshot()
-    done()
   })
 })
 
-it('handles Logux initialization error: subprotocol', done => {
-  expect.assertions(1)
-  reportersOut('error', app, {
+it('handles Logux initialization error: subprotocol', () => {
+  return reportersOut('error', app, {
     code: 'LOGUX_WRONG_OPTIONS',
     message: 'Missed client subprotocol requirements'
   }, app).then(data => {
     expect(data).toMatchSnapshot()
-    done()
   })
 })
 

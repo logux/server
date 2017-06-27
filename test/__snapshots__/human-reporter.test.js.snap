@@ -153,6 +153,7 @@ exports[`reports error from unautheficated user 1`] = `
 
 exports[`reports http 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mLogux server is listening[39m[22m [2mat 1970-01-01 00:00:00[22m
+        PID:          21384
         Logux server: [1m0.1.1[22m
         Node ID:      [1mserver[22m:H1f8LAyzl
         Environment:  [1mdevelopment[22m
@@ -167,6 +168,7 @@ exports[`reports http 1`] = `
 
 exports[`reports listen 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mLogux server is listening[39m[22m [2mat 1970-01-01 00:00:00[22m
+        PID:          21384
         Logux server: [1m0.1.1[22m
         Node ID:      [1mserver[22m:H1f8LAyzl
         Environment:  [1mdevelopment[22m
@@ -189,6 +191,7 @@ exports[`reports processed 1`] = `
 
 exports[`reports production 1`] = `
 " INFO   Logux server is listening at 1970-01-01 00:00:00
+        PID:          21384
         Logux server: 0.1.1
         Node ID:      server:H1f8LAyzl
         Environment:  production
