@@ -155,11 +155,6 @@ class HumanFormatter extends stream.Writable {
       )
     }
 
-    let note = []
-    if (rec.note) {
-      note = helpers.note(c, rec.note)
-    }
-
     const params = []
     if (rec.listen) {
       params.push(['PID', rec.pid])
@@ -167,9 +162,7 @@ class HumanFormatter extends stream.Writable {
 
     const blacklist = ['v', 'name', 'component', 'hostname', 'time', 'msg',
       'level', 'hint', 'stacktrace', 'note', 'pid']
-    const leftover = Object.keys(rec)
-    for (let i = 0; i < leftover.length; i++) {
-      const key = leftover[i]
+    for (const key of Object.keys(rec)) {
       if (blacklist.indexOf(key) === -1) {
         const value = rec[key]
         const name = key
@@ -189,7 +182,10 @@ class HumanFormatter extends stream.Writable {
     }
 
     message = message.concat(helpers.params(c, params))
-    message = message.concat(note)
+
+    if (rec.note) {
+      message = message.concat(helpers.note(c, rec.note))
+    }
 
     return helpers.message(message)
   }
