@@ -82,7 +82,7 @@ class BunyanFormatWritable extends stream.Writable {
     const leftover = Object.keys(rec)
     for (let i = 0; i < leftover.length; i++) {
       const key = leftover[i]
-      if (!blacklist.includes(key)) {
+      if (blacklist.indexOf(key) === -1) {
         const value = rec[key]
         const name = key
           .replace(/([A-Z])/g, ' $1')
