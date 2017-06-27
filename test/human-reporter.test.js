@@ -2,7 +2,6 @@
 
 const ServerConnection = require('logux-sync').ServerConnection
 const createServer = require('http').createServer
-const MemoryStream = require('memory-stream')
 const SyncError = require('logux-sync').SyncError
 const bunyan = require('bunyan')
 const path = require('path')
@@ -19,6 +18,15 @@ function bunyanLog (logger, payload) {
   logger[payload.level](details, payload.msg)
 }
 
+class MemoryStream {
+  constructor () {
+    this.string = ''
+  }
+  write (chunk) {
+    this.string += chunk
+  }
+}
+
 function reportersOut (type, app) {
   const payload = processReporter.apply({ }, arguments)
   const stream = new HumanFormatter({
@@ -32,16 +40,12 @@ function reportersOut (type, app) {
 
   bunyanLog(bunyanLogger, payload)
 
-  return new Promise(resolve => {
-    setTimeout(() => {
-      const result = stream.out
-        .toString()
-        .replace(/\r\v/g, '\n')
-        .replace(DATE, '1970-01-01 00:00:00')
-        .replace(/PID:.+\n/g, 'PID:          21384\n')
-      resolve(result)
-    }, 50)
-  })
+  return Promise.resolve(
+    stream.out.string
+      .replace(/\r\v/g, '\n')
+      .replace(DATE, '1970-01-01 00:00:00')
+      .replace(/PID:.+\n/g, 'PID:          21384\n')
+  )
 }
 
 const log = bunyan.createLogger({
