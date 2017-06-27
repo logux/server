@@ -121,30 +121,20 @@ class Server extends BaseServer {
   constructor (options) {
     if (!options) options = { }
 
-    options.reporter = options.reporter || 'text'
+    options.reporter = options.reporter || 'human'
 
-    let reporter
-    if (options.reporter === 'bunyan') {
-      if (!options.bunyanLogger) {
-        options.bunyanLogger = bunyan.createLogger({
-          name: 'logux-server'
-        })
-      }
-      reporter = function () {
-        bunyanLog(options.bunyanLogger, bunyanReporter.apply(null, arguments))
-      }
-    } else {
-      const formatOut = new BunyanFormatStream({
+    if (!options.bunyanLogger) {
+      const human = new BunyanFormatStream({
         env: options.env || process.env.NODE_ENV || 'development',
         options
       })
       options.bunyanLogger = bunyan.createLogger({
         name: 'logux-server',
-        stream: formatOut
+        stream: options.reporter === 'human' ? human : undefined
       })
-      reporter = function () {
-        bunyanLog(options.bunyanLogger, bunyanReporter.apply(null, arguments))
-      }
+    }
+    function reporter () {
+      bunyanLog(options.bunyanLogger, bunyanReporter.apply(null, arguments))
     }
 
     let initialized = false

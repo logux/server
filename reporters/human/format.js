@@ -12,30 +12,20 @@ const LEVELS = {
   60: 'fatal'
 }
 
-/**
- * Writable stream that formats bunyan records written to human readable.
- */
 class BunyanFormatWritable extends stream.Writable {
-  /**
-  * @param {Server} app application object
-  * @param {Stream} out (process.stdout) writable stream to write
-  */
   constructor (app, out) {
     super()
     this.out = out || process.stdout
     this.app = app
   }
 
-  write (chunk, encoding, cb) {
-    let rec
-    const callback = cb || (() => {})
+  write (chunk) {
     try {
-      rec = JSON.parse(chunk)
-      this.out.write(this.formatRecord(rec, this.app))
+      const record = JSON.parse(chunk)
+      this.out.write(this.formatRecord(record, this.app))
     } catch (e) {
       this.out.write(chunk)
     }
-    callback()
   }
 
   formatRecord (rec, app) {
