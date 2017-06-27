@@ -43,23 +43,6 @@ function reportersOut (type, app) {
   })
 }
 
-function reportersOutText (app) {
-  const memStream = new MemoryStream()
-  const formatOut = bunyanFormatStream({ outputMode: 'logux' }, memStream, app)
-
-  formatOut.write('Simple text payload')
-
-  return new Promise(resolve => {
-    setTimeout(() => {
-      const result = memStream
-        .toString()
-        .replace(/\r\v/g, '\n')
-        .replace(DATE, '1970-01-01 00:00:00')
-      resolve(result)
-    }, 50)
-  })
-}
-
 const log = bunyan.createLogger({
   name: 'logux-server-test',
   streams: []
@@ -125,7 +108,20 @@ it('reports listen', done => {
 
 it('reports bad log info', done => {
   expect.assertions(1)
-  reportersOutText(app).then(data => {
+  const memStream = new MemoryStream()
+  const formatOut = bunyanFormatStream({ outputMode: 'logux' }, memStream, app)
+
+  formatOut.write('Simple text payload')
+
+  new Promise(resolve => {
+    setTimeout(() => {
+      const result = memStream
+        .toString()
+        .replace(/\r\v/g, '\n')
+        .replace(DATE, '1970-01-01 00:00:00')
+      resolve(result)
+    }, 50)
+  }).then(data => {
     expect(data).toMatchSnapshot()
     done()
   })
