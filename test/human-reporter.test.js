@@ -1,22 +1,53 @@
 'use strict'
 
-const processReporter = require('../reporters/human/process')
+const processReporter = require('../reporters/bunyan/process')
 
 const ServerConnection = require('logux-sync').ServerConnection
 const createServer = require('http').createServer
 const SyncError = require('logux-sync').SyncError
 const path = require('path')
+const bunyan = require('bunyan')
 
 const ServerClient = require('../server-client')
 const BaseServer = require('../base-server')
 
+const BunyanFormatStream = require('../reporters/human/format')
+const MemoryStream = require('memory-stream')
+
 const DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
 
-function reportersOut () {
-  return processReporter.apply({}, arguments)
-    .replace(/\r\v/g, '\n')
-    .replace(DATE, '1970-01-01 00:00:00')
+function bunyanLog (logger, payload) {
+  const details = payload.details || { }
+  logger[payload.level](details, payload.msg)
 }
+
+function reportersOut (type, app) {
+  const payload = processReporter.apply({ }, arguments)
+  const memStream = new MemoryStream()
+  const formatOut = new BunyanFormatStream(app, memStream)
+  const bunyanLogger = bunyan.createLogger({
+    name: 'logux-server-test',
+    stream: formatOut
+  })
+
+  bunyanLog(bunyanLogger, payload)
+
+  return new Promise(resolve => {
+    setTimeout(() => {
+      const result = memStream
+        .toString()
+        .replace(/\r\v/g, '\n')
+        .replace(DATE, '1970-01-01 00:00:00')
+        .replace(/PID:.+\n/g, 'PID:          21384\n')
+      resolve(result)
+    }, 50)
+  })
+}
+
+const log = bunyan.createLogger({
+  name: 'logux-server-test',
+  streams: []
+})
 
 const app = new BaseServer({
   env: 'development',
@@ -24,7 +55,9 @@ const app = new BaseServer({
   subprotocol: '2.5.0',
   supports: '2.x || 1.x',
   host: '127.0.0.1',
-  port: 1337
+  port: 1337,
+  reporter: 'bunyan',
+  bunyanLogger: log
 })
 app.nodeId = 'server:H1f8LAyzl'
 
@@ -67,7 +100,30 @@ const meta = {
 }
 
 it('reports listen', () => {
-  expect(reportersOut('listen', app)).toMatchSnapshot()
+  return reportersOut('listen', app).then(data => {
+    expect(data).toMatchSnapshot()
+  })
+})
+
+it('reports bad log info', () => {
+  const memStream = new MemoryStream()
+  const formatOut = new BunyanFormatStream(
+    { outputMode: 'logux' }, memStream, app
+  )
+
+  formatOut.write('Simple text payload')
+
+  return new Promise(resolve => {
+    setTimeout(() => {
+      const result = memStream
+        .toString()
+        .replace(/\r\v/g, '\n')
+        .replace(DATE, '1970-01-01 00:00:00')
+      resolve(result)
+    }, 50)
+  }).then(data => {
+    expect(data).toMatchSnapshot()
+  })
 })
 
 it('reports production', () => {
@@ -83,7 +139,9 @@ it('reports production', () => {
   })
   wss.nodeId = 'server:H1f8LAyzl'
 
-  expect(reportersOut('listen', wss)).toMatchSnapshot()
+  return reportersOut('listen', wss).then(data => {
+    expect(data).toMatchSnapshot()
+  })
 })
 
 it('reports http', () => {
@@ -96,56 +154,82 @@ it('reports http', () => {
   })
   http.nodeId = 'server:H1f8LAyzl'
 
-  expect(reportersOut('listen', http)).toMatchSnapshot()
+  return reportersOut('listen', http).then(data => {
+    expect(data).toMatchSnapshot()
+  })
 })
 
 it('reports connect', () => {
-  expect(reportersOut('connect', app, authed)).toMatchSnapshot()
+  return reportersOut('connect', app, authed).then(data => {
+    expect(data).toMatchSnapshot()
+  })
 })
 
 it('reports authenticated', () => {
-  expect(reportersOut('authenticated', app, authed)).toMatchSnapshot()
+  return reportersOut('authenticated', app, authed).then(data => {
+    expect(data).toMatchSnapshot()
+  })
 })
 
 it('reports authenticated without user ID', () => {
-  expect(reportersOut('authenticated', app, noUserId)).toMatchSnapshot()
+  return reportersOut('authenticated', app, noUserId).then(data => {
+    expect(data).toMatchSnapshot()
+  })
 })
 
 it('reports bad authenticated', () => {
-  expect(reportersOut('unauthenticated', app, authed)).toMatchSnapshot()
+  return reportersOut('unauthenticated', app, authed).then(data => {
+    expect(data).toMatchSnapshot()
+  })
 })
 
 it('reports action', () => {
-  expect(reportersOut('add', app, action, meta)).toMatchSnapshot()
+  return reportersOut('add', app, action, meta).then(data => {
+    expect(data).toMatchSnapshot()
+  })
 })
 
 it('reports clean', () => {
-  expect(reportersOut('clean', app, action, meta)).toMatchSnapshot()
+  return reportersOut('clean', app, action, meta).then(data => {
+    expect(data).toMatchSnapshot()
+  })
 })
 
 it('reports denied', () => {
-  expect(reportersOut('denied', app, action, meta)).toMatchSnapshot()
+  return reportersOut('denied', app, action, meta).then(data => {
+    expect(data).toMatchSnapshot()
+  })
 })
 
 it('reports processed', () => {
-  expect(reportersOut('processed', app, action, meta, 500)).toMatchSnapshot()
+  return reportersOut('processed', app, action, meta, 500).then(data => {
+    expect(data).toMatchSnapshot()
+  })
 })
 
 it('reports unknownType', () => {
-  expect(reportersOut('unknownType', app, action, meta)).toMatchSnapshot()
+  return reportersOut('unknownType', app, action, meta).then(data => {
+    expect(data).toMatchSnapshot()
+  })
 })
 
 it('reports unknownType from server', () => {
   const serverMeta = { id: [1, 'server:hfeb5', 0] }
-  expect(reportersOut('unknownType', app, action, serverMeta)).toMatchSnapshot()
+  return reportersOut('unknownType', app, action, serverMeta).then(data => {
+    expect(data).toMatchSnapshot()
+  })
 })
 
 it('reports disconnect', () => {
-  expect(reportersOut('disconnect', app, authed)).toMatchSnapshot()
+  return reportersOut('disconnect', app, authed).then(data => {
+    expect(data).toMatchSnapshot()
+  })
 })
 
 it('reports disconnect from unauthenticated user', () => {
-  expect(reportersOut('disconnect', app, unauthed)).toMatchSnapshot()
+  return reportersOut('disconnect', app, unauthed).then(data => {
+    expect(data).toMatchSnapshot()
+  })
 })
 
 it('reports error', () => {
@@ -162,34 +246,48 @@ it('reports error', () => {
   error.stack = errorStack.join('\n')
 
   const out = reportersOut('runtimeError', app, error, action, meta)
-  expect(out).toMatchSnapshot()
+  return out.then(data => {
+    expect(data).toMatchSnapshot()
+  })
 })
 
 it('reports client error', () => {
   const out = reportersOut('clientError', app, authed, clientError)
-  expect(out).toMatchSnapshot()
+  return out.then(data => {
+    expect(data).toMatchSnapshot()
+  })
 })
 
 it('reports synchronization error', () => {
   const out = reportersOut('syncError', app, authed, ownError)
-  expect(out).toMatchSnapshot()
+  return out.then(data => {
+    expect(data).toMatchSnapshot()
+  })
 })
 
 it('reports error from unautheficated user', () => {
   const out = reportersOut('syncError', app, unauthed, clientError)
-  expect(out).toMatchSnapshot()
+  return out.then(data => {
+    expect(data).toMatchSnapshot()
+  })
 })
 
 it('reports zombie', () => {
-  expect(reportersOut('zombie', app, authed)).toMatchSnapshot()
+  return reportersOut('zombie', app, authed).then(data => {
+    expect(data).toMatchSnapshot()
+  })
 })
 
 it('reports destroy', () => {
-  expect(reportersOut('destroy', app)).toMatchSnapshot()
+  return reportersOut('destroy', app).then(data => {
+    expect(data).toMatchSnapshot()
+  })
 })
 
 it('handles EACCES error', () => {
-  expect(reportersOut('error', app, { code: 'EACCES' }, app)).toMatchSnapshot()
+  return reportersOut('error', app, { code: 'EACCES' }, app).then(data => {
+    expect(data).toMatchSnapshot()
+  })
 })
 
 it('handles error in production', () => {
@@ -203,26 +301,38 @@ it('handles error in production', () => {
   })
   http.nodeId = 'server:H1f8LAyzl'
 
-  expect(reportersOut('error', app, { code: 'EACCES', port: 1000 }, http))
-    .toMatchSnapshot()
+  return reportersOut('error', app, { code: 'EACCES', port: 1000 }, http)
+    .then(data => {
+      expect(data).toMatchSnapshot()
+    })
 })
 
 it('handles EADDRINUSE error', () => {
-  expect(reportersOut('error', app, {
-    code: 'EADDRINUSE',
-    port: 1337
-  }, app)).toMatchSnapshot()
+  return reportersOut(
+    'error', app, {
+      code: 'EADDRINUSE',
+      port: 1337
+    }, app).then(data => {
+    expect(data).toMatchSnapshot()
+  })
 })
 
-it('handles Logux initialization error', () => {
-  expect(reportersOut('error', app, {
+it('handles Logux initialization error: unknown option', () => {
+  return reportersOut('error', app, {
     code: 'LOGUX_UNKNOWN_OPTION',
     option: 'test'
-  }, app)).toMatchSnapshot()
-  expect(reportersOut('error', app, {
+  }, app).then(data => {
+    expect(data).toMatchSnapshot()
+  })
+})
+
+it('handles Logux initialization error: subprotocol', () => {
+  return reportersOut('error', app, {
     code: 'LOGUX_WRONG_OPTIONS',
     message: 'Missed client subprotocol requirements'
-  }, app)).toMatchSnapshot()
+  }, app).then(data => {
+    expect(data).toMatchSnapshot()
+  })
 })
 
 it('throws on undefined error', () => {

@@ -36,6 +36,7 @@
     "jest": "^20.0.4",
     "jsdoc": "^3.4.3",
     "lint-staged": "^4.0.0",
+    "memory-stream": "^0.0.3",
     "pre-commit": "^1.2.2",
     "rimraf": "^2.6.1",
     "yaspeller-ci": "^0.4.0"

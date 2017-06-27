@@ -159,14 +159,14 @@ it('reports disconnect from unauthenticated user', () => {
 })
 
 it('reports error', () => {
-  const file = __filename
-  const jest = path.join(__dirname, '..', 'node_modules', 'jest', 'index.js')
+  const file = __filename.replace(path.join(__dirname, '..'), '/fake-path')
+  const jest = path.join('/fake-path', 'node_modules', 'jest', 'index.js')
   const error = new Error('Some mistake')
   const errorStack = [
     `${ error.name }: ${ error.message }`,
     `    at Object.<anonymous> (${ file }:28:13)`,
     `    at Module._compile (module.js:573:32)`,
-    `    at at runTest (${ jest }:50:10)`,
+    `    at runTest (${ jest }:50:10)`,
     `    at process._tickCallback (internal/process/next_tick.js:103:7)`
   ]
   error.stack = errorStack.join('\n')

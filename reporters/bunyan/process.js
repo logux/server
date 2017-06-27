@@ -14,24 +14,25 @@ function clientParams (client) {
 const reporters = {
 
   listen (app) {
-    let msg
+    const details = {
+      loguxServer: pkg.version,
+      nodeId: app.nodeId,
+      environment: app.env,
+      subprotocol: app.options.subprotocol,
+      supports: app.options.supports,
+      listen: reportersCommon.getAppUrl(app)
+    }
     if (app.env === 'development') {
-      msg = 'Logux server is listening in non-secure development mode'
-    } else {
-      msg = 'Logux server is listening'
+      details.note = [
+        'Server was started in non-secure development mode',
+        'Press Ctrl-C to shutdown server'
+      ]
     }
 
     return {
       level: 'info',
-      msg,
-      details: {
-        loguxServer: pkg.version,
-        nodeId: app.nodeId,
-        environment: app.env,
-        subprotocol: app.options.subprotocol,
-        supports: app.options.supports,
-        listen: reportersCommon.getAppUrl(app)
-      }
+      msg: 'Logux server is listening',
+      details
     }
   },
 
@@ -97,13 +98,18 @@ const reporters = {
   },
 
   runtimeError (app, err, action, meta) {
-    const details = {}
+    let prefix = `${ err.name }: ${ err.message }`
+    if (err.name === 'Error') prefix = err.message
+
+    const details = {
+      stacktrace: err.stack
+    }
     if (meta) {
-      details['actionID'] = meta.id
+      details['actionId'] = meta.id
     }
     return {
       level: 'error',
-      msg: err,
+      msg: prefix,
       details
     }
   },
