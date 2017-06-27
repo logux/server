@@ -3,13 +3,14 @@
 const stream = require('stream')
 const helpers = require('../human/helpers')
 
-// Levels
-const TRACE = 10
-const DEBUG = 20
-const INFO = 30
-const WARN = 40
-const ERROR = 50
-const FATAL = 60
+const LEVELS = {
+  10: 'trace',
+  20: 'debug',
+  30: 'info',
+  40: 'warn',
+  50: 'error',
+  60: 'fatal'
+}
 
 /**
  * Writable stream that formats bunyan records written to human readable.
@@ -23,20 +24,6 @@ class BunyanFormatWritable extends stream.Writable {
     super()
     this.out = out || process.stdout
     this.app = app
-
-    const levelFromName = {
-      trace: TRACE,
-      debug: DEBUG,
-      info: INFO,
-      warn: WARN,
-      error: ERROR,
-      fatal: FATAL
-    }
-    this.nameFromLevel = {}
-    Object.keys(levelFromName).forEach(name => {
-      const lvl = levelFromName[name]
-      this.nameFromLevel[lvl] = name
-    })
   }
 
   write (chunk, encoding, cb) {
@@ -55,7 +42,7 @@ class BunyanFormatWritable extends stream.Writable {
     let message = []
     const c = helpers.color(app)
 
-    message.push(helpers[this.nameFromLevel[rec.level]](c, rec.msg))
+    message.push(helpers[LEVELS[rec.level]](c, rec.msg))
 
     if (rec.hint) {
       message = message.concat(helpers.hint(c, rec.hint))
