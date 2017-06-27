@@ -101,16 +101,15 @@ const helpers = {
     if (root.slice(-1) !== path.sep) root += path.sep
 
     return stacktrace.split('\n').slice(1).map(i => {
-      i = i.replace(/^\s*/, PADDING)
-      const match = i.match(/(\s+at [^(]+ \()([^)]+)\)/)
-      if (!match || match[2].indexOf(root) !== 0) {
-        return c.red(i)
+      const m = i.match(/\s+at ([^(]+) \(([^)]+)\)/)
+      if (!m || m[2].indexOf(root) !== 0) {
+        return c.red(i.replace(/^\s*/, PADDING))
       } else {
-        match[2] = match[2].slice(root.length)
-        if (match[2].indexOf('node_modules') !== -1) {
-          return c.red(`${ match[1] }${ match[2] })`)
+        m[2] = m[2].slice(root.length)
+        if (m[2].indexOf('node_modules') !== -1) {
+          return c.red(`${ PADDING }at ${ m[1] } (./${ m[2] })`)
         } else {
-          return c.yellow(`${ match[1] }${ match[2] })`)
+          return c.yellow(`${ PADDING }at ${ c.bold(m[1]) } (./${ m[2] })`)
         }
       }
     }).join(NEXT_LINE)
