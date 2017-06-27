@@ -116,33 +116,32 @@ const helpers = {
     }).join(NEXT_LINE)
   },
 
-  color (app) {
-    if (app.env !== 'development') {
-      return new chalk.constructor({ enabled: false })
-    } else {
-      return chalk
-    }
-  },
-
   message (strings) {
     return strings.filter(i => i !== '').join(NEXT_LINE) + SEPARATOR
   }
 }
 
 class HumanFormatter extends stream.Writable {
-  constructor (app, out) {
+  constructor (options) {
     super()
-    this.out = out || process.stdout
-    this.app = app
+
+    if (typeof options.color === 'undefined') {
+      this.chalk = chalk
+    } else {
+      this.chalk = new chalk.constructor({ enabled: options.color })
+    }
+
+    this.basepath = options.basepath || process.cwd()
+    this.out = options.out || process.stdout
   }
 
   write (record) {
-    this.out.write(this.formatRecord(record, this.app))
+    this.out.write(this.formatRecord(record))
   }
 
-  formatRecord (rec, app) {
+  formatRecord (rec) {
+    const c = this.chalk
     let message = []
-    const c = helpers.color(app)
 
     message.push(helpers[LEVELS[rec.level]](c, rec.msg))
 
@@ -152,7 +151,7 @@ class HumanFormatter extends stream.Writable {
 
     if (rec.stacktrace) {
       message = message.concat(
-        helpers.prettyStackTrace(c, rec.stacktrace, app.options.root)
+        helpers.prettyStackTrace(c, rec.stacktrace, this.basepath)
       )
     }
 

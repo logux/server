@@ -21,7 +21,10 @@ function bunyanLog (logger, payload) {
 
 function reportersOut (type, app) {
   const payload = processReporter.apply({ }, arguments)
-  const stream = new HumanFormatter(app, new MemoryStream())
+  const stream = new HumanFormatter({
+    color: app.env === 'production' ? false : undefined,
+    out: new MemoryStream()
+  })
   const bunyanLogger = bunyan.createLogger({
     name: 'logux-server-test',
     streams: [{ type: 'raw', stream }]

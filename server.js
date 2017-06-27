@@ -126,12 +126,13 @@ class Server extends BaseServer {
     if (!options.bunyanLogger) {
       let streams
       if (options.reporter === 'human') {
+        const env = options.env || process.env.NODE_ENV || 'development'
         streams = [
           {
             type: 'raw',
             stream: new HumanFormatter({
-              env: options.env || process.env.NODE_ENV || 'development',
-              options
+              basepath: options.root,
+              color: env === 'development'
             })
           }
         ]
