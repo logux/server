@@ -17,12 +17,12 @@ const MemoryStream = require('memory-stream')
 const DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
 
 function bunyanLog (logger, payload) {
-  const details = payload.details || {}
+  const details = payload.details || { }
   logger[payload.level](details, payload.msg)
 }
 
 function reportersOut (type, app) {
-  const payload = processReporter.apply({}, arguments)
+  const payload = processReporter.apply({ }, arguments)
   const memStream = new MemoryStream()
   const formatOut = new BunyanFormatStream(app, memStream)
   const bunyanLogger = bunyan.createLogger({
@@ -65,20 +65,20 @@ const ws = {
   _socket: {
     remoteAddress: '127.0.0.1'
   },
-  on: () => {}
+  on: () => { }
 }
 
 const authed = new ServerClient(app, new ServerConnection(ws), 1)
 authed.sync.remoteSubprotocol = '1.0.0'
 authed.sync.remoteProtocol = [0, 0]
 authed.id = '100'
-authed.user = {}
+authed.user = { }
 authed.nodeId = '100:H10Nf5stl'
 
 const noUserId = new ServerClient(app, new ServerConnection(ws), 1)
 noUserId.sync.remoteSubprotocol = '1.0.0'
 noUserId.sync.remoteProtocol = [0, 0]
-noUserId.user = {}
+noUserId.user = { }
 noUserId.nodeId = 'H10Nf5stl'
 
 const unauthed = new ServerClient(app, new ServerConnection(ws), 1)
