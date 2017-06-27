@@ -349,28 +349,20 @@ it('handles error in production', done => {
   http.nodeId = 'server:H1f8LAyzl'
 
   expect.assertions(1)
-  reportersOut(
-    'error',
-    app,
-    { code: 'EACCES', port: 1000 },
-    http
-  ).then(data => {
-    expect(data).toMatchSnapshot()
-    done()
-  })
+  reportersOut('error', app, { code: 'EACCES', port: 1000 }, http)
+    .then(data => {
+      expect(data).toMatchSnapshot()
+      done()
+    })
 })
 
 it('handles EADDRINUSE error', done => {
   expect.assertions(1)
   reportersOut(
-    'error',
-    app,
-    {
+    'error', app, {
       code: 'EADDRINUSE',
       port: 1337
-    },
-    app
-  ).then(data => {
+    }, app).then(data => {
     expect(data).toMatchSnapshot()
     done()
   })
