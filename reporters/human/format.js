@@ -55,57 +55,49 @@ class BunyanFormatWritable extends stream.Writable {
     let message = []
     const c = helpers.color(app)
 
-    delete rec.v
-    delete rec.name
-    delete rec.component
-    delete rec.hostname
-    delete rec.time
-
     message.push(helpers[this.nameFromLevel[rec.level]](c, rec.msg))
-    delete rec.msg
-    delete rec.level
 
     if (rec.hint) {
       message = message.concat(helpers.hint(c, rec.hint))
-      delete rec.hint
     }
 
     if (rec.stacktrace) {
       message = message.concat(
         helpers.prettyStackTrace(c, rec.stacktrace, app.options.root)
       )
-      delete rec.stacktrace
     }
 
     let note = []
     if (rec.note) {
       note = helpers.note(c, rec.note)
-      delete rec.note
     }
 
     const params = []
     if (rec.listen) {
       params.push(['PID', rec.pid])
     }
-    delete rec.pid
 
+    const blacklist = ['v', 'name', 'component', 'hostname', 'time', 'msg',
+      'level', 'hint', 'stacktrace', 'note', 'pid']
     const leftover = Object.keys(rec)
     for (let i = 0; i < leftover.length; i++) {
       const key = leftover[i]
-      const value = rec[key]
-      const name = key
-        .replace(/([A-Z])/g, ' $1')
-        .toLowerCase()
-        .split(' ')
-        .map(elem => {
-          if (elem === 'id') return 'ID'
-          if (elem === 'ip') return 'IP'
+      if (!blacklist.includes(key)) {
+        const value = rec[key]
+        const name = key
+          .replace(/([A-Z])/g, ' $1')
+          .toLowerCase()
+          .split(' ')
+          .map(elem => {
+            if (elem === 'id') return 'ID'
+            if (elem === 'ip') return 'IP'
 
-          return elem
-        })
-        .join(' ')
-        .replace(/^./, str => str.toUpperCase())
-      params.push([name, value])
+            return elem
+          })
+          .join(' ')
+          .replace(/^./, str => str.toUpperCase())
+        params.push([name, value])
+      }
     }
 
     message = message.concat(helpers.params(c, params))
