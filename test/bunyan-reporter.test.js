@@ -1,13 +1,12 @@
 'use strict'
 
-const processReporter = require('../reporters/bunyan/process')
-
 const ServerConnection = require('logux-sync').ServerConnection
 const createServer = require('http').createServer
 const SyncError = require('logux-sync').SyncError
-const path = require('path')
 const bunyan = require('bunyan')
+const path = require('path')
 
+const processReporter = require('../bunyan-reporter')
 const ServerClient = require('../server-client')
 const BaseServer = require('../base-server')
 

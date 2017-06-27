@@ -4,8 +4,8 @@ const yargs = require('yargs')
 const bunyan = require('bunyan')
 
 const BaseServer = require('./base-server')
-const bunyanReporter = require('./reporters/bunyan/process')
-const BunyanFormatStream = require('./reporters/human/format')
+const bunyanReporter = require('./bunyan-reporter')
+const HumanFormatter = require('./human-formatter')
 
 function bunyanLog (logger, payload) {
   const details = payload.details || {}
@@ -124,7 +124,7 @@ class Server extends BaseServer {
     options.reporter = options.reporter || 'human'
 
     if (!options.bunyanLogger) {
-      const human = new BunyanFormatStream({
+      const human = new HumanFormatter({
         env: options.env || process.env.NODE_ENV || 'development',
         options
       })

@@ -1,18 +1,16 @@
 'use strict'
 
-const processReporter = require('../reporters/bunyan/process')
-
 const ServerConnection = require('logux-sync').ServerConnection
 const createServer = require('http').createServer
+const MemoryStream = require('memory-stream')
 const SyncError = require('logux-sync').SyncError
-const path = require('path')
 const bunyan = require('bunyan')
+const path = require('path')
 
+const processReporter = require('../bunyan-reporter')
+const HumanFormatter = require('../human-formatter')
 const ServerClient = require('../server-client')
 const BaseServer = require('../base-server')
-
-const BunyanFormatStream = require('../reporters/human/format')
-const MemoryStream = require('memory-stream')
 
 const DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
 
@@ -24,7 +22,7 @@ function bunyanLog (logger, payload) {
 function reportersOut (type, app) {
   const payload = processReporter.apply({ }, arguments)
   const memStream = new MemoryStream()
-  const formatOut = new BunyanFormatStream(app, memStream)
+  const formatOut = new HumanFormatter(app, memStream)
   const bunyanLogger = bunyan.createLogger({
     name: 'logux-server-test',
     stream: formatOut
@@ -107,7 +105,7 @@ it('reports listen', () => {
 
 it('reports bad log info', () => {
   const memStream = new MemoryStream()
-  const formatOut = new BunyanFormatStream(
+  const formatOut = new HumanFormatter(
     { outputMode: 'logux' }, memStream, app
   )
 
