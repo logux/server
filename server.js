@@ -124,13 +124,21 @@ class Server extends BaseServer {
     options.reporter = options.reporter || 'human'
 
     if (!options.bunyanLogger) {
-      const human = new HumanFormatter({
-        env: options.env || process.env.NODE_ENV || 'development',
-        options
-      })
+      let streams
+      if (options.reporter === 'human') {
+        streams = [
+          {
+            type: 'raw',
+            stream: new HumanFormatter({
+              env: options.env || process.env.NODE_ENV || 'development',
+              options
+            })
+          }
+        ]
+      }
       options.bunyanLogger = bunyan.createLogger({
         name: 'logux-server',
-        stream: options.reporter === 'human' ? human : undefined
+        streams
       })
     }
     function reporter () {

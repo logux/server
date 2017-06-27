@@ -21,18 +21,17 @@ function bunyanLog (logger, payload) {
 
 function reportersOut (type, app) {
   const payload = processReporter.apply({ }, arguments)
-  const memStream = new MemoryStream()
-  const formatOut = new HumanFormatter(app, memStream)
+  const stream = new HumanFormatter(app, new MemoryStream())
   const bunyanLogger = bunyan.createLogger({
     name: 'logux-server-test',
-    stream: formatOut
+    streams: [{ type: 'raw', stream }]
   })
 
   bunyanLog(bunyanLogger, payload)
 
   return new Promise(resolve => {
     setTimeout(() => {
-      const result = memStream
+      const result = stream.out
         .toString()
         .replace(/\r\v/g, '\n')
         .replace(DATE, '1970-01-01 00:00:00')
@@ -99,27 +98,6 @@ const meta = {
 
 it('reports listen', () => {
   return reportersOut('listen', app).then(data => {
-    expect(data).toMatchSnapshot()
-  })
-})
-
-it('reports bad log info', () => {
-  const memStream = new MemoryStream()
-  const formatOut = new HumanFormatter(
-    { outputMode: 'logux' }, memStream, app
-  )
-
-  formatOut.write('Simple text payload')
-
-  return new Promise(resolve => {
-    setTimeout(() => {
-      const result = memStream
-        .toString()
-        .replace(/\r\v/g, '\n')
-        .replace(DATE, '1970-01-01 00:00:00')
-      resolve(result)
-    }, 50)
-  }).then(data => {
     expect(data).toMatchSnapshot()
   })
 })

@@ -82,8 +82,6 @@ exports[`reports bad authenticated 1`] = `
 "
 `;
 
-exports[`reports bad log info 1`] = `"Simple text payload"`;
-
 exports[`reports clean 1`] = `
 "[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mAction was cleaned[39m[22m [2mat 1970-01-01 00:00:00[22m
         Action ID: [[1m1487805099387[22m, [1m100:H10Nf5stl[22m, [1m0[22m]

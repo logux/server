@@ -136,13 +136,8 @@ class HumanFormatter extends stream.Writable {
     this.app = app
   }
 
-  write (chunk) {
-    try {
-      const record = JSON.parse(chunk)
-      this.out.write(this.formatRecord(record, this.app))
-    } catch (e) {
-      this.out.write(chunk)
-    }
+  write (record) {
+    this.out.write(this.formatRecord(record, this.app))
   }
 
   formatRecord (rec, app) {
