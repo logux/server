@@ -5,7 +5,7 @@ const bunyan = require('bunyan')
 
 const BaseServer = require('./base-server')
 const bunyanReporter = require('./reporters/bunyan/process')
-const bunyanFormatStream = require('./reporters/human/format')
+const BunyanFormatStream = require('./reporters/human/format')
 
 function bunyanLog (logger, payload) {
   const details = payload.details || {}
@@ -134,12 +134,15 @@ class Server extends BaseServer {
         bunyanLog(options.bunyanLogger, bunyanReporter.apply(null, arguments))
       }
     } else {
+      const formatOut = new BunyanFormatStream({
+        env: options.env || process.env.NODE_ENV || 'development',
+        options
+      })
+      options.bunyanLogger = bunyan.createLogger({
+        name: 'logux-server',
+        stream: formatOut
+      })
       reporter = function () {
-        const formatOut = bunyanFormatStream(arguments[1])
-        options.bunyanLogger = bunyan.createLogger({
-          name: 'logux-server',
-          stream: formatOut
-        })
         bunyanLog(options.bunyanLogger, bunyanReporter.apply(null, arguments))
       }
     }

@@ -11,7 +11,7 @@ const bunyan = require('bunyan')
 const ServerClient = require('../server-client')
 const BaseServer = require('../base-server')
 
-const bunyanFormatStream = require('../reporters/human/format')
+const BunyanFormatStream = require('../reporters/human/format')
 const MemoryStream = require('memory-stream')
 
 const DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
@@ -24,7 +24,7 @@ function bunyanLog (logger, payload) {
 function reportersOut (type, app) {
   const payload = processReporter.apply({}, arguments)
   const memStream = new MemoryStream()
-  const formatOut = bunyanFormatStream(app, memStream)
+  const formatOut = new BunyanFormatStream(app, memStream)
   const bunyanLogger = bunyan.createLogger({
     name: 'logux-server-test',
     stream: formatOut
@@ -100,7 +100,7 @@ const meta = {
 
 it('reports listen', done => {
   expect.assertions(1)
-  reportersOut('listen', app).then(data => {
+  return reportersOut('listen', app).then(data => {
     expect(data).toMatchSnapshot()
     done()
   })
@@ -109,7 +109,9 @@ it('reports listen', done => {
 it('reports bad log info', done => {
   expect.assertions(1)
   const memStream = new MemoryStream()
-  const formatOut = bunyanFormatStream({ outputMode: 'logux' }, memStream, app)
+  const formatOut = new BunyanFormatStream(
+    { outputMode: 'logux' }, memStream, app
+  )
 
   formatOut.write('Simple text payload')
 
