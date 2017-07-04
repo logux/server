@@ -173,13 +173,13 @@ exports[`reports disconnect from unauthenticated user 2`] = `
 `;
 
 exports[`reports error 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{\\"message\\":\\"Some mistake\\",\\"name\\":\\"Error\\",\\"stack\\":\\"Error: Some mistake\\\\n    at Object.<anonymous> (/home/ai/Dev/logux-server/test/create-reporter.test.js:28:13)\\\\n    at Module._compile (module.js:573:32)\\\\n    at at runTest (/home/ai/Dev/logux-server/node_modules/jest/index.js:50:10)\\\\n    at process._tickCallback (internal/process/next_tick.js:103:7)\\"},\\"msg\\":\\"Some mistake\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{\\"message\\":\\"Some mistake\\",\\"name\\":\\"Error\\",\\"stack\\":\\"Error: Some mistake\\\\n    at Object.<anonymous> (/dev/app/index.js:28:13)\\\\n    at Module._compile (module.js:573:32)\\\\n    at at runTest (/dev/app/node_modules/jest/index.js:50:10)\\\\n    at process._tickCallback (internal/process/next_tick.js:103:7)\\"},\\"msg\\":\\"Some mistake\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
 exports[`reports error 2`] = `
 "[1m[31m[40m[7m FATAL [27m[49m[39m[22m [1m[31mSome mistake[39m[22m [2mat 1970-01-01 00:00:00[22m
-[33m        at [1mObject.<anonymous>[22m (./test/create-reporter.test.js:28:13)[39m
+[33m        at [1mObject.<anonymous>[22m (./index.js:28:13)[39m
 [31m        at Module._compile (module.js:573:32)[39m
 [31m        at at runTest (./node_modules/jest/index.js:50:10)[39m
 [31m        at process._tickCallback (internal/process/next_tick.js:103:7)[39m
@@ -188,13 +188,13 @@ exports[`reports error 2`] = `
 `;
 
 exports[`reports error from action 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":50,\\"err\\":{\\"message\\":\\"Some mistake\\",\\"name\\":\\"Error\\",\\"stack\\":\\"Error: Some mistake\\\\n    at Object.<anonymous> (/home/ai/Dev/logux-server/test/create-reporter.test.js:28:13)\\\\n    at Module._compile (module.js:573:32)\\\\n    at at runTest (/home/ai/Dev/logux-server/node_modules/jest/index.js:50:10)\\\\n    at process._tickCallback (internal/process/next_tick.js:103:7)\\"},\\"actionId\\":[1487805099387,\\"100:H10Nf5stl\\",0],\\"msg\\":\\"Some mistake\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":50,\\"err\\":{\\"message\\":\\"Some mistake\\",\\"name\\":\\"Error\\",\\"stack\\":\\"Error: Some mistake\\\\n    at Object.<anonymous> (/dev/app/index.js:28:13)\\\\n    at Module._compile (module.js:573:32)\\\\n    at at runTest (/dev/app/node_modules/jest/index.js:50:10)\\\\n    at process._tickCallback (internal/process/next_tick.js:103:7)\\"},\\"actionId\\":[1487805099387,\\"100:H10Nf5stl\\",0],\\"msg\\":\\"Some mistake\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
 exports[`reports error from action 2`] = `
 "[1m[31m[40m[7m ERROR [27m[49m[39m[22m [1m[31mSome mistake[39m[22m [2mat 1970-01-01 00:00:00[22m
-[33m        at [1mObject.<anonymous>[22m (./test/create-reporter.test.js:28:13)[39m
+[33m        at [1mObject.<anonymous>[22m (./index.js:28:13)[39m
 [31m        at Module._compile (module.js:573:32)[39m
 [31m        at at runTest (./node_modules/jest/index.js:50:10)[39m
 [31m        at process._tickCallback (internal/process/next_tick.js:103:7)[39m

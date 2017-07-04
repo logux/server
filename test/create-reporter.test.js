@@ -2,7 +2,6 @@
 
 const SyncError = require('logux-sync').SyncError
 const bunyan = require('bunyan')
-const path = require('path')
 
 const createReporter = require('../create-reporter')
 const HumanFormatter = require('../human-formatter')
@@ -42,7 +41,7 @@ function check (type, details) {
         {
           type: 'raw',
           stream: new HumanFormatter({
-            basepath: path.join(__dirname, '..'), color: true, out: human
+            basepath: '/dev/app', color: true, out: human
           })
         }
       ]
@@ -54,14 +53,13 @@ function check (type, details) {
 }
 
 function createError (name, message) {
-  const jest = path.join(__dirname, '../node_modules/jest/index.js')
   const err = new Error(message)
   err.name = name
   err.stack =
     `${ name }: ${ message }\n` +
-    `    at Object.<anonymous> (${ __filename }:28:13)\n` +
+    `    at Object.<anonymous> (/dev/app/index.js:28:13)\n` +
     `    at Module._compile (module.js:573:32)\n` +
-    `    at at runTest (${ jest }:50:10)\n` +
+    `    at at runTest (/dev/app/node_modules/jest/index.js:50:10)\n` +
     `    at process._tickCallback (internal/process/next_tick.js:103:7)`
   return err
 }
