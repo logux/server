@@ -10,6 +10,7 @@ const fs = require('fs')
 
 const BaseServer = require('../base-server')
 const promisify = require('../promisify')
+const pkg = require('../package.json')
 
 const DEFAULT_OPTIONS = {
   subprotocol: '0.0.0',
@@ -44,11 +45,11 @@ let app, server
 
 function createReporter (opts) {
   const result = { }
-  result.reports = []
   result.names = []
-  app = createServer(opts, function () {
-    result.names.push(arguments[0])
-    result.reports.push(Array.prototype.slice.call(arguments, 0))
+  result.reports = []
+  app = createServer(opts, (name, details) => {
+    result.names.push(name)
+    result.reports.push([name, details])
   })
   result.app = app
   return result
@@ -239,7 +240,19 @@ it('reporters on start listening', () => {
   expect(test.reports).toEqual([])
 
   return promise.then(() => {
-    expect(test.reports).toEqual([['listen', test.app]])
+    expect(test.reports).toEqual([
+      ['listen', {
+        loguxServer: pkg.version,
+        environment: 'test',
+        nodeId: 'server:uuid',
+        subprotocol: '0.0.0',
+        supports: '0.x',
+        server: false,
+        cert: false,
+        host: '127.0.0.1',
+        port: test.app.options.port
+      }]
+    ])
   })
 })
 
@@ -247,23 +260,29 @@ it('reporters on log events', () => {
   const test = createReporter()
   test.app.type('A', { access: () => true })
   test.app.log.add({ type: 'A' })
-  const meta = {
-    id: [1, 'server:uuid', 0],
-    reasons: [],
-    status: 'waiting',
-    server: 'server:uuid',
-    time: 1
-  }
   expect(test.reports).toEqual([
-    ['add', test.app, { type: 'A' }, meta],
-    ['clean', test.app, { type: 'A' }, meta]
+    ['add', {
+      action: {
+        type: 'A'
+      },
+      meta: {
+        id: [1, 'server:uuid', 0],
+        reasons: [],
+        status: 'waiting',
+        server: 'server:uuid',
+        time: 1
+      }
+    }],
+    ['clean', {
+      actionId: [1, 'server:uuid', 0]
+    }]
   ])
 })
 
 it('reporters on destroing', () => {
   const test = createReporter()
   const promise = test.app.destroy()
-  expect(test.reports).toEqual([['destroy', test.app]])
+  expect(test.reports).toEqual([['destroy', undefined]])
   return promise
 })
 
@@ -306,18 +325,18 @@ it('disconnects client on destroy', () => {
 
 it('accepts custom HTTP server', () => {
   server = http.createServer()
-  const test = createReporter({ server })
+  app = createServer({ server })
 
   return promisify(done => {
-    server.listen(test.app.options.port, done)
-  }).then(() => test.app.listen()).then(() => {
-    const ws = new WebSocket(`ws://localhost:${ test.app.options.port }`)
+    server.listen(app.options.port, done)
+  }).then(() => app.listen()).then(() => {
+    const ws = new WebSocket(`ws://localhost:${ app.options.port }`)
     return new Promise((resolve, reject) => {
       ws.onopen = resolve
       ws.onerror = reject
     })
   }).then(() => {
-    expect(Object.keys(test.app.clients).length).toBe(1)
+    expect(Object.keys(app.clients).length).toBe(1)
   })
 })
 
@@ -380,9 +399,10 @@ it('reports about unknown action type', () => {
   const test = createReporter()
   return test.app.log.add({ type: 'UNKNOWN' }).then(() => {
     expect(test.names).toEqual(['add', 'unknownType', 'clean'])
-    expect(test.reports[1][1]).toEqual(test.app)
-    expect(test.reports[1][2]).toEqual({ type: 'UNKNOWN' })
-    expect(test.reports[1][3].id).toEqual([1, 'server:uuid', 0])
+    expect(test.reports[1]).toEqual(['unknownType', {
+      actionId: [1, 'server:uuid', 0],
+      type: 'UNKNOWN'
+    }])
   })
 })
 
@@ -400,26 +420,24 @@ it('sends errors to clients in development', () => {
     destroy: () => false
   }
 
-  const error = new Error('Test')
-  error.stack = 'stack'
-  test.app.emitter.emit('error', error)
+  const err = new Error('Test')
+  err.stack = 'stack'
+  test.app.emitter.emit('error', err)
 
-  expect(test.reports).toEqual([
-    ['runtimeError', test.app, error, undefined, undefined]
-  ])
+  expect(test.reports).toEqual([['error', { err, fatal: true }]])
   expect(test.app.clients[0].connection.send).toHaveBeenCalledWith(
     ['debug', 'error', 'stack']
   )
 })
 
 it('does not send errors in non-development mode', () => {
-  const test = createReporter({ env: 'production' })
-  test.app.clients[0] = {
+  app = createServer({ env: 'production' })
+  app.clients[0] = {
     connection: { send: jest.fn() },
     destroy: () => false
   }
-  test.app.emitter.emit('error', new Error('Test'))
-  expect(test.app.clients[0].connection.send).not.toHaveBeenCalled()
+  app.emitter.emit('error', new Error('Test'))
+  expect(app.clients[0].connection.send).not.toHaveBeenCalled()
 })
 
 it('processes actions', () => {
@@ -451,10 +469,9 @@ it('processes actions', () => {
       expect(processed).toEqual([{ type: 'FOO' }])
       expect(fired).toEqual([{ type: 'FOO' }])
       expect(test.names).toEqual(['add', 'processed'])
-      expect(test.reports[1][1]).toEqual(test.app)
-      expect(test.reports[1][2]).toEqual({ type: 'FOO' })
-      expect(test.reports[1][3].added).toEqual(1)
-      expect(test.reports[1][4]).toBeCloseTo(25, -2)
+      expect(Object.keys(test.reports[1][1])).toEqual(['actionId', 'latency'])
+      expect(test.reports[1][1].actionId).toEqual([1, 'server:uuid', 0])
+      expect(test.reports[1][1].latency).toBeCloseTo(25, -2)
     })
 })
 
@@ -517,23 +534,23 @@ it('waits for last processing before destroy', () => {
 it('reports about error during action processing', () => {
   const test = createReporter()
 
-  const error = new Error('Test')
+  const err = new Error('Test')
   app.type('FOO', {
     access: () => true,
     process () {
-      throw error
+      throw err
     }
   })
 
   return app.log.add({ type: 'FOO' }).then(() => {
     return wait(1)
   }).then(() => {
-    expect(test.names).toEqual(['add', 'clean', 'runtimeError', 'add'])
-    expect(test.reports[2][1]).toEqual(test.app)
-    expect(test.reports[2][2]).toEqual(error)
-    expect(test.reports[2][3]).toEqual({ type: 'FOO' })
-    expect(test.reports[2][4].id).toEqual([1, 'server:uuid', 0])
-    expect(test.reports[3][2]).toEqual({
+    expect(test.names).toEqual(['add', 'clean', 'error', 'add'])
+    expect(test.reports[2]).toEqual(['error', {
+      actionId: [1, 'server:uuid', 0],
+      err
+    }])
+    expect(test.reports[3][1].action).toEqual({
       type: 'logux/undo', reason: 'error', id: [1, 'server:uuid', 0]
     })
   })

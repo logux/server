@@ -17,8 +17,14 @@ function show (result) {
       .forEach(str => {
         if (str.trim().length === 0) return
         const parts = str.replace(/"\s*`;\s*$/, '').split(/`] = `\s*"?/)
-        process.stdout.write(
-          chalk.gray(`${ test } ${ parts[0].replace(/ 1$/, '') }:\n\n`))
+        let name = `${ test } ${ parts[0] }`
+        if (test === 'create-reporter') {
+          if (parts[1][0] === '{') return
+          name = name.replace(/ 2$/, '')
+        } else {
+          name = name.replace(/ 1$/, '')
+        }
+        process.stdout.write(chalk.gray(`${ name }:\n\n`))
         process.stdout.write(parts[1].replace(/\\\\"/g, '"'))
       })
   })

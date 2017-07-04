@@ -3,9 +3,9 @@
 exports[`destroys everything on exit 1`] = `
 " INFO   Logux server is listening at 1970-01-01 00:00:00
         PID:          21384
-        Logux server: 0.1.1
-        Node ID:      server:r1CJmycQW
+        Logux server: 0.0.0
         Environment:  test
+        Node ID:      server:r1CJmycQW
         Subprotocol:  1.0.0
         Supports:     1.x
         Listen:       ws://127.0.0.1:2000
@@ -17,37 +17,19 @@ exports[`destroys everything on exit 1`] = `
 `;
 
 exports[`disables colors for constructor errors 1`] = `
-" ERROR  Missed client subprotocol requirements at 1970-01-01 00:00:00
+" FATAL  Missed client subprotocol requirements at 1970-01-01 00:00:00
         Check server constructor and Logux Server documentation
-
-"
-`;
-
-exports[`reports to bunyan log 1`] = `
-"{\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"loguxServer\\":\\"0.1.1\\",\\"nodeId\\":\\"server:r1CJmycQW\\",\\"environment\\":\\"test\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"listen\\":\\"ws://127.0.0.1:2000\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
-{\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"msg\\":\\"Shutting down Logux server\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
-"
-`;
-
-exports[`reports to custom bunyan log 1`] = `
-"{\\"name\\":\\"logux-server-custom\\",\\"customProp\\":\\"42\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"loguxServer\\":\\"0.1.1\\",\\"nodeId\\":\\"server:r1CJmycQW\\",\\"environment\\":\\"test\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"listen\\":\\"ws://127.0.0.1:2000\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
-{\\"name\\":\\"logux-server-custom\\",\\"customProp\\":\\"42\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"msg\\":\\"Shutting down Logux server\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
-"
-`;
-
-exports[`reports unbind 1`] = `
-" INFO   Shutting down Logux server at 1970-01-01 00:00:00
 
 "
 `;
 
 exports[`shows help 1`] = `
 "Options:
-  -h, --host      Host to bind server.                                  [string]
-  -p, --port      Port to bind server                                   [number]
-  -k, --key       Path to SSL key                                       [string]
-  -c, --cert      Path to SSL certificate                               [string]
-  -r, --reporter  Reporter type            [string] [choices: \\"human\\", \\"bunyan\\"]
+  --host, -h      Host to bind server.                                  [string]
+  --port, -p      Port to bind server                                   [number]
+  --key, -k       Path to SSL key                                       [string]
+  --cert, -c      Path to SSL certificate                               [string]
+  --reporter, -r  Reporter type              [string] [choices: \\"human\\", \\"json\\"]
   --help          Show help                                            [boolean]
 
 Examples:
@@ -61,7 +43,7 @@ Environment variables:
 `;
 
 exports[`shows help about missed option 1`] = `
-" ERROR  Missed client subprotocol requirements at 1970-01-01 00:00:00
+" FATAL  Missed client subprotocol requirements at 1970-01-01 00:00:00
         Check server constructor and Logux Server documentation
 
 "
@@ -69,9 +51,9 @@ exports[`shows help about missed option 1`] = `
 
 exports[`shows help about port in use 1`] = `
 " ERROR  Port :2001 already in use at 1970-01-01 00:00:00
-        Another Logux server or other app already running on this port
-        Maybe you didn’t not stop server from other project
-        or previous version of this server was not killed
+        Another Logux server or other app already running on this port.
+        Maybe you didn’t not stop server from other project or previous version
+        of this server was not killed.
 
 "
 `;
@@ -84,15 +66,15 @@ exports[`shows help about privileged port 1`] = `
 `;
 
 exports[`shows help about unknown option 1`] = `
-" ERROR  Unknown option \`support\` in server constructor at 1970-01-01 00:00:00
-        Maybe there is a mistake in option name or this version
-        of Logux Server doesn’t support this option
+" FATAL  Unknown option 'support' in server constructor at 1970-01-01 00:00:00
+        Maybe there is a mistake in option name or this version of Logux Server
+        doesn’t support this option
 
 "
 `;
 
 exports[`shows uncatch errors 1`] = `
-" ERROR  Test Error at 1970-01-01 00:00:00
+" FATAL  Test Error at 1970-01-01 00:00:00
         fake stacktrace
 
 Error event: Test Error
@@ -102,7 +84,7 @@ Error event: Test Error
 `;
 
 exports[`shows uncatch rejects 1`] = `
-" ERROR  Test Error at 1970-01-01 00:00:00
+" FATAL  Test Error at 1970-01-01 00:00:00
         fake stacktrace
 
 Error event: Test Error
@@ -112,18 +94,36 @@ Error event: Test Error
 `;
 
 exports[`use environment variables for config 1`] = `
-"{\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"loguxServer\\":\\"0.1.1\\",\\"nodeId\\":\\"server:r1CJmycQW\\",\\"environment\\":\\"test\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"listen\\":\\"ws://127.0.0.1:31337\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"test\\",\\"nodeId\\":\\"server:r1CJmycQW\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"listen\\":\\"ws://127.0.0.1:31337\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 {\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"msg\\":\\"Shutting down Logux server\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
 exports[`uses reporter param 1`] = `
-"{\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"loguxServer\\":\\"0.1.1\\",\\"nodeId\\":\\"server:r1CJmycQW\\",\\"environment\\":\\"test\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"listen\\":\\"ws://127.0.0.1:1337\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"test\\",\\"nodeId\\":\\"server:r1CJmycQW\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"listen\\":\\"ws://127.0.0.1:1337\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 {\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"msg\\":\\"Shutting down Logux server\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
 exports[`uses reporter param for constructor errors 1`] = `
-"{\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":50,\\"hint\\":[\\"Check server constructor and Logux Server documentation\\"],\\"msg\\":\\"Missed client subprotocol requirements\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":60,\\"err\\":{\\"message\\":\\"Missed client subprotocol requirements\\",\\"name\\":\\"Error\\"},\\"note\\":\\"Check server constructor and Logux Server documentation\\",\\"msg\\":\\"Missed client subprotocol requirements\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`writes about unbind 1`] = `
+" INFO   Shutting down Logux server at 1970-01-01 00:00:00
+
+"
+`;
+
+exports[`writes to bunyan log 1`] = `
+"{\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"test\\",\\"nodeId\\":\\"server:r1CJmycQW\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"listen\\":\\"ws://127.0.0.1:2000\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+{\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"msg\\":\\"Shutting down Logux server\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`writes to custom bunyan log 1`] = `
+"{\\"name\\":\\"logux-server-custom\\",\\"customProp\\":\\"42\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"test\\",\\"nodeId\\":\\"server:r1CJmycQW\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"listen\\":\\"ws://127.0.0.1:2000\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+{\\"name\\":\\"logux-server-custom\\",\\"customProp\\":\\"42\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"msg\\":\\"Shutting down Logux server\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;

@@ -23,6 +23,7 @@
     "yyyy-mm-dd": "^1.0.1"
   },
   "devDependencies": {
+    "cross-spawn": "^5.1.0",
     "docdash": "^0.4.0",
     "eslint": "^4.1.1",
     "eslint-config-logux": "^15.0.0",

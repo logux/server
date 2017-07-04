@@ -1,28 +1,40 @@
 'use strict'
 
-const os = require('os')
-const path = require('path')
-const chalk = require('chalk')
-const stream = require('stream')
-const yyyymmdd = require('yyyy-mm-dd')
 const stripAnsi = require('strip-ansi')
-
-const LEVELS = {
-  10: 'trace',
-  20: 'debug',
-  30: 'info',
-  40: 'warn',
-  50: 'error',
-  60: 'fatal'
-}
+const yyyymmdd = require('yyyy-mm-dd')
+const stream = require('stream')
+const chalk = require('chalk')
+const path = require('path')
+const os = require('os')
 
 const INDENT = '  '
 const PADDING = '        '
 const SEPARATOR = os.EOL + os.EOL
 const NEXT_LINE = os.EOL === '\n' ? '\r\v' : os.EOL
 
-function time (c) {
-  return c.dim(`at ${ yyyymmdd.withTime(new Date()) }`)
+const LATENCY_UNIT = ' ms'
+
+const PARAMS_BLACKLIST = {
+  v: true,
+  msg: true,
+  err: true,
+  pid: true,
+  hint: true,
+  note: true,
+  name: true,
+  time: true,
+  level: true,
+  listen: true,
+  server: true,
+  hostname: true,
+  component: true
+}
+
+const LABELS = {
+  30: (c, str) => label(c, ' INFO ', 'green', str),
+  40: (c, str) => label(c, ' WARN ', 'yellow', str),
+  50: (c, str) => label(c, ' ERROR ', 'red', str),
+  60: (c, str) => label(c, ' FATAL ', 'red', str)
 }
 
 function rightPag (str, length) {
@@ -31,93 +43,106 @@ function rightPag (str, length) {
   return str
 }
 
-function labeled (c, label, color, message) {
+function label (c, type, color, message) {
   const labelFormat = c.bold[color].bgBlack.inverse
   const messageFormat = c.bold[color]
-  const pagged = rightPag(labelFormat(label), 8)
-
-  return `${ pagged }${ messageFormat(message) } ${ time(c) }`
+  const pagged = rightPag(labelFormat(type), 8)
+  const time = c.dim(`at ${ yyyymmdd.withTime(new Date()) }`)
+  return `${ pagged }${ messageFormat(message) } ${ time }`
 }
 
-const helpers = {
+function formatName (key) {
+  return key
+    .replace(/[A-Z]/g, char => ` ${ char.toLowerCase() }`)
+    .split(' ')
+    .map(word => word === 'ip' || word === 'id' ? word.toUpperCase() : word)
+    .join(' ')
+    .replace(/^\w/, char => char.toUpperCase())
+}
 
-  params (c, fields) {
-    let max = 0
-    for (let i = 0; i < fields.length; i++) {
-      const current = fields[i][0].length + 2
-      if (current > max) max = current
-    }
-    return fields.map(field => {
-      const name = field[0]
-      const value = field[1]
-
-      const start = PADDING + rightPag(`${ name }: `, max)
-
-      if (name === 'Node ID') {
-        const pos = value.indexOf(':')
-        let id, random
-        if (pos === -1) {
-          id = ''
-          random = value
-        } else {
-          id = value.slice(0, pos)
-          random = value.slice(pos)
-        }
-        return start + c.bold(id) + random
-      } else if (Array.isArray(value)) {
-        return `${ start }[${ value.map(j => c.bold(j)).join(', ') }]`
-      } else if (typeof value === 'object') {
-        return start + NEXT_LINE + INDENT +
-          helpers.params(c,
-            Object.keys(value).map(key => [key, value[key]])
-          ).split(NEXT_LINE).join(NEXT_LINE + INDENT)
-      } else {
-        return start + c.bold(value)
-      }
-    }).join(NEXT_LINE)
-  },
-
-  info (c, str) {
-    return labeled(c, ' INFO ', 'green', str)
-  },
-
-  warn (c, str) {
-    return labeled(c, ' WARN ', 'yellow', str)
-  },
-
-  error (c, str) {
-    return labeled(c, ' ERROR ', 'red', str)
-  },
-
-  hint (c, strings) {
-    return strings.map(i => PADDING + i).join(NEXT_LINE)
-  },
-
-  note (c, str) {
-    return str.map(i => PADDING + c.grey(i)).join(NEXT_LINE)
-  },
-
-  prettyStackTrace (c, stacktrace, root) {
-    if (root.slice(-1) !== path.sep) root += path.sep
-
-    return stacktrace.split('\n').slice(1).map(i => {
-      const m = i.match(/\s+at ([^(]+) \(([^)]+)\)/)
-      if (!m || m[2].indexOf(root) !== 0) {
-        return c.red(i.replace(/^\s*/, PADDING))
-      } else {
-        m[2] = m[2].slice(root.length)
-        if (m[2].indexOf('node_modules') !== -1) {
-          return c.red(`${ PADDING }at ${ m[1] } (./${ m[2] })`)
-        } else {
-          return c.yellow(`${ PADDING }at ${ c.bold(m[1]) } (./${ m[2] })`)
-        }
-      }
-    }).join(NEXT_LINE)
-  },
-
-  message (strings) {
-    return strings.filter(i => i !== '').join(NEXT_LINE) + SEPARATOR
+function formatNodeId (c, nodeId) {
+  const pos = nodeId.indexOf(':')
+  let id, random
+  if (pos === -1) {
+    return nodeId
+  } else {
+    id = nodeId.slice(0, pos)
+    random = nodeId.slice(pos)
+    return c.bold(id) + random
   }
+}
+
+function formatArray (c, array) {
+  return `[${ array.map(i => c.bold(i)).join(', ') }]`
+}
+
+function formatActionId (c, id) {
+  return `[${ c.bold(id[0]) }, ${ formatNodeId(c, id[1]) }, ${ c.bold(id[2]) }]`
+}
+
+function formatParams (c, params, parent) {
+  const maxName = params.reduce((max, param) => {
+    const name = param[0]
+    return name.length > max ? name.length : max
+  }, 0)
+
+  return params.map(param => {
+    const name = param[0]
+    const value = param[1]
+
+    const start = PADDING + rightPag(`${ name }: `, maxName + 2)
+
+    if (name === 'Node ID') {
+      return start + formatNodeId(c, value)
+    } else if (name === 'Action ID' || (parent === 'Meta' && name === 'id')) {
+      return start + formatActionId(c, value)
+    } else if (Array.isArray(value)) {
+      return start + formatArray(c, value)
+    } else if (typeof value === 'object') {
+      const nested = Object.keys(value).map(key => [key, value[key]])
+      return start + NEXT_LINE + INDENT +
+        formatParams(c, nested, name).split(NEXT_LINE).join(NEXT_LINE + INDENT)
+    } else if (name === 'Latency' && !parent) {
+      return start + c.bold(value) + LATENCY_UNIT
+    } else {
+      return start + c.bold(value)
+    }
+  }).join(NEXT_LINE)
+}
+
+function splitByLength (string, max) {
+  const words = string.split(' ')
+  const lines = ['']
+  for (const word of words) {
+    const last = lines[lines.length - 1]
+    if (last.length + word.length > max) {
+      lines.push(`${ word } `)
+    } else {
+      lines[lines.length - 1] = `${ last }${ word } `
+    }
+  }
+  return lines.map(i => i.trim())
+}
+
+function prettyStackTrace (c, stack, basepath) {
+  if (basepath.slice(-1) !== path.sep) basepath += path.sep
+
+  return stack.split('\n').slice(1).map(i => {
+    const match = i.match(/\s+at ([^(]+) \(([^)]+)\)/)
+    const isSystem = !match || match[2].indexOf(basepath) !== 0
+    const isDependecy = match && match[2].indexOf('node_modules') !== -1
+    if (isSystem) {
+      return c.red(i.replace(/^\s*/, PADDING))
+    } else {
+      const func = match[1]
+      const relative = match[2].slice(basepath.length)
+      if (isDependecy) {
+        return c.red(`${ PADDING }at ${ func } (./${ relative })`)
+      } else {
+        return c.yellow(`${ PADDING }at ${ c.bold(func) } (./${ relative })`)
+      }
+    }
+  }).join(NEXT_LINE)
 }
 
 class HumanFormatter extends stream.Writable {
@@ -135,58 +160,37 @@ class HumanFormatter extends stream.Writable {
   }
 
   write (record) {
-    this.out.write(this.formatRecord(record))
-  }
-
-  formatRecord (rec) {
     const c = this.chalk
-    let message = []
+    const message = [LABELS[record.level](c, record.msg)]
 
-    message.push(helpers[LEVELS[rec.level]](c, rec.msg))
+    const params = Object.keys(record)
+      .filter(i => !PARAMS_BLACKLIST[i])
+      .map(key => [formatName(key), record[key]])
 
-    if (rec.hint) {
-      message = message.concat(helpers.hint(c, rec.hint))
-    }
-
-    if (rec.stacktrace) {
-      message = message.concat(
-        helpers.prettyStackTrace(c, rec.stacktrace, this.basepath)
-      )
-    }
-
-    const params = []
-    if (rec.listen) {
-      params.push(['PID', rec.pid])
-    }
-
-    const blacklist = ['v', 'name', 'component', 'hostname', 'time', 'msg',
-      'level', 'hint', 'stacktrace', 'note', 'pid']
-    for (const key of Object.keys(rec)) {
-      if (blacklist.indexOf(key) === -1) {
-        const value = rec[key]
-        const name = key
-          .replace(/([A-Z])/g, ' $1')
-          .toLowerCase()
-          .split(' ')
-          .map(elem => {
-            if (elem === 'id') return 'ID'
-            if (elem === 'ip') return 'IP'
-
-            return elem
-          })
-          .join(' ')
-          .replace(/^./, str => str.toUpperCase())
-        params.push([name, value])
+    if (record.loguxServer) {
+      params.unshift(['PID', record.pid])
+      if (record.server) {
+        params.push(['Listen', 'Custom HTTP server'])
+      } else {
+        params.push(['Listen', record.listen])
       }
     }
 
-    message = message.concat(helpers.params(c, params))
-
-    if (rec.note) {
-      message = message.concat(helpers.note(c, rec.note))
+    if (record.err && record.err.stack) {
+      message.push(prettyStackTrace(c, record.err.stack, this.basepath))
     }
 
-    return helpers.message(message)
+    message.push(formatParams(c, params))
+
+    if (record.note) {
+      let note = record.note
+      if (typeof note === 'string') {
+        note = splitByLength(note, 80 - PADDING.length)
+      }
+      message.push(note.map(i => PADDING + c.grey(i)).join(NEXT_LINE))
+    }
+
+    this.out.write(message.filter(i => i !== '').join(NEXT_LINE) + SEPARATOR)
   }
 }
 

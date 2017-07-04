@@ -1,0 +1,351 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`reports EACCES error 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{},\\"note\\":\\"Try to change user (e.g. root) or use port >= 1024\\",\\"msg\\":\\"You are not allowed to run server on this port\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports EACCES error 2`] = `
+"[1m[31m[40m[7m FATAL [27m[49m[39m[22m [1m[31mYou are not allowed to run server on this port[39m[22m [2mat 1970-01-01 00:00:00[22m
+        [90mTry to change user (e.g. root) or use port >= 1024[39m
+
+"
+`;
+
+exports[`reports EADDRINUSE error 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{},\\"note\\":\\"Another Logux server or other app already running on this port. Maybe you didn’t not stop server from other project or previous version of this server was not killed.\\",\\"msg\\":\\"Port :31337 already in use\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports EADDRINUSE error 2`] = `
+"[1m[31m[40m[7m FATAL [27m[49m[39m[22m [1m[31mPort :31337 already in use[39m[22m [2mat 1970-01-01 00:00:00[22m
+        [90mAnother Logux server or other app already running on this port.[39m
+        [90mMaybe you didn’t not stop server from other project or previous version[39m
+        [90mof this server was not killed.[39m
+
+"
+`;
+
+exports[`reports LOGUX_UNKNOWN_OPTION error 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{},\\"note\\":\\"Maybe there is a mistake in option name or this version of Logux Server doesn’t support this option\\",\\"msg\\":\\"Unknown option 'suprotocol' in server constructor\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports LOGUX_UNKNOWN_OPTION error 2`] = `
+"[1m[31m[40m[7m FATAL [27m[49m[39m[22m [1m[31mUnknown option 'suprotocol' in server constructor[39m[22m [2mat 1970-01-01 00:00:00[22m
+        [90mMaybe there is a mistake in option name or this version of Logux Server[39m
+        [90mdoesn’t support this option[39m
+
+"
+`;
+
+exports[`reports LOGUX_WRONG_OPTIONS error 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{\\"message\\":\\"Missed client subprotocol requirements\\"},\\"note\\":\\"Check server constructor and Logux Server documentation\\",\\"msg\\":\\"Missed client subprotocol requirements\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports LOGUX_WRONG_OPTIONS error 2`] = `
+"[1m[31m[40m[7m FATAL [27m[49m[39m[22m [1m[31mMissed client subprotocol requirements[39m[22m [2mat 1970-01-01 00:00:00[22m
+        [90mCheck server constructor and Logux Server documentation[39m
+
+"
+`;
+
+exports[`reports add 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"action\\":{\\"type\\":\\"CHANGE_USER\\",\\"id\\":100,\\"data\\":{\\"name\\":\\"John\\"}},\\"meta\\":{\\"id\\":[1487805099387,\\"100:H10Nf5stl\\",0],\\"time\\":1487805099387,\\"reasons\\":[\\"lastValue\\",\\"debug\\"],\\"server\\":\\"server:H1f8LAyzl\\"},\\"msg\\":\\"Action was added\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports add 2`] = `
+"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mAction was added[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Action: 
+          type: [1mCHANGE_USER[22m
+          id:   [1m100[22m
+          data: 
+            name: [1mJohn[22m
+        Meta:   
+          id:      [[1m1487805099387[22m, [1m100[22m:H10Nf5stl, [1m0[22m]
+          time:    [1m1487805099387[22m
+          reasons: [[1mlastValue[22m, [1mdebug[22m]
+          server:  [1mserver:H1f8LAyzl[22m
+
+"
+`;
+
+exports[`reports authenticated 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"subprotocol\\":\\"1.0.0\\",\\"clientId\\":\\"670\\",\\"nodeId\\":\\"100:H10Nf5stl\\",\\"msg\\":\\"User was authenticated\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports authenticated 2`] = `
+"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mUser was authenticated[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Subprotocol: [1m1.0.0[22m
+        Client ID:   [1m670[22m
+        Node ID:     [1m100[22m:H10Nf5stl
+
+"
+`;
+
+exports[`reports authenticated without user ID 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"subprotocol\\":\\"1.0.0\\",\\"clientId\\":\\"670\\",\\"nodeId\\":\\"H10Nf5stl\\",\\"msg\\":\\"User was authenticated\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports authenticated without user ID 2`] = `
+"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mUser was authenticated[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Subprotocol: [1m1.0.0[22m
+        Client ID:   [1m670[22m
+        Node ID:     H10Nf5stl
+
+"
+`;
+
+exports[`reports clean 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"actionId\\":[1487805099387,\\"100:H10Nf5stl\\",0],\\"msg\\":\\"Action was cleaned\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports clean 2`] = `
+"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mAction was cleaned[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Action ID: [[1m1487805099387[22m, [1m100[22m:H10Nf5stl, [1m0[22m]
+
+"
+`;
+
+exports[`reports connect 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"clientId\\":\\"670\\",\\"ipAddress\\":\\"10.110.6.56\\",\\"msg\\":\\"Client was connected\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports connect 2`] = `
+"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mClient was connected[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Client ID:  [1m670[22m
+        IP address: [1m10.110.6.56[22m
+
+"
+`;
+
+exports[`reports denied 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"actionId\\":[1487805099387,\\"100:H10Nf5stl\\",0],\\"msg\\":\\"Action was denied\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports denied 2`] = `
+"[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mAction was denied[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Action ID: [[1m1487805099387[22m, [1m100[22m:H10Nf5stl, [1m0[22m]
+
+"
+`;
+
+exports[`reports destroy 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"msg\\":\\"Shutting down Logux server\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports destroy 2`] = `
+"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mShutting down Logux server[39m[22m [2mat 1970-01-01 00:00:00[22m
+
+"
+`;
+
+exports[`reports disconnect 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"nodeId\\":\\"100:H10Nf5stl\\",\\"msg\\":\\"Client was disconnected\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports disconnect 2`] = `
+"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mClient was disconnected[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Node ID: [1m100[22m:H10Nf5stl
+
+"
+`;
+
+exports[`reports disconnect from unauthenticated user 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"clientId\\":\\"670\\",\\"msg\\":\\"Client was disconnected\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports disconnect from unauthenticated user 2`] = `
+"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mClient was disconnected[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Client ID: [1m670[22m
+
+"
+`;
+
+exports[`reports error 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{\\"message\\":\\"Some mistake\\",\\"name\\":\\"Error\\",\\"stack\\":\\"Error: Some mistake\\\\n    at Object.<anonymous> (/home/ai/Dev/logux-server/test/create-reporter.test.js:28:13)\\\\n    at Module._compile (module.js:573:32)\\\\n    at at runTest (/home/ai/Dev/logux-server/node_modules/jest/index.js:50:10)\\\\n    at process._tickCallback (internal/process/next_tick.js:103:7)\\"},\\"msg\\":\\"Some mistake\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports error 2`] = `
+"[1m[31m[40m[7m FATAL [27m[49m[39m[22m [1m[31mSome mistake[39m[22m [2mat 1970-01-01 00:00:00[22m
+[33m        at [1mObject.<anonymous>[22m (./test/create-reporter.test.js:28:13)[39m
+[31m        at Module._compile (module.js:573:32)[39m
+[31m        at at runTest (./node_modules/jest/index.js:50:10)[39m
+[31m        at process._tickCallback (internal/process/next_tick.js:103:7)[39m
+
+"
+`;
+
+exports[`reports error from action 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":50,\\"err\\":{\\"message\\":\\"Some mistake\\",\\"name\\":\\"Error\\",\\"stack\\":\\"Error: Some mistake\\\\n    at Object.<anonymous> (/home/ai/Dev/logux-server/test/create-reporter.test.js:28:13)\\\\n    at Module._compile (module.js:573:32)\\\\n    at at runTest (/home/ai/Dev/logux-server/node_modules/jest/index.js:50:10)\\\\n    at process._tickCallback (internal/process/next_tick.js:103:7)\\"},\\"actionId\\":[1487805099387,\\"100:H10Nf5stl\\",0],\\"msg\\":\\"Some mistake\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports error from action 2`] = `
+"[1m[31m[40m[7m ERROR [27m[49m[39m[22m [1m[31mSome mistake[39m[22m [2mat 1970-01-01 00:00:00[22m
+[33m        at [1mObject.<anonymous>[22m (./test/create-reporter.test.js:28:13)[39m
+[31m        at Module._compile (module.js:573:32)[39m
+[31m        at at runTest (./node_modules/jest/index.js:50:10)[39m
+[31m        at process._tickCallback (internal/process/next_tick.js:103:7)[39m
+        Action ID: [[1m1487805099387[22m, [1m100[22m:H10Nf5stl, [1m0[22m]
+
+"
+`;
+
+exports[`reports error from client 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"err\\":{\\"message\\":\\"Logux received timeout error (A timeout was reached (5000ms))\\",\\"name\\":\\"SyncError\\"},\\"clientId\\":\\"670\\",\\"msg\\":\\"Client error: A timeout was reached (5000ms)\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports error from client 2`] = `
+"[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mClient error: A timeout was reached (5000ms)[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Client ID: [1m670[22m
+
+"
+`;
+
+exports[`reports error from sync 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"err\\":{\\"message\\":\\"A timeout was reached (5000ms)\\",\\"name\\":\\"SyncError\\"},\\"nodeId\\":\\"100:H10Nf5stl\\",\\"msg\\":\\"Sync error: A timeout was reached (5000ms)\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports error from sync 2`] = `
+"[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mSync error: A timeout was reached (5000ms)[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Node ID: [1m100[22m:H10Nf5stl
+
+"
+`;
+
+exports[`reports listen 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"development\\",\\"nodeId\\":\\"server:r1CJmycQW\\",\\"subprotocol\\":\\"0.0.0\\",\\"supports\\":\\"0.x\\",\\"note\\":[\\"Server was started in non-secure development mode\\",\\"Press Ctrl-C to shutdown server\\"],\\"listen\\":\\"ws://127.0.0.1:31337\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports listen 2`] = `
+"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mLogux server is listening[39m[22m [2mat 1970-01-01 00:00:00[22m
+        PID:          [1m21384[22m
+        Logux server: [1m0.0.0[22m
+        Environment:  [1mdevelopment[22m
+        Node ID:      [1mserver[22m:r1CJmycQW
+        Subprotocol:  [1m0.0.0[22m
+        Supports:     [1m0.x[22m
+        Listen:       [1mws://127.0.0.1:31337[22m
+        [90mServer was started in non-secure development mode[39m
+        [90mPress Ctrl-C to shutdown server[39m
+
+"
+`;
+
+exports[`reports listen for custom domain 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"development\\",\\"nodeId\\":\\"server:r1CJmycQW\\",\\"subprotocol\\":\\"0.0.0\\",\\"supports\\":\\"0.x\\",\\"note\\":[\\"Server was started in non-secure development mode\\",\\"Press Ctrl-C to shutdown server\\"],\\"server\\":true,\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports listen for custom domain 2`] = `
+"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mLogux server is listening[39m[22m [2mat 1970-01-01 00:00:00[22m
+        PID:          [1m21384[22m
+        Logux server: [1m0.0.0[22m
+        Environment:  [1mdevelopment[22m
+        Node ID:      [1mserver[22m:r1CJmycQW
+        Subprotocol:  [1m0.0.0[22m
+        Supports:     [1m0.x[22m
+        Listen:       [1mCustom HTTP server[22m
+        [90mServer was started in non-secure development mode[39m
+        [90mPress Ctrl-C to shutdown server[39m
+
+"
+`;
+
+exports[`reports listen for production 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"production\\",\\"nodeId\\":\\"server:r1CJmycQW\\",\\"subprotocol\\":\\"0.0.0\\",\\"supports\\":\\"0.x\\",\\"listen\\":\\"wss://127.0.0.1:1337\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports listen for production 2`] = `
+"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mLogux server is listening[39m[22m [2mat 1970-01-01 00:00:00[22m
+        PID:          [1m21384[22m
+        Logux server: [1m0.0.0[22m
+        Environment:  [1mproduction[22m
+        Node ID:      [1mserver[22m:r1CJmycQW
+        Subprotocol:  [1m0.0.0[22m
+        Supports:     [1m0.x[22m
+        Listen:       [1mwss://127.0.0.1:1337[22m
+
+"
+`;
+
+exports[`reports processed 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"actionId\\":[1487805099387,\\"100:H10Nf5stl\\",0],\\"latency\\":500,\\"msg\\":\\"Action was processed\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports processed 2`] = `
+"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mAction was processed[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Action ID: [[1m1487805099387[22m, [1m100[22m:H10Nf5stl, [1m0[22m]
+        Latency:   [1m500[22m ms
+
+"
+`;
+
+exports[`reports unauthenticated 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"subprotocol\\":\\"1.0.0\\",\\"clientId\\":\\"670\\",\\"nodeId\\":\\"100:H10Nf5stl\\",\\"msg\\":\\"Bad authentication\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports unauthenticated 2`] = `
+"[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mBad authentication[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Subprotocol: [1m1.0.0[22m
+        Client ID:   [1m670[22m
+        Node ID:     [1m100[22m:H10Nf5stl
+
+"
+`;
+
+exports[`reports unknownType 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"type\\":\\"CHANGE_SER\\",\\"actionId\\":[1487805099387,\\"100:H10Nf5stl\\",0],\\"msg\\":\\"Action with unknown type\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports unknownType 2`] = `
+"[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mAction with unknown type[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Type:      [1mCHANGE_SER[22m
+        Action ID: [[1m1487805099387[22m, [1m100[22m:H10Nf5stl, [1m0[22m]
+
+"
+`;
+
+exports[`reports unknownType from server 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":50,\\"type\\":\\"CHANGE_SER\\",\\"actionId\\":[1487805099387,\\"server:r1CJmycQW\\",0],\\"msg\\":\\"Action with unknown type\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports unknownType from server 2`] = `
+"[1m[31m[40m[7m ERROR [27m[49m[39m[22m [1m[31mAction with unknown type[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Type:      [1mCHANGE_SER[22m
+        Action ID: [[1m1487805099387[22m, [1mserver[22m:r1CJmycQW, [1m0[22m]
+
+"
+`;
+
+exports[`reports zombie 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"nodeId\\":\\"100:H10Nf5stl\\",\\"msg\\":\\"Zombie client was disconnected\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports zombie 2`] = `
+"[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mZombie client was disconnected[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Node ID: [1m100[22m:H10Nf5stl
+
+"
+`;

@@ -1,5 +1,6 @@
 'use strict'
 
+const SyncError = require('logux-sync').SyncError
 const TestPair = require('logux-sync').TestPair
 
 const ServerClient = require('../server-client')
@@ -30,11 +31,11 @@ function createServer (opts, reporter) {
 }
 
 function createReporter () {
-  const reports = []
   const names = []
-  const app = createServer({ }, function () {
-    names.push(arguments[0])
-    reports.push(Array.prototype.slice.call(arguments, 0))
+  const reports = []
+  const app = createServer({ }, (name, details) => {
+    names.push(name)
+    reports.push([name, details])
   })
   return { app, reports, names }
 }
@@ -105,8 +106,10 @@ it('has remote address shortcut', () => {
 
 it('reports about connection', () => {
   const test = createReporter()
-  const client = new ServerClient(test.app, createConnection(), 1)
-  expect(test.reports).toEqual([['connect', test.app, client]])
+  new ServerClient(test.app, createConnection(), 1)
+  expect(test.reports).toEqual([['connect', {
+    clientId: '1', ipAddress: '127.0.0.1'
+  }]])
 })
 
 it('removes itself on destroy', () => {
@@ -126,12 +129,23 @@ it('removes itself on destroy', () => {
     expect(test.app.users).toEqual({ 10: [client2] })
     expect(client1.connection.connected).toBeFalsy()
     expect(test.names).toEqual([
-      'connect', 'connect', 'authenticated', 'authenticated', 'disconnect'])
-    expect(test.reports[4]).toEqual(['disconnect', test.app, client1])
+      'connect', 'connect', 'authenticated', 'authenticated', 'disconnect'
+    ])
+    expect(test.reports[4]).toEqual(['disconnect', { nodeId: '10:uuid' }])
     client2.destroy()
     expect(test.app.clients).toEqual({ })
     expect(test.app.nodeIds).toEqual({ })
     expect(test.app.users).toEqual({ })
+  })
+})
+
+it('reports client ID before authentication', () => {
+  const test = createReporter()
+  const client = createClient(test.app)
+
+  return client.connection.connect().then(() => {
+    client.destroy()
+    expect(test.reports[1]).toEqual(['disconnect', { clientId: '1' }])
   })
 })
 
@@ -145,7 +159,7 @@ it('does not report users disconnects on server destroy', () => {
     expect(test.app.clients).toEqual({ })
     expect(client.connection.connected).toBeFalsy()
     expect(test.names).toEqual(['connect', 'destroy'])
-    expect(test.reports[1]).toEqual(['destroy', test.app])
+    expect(test.reports[1]).toEqual(['destroy', undefined])
   })
 })
 
@@ -170,8 +184,9 @@ it('reports on wrong authentication', () => {
     return client.connection.pair.wait('right')
   }).then(() => {
     expect(test.names).toEqual(['connect', 'unauthenticated', 'disconnect'])
-    expect(test.reports[1][1]).toEqual(test.app)
-    expect(test.reports[1][2]).toEqual(client)
+    expect(test.reports[1]).toEqual(['unauthenticated', {
+      clientId: '1', nodeId: '10:uuid', subprotocol: '0.0.0'
+    }])
   })
 })
 
@@ -185,8 +200,9 @@ it('reports on server in user name', () => {
     return client.connection.pair.wait('right')
   }).then(() => {
     expect(test.names).toEqual(['connect', 'unauthenticated', 'disconnect'])
-    expect(test.reports[1][1]).toEqual(test.app)
-    expect(test.reports[1][2]).toEqual(client)
+    expect(test.reports[1]).toEqual(['unauthenticated', {
+      clientId: '1', nodeId: 'server:uuid', subprotocol: '0.0.0'
+    }])
   })
 })
 
@@ -210,14 +226,16 @@ it('authenticates user', () => {
     expect(test.app.nodeIds).toEqual({ '10:uuid': client })
     expect(test.app.users).toEqual({ 10: [client] })
     expect(test.names).toEqual(['connect', 'authenticated'])
-    expect(test.reports[1]).toEqual(['authenticated', test.app, client])
+    expect(test.reports[1]).toEqual(['authenticated', {
+      clientId: '1', nodeId: '10:uuid', subprotocol: '0.0.0'
+    }])
   })
 })
 
 it('supports non-promise authenticator', () => {
-  const test = createReporter()
-  test.app.auth((id, token) => token === 'token')
-  const client = createClient(test.app)
+  const app = createServer()
+  app.auth((id, token) => token === 'token')
+  const client = createClient(app)
 
   return client.connection.connect().then(() => {
     const protocol = client.sync.localProtocol
@@ -231,9 +249,8 @@ it('supports non-promise authenticator', () => {
 })
 
 it('authenticates user without user name', () => {
-  const test = createReporter()
-  test.app.auth(() => true)
-  const client = createClient(test.app)
+  const app = createServer()
+  const client = createClient(app)
 
   return client.connection.connect().then(() => {
     const protocol = client.sync.localProtocol
@@ -241,7 +258,7 @@ it('authenticates user without user name', () => {
     return client.connection.pair.wait('right')
   }).then(() => {
     expect(client.user).not.toBeDefined()
-    expect(test.app.users).toEqual({ })
+    expect(app.users).toEqual({ })
   })
 })
 
@@ -252,11 +269,11 @@ it('reports about synchronization errors', () => {
     client.connection.other().send(['error', 'wrong-format'])
     return client.connection.pair.wait()
   }).then(() => {
-    expect(test.names).toEqual(['connect', 'syncError'])
-    expect(test.reports[1][0]).toEqual('syncError')
-    expect(test.reports[1][1]).toEqual(test.app)
-    expect(test.reports[1][2]).toEqual(client)
-    expect(test.reports[1][3].type).toEqual('wrong-format')
+    expect(test.names).toEqual(['connect', 'error'])
+    expect(test.reports[1]).toEqual(['error', {
+      clientId: '1',
+      err: new SyncError(client.sync, 'wrong-format', undefined, true)
+    }])
   })
 })
 
@@ -270,16 +287,19 @@ it('checks subprotocol', () => {
     ])
     return client.connection.pair.wait('right')
   }).then(() => {
-    expect(test.names).toEqual(['connect', 'clientError', 'disconnect'])
-    expect(test.reports[1][3].message).toEqual(
-      'Only 0.x application subprotocols are supported, but you use 1.0.0')
-    expect(test.reports[2][0]).toEqual('disconnect')
+    expect(test.names).toEqual(['connect', 'error', 'disconnect'])
+    expect(test.reports[1]).toEqual(['error', {
+      clientId: '1',
+      err: new SyncError(client.sync, 'wrong-subprotocol', {
+        supported: '0.x', used: '1.0.0'
+      })
+    }])
   })
 })
 
 it('has method to check client subprotocol', () => {
-  const test = createReporter()
-  const client = createClient(test.app)
+  const app = createServer()
+  const client = createClient(app)
   client.sync.remoteSubprotocol = '1.0.1'
   expect(client.isSubprotocol('>= 1.0.0')).toBeTruthy()
   expect(client.isSubprotocol('< 1.0.0')).toBeFalsy()
@@ -324,7 +344,7 @@ it('disconnects zombie', () => {
       'zombie',
       'authenticated'
     ])
-    expect(test.reports[3]).toEqual(['zombie', test.app, client1])
+    expect(test.reports[3]).toEqual(['zombie', { nodeId: '10:uuid' }])
   })
 })
 
@@ -342,8 +362,8 @@ it('checks action creator', () => {
   }).then(() => {
     expect(actions(test.app)).toEqual([{ type: 'GOOD' }])
     expect(test.names).toEqual(['connect', 'authenticated', 'denied', 'add'])
-    expect(test.reports[2][3].id).toEqual([2, '1:uuid', 0])
-    expect(test.reports[3][3].id).toEqual([1, '10:uuid', 0])
+    expect(test.reports[2]).toEqual(['denied', { actionId: [2, '1:uuid', 0] }])
+    expect(test.reports[3][1].meta.id).toEqual([1, '10:uuid', 0])
   })
 })
 
@@ -361,8 +381,8 @@ it('checks action meta', () => {
   }).then(() => {
     expect(actions(test.app)).toEqual([{ type: 'GOOD' }])
     expect(test.names).toEqual(['connect', 'authenticated', 'denied', 'add'])
-    expect(test.reports[2][3].id).toEqual([1, '10:uuid', 0])
-    expect(test.reports[3][3].id).toEqual([2, '10:uuid', 0])
+    expect(test.reports[2][1].actionId).toEqual([1, '10:uuid', 0])
+    expect(test.reports[3][1].meta.id).toEqual([2, '10:uuid', 0])
   })
 })
 
@@ -380,9 +400,9 @@ it('ignores unknown action types', () => {
     ])
     expect(test.names).toEqual([
       'connect', 'authenticated', 'unknownType', 'add'])
-    expect(test.reports[2][1]).toBe(test.app)
-    expect(test.reports[2][2].type).toEqual('UNKNOWN')
-    expect(test.reports[2][3].id).toEqual([1, '10:uuid', 0])
+    expect(test.reports[2]).toEqual(['unknownType', {
+      actionId: [1, '10:uuid', 0], type: 'UNKNOWN'
+    }])
   })
 })
 
@@ -410,19 +430,17 @@ it('checks user access for action', () => {
     ])
     expect(test.names).toEqual([
       'connect', 'authenticated', 'denied', 'add', 'add'])
-    expect(test.reports[2][1]).toBe(test.app)
-    expect(test.reports[2][2].type).toEqual('FOO')
-    expect(test.reports[2][3].id).toEqual([1, '10:uuid', 0])
+    expect(test.reports[2][1].actionId).toEqual([1, '10:uuid', 0])
   })
 })
 
 it('reports about errors in access callback', () => {
-  const error = new Error('test')
+  const err = new Error('test')
 
   const test = createReporter()
   test.app.type('FOO', {
     access () {
-      throw error
+      throw err
     }
   })
 
@@ -440,9 +458,11 @@ it('reports about errors in access callback', () => {
     expect(actions(test.app)).toEqual([
       { type: 'logux/undo', reason: 'error', id: [1, '10:uuid', 0] }
     ])
-    expect(test.names).toEqual([
-      'connect', 'authenticated', 'runtimeError', 'add'])
-    expect(throwed).toEqual(error)
+    expect(test.names).toEqual(['connect', 'authenticated', 'error', 'add'])
+    expect(test.reports[2]).toEqual(['error', {
+      actionId: [1, '10:uuid', 0], err
+    }])
+    expect(throwed).toEqual(err)
   })
 })
 

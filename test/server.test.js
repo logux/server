@@ -1,6 +1,6 @@
 'use strict'
 
-const spawn = require('child_process').spawn
+const spawn = require('cross-spawn')
 const path = require('path')
 
 const Server = require('../server')
@@ -30,7 +30,7 @@ function start (name, args) {
   })
 }
 
-function test (name, args) {
+function check (name, args) {
   return new Promise(resolve => {
     let out = ''
     const server = spawn(path.join(__dirname, '/servers/', name), args)
@@ -43,16 +43,12 @@ function test (name, args) {
     server.on('close', exitCode => {
       let fixed = out
         .replace(DATE, '1970-01-01 00:00:00')
+        .replace(/"time":"[^"]+"/g, '"time":"1970-01-01T00:00:00.000Z"')
         .replace(/PID:(\s+)\d+/, 'PID:$121384')
         .replace(/"pid":\d+,/g, '"pid":21384,')
-        .replace(
-          /"hostname":"[-.\w]+",/g,
-          '"hostname":"localhost",'
-        )
-        .replace(
-          /"time":"[-.:\dTZ]+",/g,
-          '"time":"1970-01-01T00:00:00.000Z",'
-        )
+        .replace(/Logux server:( +)\d+.\d+.\d+/g, 'Logux server:$10.0.0')
+        .replace(/"loguxServer":"\d+.\d+.\d+"/g, '"loguxServer":"0.0.0"')
+        .replace(/"hostname":"[^"]+"/g, '"hostname":"localhost"')
       fixed = fixed.replace(/\r\v/g, '\n')
       resolve([fixed, exitCode])
     })
@@ -63,12 +59,12 @@ function test (name, args) {
 }
 
 function checkOut (name, args) {
-  return test(name, args).then(result => {
+  return check(name, args).then(result => {
     const out = result[0]
     const exit = result[1]
 
     if (exit !== 0) {
-      console.error(`${ test } fall with:\n${ out }`)
+      console.error(`${ name } fall with:\n${ out }`)
     }
     expect(exit).toEqual(0)
     expect(out).toMatchSnapshot()
@@ -76,7 +72,7 @@ function checkOut (name, args) {
 }
 
 function checkError (name, args) {
-  return test(name, args).then(result => {
+  return check(name, args).then(result => {
     const out = result[0]
     const exit = result[1]
     expect(exit).toEqual(1)
@@ -95,19 +91,20 @@ afterEach(() => {
   }
 })
 
-it('uses cli args for options', () => {
+it('uses CLI args for options', () => {
   const options = Server.loadOptions({
     argv: [
-      '', '--port', '31337',
+      '',
+      '--port', '31337',
       '--host', '192.168.1.1',
-      '--reporter', 'bunyan'
+      '--reporter', 'json'
     ],
     env: { }
   })
 
   expect(options.host).toEqual('192.168.1.1')
   expect(options.port).toEqual(31337)
-  expect(options.reporter).toEqual('bunyan')
+  expect(options.reporter).toEqual('json')
   expect(options.cert).toBeUndefined()
   expect(options.key).toBeUndefined()
 })
@@ -118,13 +115,13 @@ it('uses env for options', () => {
     env: {
       LOGUX_HOST: '127.0.1.1',
       LOGUX_PORT: 31337,
-      LOGUX_REPORTER: 'bunyan'
+      LOGUX_REPORTER: 'json'
     }
   })
 
   expect(options.host).toEqual('127.0.1.1')
   expect(options.port).toEqual(31337)
-  expect(options.reporter).toEqual('bunyan')
+  expect(options.reporter).toEqual('json')
 })
 
 it('uses combined options', () => {
@@ -159,8 +156,8 @@ it('uses arg, env, options in given priority', () => {
 
 it('destroys everything on exit', () => checkOut('destroy.js'))
 
-it('reports unbind', () => {
-  return test('unbind.js').then(result => {
+it('writes about unbind', () => {
+  return check('unbind.js').then(result => {
     expect(result[0]).toMatchSnapshot()
   })
 })
@@ -171,17 +168,17 @@ it('shows uncatch rejects', () => checkError('uncatch.js'))
 
 it('use environment variables for config', () => {
   process.env.LOGUX_PORT = 31337
-  process.env.LOGUX_REPORTER = 'bunyan'
+  process.env.LOGUX_REPORTER = 'json'
   return checkOut('options.js')
 })
 
-it('uses reporter param', () => checkOut('options.js', ['', '--r', 'bunyan']))
+it('uses reporter param', () => checkOut('options.js', ['', '--r', 'json']))
 
 it('shows help', () => checkOut('options.js', ['', '--help']))
 
 it('shows help about port in use', () => {
   return start('eaddrinuse.js').then(() => {
-    return test('eaddrinuse.js')
+    return check('eaddrinuse.js')
   }).then(result => {
     expect(result[0]).toMatchSnapshot()
   })
@@ -199,9 +196,9 @@ it('disables colors for constructor errors', () => {
 })
 
 it('uses reporter param for constructor errors', () => {
-  return checkError('missed.js', ['', '--r', 'bunyan'])
+  return checkError('missed.js', ['', '--r', 'json'])
 })
 
-it('reports to bunyan log', () => checkOut('bunyan.js'))
+it('writes to bunyan log', () => checkOut('bunyan.js'))
 
-it('reports to custom bunyan log', () => checkOut('bunyan-custom.js'))
+it('writes to custom bunyan log', () => checkOut('bunyan-custom.js'))

@@ -6,6 +6,24 @@ const semver = require('semver')
 const FilteredSync = require('./filtered-sync')
 const forcePromise = require('./force-promise')
 
+function reportDetails (client) {
+  return {
+    subprotocol: client.sync.remoteSubprotocol,
+    clientId: client.key,
+    nodeId: client.nodeId
+  }
+}
+
+function reportClient (client, obj) {
+  if (!obj) obj = { }
+  if (client.nodeId) {
+    obj.nodeId = client.nodeId
+  } else {
+    obj.clientId = client.key
+  }
+  return obj
+}
+
 /**
  * Logux client connected to server.
  *
@@ -94,7 +112,7 @@ class ServerClient {
     })
 
     this.sync.catch(err => {
-      this.app.reporter('syncError', this.app, this, err)
+      this.app.reporter('error', reportClient(this, { err }))
     })
     this.sync.on('connect', () => {
       if (!this.isSubprotocol(this.app.options.supports)) {
@@ -109,11 +127,14 @@ class ServerClient {
     })
     this.sync.on('clientError', err => {
       if (err.type !== 'wrong-credentials') {
-        this.app.reporter('clientError', this.app, this, err)
+        this.app.reporter('error', reportClient(this, { err }))
       }
     })
 
-    app.reporter('connect', app, this)
+    app.reporter('connect', {
+      clientId: this.key,
+      ipAddress: this.remoteAddress
+    })
   }
 
   /**
@@ -141,7 +162,7 @@ class ServerClient {
   destroy () {
     this.destroyed = true
     if (!this.app.destroing && !this.zombie) {
-      this.app.reporter('disconnect', this.app, this)
+      this.app.reporter('disconnect', reportClient(this))
     }
     if (this.sync.connected) this.sync.destroy()
     if (this.user) {
@@ -164,7 +185,7 @@ class ServerClient {
 
     const user = this.app.getUser(nodeId)
     if (user === 'server') {
-      this.app.reporter('unauthenticated', this.app, this)
+      this.app.reporter('unauthenticated', reportDetails(this))
       return Promise.resolve(false)
     }
     if (typeof user !== 'undefined') this.user = user
@@ -175,7 +196,7 @@ class ServerClient {
           const zombie = this.app.nodeIds[this.nodeId]
           if (zombie) {
             zombie.zombie = true
-            this.app.reporter('zombie', this.app, zombie)
+            this.app.reporter('zombie', { nodeId: zombie.nodeId })
             zombie.destroy()
           }
           this.app.nodeIds[this.nodeId] = this
@@ -183,9 +204,9 @@ class ServerClient {
             if (!this.app.users[this.user]) this.app.users[this.user] = []
             this.app.users[this.user].push(this)
           }
-          this.app.reporter('authenticated', this.app, this)
+          this.app.reporter('authenticated', reportDetails(this))
         } else {
-          this.app.reporter('unauthenticated', this.app, this)
+          this.app.reporter('unauthenticated', reportDetails(this))
         }
         return result
       })
@@ -197,7 +218,7 @@ class ServerClient {
     const wrongUser = this.user && this.user !== creator.user
     const wrongMeta = Object.keys(meta).some(i => i !== 'id' && i !== 'time')
     if (wrongUser || wrongMeta) {
-      this.app.reporter('denied', this.app, action, meta)
+      this.app.reporter('denied', { actionId: meta.id })
       return Promise.resolve(false)
     }
 
@@ -210,7 +231,7 @@ class ServerClient {
     return forcePromise(() => type.access(action, meta, creator))
       .then(result => {
         if (!result) {
-          this.app.reporter('denied', this.app, action, meta)
+          this.app.reporter('denied', { actionId: meta.id })
           this.app.undo(meta, 'denied')
         }
         return result

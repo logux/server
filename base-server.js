@@ -15,6 +15,7 @@ const forcePromise = require('./force-promise')
 const ServerClient = require('./server-client')
 const promisify = require('./promisify')
 const Creator = require('./creator')
+const pkg = require('./package.json')
 
 const PEM_PREAMBLE = '-----BEGIN'
 
@@ -162,7 +163,7 @@ class BaseServer {
     })
 
     this.log.on('add', (action, meta) => {
-      this.reporter('add', this, action, meta)
+      this.reporter('add', { action, meta })
 
       if (this.destroing) return
 
@@ -179,13 +180,17 @@ class BaseServer {
       }
     })
     this.log.on('clean', (action, meta) => {
-      this.reporter('clean', this, action, meta)
+      this.reporter('clean', { actionId: meta.id })
     })
 
     this.emitter = new NanoEvents()
-    this.on('error', (e, action, meta) => {
-      this.reporter('runtimeError', this, e, action, meta)
-      if (this.env === 'development') this.debugError(e)
+    this.on('error', (err, action, meta) => {
+      if (meta) {
+        this.reporter('error', { err, actionId: meta.id })
+      } else {
+        this.reporter('error', { err, fatal: true })
+      }
+      if (this.env === 'development') this.debugError(err)
     })
 
     this.unbind = []
@@ -305,7 +310,17 @@ class BaseServer {
         this.clients[this.lastClient] = node
       })
     }).then(() => {
-      this.reporter('listen', this)
+      this.reporter('listen', {
+        loguxServer: pkg.version,
+        nodeId: this.nodeId,
+        environment: this.env,
+        subprotocol: this.options.subprotocol,
+        supports: this.options.supports,
+        server: !!this.options.server,
+        cert: !!this.options.cert,
+        host: this.options.host,
+        port: this.options.port
+      })
     })
   }
 
@@ -360,7 +375,7 @@ class BaseServer {
    */
   destroy () {
     this.destroing = true
-    this.reporter('destroy', this)
+    this.reporter('destroy')
     return Promise.all(this.unbind.map(i => i()))
   }
 
@@ -439,7 +454,10 @@ class BaseServer {
 
     this.processing += 1
     forcePromise(() => type.process(action, meta, creator)).then(() => {
-      this.reporter('processed', this, action, meta, Date.now() - start)
+      this.reporter('processed', {
+        actionId: meta.id,
+        latency: Date.now() - start
+      })
       this.processing -= 1
       this.emitter.emit('processed', action, meta)
     }).catch(e => {
@@ -473,7 +491,7 @@ class BaseServer {
 
   unknownType (action, meta) {
     this.log.changeMeta(meta.id, { status: 'error' })
-    this.reporter('unknownType', this, action, meta)
+    this.reporter('unknownType', { type: action.type, actionId: meta.id })
 
     if (this.getUser(meta.id[1]) !== 'server') {
       this.undo(meta, 'unknownType')
