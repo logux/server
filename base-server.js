@@ -525,8 +525,12 @@ class BaseServer {
     const nodeId = meta.id[1]
     const user = this.getUser(nodeId)
 
-    const client = this.nodeIds[nodeId]
-    const subprotocol = client ? client.sync.remoteSubprotocol : undefined
+    let subprotocol
+    if (meta.subprotocol) {
+      subprotocol = meta.subprotocol
+    } else if (this.nodeIds[nodeId]) {
+      subprotocol = this.nodeIds[nodeId].sync.remoteSubprotocol
+    }
 
     return new Creator(nodeId, user, subprotocol)
   }

@@ -434,6 +434,28 @@ it('checks user access for action', () => {
   })
 })
 
+it('takes subprotocol from action meta', () => {
+  const app = createServer()
+  const subprotocols = []
+  app.type('FOO', {
+    access: () => true,
+    process (action, meta, creator) {
+      subprotocols.push(creator.subprotocol)
+      return true
+    }
+  })
+
+  return connectClient(app).then(client => {
+    app.log.add(
+      { type: 'FOO' },
+      { id: [1, client.nodeId, 0], subprotocol: '1.0.0' }
+    )
+    return Promise.resolve()
+  }).then(() => {
+    expect(subprotocols).toEqual(['1.0.0'])
+  })
+})
+
 it('reports about errors in access callback', () => {
   const err = new Error('test')
 
