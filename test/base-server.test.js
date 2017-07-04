@@ -270,6 +270,7 @@ it('reporters on log events', () => {
         reasons: [],
         status: 'waiting',
         server: 'server:uuid',
+        subprotocol: '0.0.0',
         time: 1
       }
     }],
@@ -578,9 +579,40 @@ it('undos actions on client', () => {
           nodeIds: ['1:uuid', '2:uuid'],
           reasons: ['error'],
           server: 'server:uuid',
-          status: 'processed'
+          status: 'processed',
+          subprotocol: '0.0.0'
         }
       ]
     ])
+  })
+})
+
+it('adds current subprotocol to meta', () => {
+  app = createServer({ subprotocol: '1.0.0' })
+  app.type('A', { access: () => true })
+  return app.log.add({ type: 'A' }, { reasons: ['test'] }).then(() => {
+    expect(app.log.store.created[0][1].subprotocol).toEqual('1.0.0')
+  })
+})
+
+it('adds current subprotocol only to own actions', () => {
+  app = createServer({ subprotocol: '1.0.0' })
+  app.type('A', { access: () => true })
+  return app.log.add(
+    { type: 'A' },
+    { id: [1, '0:other', 0], reasons: ['test'] }
+  ).then(() => {
+    expect(app.log.store.created[0][1].subprotocol).not.toBeDefined()
+  })
+})
+
+it('allows to override subprotocol in meta', () => {
+  app = createServer({ subprotocol: '1.0.0' })
+  app.type('A', { access: () => true })
+  return app.log.add(
+    { type: 'A' },
+    { subprotocol: '0.1.0', reasons: ['test'] }
+  ).then(() => {
+    expect(app.log.store.created[0][1].subprotocol).toEqual('0.1.0')
   })
 })

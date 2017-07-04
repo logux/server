@@ -160,6 +160,9 @@ class BaseServer {
     this.log.on('preadd', (action, meta) => {
       if (!meta.server) meta.server = this.nodeId
       if (!meta.status) meta.status = 'waiting'
+      if (meta.id[1] === this.nodeId && !meta.subprotocol) {
+        meta.subprotocol = this.options.subprotocol
+      }
     })
 
     this.log.on('add', (action, meta) => {

@@ -185,7 +185,8 @@ it('reports add', () => {
       id: [1487805099387, '100:H10Nf5stl', 0],
       time: 1487805099387,
       reasons: ['lastValue', 'debug'],
-      server: 'server:H1f8LAyzl'
+      server: 'server:H1f8LAyzl',
+      subprotocol: '1.0.0'
     }
   })
 })

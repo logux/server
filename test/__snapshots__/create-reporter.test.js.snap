@@ -52,7 +52,7 @@ exports[`reports LOGUX_WRONG_OPTIONS error 2`] = `
 `;
 
 exports[`reports add 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"action\\":{\\"type\\":\\"CHANGE_USER\\",\\"id\\":100,\\"data\\":{\\"name\\":\\"John\\"}},\\"meta\\":{\\"id\\":[1487805099387,\\"100:H10Nf5stl\\",0],\\"time\\":1487805099387,\\"reasons\\":[\\"lastValue\\",\\"debug\\"],\\"server\\":\\"server:H1f8LAyzl\\"},\\"msg\\":\\"Action was added\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"action\\":{\\"type\\":\\"CHANGE_USER\\",\\"id\\":100,\\"data\\":{\\"name\\":\\"John\\"}},\\"meta\\":{\\"id\\":[1487805099387,\\"100:H10Nf5stl\\",0],\\"time\\":1487805099387,\\"reasons\\":[\\"lastValue\\",\\"debug\\"],\\"server\\":\\"server:H1f8LAyzl\\",\\"subprotocol\\":\\"1.0.0\\"},\\"msg\\":\\"Action was added\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
@@ -64,10 +64,11 @@ exports[`reports add 2`] = `
           data: 
             name: [1mJohn[22m
         Meta:   
-          id:      [[1m1487805099387[22m, [1m100[22m:H10Nf5stl, [1m0[22m]
-          time:    [1m1487805099387[22m
-          reasons: [[1mlastValue[22m, [1mdebug[22m]
-          server:  [1mserver:H1f8LAyzl[22m
+          id:          [[1m1487805099387[22m, [1m100[22m:H10Nf5stl, [1m0[22m]
+          time:        [1m1487805099387[22m
+          reasons:     [[1mlastValue[22m, [1mdebug[22m]
+          server:      [1mserver:H1f8LAyzl[22m
+          subprotocol: [1m1.0.0[22m
 
 "
 `;
