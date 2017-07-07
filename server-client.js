@@ -6,6 +6,8 @@ const semver = require('semver')
 const FilteredSync = require('./filtered-sync')
 const forcePromise = require('./force-promise')
 
+const ALLOWED_META = ['id', 'time', 'nodeIds', 'users', 'channels']
+
 function reportDetails (client) {
   return {
     subprotocol: client.sync.remoteSubprotocol,
@@ -107,6 +109,7 @@ class ServerClient {
       subprotocol: app.options.subprotocol,
       inFilter: this.filter.bind(this),
       timeout: app.options.timeout,
+      outMap: this.map.bind(this),
       ping: app.options.ping,
       auth: this.auth.bind(this)
     })
@@ -212,11 +215,17 @@ class ServerClient {
       })
   }
 
+  map (action, meta) {
+    return Promise.resolve([action, { id: meta.id, time: meta.time }])
+  }
+
   filter (action, meta) {
     const creator = this.app.createCreator(meta)
 
     const wrongUser = this.user && this.user !== creator.user
-    const wrongMeta = Object.keys(meta).some(i => i !== 'id' && i !== 'time')
+    const wrongMeta = Object.keys(meta).some(i => {
+      return ALLOWED_META.indexOf(i) === -1
+    })
     if (wrongUser || wrongMeta) {
       this.app.reporter('denied', { actionId: meta.id })
       return Promise.resolve(false)

@@ -13,17 +13,21 @@ class FilteredSync extends ServerSync {
   }
 
   syncSinceQuery (lastSynced) {
-    const data = []
+    const data = { added: 0, entries: [] }
     return this.log.each({ order: 'added' }, (action, meta) => {
       if (meta.added <= lastSynced) {
         return false
       } else {
+        let passed = false
         if (meta.nodeIds && meta.nodeIds.indexOf(this.client.nodeId) !== -1) {
-          data.push(action, meta)
-          return true
+          passed = true
         }
         if (meta.users && meta.users.indexOf(this.client.user) !== -1) {
-          data.push(action, meta)
+          passed = true
+        }
+        if (passed) {
+          if (meta.added > data.added) data.added = meta.added
+          data.entries.push([action, meta])
           return true
         }
         return true

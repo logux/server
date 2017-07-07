@@ -50,6 +50,7 @@ function createClient (app) {
 function connectClient (server, nodeId) {
   if (!nodeId) nodeId = '10:uuid'
   const client = createClient(server)
+  client.sync.now = () => 0
   return client.connection.connect().then(() => {
     const protocol = client.sync.localProtocol
     client.connection.other().send(['connect', protocol, nodeId, 0])
@@ -355,15 +356,15 @@ it('checks action creator', () => {
 
   return connectClient(test.app).then(client => {
     client.connection.other().send(['sync', 2,
-      { type: 'GOOD' }, { id: [1, '10:uuid', 0] },
-      { type: 'BAD' }, { id: [2, '1:uuid', 0] }
+      { type: 'GOOD' }, { id: [1, '10:uuid', 0], time: 1 },
+      { type: 'BAD' }, { id: [2, '1:uuid', 0], time: 2 }
     ])
     return client.connection.pair.wait('right')
   }).then(() => {
-    expect(actions(test.app)).toEqual([{ type: 'GOOD' }])
     expect(test.names).toEqual(['connect', 'authenticated', 'denied', 'add'])
     expect(test.reports[2]).toEqual(['denied', { actionId: [2, '1:uuid', 0] }])
     expect(test.reports[3][1].meta.id).toEqual([1, '10:uuid', 0])
+    expect(actions(test.app)).toEqual([{ type: 'GOOD' }])
   })
 })
 
@@ -374,8 +375,16 @@ it('checks action meta', () => {
 
   return connectClient(test.app).then(client => {
     client.connection.other().send(['sync', 2,
-      { type: 'BAD' }, { id: [1, '10:uuid', 0], status: 'processed' },
-      { type: 'GOOD' }, { id: [2, '10:uuid', 0], time: 3 }
+      { type: 'BAD' },
+      { id: [1, '10:uuid', 0], time: 1, status: 'processed' },
+      { type: 'GOOD' },
+      {
+        id: [2, '10:uuid', 0],
+        time: 3,
+        users: ['10'],
+        nodeIds: ['10:uuid'],
+        channels: ['user:10']
+      }
     ])
     return client.connection.pair.wait('right')
   }).then(() => {
@@ -391,7 +400,7 @@ it('ignores unknown action types', () => {
 
   return connectClient(test.app).then(client => {
     client.connection.other().send(['sync', 2,
-      { type: 'UNKNOWN' }, { id: [1, '10:uuid', 0] }
+      { type: 'UNKNOWN' }, { id: [1, '10:uuid', 0], time: 1 }
     ])
     return client.connection.pair.wait('right')
   }).then(() => {
@@ -419,8 +428,8 @@ it('checks user access for action', () => {
 
   return connectClient(test.app).then(client => {
     client.connection.other().send(['sync', 2,
-      { type: 'FOO' }, { id: [1, '10:uuid', 0] },
-      { type: 'FOO', bar: true }, { id: [1, '10:uuid', 1] }
+      { type: 'FOO' }, { id: [1, '10:uuid', 0], time: 1 },
+      { type: 'FOO', bar: true }, { id: [1, '10:uuid', 1], time: 1 }
     ])
     return client.connection.pair.wait('right')
   }).then(() => {
@@ -473,7 +482,7 @@ it('reports about errors in access callback', () => {
 
   return connectClient(test.app).then(client => {
     client.connection.other().send(['sync', 2,
-      { type: 'FOO', bar: true }, { id: [1, '10:uuid', 0] }
+      { type: 'FOO', bar: true }, { id: [1, '10:uuid', 0], time: 1 }
     ])
     return client.connection.pair.wait('right')
   }).then(() => {
