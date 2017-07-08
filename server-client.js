@@ -6,7 +6,9 @@ const semver = require('semver')
 const FilteredSync = require('./filtered-sync')
 const forcePromise = require('./force-promise')
 
-const ALLOWED_META = ['id', 'time', 'nodeIds', 'users', 'channels']
+const ALLOWED_META = [
+  'id', 'time', 'nodeIds', 'users', 'channels', 'subprotocol'
+]
 
 function reportDetails (client) {
   return {
@@ -109,7 +111,8 @@ class ServerClient {
       subprotocol: app.options.subprotocol,
       inFilter: this.filter.bind(this),
       timeout: app.options.timeout,
-      outMap: this.map.bind(this),
+      outMap: this.outMap.bind(this),
+      inMap: this.inMap.bind(this),
       ping: app.options.ping,
       auth: this.auth.bind(this)
     })
@@ -215,8 +218,15 @@ class ServerClient {
       })
   }
 
-  map (action, meta) {
+  outMap (action, meta) {
     return Promise.resolve([action, { id: meta.id, time: meta.time }])
+  }
+
+  inMap (action, meta) {
+    if (!meta.subprotocol) {
+      meta.subprotocol = this.sync.remoteSubprotocol
+    }
+    return Promise.resolve([action, meta])
   }
 
   filter (action, meta) {

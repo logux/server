@@ -657,3 +657,19 @@ it('does not send debug back on unknown type in production', () => {
     })
   })
 })
+
+it('decompress subprotocol', () => {
+  const app = createServer({ env: 'production' })
+  app.type('A', { access: () => true })
+  return connectClient(app).then(client => {
+    client.sync.connection.other().send([
+      'sync', 2,
+      { type: 'A' }, { id: [1, '10:uuid', 0], time: 1 },
+      { type: 'A' }, { id: [2, '10:uuid', 0], time: 2, subprotocol: '2.0.0' }
+    ])
+    return client.sync.connection.pair.wait('right')
+  }).then(() => {
+    expect(app.log.store.created[0][1].subprotocol).toEqual('2.0.0')
+    expect(app.log.store.created[1][1].subprotocol).toEqual('0.0.0')
+  })
+})
