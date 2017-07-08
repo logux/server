@@ -82,12 +82,17 @@ it('creates JSON reporter', () => {
 })
 
 it('creates human reporter', () => {
-  const reporter = createReporter({ reporter: 'human', root: '/a' })
+  const reporter = createReporter({ reporter: 'human', root: '/dir/' })
   expect(reporter.logger.streams.length).toEqual(1)
   const stream = reporter.logger.streams[0].stream
   expect(stream instanceof HumanFormatter).toBeTruthy()
-  expect(stream.basepath).toEqual('/a')
+  expect(stream.basepath).toEqual('/dir/')
   expect(stream.chalk.enabled).toBeFalsy()
+})
+
+it('adds trailing slash to path', () => {
+  const reporter = createReporter({ reporter: 'human', root: '/dir' })
+  expect(reporter.logger.streams[0].stream.basepath).toEqual('/dir/')
 })
 
 it('uses color in development', () => {

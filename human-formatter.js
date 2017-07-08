@@ -125,8 +125,6 @@ function splitByLength (string, max) {
 }
 
 function prettyStackTrace (c, stack, basepath) {
-  if (basepath.slice(-1) !== path.sep) basepath += path.sep
-
   return stack.split('\n').slice(1).map(i => {
     const match = i.match(/\s+at ([^(]+) \(([^)]+)\)/)
     const isSystem = !match || match[2].indexOf(basepath) !== 0
@@ -157,6 +155,8 @@ class HumanFormatter extends stream.Writable {
 
     this.basepath = options.basepath || process.cwd()
     this.out = options.out || process.stdout
+
+    if (this.basepath.slice(-1) !== path.sep) this.basepath += path.sep
   }
 
   write (record) {
