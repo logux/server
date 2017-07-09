@@ -551,8 +551,8 @@ class BaseServer {
     if (meta.subscriptions) {
       for (const subscription of meta.subscriptions) {
         if (this.subscribers[subscription]) {
-          for (const nodeId in this.subscribers[subscription]) {
-            this.subscribers[subscription][nodeId].sync.onAdd(action, meta)
+          for (const i in this.subscribers[subscription]) {
+            this.subscribers[subscription][i].sync.onAdd(action, meta)
           }
         }
       }
