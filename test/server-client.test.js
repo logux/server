@@ -608,6 +608,31 @@ it('sends new actions by user', () => {
   })
 })
 
+it('sends new actions by subscription', () => {
+  const app = createServer()
+  app.type('FOO', { access: () => true })
+
+  return connectClient(app).then(client => {
+    app.subscribers.bar = {
+      '10:uuid': client
+    }
+    return Promise.all([
+      app.log.add({ type: 'FOO' }, { id: [1, 'server:uuid', 0] }),
+      app.log.add({ type: 'FOO' }, {
+        id: [2, 'server:uuid', 0], subscriptions: ['bar']
+      })
+    ]).then(() => {
+      client.connection.other().send(['synced', 2])
+      return client.sync.waitFor('synchronized')
+    }).then(() => {
+      expect(sentNames(client)).toEqual(['connected', 'sync'])
+      expect(sent(client)[1]).toEqual([
+        'sync', 2, { type: 'FOO' }, { id: [2, 'server:uuid', 0], time: 2 }
+      ])
+    })
+  })
+})
+
 it('sends old action only once', () => {
   const app = createServer()
   app.type('FOO', { access: () => true })
