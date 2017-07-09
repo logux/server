@@ -616,7 +616,6 @@ class BaseServer {
           }
           this.subscribers[action.name][creator.nodeId] = client
         }).catch(e => {
-          this.undo(meta, 'error')
           this.emitter.emit('error', e, action, meta)
         })
       }
