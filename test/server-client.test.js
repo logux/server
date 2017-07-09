@@ -30,10 +30,10 @@ function createServer (opts, reporter) {
   return server
 }
 
-function createReporter () {
+function createReporter (opts) {
   const names = []
   const reports = []
-  const app = createServer({ }, (name, details) => {
+  const app = createServer(opts, (name, details) => {
     names.push(name)
     reports.push([name, details])
   })
@@ -125,18 +125,29 @@ it('removes itself on destroy', () => {
   ]).then(() => {
     client1.auth({ }, '10:uuid')
     client2.auth({ }, '10:other')
+    test.app.subscribers = {
+      'user/10': {
+        '10:uuid': client1,
+        '10:other': client2
+      }
+    }
   }).then(() => {
     client1.destroy()
     expect(test.app.users).toEqual({ 10: [client2] })
+    expect(test.app.subscribers).toEqual({
+      'user/10': { '10:other': client2 }
+    })
     expect(client1.connection.connected).toBeFalsy()
     expect(test.names).toEqual([
       'connect', 'connect', 'authenticated', 'authenticated', 'disconnect'
     ])
     expect(test.reports[4]).toEqual(['disconnect', { nodeId: '10:uuid' }])
+
     client2.destroy()
     expect(test.app.clients).toEqual({ })
     expect(test.app.nodeIds).toEqual({ })
     expect(test.app.users).toEqual({ })
+    expect(test.app.subscribers).toEqual({ })
   })
 })
 
@@ -361,10 +372,15 @@ it('checks action creator', () => {
     ])
     return client.connection.pair.wait('right')
   }).then(() => {
-    expect(test.names).toEqual(['connect', 'authenticated', 'denied', 'add'])
+    expect(test.names).toEqual([
+      'connect', 'authenticated', 'denied', 'add', 'add'
+    ])
     expect(test.reports[2]).toEqual(['denied', { actionId: [2, '1:uuid', 0] }])
-    expect(test.reports[3][1].meta.id).toEqual([1, '10:uuid', 0])
-    expect(actions(test.app)).toEqual([{ type: 'GOOD' }])
+    expect(test.reports[4][1].meta.id).toEqual([1, '10:uuid', 0])
+    expect(actions(test.app)).toEqual([
+      { type: 'logux/undo', id: [2, '1:uuid', 0], reason: 'denied' },
+      { type: 'GOOD' }
+    ])
   })
 })
 
@@ -388,10 +404,15 @@ it('checks action meta', () => {
     ])
     return client.connection.pair.wait('right')
   }).then(() => {
-    expect(actions(test.app)).toEqual([{ type: 'GOOD' }])
-    expect(test.names).toEqual(['connect', 'authenticated', 'denied', 'add'])
+    expect(actions(test.app)).toEqual([
+      { type: 'logux/undo', id: [1, '10:uuid', 0], reason: 'denied' },
+      { type: 'GOOD' }
+    ])
+    expect(test.names).toEqual([
+      'connect', 'authenticated', 'denied', 'add', 'add'
+    ])
     expect(test.reports[2][1].actionId).toEqual([1, '10:uuid', 0])
-    expect(test.reports[3][1].meta.id).toEqual([2, '10:uuid', 0])
+    expect(test.reports[4][1].meta.id).toEqual([2, '10:uuid', 0])
   })
 })
 
@@ -405,7 +426,7 @@ it('ignores unknown action types', () => {
     return client.connection.pair.wait('right')
   }).then(() => {
     expect(actions(test.app)).toEqual([
-      { type: 'logux/undo', reason: 'unknownType', id: [1, '10:uuid', 0] }
+      { type: 'logux/undo', reason: 'error', id: [1, '10:uuid', 0] }
     ])
     expect(test.names).toEqual([
       'connect', 'authenticated', 'unknownType', 'add'])
@@ -416,7 +437,7 @@ it('ignores unknown action types', () => {
 })
 
 it('checks user access for action', () => {
-  const test = createReporter()
+  const test = createReporter({ env: 'development' })
   test.app.type('FOO', {
     access (action, meta, creator) {
       expect(creator.user).toEqual('10')
@@ -426,7 +447,10 @@ it('checks user access for action', () => {
     }
   })
 
-  return connectClient(test.app).then(client => {
+  let client
+  return connectClient(test.app).then(created => {
+    client = created
+    client.connection.send = jest.fn(client.connection.send)
     client.connection.other().send(['sync', 2,
       { type: 'FOO' }, { id: [1, '10:uuid', 0], time: 1 },
       { type: 'FOO', bar: true }, { id: [1, '10:uuid', 1], time: 1 }
@@ -440,6 +464,9 @@ it('checks user access for action', () => {
     expect(test.names).toEqual([
       'connect', 'authenticated', 'denied', 'add', 'add'])
     expect(test.reports[2][1].actionId).toEqual([1, '10:uuid', 0])
+    expect(client.connection.send).toHaveBeenCalledWith([
+      'debug', 'error', 'Action [1,"10:uuid",0] was denied'
+    ])
   })
 })
 

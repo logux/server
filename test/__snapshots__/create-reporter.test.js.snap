@@ -299,6 +299,19 @@ exports[`reports processed 2`] = `
 "
 `;
 
+exports[`reports subscribed 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"subscription\\":\\"user/100\\",\\"actionId\\":[1487805099387,\\"100:H10Nf5stl\\",0],\\"msg\\":\\"Client was subscribed\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports subscribed 2`] = `
+"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mClient was subscribed[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Subscription: [1muser/100[22m
+        Action ID:    [[1m1487805099387[22m, [1m100[22m:H10Nf5stl, [1m0[22m]
+
+"
+`;
+
 exports[`reports unauthenticated 1`] = `
 "{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"subprotocol\\":\\"1.0.0\\",\\"clientId\\":\\"670\\",\\"nodeId\\":\\"100:H10Nf5stl\\",\\"msg\\":\\"Bad authentication\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
@@ -335,6 +348,45 @@ exports[`reports unknownType from server 2`] = `
 "[1m[31m[40m[7m ERROR [27m[49m[39m[22m [1m[31mAction with unknown type[39m[22m [2mat 1970-01-01 00:00:00[22m
         Type:      [1mCHANGE_SER[22m
         Action ID: [[1m1487805099387[22m, [1mserver[22m:r1CJmycQW, [1m0[22m]
+
+"
+`;
+
+exports[`reports unsubscribed 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"subscription\\":\\"user/100\\",\\"actionId\\":[1487805099387,\\"100:H10Nf5stl\\",0],\\"msg\\":\\"Client was unsubscribed\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports unsubscribed 2`] = `
+"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mClient was unsubscribed[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Subscription: [1muser/100[22m
+        Action ID:    [[1m1487805099387[22m, [1m100[22m:H10Nf5stl, [1m0[22m]
+
+"
+`;
+
+exports[`reports wrongSubscription 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"subscription\\":\\"ser/100\\",\\"actionId\\":[1487805099387,\\"100:H10Nf5stl\\",0],\\"msg\\":\\"Subscription with wrong name\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports wrongSubscription 2`] = `
+"[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mSubscription with wrong name[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Subscription: [1mser/100[22m
+        Action ID:    [[1m1487805099387[22m, [1m100[22m:H10Nf5stl, [1m0[22m]
+
+"
+`;
+
+exports[`reports wrongSubscription without name 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"actionId\\":[1487805099387,\\"100:H10Nf5stl\\",0],\\"msg\\":\\"Subscription with wrong name\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports wrongSubscription without name 2`] = `
+"[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mSubscription with wrong name[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Subscription: [1mundefined[22m
+        Action ID:    [[1m1487805099387[22m, [1m100[22m:H10Nf5stl, [1m0[22m]
 
 "
 `;

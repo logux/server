@@ -216,9 +216,37 @@ it('reports unknownType from server', () => {
   })
 })
 
+it('reports wrongSubscription', () => {
+  check('wrongSubscription', {
+    subscription: 'ser/100',
+    actionId: [1487805099387, '100:H10Nf5stl', 0]
+  })
+})
+
+it('reports wrongSubscription without name', () => {
+  check('wrongSubscription', {
+    subscription: undefined,
+    actionId: [1487805099387, '100:H10Nf5stl', 0]
+  })
+})
+
 it('reports processed', () => {
   check('processed', {
     actionId: [1487805099387, '100:H10Nf5stl', 0], latency: 500
+  })
+})
+
+it('reports subscribed', () => {
+  check('subscribed', {
+    subscription: 'user/100',
+    actionId: [1487805099387, '100:H10Nf5stl', 0]
+  })
+})
+
+it('reports unsubscribed', () => {
+  check('unsubscribed', {
+    subscription: 'user/100',
+    actionId: [1487805099387, '100:H10Nf5stl', 0]
   })
 })
 

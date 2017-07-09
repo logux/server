@@ -361,6 +361,7 @@ it('marks actions with own node ID', () => {
 it('marks actions with waiting status', () => {
   app = createServer()
   app.type('A', { access: () => true })
+  app.subscription('a', () => true)
 
   const statuses = []
   app.log.on('add', (action, meta) => {
@@ -369,9 +370,10 @@ it('marks actions with waiting status', () => {
 
   return Promise.all([
     app.log.add({ type: 'A' }),
-    app.log.add({ type: 'A' }, { status: 'processed' })
+    app.log.add({ type: 'A' }, { status: 'processed' }),
+    app.log.add({ type: 'logux/subscribe', name: 'a' })
   ]).then(() => {
-    expect(statuses).toEqual(['waiting', 'processed'])
+    expect(statuses).toEqual(['waiting', 'processed', undefined])
   })
 })
 
@@ -559,9 +561,7 @@ it('reports about error during action processing', () => {
 
 it('undos actions on client', () => {
   app = createServer()
-
   app.undo({ id: [1, '1:uuid', 0], nodeIds: ['2:uuid'], users: ['3'] }, 'magic')
-
   return wait(1).then(() => {
     const entries = app.log.store.created.map(i => i.slice(0, 2))
     expect(entries).toEqual([
@@ -614,5 +614,138 @@ it('allows to override subprotocol in meta', () => {
     { subprotocol: '0.1.0', reasons: ['test'] }
   ).then(() => {
     expect(app.log.store.created[0][1].subprotocol).toEqual('0.1.0')
+  })
+})
+
+it('reports about subscription with wrong name', () => {
+  const test = createReporter({ env: 'development' })
+  test.app.subscription('foo', () => true)
+  test.app.nodeIds['10:uuid'] = {
+    connection: { send: jest.fn() },
+    sync: { onAdd () { } }
+  }
+  return test.app.log.add(
+    { type: 'logux/subscribe' }, { id: [1, '10:uuid', 0] }
+  ).then(() => {
+    expect(test.names).toEqual(['add', 'wrongSubscription', 'clean', 'add'])
+    expect(test.reports[1][1]).toEqual({
+      actionId: [1, '10:uuid', 0], subscription: undefined
+    })
+    expect(test.reports[3][1].action).toEqual({
+      id: [1, '10:uuid', 0], reason: 'error', type: 'logux/undo'
+    })
+    expect(test.app.nodeIds['10:uuid'].connection.send).toHaveBeenCalledWith([
+      'debug', 'error', 'Wrong subscription name undefined'
+    ])
+    return test.app.log.add({ type: 'logux/unsubscribe' })
+  }).then(() => {
+    expect(test.reports[5]).toEqual(['wrongSubscription', {
+      actionId: [2, 'server:uuid', 0], subscription: undefined
+    }])
+    return test.app.log.add({ type: 'logux/subscribe', name: 'unknown' })
+  }).then(() => {
+    expect(test.reports[9]).toEqual(['wrongSubscription', {
+      actionId: [4, 'server:uuid', 0], subscription: 'unknown'
+    }])
+  })
+})
+
+it('ignores subscription for other servers', () => {
+  const test = createReporter()
+  const action = { type: 'logux/subscribe' }
+  test.app.log.add(action, { server: 'server:other' }).then(() => {
+    expect(test.names).toEqual(['add', 'clean'])
+  })
+})
+
+it('checks access to subscription', () => {
+  const test = createReporter()
+  const client = {
+    sync: { remoteSubprotocol: '0.0.0', onAdd: () => false }
+  }
+  test.app.nodeIds['10:uuid'] = client
+
+  test.app.subscription(/^user\/(\d+)$/, params => {
+    expect(params[1]).toEqual('10')
+    return Promise.resolve(false)
+  })
+
+  return test.app.log.add(
+    { type: 'logux/subscribe', name: 'user/10' }, { id: [1, '10:uuid', 0] }
+  ).then(() => {
+    return Promise.resolve()
+  }).then(() => {
+    expect(test.names).toEqual(['add', 'clean', 'denied'])
+    expect(test.reports[2][1]).toEqual({ actionId: [1, '10:uuid', 0] })
+    expect(test.app.subscribers).toEqual({ })
+  })
+})
+
+it('reports about errors during subscription', () => {
+  const test = createReporter()
+  const client = {
+    sync: { remoteSubprotocol: '0.0.0', onAdd: () => false }
+  }
+  test.app.nodeIds['10:uuid'] = client
+
+  const err = new Error()
+  test.app.subscription(/^user\/(\d+)$/, () => {
+    throw err
+  })
+
+  return test.app.log.add(
+    { type: 'logux/subscribe', name: 'user/10' }, { id: [1, '10:uuid', 0] }
+  ).then(() => {
+    return Promise.resolve()
+  }).then(() => {
+    expect(test.names).toEqual(['add', 'clean', 'error'])
+    expect(test.reports[2][1]).toEqual({ actionId: [1, '10:uuid', 0], err })
+    expect(test.app.subscribers).toEqual({ })
+  })
+})
+
+it('subscribes clients', () => {
+  const test = createReporter()
+  const client = {
+    sync: { remoteSubprotocol: '0.0.0', onAdd: () => false }
+  }
+  test.app.nodeIds['10:uuid'] = client
+
+  let calls = 0
+  test.app.subscription('user/:id', (params, action, meta, creator) => {
+    expect(params.id).toEqual('10')
+    expect(action.name).toEqual('user/10')
+    expect(meta.id).toEqual([1, '10:uuid', 0])
+    expect(creator.nodeId).toEqual('10:uuid')
+    calls += 1
+    return true
+  })
+
+  return test.app.log.add(
+    { type: 'logux/subscribe', name: 'user/10' }, { id: [1, '10:uuid', 0] }
+  ).then(() => {
+    return Promise.resolve()
+  }).then(() => {
+    expect(calls).toEqual(1)
+    expect(test.names).toEqual(['add', 'clean', 'subscribed'])
+    expect(test.reports[2][1]).toEqual({
+      actionId: [1, '10:uuid', 0], subscription: 'user/10'
+    })
+    expect(test.app.subscribers).toEqual({
+      'user/10': {
+        '10:uuid': client
+      }
+    })
+    return test.app.log.add(
+      { type: 'logux/unsubscribe', name: 'user/10' }, { id: [1, '10:uuid', 0] }
+    )
+  }).then(() => {
+    expect(test.names).toEqual([
+      'add', 'clean', 'subscribed', 'add', 'unsubscribed', 'clean'
+    ])
+    expect(test.reports[4][1]).toEqual({
+      actionId: [1, '10:uuid', 0], subscription: 'user/10'
+    })
+    expect(test.app.subscribers).toEqual({ })
   })
 })

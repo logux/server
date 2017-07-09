@@ -3,6 +3,7 @@
 const ServerConnection = require('logux-sync').ServerConnection
 const MemoryStore = require('logux-core').MemoryStore
 const NanoEvents = require('nanoevents')
+const UrlPattern = require('url-pattern')
 const WebSocket = require('uws')
 const shortid = require('shortid')
 const https = require('https')
@@ -158,8 +159,12 @@ class BaseServer {
     this.log = new Log({ store, nodeId: this.nodeId })
 
     this.log.on('preadd', (action, meta) => {
-      if (!meta.server) meta.server = this.nodeId
-      if (!meta.status) meta.status = 'waiting'
+      if (!meta.server) {
+        meta.server = this.nodeId
+      }
+      if (!meta.status && action.type.slice(0, 6) !== 'logux/') {
+        meta.status = 'waiting'
+      }
       if (meta.id[1] === this.nodeId && !meta.subprotocol) {
         meta.subprotocol = this.options.subprotocol
       }
@@ -170,6 +175,20 @@ class BaseServer {
 
       if (this.destroing) return
 
+      if (action.type === 'logux/subscribe') {
+        if (meta.server === this.nodeId) {
+          this.subscribeAction(action, meta)
+        }
+        return
+      }
+
+      if (action.type === 'logux/unsubscribe') {
+        if (meta.server === this.nodeId) {
+          this.unsubscribeAction(action, meta)
+        }
+        return
+      }
+
       const type = this.types[action.type]
       if (type || meta.status !== 'waiting') {
         this.sendAction(action, meta)
@@ -179,7 +198,7 @@ class BaseServer {
           this.unknownType(action, meta)
           return
         }
-        if (type.process) this.process(type, action, meta)
+        if (type.process) this.processAction(type, action, meta)
       }
     })
     this.log.on('clean', (action, meta) => {
@@ -214,6 +233,9 @@ class BaseServer {
     this.processing = 0
 
     this.lastClient = 0
+
+    this.subscriptions = []
+    this.subscribers = { }
 
     this.unbind.push(() => {
       for (const i in this.clients) this.clients[i].destroy()
@@ -415,6 +437,41 @@ class BaseServer {
   }
 
   /**
+   * Define subscription callback.
+   *
+   * @param {string|regexp} pattern Pattern or regular expression
+   *                                for subscription name.
+   * @param {subscriber} callback Callback to check access
+   *                             and send custom actions.
+   *
+   * @return {undefined}
+   *
+   * @example
+   * app.subscription('user/:id', (params, action, meta, creator) => {
+   *   if (params.id === creator.userId) {
+   *     db.loadUser((params.id).then(user => {
+   *       app.log.add({
+   *         type: 'USER_NAME',
+   *         name: user.name
+   *       }, {
+   *         nodeIds: [creator.nodeId]
+   *       })
+   *     })
+   *     return true
+   *   } else {
+   *     return false
+   *   }
+   * })
+   */
+  subscription (pattern, callback) {
+    if (typeof pattern === 'string') {
+      this.subscriptions.push({ pattern: new UrlPattern(pattern), callback })
+    } else {
+      this.subscriptions.push({ regexp: pattern, callback })
+    }
+  }
+
+  /**
    * Undo action from client.
    *
    * @param {Meta} meta The action’s metadata.
@@ -451,7 +508,7 @@ class BaseServer {
     }
   }
 
-  process (type, action, meta) {
+  processAction (type, action, meta) {
     const start = Date.now()
     const creator = this.createCreator(meta)
 
@@ -495,21 +552,10 @@ class BaseServer {
   unknownType (action, meta) {
     this.log.changeMeta(meta.id, { status: 'error' })
     this.reporter('unknownType', { type: action.type, actionId: meta.id })
-
     if (this.getUser(meta.id[1]) !== 'server') {
-      this.undo(meta, 'unknownType')
+      this.undo(meta, 'error')
     }
-
-    const nodeId = meta.id[1]
-    if (this.env === 'development' && this.getUser(nodeId) !== 'server') {
-      if (this.nodeIds[nodeId]) {
-        this.nodeIds[nodeId].connection.send([
-          'debug',
-          'error',
-          `Action with unknown type ${ action.type }`
-        ])
-      }
-    }
+    this.debugActionError(meta, `Action with unknown type ${ action.type }`)
   }
 
   getUser (nodeId) {
@@ -533,6 +579,93 @@ class BaseServer {
     }
 
     return new Creator(nodeId, user, subprotocol)
+  }
+
+  subscribeAction (action, meta) {
+    if (typeof action.name !== 'string') {
+      this.wrongSubscription(action, meta)
+      return
+    }
+
+    let match
+    for (const i of this.subscriptions) {
+      if (i.pattern) {
+        match = i.pattern.match(action.name)
+      } else {
+        match = action.name.match(i.regexp)
+      }
+
+      if (match) {
+        const creator = this.createCreator(meta)
+        forcePromise(() => i.callback(match, action, meta, creator)).then(r => {
+          if (!r) {
+            this.denyAction(meta, false)
+            return
+          }
+
+          const client = this.nodeIds[creator.nodeId]
+          if (!client) return
+
+          this.reporter('subscribed', {
+            subscription: action.name,
+            actionId: meta.id
+          })
+
+          if (!this.subscribers[action.name]) {
+            this.subscribers[action.name] = { }
+          }
+          this.subscribers[action.name][creator.nodeId] = client
+        }).catch(e => {
+          this.undo(meta, 'error')
+          this.emitter.emit('error', e, action, meta)
+        })
+      }
+    }
+
+    if (!match) this.wrongSubscription(action, meta)
+  }
+
+  unsubscribeAction (action, meta) {
+    if (typeof action.name !== 'string') {
+      this.wrongSubscription(action, meta)
+      return
+    }
+
+    const nodeId = meta.id[1]
+    delete this.subscribers[action.name][nodeId]
+    if (Object.keys(this.subscribers[action.name]).length === 0) {
+      delete this.subscribers[action.name]
+    }
+
+    this.reporter('unsubscribed', {
+      subscription: action.name,
+      actionId: meta.id
+    })
+  }
+
+  wrongSubscription (action, meta) {
+    this.reporter('wrongSubscription', {
+      subscription: action.name,
+      actionId: meta.id
+    })
+    this.undo(meta, 'error')
+    this.debugActionError(meta, `Wrong subscription name ${ action.name }`)
+  }
+
+  denyAction (meta, undo) {
+    this.reporter('denied', { actionId: meta.id })
+    if (undo !== false) this.undo(meta, 'denied')
+    const id = JSON.stringify(meta.id)
+    this.debugActionError(meta, `Action ${ id } was denied`)
+  }
+
+  debugActionError (meta, msg) {
+    if (this.env === 'development') {
+      const nodeId = meta.id[1]
+      if (this.nodeIds[nodeId]) {
+        this.nodeIds[nodeId].connection.send(['debug', 'error', msg])
+      }
+    }
   }
 }
 
@@ -562,4 +695,15 @@ module.exports = BaseServer
  * @param {Meta} meta The action metadata.
  * @param {Creator} creator Information about node, who create this action.
  * @return {Promise|undefined} Promise when processing will be finished.
+ */
+
+/**
+ * @callback subscriber
+ * @param {object} params Match object from subscription name pattern
+ *                        or from regular expression.
+ * @param {Action} action The action data.
+ * @param {Meta} meta The action metadata.
+ * @param {Creator} creator Information about node, who create this action.
+ * @return {boolean|Promise} `true` or Promise with `true` if client are allowed
+ *                           to subscribe.
  */

@@ -18,6 +18,7 @@
     "semver": "^5.3.0",
     "shortid": "^2.2.8",
     "strip-ansi": "^4.0.0",
+    "url-pattern": "^1.0.3",
     "uws": "^8.14.0",
     "yargs": "^8.0.2",
     "yyyy-mm-dd": "^1.0.1"

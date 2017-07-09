@@ -67,6 +67,10 @@ const REPORTERS = {
 
   processed: () => ({ msg: 'Action was processed' }),
 
+  subscribed: () => ({ msg: 'Client was subscribed' }),
+
+  unsubscribed: () => ({ msg: 'Client was unsubscribed' }),
+
   unauthenticated: () => ({ level: 'warn', msg: 'Bad authentication' }),
 
   denied: () => ({ level: 'warn', msg: 'Action was denied' }),
@@ -76,6 +80,11 @@ const REPORTERS = {
   unknownType: record => ({
     level: /^server(:|$)/.test(record.actionId[1]) ? 'error' : 'warn',
     msg: 'Action with unknown type'
+  }),
+
+  wrongSubscription: () => ({
+    level: 'warn',
+    msg: 'Subscription with wrong name'
   }),
 
   error: record => {

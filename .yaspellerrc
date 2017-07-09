@@ -36,6 +36,8 @@
     "cli",
     "CLI",
     "bunyan",
-    "isServer"
+    "isServer",
+    "params",
+    "regexp"
   ]
 }

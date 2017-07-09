@@ -182,7 +182,15 @@ class ServerClient {
         }
       }
     }
-    if (this.nodeId) delete this.app.nodeIds[this.nodeId]
+    if (this.nodeId) {
+      delete this.app.nodeIds[this.nodeId]
+      for (const i in this.app.subscribers) {
+        delete this.app.subscribers[i][this.nodeId]
+        if (Object.keys(this.app.subscribers[i]).length === 0) {
+          delete this.app.subscribers[i]
+        }
+      }
+    }
     delete this.app.clients[this.key]
   }
 
@@ -237,7 +245,7 @@ class ServerClient {
       return ALLOWED_META.indexOf(i) === -1
     })
     if (wrongUser || wrongMeta) {
-      this.app.reporter('denied', { actionId: meta.id })
+      this.app.denyAction(meta)
       return Promise.resolve(false)
     }
 
@@ -249,10 +257,7 @@ class ServerClient {
 
     return forcePromise(() => type.access(action, meta, creator))
       .then(result => {
-        if (!result) {
-          this.app.reporter('denied', { actionId: meta.id })
-          this.app.undo(meta, 'denied')
-        }
+        if (!result) this.app.denyAction(meta)
         return result
       }).catch(e => {
         this.app.undo(meta, 'error')
