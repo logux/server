@@ -611,23 +611,41 @@ it('sends new actions by user', () => {
 it('sends new actions by subscription', () => {
   const app = createServer()
   app.type('FOO', { access: () => true })
+  app.type('BAR', { access: () => true })
 
   return connectClient(app).then(client => {
+    app.subscribers.foo = {
+      '10:uuid': true
+    }
     app.subscribers.bar = {
-      '10:uuid': client
+      '10:uuid': (action, meta, creator) => {
+        expect(meta.id[1]).toEqual('server:uuid')
+        expect(creator.isServer).toBeTruthy()
+        return !action.secret
+      }
     }
     return Promise.all([
       app.log.add({ type: 'FOO' }, { id: [1, 'server:uuid', 0] }),
       app.log.add({ type: 'FOO' }, {
-        id: [2, 'server:uuid', 0], subscriptions: ['bar']
+        id: [2, 'server:uuid', 0], subscriptions: ['foo']
+      }),
+      app.log.add({ type: 'BAR', secret: true }, {
+        id: [3, 'server:uuid', 0], subscriptions: ['bar']
+      }),
+      app.log.add({ type: 'BAR' }, {
+        id: [4, 'server:uuid', 0], subscriptions: ['bar']
       })
     ]).then(() => {
       client.connection.other().send(['synced', 2])
+      client.connection.other().send(['synced', 4])
       return client.sync.waitFor('synchronized')
     }).then(() => {
-      expect(sentNames(client)).toEqual(['connected', 'sync'])
+      expect(sentNames(client)).toEqual(['connected', 'sync', 'sync'])
       expect(sent(client)[1]).toEqual([
         'sync', 2, { type: 'FOO' }, { id: [2, 'server:uuid', 0], time: 2 }
+      ])
+      expect(sent(client)[2]).toEqual([
+        'sync', 4, { type: 'BAR' }, { id: [4, 'server:uuid', 0], time: 4 }
       ])
     })
   })

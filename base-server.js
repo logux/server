@@ -441,8 +441,8 @@ class BaseServer {
    *
    * @param {string|regexp} pattern Pattern or regular expression
    *                                for subscription name.
-   * @param {subscriber} callback Callback to check access
-   *                             and send custom actions.
+   * @param {subscriber} callback Callback to check access, define custom action
+   *                              filter and send initial actions.
    *
    * @return {undefined}
    *
@@ -457,7 +457,9 @@ class BaseServer {
    *         nodeIds: [creator.nodeId]
    *       })
    *     })
-   *     return true
+   *     return (action, meta, creator) => {
+   *       return !action.hidden
+   *     }
    *   } else {
    *     return false
    *   }
@@ -549,10 +551,17 @@ class BaseServer {
     }
 
     if (meta.subscriptions) {
+      const creator = this.createCreator(meta)
       for (const subscription of meta.subscriptions) {
         if (this.subscribers[subscription]) {
-          for (const i in this.subscribers[subscription]) {
-            this.subscribers[subscription][i].sync.onAdd(action, meta)
+          for (const nodeId in this.subscribers[subscription]) {
+            let filter = this.subscribers[subscription][nodeId]
+            if (typeof filter === 'function') {
+              filter = filter(action, meta, creator)
+            }
+            if (filter && this.nodeIds[nodeId]) {
+              this.nodeIds[nodeId].sync.onAdd(action, meta)
+            }
           }
         }
       }
@@ -607,8 +616,10 @@ class BaseServer {
 
       if (match) {
         const creator = this.createCreator(meta)
-        forcePromise(() => i.callback(match, action, meta, creator)).then(r => {
-          if (!r) {
+        forcePromise(() => {
+          return i.callback(match, action, meta, creator)
+        }).then(filter => {
+          if (!filter) {
             this.denyAction(meta, false)
             return
           }
@@ -624,10 +635,11 @@ class BaseServer {
           if (!this.subscribers[action.name]) {
             this.subscribers[action.name] = { }
           }
-          this.subscribers[action.name][creator.nodeId] = client
+          this.subscribers[action.name][creator.nodeId] = filter
         }).catch(e => {
           this.emitter.emit('error', e, action, meta)
         })
+        break
       }
     }
 
@@ -707,12 +719,20 @@ module.exports = BaseServer
  */
 
 /**
+ * @callback filter
+ * @param {Action} action The action data.
+ * @param {Meta} meta The action metadata.
+ * @param {Creator} creator Information about node, who create this action.
+ * @return {boolean} Should action be sent to client.
+ */
+
+/**
  * @callback subscriber
  * @param {object} params Match object from subscription name pattern
  *                        or from regular expression.
  * @param {Action} action The action data.
  * @param {Meta} meta The action metadata.
  * @param {Creator} creator Information about node, who create this action.
- * @return {boolean|Promise} `true` or Promise with `true` if client are allowed
- *                           to subscribe.
+ * @return {boolean|filter|Promise} Promise with boolean or action filter.
+ *                                  On `false` subscription will be denied.
  */

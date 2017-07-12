@@ -711,41 +711,63 @@ it('subscribes clients', () => {
   }
   test.app.nodeIds['10:uuid'] = client
 
-  let calls = 0
+  let userSubsriptions = 0
   test.app.subscription('user/:id', (params, action, meta, creator) => {
     expect(params.id).toEqual('10')
     expect(action.name).toEqual('user/10')
     expect(meta.id).toEqual([1, '10:uuid', 0])
     expect(creator.nodeId).toEqual('10:uuid')
-    calls += 1
+    userSubsriptions += 1
     return true
   })
+
+  function filter () { }
+  test.app.subscription('posts', () => filter)
 
   return test.app.log.add(
     { type: 'logux/subscribe', name: 'user/10' }, { id: [1, '10:uuid', 0] }
   ).then(() => {
     return Promise.resolve()
   }).then(() => {
-    expect(calls).toEqual(1)
+    expect(userSubsriptions).toEqual(1)
     expect(test.names).toEqual(['add', 'clean', 'subscribed'])
     expect(test.reports[2][1]).toEqual({
       actionId: [1, '10:uuid', 0], subscription: 'user/10'
     })
     expect(test.app.subscribers).toEqual({
       'user/10': {
-        '10:uuid': client
+        '10:uuid': true
       }
     })
     return test.app.log.add(
-      { type: 'logux/unsubscribe', name: 'user/10' }, { id: [1, '10:uuid', 0] }
+      { type: 'logux/subscribe', name: 'posts' }, { id: [2, '10:uuid', 0] }
+    )
+  }).then(() => {
+    return Promise.resolve()
+  }).then(() => {
+    expect(test.app.subscribers).toEqual({
+      'user/10': {
+        '10:uuid': true
+      },
+      'posts': {
+        '10:uuid': filter
+      }
+    })
+    return test.app.log.add(
+      { type: 'logux/unsubscribe', name: 'user/10' }, { id: [3, '10:uuid', 0] }
     )
   }).then(() => {
     expect(test.names).toEqual([
-      'add', 'clean', 'subscribed', 'add', 'unsubscribed', 'clean'
+      'add', 'clean', 'subscribed', 'add', 'clean', 'subscribed',
+      'add', 'unsubscribed', 'clean'
     ])
-    expect(test.reports[4][1]).toEqual({
-      actionId: [1, '10:uuid', 0], subscription: 'user/10'
+    expect(test.reports[7][1]).toEqual({
+      actionId: [3, '10:uuid', 0], subscription: 'user/10'
     })
-    expect(test.app.subscribers).toEqual({ })
+    expect(test.app.subscribers).toEqual({
+      'posts': {
+        '10:uuid': filter
+      }
+    })
   })
 })
