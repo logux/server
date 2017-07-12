@@ -674,29 +674,6 @@ it('sends old action only once', () => {
   })
 })
 
-it('does not resent unknown types before processing', () => {
-  const app = createServer()
-
-  return connectClient(app).then(client => {
-    return Promise.all([
-      app.log.add({ type: 'UNKNOWN' }, {
-        id: [1, 'server:uuid', 0], nodeIds: ['10:uuid']
-      }),
-      app.log.add({ type: 'UNKNOWN' }, {
-        id: [2, 'server:uuid', 0], nodeIds: ['10:uuid'], status: 'processed'
-      })
-    ]).then(() => {
-      client.connection.other().send(['synced', 2])
-      return client.sync.waitFor('synchronized')
-    }).then(() => {
-      expect(sentNames(client)).toEqual(['connected', 'sync'])
-      expect(sent(client)[1]).toEqual([
-        'sync', 2, { type: 'UNKNOWN' }, { id: [2, 'server:uuid', 0], time: 2 }
-      ])
-    })
-  })
-})
-
 it('sends debug back on unknown type', () => {
   const app = createServer({ env: 'development' })
   return Promise.all([

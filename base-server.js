@@ -189,11 +189,9 @@ class BaseServer {
         return
       }
 
-      const type = this.types[action.type]
-      if (type || meta.status !== 'waiting') {
-        this.sendAction(action, meta)
-      }
+      this.sendAction(action, meta)
       if (meta.status === 'waiting') {
+        const type = this.types[action.type]
         if (!type) {
           this.unknownType(action, meta)
           return
@@ -510,27 +508,25 @@ class BaseServer {
     }
   }
 
-  processAction (type, action, meta) {
-    const start = Date.now()
-    const creator = this.createCreator(meta)
-
-    this.processing += 1
-    forcePromise(() => type.process(action, meta, creator)).then(() => {
-      this.reporter('processed', {
-        actionId: meta.id,
-        latency: Date.now() - start
-      })
-      this.processing -= 1
-      this.emitter.emit('processed', action, meta)
-    }).catch(e => {
-      this.log.changeMeta(meta.id, { status: 'error' })
-      this.undo(meta, 'error')
-      this.emitter.emit('error', e, action, meta)
-      this.processing -= 1
-      this.emitter.emit('processed', action, meta)
-    })
-  }
-
+  /**
+   * Send action, received by other server, to all clients of current server.
+   * This method is for multi-server configuration only.
+   *
+   * @param {Action} action New action.
+   * @param {Meta} meta Action’s metadata.
+   *
+   * @return {undefined}
+   *
+   * @example
+   * app.log.on('add', (action, meta) => {
+   *   if (meta.server === app.nodeId) {
+   *     sendToOtherServersByRedis(action, meta)
+   *   }
+   * })
+   * onReceivingFromOtherServer((action, meta) => {
+   *   app.sendAction(action, meta)
+   * })
+   */
   sendAction (action, meta) {
     if (meta.nodeIds) {
       for (const id of meta.nodeIds) {
@@ -566,6 +562,27 @@ class BaseServer {
         }
       }
     }
+  }
+
+  processAction (type, action, meta) {
+    const start = Date.now()
+    const creator = this.createCreator(meta)
+
+    this.processing += 1
+    forcePromise(() => type.process(action, meta, creator)).then(() => {
+      this.reporter('processed', {
+        actionId: meta.id,
+        latency: Date.now() - start
+      })
+      this.processing -= 1
+      this.emitter.emit('processed', action, meta)
+    }).catch(e => {
+      this.log.changeMeta(meta.id, { status: 'error' })
+      this.undo(meta, 'error')
+      this.emitter.emit('error', e, action, meta)
+      this.processing -= 1
+      this.emitter.emit('processed', action, meta)
+    })
   }
 
   unknownType (action, meta) {
