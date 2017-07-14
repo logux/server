@@ -36,7 +36,7 @@
     "eslint-plugin-security": "^1.4.0",
     "eslint-plugin-standard": "^3.0.1",
     "jest": "^20.0.4",
-    "jsdoc": "^3.5.1",
+    "jsdoc": "^3.5.3",
     "lint-staged": "^4.0.1",
     "pre-commit": "^1.2.2",
     "rimraf": "^2.6.1",

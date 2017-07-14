@@ -423,9 +423,9 @@ caseless@~0.12.0:
   version "0.12.0"
   resolved "https://registry.yarnpkg.com/caseless/-/caseless-0.12.0.tgz#1b681c21ff84033c826543090689420d187151dc"
 
-catharsis@~0.8.8:
-  version "0.8.8"
-  resolved "https://registry.yarnpkg.com/catharsis/-/catharsis-0.8.8.tgz#693479f43aac549d806bd73e924cd0d944951a06"
+catharsis@~0.8.9:
+  version "0.8.9"
+  resolved "https://registry.yarnpkg.com/catharsis/-/catharsis-0.8.9.tgz#98cc890ca652dd2ef0e70b37925310ff9e90fc8b"
   dependencies:
     underscore-contrib "~0.3.0"
 
@@ -1750,13 +1750,13 @@ jschardet@^1.4.2:
   version "1.4.2"
   resolved "https://registry.yarnpkg.com/jschardet/-/jschardet-1.4.2.tgz#2aa107f142af4121d145659d44f50830961e699a"
 
-jsdoc@^3.5.1:
-  version "3.5.1"
-  resolved "https://registry.yarnpkg.com/jsdoc/-/jsdoc-3.5.1.tgz#bab0f6e8cdd01a5ad336d3736db8921edbd4717d"
+jsdoc@^3.5.3:
+  version "3.5.3"
+  resolved "https://registry.yarnpkg.com/jsdoc/-/jsdoc-3.5.3.tgz#c8bb6a452548e3c778d4eff38f66ac20df2cac87"
   dependencies:
     babylon "~7.0.0-beta.16"
     bluebird "~3.5.0"
-    catharsis "~0.8.8"
+    catharsis "~0.8.9"
     escape-string-regexp "~1.0.5"
     js2xmlparser "~3.0.0"
     klaw "~2.0.0"
