@@ -675,8 +675,11 @@ it('checks access to subscription', () => {
   ).then(() => {
     return Promise.resolve()
   }).then(() => {
-    expect(test.names).toEqual(['add', 'clean', 'denied'])
+    expect(test.names).toEqual(['add', 'clean', 'denied', 'add'])
     expect(test.reports[2][1]).toEqual({ actionId: [1, '10:uuid', 0] })
+    expect(test.reports[3][1].action).toEqual({
+      type: 'logux/undo', id: [1, '10:uuid', 0], reason: 'denied'
+    })
     expect(test.app.subscribers).toEqual({ })
   })
 })
@@ -698,8 +701,13 @@ it('reports about errors during subscription', () => {
   ).then(() => {
     return Promise.resolve()
   }).then(() => {
-    expect(test.names).toEqual(['add', 'clean', 'error'])
+    return Promise.resolve()
+  }).then(() => {
+    expect(test.names).toEqual(['add', 'clean', 'error', 'add'])
     expect(test.reports[2][1]).toEqual({ actionId: [1, '10:uuid', 0], err })
+    expect(test.reports[3][1].action).toEqual({
+      type: 'logux/undo', id: [1, '10:uuid', 0], reason: 'error'
+    })
     expect(test.app.subscribers).toEqual({ })
   })
 })

@@ -637,7 +637,7 @@ class BaseServer {
           return i.callback(match, action, meta, creator)
         }).then(filter => {
           if (!filter) {
-            this.denyAction(meta, false)
+            this.denyAction(meta)
             return
           }
 
@@ -655,6 +655,7 @@ class BaseServer {
           this.subscribers[action.name][creator.nodeId] = filter
         }).catch(e => {
           this.emitter.emit('error', e, action, meta)
+          this.undo(meta, 'error')
         })
         break
       }
@@ -690,9 +691,9 @@ class BaseServer {
     this.debugActionError(meta, `Wrong subscription name ${ action.name }`)
   }
 
-  denyAction (meta, undo) {
+  denyAction (meta) {
     this.reporter('denied', { actionId: meta.id })
-    if (undo !== false) this.undo(meta, 'denied')
+    this.undo(meta, 'denied')
     const id = JSON.stringify(meta.id)
     this.debugActionError(meta, `Action ${ id } was denied`)
   }
