@@ -90,15 +90,13 @@ yargs
  *                               is highly recommended.
  *
  * @example
- * import { Server } from 'logux-server'
+ * const Server = require('logux-server/server')
  *
- * let env = process.env.NODE_ENV || 'development'
- * let envOptions = {}
+ * const env = process.env.NODE_ENV || 'development'
+ * const envOptions = {}
  * if (env === 'production') {
- *   envOptions = {
- *     cert: 'cert.pem',
- *     key: 'key.pem'
- *   }
+ *   envOptions.cert = 'cert.pem'
+ *   envOptions.key = 'key.pem'
  * }
  *
  * const app = new Server(Object.assign({

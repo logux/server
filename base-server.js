@@ -88,7 +88,7 @@ function optionError (msg) {
  * @param {function} [reporter] Function to show current server status.
  *
  * @example
- * import { BaseServer } from 'logux-server'
+ * const BaseServer = require('logux-server/base-server')
  * class MyLoguxHack extends BaseServer {
  *   …
  * }
