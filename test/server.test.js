@@ -24,7 +24,7 @@ function start (name, args) {
   })
 }
 
-function check (name, args) {
+function check (name, args, kill) {
   return new Promise(resolve => {
     let out = ''
     const server = spawn(path.join(__dirname, '/servers/', name), args)
@@ -46,6 +46,7 @@ function check (name, args) {
       fixed = fixed.replace(/\r\v/g, '\n')
       resolve([fixed, exit])
     })
+
     function waitOut () {
       if (out.length > 0) {
         server.kill('SIGINT')
@@ -53,12 +54,12 @@ function check (name, args) {
         setTimeout(waitOut, 100)
       }
     }
-    setTimeout(waitOut, 200)
+    if (kill) setTimeout(waitOut, 200)
   })
 }
 
 function checkOut (name, args) {
-  return check(name, args).then(result => {
+  return check(name, args, 'kill').then(result => {
     const out = result[0]
     const exit = result[1]
     if (exit !== 0) {
@@ -154,7 +155,7 @@ it('uses arg, env, options in given priority', () => {
 it('destroys everything on exit', () => checkOut('destroy.js'))
 
 it('writes about unbind', () => {
-  return check('unbind.js').then(result => {
+  return check('unbind.js', [], 'kill').then(result => {
     expect(result[0]).toMatchSnapshot()
   })
 })
