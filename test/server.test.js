@@ -31,7 +31,7 @@ function start (name, args) {
 }
 
 function check (name, args) {
-  return new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     let out = ''
     const server = spawn(path.join(__dirname, '/servers/', name), args)
     server.stdout.on('data', chank => {
@@ -50,12 +50,7 @@ function check (name, args) {
         .replace(/"loguxServer":"\d+.\d+.\d+"/g, '"loguxServer":"0.0.0"')
         .replace(/"hostname":"[^"]+"/g, '"hostname":"localhost"')
       fixed = fixed.replace(/\r\v/g, '\n')
-
-      if (typeof exit !== 'number') {
-        reject(new Error('Timeout was reached'))
-      } else {
-        resolve([fixed, exit])
-      }
+      resolve([fixed, exit])
     })
     wait(700).then(() => {
       server.kill('SIGINT')
@@ -68,7 +63,9 @@ function checkOut (name, args) {
     const out = result[0]
     const exit = result[1]
 
-    if (exit !== 0) {
+    if (typeof exit !== 'number') {
+      throw new Error('Timeout was reached')
+    } else if (exit !== 0) {
       throw new Error(`Fall with:\n${ out }`)
     }
     expect(out).toMatchSnapshot()
@@ -79,6 +76,9 @@ function checkError (name, args) {
   return check(name, args).then(result => {
     const out = result[0]
     const exit = result[1]
+    if (typeof exit !== 'number') {
+      throw new Error('Timeout was reached')
+    }
     expect(exit).toEqual(1)
     expect(out).toMatchSnapshot()
   })
