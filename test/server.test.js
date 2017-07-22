@@ -7,12 +7,6 @@ const Server = require('../server')
 
 const DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
 
-function wait (ms) {
-  return new Promise(resolve => {
-    setTimeout(resolve, ms)
-  })
-}
-
 let started
 
 function start (name, args) {
@@ -52,9 +46,14 @@ function check (name, args) {
       fixed = fixed.replace(/\r\v/g, '\n')
       resolve([fixed, exit])
     })
-    wait(700).then(() => {
-      server.kill('SIGINT')
-    })
+    function waitOut () {
+      if (out.length > 0) {
+        server.kill('SIGINT')
+      } else {
+        setTimeout(waitOut, 700)
+      }
+    }
+    setTimeout(waitOut, 700)
   })
 }
 
@@ -62,10 +61,7 @@ function checkOut (name, args) {
   return check(name, args).then(result => {
     const out = result[0]
     const exit = result[1]
-
-    if (typeof exit !== 'number') {
-      throw new Error('Timeout was reached')
-    } else if (exit !== 0) {
+    if (exit !== 0) {
       throw new Error(`Fall with:\n${ out }`)
     }
     expect(out).toMatchSnapshot()
@@ -76,9 +72,6 @@ function checkError (name, args) {
   return check(name, args).then(result => {
     const out = result[0]
     const exit = result[1]
-    if (typeof exit !== 'number') {
-      throw new Error('Timeout was reached')
-    }
     expect(exit).toEqual(1)
     expect(out).toMatchSnapshot()
   })
