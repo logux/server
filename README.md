@@ -70,11 +70,11 @@ You need to write custom logic inside your action callbacks.
 
 ```js
 app.type('CHANGE_NAME', {
-  access (action, meta, userId) {
-    return action.user === userId
+  access (action, meta, creator) {
+    return action.user === creator.userId
   }
   process (action) {
-    users.find({ id: action.user }).then(user => {
+    return users.find({ id: action.user }).then(user => {
       user.update({ name: action.name })
     })
   }
@@ -97,6 +97,47 @@ For one, you may just call the legacy REST API:
 
 [`logux-core`]: https://github.com/logux/logux-core
 
+
+### Control Data Access
+
+By default other clients will not receive new actions.
+
+There are 3 ways to send new action to client.
+
+* Set `nodeIds: ['10:h40vj5']` in action’s metadata.
+* Set `users: ['10']` in action’s metadata.
+* Using subscriptions.
+
+Before using subscriptions, you need to define them:
+
+```js
+app.subscriptions('user/:id', (params, action, meta, creator) => {
+  if (params.id !== creator.userId) {
+    // Access denied
+    return false
+  } else {
+    // Sending initial state
+    db.loadUser(params.id).then(user => {
+      app.log.add({
+        type: 'USER_NAME',
+        name: user.name
+      }, {
+        nodeIds: [creator.nodeId]
+      })
+    })
+    return true
+  }
+})
+```
+
+Then server or clients could create actions with `subscriptions: ['user/10']`
+in action’s metadata.
+
+`logux/subscribe` action will open subscription for client:
+
+```js
+client.log.add({ type: 'logux/subscribe', name: 'user/10' })
+```
 
 ### Test Your Logic Locally
 

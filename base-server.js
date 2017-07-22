@@ -446,8 +446,10 @@ class BaseServer {
    *
    * @example
    * app.subscription('user/:id', (params, action, meta, creator) => {
-   *   if (params.id === creator.userId) {
-   *     db.loadUser((params.id).then(user => {
+   *   if (params.id !== creator.userId) {
+   *     return false
+   *   } else {
+   *     db.loadUser(params.id).then(user => {
    *       app.log.add({
    *         type: 'USER_NAME',
    *         name: user.name
@@ -458,8 +460,6 @@ class BaseServer {
    *     return (action, meta, creator) => {
    *       return !action.hidden
    *     }
-   *   } else {
-   *     return false
    *   }
    * })
    */
