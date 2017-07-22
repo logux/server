@@ -63,10 +63,11 @@ function checkOut (name, args) {
     const out = result[0]
     const exit = result[1]
 
-    if (exit !== 0) {
-      console.error(`${ name } fall with:\n${ out }`)
+    if (typeof exit !== 'number') {
+      throw new Error('Timeout was reached')
+    } else if (exit !== 0) {
+      throw new Error(`Fall with:\n${ out }`)
     }
-    expect(exit).toEqual(0)
     expect(out).toMatchSnapshot()
   })
 }
