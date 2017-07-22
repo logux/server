@@ -52,7 +52,7 @@ function check (name, args) {
       fixed = fixed.replace(/\r\v/g, '\n')
       resolve([fixed, exitCode])
     })
-    wait(500).then(() => {
+    wait(700).then(() => {
       server.kill('SIGINT')
     })
   })
