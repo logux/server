@@ -31,7 +31,7 @@ function start (name, args) {
 }
 
 function check (name, args) {
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     let out = ''
     const server = spawn(path.join(__dirname, '/servers/', name), args)
     server.stdout.on('data', chank => {
@@ -40,7 +40,7 @@ function check (name, args) {
     server.stderr.on('data', chank => {
       out += chank
     })
-    server.on('close', exitCode => {
+    server.on('close', exit => {
       let fixed = out
         .replace(DATE, '1970-01-01 00:00:00')
         .replace(/"time":"[^"]+"/g, '"time":"1970-01-01T00:00:00.000Z"')
@@ -50,7 +50,12 @@ function check (name, args) {
         .replace(/"loguxServer":"\d+.\d+.\d+"/g, '"loguxServer":"0.0.0"')
         .replace(/"hostname":"[^"]+"/g, '"hostname":"localhost"')
       fixed = fixed.replace(/\r\v/g, '\n')
-      resolve([fixed, exitCode])
+
+      if (typeof exit !== 'number') {
+        reject(new Error('Timeout was reached'))
+      } else {
+        resolve([fixed, exit])
+      }
     })
     wait(700).then(() => {
       server.kill('SIGINT')
@@ -63,9 +68,7 @@ function checkOut (name, args) {
     const out = result[0]
     const exit = result[1]
 
-    if (typeof exit !== 'number') {
-      throw new Error('Timeout was reached')
-    } else if (exit !== 0) {
+    if (exit !== 0) {
       throw new Error(`Fall with:\n${ out }`)
     }
     expect(out).toMatchSnapshot()
