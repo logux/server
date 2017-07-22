@@ -50,10 +50,10 @@ function check (name, args) {
       if (out.length > 0) {
         server.kill('SIGINT')
       } else {
-        setTimeout(waitOut, 700)
+        setTimeout(waitOut, 100)
       }
     }
-    setTimeout(waitOut, 700)
+    setTimeout(waitOut, 200)
   })
 }
 
