@@ -118,12 +118,9 @@ app.subscriptions('user/:id', (params, action, meta, creator) => {
   } else {
     // Sending initial state
     db.loadUser(params.id).then(user => {
-      app.log.add({
-        type: 'USER_NAME',
-        name: user.name
-      }, {
-        nodeIds: [creator.nodeId]
-      })
+      app.log.add(
+        { type: 'USER_NAME', name: user.name },
+        { nodeIds: [creator.nodeId] })
     })
     return true
   }

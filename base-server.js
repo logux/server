@@ -450,12 +450,9 @@ class BaseServer {
    *     return false
    *   } else {
    *     db.loadUser(params.id).then(user => {
-   *       app.log.add({
-   *         type: 'USER_NAME',
-   *         name: user.name
-   *       }, {
-   *         nodeIds: [creator.nodeId]
-   *       })
+   *       app.log.add(
+   *         { type: 'USER_NAME', name: user.name },
+   *         { nodeIds: [creator.nodeId] })
    *     })
    *     return (action, meta, creator) => {
    *       return !action.hidden
