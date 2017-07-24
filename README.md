@@ -139,6 +139,18 @@ in action’s metadata.
 client.log.add({ type: 'logux/subscribe', name: 'user/10' })
 ```
 
+To send action to subscription, add `subscriptions` metadata:
+
+```js
+client.log.add(
+  { type: 'CHANGE_NAME', name: 'New', user: 10 },
+  { subscriptions: ['user/10'] }
+)
+```
+
+Note, that everyone could send actions to subscriptions. If you don’t want it,
+check metadata in `access()` callbacks inside `type()` definition.
+
 ### Test Your Logic Locally
 
 You can run your server with:
