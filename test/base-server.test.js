@@ -561,7 +561,12 @@ it('reports about error during action processing', () => {
 
 it('undos actions on client', () => {
   app = createServer()
-  app.undo({ id: [1, '1:uuid', 0], nodeIds: ['2:uuid'], users: ['3'] }, 'magic')
+  app.undo({
+    subscriptions: ['user/1'],
+    nodeIds: ['2:uuid'],
+    users: ['3'],
+    id: [1, '1:uuid', 0]
+  }, 'magic')
   return wait(1).then(() => {
     const entries = app.log.store.created.map(i => i.slice(0, 2))
     expect(entries).toEqual([
@@ -580,7 +585,8 @@ it('undos actions on client', () => {
           reasons: ['error'],
           server: 'server:uuid',
           status: 'processed',
-          subprotocol: '0.0.0'
+          subprotocol: '0.0.0',
+          subscriptions: ['user/1']
         }
       ]
     ])
