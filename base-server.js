@@ -482,8 +482,9 @@ class BaseServer {
    * }
    */
   undo (meta, reason) {
-    const undoMeta = { reasons: ['error'], status: 'processed' }
+    const undoMeta = { status: 'processed' }
     if (meta.users) undoMeta.users = meta.users.slice(0)
+    if (meta.reasons) undoMeta.reasons = meta.reasons.slice(0)
     if (meta.subscriptions) undoMeta.subscriptions = meta.subscriptions.slice(0)
     undoMeta.nodeIds = [meta.id[1]]
     if (meta.nodeIds) undoMeta.nodeIds = undoMeta.nodeIds.concat(meta.nodeIds)

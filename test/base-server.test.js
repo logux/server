@@ -545,15 +545,15 @@ it('reports about error during action processing', () => {
     }
   })
 
-  return app.log.add({ type: 'FOO' }).then(() => {
+  return app.log.add({ type: 'FOO' }, { reasons: ['test'] }).then(() => {
     return wait(1)
   }).then(() => {
-    expect(test.names).toEqual(['add', 'clean', 'error', 'add'])
-    expect(test.reports[2]).toEqual(['error', {
+    expect(test.names).toEqual(['add', 'error', 'add'])
+    expect(test.reports[1]).toEqual(['error', {
       actionId: [1, 'server:uuid', 0],
       err
     }])
-    expect(test.reports[3][1].action).toEqual({
+    expect(test.reports[2][1].action).toEqual({
       type: 'logux/undo', reason: 'error', id: [1, 'server:uuid', 0]
     })
   })
@@ -564,6 +564,7 @@ it('undos actions on client', () => {
   app.undo({
     subscriptions: ['user/1'],
     nodeIds: ['2:uuid'],
+    reasons: ['user/1/lastValue'],
     users: ['3'],
     id: [1, '1:uuid', 0]
   }, 'magic')
@@ -582,7 +583,7 @@ it('undos actions on client', () => {
           added: 1,
           users: ['3'],
           nodeIds: ['1:uuid', '2:uuid'],
-          reasons: ['error'],
+          reasons: ['user/1/lastValue'],
           server: 'server:uuid',
           status: 'processed',
           subprotocol: '0.0.0',
@@ -633,11 +634,13 @@ it('reports about subscription with wrong name', () => {
   return test.app.log.add(
     { type: 'logux/subscribe' }, { id: [1, '10:uuid', 0] }
   ).then(() => {
-    expect(test.names).toEqual(['add', 'wrongSubscription', 'clean', 'add'])
+    expect(test.names).toEqual([
+      'add', 'wrongSubscription', 'add', 'clean', 'clean'
+    ])
     expect(test.reports[1][1]).toEqual({
       actionId: [1, '10:uuid', 0], subscription: undefined
     })
-    expect(test.reports[3][1].action).toEqual({
+    expect(test.reports[2][1].action).toEqual({
       id: [1, '10:uuid', 0], reason: 'error', type: 'logux/undo'
     })
     expect(test.app.nodeIds['10:uuid'].connection.send).toHaveBeenCalledWith([
@@ -645,12 +648,12 @@ it('reports about subscription with wrong name', () => {
     ])
     return test.app.log.add({ type: 'logux/unsubscribe' })
   }).then(() => {
-    expect(test.reports[5]).toEqual(['wrongSubscription', {
+    expect(test.reports[6]).toEqual(['wrongSubscription', {
       actionId: [2, 'server:uuid', 0], subscription: undefined
     }])
     return test.app.log.add({ type: 'logux/subscribe', name: 'unknown' })
   }).then(() => {
-    expect(test.reports[9]).toEqual(['wrongSubscription', {
+    expect(test.reports[11]).toEqual(['wrongSubscription', {
       actionId: [4, 'server:uuid', 0], subscription: 'unknown'
     }])
   })
@@ -681,7 +684,7 @@ it('checks access to subscription', () => {
   ).then(() => {
     return Promise.resolve()
   }).then(() => {
-    expect(test.names).toEqual(['add', 'clean', 'denied', 'add'])
+    expect(test.names).toEqual(['add', 'clean', 'denied', 'add', 'clean'])
     expect(test.reports[2][1]).toEqual({ actionId: [1, '10:uuid', 0] })
     expect(test.reports[3][1].action).toEqual({
       type: 'logux/undo', id: [1, '10:uuid', 0], reason: 'denied'
@@ -709,7 +712,7 @@ it('reports about errors during subscription', () => {
   }).then(() => {
     return Promise.resolve()
   }).then(() => {
-    expect(test.names).toEqual(['add', 'clean', 'error', 'add'])
+    expect(test.names).toEqual(['add', 'clean', 'error', 'add', 'clean'])
     expect(test.reports[2][1]).toEqual({ actionId: [1, '10:uuid', 0], err })
     expect(test.reports[3][1].action).toEqual({
       type: 'logux/undo', id: [1, '10:uuid', 0], reason: 'error'
