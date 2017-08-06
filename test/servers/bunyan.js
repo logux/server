@@ -10,7 +10,7 @@ const app = new Server({
   port: 2000,
   reporter: 'bunyan'
 })
-app.nodeId = 'server:FnXaqDxY5e'
+app.nodeId = 'server:FnXaqDxY'
 
 app.auth(() => Promise.resolve(true))
 

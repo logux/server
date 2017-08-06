@@ -144,7 +144,7 @@ class BaseServer {
      * @example
      * console.log('Error was raised on ' + app.nodeId)
      */
-    this.nodeId = `server:${ generateId(urlAlphabet, 10) }`
+    this.nodeId = `server:${ generateId(urlAlphabet, 8) }`
 
     this.options.root = this.options.root || process.cwd()
 

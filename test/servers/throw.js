@@ -8,7 +8,7 @@ const app = new Server({
   subprotocol: '1.0.0',
   supports: '1.x'
 })
-app.nodeId = 'server:FnXaqDxY5e'
+app.nodeId = 'server:FnXaqDxY'
 
 app.on('error', e => console.log(`Error event: ${ e.message }`))
 

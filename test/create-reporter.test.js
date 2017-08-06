@@ -116,7 +116,7 @@ it('reports listen', () => {
   check('listen', {
     loguxServer: '0.0.0',
     environment: 'development',
-    nodeId: 'server:FnXaqDxY5e',
+    nodeId: 'server:FnXaqDxY',
     subprotocol: '0.0.0',
     supports: '0.x',
     server: false,
@@ -130,7 +130,7 @@ it('reports listen for production', () => {
   check('listen', {
     loguxServer: '0.0.0',
     environment: 'production',
-    nodeId: 'server:FnXaqDxY5e',
+    nodeId: 'server:FnXaqDxY',
     subprotocol: '0.0.0',
     supports: '0.x',
     server: false,
@@ -144,7 +144,7 @@ it('reports listen for custom domain', () => {
   check('listen', {
     loguxServer: '0.0.0',
     environment: 'development',
-    nodeId: 'server:FnXaqDxY5e',
+    nodeId: 'server:FnXaqDxY',
     subprotocol: '0.0.0',
     supports: '0.x',
     server: true
@@ -159,7 +159,7 @@ it('reports authenticated', () => {
   check('authenticated', {
     subprotocol: '1.0.0',
     clientId: '670',
-    nodeId: '100:uImkcF4zur'
+    nodeId: '100:uImkcF4z'
   })
 })
 
@@ -167,7 +167,7 @@ it('reports authenticated without user ID', () => {
   check('authenticated', {
     subprotocol: '1.0.0',
     clientId: '670',
-    nodeId: 'uImkcF4zur'
+    nodeId: 'uImkcF4z'
   })
 })
 
@@ -175,7 +175,7 @@ it('reports unauthenticated', () => {
   check('unauthenticated', {
     subprotocol: '1.0.0',
     clientId: '670',
-    nodeId: '100:uImkcF4zur'
+    nodeId: '100:uImkcF4z'
   })
 })
 
@@ -187,7 +187,7 @@ it('reports add', () => {
       data: { name: 'John' }
     },
     meta: {
-      id: [1487805099387, '100:uImkcF4zur', 0],
+      id: [1487805099387, '100:uImkcF4z', 0],
       time: 1487805099387,
       reasons: ['lastValue', 'debug'],
       server: 'server:H1f8LAyzl',
@@ -198,62 +198,62 @@ it('reports add', () => {
 
 it('reports clean', () => {
   check('clean', {
-    actionId: [1487805099387, '100:uImkcF4zur', 0]
+    actionId: [1487805099387, '100:uImkcF4z', 0]
   })
 })
 
 it('reports denied', () => {
   check('denied', {
-    actionId: [1487805099387, '100:uImkcF4zur', 0]
+    actionId: [1487805099387, '100:uImkcF4z', 0]
   })
 })
 
 it('reports unknownType', () => {
   check('unknownType', {
-    type: 'CHANGE_SER', actionId: [1487805099387, '100:uImkcF4zur', 0]
+    type: 'CHANGE_SER', actionId: [1487805099387, '100:uImkcF4z', 0]
   })
 })
 
 it('reports unknownType from server', () => {
   check('unknownType', {
     type: 'CHANGE_SER',
-    actionId: [1487805099387, 'server:FnXaqDxY5e', 0]
+    actionId: [1487805099387, 'server:FnXaqDxY', 0]
   })
 })
 
 it('reports wrongSubscription', () => {
   check('wrongSubscription', {
     subscription: 'ser/100',
-    actionId: [1487805099387, '100:uImkcF4zur', 0]
+    actionId: [1487805099387, '100:uImkcF4z', 0]
   })
 })
 
 it('reports wrongSubscription without name', () => {
   check('wrongSubscription', {
-    subscription: undefined, actionId: [1487805099387, '100:uImkcF4zur', 0]
+    subscription: undefined, actionId: [1487805099387, '100:uImkcF4z', 0]
   })
 })
 
 it('reports processed', () => {
   check('processed', {
-    actionId: [1487805099387, '100:uImkcF4zur', 0], latency: 500
+    actionId: [1487805099387, '100:uImkcF4z', 0], latency: 500
   })
 })
 
 it('reports subscribed', () => {
   check('subscribed', {
-    subscription: 'user/100', actionId: [1487805099387, '100:uImkcF4zur', 0]
+    subscription: 'user/100', actionId: [1487805099387, '100:uImkcF4z', 0]
   })
 })
 
 it('reports unsubscribed', () => {
   check('unsubscribed', {
-    subscription: 'user/100', actionId: [1487805099387, '100:uImkcF4zur', 0]
+    subscription: 'user/100', actionId: [1487805099387, '100:uImkcF4z', 0]
   })
 })
 
 it('reports disconnect', () => {
-  check('disconnect', { nodeId: '100:uImkcF4zur' })
+  check('disconnect', { nodeId: '100:uImkcF4z' })
 })
 
 it('reports disconnect from unauthenticated user', () => {
@@ -261,7 +261,7 @@ it('reports disconnect from unauthenticated user', () => {
 })
 
 it('reports zombie', () => {
-  check('zombie', { nodeId: '100:uImkcF4zur' })
+  check('zombie', { nodeId: '100:uImkcF4z' })
 })
 
 it('reports destroy', () => {
@@ -297,7 +297,7 @@ it('reports error', () => {
 
 it('reports error from action', () => {
   check('error', {
-    actionId: [1487805099387, '100:uImkcF4zur', 0],
+    actionId: [1487805099387, '100:uImkcF4z', 0],
     err: createError('Error', 'Some mistake')
   })
 })
@@ -309,5 +309,5 @@ it('reports error from client', () => {
 
 it('reports error from sync', () => {
   const err = new SyncError({ }, 'timeout', 5000, false)
-  check('error', { nodeId: '100:uImkcF4zur', err })
+  check('error', { nodeId: '100:uImkcF4z', err })
 })
