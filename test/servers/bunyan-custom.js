@@ -16,7 +16,7 @@ const app = new Server({
   bunyan: logger,
   port: 2000
 })
-app.nodeId = 'server:r1CJmycQW'
+app.nodeId = 'server:FnXaqDxY5e'
 
 app.auth(() => Promise.resolve(true))
 

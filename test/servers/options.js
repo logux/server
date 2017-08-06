@@ -11,7 +11,7 @@ const app = new Server(
     host: '127.0.0.1'
   })
 )
-app.nodeId = 'server:r1CJmycQW'
+app.nodeId = 'server:FnXaqDxY5e'
 
 app.auth(() => Promise.resolve(true))
 

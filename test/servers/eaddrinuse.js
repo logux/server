@@ -9,7 +9,7 @@ const app = new Server({
   supports: '1.x',
   port: 2001
 })
-app.nodeId = 'server:r1CJmycQW'
+app.nodeId = 'server:FnXaqDxY5e'
 
 app.auth(() => Promise.resolve(true))
 
