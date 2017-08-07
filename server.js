@@ -77,17 +77,17 @@ yargs
  * @param {http.Server} [options.server] HTTP server to connect WebSocket
  *                                       server to it.
  *                                       Same as in ws.WebSocketServer.
- * @param {number} [option.port=1337] Port to bind server. It will create
- *                                    HTTP server manually to connect
- *                                    WebSocket server to it.
- * @param {string} [option.host="127.0.0.1"] IP-address to bind server.
- * @param {string} [option.key] SSL key or path to it. Path could be relative
- *                              from server root. It is required in production
- *                              mode, because WSS is highly recommended.
- * @param {string} [option.cert] SSL certificate or path to it. Path could
- *                               be relative from server root. It is required
- *                               in production mode, because WSS
- *                               is highly recommended.
+ * @param {number} [options.port=1337] Port to bind server. It will create
+ *                                     HTTP server manually to connect
+ *                                     WebSocket server to it.
+ * @param {string} [options.host="127.0.0.1"] IP-address to bind server.
+ * @param {string} [options.key] SSL key or path to it. Path could be relative
+ *                               from server root. It is required in production
+ *                               mode, because WSS is highly recommended.
+ * @param {string} [options.cert] SSL certificate or path to it. Path could
+ *                                be relative from server root. It is required
+ *                                in production mode, because WSS
+ *                                is highly recommended.
  *
  * @example
  * const Server = require('logux-server/server')
