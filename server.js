@@ -139,10 +139,10 @@ class Server extends BaseServer {
     return options
   }
 
-  constructor (options) {
+  constructor (options, reporter) {
     if (!options) options = { }
     options.reporter = options.reporter || 'human'
-    const reporter = createReporter(options)
+    if (!reporter) reporter = createReporter(options)
 
     let initialized = false
     const onError = err => {
