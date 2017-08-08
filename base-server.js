@@ -95,7 +95,7 @@ function optionError (msg) {
  * }
  */
 class BaseServer {
-  constructor (options, reporter) {
+  constructor (options) {
     /**
      * Server options.
      * @type {object}
@@ -105,7 +105,7 @@ class BaseServer {
      */
     this.options = options || { }
 
-    this.reporter = reporter || function () { }
+    this.reporter = this.options.reporter || function () { }
 
     /**
      * Production or development mode.

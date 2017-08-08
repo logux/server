@@ -142,12 +142,9 @@ class Server extends BaseServer {
   constructor (options) {
     if (!options) options = { }
 
-    let reporter
-    if (typeof options.reporter === 'function') {
-      reporter = options.reporter
-    } else {
+    if (typeof options.reporter !== 'function') {
       options.reporter = options.reporter || 'human'
-      reporter = createReporter(options)
+      options.reporter = createReporter(options)
     }
 
     let initialized = false
@@ -158,7 +155,7 @@ class Server extends BaseServer {
           process.exit(1)
         })
       } else {
-        reporter('error', { err, fatal: true })
+        options.reporter('error', { err, fatal: true })
         process.exit(1)
       }
     }
@@ -174,7 +171,7 @@ class Server extends BaseServer {
       }
     }
 
-    super(options, reporter)
+    super(options)
     initialized = true
 
     const onExit = () => {

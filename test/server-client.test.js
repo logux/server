@@ -16,12 +16,12 @@ function createConnection () {
   return pair.left
 }
 
-function createServer (opts, reporter) {
+function createServer (opts) {
   if (!opts) opts = { }
   opts.subprotocol = '0.0.1'
   opts.supports = '0.x'
 
-  const server = new BaseServer(opts, reporter)
+  const server = new BaseServer(opts)
   server.auth(() => true)
   server.log.on('preadd', (action, meta) => {
     meta.reasons.push('test')
@@ -33,10 +33,14 @@ function createServer (opts, reporter) {
 function createReporter (opts) {
   const names = []
   const reports = []
-  const app = createServer(opts, (name, details) => {
+
+  opts = opts || { }
+  opts.reporter = (name, details) => {
     names.push(name)
     reports.push([name, details])
-  })
+  }
+
+  const app = createServer(opts)
   return { app, reports, names }
 }
 

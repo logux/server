@@ -20,7 +20,7 @@ const CERT = path.join(__dirname, 'fixtures/cert.pem')
 const KEY = path.join(__dirname, 'fixtures/key.pem')
 
 let lastPort = 9111
-function createServer (options, reporter) {
+function createServer (options) {
   if (!options) options = { }
   for (const i in DEFAULT_OPTIONS) {
     if (typeof options[i] === 'undefined') {
@@ -32,7 +32,7 @@ function createServer (options, reporter) {
     options.port = lastPort
   }
 
-  const created = new BaseServer(options, reporter)
+  const created = new BaseServer(options)
   created.nodeId = 'server:uuid'
   created.auth(() => true)
   let lastId = 0
@@ -47,10 +47,14 @@ function createReporter (opts) {
   const result = { }
   result.names = []
   result.reports = []
-  app = createServer(opts, (name, details) => {
+
+  opts = opts || { }
+  opts.reporter = (name, details) => {
     result.names.push(name)
     result.reports.push([name, details])
-  })
+  }
+
+  app = createServer(opts)
   result.app = app
   return result
 }
