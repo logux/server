@@ -200,3 +200,5 @@ it('uses reporter param for constructor errors', () => {
 it('writes to bunyan log', () => checkOut('bunyan.js'))
 
 it('writes to custom bunyan log', () => checkOut('bunyan-custom.js'))
+
+it('writes using custom reporter', () => checkOut('custom-reporter.js'))

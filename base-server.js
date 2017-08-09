@@ -86,7 +86,7 @@ function optionError (msg) {
  *                                be relative from server root. It is required
  *                                in production mode, because WSS
  *                                is highly recommended.
- * @param {function} [reporter] Function to show current server status.
+ * @param {function} [options.reporter] Function to show current server status.
  *
  * @example
  * const BaseServer = require('logux-server/base-server')
@@ -95,7 +95,7 @@ function optionError (msg) {
  * }
  */
 class BaseServer {
-  constructor (options, reporter) {
+  constructor (options) {
     /**
      * Server options.
      * @type {object}
@@ -105,7 +105,7 @@ class BaseServer {
      */
     this.options = options || { }
 
-    this.reporter = reporter || function () { }
+    this.reporter = this.options.reporter || function () { }
 
     /**
      * Production or development mode.
