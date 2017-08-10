@@ -2,11 +2,10 @@
 
 const ServerConnection = require('logux-sync').ServerConnection
 const MemoryStore = require('logux-core').MemoryStore
-const urlAlphabet = require('nanoid/url')
-const generateId = require('nanoid/generate')
 const NanoEvents = require('nanoevents')
 const UrlPattern = require('url-pattern')
 const WebSocket = require('uws')
+const nanoid = require('nanoid')
 const https = require('https')
 const http = require('http')
 const path = require('path')
@@ -144,7 +143,7 @@ class BaseServer {
      * @example
      * console.log('Error was raised on ' + app.nodeId)
      */
-    this.nodeId = `server:${ generateId(urlAlphabet, 8) }`
+    this.nodeId = `server:${ nanoid(8) }`
 
     this.options.root = this.options.root || process.cwd()
 
