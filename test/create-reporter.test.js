@@ -269,7 +269,7 @@ it('reports destroy', () => {
 })
 
 it('reports EACCES error', () => {
-  check('error', { fatal: true, err: { code: 'EACCES' } })
+  check('error', { fatal: true, err: { code: 'EACCES', port: 1337 } })
 })
 
 it('reports EADDRINUSE error', () => {
@@ -278,7 +278,9 @@ it('reports EADDRINUSE error', () => {
 
 it('reports LOGUX_UNKNOWN_OPTION error', () => {
   const err = {
-    code: 'LOGUX_UNKNOWN_OPTION', option: 'suprotocol'
+    message: 'Unknown option `suprotocol` in server constructor',
+    option: 'suprotocol',
+    code: 'LOGUX_UNKNOWN_OPTION'
   }
   check('error', { fatal: true, err })
 })

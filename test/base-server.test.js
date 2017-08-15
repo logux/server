@@ -91,19 +91,19 @@ it('generates node ID', () => {
     subprotocol: '0.0.0',
     supports: '0.x'
   })
-  expect(app.nodeId).toMatch(/server:[\w\d]+/)
+  expect(app.nodeId).toMatch(/server:[\w\d~_]+/)
 })
 
 it('throws on missed subprotocol', () => {
   expect(() => {
     new BaseServer({ })
-  }).toThrowError(/subprotocol version/)
+  }).toThrowError(/Missed `subprotocol` option/)
 })
 
 it('throws on missed supported subprotocols', () => {
   expect(() => {
     new BaseServer({ subprotocol: '0.0.0' })
-  }).toThrowError(/client subprotocol/)
+  }).toThrowError(/Missed `supports` option/)
 })
 
 it('sets development environment by default', () => {
@@ -187,13 +187,13 @@ it('uses 127.0.0.1 to bind server by default', () => {
 it('throws a error on key without certificate', () => {
   expect(() => {
     app = createServer({ key: fs.readFileSync(KEY) })
-  }).toThrowError(/set cert option/)
+  }).toThrowError(/set `cert` option/)
 })
 
 it('throws a error on certificate without key', () => {
   expect(() => {
     app = createServer({ cert: fs.readFileSync(CERT) })
-  }).toThrowError(/set key option/)
+  }).toThrowError(/set `key` option/)
 })
 
 it('uses HTTPS', () => {

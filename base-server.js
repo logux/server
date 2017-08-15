@@ -118,17 +118,17 @@ class BaseServer {
     this.env = this.options.env || process.env.NODE_ENV || 'development'
 
     if (typeof this.options.subprotocol === 'undefined') {
-      throw optionError('Missed subprotocol version')
+      throw optionError('Missed `subprotocol` option in server constructor')
     }
     if (typeof this.options.supports === 'undefined') {
-      throw optionError('Missed client subprotocol requirements')
+      throw optionError('Missed `supports` option in server constructor')
     }
 
     if (this.options.key && !this.options.cert) {
-      throw optionError('You must set cert option too if you use key option')
+      throw optionError('You must set `cert` option if you use `key` option')
     }
     if (!this.options.key && this.options.cert) {
-      throw optionError('You must set key option too if you use cert option')
+      throw optionError('You must set `key` option if you use `cert` option')
     }
 
     if (!this.options.server) {

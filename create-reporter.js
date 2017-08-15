@@ -6,17 +6,17 @@ const HumanFormatter = require('./human-formatter')
 
 const ERROR_CODES = {
   EADDRINUSE: e => ({
-    msg: `Port :${ e.port } already in use`,
+    msg: `Port \`:${ e.port }\` already in use`,
     note: 'Another Logux server or other app already running on this port. ' +
           'Maybe you didn’t not stop server from other project ' +
           'or previous version of this server was not killed.'
   }),
-  EACCES: () => ({
-    msg: 'You are not allowed to run server on this port',
+  EACCES: e => ({
+    msg: `You are not allowed to run server on port \`:${ e.port }\``,
     note: 'Try to change user (e.g. root) or use port >= 1024'
   }),
   LOGUX_UNKNOWN_OPTION: e => ({
-    msg: `Unknown option '${ e.option }' in server constructor`,
+    msg: e.message,
     note: 'Maybe there is a mistake in option name or this version ' +
           'of Logux Server doesn’t support this option'
   }),

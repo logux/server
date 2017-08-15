@@ -164,7 +164,8 @@ class Server extends BaseServer {
 
     for (const name in options) {
       if (AVAILABLE_OPTIONS.indexOf(name) === -1) {
-        const error = new Error(`Unknown option ${ name }`)
+        const error = new Error(
+          `Unknown option \`${ name }\` in server constructor`)
         error.code = 'LOGUX_UNKNOWN_OPTION'
         error.option = name
         throw error

@@ -17,7 +17,7 @@ exports[`destroys everything on exit 1`] = `
 `;
 
 exports[`disables colors for constructor errors 1`] = `
-" FATAL  Missed client subprotocol requirements at 1970-01-01 00:00:00
+" FATAL  Missed supports option in server constructor at 1970-01-01 00:00:00
         Check server constructor and Logux Server documentation
 
 "
@@ -43,7 +43,7 @@ Environment variables:
 `;
 
 exports[`shows help about missed option 1`] = `
-" FATAL  Missed client subprotocol requirements at 1970-01-01 00:00:00
+" FATAL  Missed supports option in server constructor at 1970-01-01 00:00:00
         Check server constructor and Logux Server documentation
 
 "
@@ -59,14 +59,14 @@ exports[`shows help about port in use 1`] = `
 `;
 
 exports[`shows help about privileged port 1`] = `
-" ERROR  You are not allowed to run server on this port at 1970-01-01 00:00:00
+" ERROR  You are not allowed to run server on port :1000 at 1970-01-01 00:00:00
         Try to change user (e.g. root) or use port >= 1024
 
 "
 `;
 
 exports[`shows help about unknown option 1`] = `
-" FATAL  Unknown option 'support' in server constructor at 1970-01-01 00:00:00
+" FATAL  Unknown option support in server constructor at 1970-01-01 00:00:00
         Maybe there is a mistake in option name or this version of Logux Server
         doesn’t support this option
 
@@ -106,7 +106,7 @@ exports[`uses reporter param 1`] = `
 `;
 
 exports[`uses reporter param for constructor errors 1`] = `
-"{\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":60,\\"err\\":{\\"message\\":\\"Missed client subprotocol requirements\\",\\"name\\":\\"Error\\"},\\"note\\":\\"Check server constructor and Logux Server documentation\\",\\"msg\\":\\"Missed client subprotocol requirements\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":60,\\"err\\":{\\"message\\":\\"Missed \`supports\` option in server constructor\\",\\"name\\":\\"Error\\"},\\"note\\":\\"Check server constructor and Logux Server documentation\\",\\"msg\\":\\"Missed \`supports\` option in server constructor\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 

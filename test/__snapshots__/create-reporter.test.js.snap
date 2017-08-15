@@ -1,24 +1,24 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`reports EACCES error 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{},\\"note\\":\\"Try to change user (e.g. root) or use port >= 1024\\",\\"msg\\":\\"You are not allowed to run server on this port\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{},\\"note\\":\\"Try to change user (e.g. root) or use port >= 1024\\",\\"msg\\":\\"You are not allowed to run server on port \`:1337\`\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
 exports[`reports EACCES error 2`] = `
-"[1m[31m[40m[7m FATAL [27m[49m[39m[22m [1m[31mYou are not allowed to run server on this port[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[41m[37m FATAL [39m[49m [1m[31mYou are not allowed to run server on port [33m:1337[31m[39m[22m [2mat 1970-01-01 00:00:00[22m
         [90mTry to change user (e.g. root) or use port >= 1024[39m
 
 "
 `;
 
 exports[`reports EADDRINUSE error 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{},\\"note\\":\\"Another Logux server or other app already running on this port. Maybe you didn’t not stop server from other project or previous version of this server was not killed.\\",\\"msg\\":\\"Port :31337 already in use\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{},\\"note\\":\\"Another Logux server or other app already running on this port. Maybe you didn’t not stop server from other project or previous version of this server was not killed.\\",\\"msg\\":\\"Port \`:31337\` already in use\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
 exports[`reports EADDRINUSE error 2`] = `
-"[1m[31m[40m[7m FATAL [27m[49m[39m[22m [1m[31mPort :31337 already in use[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[41m[37m FATAL [39m[49m [1m[31mPort [33m:31337[31m already in use[39m[22m [2mat 1970-01-01 00:00:00[22m
         [90mAnother Logux server or other app already running on this port.[39m
         [90mMaybe you didn’t not stop server from other project or previous version[39m
         [90mof this server was not killed.[39m
@@ -27,12 +27,12 @@ exports[`reports EADDRINUSE error 2`] = `
 `;
 
 exports[`reports LOGUX_UNKNOWN_OPTION error 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{},\\"note\\":\\"Maybe there is a mistake in option name or this version of Logux Server doesn’t support this option\\",\\"msg\\":\\"Unknown option 'suprotocol' in server constructor\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{\\"message\\":\\"Unknown option \`suprotocol\` in server constructor\\"},\\"note\\":\\"Maybe there is a mistake in option name or this version of Logux Server doesn’t support this option\\",\\"msg\\":\\"Unknown option \`suprotocol\` in server constructor\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
 exports[`reports LOGUX_UNKNOWN_OPTION error 2`] = `
-"[1m[31m[40m[7m FATAL [27m[49m[39m[22m [1m[31mUnknown option 'suprotocol' in server constructor[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[41m[37m FATAL [39m[49m [1m[31mUnknown option [33msuprotocol[31m in server constructor[39m[22m [2mat 1970-01-01 00:00:00[22m
         [90mMaybe there is a mistake in option name or this version of Logux Server[39m
         [90mdoesn’t support this option[39m
 
@@ -45,7 +45,7 @@ exports[`reports LOGUX_WRONG_OPTIONS error 1`] = `
 `;
 
 exports[`reports LOGUX_WRONG_OPTIONS error 2`] = `
-"[1m[31m[40m[7m FATAL [27m[49m[39m[22m [1m[31mMissed client subprotocol requirements[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[41m[37m FATAL [39m[49m [1m[31mMissed client subprotocol requirements[39m[22m [2mat 1970-01-01 00:00:00[22m
         [90mCheck server constructor and Logux Server documentation[39m
 
 "
@@ -57,7 +57,7 @@ exports[`reports add 1`] = `
 `;
 
 exports[`reports add 2`] = `
-"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mAction was added[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[42m[30m INFO [39m[49m  [1m[32mAction was added[39m[22m [2mat 1970-01-01 00:00:00[22m
         Action: 
           type: [1mCHANGE_USER[22m
           id:   [1m100[22m
@@ -79,7 +79,7 @@ exports[`reports authenticated 1`] = `
 `;
 
 exports[`reports authenticated 2`] = `
-"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mUser was authenticated[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[42m[30m INFO [39m[49m  [1m[32mUser was authenticated[39m[22m [2mat 1970-01-01 00:00:00[22m
         Subprotocol: [1m1.0.0[22m
         Client ID:   [1m670[22m
         Node ID:     [1m100[22m:uImkcF4z
@@ -93,7 +93,7 @@ exports[`reports authenticated without user ID 1`] = `
 `;
 
 exports[`reports authenticated without user ID 2`] = `
-"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mUser was authenticated[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[42m[30m INFO [39m[49m  [1m[32mUser was authenticated[39m[22m [2mat 1970-01-01 00:00:00[22m
         Subprotocol: [1m1.0.0[22m
         Client ID:   [1m670[22m
         Node ID:     uImkcF4z
@@ -107,7 +107,7 @@ exports[`reports clean 1`] = `
 `;
 
 exports[`reports clean 2`] = `
-"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mAction was cleaned[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[42m[30m INFO [39m[49m  [1m[32mAction was cleaned[39m[22m [2mat 1970-01-01 00:00:00[22m
         Action ID: [[1m1487805099387[22m, [1m100[22m:uImkcF4z, [1m0[22m]
 
 "
@@ -119,7 +119,7 @@ exports[`reports connect 1`] = `
 `;
 
 exports[`reports connect 2`] = `
-"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mClient was connected[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[42m[30m INFO [39m[49m  [1m[32mClient was connected[39m[22m [2mat 1970-01-01 00:00:00[22m
         Client ID:  [1m670[22m
         IP address: [1m10.110.6.56[22m
 
@@ -132,7 +132,7 @@ exports[`reports denied 1`] = `
 `;
 
 exports[`reports denied 2`] = `
-"[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mAction was denied[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[43m[30m WARN [39m[49m  [1m[33mAction was denied[39m[22m [2mat 1970-01-01 00:00:00[22m
         Action ID: [[1m1487805099387[22m, [1m100[22m:uImkcF4z, [1m0[22m]
 
 "
@@ -144,7 +144,7 @@ exports[`reports destroy 1`] = `
 `;
 
 exports[`reports destroy 2`] = `
-"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mShutting down Logux server[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[42m[30m INFO [39m[49m  [1m[32mShutting down Logux server[39m[22m [2mat 1970-01-01 00:00:00[22m
 
 "
 `;
@@ -155,7 +155,7 @@ exports[`reports disconnect 1`] = `
 `;
 
 exports[`reports disconnect 2`] = `
-"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mClient was disconnected[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[42m[30m INFO [39m[49m  [1m[32mClient was disconnected[39m[22m [2mat 1970-01-01 00:00:00[22m
         Node ID: [1m100[22m:uImkcF4z
 
 "
@@ -167,7 +167,7 @@ exports[`reports disconnect from unauthenticated user 1`] = `
 `;
 
 exports[`reports disconnect from unauthenticated user 2`] = `
-"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mClient was disconnected[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[42m[30m INFO [39m[49m  [1m[32mClient was disconnected[39m[22m [2mat 1970-01-01 00:00:00[22m
         Client ID: [1m670[22m
 
 "
@@ -179,7 +179,7 @@ exports[`reports error 1`] = `
 `;
 
 exports[`reports error 2`] = `
-"[1m[31m[40m[7m FATAL [27m[49m[39m[22m [1m[31mSome mistake[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[41m[37m FATAL [39m[49m [1m[31mSome mistake[39m[22m [2mat 1970-01-01 00:00:00[22m
 [33m        at [1mObject.<anonymous>[22m (./index.js:28:13)[39m
 [31m        at Module._compile (module.js:573:32)[39m
 [31m        at at runTest (./node_modules/jest/index.js:50:10)[39m
@@ -194,7 +194,7 @@ exports[`reports error from action 1`] = `
 `;
 
 exports[`reports error from action 2`] = `
-"[1m[31m[40m[7m ERROR [27m[49m[39m[22m [1m[31mSome mistake[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[41m[37m ERROR [39m[49m [1m[31mSome mistake[39m[22m [2mat 1970-01-01 00:00:00[22m
 [33m        at [1mObject.<anonymous>[22m (./index.js:28:13)[39m
 [31m        at Module._compile (module.js:573:32)[39m
 [31m        at at runTest (./node_modules/jest/index.js:50:10)[39m
@@ -210,7 +210,7 @@ exports[`reports error from client 1`] = `
 `;
 
 exports[`reports error from client 2`] = `
-"[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mClient error: A timeout was reached (5000ms)[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[43m[30m WARN [39m[49m  [1m[33mClient error: A timeout was reached (5000ms)[39m[22m [2mat 1970-01-01 00:00:00[22m
         Client ID: [1m670[22m
 
 "
@@ -222,7 +222,7 @@ exports[`reports error from sync 1`] = `
 `;
 
 exports[`reports error from sync 2`] = `
-"[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mSync error: A timeout was reached (5000ms)[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[43m[30m WARN [39m[49m  [1m[33mSync error: A timeout was reached (5000ms)[39m[22m [2mat 1970-01-01 00:00:00[22m
         Node ID: [1m100[22m:uImkcF4z
 
 "
@@ -234,7 +234,7 @@ exports[`reports listen 1`] = `
 `;
 
 exports[`reports listen 2`] = `
-"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mLogux server is listening[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[42m[30m INFO [39m[49m  [1m[32mLogux server is listening[39m[22m [2mat 1970-01-01 00:00:00[22m
         PID:          [1m21384[22m
         Logux server: [1m0.0.0[22m
         Environment:  [1mdevelopment[22m
@@ -254,7 +254,7 @@ exports[`reports listen for custom domain 1`] = `
 `;
 
 exports[`reports listen for custom domain 2`] = `
-"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mLogux server is listening[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[42m[30m INFO [39m[49m  [1m[32mLogux server is listening[39m[22m [2mat 1970-01-01 00:00:00[22m
         PID:          [1m21384[22m
         Logux server: [1m0.0.0[22m
         Environment:  [1mdevelopment[22m
@@ -274,7 +274,7 @@ exports[`reports listen for production 1`] = `
 `;
 
 exports[`reports listen for production 2`] = `
-"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mLogux server is listening[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[42m[30m INFO [39m[49m  [1m[32mLogux server is listening[39m[22m [2mat 1970-01-01 00:00:00[22m
         PID:          [1m21384[22m
         Logux server: [1m0.0.0[22m
         Environment:  [1mproduction[22m
@@ -292,7 +292,7 @@ exports[`reports processed 1`] = `
 `;
 
 exports[`reports processed 2`] = `
-"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mAction was processed[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[42m[30m INFO [39m[49m  [1m[32mAction was processed[39m[22m [2mat 1970-01-01 00:00:00[22m
         Action ID: [[1m1487805099387[22m, [1m100[22m:uImkcF4z, [1m0[22m]
         Latency:   [1m500[22m ms
 
@@ -305,7 +305,7 @@ exports[`reports subscribed 1`] = `
 `;
 
 exports[`reports subscribed 2`] = `
-"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mClient was subscribed[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[42m[30m INFO [39m[49m  [1m[32mClient was subscribed[39m[22m [2mat 1970-01-01 00:00:00[22m
         Subscription: [1muser/100[22m
         Action ID:    [[1m1487805099387[22m, [1m100[22m:uImkcF4z, [1m0[22m]
 
@@ -318,7 +318,7 @@ exports[`reports unauthenticated 1`] = `
 `;
 
 exports[`reports unauthenticated 2`] = `
-"[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mBad authentication[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[43m[30m WARN [39m[49m  [1m[33mBad authentication[39m[22m [2mat 1970-01-01 00:00:00[22m
         Subprotocol: [1m1.0.0[22m
         Client ID:   [1m670[22m
         Node ID:     [1m100[22m:uImkcF4z
@@ -332,7 +332,7 @@ exports[`reports unknownType 1`] = `
 `;
 
 exports[`reports unknownType 2`] = `
-"[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mAction with unknown type[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[43m[30m WARN [39m[49m  [1m[33mAction with unknown type[39m[22m [2mat 1970-01-01 00:00:00[22m
         Type:      [1mCHANGE_SER[22m
         Action ID: [[1m1487805099387[22m, [1m100[22m:uImkcF4z, [1m0[22m]
 
@@ -345,7 +345,7 @@ exports[`reports unknownType from server 1`] = `
 `;
 
 exports[`reports unknownType from server 2`] = `
-"[1m[31m[40m[7m ERROR [27m[49m[39m[22m [1m[31mAction with unknown type[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[41m[37m ERROR [39m[49m [1m[31mAction with unknown type[39m[22m [2mat 1970-01-01 00:00:00[22m
         Type:      [1mCHANGE_SER[22m
         Action ID: [[1m1487805099387[22m, [1mserver[22m:FnXaqDxY, [1m0[22m]
 
@@ -358,7 +358,7 @@ exports[`reports unsubscribed 1`] = `
 `;
 
 exports[`reports unsubscribed 2`] = `
-"[1m[32m[40m[7m INFO [27m[49m[39m[22m  [1m[32mClient was unsubscribed[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[42m[30m INFO [39m[49m  [1m[32mClient was unsubscribed[39m[22m [2mat 1970-01-01 00:00:00[22m
         Subscription: [1muser/100[22m
         Action ID:    [[1m1487805099387[22m, [1m100[22m:uImkcF4z, [1m0[22m]
 
@@ -371,7 +371,7 @@ exports[`reports wrongSubscription 1`] = `
 `;
 
 exports[`reports wrongSubscription 2`] = `
-"[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mSubscription with wrong name[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[43m[30m WARN [39m[49m  [1m[33mSubscription with wrong name[39m[22m [2mat 1970-01-01 00:00:00[22m
         Subscription: [1mser/100[22m
         Action ID:    [[1m1487805099387[22m, [1m100[22m:uImkcF4z, [1m0[22m]
 
@@ -384,7 +384,7 @@ exports[`reports wrongSubscription without name 1`] = `
 `;
 
 exports[`reports wrongSubscription without name 2`] = `
-"[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mSubscription with wrong name[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[43m[30m WARN [39m[49m  [1m[33mSubscription with wrong name[39m[22m [2mat 1970-01-01 00:00:00[22m
         Subscription: [1mundefined[22m
         Action ID:    [[1m1487805099387[22m, [1m100[22m:uImkcF4z, [1m0[22m]
 
@@ -397,7 +397,7 @@ exports[`reports zombie 1`] = `
 `;
 
 exports[`reports zombie 2`] = `
-"[1m[33m[40m[7m WARN [27m[49m[39m[22m  [1m[33mZombie client was disconnected[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[43m[30m WARN [39m[49m  [1m[33mZombie client was disconnected[39m[22m [2mat 1970-01-01 00:00:00[22m
         Node ID: [1m100[22m:uImkcF4z
 
 "

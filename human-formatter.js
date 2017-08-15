@@ -31,10 +31,10 @@ const PARAMS_BLACKLIST = {
 }
 
 const LABELS = {
-  30: (c, str) => label(c, ' INFO ', 'green', str),
-  40: (c, str) => label(c, ' WARN ', 'yellow', str),
-  50: (c, str) => label(c, ' ERROR ', 'red', str),
-  60: (c, str) => label(c, ' FATAL ', 'red', str)
+  30: (c, str) => label(c, ' INFO ', 'green', 'bgGreen', 'black', str),
+  40: (c, str) => label(c, ' WARN ', 'yellow', 'bgYellow', 'black', str),
+  50: (c, str) => label(c, ' ERROR ', 'red', 'bgRed', 'white', str),
+  60: (c, str) => label(c, ' FATAL ', 'red', 'bgRed', 'white', str)
 }
 
 function rightPag (str, length) {
@@ -43,12 +43,13 @@ function rightPag (str, length) {
   return str
 }
 
-function label (c, type, color, message) {
-  const labelFormat = c.bold[color].bgBlack.inverse
+function label (c, type, color, labelBg, labelText, message) {
+  const labelFormat = c[labelBg][labelText]
   const messageFormat = c.bold[color]
   const pagged = rightPag(labelFormat(type), 8)
   const time = c.dim(`at ${ yyyymmdd.withTime(new Date()) }`)
-  return `${ pagged }${ messageFormat(message) } ${ time }`
+  const highlighted = message.replace(/`([^`]+)`/, c.yellow('$1'))
+  return `${ pagged }${ messageFormat(highlighted) } ${ time }`
 }
 
 function formatName (key) {
