@@ -388,6 +388,34 @@ it('checks action creator', () => {
   })
 })
 
+it('allows subscribe and unsubscribe actions', () => {
+  const test = createReporter()
+  test.app.subscription('a', () => true)
+
+  return connectClient(test.app).then(client => {
+    client.connection.other().send(['sync', 2,
+      { type: 'logux/subscribe', name: 'a' },
+      { id: [1, '10:uuid', 0], time: 1 },
+      { type: 'logux/unsubscribe', name: 'a' },
+      { id: [2, '10:uuid', 0], time: 2 },
+      { type: 'logux/undo' },
+      { id: [3, '10:uuid', 0], time: 3 }
+    ])
+    return client.connection.pair.wait('right')
+  }).then(() => {
+    expect(test.names).toEqual([
+      'connect',
+      'authenticated',
+      'unknownType',
+      'add',
+      'add',
+      'add',
+      'subscribed'
+    ])
+    expect(test.reports[2][1].actionId).toEqual([3, '10:uuid', 0])
+  })
+})
+
 it('checks action meta', () => {
   const test = createReporter()
   test.app.type('GOOD', { access: () => true })

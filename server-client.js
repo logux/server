@@ -249,13 +249,18 @@ class ServerClient {
       return Promise.resolve(false)
     }
 
-    const type = this.app.types[action.type]
-    if (!type) {
+    const type = action.type
+    if (type === 'logux/subscribe' || type === 'logux/unsubscribe') {
+      return Promise.resolve(true)
+    }
+
+    const processor = this.app.types[type]
+    if (!processor) {
       this.app.unknownType(action, meta)
       return Promise.resolve(false)
     }
 
-    return forcePromise(() => type.access(action, meta, creator))
+    return forcePromise(() => processor.access(action, meta, creator))
       .then(result => {
         if (!result) this.app.denyAction(meta)
         return result
