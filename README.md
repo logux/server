@@ -111,7 +111,7 @@ There are 3 ways to send new action to client.
 Before using subscriptions, you need to define them:
 
 ```js
-app.subscriptions('user/:id', (params, action, meta, creator) => {
+app.subscription('user/:id', (params, action, meta, creator) => {
   if (params.id !== creator.userId) {
     // Access denied
     return false
