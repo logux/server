@@ -335,10 +335,7 @@ class BaseServer {
 
     return promise.then(() => {
       this.ws.on('connection', ws => {
-        this.lastClient += 1
-        const connection = new ServerConnection(ws)
-        const node = new ServerClient(this, connection, this.lastClient)
-        this.clients[this.lastClient] = node
+        this.addClient(new ServerConnection(ws))
       })
     }).then(() => {
       this.reporter('listen', {
@@ -569,6 +566,24 @@ class BaseServer {
         }
       }
     }
+  }
+
+  /**
+   * Add new client for server. You should call this method manually
+   * mostly for test purposes.
+   *
+   * @param {Connection} connection Logux connection to client.
+   *
+   * @return {number} Client ID,
+   *
+   * @example
+   * server.addClient(test.right)
+   */
+  addClient (connection) {
+    this.lastClient += 1
+    const node = new ServerClient(this, connection, this.lastClient)
+    this.clients[this.lastClient] = node
+    return this.lastClient
   }
 
   processAction (type, action, meta) {

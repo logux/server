@@ -319,6 +319,20 @@ it('creates a client on connection', () => {
   })
 })
 
+it('creates a client manually', () => {
+  app = createServer()
+  app.addClient({
+    on: () => true,
+    ws: {
+      _socket: {
+        remoteAddress: '127.0.0.1'
+      }
+    }
+  })
+  expect(Object.keys(app.clients).length).toBe(1)
+  expect(app.clients[1].remoteAddress).toEqual('127.0.0.1')
+})
+
 it('send debug message to clients on runtimeError', () => {
   app = createServer()
   app.clients[1] = { connection: { send: jest.fn() }, destroy: () => false }
