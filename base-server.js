@@ -63,6 +63,8 @@ function optionError (msg) {
  *                                      connection by sending ping.
  * @param {Store} [options.store] Store to save log. Will be `MemoryStore`,
  *                                by default.
+ * @param {TestTime} [options.time] Test time to test server.
+ * @param {string} [options.id] Custom random ID to be used in node ID.
  * @param {"production"|"development"} [options.env] Development or production
  *                                                   server mode. By default,
  *                                                   it will be taken from
@@ -143,12 +145,18 @@ class BaseServer {
      * @example
      * console.log('Error was raised on ' + app.nodeId)
      */
-    this.nodeId = `server:${ nanoid(8) }`
+    this.nodeId = `server:${ this.options.id || nanoid(8) }`
 
     this.options.root = this.options.root || process.cwd()
 
     const store = this.options.store || new MemoryStore()
 
+    let log
+    if (this.options.time) {
+      log = this.options.time.nextLog({ store, nodeId: this.nodeId })
+    } else {
+      log = new Log({ store, nodeId: this.nodeId })
+    }
     /**
      * Server actions log.
      * @type {Log}
@@ -156,7 +164,7 @@ class BaseServer {
      * @example
      * app.log.each(finder)
      */
-    this.log = new Log({ store, nodeId: this.nodeId })
+    this.log = log
 
     this.log.on('preadd', (action, meta) => {
       if (!meta.server) {

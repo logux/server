@@ -2,6 +2,7 @@
 
 const MemoryStore = require('logux-core').MemoryStore
 const WebSocket = require('uws')
+const TestTime = require('logux-core').TestTime
 const https = require('https')
 const http = require('http')
 const path = require('path')
@@ -155,6 +156,19 @@ it('creates log with custom store', () => {
     store
   })
   expect(app.log.store).toBe(store)
+})
+
+it('uses test time and ID', () => {
+  const store = new MemoryStore()
+  app = new BaseServer({
+    subprotocol: '0.0.0',
+    supports: '0.x',
+    store,
+    time: new TestTime(),
+    id: 'uuid'
+  })
+  expect(app.log.store).toEqual(store)
+  expect(app.log.generateId()).toEqual([1, 'server:uuid', 0])
 })
 
 it('destroys application without runned server', () => {

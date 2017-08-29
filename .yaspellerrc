@@ -39,6 +39,7 @@
     "isServer",
     "params",
     "regexp",
-    "sendAction"
+    "sendAction",
+    "TestTime"
   ]
 }
