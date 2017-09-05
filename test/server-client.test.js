@@ -396,7 +396,7 @@ it('allows subscribe and unsubscribe actions', () => {
     client.connection.other().send(['sync', 2,
       { type: 'logux/subscribe', name: 'a' },
       { id: [1, '10:uuid', 0], time: 1 },
-      { type: 'logux/unsubscribe', name: 'a' },
+      { type: 'logux/unsubscribe', name: 'b' },
       { id: [2, '10:uuid', 0], time: 2 },
       { type: 'logux/undo' },
       { id: [3, '10:uuid', 0], time: 3 }
@@ -410,6 +410,7 @@ it('allows subscribe and unsubscribe actions', () => {
       'add',
       'add',
       'add',
+      'unsubscribed',
       'subscribed'
     ])
     expect(test.reports[2][1].actionId).toEqual([3, '10:uuid', 0])

@@ -693,9 +693,11 @@ class BaseServer {
     }
 
     const nodeId = meta.id[1]
-    delete this.subscribers[action.name][nodeId]
-    if (Object.keys(this.subscribers[action.name]).length === 0) {
-      delete this.subscribers[action.name]
+    if (this.subscribers[action.name]) {
+      delete this.subscribers[action.name][nodeId]
+      if (Object.keys(this.subscribers[action.name]).length === 0) {
+        delete this.subscribers[action.name]
+      }
     }
 
     this.reporter('unsubscribed', {
