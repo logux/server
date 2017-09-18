@@ -374,24 +374,6 @@ class BaseServer {
   }
 
   /**
-   * Add one-time listener for synchronization events.
-   * See {@link BaseServer#on} for supported events.
-   *
-   * @param {"error"|"processed"} event The event name.
-   * @param {listener} listener The listener function.
-   *
-   * @return {function} Unbind listener from event.
-   *
-   * @example
-   * sync.once('processed', () => {
-   *   console.log('First work done')
-   * })
-   */
-  once (event, listener) {
-    return this.emitter.once(event, listener)
-  }
-
-  /**
    * Stop server and unbind all listeners.
    *
    * @return {Promise} Promise when all listeners will be removed.

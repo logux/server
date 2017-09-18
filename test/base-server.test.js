@@ -513,13 +513,9 @@ it('processes actions', () => {
 it('has full events API', () => {
   app = createServer()
 
-  let always = 0
+  let events = 0
   const unbind = app.on('processed', () => {
-    always += 1
-  })
-  let once = 0
-  app.once('processed', () => {
-    once += 1
+    events += 1
   })
 
   app.emitter.emit('processed')
@@ -527,8 +523,7 @@ it('has full events API', () => {
   unbind()
   app.emitter.emit('processed')
 
-  expect(always).toEqual(2)
-  expect(once).toEqual(1)
+  expect(events).toEqual(2)
 })
 
 it('waits for last processing before destroy', () => {

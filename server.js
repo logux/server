@@ -45,6 +45,7 @@ yargs
   .example('LOGUX_PORT=1337 $0')
   .locale('en')
   .help()
+  .version(false)
 
 /**
  * End-user API to create Logux server.
