@@ -9,10 +9,6 @@ between clients and server logs.
 This framework helps you to write Logux server and define back-end callbacks
 for each client’s event type.
 
-This is a first **proof-of-concept** version. It simply synchronizes all
-the actions between clients, not yet having many syntax sugar
-that we've planned for future.
-
 <a href="https://evilmartians.com/?utm_source=logux-server">
   <img src="https://evilmartians.com/badges/sponsored-by-evil-martians.svg"
        alt="Sponsored by Evil Martians" width="236" height="54">
