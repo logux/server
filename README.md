@@ -102,12 +102,12 @@ There are 3 ways to send new action to client.
 
 * Set `nodeIds: ['10:h40vj5']` in action’s metadata.
 * Set `users: ['10']` in action’s metadata.
-* Using subscriptions.
+* Using channels.
 
-Before using subscriptions, you need to define them:
+Before using channel, you need to define it:
 
 ```js
-app.subscription('user/:id', (params, action, meta, creator) => {
+app.channel('user/:id', (params, action, meta, creator) => {
   if (params.id !== creator.userId) {
     // Access denied
     return false
@@ -123,25 +123,25 @@ app.subscription('user/:id', (params, action, meta, creator) => {
 })
 ```
 
-Then server or clients could create actions with `subscriptions: ['user/10']`
+Then server or clients could create actions with `channels: ['user/10']`
 in action’s metadata.
 
-`logux/subscribe` action will open subscription for client:
+`logux/subscribe` action will subscribe client to a channel:
 
 ```js
-client.log.add({ type: 'logux/subscribe', name: 'user/10' })
+client.log.add({ type: 'logux/subscribe', channel: 'user/10' })
 ```
 
-To send action to subscription, add `subscriptions` metadata:
+To send action to channel, add `channels` metadata:
 
 ```js
 client.log.add(
   { type: 'CHANGE_NAME', name: 'New', user: 10 },
-  { subscriptions: ['user/10'] }
+  { channels: ['user/10'] }
 )
 ```
 
-Note, that everyone could send actions to subscriptions. If you don’t want it,
+Note, that everyone could send actions to a channel. If you don’t want it,
 check metadata in `access()` callbacks inside `type()` definition.
 
 ### Test Your Logic Locally

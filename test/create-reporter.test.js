@@ -221,16 +221,16 @@ it('reports unknownType from server', () => {
   })
 })
 
-it('reports wrongSubscription', () => {
-  check('wrongSubscription', {
-    subscription: 'ser/100',
-    actionId: [1487805099387, '100:uImkcF4z', 0]
+it('reports wrongChannel', () => {
+  check('wrongChannel', {
+    actionId: [1487805099387, '100:uImkcF4z', 0],
+    channel: 'ser/100'
   })
 })
 
-it('reports wrongSubscription without name', () => {
-  check('wrongSubscription', {
-    subscription: undefined, actionId: [1487805099387, '100:uImkcF4z', 0]
+it('reports wrongChannel without name', () => {
+  check('wrongChannel', {
+    channel: undefined, actionId: [1487805099387, '100:uImkcF4z', 0]
   })
 })
 
@@ -242,13 +242,13 @@ it('reports processed', () => {
 
 it('reports subscribed', () => {
   check('subscribed', {
-    subscription: 'user/100', actionId: [1487805099387, '100:uImkcF4z', 0]
+    channel: 'user/100', actionId: [1487805099387, '100:uImkcF4z', 0]
   })
 })
 
 it('reports unsubscribed', () => {
   check('unsubscribed', {
-    subscription: 'user/100', actionId: [1487805099387, '100:uImkcF4z', 0]
+    channel: 'user/100', actionId: [1487805099387, '100:uImkcF4z', 0]
   })
 })
 

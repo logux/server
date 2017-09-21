@@ -240,7 +240,7 @@ class BaseServer {
 
     this.lastClient = 0
 
-    this.subscriptions = []
+    this.channels = []
     this.subscribers = { }
 
     this.unbind.push(() => {
@@ -422,17 +422,17 @@ class BaseServer {
   }
 
   /**
-   * Define subscription callback.
+   * Define the channel.
    *
    * @param {string|regexp} pattern Pattern or regular expression
-   *                                for subscription name.
+   *                                for channel name.
    * @param {subscriber} callback Callback to check access, define custom action
    *                              filter and send initial actions.
    *
    * @return {undefined}
    *
    * @example
-   * app.subscription('user/:id', (params, action, meta, creator) => {
+   * app.channel('user/:id', (params, action, meta, creator) => {
    *   if (params.id !== creator.userId) {
    *     return false
    *   } else {
@@ -447,11 +447,11 @@ class BaseServer {
    *   }
    * })
    */
-  subscription (pattern, callback) {
+  channel (pattern, callback) {
     if (typeof pattern === 'string') {
-      this.subscriptions.push({ pattern: new UrlPattern(pattern), callback })
+      this.channels.push({ pattern: new UrlPattern(pattern), callback })
     } else {
-      this.subscriptions.push({ regexp: pattern, callback })
+      this.channels.push({ regexp: pattern, callback })
     }
   }
 
@@ -470,11 +470,14 @@ class BaseServer {
    */
   undo (meta, reason) {
     const undoMeta = { status: 'processed' }
+
     if (meta.users) undoMeta.users = meta.users.slice(0)
     if (meta.reasons) undoMeta.reasons = meta.reasons.slice(0)
-    if (meta.subscriptions) undoMeta.subscriptions = meta.subscriptions.slice(0)
+    if (meta.channels) undoMeta.channels = meta.channels.slice(0)
+
     undoMeta.nodeIds = [meta.id[1]]
     if (meta.nodeIds) undoMeta.nodeIds = undoMeta.nodeIds.concat(meta.nodeIds)
+
     this.log.add({ type: 'logux/undo', id: meta.id, reason }, undoMeta)
   }
 
@@ -532,12 +535,12 @@ class BaseServer {
       }
     }
 
-    if (meta.subscriptions) {
+    if (meta.channels) {
       const creator = this.createCreator(meta)
-      for (const subscription of meta.subscriptions) {
-        if (this.subscribers[subscription]) {
-          for (const nodeId in this.subscribers[subscription]) {
-            let filter = this.subscribers[subscription][nodeId]
+      for (const channel of meta.channels) {
+        if (this.subscribers[channel]) {
+          for (const nodeId in this.subscribers[channel]) {
+            let filter = this.subscribers[channel][nodeId]
             if (typeof filter === 'function') {
               filter = filter(action, meta, creator)
             }
@@ -622,17 +625,17 @@ class BaseServer {
   }
 
   subscribeAction (action, meta) {
-    if (typeof action.name !== 'string') {
-      this.wrongSubscription(action, meta)
+    if (typeof action.channel !== 'string') {
+      this.wrongChannel(action, meta)
       return
     }
 
     let match
-    for (const i of this.subscriptions) {
+    for (const i of this.channels) {
       if (i.pattern) {
-        match = i.pattern.match(action.name)
+        match = i.pattern.match(action.channel)
       } else {
-        match = action.name.match(i.regexp)
+        match = action.channel.match(i.regexp)
       }
 
       if (match) {
@@ -649,14 +652,14 @@ class BaseServer {
           if (!client) return
 
           this.reporter('subscribed', {
-            subscription: action.name,
-            actionId: meta.id
+            actionId: meta.id,
+            channel: action.channel
           })
 
-          if (!this.subscribers[action.name]) {
-            this.subscribers[action.name] = { }
+          if (!this.subscribers[action.channel]) {
+            this.subscribers[action.channel] = { }
           }
-          this.subscribers[action.name][creator.nodeId] = filter
+          this.subscribers[action.channel][creator.nodeId] = filter
         }).catch(e => {
           this.emitter.emit('error', e, action, meta)
           this.undo(meta, 'error')
@@ -665,36 +668,36 @@ class BaseServer {
       }
     }
 
-    if (!match) this.wrongSubscription(action, meta)
+    if (!match) this.wrongChannel(action, meta)
   }
 
   unsubscribeAction (action, meta) {
-    if (typeof action.name !== 'string') {
-      this.wrongSubscription(action, meta)
+    if (typeof action.channel !== 'string') {
+      this.wrongChannel(action, meta)
       return
     }
 
     const nodeId = meta.id[1]
-    if (this.subscribers[action.name]) {
-      delete this.subscribers[action.name][nodeId]
-      if (Object.keys(this.subscribers[action.name]).length === 0) {
-        delete this.subscribers[action.name]
+    if (this.subscribers[action.channel]) {
+      delete this.subscribers[action.channel][nodeId]
+      if (Object.keys(this.subscribers[action.channel]).length === 0) {
+        delete this.subscribers[action.channel]
       }
     }
 
     this.reporter('unsubscribed', {
-      subscription: action.name,
-      actionId: meta.id
+      actionId: meta.id,
+      channel: action.channel
     })
   }
 
-  wrongSubscription (action, meta) {
-    this.reporter('wrongSubscription', {
-      subscription: action.name,
-      actionId: meta.id
+  wrongChannel (action, meta) {
+    this.reporter('wrongChannel', {
+      actionId: meta.id,
+      channel: action.channel
     })
     this.undo(meta, 'error')
-    this.debugActionError(meta, `Wrong subscription name ${ action.name }`)
+    this.debugActionError(meta, `Wrong channel name ${ action.channel }`)
   }
 
   denyAction (meta) {
@@ -752,7 +755,7 @@ module.exports = BaseServer
 
 /**
  * @callback subscriber
- * @param {object} params Match object from subscription name pattern
+ * @param {object} params Match object from channel name pattern
  *                        or from regular expression.
  * @param {Action} action The action data.
  * @param {Meta} meta The action metadata.

@@ -390,13 +390,13 @@ it('checks action creator', () => {
 
 it('allows subscribe and unsubscribe actions', () => {
   const test = createReporter()
-  test.app.subscription('a', () => true)
+  test.app.channel('a', () => true)
 
   return connectClient(test.app).then(client => {
     client.connection.other().send(['sync', 2,
-      { type: 'logux/subscribe', name: 'a' },
+      { type: 'logux/subscribe', channel: 'a' },
       { id: [1, '10:uuid', 0], time: 1 },
-      { type: 'logux/unsubscribe', name: 'b' },
+      { type: 'logux/unsubscribe', channel: 'b' },
       { id: [2, '10:uuid', 0], time: 2 },
       { type: 'logux/undo' },
       { id: [3, '10:uuid', 0], time: 3 }
@@ -641,7 +641,7 @@ it('sends new actions by user', () => {
   })
 })
 
-it('sends new actions by subscription', () => {
+it('sends new actions by channel', () => {
   const app = createServer()
   app.type('FOO', { access: () => true })
   app.type('BAR', { access: () => true })
@@ -660,13 +660,13 @@ it('sends new actions by subscription', () => {
     return Promise.all([
       app.log.add({ type: 'FOO' }, { id: [1, 'server:uuid', 0] }),
       app.log.add({ type: 'FOO' }, {
-        id: [2, 'server:uuid', 0], subscriptions: ['foo']
+        id: [2, 'server:uuid', 0], channels: ['foo']
       }),
       app.log.add({ type: 'BAR', secret: true }, {
-        id: [3, 'server:uuid', 0], subscriptions: ['bar']
+        id: [3, 'server:uuid', 0], channels: ['bar']
       }),
       app.log.add({ type: 'BAR' }, {
-        id: [4, 'server:uuid', 0], subscriptions: ['bar']
+        id: [4, 'server:uuid', 0], channels: ['bar']
       })
     ]).then(() => {
       client.connection.other().send(['synced', 2])

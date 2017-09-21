@@ -82,9 +82,9 @@ const REPORTERS = {
     msg: 'Action with unknown type'
   }),
 
-  wrongSubscription: () => ({
+  wrongChannel: () => ({
     level: 'warn',
-    msg: 'Subscription with wrong name'
+    msg: 'Wrong channel name'
   }),
 
   error: record => {

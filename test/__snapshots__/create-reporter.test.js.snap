@@ -300,14 +300,14 @@ exports[`reports processed 2`] = `
 `;
 
 exports[`reports subscribed 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"subscription\\":\\"user/100\\",\\"actionId\\":[1487805099387,\\"100:uImkcF4z\\",0],\\"msg\\":\\"Client was subscribed\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"channel\\":\\"user/100\\",\\"actionId\\":[1487805099387,\\"100:uImkcF4z\\",0],\\"msg\\":\\"Client was subscribed\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
 exports[`reports subscribed 2`] = `
 "[42m[30m INFO [39m[49m  [1m[32mClient was subscribed[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Subscription: [1muser/100[22m
-        Action ID:    [[1m1487805099387[22m, [1m100[22m:uImkcF4z, [1m0[22m]
+        Channel:   [1muser/100[22m
+        Action ID: [[1m1487805099387[22m, [1m100[22m:uImkcF4z, [1m0[22m]
 
 "
 `;
@@ -353,40 +353,40 @@ exports[`reports unknownType from server 2`] = `
 `;
 
 exports[`reports unsubscribed 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"subscription\\":\\"user/100\\",\\"actionId\\":[1487805099387,\\"100:uImkcF4z\\",0],\\"msg\\":\\"Client was unsubscribed\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"channel\\":\\"user/100\\",\\"actionId\\":[1487805099387,\\"100:uImkcF4z\\",0],\\"msg\\":\\"Client was unsubscribed\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
 exports[`reports unsubscribed 2`] = `
 "[42m[30m INFO [39m[49m  [1m[32mClient was unsubscribed[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Subscription: [1muser/100[22m
-        Action ID:    [[1m1487805099387[22m, [1m100[22m:uImkcF4z, [1m0[22m]
+        Channel:   [1muser/100[22m
+        Action ID: [[1m1487805099387[22m, [1m100[22m:uImkcF4z, [1m0[22m]
 
 "
 `;
 
-exports[`reports wrongSubscription 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"subscription\\":\\"ser/100\\",\\"actionId\\":[1487805099387,\\"100:uImkcF4z\\",0],\\"msg\\":\\"Subscription with wrong name\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+exports[`reports wrongChannel 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"actionId\\":[1487805099387,\\"100:uImkcF4z\\",0],\\"channel\\":\\"ser/100\\",\\"msg\\":\\"Wrong channel name\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
-exports[`reports wrongSubscription 2`] = `
-"[43m[30m WARN [39m[49m  [1m[33mSubscription with wrong name[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Subscription: [1mser/100[22m
-        Action ID:    [[1m1487805099387[22m, [1m100[22m:uImkcF4z, [1m0[22m]
+exports[`reports wrongChannel 2`] = `
+"[43m[30m WARN [39m[49m  [1m[33mWrong channel name[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Action ID: [[1m1487805099387[22m, [1m100[22m:uImkcF4z, [1m0[22m]
+        Channel:   [1mser/100[22m
 
 "
 `;
 
-exports[`reports wrongSubscription without name 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"actionId\\":[1487805099387,\\"100:uImkcF4z\\",0],\\"msg\\":\\"Subscription with wrong name\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+exports[`reports wrongChannel without name 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"actionId\\":[1487805099387,\\"100:uImkcF4z\\",0],\\"msg\\":\\"Wrong channel name\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
-exports[`reports wrongSubscription without name 2`] = `
-"[43m[30m WARN [39m[49m  [1m[33mSubscription with wrong name[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Subscription: [1mundefined[22m
-        Action ID:    [[1m1487805099387[22m, [1m100[22m:uImkcF4z, [1m0[22m]
+exports[`reports wrongChannel without name 2`] = `
+"[43m[30m WARN [39m[49m  [1m[33mWrong channel name[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Channel:   [1mundefined[22m
+        Action ID: [[1m1487805099387[22m, [1m100[22m:uImkcF4z, [1m0[22m]
 
 "
 `;
