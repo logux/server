@@ -236,7 +236,7 @@ it('authenticates user', () => {
     ])
     return client.connection.pair.wait('right')
   }).then(() => {
-    expect(client.user).toEqual('10')
+    expect(client.userId).toEqual('10')
     expect(client.nodeId).toEqual('10:uuid')
     expect(client.sync.authenticated).toBeTruthy()
     expect(test.app.nodeIds).toEqual({ '10:uuid': client })
@@ -273,7 +273,7 @@ it('authenticates user without user name', () => {
     client.connection.other().send(['connect', protocol, 'uuid', 0])
     return client.connection.pair.wait('right')
   }).then(() => {
-    expect(client.user).not.toBeDefined()
+    expect(client.userId).not.toBeDefined()
     expect(app.users).toEqual({ })
   })
 })
@@ -473,7 +473,7 @@ it('checks user access for action', () => {
   const test = createReporter({ env: 'development' })
   test.app.type('FOO', {
     access (action, meta, creator) {
-      expect(creator.user).toEqual('10')
+      expect(creator.userId).toEqual('10')
       expect(creator.subprotocol).toEqual('0.0.0')
       expect(meta.id).toBeDefined()
       return Promise.resolve(!!action.bar)

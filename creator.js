@@ -13,7 +13,7 @@ const semver = require('semver')
  * })
  */
 class Creator {
-  constructor (nodeId, user, subprotocol) {
+  constructor (nodeId, userId, subprotocol) {
     /**
      * Unique client’s node ID.
      * @type {string}
@@ -36,10 +36,10 @@ class Creator {
      *
      * @example
      * access (action, meta, creator) {
-     *   db.getUser(creator.user).then(user => user.admin)
+     *   db.getUser(creator.userId).then(user => user.admin)
      * }
      */
-    this.user = user
+    this.userId = userId
 
     /**
      * Action creator application subprotocol version in SemVer format.

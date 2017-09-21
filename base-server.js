@@ -402,7 +402,7 @@ class BaseServer {
    * @example
    * app.type('CHANGE_NAME', {
    *   access (action, meta, creator) {
-   *     return action.user === creator.user
+   *     return action.user === creator.userId
    *   },
    *   process (action, meta) {
    *     if (isFirstOlder(lastNameChange(action.user), meta)) {
@@ -523,9 +523,9 @@ class BaseServer {
     }
 
     if (meta.users) {
-      for (const user of meta.users) {
-        if (this.users[user]) {
-          for (const client of this.users[user]) {
+      for (const userId of meta.users) {
+        if (this.users[userId]) {
+          for (const client of this.users[userId]) {
             client.sync.onAdd(action, meta)
           }
         }
@@ -592,13 +592,13 @@ class BaseServer {
   unknownType (action, meta) {
     this.log.changeMeta(meta.id, { status: 'error' })
     this.reporter('unknownType', { type: action.type, actionId: meta.id })
-    if (this.getUser(meta.id[1]) !== 'server') {
+    if (this.getUserId(meta.id[1]) !== 'server') {
       this.undo(meta, 'error')
     }
     this.debugActionError(meta, `Action with unknown type ${ action.type }`)
   }
 
-  getUser (nodeId) {
+  getUserId (nodeId) {
     const pos = nodeId.indexOf(':')
     if (pos !== -1) {
       return nodeId.slice(0, pos)
@@ -609,7 +609,7 @@ class BaseServer {
 
   createCreator (meta) {
     const nodeId = meta.id[1]
-    const user = this.getUser(nodeId)
+    const userId = this.getUserId(nodeId)
 
     let subprotocol
     if (meta.subprotocol) {
@@ -618,7 +618,7 @@ class BaseServer {
       subprotocol = this.nodeIds[nodeId].sync.remoteSubprotocol
     }
 
-    return new Creator(nodeId, user, subprotocol)
+    return new Creator(nodeId, userId, subprotocol)
   }
 
   subscribeAction (action, meta) {
@@ -718,7 +718,7 @@ module.exports = BaseServer
 
 /**
  * @callback authenticator
- * @param {string} user User ID.
+ * @param {string} userId User ID.
  * @param {any} credentials The client credentials.
  * @param {Client} client Client object.
  * @return {boolean|Promise} `true` or Promise with `true`

@@ -47,7 +47,7 @@ class ServerClient {
      * It will be undefined before correct authentication.
      * @type {string|undefined}
      */
-    this.user = undefined
+    this.userId = undefined
 
     /**
      * Unique client’s node ID.
@@ -171,14 +171,14 @@ class ServerClient {
       this.app.reporter('disconnect', reportClient(this))
     }
     if (this.sync.connected) this.sync.destroy()
-    if (this.user) {
-      let users = this.app.users[this.user]
+    if (this.userId) {
+      let users = this.app.users[this.userId]
       if (users) {
         users = users.filter(i => i !== this)
         if (users.length === 0) {
-          delete this.app.users[this.user]
+          delete this.app.users[this.userId]
         } else {
-          this.app.users[this.user] = users
+          this.app.users[this.userId] = users
         }
       }
     }
@@ -197,14 +197,14 @@ class ServerClient {
   auth (credentials, nodeId) {
     this.nodeId = nodeId
 
-    const user = this.app.getUser(nodeId)
-    if (user === 'server') {
+    const userId = this.app.getUserId(nodeId)
+    if (userId === 'server') {
       this.app.reporter('unauthenticated', reportDetails(this))
       return Promise.resolve(false)
     }
-    if (typeof user !== 'undefined') this.user = user
+    if (typeof userId !== 'undefined') this.userId = userId
 
-    return this.app.authenticator(this.user, credentials, this)
+    return this.app.authenticator(this.userId, credentials, this)
       .then(result => {
         if (result) {
           const zombie = this.app.nodeIds[this.nodeId]
@@ -214,9 +214,9 @@ class ServerClient {
             zombie.destroy()
           }
           this.app.nodeIds[this.nodeId] = this
-          if (this.user) {
-            if (!this.app.users[this.user]) this.app.users[this.user] = []
-            this.app.users[this.user].push(this)
+          if (this.userId) {
+            if (!this.app.users[this.userId]) this.app.users[this.userId] = []
+            this.app.users[this.userId].push(this)
           }
           this.app.reporter('authenticated', reportDetails(this))
         } else {
@@ -240,7 +240,7 @@ class ServerClient {
   filter (action, meta) {
     const creator = this.app.createCreator(meta)
 
-    const wrongUser = this.user && this.user !== creator.user
+    const wrongUser = this.userId && this.userId !== creator.userId
     const wrongMeta = Object.keys(meta).some(i => {
       return ALLOWED_META.indexOf(i) === -1
     })

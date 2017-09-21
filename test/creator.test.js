@@ -5,7 +5,7 @@ const Creator = require('../creator')
 it('saves date', () => {
   const creator = new Creator('10:uuid', '10', '2.4.0')
   expect(creator.nodeId).toEqual('10:uuid')
-  expect(creator.user).toEqual('10')
+  expect(creator.userId).toEqual('10')
   expect(creator.subprotocol).toEqual('2.4.0')
 })
 

@@ -22,7 +22,7 @@ class FilteredSync extends ServerSync {
         if (meta.nodeIds && meta.nodeIds.indexOf(this.client.nodeId) !== -1) {
           passed = true
         }
-        if (meta.users && meta.users.indexOf(this.client.user) !== -1) {
+        if (meta.users && meta.users.indexOf(this.client.userId) !== -1) {
           passed = true
         }
         if (passed) {
