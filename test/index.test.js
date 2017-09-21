@@ -11,3 +11,9 @@ it('has BaseServer class', () => {
 it('has Server class', () => {
   expect(index.Server).toBe(Server)
 })
+
+it('has allowed meta keys list', () => {
+  for (const key of index.ALLOWED_META) {
+    expect(typeof key).toEqual('string')
+  }
+})

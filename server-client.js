@@ -5,10 +5,7 @@ const semver = require('semver')
 
 const FilteredSync = require('./filtered-sync')
 const forcePromise = require('./force-promise')
-
-const ALLOWED_META = [
-  'id', 'time', 'nodeIds', 'users', 'channels', 'subprotocol'
-]
+const ALLOWED_META = require('./allowed-meta')
 
 function reportDetails (client) {
   return {
