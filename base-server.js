@@ -167,14 +167,20 @@ class BaseServer {
     this.log = log
 
     this.log.on('preadd', (action, meta) => {
+      const isLogux = action.type.slice(0, 6) === 'logux/'
       if (!meta.server) {
         meta.server = this.nodeId
       }
-      if (!meta.status && action.type.slice(0, 6) !== 'logux/') {
+      if (!meta.status && !isLogux) {
         meta.status = 'waiting'
       }
-      if (meta.id[1] === this.nodeId && !meta.subprotocol) {
-        meta.subprotocol = this.options.subprotocol
+      if (meta.id[1] === this.nodeId) {
+        if (!meta.subprotocol) {
+          meta.subprotocol = this.options.subprotocol
+        }
+        if (!this.types[action.type] && !isLogux) {
+          meta.status = 'processed'
+        }
       }
     })
 

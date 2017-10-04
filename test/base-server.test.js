@@ -432,10 +432,12 @@ it('requires access callback for type', () => {
 
 it('reports about unknown action type', () => {
   const test = createReporter()
-  return test.app.log.add({ type: 'UNKNOWN' }).then(() => {
-    expect(test.names).toEqual(['add', 'unknownType', 'clean'])
+  return test.app.log.add(
+    { type: 'UNKNOWN' }, { id: [1, '10:uuid', 0] }
+  ).then(() => {
+    expect(test.names).toEqual(['add', 'unknownType', 'add', 'clean', 'clean'])
     expect(test.reports[1]).toEqual(['unknownType', {
-      actionId: [1, 'server:uuid', 0],
+      actionId: [1, '10:uuid', 0],
       type: 'UNKNOWN'
     }])
   })
@@ -814,5 +816,14 @@ it('subscribes clients', () => {
         '10:uuid': filter
       }
     })
+  })
+})
+
+it('does not need type definition for own actions', () => {
+  const test = createReporter()
+  return test.app.log.add({ type: 'unknown' }).then(() => {
+    expect(test.names).toEqual(['add', 'clean'])
+    expect(test.reports[0][1].action.type).toEqual('unknown')
+    expect(test.reports[0][1].meta.status).toEqual('processed')
   })
 })
