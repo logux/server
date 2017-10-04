@@ -99,7 +99,7 @@ function formatParams (c, params, parent) {
       return start + formatActionId(c, value)
     } else if (Array.isArray(value)) {
       return start + formatArray(c, value)
-    } else if (typeof value === 'object') {
+    } else if (typeof value === 'object' && value) {
       const nested = Object.keys(value).map(key => [key, value[key]])
       return start + NEXT_LINE + INDENT +
         formatParams(c, nested, name).split(NEXT_LINE).join(NEXT_LINE + INDENT)

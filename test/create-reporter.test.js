@@ -184,7 +184,7 @@ it('reports add', () => {
     action: {
       type: 'CHANGE_USER',
       id: 100,
-      data: { name: 'John' }
+      data: { name: 'John', project: null }
     },
     meta: {
       id: [1487805099387, '100:uImkcF4z', 0],
