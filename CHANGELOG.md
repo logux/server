@@ -1,6 +1,10 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.2.1
+* Don’t show `unknownType` error on server actions without processor.
+* Better action and meta view in `human` log.
+
 ## 0.2 “Neuromancer”
 * Use Logux Protocol 2.
 * Use Logux Core 0.2 and Logux Sync 0.2.
