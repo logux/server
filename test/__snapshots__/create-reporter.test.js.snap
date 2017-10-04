@@ -59,17 +59,17 @@ exports[`reports add 1`] = `
 exports[`reports add 2`] = `
 "[42m[30m INFO [39m[49m  [1m[32mAction was added[39m[22m [2mat 1970-01-01 00:00:00[22m
         Action: 
-          type: [1mCHANGE_USER[22m
+          type: \\"[1mCHANGE_USER[22m\\"
           id:   [1m100[22m
           data: 
-            name:    [1mJohn[22m
+            name:    \\"[1mJohn[22m\\"
             project: [1mnull[22m
         Meta:   
           id:          [[1m1487805099387[22m, [1m100[22m:uImkcF4z, [1m0[22m]
           time:        [1m1487805099387[22m
-          reasons:     [[1mlastValue[22m, [1mdebug[22m]
-          server:      [1mserver:H1f8LAyzl[22m
-          subprotocol: [1m1.0.0[22m
+          reasons:     [\\"[1mlastValue[22m\\", \\"[1mdebug[22m\\"]
+          server:      \\"[1mserver:H1f8LAyzl[22m\\"
+          subprotocol: \\"[1m1.0.0[22m\\"
 
 "
 `;

@@ -74,7 +74,14 @@ function formatNodeId (c, nodeId) {
 }
 
 function formatArray (c, array) {
-  return `[${ array.map(i => c.bold(i)).join(', ') }]`
+  const items = array.map(i => {
+    if (typeof i === 'string') {
+      return '"' + c.bold(i) + '"'
+    } else {
+      return c.bold(i)
+    }
+  })
+  return `[${ items.join(', ') }]`
 }
 
 function formatActionId (c, id) {
@@ -105,6 +112,8 @@ function formatParams (c, params, parent) {
         formatParams(c, nested, name).split(NEXT_LINE).join(NEXT_LINE + INDENT)
     } else if (name === 'Latency' && !parent) {
       return start + c.bold(value) + LATENCY_UNIT
+    } else if (typeof value === 'string' && parent) {
+      return start + '"' + c.bold(value) + '"'
     } else {
       return start + c.bold(value)
     }
