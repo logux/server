@@ -52,7 +52,7 @@ exports[`reports LOGUX_WRONG_OPTIONS error 2`] = `
 `;
 
 exports[`reports add 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"action\\":{\\"type\\":\\"CHANGE_USER\\",\\"id\\":100,\\"data\\":{\\"name\\":\\"John\\",\\"project\\":null}},\\"meta\\":{\\"id\\":[1487805099387,\\"100:uImkcF4z\\",0],\\"time\\":1487805099387,\\"reasons\\":[\\"lastValue\\",\\"debug\\"],\\"server\\":\\"server:H1f8LAyzl\\",\\"subprotocol\\":\\"1.0.0\\"},\\"msg\\":\\"Action was added\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"action\\":{\\"type\\":\\"CHANGE_USER\\",\\"id\\":100,\\"data\\":{\\"name\\":\\"John\\",\\"role\\":null,\\"array\\":[1,[2],{\\"a\\":\\"1\\",\\"b\\":{\\"c\\":2},\\"d\\":[],\\"e\\":null},null]}},\\"meta\\":{\\"id\\":[1487805099387,\\"100:uImkcF4z\\",0],\\"time\\":1487805099387,\\"reasons\\":[\\"lastValue\\",\\"debug\\"],\\"server\\":\\"server:H1f8LAyzl\\",\\"subprotocol\\":\\"1.0.0\\"},\\"msg\\":\\"Action was added\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
@@ -62,8 +62,9 @@ exports[`reports add 2`] = `
           type: \\"[1mCHANGE_USER[22m\\"
           id:   [1m100[22m
           data: 
-            name:    \\"[1mJohn[22m\\"
-            project: [1mnull[22m
+            name:  \\"[1mJohn[22m\\"
+            role:  [1mnull[22m
+            array: [[1m1[22m, [[1m2[22m], { a: \\"[1m1[22m\\", b: { c: [1m2[22m }, d: [], e: [1mnull[22m }, [1mnull[22m]
         Meta:   
           id:          [[1m1487805099387[22m, [1m100[22m:uImkcF4z, [1m0[22m]
           time:        [1m1487805099387[22m

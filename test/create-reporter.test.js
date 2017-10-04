@@ -184,7 +184,11 @@ it('reports add', () => {
     action: {
       type: 'CHANGE_USER',
       id: 100,
-      data: { name: 'John', project: null }
+      data: {
+        name: 'John',
+        role: null,
+        array: [1, [2], { a: '1', b: { c: 2 }, d: [], e: null }, null]
+      }
     },
     meta: {
       id: [1487805099387, '100:uImkcF4z', 0],

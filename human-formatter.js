@@ -73,14 +73,25 @@ function formatNodeId (c, nodeId) {
   }
 }
 
+function formatValue (c, value) {
+  if (typeof value === 'string') {
+    return '"' + c.bold(value) + '"'
+  } else if (Array.isArray(value)) {
+    return formatArray(c, value)
+  } else if (typeof value === 'object' && value) {
+    return formatObject(c, value)
+  } else {
+    return c.bold(value)
+  }
+}
+
+function formatObject (c, obj) {
+  const items = Object.keys(obj).map(k => k + ': ' + formatValue(c, obj[k]))
+  return `{ ${ items.join(', ') } }`
+}
+
 function formatArray (c, array) {
-  const items = array.map(i => {
-    if (typeof i === 'string') {
-      return '"' + c.bold(i) + '"'
-    } else {
-      return c.bold(i)
-    }
-  })
+  const items = array.map(i => formatValue(c, i))
   return `[${ items.join(', ') }]`
 }
 
