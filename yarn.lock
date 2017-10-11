@@ -652,8 +652,8 @@ dashdash@^1.12.0:
     assert-plus "^1.0.0"
 
 date-fns@^1.27.2:
-  version "1.28.5"
-  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-1.28.5.tgz#257cfc45d322df45ef5658665967ee841cd73faf"
+  version "1.29.0"
+  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-1.29.0.tgz#12e609cdcb935127311d04d33334e2960a2a54e6"
 
 debug@^2.2.0, debug@^2.6.3, debug@^2.6.8:
   version "2.6.9"
@@ -712,8 +712,8 @@ detect-indent@^4.0.0:
     repeating "^2.0.0"
 
 diff@^3.2.0:
-  version "3.3.1"
-  resolved "https://registry.yarnpkg.com/diff/-/diff-3.3.1.tgz#aa8567a6eed03c531fc89d3f711cd0e5259dec75"
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/diff/-/diff-3.4.0.tgz#b1d85507daf3964828de54b37d0d73ba67dda56c"
 
 docdash@^0.4.0:
   version "0.4.0"
@@ -2147,15 +2147,15 @@ log-update@^1.0.2:
     ansi-escapes "^1.0.0"
     cli-cursor "^1.0.2"
 
-logux-core@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/logux-core/-/logux-core-0.2.0.tgz#311c6858452eff5379504fc12c633274b33e351f"
+logux-core@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/logux-core/-/logux-core-0.2.1.tgz#e63ca128a08eb1c4d4f1c965b07269ebb92b516b"
   dependencies:
     nanoevents "^1.0.2"
 
-logux-sync@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/logux-sync/-/logux-sync-0.2.0.tgz#b4e47750db07845e3ba8e1598b2a757acba8d008"
+logux-sync@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/logux-sync/-/logux-sync-0.2.1.tgz#f3d80fba5f910fcd560ce122aff3c25001ca5a03"
   dependencies:
     nanoevents "^1.0.2"
 
@@ -2253,8 +2253,8 @@ minimist@~0.0.1:
     minimist "0.0.8"
 
 moment@^2.10.6:
-  version "2.18.1"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.18.1.tgz#c36193dd3ce1c2eed2adb7c802dbbc77a81b1c0f"
+  version "2.19.0"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.19.0.tgz#44f675ef6b944942762581b1c179fb679e599d67"
 
 ms@2.0.0:
   version "2.0.0"
@@ -2280,9 +2280,9 @@ nanoevents@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/nanoevents/-/nanoevents-1.0.2.tgz#5078a4f8d3e4318aa585c5f2c633cc57fc06ac0f"
 
-nanoid@^0.2.1:
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-0.2.1.tgz#0bc1446ddf73011893cb09103e65783272028ff9"
+nanoid@^0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-0.2.2.tgz#e2ebc6ad3db5e0454fd8124d30ca39b06555fe56"
 
 natural-compare@^1.4.0:
   version "1.4.0"
@@ -2932,8 +2932,8 @@ shellwords@^0.1.0:
   resolved "https://registry.yarnpkg.com/shellwords/-/shellwords-0.1.1.tgz#d6b9181c1a48d397324c84871efbcfc73fc0654b"
 
 showdown@^1.7.1:
-  version "1.7.5"
-  resolved "https://registry.yarnpkg.com/showdown/-/showdown-1.7.5.tgz#08edefd1aa7af35bd6de18a4e30192e2f5e176cb"
+  version "1.7.6"
+  resolved "https://registry.yarnpkg.com/showdown/-/showdown-1.7.6.tgz#ac3d3de9bec712372d0406487476ad97a27b4c34"
   dependencies:
     yargs "^9.0.1"
 
