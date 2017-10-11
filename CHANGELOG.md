@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.2.2
+* Don’t destroy server again on error during destroy.
+
 ## 0.2.1
 * Don’t show `unknownType` error on server actions without processor.
 * Better action and meta view in `human` log.
