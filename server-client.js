@@ -164,7 +164,7 @@ class ServerClient {
    */
   destroy () {
     this.destroyed = true
-    if (!this.app.destroing && !this.zombie) {
+    if (!this.app.destroying && !this.zombie) {
       this.app.reporter('disconnect', reportClient(this))
     }
     if (this.sync.connected) this.sync.destroy()

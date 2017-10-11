@@ -187,7 +187,7 @@ class BaseServer {
     this.log.on('add', (action, meta) => {
       this.reporter('add', { action, meta })
 
-      if (this.destroing) return
+      if (this.destroying) return
 
       if (action.type === 'logux/subscribe') {
         if (meta.server === this.nodeId) {
@@ -390,7 +390,7 @@ class BaseServer {
    * })
    */
   destroy () {
-    this.destroing = true
+    this.destroying = true
     this.reporter('destroy')
     return Promise.all(this.unbind.map(i => i()))
   }

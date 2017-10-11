@@ -152,7 +152,7 @@ class Server extends BaseServer {
     const onError = err => {
       if (initialized) {
         this.emitter.emit('error', err)
-        if (!this.destroing) {
+        if (!this.destroying) {
           this.destroy().then(() => {
             process.exit(1)
           })

@@ -298,7 +298,7 @@ it('reporters on log events', () => {
   ])
 })
 
-it('reporters on destroing', () => {
+it('reporters on destroying', () => {
   const test = createReporter()
   const promise = test.app.destroy()
   expect(test.reports).toEqual([['destroy', undefined]])
