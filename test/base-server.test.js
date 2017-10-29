@@ -3,6 +3,7 @@
 const MemoryStore = require('logux-core').MemoryStore
 const WebSocket = require('uws')
 const TestTime = require('logux-core').TestTime
+const delay = require('nanodelay')
 const https = require('https')
 const http = require('http')
 const path = require('path')
@@ -58,12 +59,6 @@ function createReporter (opts) {
   app = createServer(opts)
   result.app = app
   return result
-}
-
-function wait (ms) {
-  return new Promise(resolve => {
-    setTimeout(resolve, ms)
-  })
 }
 
 const originEnv = process.env.NODE_ENV
@@ -487,7 +482,7 @@ it('processes actions', () => {
     process (action, meta, creator) {
       expect(meta.added).toEqual(1)
       expect(creator.isServer).toBeTruthy()
-      return wait(25).then(() => {
+      return delay(25).then(() => {
         processed.push(action)
       })
     }
@@ -498,10 +493,10 @@ it('processes actions', () => {
   })
 
   return test.app.log.add({ type: 'FOO' }, { reasons: ['test'] })
-    .then(() => wait(1))
+    .then(() => Promise.resolve())
     .then(() => {
       expect(fired).toEqual([])
-      return wait(30)
+      return delay(30)
     }).then(() => {
       expect(processed).toEqual([{ type: 'FOO' }])
       expect(fired).toEqual([{ type: 'FOO' }])
@@ -549,7 +544,7 @@ it('waits for last processing before destroy', () => {
     app.destroy().then(() => {
       destroyed = true
     })
-    return wait(1)
+    return Promise.resolve()
   }).then(() => {
     expect(destroyed).toBeFalsy()
     expect(app.processing).toEqual(1)
@@ -557,7 +552,7 @@ it('waits for last processing before destroy', () => {
   }).then(() => {
     expect(started).toEqual(1)
     process()
-    return wait(1)
+    return delay(1)
   }).then(() => {
     expect(destroyed).toBeTruthy()
   })
@@ -575,7 +570,7 @@ it('reports about error during action processing', () => {
   })
 
   return app.log.add({ type: 'FOO' }, { reasons: ['test'] }).then(() => {
-    return wait(1)
+    return delay(1)
   }).then(() => {
     expect(test.names).toEqual(['add', 'error', 'add'])
     expect(test.reports[1]).toEqual(['error', {
@@ -597,7 +592,7 @@ it('undos actions on client', () => {
     nodeIds: ['2:uuid'],
     channels: ['user/1']
   }, 'magic')
-  return wait(1).then(() => {
+  return Promise.resolve().then(() => {
     const entries = app.log.store.created.map(i => i.slice(0, 2))
     expect(entries).toEqual([
       [

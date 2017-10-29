@@ -38,6 +38,7 @@
     "jest": "^21.2.1",
     "jsdoc": "^3.5.5",
     "lint-staged": "^4.3.0",
+    "nanodelay": "^0.1.2",
     "pre-commit": "^1.2.2",
     "rimraf": "^2.6.2",
     "yaspeller-ci": "^0.7.0"
