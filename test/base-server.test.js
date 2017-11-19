@@ -309,7 +309,7 @@ it('creates a client on connection', () => {
       ws.internalOnError = reject
     })
   }).then(() => {
-    expect(Object.keys(app.clients).length).toBe(1)
+    expect(Object.keys(app.clients)).toHaveLength(1)
     expect(app.clients[1].remoteAddress).toEqual('127.0.0.1')
   })
 })
@@ -324,7 +324,7 @@ it('creates a client manually', () => {
       }
     }
   })
-  expect(Object.keys(app.clients).length).toBe(1)
+  expect(Object.keys(app.clients)).toHaveLength(1)
   expect(app.clients[1].remoteAddress).toEqual('127.0.0.1')
 })
 
@@ -364,7 +364,7 @@ it('accepts custom HTTP server', () => {
       ws.onerror = reject
     })
   }).then(() => {
-    expect(Object.keys(app.clients).length).toBe(1)
+    expect(Object.keys(app.clients)).toHaveLength(1)
   })
 })
 
