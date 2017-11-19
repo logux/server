@@ -83,7 +83,7 @@ it('creates JSON reporter', () => {
 
 it('creates human reporter', () => {
   const reporter = createReporter({ reporter: 'human', root: '/dir/' })
-  expect(reporter.logger.streams.length).toEqual(1)
+  expect(reporter.logger.streams).toHaveLength(1)
   const stream = reporter.logger.streams[0].stream
   expect(stream instanceof HumanFormatter).toBeTruthy()
   expect(stream.basepath).toEqual('/dir/')
