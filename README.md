@@ -116,7 +116,10 @@ app.channel('user/:id', (params, action, meta, creator) => {
     db.loadUser(params.id).then(user => {
       app.log.add(
         { type: 'USER_NAME', name: user.name },
-        { nodeIds: [creator.nodeId] })
+        {
+          nodeIds: [creator.nodeId],
+          time: [user.nameChangedAt * 1000, 'server', 0]
+        })
     })
     return true
   }
