@@ -118,7 +118,7 @@ app.channel('user/:id', (params, action, meta, creator) => {
         { type: 'USER_NAME', name: user.name },
         {
           nodeIds: [creator.nodeId],
-          time: [user.nameChangedAt * 1000, 'server', 0]
+          time: user.nameChangedAt * 1000
         })
     })
     return true
