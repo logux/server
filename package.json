@@ -13,7 +13,7 @@
     "bunyan": "^1.8.12",
     "chalk": "^2.3.0",
     "logux-core": "^0.2.1",
-    "logux-sync": "^0.2.1",
+    "logux-sync": "^0.2.2",
     "nanoevents": "^1.0.2",
     "nanoid": "^1.0.1",
     "semver": "^5.4.1",
