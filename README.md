@@ -68,7 +68,7 @@ You need to write custom logic inside your action callbacks.
 app.type('CHANGE_NAME', {
   access (action, meta, creator) {
     return action.user === creator.userId
-  }
+  },
   process (action) {
     return users.find({ id: action.user }).then(user => {
       user.update({ name: action.name })
