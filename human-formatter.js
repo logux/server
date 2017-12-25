@@ -62,7 +62,7 @@ function formatName (key) {
 }
 
 function formatNodeId (c, nodeId) {
-  const pos = nodeId.indexOf(':')
+  const pos = nodeId.lastIndexOf(':')
   let id, random
   if (pos === -1) {
     return nodeId

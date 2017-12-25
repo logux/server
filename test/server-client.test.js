@@ -225,25 +225,25 @@ it('reports on server in user name', () => {
 it('authenticates user', () => {
   const test = createReporter()
   test.app.auth((id, token, who) => Promise.resolve(
-    token === 'token' && id === '10' && who === client
+    token === 'token' && id === 'a:b' && who === client
   ))
   const client = createClient(test.app)
 
   return client.connection.connect().then(() => {
     const protocol = client.sync.localProtocol
     client.connection.other().send([
-      'connect', protocol, '10:uuid', 0, { credentials: 'token' }
+      'connect', protocol, 'a:b:uuid', 0, { credentials: 'token' }
     ])
     return client.connection.pair.wait('right')
   }).then(() => {
-    expect(client.userId).toEqual('10')
-    expect(client.nodeId).toEqual('10:uuid')
+    expect(client.userId).toEqual('a:b')
+    expect(client.nodeId).toEqual('a:b:uuid')
     expect(client.sync.authenticated).toBeTruthy()
-    expect(test.app.nodeIds).toEqual({ '10:uuid': client })
-    expect(test.app.users).toEqual({ 10: [client] })
+    expect(test.app.nodeIds).toEqual({ 'a:b:uuid': client })
+    expect(test.app.users).toEqual({ 'a:b': [client] })
     expect(test.names).toEqual(['connect', 'authenticated'])
     expect(test.reports[1]).toEqual(['authenticated', {
-      clientId: '1', nodeId: '10:uuid', subprotocol: '0.0.0'
+      clientId: '1', nodeId: 'a:b:uuid', subprotocol: '0.0.0'
     }])
   })
 })

@@ -159,7 +159,7 @@ it('reports authenticated', () => {
   check('authenticated', {
     subprotocol: '1.0.0',
     clientId: '670',
-    nodeId: '100:uImkcF4z'
+    nodeId: 'admin:100:uImkcF4z'
   })
 })
 

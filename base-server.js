@@ -610,7 +610,7 @@ class BaseServer {
   }
 
   getUserId (nodeId) {
-    const pos = nodeId.indexOf(':')
+    const pos = nodeId.lastIndexOf(':')
     if (pos !== -1) {
       return nodeId.slice(0, pos)
     } else {
