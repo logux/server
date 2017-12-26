@@ -162,11 +162,11 @@ it('shows uncatch rejects', () => checkError('uncatch.js'))
 
 it('use environment variables for config', () => {
   return checkOut('options.js', {
-    env: {
+    env: Object.assign({ }, process.env, {
       LOGUX_REPORTER: 'json',
       LOGUX_PORT: 31337,
       NODE_ENV: 'test'
-    }
+    })
   })
 })
 
@@ -190,9 +190,9 @@ it('shows help about missed option', () => checkError('missed.js'))
 
 it('disables colors for constructor errors', () => {
   return checkError('missed.js', {
-    env: {
+    env: Object.assign({ }, process.env, {
       NODE_ENV: 'production'
-    }
+    })
   })
 })
 
