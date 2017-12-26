@@ -78,11 +78,7 @@ function checkError (name, args) {
   })
 }
 
-const originEnv = process.env.NODE_ENV
 afterEach(() => {
-  process.env.NODE_ENV = originEnv
-  delete process.env.LOGUX_PORT
-  delete process.env.LOGUX_REPORTER
   if (started) {
     started.kill('SIGINT')
     started = undefined
@@ -165,9 +161,13 @@ it('shows uncatch errors', () => checkError('throw.js'))
 it('shows uncatch rejects', () => checkError('uncatch.js'))
 
 it('use environment variables for config', () => {
-  process.env.LOGUX_PORT = 31337
-  process.env.LOGUX_REPORTER = 'json'
-  return checkOut('options.js')
+  return checkOut('options.js', {
+    env: {
+      LOGUX_REPORTER: 'json',
+      LOGUX_PORT: 31337,
+      NODE_ENV: 'test'
+    }
+  })
 })
 
 it('uses reporter param', () => checkOut('options.js', ['', '--r', 'json']))
@@ -189,8 +189,11 @@ it('shows help about unknown option', () => checkError('unknown.js'))
 it('shows help about missed option', () => checkError('missed.js'))
 
 it('disables colors for constructor errors', () => {
-  process.env.NODE_ENV = 'production'
-  return checkError('missed.js')
+  return checkError('missed.js', {
+    env: {
+      NODE_ENV: 'production'
+    }
+  })
 })
 
 it('uses reporter param for constructor errors', () => {
