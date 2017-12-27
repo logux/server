@@ -160,7 +160,7 @@ it('shows uncatch errors', () => checkError('throw.js'))
 
 it('shows uncatch rejects', () => checkError('uncatch.js'))
 
-it('use environment variables for config', () => {
+it('uses environment variables for config', () => {
   return checkOut('options.js', {
     env: Object.assign({ }, process.env, {
       LOGUX_REPORTER: 'json',
