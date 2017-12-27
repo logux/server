@@ -167,7 +167,7 @@ class ServerClient {
     if (!this.app.destroying && !this.zombie) {
       this.app.reporter('disconnect', reportClient(this))
     }
-    if (this.sync.connected) this.sync.destroy()
+    this.sync.destroy()
     if (this.userId) {
       let users = this.app.users[this.userId]
       if (users) {
