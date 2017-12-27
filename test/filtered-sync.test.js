@@ -29,8 +29,14 @@ function createTest () {
   return { client, server }
 }
 
+let test
+afterEach(() => {
+  test.client.destroy()
+  test.server.destroy()
+})
+
 it('does not sync actions on add', () => {
-  const test = createTest()
+  test = createTest()
   return test.client.connection.connect().then(() => {
     return test.client.waitFor('synchronized')
   }).then(() => {
@@ -43,7 +49,7 @@ it('does not sync actions on add', () => {
 })
 
 it('synchronizes only node-specific actions on connection', () => {
-  const test = createTest()
+  test = createTest()
   return Promise.all([
     test.server.log.add({ type: 'A' }, { nodeIds: ['1:b'] }),
     test.server.log.add({ type: 'B' }, { nodeIds: ['1:a'] }),
@@ -58,7 +64,7 @@ it('synchronizes only node-specific actions on connection', () => {
 })
 
 it('synchronizes only user-specific actions on connection', () => {
-  const test = createTest()
+  test = createTest()
   return Promise.all([
     test.server.log.add({ type: 'A' }, { users: ['2'] }),
     test.server.log.add({ type: 'B' }, { users: ['1'] }),
@@ -73,7 +79,7 @@ it('synchronizes only user-specific actions on connection', () => {
 })
 
 it('still sends only new actions', () => {
-  const test = createTest()
+  test = createTest()
   return test.server.log.add({ type: 'A' }, { nodeIds: ['1:a'] }).then(() => {
     return test.server.log.add({ type: 'B' }, { nodeIds: ['1:a'] })
   }).then(() => {

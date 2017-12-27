@@ -317,7 +317,9 @@ it('creates a client on connection', () => {
 it('creates a client manually', () => {
   app = createServer()
   app.addClient({
-    on: () => true,
+    on: () => {
+      return () => true
+    },
     ws: {
       _socket: {
         remoteAddress: '127.0.0.1'

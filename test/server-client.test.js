@@ -6,6 +6,8 @@ const TestPair = require('logux-sync').TestPair
 const ServerClient = require('../server-client')
 const BaseServer = require('../base-server')
 
+let destroyable = []
+
 function createConnection () {
   const pair = new TestPair()
   pair.left.ws = {
@@ -48,6 +50,7 @@ function createClient (app) {
   app.lastClient += 1
   const client = new ServerClient(app, createConnection(), app.lastClient)
   app.clients[app.lastClient] = client
+  destroyable.push(client)
   return client
 }
 
@@ -76,6 +79,11 @@ function sentNames (client) {
   return sent(client).map(i => i[0])
 }
 
+afterEach(() => {
+  destroyable.forEach(i => i.destroy())
+  destroyable = []
+})
+
 it('uses server options', () => {
   const app = createServer({
     subprotocol: '0.0.1',
@@ -98,7 +106,7 @@ it('saves connection', () => {
   expect(client.connection).toBe(connection)
 })
 
-it('use string key', () => {
+it('uses string key', () => {
   const client = new ServerClient(createServer(), createConnection(), 1)
   expect(client.key).toEqual('1')
   expect(typeof client.key).toEqual('string')
