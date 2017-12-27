@@ -50,7 +50,7 @@
     "clean": "rimraf docs/ coverage/",
     "lint": "eslint-ci *.js test/{**/,}*.js",
     "docs": "jsdoc --configure .jsdocrc *.js",
-    "test": "jest --coverage && yarn lint && yarn spellcheck"
+    "test": "jest --runInBand --coverage && yarn lint && yarn spellcheck"
   },
   "jest": {
     "testEnvironment": "node",
