@@ -281,7 +281,7 @@ it('authenticates user without user name', () => {
     client.connection.other().send(['connect', protocol, 'uuid', 0])
     return client.connection.pair.wait('right')
   }).then(() => {
-    expect(client.userId).not.toBeDefined()
+    expect(client.userId).toBeUndefined()
     expect(app.users).toEqual({ })
   })
 })

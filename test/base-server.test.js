@@ -635,7 +635,7 @@ it('adds current subprotocol only to own actions', () => {
     { type: 'A' },
     { id: [1, '0:other', 0], reasons: ['test'] }
   ).then(() => {
-    expect(app.log.store.created[0][1].subprotocol).not.toBeDefined()
+    expect(app.log.store.created[0][1].subprotocol).toBeUndefined()
   })
 })
 
@@ -688,7 +688,7 @@ it('reports about wrong channel name', () => {
 it('ignores subscription for other servers', () => {
   const test = createReporter()
   const action = { type: 'logux/subscribe' }
-  test.app.log.add(action, { server: 'server:other' }).then(() => {
+  return test.app.log.add(action, { server: 'server:other' }).then(() => {
     expect(test.names).toEqual(['add', 'clean'])
   })
 })
