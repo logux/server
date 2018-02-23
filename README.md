@@ -1,4 +1,4 @@
-# Logux Server
+# Logux Server [![Cult Of Martians][cult-img]][cult]
 
 <img align="right" width="95" height="95" title="Logux logo"
      src="https://cdn.rawgit.com/logux/logux/master/logo.svg">
@@ -8,6 +8,9 @@ between clients and server logs.
 
 This framework helps you to write Logux server and define back-end callbacks
 for each client’s event type.
+
+[cult-img]: http://cultofmartians.com/assets/badges/badge.svg
+[cult]: http://cultofmartians.com/done.html
 
 <a href="https://evilmartians.com/?utm_source=logux-server">
   <img src="https://evilmartians.com/badges/sponsored-by-evil-martians.svg"
