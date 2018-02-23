@@ -1,6 +1,6 @@
 {
   "name": "logux-server",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Logux server-side framework",
   "keywords": [
     "logux",
