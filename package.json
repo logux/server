@@ -11,8 +11,8 @@
   "repository": "logux/logux-server",
   "dependencies": {
     "bunyan": "^1.8.12",
-    "chalk": "^2.3.1",
-    "logux-core": "^0.2.1",
+    "chalk": "^2.3.2",
+    "logux-core": "^0.2.2",
     "logux-sync": "^0.2.2",
     "nanoevents": "^1.0.2",
     "nanoid": "^1.0.2",
@@ -24,14 +24,14 @@
     "yyyy-mm-dd": "^1.0.2"
   },
   "devDependencies": {
-    "cross-spawn": "^6.0.4",
+    "cross-spawn": "^6.0.5",
     "docdash": "^0.4.0",
-    "eslint": "^4.18.1",
+    "eslint": "^4.18.2",
     "eslint-ci": "^0.1.1",
     "eslint-config-logux": "^21.0.0",
     "eslint-config-standard": "^11.0.0",
     "eslint-plugin-import": "^2.9.0",
-    "eslint-plugin-jest": "^21.12.2",
+    "eslint-plugin-jest": "^21.13.0",
     "eslint-plugin-node": "^6.0.1",
     "eslint-plugin-promise": "^3.6.0",
     "eslint-plugin-security": "^1.4.0",
