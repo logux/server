@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.2.7
+* Use `uWS` 9.x with Node.js 10 support.
+
 ## 0.2.6
 * Use `yargs` 11.x.
 
