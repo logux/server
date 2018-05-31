@@ -249,8 +249,16 @@ class BaseServer {
     this.channels = []
     this.subscribers = { }
 
+    this.authAttempts = { }
+
+    this.timeouts = { }
+    this.lastTimeout = 0
+
     this.unbind.push(() => {
       for (const i in this.clients) this.clients[i].destroy()
+      for (const i in this.timeouts) {
+        clearTimeout(this.timeouts[i])
+      }
     })
     this.unbind.push(() => new Promise(resolve => {
       if (this.processing === 0) {
@@ -722,6 +730,15 @@ class BaseServer {
         this.nodeIds[nodeId].connection.send(['debug', 'error', msg])
       }
     }
+  }
+
+  setTimeout (callback, ms) {
+    this.lastTimeout += 1
+    const id = this.lastTimeout
+    this.timeouts[id] = setTimeout(() => {
+      delete this.timeouts[id]
+      callback()
+    }, ms)
   }
 }
 

@@ -2,6 +2,7 @@
 
 const SyncError = require('logux-sync').SyncError
 const TestPair = require('logux-sync').TestPair
+const delay = require('nanodelay')
 
 const ServerClient = require('../server-client')
 const BaseServer = require('../base-server')
@@ -28,6 +29,8 @@ function createServer (opts) {
   server.log.on('preadd', (action, meta) => {
     meta.reasons.push('test')
   })
+
+  destroyable.push(server)
 
   return server
 }
@@ -143,6 +146,7 @@ it('removes itself on destroy', () => {
         '10:other': client2
       }
     }
+    return Promise.resolve()
   }).then(() => {
     client1.destroy()
     expect(test.app.users).toEqual({ 10: [client2] })
@@ -211,6 +215,37 @@ it('reports on wrong authentication', () => {
     expect(test.reports[1]).toEqual(['unauthenticated', {
       clientId: '1', nodeId: '10:uuid', subprotocol: '0.0.0'
     }])
+  })
+})
+
+it('blocks authentication bruteforce', () => {
+  const test = createReporter()
+  test.app.auth(() => Promise.resolve(false))
+  function connect (num) {
+    const client = new ServerClient(test.app, createConnection(), num)
+    return client.connection.connect().then(() => {
+      const protocol = client.sync.localProtocol
+      client.connection.other().send(['connect', protocol, num + ':uuid', 0])
+      return client.connection.pair.wait('right')
+    })
+  }
+  return Promise.all([1, 2, 3, 4, 5].map(i => {
+    return connect(i)
+  })).then(() => {
+    expect(test.names.filter(i => i === 'disconnect')).toHaveLength(5)
+    expect(test.names.filter(i => i === 'unauthenticated')).toHaveLength(3)
+    expect(test.names.filter(i => i === 'error')).toHaveLength(2)
+    test.reports.filter(i => i[0] === 'error').forEach(report => {
+      expect(report[1].err.type).toEqual('bruteforce')
+      expect(report[1].nodeId).toMatch(/(4|5):uuid/)
+    })
+    return delay(3050)
+  }).then(() => {
+    return connect(6)
+  }).then(() => {
+    expect(test.names.filter(i => i === 'disconnect')).toHaveLength(6)
+    expect(test.names.filter(i => i === 'unauthenticated')).toHaveLength(4)
+    expect(test.names.filter(i => i === 'error')).toHaveLength(2)
   })
 })
 
@@ -356,9 +391,10 @@ it('disconnects zombie', () => {
 
   return client1.connection.connect().then(() => {
     client1.auth({ }, '10:uuid')
-    client2.connection.connect()
+    return client2.connection.connect()
   }).then(() => {
     client2.auth({ }, '10:uuid')
+    return Promise.resolve()
   }).then(() => {
     expect(Object.keys(test.app.clients)).toEqual([client2.key])
     expect(test.names).toEqual([
