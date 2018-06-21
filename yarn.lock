@@ -2769,9 +2769,13 @@ nanoevents@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/nanoevents/-/nanoevents-1.0.2.tgz#5078a4f8d3e4318aa585c5f2c633cc57fc06ac0f"
 
-nanoid@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-1.0.2.tgz#15d2b5e76b6dbfb15cac1000cb457d4bfc845bdb"
+nanoevents@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/nanoevents/-/nanoevents-1.0.3.tgz#b72e5396605d1d9eee3b584594b7aeffa7c4db82"
+
+nanoid@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-1.0.3.tgz#3ff31779301f481baa52a6a31a67c8f6e91949d2"
 
 nanomatch@^1.2.9:
   version "1.2.9"
