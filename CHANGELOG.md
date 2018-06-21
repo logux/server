@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.2.9
+* Use `ws` instead of `uWS`.
+
 ## 0.2.8
 * Add protection against authentication brute force.
 
