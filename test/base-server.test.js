@@ -1,7 +1,7 @@
 'use strict'
 
 const MemoryStore = require('logux-core').MemoryStore
-const WebSocket = require('uws')
+const WebSocket = require('ws')
 const TestTime = require('logux-core').TestTime
 const delay = require('nanodelay')
 const https = require('https')
@@ -305,8 +305,8 @@ it('creates a client on connection', () => {
   return app.listen().then(() => {
     const ws = new WebSocket(`ws://127.0.0.1:${ app.options.port }`)
     return new Promise((resolve, reject) => {
-      ws.internalOnOpen = resolve
-      ws.internalOnError = reject
+      ws.onopen = resolve
+      ws.onerror = reject
     })
   }).then(() => {
     expect(Object.keys(app.clients)).toHaveLength(1)
