@@ -9,7 +9,7 @@
  * function outMap (action, meta) {
  *   const filtered = { }
  *   for (const i in meta) {
- *     if (['id', 'time'].indexOf(i) !== -1) {
+ *     if (ALLOWED_META.includes(i)) {
  *       filtered[i] = meta[i]
  *     }
  *   }
