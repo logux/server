@@ -1,5 +1,3 @@
-'use strict'
-
 const forcePromise = require('../force-promise')
 
 it('executes Promise', () => {

@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 
-'use strict'
-
 const Server = require('../../server')
 
 const app = new Server({

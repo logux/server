@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 
-'use strict'
-
 const bunyan = require('bunyan')
 const Server = require('../../server')
 

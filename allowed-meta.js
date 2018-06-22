@@ -1,5 +1,3 @@
-'use strict'
-
 /**
  * List of meta keys permitted for clients.
  * @type {string[]}

@@ -1,5 +1,3 @@
-'use strict'
-
 const Creator = require('../creator')
 
 it('saves date', () => {

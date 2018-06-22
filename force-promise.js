@@ -1,5 +1,3 @@
-'use strict'
-
 function forcePromise (callback) {
   let result
   try {

@@ -1,5 +1,3 @@
-'use strict'
-
 const ServerConnection = require('logux-core').ServerConnection
 const MemoryStore = require('logux-core').MemoryStore
 const NanoEvents = require('nanoevents')
@@ -287,8 +285,8 @@ class BaseServer {
    * })
    */
   auth (authenticator) {
-    this.authenticator = function () {
-      return forcePromise(() => authenticator.apply(this, arguments))
+    this.authenticator = function (...args) {
+      return forcePromise(() => authenticator(...args))
     }
   }
 

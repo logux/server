@@ -1,5 +1,3 @@
-'use strict'
-
 const SyncError = require('logux-core').SyncError
 const bunyan = require('bunyan')
 

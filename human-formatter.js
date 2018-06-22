@@ -1,5 +1,3 @@
-'use strict'
-
 const stripAnsi = require('strip-ansi')
 const yyyymmdd = require('yyyy-mm-dd')
 const stream = require('stream')

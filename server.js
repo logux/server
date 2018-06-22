@@ -1,5 +1,3 @@
-'use strict'
-
 const yargs = require('yargs')
 
 const createReporter = require('./create-reporter')
@@ -190,9 +188,9 @@ class Server extends BaseServer {
     })
   }
 
-  listen () {
+  listen (...args) {
     const origin = BaseServer.prototype.listen
-    return origin.apply(this, arguments).catch(err => {
+    return origin.apply(this, args).catch(err => {
       this.reporter('error', { err })
       process.exit(1)
     })

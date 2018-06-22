@@ -1,5 +1,3 @@
-'use strict'
-
 const BaseServer = require('../base-server')
 const Server = require('../server')
 const index = require('../')

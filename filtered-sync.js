@@ -1,5 +1,3 @@
-'use strict'
-
 const ServerSync = require('logux-core/server-sync')
 
 class FilteredSync extends ServerSync {

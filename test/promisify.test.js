@@ -1,5 +1,3 @@
-'use strict'
-
 const promisify = require('../promisify')
 
 it('makes promise from callback function', () => {

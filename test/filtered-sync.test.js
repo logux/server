@@ -1,5 +1,3 @@
-'use strict'
-
 const ClientSync = require('logux-core').ClientSync
 const TestPair = require('logux-core').TestPair
 const TestTime = require('logux-core').TestTime

@@ -1,5 +1,3 @@
-'use strict'
-
 const MemoryStore = require('logux-core').MemoryStore
 const WebSocket = require('ws')
 const TestTime = require('logux-core').TestTime
