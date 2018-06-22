@@ -9,6 +9,9 @@
   "author": "Andrey Sitnik <andrey@sitnik.ru>",
   "license": "MIT",
   "repository": "logux/logux-server",
+  "engines": {
+    "node": ">=6.0.0"
+  },
   "dependencies": {
     "bunyan": "^1.8.12",
     "chalk": "^2.4.1",
@@ -63,9 +66,6 @@
       "/node_modules/",
       "/server.js"
     ]
-  },
-  "engines": {
-    "node": ">=4.0.0"
   },
   "eslintConfig": {
     "extends": "eslint-config-logux/node4"
