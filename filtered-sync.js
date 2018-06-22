@@ -1,6 +1,6 @@
 'use strict'
 
-const ServerSync = require('logux-sync/server-sync')
+const ServerSync = require('logux-core/server-sync')
 
 class FilteredSync extends ServerSync {
   constructor (client, nodeId, log, connection, options) {

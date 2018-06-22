@@ -1,6 +1,6 @@
 'use strict'
 
-const SyncError = require('logux-sync').SyncError
+const SyncError = require('logux-core').SyncError
 const semver = require('semver')
 
 const FilteredSync = require('./filtered-sync')
@@ -97,7 +97,7 @@ class ServerClient {
     }
 
     /**
-     * Sync instance from `logux-sync` to synchronize logs.
+     * Sync instance to synchronize logs.
      * @type {ServerSync}
      *
      * @example

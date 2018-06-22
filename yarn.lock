@@ -2574,17 +2574,11 @@ log-update@^1.0.2:
     ansi-escapes "^1.0.0"
     cli-cursor "^1.0.2"
 
-logux-core@^0.2.2:
+logux-core@logux/logux-core:
   version "0.2.2"
-  resolved "https://registry.yarnpkg.com/logux-core/-/logux-core-0.2.2.tgz#b0603adad1db99e673d72594790c80d11462466d"
+  resolved "https://codeload.github.com/logux/logux-core/tar.gz/e7344946c9c026090a649a697e85326494cf9186"
   dependencies:
-    nanoevents "^1.0.2"
-
-logux-sync@^0.2.7:
-  version "0.2.7"
-  resolved "https://registry.yarnpkg.com/logux-sync/-/logux-sync-0.2.7.tgz#b385ff99bc4bbcae27e292ce06dffaa3f031f0dd"
-  dependencies:
-    nanoevents "^1.0.2"
+    nanoevents "^1.0.4"
 
 longest@^1.0.1:
   version "1.0.1"
@@ -2765,13 +2759,13 @@ nanodelay@^0.1.3:
   version "0.1.3"
   resolved "https://registry.yarnpkg.com/nanodelay/-/nanodelay-0.1.3.tgz#5e83131e4aa3674851ffef63a779fa7c856b9966"
 
-nanoevents@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/nanoevents/-/nanoevents-1.0.2.tgz#5078a4f8d3e4318aa585c5f2c633cc57fc06ac0f"
-
 nanoevents@^1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/nanoevents/-/nanoevents-1.0.3.tgz#b72e5396605d1d9eee3b584594b7aeffa7c4db82"
+
+nanoevents@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/nanoevents/-/nanoevents-1.0.4.tgz#cad8bd7bd77d0f0b2c87cdff8770c5b461b49d7f"
 
 nanoid@^1.0.3:
   version "1.0.3"

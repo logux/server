@@ -1,6 +1,6 @@
 'use strict'
 
-const SyncError = require('logux-sync').SyncError
+const SyncError = require('logux-core').SyncError
 const bunyan = require('bunyan')
 
 const createReporter = require('../create-reporter')

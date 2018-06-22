@@ -1,7 +1,7 @@
 'use strict'
 
-const SyncError = require('logux-sync').SyncError
-const TestPair = require('logux-sync').TestPair
+const SyncError = require('logux-core').SyncError
+const TestPair = require('logux-core').TestPair
 const delay = require('nanodelay')
 
 const ServerClient = require('../server-client')

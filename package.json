@@ -15,8 +15,7 @@
   "dependencies": {
     "bunyan": "^1.8.12",
     "chalk": "^2.4.1",
-    "logux-core": "^0.2.2",
-    "logux-sync": "^0.2.7",
+    "logux-core": "logux/logux-core",
     "nanoevents": "^1.0.3",
     "nanoid": "^1.0.3",
     "semver": "^5.5.0",

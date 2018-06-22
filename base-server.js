@@ -1,6 +1,6 @@
 'use strict'
 
-const ServerConnection = require('logux-sync').ServerConnection
+const ServerConnection = require('logux-core').ServerConnection
 const MemoryStore = require('logux-core').MemoryStore
 const NanoEvents = require('nanoevents')
 const UrlPattern = require('url-pattern')
