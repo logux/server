@@ -54,25 +54,6 @@
     "docs": "jsdoc --configure .jsdocrc *.js",
     "test": "jest --runInBand --coverage && yarn lint && yarn spellcheck"
   },
-  "jest": {
-    "testEnvironment": "node",
-    "coverageThreshold": {
-      "global": {
-        "statements": 100
-      }
-    },
-    "coveragePathIgnorePatterns": [
-      "/node_modules/",
-      "/server.js"
-    ]
-  },
-  "eslintConfig": {
-    "extends": "eslint-config-logux/node"
-  },
-  "lint-staged": {
-    "*.md": "yaspeller-ci",
-    "*.js": "eslint"
-  },
   "pre-commit": [
     "lint-staged"
   ]
