@@ -259,7 +259,8 @@ class BaseServer {
     this.subscribers = { }
 
     this.authAttempts = { }
-    this.unknowns = { }
+    this.unknownTypes = { }
+    this.wrongChannels = { }
 
     this.timeouts = { }
     this.lastTimeout = 0
@@ -665,7 +666,36 @@ class BaseServer {
    */
   unknownType (action, meta) {
     this.internalUnkownType(action, meta)
-    this.unknowns[meta.id.join('\t')] = true
+    this.unknownTypes[meta.id.join('\t')] = true
+  }
+
+  /**
+   * Report that client try to subscribe for unknown channel.
+   *
+   * Logux call it automatically, if you will not provide some add channel
+   * handler with RegExp to call any channels.
+   *
+   * @param {Action} action The subscribe action.
+   * @param {Meta} meta Action’s metadata.
+   *
+   * @return {undefined}
+   *
+   * @example
+   * server.channel(/([\w\W]*)/, {
+   *   access (param, action, meta, creator) {
+   *     return phpBackend.checkChannel(params[0], creator.userId).then(res => {
+   *       if (res.code === 404) {
+   *         this.wrongChannel(action, meta)
+   *       } else {
+   *         return response.body === 'granted'
+   *       }
+   *     })
+   *   }
+   * })
+   */
+  wrongChannel (action, meta) {
+    this.internalWrongChannel(action, meta)
+    this.wrongChannels[meta.id.join('\t')] = true
   }
 
   internalUnkownType (action, meta) {
@@ -675,6 +705,15 @@ class BaseServer {
       this.undo(meta, 'error')
     }
     this.debugActionError(meta, `Action with unknown type ${ action.type }`)
+  }
+
+  internalWrongChannel (action, meta) {
+    this.reporter('wrongChannel', {
+      actionId: meta.id,
+      channel: action.channel
+    })
+    this.undo(meta, 'error')
+    this.debugActionError(meta, `Wrong channel name ${ action.channel }`)
   }
 
   processAction (type, action, meta) {
@@ -749,6 +788,10 @@ class BaseServer {
         forcePromise(() => {
           return i.access(match, action, meta, creator)
         }).then(access => {
+          if (this.wrongChannels[meta.id.join('\t')]) {
+            delete this.wrongChannels[meta.id.join('\t')]
+            return false
+          }
           if (!access) {
             this.denyAction(meta)
             return false
@@ -809,15 +852,6 @@ class BaseServer {
       actionId: meta.id,
       channel: action.channel
     })
-  }
-
-  wrongChannel (action, meta) {
-    this.reporter('wrongChannel', {
-      actionId: meta.id,
-      channel: action.channel
-    })
-    this.undo(meta, 'error')
-    this.debugActionError(meta, `Wrong channel name ${ action.channel }`)
   }
 
   denyAction (meta) {

@@ -683,6 +683,29 @@ it('reports about wrong channel name', () => {
   })
 })
 
+it('allows to have custom channel name check', () => {
+  const test = createReporter()
+  const channels = []
+  test.app.channel(/.*/, {
+    access (params, action, meta) {
+      channels.push(params[0])
+      test.app.wrongChannel(action, meta)
+    }
+  })
+  test.app.nodeIds['10:uuid'] = {
+    connection: { send: jest.fn() },
+    sync: { onAdd () { } }
+  }
+  return test.app.log.add(
+    { type: 'logux/subscribe', channel: 'foo' }
+  ).then(() => {
+    expect(channels).toEqual(['foo'])
+    expect(test.names).toEqual([
+      'add', 'wrongChannel', 'add', 'clean', 'clean'
+    ])
+  })
+})
+
 it('ignores subscription for other servers', () => {
   const test = createReporter()
   const action = { type: 'logux/subscribe' }
