@@ -58,6 +58,10 @@
     "Beziuk",
     "Mitin",
     "Konstantin",
-    "Krivlenia"
+    "Krivlenia",
+    "filterCreator",
+    "otherType",
+    "unknownType",
+    "wrongChannel"
   ]
 }

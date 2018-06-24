@@ -486,7 +486,7 @@ class BaseServer {
    *
    * @param {string|regexp} pattern Pattern or regular expression
    *                                for channel name.
-   * @param {objects} callbacks Callback during subscription pprocess.
+   * @param {objects} callbacks Callback during subscription process.
    * @param {channelAuthorizer} callbacks.access Checks user access for channel.
    * @param {filterCreator} [callback.filter] Generates custom filter
    *                                          for channel’s actions.
@@ -673,7 +673,7 @@ class BaseServer {
    * Report that client try to subscribe for unknown channel.
    *
    * Logux call it automatically, if you will not provide some add channel
-   * handler with RegExp to call any channels.
+   * handler with regular expression to call any channels.
    *
    * @param {Action} action The subscribe action.
    * @param {Meta} meta Action’s metadata.
