@@ -388,7 +388,7 @@ it('marks actions with own node ID', () => {
 it('marks actions with waiting status', () => {
   app = createServer()
   app.type('A', { access: () => true })
-  app.channel('a', () => true)
+  app.channel('a', { access: () => true })
 
   const statuses = []
   app.log.on('add', (action, meta) => {
@@ -650,7 +650,7 @@ it('allows to override subprotocol in meta', () => {
 
 it('reports about wrong channel name', () => {
   const test = createReporter({ env: 'development' })
-  test.app.channel('foo', () => true)
+  test.app.channel('foo', { access: () => true })
   test.app.nodeIds['10:uuid'] = {
     connection: { send: jest.fn() },
     sync: { onAdd () { } }
@@ -698,9 +698,11 @@ it('checks channel access', () => {
   }
   test.app.nodeIds['10:uuid'] = client
 
-  test.app.channel(/^user\/(\d+)$/, params => {
-    expect(params[1]).toEqual('10')
-    return Promise.resolve(false)
+  test.app.channel(/^user\/(\d+)$/, {
+    access (params) {
+      expect(params[1]).toEqual('10')
+      return Promise.resolve(false)
+    }
   })
 
   return test.app.log.add(
@@ -717,7 +719,7 @@ it('checks channel access', () => {
   })
 })
 
-it('reports about errors during subscription', () => {
+it('reports about errors during channel authorization', () => {
   const test = createReporter()
   const client = {
     sync: { remoteSubprotocol: '0.0.0', onAdd: () => false }
@@ -725,8 +727,10 @@ it('reports about errors during subscription', () => {
   test.app.nodeIds['10:uuid'] = client
 
   const err = new Error()
-  test.app.channel(/^user\/(\d+)$/, () => {
-    throw err
+  test.app.channel(/^user\/(\d+)$/, {
+    access () {
+      throw err
+    }
   })
 
   return test.app.log.add(
@@ -753,17 +757,26 @@ it('subscribes clients', () => {
   test.app.nodeIds['10:uuid'] = client
 
   let userSubsriptions = 0
-  test.app.channel('user/:id', (params, action, meta, creator) => {
-    expect(params.id).toEqual('10')
-    expect(action.channel).toEqual('user/10')
-    expect(meta.id).toEqual([1, '10:uuid', 0])
-    expect(creator.nodeId).toEqual('10:uuid')
-    userSubsriptions += 1
-    return true
+  test.app.channel('user/:id', {
+    access (params, action, meta, creator) {
+      expect(params.id).toEqual('10')
+      expect(action.channel).toEqual('user/10')
+      expect(meta.id).toEqual([1, '10:uuid', 0])
+      expect(creator.nodeId).toEqual('10:uuid')
+      userSubsriptions += 1
+      return true
+    }
   })
 
   function filter () { }
-  test.app.channel('posts', () => filter)
+  test.app.channel('posts', {
+    access () {
+      return true
+    },
+    filter () {
+      return filter
+    }
+  })
 
   return test.app.log.add(
     { type: 'logux/subscribe', channel: 'user/10' }, { id: [1, '10:uuid', 0] }
@@ -811,6 +824,77 @@ it('subscribes clients', () => {
         '10:uuid': filter
       }
     })
+  })
+})
+
+it('reports about errors during channel initialization', () => {
+  const test = createReporter()
+  const client = {
+    sync: { remoteSubprotocol: '0.0.0', onAdd: () => false }
+  }
+  test.app.nodeIds['10:uuid'] = client
+
+  const err = new Error()
+  test.app.channel(/^user\/(\d+)$/, {
+    access: () => true,
+    init () {
+      throw err
+    }
+  })
+
+  return test.app.log.add(
+    { type: 'logux/subscribe', channel: 'user/10' }, { id: [1, '10:uuid', 0] }
+  ).then(() => {
+    return Promise.resolve()
+  }).then(() => {
+    return Promise.resolve()
+  }).then(() => {
+    expect(test.names).toEqual([
+      'add', 'clean', 'subscribed', 'error', 'add', 'clean', 'unsubscribed'
+    ])
+    expect(test.reports[3][1]).toEqual({ actionId: [1, '10:uuid', 0], err })
+    expect(test.reports[4][1].action).toEqual({
+      type: 'logux/undo', id: [1, '10:uuid', 0], reason: 'error'
+    })
+    expect(test.app.subscribers).toEqual({ })
+  })
+})
+
+it('loads initial actions during subscription', () => {
+  const test = createReporter()
+  const client = {
+    sync: { remoteSubprotocol: '0.0.0', onAdd: () => false }
+  }
+  test.app.nodeIds['10:uuid'] = client
+
+  let userLoaded = 0
+  let initializating
+  test.app.channel('user/:id', {
+    access: () => true,
+    init (params, action, meta, creator) {
+      expect(params.id).toEqual('10')
+      expect(action.channel).toEqual('user/10')
+      expect(meta.id).toEqual([1, '10:uuid', 0])
+      expect(creator.nodeId).toEqual('10:uuid')
+      userLoaded += 1
+      return new Promise(resolve => {
+        initializating = resolve
+      })
+    }
+  })
+
+  return test.app.log.add(
+    { type: 'logux/subscribe', channel: 'user/10' }, { id: [1, '10:uuid', 0] }
+  ).then(() => {
+    return Promise.resolve()
+  }).then(() => {
+    expect(userLoaded).toEqual(1)
+    expect(test.app.subscribers).toEqual({
+      'user/10': {
+        '10:uuid': true
+      }
+    })
+    initializating()
   })
 })
 

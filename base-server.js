@@ -440,33 +440,41 @@ class BaseServer {
    *
    * @param {string|regexp} pattern Pattern or regular expression
    *                                for channel name.
-   * @param {subscriber} callback Callback to check access, define custom action
-   *                              filter and send initial actions.
+   * @param {objects} callbacks Callback during subscription pprocess.
+   * @param {channelAuthorizer} callbacks.access Checks user access for channel.
+   * @param {filterCreator} [callback.filter] Generates custom filter
+   *                                          for channel’s actions.
+   * @param {initialized} [callbacks.init] Creates actions with initial state.
    *
    * @return {undefined}
    *
    * @example
-   * app.channel('user/:id', (params, action, meta, creator) => {
-   *   if (params.id !== creator.userId) {
-   *     return false
-   *   } else {
+   * app.channel('user/:id', {
+   *   access (params, action, meta, creator) {
+   *     return params.id === creator.userId
+   *   }
+   *   filter (params, action, meta, creator) {
+   *     return (action, meta, creator) => {
+   *       return !action.hidden
+   *     }
+   *   }
+   *   init () {
    *     db.loadUser(params.id).then(user => {
    *       app.log.add(
    *         { type: 'USER_NAME', name: user.name },
    *         { nodeIds: [creator.nodeId] })
    *     })
-   *     return (action, meta, creator) => {
-   *       return !action.hidden
-   *     }
    *   }
    * })
    */
-  channel (pattern, callback) {
+  channel (pattern, callbacks) {
+    const channel = Object.assign({ }, callbacks)
     if (typeof pattern === 'string') {
-      this.channels.push({ pattern: new UrlPattern(pattern), callback })
+      channel.pattern = new UrlPattern(pattern)
     } else {
-      this.channels.push({ regexp: pattern, callback })
+      channel.regexp = pattern
     }
+    this.channels.push(channel)
   }
 
   /**
@@ -652,18 +660,21 @@ class BaseServer {
         match = action.channel.match(i.regexp)
       }
 
+      let subscribed = false
       if (match) {
         const creator = this.createCreator(meta)
         forcePromise(() => {
-          return i.callback(match, action, meta, creator)
-        }).then(filter => {
-          if (!filter) {
+          return i.access(match, action, meta, creator)
+        }).then(access => {
+          if (!access) {
             this.denyAction(meta)
-            return
+            return false
           }
 
+          const filter = i.filter && i.filter(match, action, meta, creator)
+
           const client = this.nodeIds[creator.nodeId]
-          if (!client) return
+          if (!client) return false
 
           this.reporter('subscribed', {
             actionId: meta.id,
@@ -673,10 +684,20 @@ class BaseServer {
           if (!this.subscribers[action.channel]) {
             this.subscribers[action.channel] = { }
           }
-          this.subscribers[action.channel][creator.nodeId] = filter
+          this.subscribers[action.channel][creator.nodeId] = filter || true
+          subscribed = true
+
+          if (i.init) {
+            return forcePromise(() => i.init(match, action, meta, creator))
+          } else {
+            return true
+          }
         }).catch(e => {
           this.emitter.emit('error', e, action, meta)
           this.undo(meta, 'error')
+          if (subscribed) {
+            this.unsubscribeAction(action, meta)
+          }
         })
         break
       }
@@ -777,12 +798,32 @@ module.exports = BaseServer
  */
 
 /**
- * @callback subscriber
+ * @callback channelAuthorizer
  * @param {object} params Match object from channel name pattern
  *                        or from regular expression.
  * @param {Action} action The action data.
  * @param {Meta} meta The action metadata.
  * @param {Creator} creator Information about node, who create this action.
- * @return {boolean|filter|Promise} Promise with boolean or action filter.
- *                                  On `false` subscription will be denied.
+ * @return {boolean|Promise} Promise with boolean.
+ *                           On `false` subscription will be denied.
+ */
+
+/**
+ * @callback filterCreator
+ * @param {object} params Match object from channel name pattern
+ *                        or from regular expression.
+ * @param {Action} action The action data.
+ * @param {Meta} meta The action metadata.
+ * @param {Creator} creator Information about node, who create this action.
+ * @return {filter|undefined} Actions filter.
+ */
+
+/**
+ * @callback initialized
+ * @param {object} params Match object from channel name pattern
+ *                        or from regular expression.
+ * @param {Action} action The action data.
+ * @param {Meta} meta The action metadata.
+ * @param {Creator} creator Information about node, who create this action.
+ * @return {Promise|undefined} Promise during initial actions loading.
  */

@@ -432,7 +432,7 @@ it('checks action creator', () => {
 
 it('allows subscribe and unsubscribe actions', () => {
   const test = createReporter()
-  test.app.channel('a', () => true)
+  test.app.channel('a', { access: () => true })
 
   return connectClient(test.app).then(client => {
     client.connection.other().send(['sync', 2,
