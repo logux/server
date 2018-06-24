@@ -784,10 +784,15 @@ it('subscribes clients', () => {
     return Promise.resolve()
   }).then(() => {
     expect(userSubsriptions).toEqual(1)
-    expect(test.names).toEqual(['add', 'clean', 'subscribed'])
+    expect(test.names).toEqual(['add', 'clean', 'subscribed', 'add', 'clean'])
     expect(test.reports[2][1]).toEqual({
       actionId: [1, '10:uuid', 0], channel: 'user/10'
     })
+    expect(test.reports[3][1].action).toEqual({
+      type: 'logux/processed', id: [1, '10:uuid', 0]
+    })
+    expect(test.reports[3][1].meta.nodeIds).toEqual(['10:uuid'])
+    expect(test.reports[3][1].meta.status).toEqual('processed')
     expect(test.app.subscribers).toEqual({
       'user/10': {
         '10:uuid': true
@@ -813,10 +818,11 @@ it('subscribes clients', () => {
     )
   }).then(() => {
     expect(test.names).toEqual([
-      'add', 'clean', 'subscribed', 'add', 'clean', 'subscribed',
-      'add', 'unsubscribed', 'clean'
+      'add', 'clean', 'subscribed',
+      'add', 'clean', 'add', 'clean', 'subscribed',
+      'add', 'clean', 'add', 'unsubscribed', 'clean'
     ])
-    expect(test.reports[7][1]).toEqual({
+    expect(test.reports[11][1]).toEqual({
       actionId: [3, '10:uuid', 0], channel: 'user/10'
     })
     expect(test.app.subscribers).toEqual({

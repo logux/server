@@ -211,7 +211,15 @@ class BaseServer {
           this.internalUnkownType(action, meta)
           return
         }
-        if (type.process) this.processAction(type, action, meta)
+        let processing
+        if (type.process) {
+          processing = this.processAction(type, action, meta)
+        } else {
+          processing = Promise.resolve()
+        }
+        processing.then(() => {
+          this.markAsProcessed(meta)
+        })
       }
     })
     this.log.on('clean', (action, meta) => {
@@ -674,7 +682,7 @@ class BaseServer {
     const creator = this.createCreator(meta)
 
     this.processing += 1
-    forcePromise(() => type.process(action, meta, creator)).then(() => {
+    return forcePromise(() => type.process(action, meta, creator)).then(() => {
       this.reporter('processed', {
         actionId: meta.id,
         latency: Date.now() - start
@@ -688,6 +696,14 @@ class BaseServer {
       this.processing -= 1
       this.emitter.emit('processed', action, meta)
     })
+  }
+
+  markAsProcessed (meta) {
+    if (!/^server:/.test(meta.id[1])) {
+      this.log.add(
+        { type: 'logux/processed', id: meta.id },
+        { nodeIds: [meta.id[1]], status: 'processed' })
+    }
   }
 
   getUserId (nodeId) {
@@ -759,6 +775,8 @@ class BaseServer {
           } else {
             return true
           }
+        }).then(access => {
+          if (access) this.markAsProcessed(meta)
         }).catch(e => {
           this.emitter.emit('error', e, action, meta)
           this.undo(meta, 'error')
