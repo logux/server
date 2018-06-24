@@ -203,9 +203,12 @@ class BaseServer {
 
       this.sendAction(action, meta)
       if (meta.status === 'waiting') {
-        const type = this.types[action.type]
+        let type = this.types[action.type]
         if (!type) {
-          this.unknownType(action, meta)
+          type = this.otherProcessor
+        }
+        if (!type) {
+          this.internalUnkownType(action, meta)
           return
         }
         if (type.process) this.processAction(type, action, meta)
@@ -248,6 +251,7 @@ class BaseServer {
     this.subscribers = { }
 
     this.authAttempts = { }
+    this.unknowns = { }
 
     this.timeouts = { }
     this.lastTimeout = 0
@@ -436,6 +440,39 @@ class BaseServer {
   }
 
   /**
+   * Define callbacks for actions, which type was not defined
+   * by any {@link Server#type}. Useful for proxy or some hacks.
+   *
+   * Without this settings, server will call {@link Server#unknownType}
+   * on unknown type.
+   *
+   * @param {object} callbacks Callbacks for actions with this type.
+   * @param {authorizer} callback.access Check does user can do this action.
+   * @param {processor} [callback.process] Action business logic.
+   *
+   * @return {undefined}
+   *
+   * @example
+   * app.otherType(
+   *   access (action, meta, creator) {
+   *     return phpBackend.checkByHTTP(action, meta).then(response => {
+   *       if (response.code === 404) {
+   *         return this.unknownType(action, meta)
+   *       } else {
+   *         return response.body === 'granted'
+   *       }
+   *     })
+   *   }
+   *   process (action, meta, creator) {
+   *     return phpBackend.sendHTTP(action, meta)
+   *   }
+   * })
+   */
+  otherType (callbacks) {
+    this.otherProcessor = callbacks
+  }
+
+  /**
    * Define the channel.
    *
    * @param {string|regexp} pattern Pattern or regular expression
@@ -593,6 +630,43 @@ class BaseServer {
     return this.lastClient
   }
 
+  /**
+   * If you receive action with unknown type, this method will mark this action
+   * with `error` status and undo it on the clients.
+   *
+   * If you didn’t set {@link Server#otherType},
+   * Logux will call it automatically.
+   *
+   * @param {Action} action The action with unknown type.
+   * @param {Meta} meta Action’s metadata.
+   *
+   * @return {undefined}
+   *
+   * @example
+   * app.otherType({
+   *   access (action, meta) {
+   *     if (action.type.startsWith('myapp/')) {
+   *       return proxy.access(action, meta)
+   *     } else {
+   *       app.unknownType(action, meta)
+   *     }
+   *   }
+   * })
+   */
+  unknownType (action, meta) {
+    this.internalUnkownType(action, meta)
+    this.unknowns[meta.id.join('\t')] = true
+  }
+
+  internalUnkownType (action, meta) {
+    this.log.changeMeta(meta.id, { status: 'error' })
+    this.reporter('unknownType', { type: action.type, actionId: meta.id })
+    if (this.getUserId(meta.id[1]) !== 'server') {
+      this.undo(meta, 'error')
+    }
+    this.debugActionError(meta, `Action with unknown type ${ action.type }`)
+  }
+
   processAction (type, action, meta) {
     const start = Date.now()
     const creator = this.createCreator(meta)
@@ -612,15 +686,6 @@ class BaseServer {
       this.processing -= 1
       this.emitter.emit('processed', action, meta)
     })
-  }
-
-  unknownType (action, meta) {
-    this.log.changeMeta(meta.id, { status: 'error' })
-    this.reporter('unknownType', { type: action.type, actionId: meta.id })
-    if (this.getUserId(meta.id[1]) !== 'server') {
-      this.undo(meta, 'error')
-    }
-    this.debugActionError(meta, `Action with unknown type ${ action.type }`)
   }
 
   getUserId (nodeId) {

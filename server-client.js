@@ -266,16 +266,26 @@ class ServerClient {
       return Promise.resolve(true)
     }
 
-    const processor = this.app.types[type]
+    let processor = this.app.types[type]
     if (!processor) {
-      this.app.unknownType(action, meta)
+      processor = this.app.otherProcessor
+    }
+    if (!processor) {
+      this.app.internalUnkownType(action, meta)
       return Promise.resolve(false)
     }
 
     return forcePromise(() => processor.access(action, meta, creator))
       .then(result => {
-        if (!result) this.app.denyAction(meta)
-        return result
+        if (this.app.unknowns[meta.id.join('\t')]) {
+          delete this.app.unknowns[meta.id.join('\t')]
+          return false
+        } else if (!result) {
+          this.app.denyAction(meta)
+          return false
+        } else {
+          return true
+        }
       }).catch(e => {
         this.app.undo(meta, 'error')
         this.app.emitter.emit('error', e, action, meta)

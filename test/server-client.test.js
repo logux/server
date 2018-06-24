@@ -795,3 +795,54 @@ it('decompress subprotocol', () => {
     expect(app.log.store.created[1][1].subprotocol).toEqual('0.0.0')
   })
 })
+
+it('has custom processor for unknown type', () => {
+  const test = createReporter()
+  const calls = []
+  test.app.otherType({
+    access () {
+      calls.push('access')
+      return true
+    },
+    process () {
+      calls.push('process')
+    }
+  })
+  return connectClient(test.app).then(client => {
+    client.sync.connection.other().send([
+      'sync', 1,
+      { type: 'UNKOWN' }, { id: [1, '10:uuid', 0], time: 1 }
+    ])
+    return client.sync.connection.pair.wait('right')
+  }).then(() => {
+    expect(test.names).toEqual(['connect', 'authenticated', 'add', 'processed'])
+    expect(calls).toEqual(['access', 'process'])
+  })
+})
+
+it('allows to reports about unknown type in custom processor', () => {
+  const test = createReporter()
+  const calls = []
+  test.app.otherType({
+    access (action, meta) {
+      calls.push('access')
+      test.app.unknownType(action, meta)
+      return true
+    },
+    process () {
+      calls.push('process')
+    }
+  })
+  return connectClient(test.app).then(client => {
+    client.sync.connection.other().send([
+      'sync', 1,
+      { type: 'UNKOWN' }, { id: [1, '10:uuid', 0], time: 1 }
+    ])
+    return client.sync.connection.pair.wait('right')
+  }).then(() => {
+    expect(test.names).toEqual([
+      'connect', 'authenticated', 'unknownType', 'add'
+    ])
+    expect(calls).toEqual(['access'])
+  })
+})
