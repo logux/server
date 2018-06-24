@@ -31,7 +31,7 @@ function reportClient (client, obj) {
  * @param {number} key Client number used as `app.clients` key.
  *
  * @example
- * const client = app.clients[0]
+ * const client = server.clients[0]
  */
 class ServerClient {
   constructor (app, connection, key) {

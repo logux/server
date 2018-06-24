@@ -98,13 +98,13 @@ yargs
  *   envOptions.key = 'key.pem'
  * }
  *
- * const app = new Server(Object.assign({
+ * const server = new Server(Object.assign({
  *   subprotocol: '1.0.0',
  *   supports: '1.x || 0.x',
  *   root: __dirname
  * }, envOptions))
  *
- * app.listen()
+ * server.listen()
  *
  * @extends BaseServer
  */
@@ -117,7 +117,7 @@ class Server extends BaseServer {
    * @return {object} Parsed options object.
    *
    * @example
-   * const app = new Server(Server.loadOptions(process, {
+   * const server = new Server(Server.loadOptions(process, {
    *   subprotocol: '1.0.0',
    *   supports: '1.x',
    *   root: __dirname,

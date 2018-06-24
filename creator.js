@@ -4,7 +4,7 @@ const semver = require('semver')
  * Action creator.
  *
  * @example
- * app.type('FOO', {
+ * server.type('FOO', {
  *   access (action, meta, creator) {
  *     return creator.isSubprotocol('3.x') ? check3(action) : check4(action)
  *   }
@@ -17,7 +17,7 @@ class Creator {
      * @type {string}
      *
      * @example
-     * app.nodeIds[node.nodeId]
+     * server.nodeIds[node.nodeId]
      */
     this.nodeId = nodeId
     /**

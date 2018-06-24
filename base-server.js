@@ -100,7 +100,7 @@ class BaseServer {
      * @type {object}
      *
      * @example
-     * console.log('Server options', app.options.subprotocol)
+     * console.log('Server options', server.options.subprotocol)
      */
     this.options = options || { }
 
@@ -111,7 +111,7 @@ class BaseServer {
      * @type {"production"|"development"}
      *
      * @example
-     * if (app.env === 'development') {
+     * if (server.env === 'development') {
      *   logDebugData()
      * }
      */
@@ -141,7 +141,7 @@ class BaseServer {
      * @type {string}
      *
      * @example
-     * console.log('Error was raised on ' + app.nodeId)
+     * console.log('Error was raised on ' + server.nodeId)
      */
     this.nodeId = `server:${ this.options.id || nanoid(8) }`
 
@@ -160,7 +160,7 @@ class BaseServer {
      * @type {Log}
      *
      * @example
-     * app.log.each(finder)
+     * server.log.each(finder)
      */
     this.log = log
 
@@ -235,8 +235,8 @@ class BaseServer {
      * @type {ServerClient[]}
      *
      * @example
-     * for (let i in app.clients) {
-     *   console.log(app.clients[i].remoteAddress)
+     * for (let i in server.clients) {
+     *   console.log(server.clients[i].remoteAddress)
      * }
      */
     this.clients = { }
@@ -282,7 +282,7 @@ class BaseServer {
    * @return {undefined}
    *
    * @example
-   * app.auth((userId, token) => {
+   * server.auth((userId, token) => {
    *   return findUserByToken(token).then(user => {
    *     return !!user && userId === user.id
    *   })
@@ -301,7 +301,7 @@ class BaseServer {
    */
   listen () {
     if (!this.authenticator) {
-      throw new Error('You must set authentication callback by app.auth()')
+      throw new Error('You must set authentication callback by server.auth()')
     }
 
     let promise = Promise.resolve()
@@ -398,7 +398,7 @@ class BaseServer {
    *
    * @example
    * afterEach(() => {
-   *   testApp.destroy()
+   *   testServer.destroy()
    * })
    */
   destroy () {
@@ -418,7 +418,7 @@ class BaseServer {
    * @return {undefined}
    *
    * @example
-   * app.type('CHANGE_NAME', {
+   * server.type('CHANGE_NAME', {
    *   access (action, meta, creator) {
    *     return action.user === creator.userId
    *   },
@@ -453,7 +453,7 @@ class BaseServer {
    * @return {undefined}
    *
    * @example
-   * app.otherType(
+   * server.otherType(
    *   access (action, meta, creator) {
    *     return phpBackend.checkByHTTP(action, meta).then(response => {
    *       if (response.code === 404) {
@@ -486,7 +486,7 @@ class BaseServer {
    * @return {undefined}
    *
    * @example
-   * app.channel('user/:id', {
+   * server.channel('user/:id', {
    *   access (params, action, meta, creator) {
    *     return params.id === creator.userId
    *   }
@@ -497,7 +497,7 @@ class BaseServer {
    *   }
    *   init () {
    *     db.loadUser(params.id).then(user => {
-   *       app.log.add(
+   *       server.log.add(
    *         { type: 'USER_NAME', name: user.name },
    *         { nodeIds: [creator.nodeId] })
    *     })
@@ -524,7 +524,7 @@ class BaseServer {
    *
    * @example
    * if (couldNotFixConflict(action, meta)) {
-   *   app.undo(meta)
+   *   server.undo(meta)
    * }
    */
   undo (meta, reason) {
@@ -548,7 +548,9 @@ class BaseServer {
    * @return {undefined}
    *
    * @example
-   * process.on('uncaughtException', app.debugError)
+   * process.on('uncaughtException', e => {
+   *   server.debugError(e)
+   * })
    */
   debugError (error) {
     for (const i in this.clients) {
@@ -566,13 +568,13 @@ class BaseServer {
    * @return {undefined}
    *
    * @example
-   * app.log.on('add', (action, meta) => {
-   *   if (meta.server === app.nodeId) {
+   * server.log.on('add', (action, meta) => {
+   *   if (meta.server === server.nodeId) {
    *     sendToOtherServersByRedis(action, meta)
    *   }
    * })
    * onReceivingFromOtherServer((action, meta) => {
-   *   app.sendAction(action, meta)
+   *   server.sendAction(action, meta)
    * })
    */
   sendAction (action, meta) {
@@ -643,12 +645,12 @@ class BaseServer {
    * @return {undefined}
    *
    * @example
-   * app.otherType({
+   * server.otherType({
    *   access (action, meta) {
    *     if (action.type.startsWith('myapp/')) {
    *       return proxy.access(action, meta)
    *     } else {
-   *       app.unknownType(action, meta)
+   *       server.unknownType(action, meta)
    *     }
    *   }
    * })
