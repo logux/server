@@ -953,10 +953,10 @@ it('checks callbacks in unknown type handler', () => {
 
   expect(() => {
     app.otherType({ process: () => true })
-  }).toThrowError(/Unknown type must have access callback/)
+  }).toThrowError('Unknown type must have access callback')
 
   app.otherType({ access: () => true })
   expect(() => {
     app.otherType({ access: () => true })
-  }).toThrowError(/Callbacks for unknown types are already defined/)
+  }).toThrowError('Callbacks for unknown types are already defined')
 })
