@@ -695,10 +695,23 @@ it('reports about wrong channel name', () => {
   })
 })
 
+it('checks custom channel name subscriber', () => {
+  app = createServer()
+
+  expect(() => {
+    app.otherChannel()
+  }).toThrowError('Unknown channel must have access callback')
+
+  app.otherChannel({ access: true })
+  expect(() => {
+    app.otherChannel({ access: true })
+  }).toThrowError('Callbacks for unknown channel are already defined')
+})
+
 it('allows to have custom channel name check', () => {
   const test = createReporter()
   const channels = []
-  test.app.channel(/.*/, {
+  test.app.otherChannel({
     access (params, action, meta) {
       channels.push(params[0])
       test.app.wrongChannel(action, meta)

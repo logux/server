@@ -533,6 +533,46 @@ class BaseServer {
   }
 
   /**
+   * Set callbacks for unknown channel subscription.
+   *
+   * @param {objects} callbacks Callback during subscription process.
+   * @param {channelAuthorizer} callbacks.access Checks user access for channel.
+   * @param {filterCreator} [callback.filter] Generates custom filter
+   *                                          for channel’s actions.
+   * @param {initialized} [callbacks.init] Creates actions with initial state.
+   *
+   * @return {undefined}
+   *
+   * @example
+   * server.otherChannel({
+   *   access (param, action, meta, creator) {
+   *     return phpBackend.checkChannel(params[0], creator.userId).then(res => {
+   *       if (res.code === 404) {
+   *         this.wrongChannel(action, meta)
+   *       } else {
+   *         return response.body === 'granted'
+   *       }
+   *     })
+   *   }
+   * })
+   */
+  otherChannel (callbacks) {
+    if (!callbacks || !callbacks.access) {
+      throw new Error(`Unknown channel must have access callback`)
+    }
+    if (this.otherSubscriber) {
+      throw new Error(`Callbacks for unknown channel are already defined`)
+    }
+    const channel = Object.assign({ }, callbacks)
+    channel.pattern = {
+      match (name) {
+        return [name]
+      }
+    }
+    this.otherSubscriber = channel
+  }
+
+  /**
    * Undo action from client.
    *
    * @param {Meta} meta The action’s metadata.
@@ -681,8 +721,8 @@ class BaseServer {
   /**
    * Report that client try to subscribe for unknown channel.
    *
-   * Logux call it automatically, if you will not provide some add channel
-   * handler with regular expression to call any channels.
+   * Logux call it automatically,
+   * if you will not set {@link Server#otherChannel}.
    *
    * @param {Action} action The subscribe action.
    * @param {Meta} meta Action’s metadata.
@@ -690,7 +730,7 @@ class BaseServer {
    * @return {undefined}
    *
    * @example
-   * server.channel(/([\w\W]*)/, {
+   * server.otherChannel({
    *   access (param, action, meta, creator) {
    *     return phpBackend.checkChannel(params[0], creator.userId).then(res => {
    *       if (res.code === 404) {
@@ -783,8 +823,13 @@ class BaseServer {
       return
     }
 
+    let channels = this.channels
+    if (this.otherSubscriber) {
+      channels = this.channels.concat([this.otherSubscriber])
+    }
+
     let match
-    for (const i of this.channels) {
+    for (const i of channels) {
       if (i.pattern) {
         match = i.pattern.match(action.channel)
       } else {
