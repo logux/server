@@ -648,6 +648,18 @@ it('allows to override subprotocol in meta', () => {
   })
 })
 
+it('checks channel definition', () => {
+  app = createServer()
+
+  expect(() => {
+    app.channel('foo/:id')
+  }).toThrowError('Channel foo/:id must have access callback')
+
+  expect(() => {
+    app.channel(/^foo:/, { init: true })
+  }).toThrowError('Channel /^foo:/ must have access callback')
+})
+
 it('reports about wrong channel name', () => {
   const test = createReporter({ env: 'development' })
   test.app.channel('foo', { access: () => true })

@@ -520,6 +520,9 @@ class BaseServer {
    * })
    */
   channel (pattern, callbacks) {
+    if (!callbacks || !callbacks.access) {
+      throw new Error(`Channel ${ pattern } must have access callback`)
+    }
     const channel = Object.assign({ }, callbacks)
     if (typeof pattern === 'string') {
       channel.pattern = new UrlPattern(pattern)
