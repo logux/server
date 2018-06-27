@@ -62,6 +62,7 @@
     "filterCreator",
     "otherType",
     "unknownType",
-    "wrongChannel"
+    "wrongChannel",
+    "otherChannel"
   ]
 }
