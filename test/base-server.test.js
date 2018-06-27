@@ -935,3 +935,16 @@ it('does not need type definition for own actions', () => {
     expect(test.reports[0][1].meta.status).toEqual('processed')
   })
 })
+
+it('checks callbacks in unknown type handler', () => {
+  app = createServer()
+
+  expect(() => {
+    app.otherType({ process: () => true })
+  }).toThrowError(/Unknown type must have access callback/)
+
+  app.otherType({ access: () => true })
+  expect(() => {
+    app.otherType({ access: () => true })
+  }).toThrowError(/Callbacks for unknown types are already defined/)
+})

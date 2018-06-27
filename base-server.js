@@ -478,6 +478,12 @@ class BaseServer {
    * })
    */
   otherType (callbacks) {
+    if (this.otherProcessor) {
+      throw new Error(`Callbacks for unknown types are already defined`)
+    }
+    if (!callbacks || !callbacks.access) {
+      throw new Error(`Unknown type must have access callback`)
+    }
     this.otherProcessor = callbacks
   }
 
