@@ -38,7 +38,6 @@ Examples:
 
 Environment variables:
   LOGUX_HOST, LOGUX_PORT, LOGUX_KEY, LOGUX_CERT, LOGUX_REPORTER
-
 "
 `;
 
