@@ -63,6 +63,8 @@
     "otherType",
     "unknownType",
     "wrongChannel",
-    "otherChannel"
+    "otherChannel",
+    "BackedSettings",
+    "backend"
   ]
 }

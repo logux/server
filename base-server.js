@@ -10,6 +10,7 @@ const path = require('path')
 const Log = require('logux-core').Log
 const fs = require('fs')
 
+const createBackendProxy = require('./create-backend-proxy')
 const forcePromise = require('./force-promise')
 const ServerClient = require('./server-client')
 const promisify = require('./promisify')
@@ -59,6 +60,8 @@ function optionError (msg) {
  *                                         to disconnect connection.
  * @param {number} [options.ping=10000] Milliseconds since last message to test
  *                                      connection by sending ping.
+ * @param {BackedSettings} [options.backend] Settings to work with PHP,
+                                             Ruby on Rails, or other backend.
  * @param {Store} [options.store] Store to save log. Will be `MemoryStore`,
  *                                by default.
  * @param {TestTime} [options.time] Test time to test server.
@@ -265,6 +268,12 @@ class BaseServer {
     this.timeouts = { }
     this.lastTimeout = 0
 
+    if (this.options.backend) {
+      if (!this.options.backend.port) this.options.backend.port = 1338
+      if (!this.options.backend.host) this.options.backend.host = '127.0.0.1'
+      this.backend = createBackendProxy(this, this.options.backend)
+    }
+
     this.unbind.push(() => {
       for (const i in this.clients) this.clients[i].destroy()
       for (const i in this.timeouts) {
@@ -347,6 +356,16 @@ class BaseServer {
 
           this.http.listen(this.options.port, this.options.host, resolve)
         }))
+    }
+
+    if (this.backend) {
+      promise = promise.then(() => {
+        return new Promise((resolve, reject) => {
+          this.backend.on('error', reject)
+          this.backend.listen(
+            this.options.backend.port, this.options.backend.host, resolve)
+        })
+      })
     }
 
     this.unbind.push(() => promisify(done => {
@@ -999,4 +1018,15 @@ module.exports = BaseServer
  * @param {Meta} meta The action metadata.
  * @param {Creator} creator Information about node, who create this action.
  * @return {Promise|undefined} Promise during initial actions loading.
+ */
+
+/**
+ * Settings for proxy actions to other backend.
+ *
+ * @typedef {object} BackedSettings
+ * @property {string} url URL to send actions to backend.
+ * @property {string} password Password to sign every request.
+ * @property {number} [port=1338] Port to bind actions receiving server.
+ * @param {string} [host="127.0.0.1"] IP-address to bind
+ *                                    actions receiving server.
  */

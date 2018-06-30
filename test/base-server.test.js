@@ -8,9 +8,12 @@ const path = require('path')
 const Log = require('logux-core').Log
 const fs = require('fs')
 
+const createBackendProxy = require('../create-backend-proxy')
 const BaseServer = require('../base-server')
 const promisify = require('../promisify')
 const pkg = require('../package.json')
+
+jest.mock('../create-backend-proxy')
 
 const DEFAULT_OPTIONS = {
   subprotocol: '0.0.0',
@@ -972,4 +975,19 @@ it('checks callbacks in unknown type handler', () => {
   expect(() => {
     app.otherType({ access: () => true })
   }).toThrowError('Callbacks for unknown types are already defined')
+})
+
+it('sets default options for backend', () => {
+  app = createServer({
+    backend: {
+      password: 'a',
+      url: 'http://127.0.0.1/rails'
+    }
+  })
+  expect(createBackendProxy).toHaveBeenCalledWith(app, {
+    password: 'a',
+    host: '127.0.0.1',
+    port: 1338,
+    url: 'http://127.0.0.1/rails'
+  })
 })
