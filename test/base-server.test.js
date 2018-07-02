@@ -918,11 +918,15 @@ it('reports about errors during channel initialization', () => {
 })
 
 it('loads initial actions during subscription', () => {
-  const test = createReporter()
+  const test = createReporter({ time: new TestTime() })
   const client = {
     sync: { remoteSubprotocol: '0.0.0', onAdd: () => false }
   }
   test.app.nodeIds['10:uuid'] = client
+
+  test.app.log.on('preadd', (action, meta) => {
+    meta.reasons.push('test')
+  })
 
   let userLoaded = 0
   let initializating
@@ -951,7 +955,16 @@ it('loads initial actions during subscription', () => {
         '10:uuid': true
       }
     })
+    expect(test.app.log.actions()).toEqual([
+      { type: 'logux/subscribe', channel: 'user/10' }
+    ])
     initializating()
+    return delay(1)
+  }).then(() => {
+    expect(test.app.log.actions()).toEqual([
+      { type: 'logux/processed', id: [1, '10:uuid', 0] },
+      { type: 'logux/subscribe', channel: 'user/10' }
+    ])
   })
 })
 

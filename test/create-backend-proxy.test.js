@@ -106,12 +106,17 @@ const httpServer = http.createServer((req, res) => {
     sent.push([req.method, req.url, data])
     if (data.commands[0][1].type === 'NO') {
       res.statusCode = 404
+      res.end()
     } else if (data.commands[0][1].type === 'BAD') {
       res.write(JSON.stringify([['rejected']]))
+      res.end()
     } else {
-      res.write(JSON.stringify([['processed']]))
+      res.write(JSON.stringify([['approved']]))
+      delay(100).then(() => {
+        res.write(JSON.stringify([['processed']]))
+        res.end()
+      })
     }
-    res.end()
   })
 })
 
@@ -250,9 +255,7 @@ it('notifies about actions and subscriptions', () => {
     return client.connection.pair.wait('right')
   }).then(() => {
     expect(app.log.actions()).toEqual([
-      { type: 'logux/processed', id: [2, '10:uuid', 0] },
       { type: 'logux/subscribe', channel: 'a' },
-      { type: 'logux/processed', id: [1, '10:uuid', 0] },
       { type: 'A' }
     ])
     expect(sent).toEqual([
@@ -293,6 +296,14 @@ it('notifies about actions and subscriptions', () => {
           ]
         }
       ]
+    ])
+    return delay(150)
+  }).then(() => {
+    expect(app.log.actions()).toEqual([
+      { type: 'logux/processed', id: [2, '10:uuid', 0] },
+      { type: 'logux/subscribe', channel: 'a' },
+      { type: 'logux/processed', id: [1, '10:uuid', 0] },
+      { type: 'A' }
     ])
   })
 })

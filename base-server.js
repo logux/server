@@ -887,7 +887,9 @@ class BaseServer {
           subscribed = true
 
           if (i.init) {
-            return forcePromise(() => i.init(match, action, meta, creator))
+            return forcePromise(() => {
+              return i.init(match, action, meta, creator)
+            }).then(() => true)
           } else {
             return true
           }

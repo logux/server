@@ -5,7 +5,7 @@ const url = require('url')
 const VERSION = 0
 const MIN_VERSION = 0
 
-const PROCESSED = /^\[\s*\[\s*"processed"/
+const APPROVED = /^\[\s*\[\s*"approved"/
 const REJECTED = /^\[\s*\[\s*"rejected"/
 
 function isValid (data) {
@@ -23,7 +23,13 @@ function isValid (data) {
   return true
 }
 
-function send (backend, password, action, meta) {
+function waitForEnd (res) {
+  return new Promise(resolve => {
+    res.on('end', resolve)
+  })
+}
+
+function send (backend, processing, password, action, meta) {
   const body = JSON.stringify({
     version: VERSION,
     password,
@@ -42,18 +48,21 @@ function send (backend, password, action, meta) {
       }
     }, res => {
       let received = ''
-      let processed = false
+      let approved = false
       if (res.statusCode < 200 || res.statusCode > 299) {
         reject(new Error('Backend responsed with ' + res.statusCode + ' code'))
       } else {
+        const key = meta.id.join('\t')
+        processing[key] = waitForEnd(res)
         res.on('data', part => {
-          if (!processed) {
+          if (!approved) {
             received += part
-            if (PROCESSED.test(received)) {
-              processed = true
+            if (APPROVED.test(received)) {
+              approved = true
               resolve(true)
             } else if (REJECTED.test(received)) {
-              processed = true
+              approved = true
+              delete processing[key]
               resolve(false)
             }
           }
@@ -78,15 +87,29 @@ function createBackendProxy (server, options) {
 
   const backend = url.parse(options.url)
 
+  const processing = []
+
   server.otherType({
     access (action, meta) {
-      return send(backend, options.password, action, meta)
+      return send(backend, processing, options.password, action, meta)
+    },
+    process (action, meta) {
+      const key = meta.id.join('\t')
+      return processing[key].then(() => {
+        delete processing[key]
+      })
     }
   })
 
   server.otherChannel({
     access (param, action, meta) {
-      return send(backend, options.password, action, meta)
+      return send(backend, processing, options.password, action, meta)
+    },
+    init (param, action, meta) {
+      const key = meta.id.join('\t')
+      return processing[key].then(() => {
+        delete processing[key]
+      })
     }
   })
 
