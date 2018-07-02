@@ -927,6 +927,7 @@ class BaseServer {
       actionId: meta.id,
       channel: action.channel
     })
+    this.markAsProcessed(meta)
   }
 
   denyAction (meta) {

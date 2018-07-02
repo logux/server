@@ -455,6 +455,7 @@ it('allows subscribe and unsubscribe actions', () => {
       'add',
       'unsubscribed',
       'subscribed',
+      'add',
       'add'
     ])
     expect(test.reports[2][1].actionId).toEqual([3, '10:uuid', 0])

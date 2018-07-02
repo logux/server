@@ -871,10 +871,13 @@ it('subscribes clients', () => {
     expect(test.names).toEqual([
       'add', 'clean', 'subscribed',
       'add', 'clean', 'add', 'clean', 'subscribed',
-      'add', 'clean', 'add', 'unsubscribed', 'clean'
+      'add', 'clean', 'add', 'unsubscribed', 'add', 'clean', 'clean'
     ])
     expect(test.reports[11][1]).toEqual({
       actionId: [3, '10:uuid', 0], channel: 'user/10'
+    })
+    expect(test.reports[12][1].action).toEqual({
+      type: 'logux/processed', id: [3, '10:uuid', 0]
     })
     expect(test.app.subscribers).toEqual({
       'posts': {
@@ -905,7 +908,8 @@ it('reports about errors during channel initialization', () => {
     return delay(1)
   }).then(() => {
     expect(test.names).toEqual([
-      'add', 'clean', 'subscribed', 'error', 'add', 'clean', 'unsubscribed'
+      'add', 'clean', 'subscribed', 'error', 'add', 'clean',
+      'unsubscribed', 'add', 'clean'
     ])
     expect(test.reports[3][1]).toEqual({ actionId: [1, '10:uuid', 0], err })
     expect(test.reports[4][1].action).toEqual({
