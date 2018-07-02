@@ -108,7 +108,7 @@ const httpServer = http.createServer((req, res) => {
       res.statusCode = 404
       res.end()
     } else if (data.commands[0][1].type === 'BAD') {
-      res.write(JSON.stringify([['rejected']]))
+      res.write(JSON.stringify([['forbidden']]))
       res.end()
     } else {
       res.write(JSON.stringify([['approved']]))

@@ -5,8 +5,8 @@ const url = require('url')
 const VERSION = 0
 const MIN_VERSION = 0
 
+const FORBIDDEN = /^\[\s*\[\s*"forbidden"/
 const APPROVED = /^\[\s*\[\s*"approved"/
-const REJECTED = /^\[\s*\[\s*"rejected"/
 
 function isValid (data) {
   if (typeof data !== 'object') return false
@@ -60,7 +60,7 @@ function send (backend, processing, password, action, meta) {
             if (APPROVED.test(received)) {
               approved = true
               resolve(true)
-            } else if (REJECTED.test(received)) {
+            } else if (FORBIDDEN.test(received)) {
               approved = true
               delete processing[key]
               resolve(false)
