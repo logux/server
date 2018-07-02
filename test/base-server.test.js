@@ -902,9 +902,7 @@ it('reports about errors during channel initialization', () => {
   return test.app.log.add(
     { type: 'logux/subscribe', channel: 'user/10' }, { id: [1, '10:uuid', 0] }
   ).then(() => {
-    return Promise.resolve()
-  }).then(() => {
-    return Promise.resolve()
+    return delay(1)
   }).then(() => {
     expect(test.names).toEqual([
       'add', 'clean', 'subscribed', 'error', 'add', 'clean', 'unsubscribed'
