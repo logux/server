@@ -5,7 +5,7 @@ const BaseServer = require('./base-server')
 
 const AVAILABLE_OPTIONS = [
   'subprotocol', 'supports', 'timeout', 'ping', 'root', 'store', 'server',
-  'port', 'host', 'key', 'cert', 'env', 'bunyan', 'reporter'
+  'port', 'host', 'key', 'cert', 'env', 'bunyan', 'reporter', 'backend'
 ]
 
 yargs
