@@ -43,18 +43,22 @@ function send (backend, password, action, meta) {
     }, res => {
       let received = ''
       let processed = false
-      res.on('data', part => {
-        if (!processed) {
-          received += part
-          if (PROCESSED.test(received)) {
-            processed = true
-            resolve(true)
-          } else if (REJECTED.test(received)) {
-            processed = true
-            resolve(false)
+      if (res.statusCode < 200 || res.statusCode > 299) {
+        reject(new Error('Backend responsed with ' + res.statusCode + ' code'))
+      } else {
+        res.on('data', part => {
+          if (!processed) {
+            received += part
+            if (PROCESSED.test(received)) {
+              processed = true
+              resolve(true)
+            } else if (REJECTED.test(received)) {
+              processed = true
+              resolve(false)
+            }
           }
-        }
-      })
+        })
+      }
     })
     req.on('error', reject)
     req.end(body)

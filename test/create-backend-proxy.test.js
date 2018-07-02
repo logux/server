@@ -1,5 +1,6 @@
 const TestTime = require('logux-core').TestTime
 const TestPair = require('logux-core').TestPair
+const delay = require('nanodelay')
 const http = require('http')
 
 const ServerClient = require('../server-client')
@@ -103,7 +104,9 @@ const httpServer = http.createServer((req, res) => {
   req.on('end', () => {
     const data = JSON.parse(body)
     sent.push([req.method, req.url, data])
-    if (data.commands[0][1].type === 'BAD') {
+    if (data.commands[0][1].type === 'NO') {
+      res.statusCode = 404
+    } else if (data.commands[0][1].type === 'BAD') {
       res.write(JSON.stringify([['rejected']]))
     } else {
       res.write(JSON.stringify([['processed']]))
@@ -189,7 +192,7 @@ it('creates actions', () => {
   })
 })
 
-it('reports about HTTP errors', () => {
+it('reports about network errors', () => {
   const app = createServer({
     backend: {
       password: '1234',
@@ -204,9 +207,31 @@ it('reports about HTTP errors', () => {
     client.connection.other().send(['sync', 1,
       { type: 'A' }, { id: [1, '10:uuid', 0], time: 1 }
     ])
-    return client.connection.pair.wait('right')
+    return delay(100)
   }).then(() => {
     expect(errors).toEqual(['ECONNREFUSED'])
+    expect(app.log.actions()).toEqual([
+      { type: 'logux/undo', reason: 'error', id: [1, '10:uuid', 0] }
+    ])
+  })
+})
+
+it('reports bad HTTP answers', () => {
+  const app = createServer(OPTIONS)
+  const errors = []
+  app.on('error', e => {
+    errors.push(e.message)
+  })
+  return connectClient(app).then(client => {
+    client.connection.other().send(['sync', 1,
+      { type: 'NO' }, { id: [1, '10:uuid', 0], time: 1 }
+    ])
+    return delay(100)
+  }).then(() => {
+    expect(errors).toEqual(['Backend responsed with 404 code'])
+    expect(app.log.actions()).toEqual([
+      { type: 'logux/undo', reason: 'error', id: [1, '10:uuid', 0] }
+    ])
   })
 })
 
