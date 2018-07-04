@@ -14,7 +14,7 @@ const createBackendProxy = require('./create-backend-proxy')
 const forcePromise = require('./force-promise')
 const ServerClient = require('./server-client')
 const promisify = require('./promisify')
-const Creator = require('./creator')
+const Context = require('./context')
 const pkg = require('./package.json')
 
 const PEM_PREAMBLE = '-----BEGIN'
@@ -264,6 +264,7 @@ class BaseServer {
     this.authAttempts = { }
     this.unknownTypes = { }
     this.wrongChannels = { }
+    this.contexts = { }
 
     this.timeouts = { }
     this.lastTimeout = 0
@@ -447,10 +448,10 @@ class BaseServer {
    *
    * @example
    * server.type('CHANGE_NAME', {
-   *   access (action, meta, creator) {
-   *     return action.user === creator.userId
+   *   access (ctx, action, meta) {
+   *     return action.user === ctx.userId
    *   },
-   *   process (action, meta) {
+   *   process (ctx, action, meta) {
    *     if (isFirstOlder(lastNameChange(action.user), meta)) {
    *       return db.changeUserName({ id: action.user, name: action.name })
    *     }
@@ -482,7 +483,7 @@ class BaseServer {
    *
    * @example
    * server.otherType(
-   *   access (action, meta, creator) {
+   *   access (ctx, action, meta) {
    *     return phpBackend.checkByHTTP(action, meta).then(response => {
    *       if (response.code === 404) {
    *         return this.unknownType(action, meta)
@@ -491,7 +492,7 @@ class BaseServer {
    *       }
    *     })
    *   }
-   *   process (action, meta, creator) {
+   *   process (ctx, action, meta) {
    *     return phpBackend.sendHTTP(action, meta)
    *   }
    * })
@@ -521,19 +522,19 @@ class BaseServer {
    *
    * @example
    * server.channel('user/:id', {
-   *   access (params, action, meta, creator) {
-   *     return params.id === creator.userId
+   *   access (ctx, action, meta) {
+   *     return ctx.params.id === ctx.userId
    *   }
-   *   filter (params, action, meta, creator) {
-   *     return (action, meta, creator) => {
+   *   filter (ctx, action, meta) {
+   *     return (otherCtx, otherAction, otherMeta) => {
    *       return !action.hidden
    *     }
    *   }
-   *   init () {
-   *     db.loadUser(params.id).then(user => {
+   *   init (ctx, action, meta) {
+   *     db.loadUser(ctx.params.id).then(user => {
    *       server.log.add(
    *         { type: 'USER_NAME', name: user.name },
-   *         { nodeIds: [creator.nodeId] })
+   *         { nodeIds: [ctx.nodeId] })
    *     })
    *   }
    * })
@@ -564,8 +565,8 @@ class BaseServer {
    *
    * @example
    * server.otherChannel({
-   *   access (param, action, meta, creator) {
-   *     return phpBackend.checkChannel(params[0], creator.userId).then(res => {
+   *   access (ctx, action, meta) {
+   *     return phpBackend.checkChannel(ctx.params[0], ctx.userId).then(res => {
    *       if (res.code === 404) {
    *         this.wrongChannel(action, meta)
    *       } else {
@@ -674,13 +675,13 @@ class BaseServer {
     }
 
     if (meta.channels) {
-      const creator = this.createCreator(meta)
+      const ctx = this.createContext(meta)
       for (const channel of meta.channels) {
         if (this.subscribers[channel]) {
           for (const nodeId in this.subscribers[channel]) {
             let filter = this.subscribers[channel][nodeId]
             if (typeof filter === 'function') {
-              filter = filter(action, meta, creator)
+              filter = filter(ctx, action, meta)
             }
             if (filter && this.nodeIds[nodeId]) {
               this.nodeIds[nodeId].sync.onAdd(action, meta)
@@ -723,7 +724,7 @@ class BaseServer {
    *
    * @example
    * server.otherType({
-   *   access (action, meta) {
+   *   access (ctx, action, meta) {
    *     if (action.type.startsWith('myapp/')) {
    *       return proxy.access(action, meta)
    *     } else {
@@ -750,8 +751,8 @@ class BaseServer {
    *
    * @example
    * server.otherChannel({
-   *   access (param, action, meta, creator) {
-   *     return phpBackend.checkChannel(params[0], creator.userId).then(res => {
+   *   access (ctx, action, meta) {
+   *     return phpBackend.checkChannel(params[0], ctx.userId).then(res => {
    *       if (res.code === 404) {
    *         this.wrongChannel(action, meta)
    *       } else {
@@ -786,22 +787,22 @@ class BaseServer {
 
   processAction (type, action, meta) {
     const start = Date.now()
-    const creator = this.createCreator(meta)
+    const ctx = this.createContext(meta)
 
     this.processing += 1
-    return forcePromise(() => type.process(action, meta, creator)).then(() => {
+    return forcePromise(() => type.process(ctx, action, meta)).then(() => {
       this.reporter('processed', {
         actionId: meta.id,
         latency: Date.now() - start
       })
-      this.processing -= 1
-      this.emitter.emit('processed', action, meta)
     }).catch(e => {
       this.log.changeMeta(meta.id, { status: 'error' })
       this.undo(meta, 'error')
       this.emitter.emit('error', e, action, meta)
+    }).then(() => {
       this.processing -= 1
       this.emitter.emit('processed', action, meta)
+      delete this.contexts[meta.id]
     })
   }
 
@@ -823,7 +824,11 @@ class BaseServer {
     }
   }
 
-  createCreator (meta) {
+  createContext (meta) {
+    if (this.contexts[meta.id]) {
+      return this.contexts[meta.id]
+    }
+
     const nodeId = meta.id.split(' ')[1]
     const userId = this.getUserId(nodeId)
 
@@ -834,7 +839,8 @@ class BaseServer {
       subprotocol = this.nodeIds[nodeId].sync.remoteSubprotocol
     }
 
-    return new Creator(nodeId, userId, subprotocol)
+    const ctx = new Context(nodeId, userId, subprotocol)
+    return ctx
   }
 
   subscribeAction (action, meta) {
@@ -858,9 +864,11 @@ class BaseServer {
 
       let subscribed = false
       if (match) {
-        const creator = this.createCreator(meta)
+        const ctx = this.createContext(meta)
+        ctx.params = match
+
         forcePromise(() => {
-          return i.access(match, action, meta, creator)
+          return i.access(ctx, action, meta)
         }).then(access => {
           if (this.wrongChannels[meta.id]) {
             delete this.wrongChannels[meta.id]
@@ -871,9 +879,9 @@ class BaseServer {
             return false
           }
 
-          const filter = i.filter && i.filter(match, action, meta, creator)
+          const filter = i.filter && i.filter(ctx, action, meta)
 
-          const client = this.nodeIds[creator.nodeId]
+          const client = this.nodeIds[ctx.nodeId]
           if (!client) return false
 
           this.reporter('subscribed', {
@@ -884,12 +892,12 @@ class BaseServer {
           if (!this.subscribers[action.channel]) {
             this.subscribers[action.channel] = { }
           }
-          this.subscribers[action.channel][creator.nodeId] = filter || true
+          this.subscribers[action.channel][ctx.nodeId] = filter || true
           subscribed = true
 
           if (i.init) {
             return forcePromise(() => {
-              return i.init(match, action, meta, creator)
+              return i.init(ctx, action, meta)
             }).then(() => true)
           } else {
             return true
@@ -969,57 +977,51 @@ module.exports = BaseServer
 
 /**
  * @callback authorizer
+ * @param {Context} ctx Information about node, who create this action.
  * @param {Action} action The action data.
  * @param {Meta} meta The action metadata.
- * @param {Creator} creator Information about node, who create this action.
  * @return {boolean|Promise} `true` or Promise with `true` if client are allowed
  *                           to use this action.
  */
 
 /**
  * @callback processor
+ * @param {Context} ctx Information about node, who create this action.
  * @param {Action} action The action data.
  * @param {Meta} meta The action metadata.
- * @param {Creator} creator Information about node, who create this action.
  * @return {Promise|undefined} Promise when processing will be finished.
  */
 
 /**
  * @callback filter
+ * @param {Context} ctx Information about node, who create this action.
  * @param {Action} action The action data.
  * @param {Meta} meta The action metadata.
- * @param {Creator} creator Information about node, who create this action.
  * @return {boolean} Should action be sent to client.
  */
 
 /**
  * @callback channelAuthorizer
- * @param {object} params Match object from channel name pattern
- *                        or from regular expression.
+ * @param {ChannelContext} ctx Information about node, who create this action.
  * @param {Action} action The action data.
  * @param {Meta} meta The action metadata.
- * @param {Creator} creator Information about node, who create this action.
  * @return {boolean|Promise} Promise with boolean.
  *                           On `false` subscription will be denied.
  */
 
 /**
  * @callback filterCreator
- * @param {object} params Match object from channel name pattern
- *                        or from regular expression.
+ * @param {ChannelContext} ctx Information about node, who create this action.
  * @param {Action} action The action data.
  * @param {Meta} meta The action metadata.
- * @param {Creator} creator Information about node, who create this action.
  * @return {filter|undefined} Actions filter.
  */
 
 /**
  * @callback initialized
- * @param {object} params Match object from channel name pattern
- *                        or from regular expression.
+ * @param {ChannelContext} ctx Information about node, who create this action.
  * @param {Action} action The action data.
  * @param {Meta} meta The action metadata.
- * @param {Creator} creator Information about node, who create this action.
  * @return {Promise|undefined} Promise during initial actions loading.
  */
 

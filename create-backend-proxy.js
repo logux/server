@@ -29,50 +29,6 @@ function waitForEnd (res) {
   })
 }
 
-function send (backend, processing, password, action, meta) {
-  const body = JSON.stringify({
-    version: VERSION,
-    password,
-    commands: [['action', action, meta]]
-  })
-  const protocol = backend.protocol === 'https:' ? https : http
-  return new Promise((resolve, reject) => {
-    const req = protocol.request({
-      method: 'POST',
-      host: backend.hostname,
-      port: backend.port,
-      path: backend.path,
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(body)
-      }
-    }, res => {
-      let received = ''
-      let approved = false
-      if (res.statusCode < 200 || res.statusCode > 299) {
-        reject(new Error('Backend responsed with ' + res.statusCode + ' code'))
-      } else {
-        processing[meta.id] = waitForEnd(res)
-        res.on('data', part => {
-          if (!approved) {
-            received += part
-            if (APPROVED.test(received)) {
-              approved = true
-              resolve(true)
-            } else if (FORBIDDEN.test(received)) {
-              approved = true
-              delete processing[meta.id]
-              resolve(false)
-            }
-          }
-        })
-      }
-    })
-    req.on('error', reject)
-    req.end(body)
-  })
-}
-
 function createBackendProxy (server, options) {
   if (!options.password) {
     throw new Error(
@@ -88,26 +44,65 @@ function createBackendProxy (server, options) {
 
   const processing = []
 
-  server.otherType({
-    access (action, meta) {
-      return send(backend, processing, options.password, action, meta)
-    },
-    process (action, meta) {
-      return processing[meta.id].then(() => {
-        delete processing[meta.id]
+  function send (ctx, action, meta) {
+    const body = JSON.stringify({
+      version: VERSION,
+      password: options.password,
+      commands: [['action', action, meta]]
+    })
+    const protocol = backend.protocol === 'https:' ? https : http
+    return new Promise((resolve, reject) => {
+      const req = protocol.request({
+        method: 'POST',
+        host: backend.hostname,
+        port: backend.port,
+        path: backend.path,
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(body)
+        }
+      }, res => {
+        let received = ''
+        let approved = false
+        if (res.statusCode < 200 || res.statusCode > 299) {
+          reject(
+            new Error('Backend responsed with ' + res.statusCode + ' code'))
+        } else {
+          processing[meta.id] = waitForEnd(res)
+          res.on('data', part => {
+            if (!approved) {
+              received += part
+              if (APPROVED.test(received)) {
+                approved = true
+                resolve(true)
+              } else if (FORBIDDEN.test(received)) {
+                approved = true
+                delete processing[meta.id]
+                resolve(false)
+              }
+            }
+          })
+        }
       })
-    }
+      req.on('error', reject)
+      req.end(body)
+    })
+  }
+
+  function process (ctx, action, meta) {
+    return processing[meta.id].then(() => {
+      delete processing[meta.id]
+    })
+  }
+
+  server.otherType({
+    access: send,
+    process
   })
 
   server.otherChannel({
-    access (param, action, meta) {
-      return send(backend, processing, options.password, action, meta)
-    },
-    init (param, action, meta) {
-      return processing[meta.id].then(() => {
-        delete processing[meta.id]
-      })
-    }
+    access: send,
+    init: process
   })
 
   const httpServer = http.createServer((req, res) => {

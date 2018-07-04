@@ -250,9 +250,10 @@ class ServerClient {
   }
 
   filter (action, meta) {
-    const creator = this.app.createCreator(meta)
+    const ctx = this.app.createContext(meta)
+    this.app.contexts[meta.id] = ctx
 
-    const wrongUser = this.userId && this.userId !== creator.userId
+    const wrongUser = this.userId && this.userId !== ctx.userId
     const wrongMeta = Object.keys(meta).some(i => {
       return ALLOWED_META.indexOf(i) === -1
     })
@@ -275,7 +276,7 @@ class ServerClient {
       return Promise.resolve(false)
     }
 
-    return forcePromise(() => processor.access(action, meta, creator))
+    return forcePromise(() => processor.access(ctx, action, meta))
       .then(result => {
         if (this.app.unknownTypes[meta.id]) {
           delete this.app.unknownTypes[meta.id]

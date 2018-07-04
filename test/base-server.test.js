@@ -482,9 +482,9 @@ it('processes actions', () => {
 
   test.app.type('FOO', {
     access: () => true,
-    process (action, meta, creator) {
+    process (ctx, action, meta) {
       expect(meta.added).toEqual(1)
-      expect(creator.isServer).toBeTruthy()
+      expect(ctx.isServer).toBeTruthy()
       return delay(25).then(() => {
         processed.push(action)
       })
@@ -715,8 +715,8 @@ it('allows to have custom channel name check', () => {
   const test = createReporter()
   const channels = []
   test.app.otherChannel({
-    access (params, action, meta) {
-      channels.push(params[0])
+    access (ctx, action, meta) {
+      channels.push(ctx.params[0])
       test.app.wrongChannel(action, meta)
     }
   })
@@ -750,8 +750,8 @@ it('checks channel access', () => {
   test.app.nodeIds['10:uuid'] = client
 
   test.app.channel(/^user\/(\d+)$/, {
-    access (params) {
-      expect(params[1]).toEqual('10')
+    access (ctx) {
+      expect(ctx.params[1]).toEqual('10')
       return Promise.resolve(false)
     }
   })
@@ -809,11 +809,11 @@ it('subscribes clients', () => {
 
   let userSubsriptions = 0
   test.app.channel('user/:id', {
-    access (params, action, meta, creator) {
-      expect(params.id).toEqual('10')
+    access (ctx, action, meta) {
+      expect(ctx.params.id).toEqual('10')
       expect(action.channel).toEqual('user/10')
       expect(meta.id).toEqual('1 10:uuid 0')
-      expect(creator.nodeId).toEqual('10:uuid')
+      expect(ctx.nodeId).toEqual('10:uuid')
       userSubsriptions += 1
       return true
     }
@@ -887,6 +887,39 @@ it('subscribes clients', () => {
   })
 })
 
+it('keeps data between subscription steps', () => {
+  app = createServer()
+  const client = {
+    sync: { remoteSubprotocol: '0.0.0', onAdd: () => false }
+  }
+  app.nodeIds['10:uuid'] = client
+
+  let subsriptions = 0
+
+  app.channel('test', {
+    access (ctx) {
+      ctx.data.one = 1
+      return true
+    },
+    filter (ctx) {
+      expect(ctx.data.one).toEqual(1)
+      return () => true
+    },
+    init (ctx) {
+      expect(ctx.data.one).toEqual(1)
+      subsriptions += 1
+    }
+  })
+
+  return app.log.add(
+    { type: 'logux/subscribe', channel: 'test' }, { id: '1 10:uuid 0' }
+  ).then(() => {
+    return delay(10)
+  }).then(() => {
+    expect(subsriptions).toEqual(1)
+  })
+})
+
 it('reports about errors during channel initialization', () => {
   const test = createReporter()
   const client = {
@@ -934,11 +967,11 @@ it('loads initial actions during subscription', () => {
   let initializating
   test.app.channel('user/:id', {
     access: () => true,
-    init (params, action, meta, creator) {
-      expect(params.id).toEqual('10')
+    init (ctx, action, meta) {
+      expect(ctx.params.id).toEqual('10')
       expect(action.channel).toEqual('user/10')
       expect(meta.id).toEqual('1 10:uuid 0')
-      expect(creator.nodeId).toEqual('10:uuid')
+      expect(ctx.nodeId).toEqual('10:uuid')
       userLoaded += 1
       return new Promise(resolve => {
         initializating = resolve

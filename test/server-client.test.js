@@ -519,9 +519,9 @@ it('ignores unknown action types', () => {
 it('checks user access for action', () => {
   const test = createReporter({ env: 'development' })
   test.app.type('FOO', {
-    access (action, meta, creator) {
-      expect(creator.userId).toEqual('10')
-      expect(creator.subprotocol).toEqual('0.0.0')
+    access (ctx, action, meta) {
+      expect(ctx.userId).toEqual('10')
+      expect(ctx.subprotocol).toEqual('0.0.0')
       expect(meta.id).toBeDefined()
       return Promise.resolve(!!action.bar)
     }
@@ -556,8 +556,8 @@ it('takes subprotocol from action meta', () => {
   const subprotocols = []
   app.type('FOO', {
     access: () => true,
-    process (action, meta, creator) {
-      subprotocols.push(creator.subprotocol)
+    process (ctx) {
+      subprotocols.push(ctx.subprotocol)
       return true
     }
   })
@@ -698,9 +698,9 @@ it('sends new actions by channel', () => {
       '10:uuid': true
     }
     app.subscribers.bar = {
-      '10:uuid': (action, meta, creator) => {
+      '10:uuid': (ctx, action, meta) => {
         expect(meta.id).toContain(' server:uuid ')
-        expect(creator.isServer).toBeTruthy()
+        expect(ctx.isServer).toBeTruthy()
         return !action.secret
       }
     }
@@ -829,11 +829,35 @@ it('has custom processor for unknown type', () => {
   })
 })
 
+it('keeps data between processing steps', () => {
+  const app = createServer()
+  let calls = 0
+  app.type('A', {
+    access (ctx) {
+      ctx.data.one = 1
+      return true
+    },
+    process (ctx) {
+      expect(ctx.data.one).toEqual(1)
+      calls += 1
+    }
+  })
+  return connectClient(app).then(client => {
+    client.sync.connection.other().send([
+      'sync', 1,
+      { type: 'A' }, { id: [1, '10:uuid', 0], time: 1 }
+    ])
+    return client.sync.connection.pair.wait('right')
+  }).then(() => {
+    expect(calls).toEqual(1)
+  })
+})
+
 it('allows to reports about unknown type in custom processor', () => {
   const test = createReporter()
   const calls = []
   test.app.otherType({
-    access (action, meta) {
+    access (ctx, action, meta) {
       calls.push('access')
       test.app.unknownType(action, meta)
       return true
