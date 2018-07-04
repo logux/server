@@ -94,7 +94,8 @@ function formatArray (c, array) {
 }
 
 function formatActionId (c, id) {
-  return `[${ c.bold(id[0]) }, ${ formatNodeId(c, id[1]) }, ${ c.bold(id[2]) }]`
+  const p = id.split(' ')
+  return `${ c.bold(p[0]) } ${ formatNodeId(c, p[1]) } ${ c.bold(p[2]) }`
 }
 
 function formatParams (c, params, parent) {

@@ -175,7 +175,7 @@ class BaseServer {
       if (!meta.status && !isLogux) {
         meta.status = 'waiting'
       }
-      if (meta.id[1] === this.nodeId) {
+      if (meta.id.split(' ')[1] === this.nodeId) {
         if (!meta.subprotocol) {
           meta.subprotocol = this.options.subprotocol
         }
@@ -611,7 +611,7 @@ class BaseServer {
     if (meta.reasons) undoMeta.reasons = meta.reasons.slice(0)
     if (meta.channels) undoMeta.channels = meta.channels.slice(0)
 
-    undoMeta.nodeIds = [meta.id[1]]
+    undoMeta.nodeIds = [meta.id.split(' ')[1]]
     if (meta.nodeIds) undoMeta.nodeIds = undoMeta.nodeIds.concat(meta.nodeIds)
 
     this.log.add({ type: 'logux/undo', id: meta.id, reason }, undoMeta)
@@ -734,7 +734,7 @@ class BaseServer {
    */
   unknownType (action, meta) {
     this.internalUnkownType(action, meta)
-    this.unknownTypes[meta.id.join('\t')] = true
+    this.unknownTypes[meta.id] = true
   }
 
   /**
@@ -763,13 +763,13 @@ class BaseServer {
    */
   wrongChannel (action, meta) {
     this.internalWrongChannel(action, meta)
-    this.wrongChannels[meta.id.join('\t')] = true
+    this.wrongChannels[meta.id] = true
   }
 
   internalUnkownType (action, meta) {
     this.log.changeMeta(meta.id, { status: 'error' })
     this.reporter('unknownType', { type: action.type, actionId: meta.id })
-    if (this.getUserId(meta.id[1]) !== 'server') {
+    if (this.getUserId(meta.id.split(' ')[1]) !== 'server') {
       this.undo(meta, 'error')
     }
     this.debugActionError(meta, `Action with unknown type ${ action.type }`)
@@ -806,10 +806,11 @@ class BaseServer {
   }
 
   markAsProcessed (meta) {
-    if (!/^server:/.test(meta.id[1])) {
+    const nodeId = meta.id.split(' ')[1]
+    if (!/^server:/.test(nodeId)) {
       this.log.add(
         { type: 'logux/processed', id: meta.id },
-        { nodeIds: [meta.id[1]], status: 'processed' })
+        { nodeIds: [nodeId], status: 'processed' })
     }
   }
 
@@ -823,7 +824,7 @@ class BaseServer {
   }
 
   createCreator (meta) {
-    const nodeId = meta.id[1]
+    const nodeId = meta.id.split(' ')[1]
     const userId = this.getUserId(nodeId)
 
     let subprotocol
@@ -861,8 +862,8 @@ class BaseServer {
         forcePromise(() => {
           return i.access(match, action, meta, creator)
         }).then(access => {
-          if (this.wrongChannels[meta.id.join('\t')]) {
-            delete this.wrongChannels[meta.id.join('\t')]
+          if (this.wrongChannels[meta.id]) {
+            delete this.wrongChannels[meta.id]
             return false
           }
           if (!access) {
@@ -915,7 +916,7 @@ class BaseServer {
       return
     }
 
-    const nodeId = meta.id[1]
+    const nodeId = meta.id.split(' ')[1]
     if (this.subscribers[action.channel]) {
       delete this.subscribers[action.channel][nodeId]
       if (Object.keys(this.subscribers[action.channel]).length === 0) {
@@ -933,13 +934,12 @@ class BaseServer {
   denyAction (meta) {
     this.reporter('denied', { actionId: meta.id })
     this.undo(meta, 'denied')
-    const id = JSON.stringify(meta.id)
-    this.debugActionError(meta, `Action ${ id } was denied`)
+    this.debugActionError(meta, `Action "${ meta.id }" was denied`)
   }
 
   debugActionError (meta, msg) {
     if (this.env === 'development') {
-      const nodeId = meta.id[1]
+      const nodeId = meta.id.split(' ')[1]
       if (this.nodeIds[nodeId]) {
         this.nodeIds[nodeId].connection.send(['debug', 'error', msg])
       }

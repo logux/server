@@ -4,10 +4,6 @@ const TestTime = require('logux-core').TestTime
 
 const FilteredSync = require('../filtered-sync')
 
-function actions (sync) {
-  return sync.log.store.created.map(i => i[0])
-}
-
 function createTest () {
   const time = new TestTime()
   const log1 = time.nextLog()
@@ -42,7 +38,7 @@ it('does not sync actions on add', () => {
   }).then(() => {
     return test.server.waitFor('synchronized')
   }).then(() => {
-    expect(actions(test.client)).toEqual([])
+    expect(test.client.log.actions()).toEqual([])
   })
 })
 
@@ -57,7 +53,7 @@ it('synchronizes only node-specific actions on connection', () => {
   }).then(() => {
     return test.server.waitFor('synchronized')
   }).then(() => {
-    expect(actions(test.client)).toEqual([{ type: 'B' }])
+    expect(test.client.log.actions()).toEqual([{ type: 'B' }])
   })
 })
 
@@ -72,7 +68,7 @@ it('synchronizes only user-specific actions on connection', () => {
   }).then(() => {
     return test.server.waitFor('synchronized')
   }).then(() => {
-    expect(actions(test.client)).toEqual([{ type: 'B' }])
+    expect(test.client.log.actions()).toEqual([{ type: 'B' }])
   })
 })
 
@@ -86,6 +82,6 @@ it('still sends only new actions', () => {
   }).then(() => {
     return test.server.waitFor('synchronized')
   }).then(() => {
-    expect(actions(test.client)).toEqual([{ type: 'B' }])
+    expect(test.client.log.actions()).toEqual([{ type: 'B' }])
   })
 })

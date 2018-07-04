@@ -76,7 +76,7 @@ const REPORTERS = {
   zombie: () => ({ level: 'warn', msg: 'Zombie client was disconnected' }),
 
   unknownType: record => ({
-    level: /^server(:|$)/.test(record.actionId[1]) ? 'error' : 'warn',
+    level: /^ server(:| )/.test(record.actionId) ? 'error' : 'warn',
     msg: 'Action with unknown type'
   }),
 

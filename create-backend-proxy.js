@@ -52,8 +52,7 @@ function send (backend, processing, password, action, meta) {
       if (res.statusCode < 200 || res.statusCode > 299) {
         reject(new Error('Backend responsed with ' + res.statusCode + ' code'))
       } else {
-        const key = meta.id.join('\t')
-        processing[key] = waitForEnd(res)
+        processing[meta.id] = waitForEnd(res)
         res.on('data', part => {
           if (!approved) {
             received += part
@@ -62,7 +61,7 @@ function send (backend, processing, password, action, meta) {
               resolve(true)
             } else if (FORBIDDEN.test(received)) {
               approved = true
-              delete processing[key]
+              delete processing[meta.id]
               resolve(false)
             }
           }
@@ -94,9 +93,8 @@ function createBackendProxy (server, options) {
       return send(backend, processing, options.password, action, meta)
     },
     process (action, meta) {
-      const key = meta.id.join('\t')
-      return processing[key].then(() => {
-        delete processing[key]
+      return processing[meta.id].then(() => {
+        delete processing[meta.id]
       })
     }
   })
@@ -106,9 +104,8 @@ function createBackendProxy (server, options) {
       return send(backend, processing, options.password, action, meta)
     },
     init (param, action, meta) {
-      const key = meta.id.join('\t')
-      return processing[key].then(() => {
-        delete processing[key]
+      return processing[meta.id].then(() => {
+        delete processing[meta.id]
       })
     }
   })

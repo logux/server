@@ -277,8 +277,8 @@ class ServerClient {
 
     return forcePromise(() => processor.access(action, meta, creator))
       .then(result => {
-        if (this.app.unknownTypes[meta.id.join('\t')]) {
-          delete this.app.unknownTypes[meta.id.join('\t')]
+        if (this.app.unknownTypes[meta.id]) {
+          delete this.app.unknownTypes[meta.id]
           return false
         } else if (!result) {
           this.app.denyAction(meta)

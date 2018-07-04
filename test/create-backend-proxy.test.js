@@ -17,7 +17,7 @@ const OPTIONS = {
 }
 
 const ACTION = [
-  'action', { type: 'A' }, { id: [1, 'server:uuid', 0], reasons: ['test'] }
+  'action', { type: 'A' }, { id: '1 server:uuid 0', reasons: ['test'] }
 ]
 
 function createConnection () {
@@ -216,7 +216,7 @@ it('reports about network errors', () => {
   }).then(() => {
     expect(errors).toEqual(['ECONNREFUSED'])
     expect(app.log.actions()).toEqual([
-      { type: 'logux/undo', reason: 'error', id: [1, '10:uuid', 0] }
+      { type: 'logux/undo', reason: 'error', id: '1 10:uuid 0' }
     ])
   })
 })
@@ -235,7 +235,7 @@ it('reports bad HTTP answers', () => {
   }).then(() => {
     expect(errors).toEqual(['Backend responsed with 404 code'])
     expect(app.log.actions()).toEqual([
-      { type: 'logux/undo', reason: 'error', id: [1, '10:uuid', 0] }
+      { type: 'logux/undo', reason: 'error', id: '1 10:uuid 0' }
     ])
   })
 })
@@ -255,8 +255,8 @@ it('notifies about actions and subscriptions', () => {
     return client.connection.pair.wait('right')
   }).then(() => {
     expect(app.log.actions()).toEqual([
-      { type: 'logux/subscribe', channel: 'a' },
-      { type: 'A' }
+      { type: 'A' },
+      { type: 'logux/subscribe', channel: 'a' }
     ])
     expect(sent).toEqual([
       [
@@ -269,7 +269,7 @@ it('notifies about actions and subscriptions', () => {
             [
               'action',
               { type: 'A' },
-              { id: [1, '10:uuid', 0], time: 1 }
+              { id: '1 10:uuid 0', time: 1 }
             ]
           ]
         }
@@ -286,7 +286,7 @@ it('notifies about actions and subscriptions', () => {
               { type: 'logux/subscribe', channel: 'a' },
               {
                 added: 1,
-                id: [2, '10:uuid', 0],
+                id: '2 10:uuid 0',
                 time: 2,
                 reasons: ['test'],
                 server: 'server:uuid',
@@ -300,10 +300,10 @@ it('notifies about actions and subscriptions', () => {
     return delay(150)
   }).then(() => {
     expect(app.log.actions()).toEqual([
-      { type: 'logux/processed', id: [2, '10:uuid', 0] },
+      { type: 'A' },
+      { type: 'logux/processed', id: '1 10:uuid 0' },
       { type: 'logux/subscribe', channel: 'a' },
-      { type: 'logux/processed', id: [1, '10:uuid', 0] },
-      { type: 'A' }
+      { type: 'logux/processed', id: '2 10:uuid 0' }
     ])
   })
 })
@@ -320,7 +320,7 @@ it('asks about action access', () => {
     return client.connection.pair.wait('right')
   }).then(() => {
     expect(app.log.actions()).toEqual([
-      { type: 'logux/undo', reason: 'denied', id: [1, '10:uuid', 0] }
+      { type: 'logux/undo', reason: 'denied', id: '1 10:uuid 0' }
     ])
   })
 })

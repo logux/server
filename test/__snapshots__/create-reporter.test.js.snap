@@ -52,7 +52,7 @@ exports[`reports LOGUX_WRONG_OPTIONS error 2`] = `
 `;
 
 exports[`reports add 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"action\\":{\\"type\\":\\"CHANGE_USER\\",\\"id\\":100,\\"data\\":{\\"name\\":\\"John\\",\\"role\\":null,\\"array\\":[1,[2],{\\"a\\":\\"1\\",\\"b\\":{\\"c\\":2},\\"d\\":[],\\"e\\":null},null]}},\\"meta\\":{\\"id\\":[1487805099387,\\"100:uImkcF4z\\",0],\\"time\\":1487805099387,\\"reasons\\":[\\"lastValue\\",\\"debug\\"],\\"server\\":\\"server:H1f8LAyzl\\",\\"subprotocol\\":\\"1.0.0\\"},\\"msg\\":\\"Action was added\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"action\\":{\\"type\\":\\"CHANGE_USER\\",\\"id\\":100,\\"data\\":{\\"name\\":\\"John\\",\\"role\\":null,\\"array\\":[1,[2],{\\"a\\":\\"1\\",\\"b\\":{\\"c\\":2},\\"d\\":[],\\"e\\":null},null]}},\\"meta\\":{\\"id\\":\\"1487805099387 100:uImkcF4z 0\\",\\"time\\":1487805099387,\\"reasons\\":[\\"lastValue\\",\\"debug\\"],\\"server\\":\\"server:H1f8LAyzl\\",\\"subprotocol\\":\\"1.0.0\\"},\\"msg\\":\\"Action was added\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
@@ -66,7 +66,7 @@ exports[`reports add 2`] = `
             role:  [1mnull[22m
             array: [[1m1[22m, [[1m2[22m], { a: \\"[1m1[22m\\", b: { c: [1m2[22m }, d: [], e: [1mnull[22m }, [1mnull[22m]
         Meta:   
-          id:          [[1m1487805099387[22m, [1m100[22m:uImkcF4z, [1m0[22m]
+          id:          [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
           time:        [1m1487805099387[22m
           reasons:     [\\"[1mlastValue[22m\\", \\"[1mdebug[22m\\"]
           server:      \\"[1mserver:H1f8LAyzl[22m\\"
@@ -104,13 +104,13 @@ exports[`reports authenticated without user ID 2`] = `
 `;
 
 exports[`reports clean 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"actionId\\":[1487805099387,\\"100:uImkcF4z\\",0],\\"msg\\":\\"Action was cleaned\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"msg\\":\\"Action was cleaned\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
 exports[`reports clean 2`] = `
 "[42m[30m INFO [39m[49m  [1m[32mAction was cleaned[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Action ID: [[1m1487805099387[22m, [1m100[22m:uImkcF4z, [1m0[22m]
+        Action ID: [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
 
 "
 `;
@@ -129,13 +129,13 @@ exports[`reports connect 2`] = `
 `;
 
 exports[`reports denied 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"actionId\\":[1487805099387,\\"100:uImkcF4z\\",0],\\"msg\\":\\"Action was denied\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"msg\\":\\"Action was denied\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
 exports[`reports denied 2`] = `
 "[43m[30m WARN [39m[49m  [1m[33mAction was denied[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Action ID: [[1m1487805099387[22m, [1m100[22m:uImkcF4z, [1m0[22m]
+        Action ID: [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
 
 "
 `;
@@ -191,7 +191,7 @@ exports[`reports error 2`] = `
 `;
 
 exports[`reports error from action 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":50,\\"err\\":{\\"message\\":\\"Some mistake\\",\\"name\\":\\"Error\\",\\"stack\\":\\"Error: Some mistake\\\\n    at Object.<anonymous> (/dev/app/index.js:28:13)\\\\n    at Module._compile (module.js:573:32)\\\\n    at at runTest (/dev/app/node_modules/jest/index.js:50:10)\\\\n    at process._tickCallback (internal/process/next_tick.js:103:7)\\"},\\"actionId\\":[1487805099387,\\"100:uImkcF4z\\",0],\\"msg\\":\\"Some mistake\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":50,\\"err\\":{\\"message\\":\\"Some mistake\\",\\"name\\":\\"Error\\",\\"stack\\":\\"Error: Some mistake\\\\n    at Object.<anonymous> (/dev/app/index.js:28:13)\\\\n    at Module._compile (module.js:573:32)\\\\n    at at runTest (/dev/app/node_modules/jest/index.js:50:10)\\\\n    at process._tickCallback (internal/process/next_tick.js:103:7)\\"},\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"msg\\":\\"Some mistake\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
@@ -201,7 +201,7 @@ exports[`reports error from action 2`] = `
 [31m        at Module._compile (module.js:573:32)[39m
 [31m        at at runTest (./node_modules/jest/index.js:50:10)[39m
 [31m        at process._tickCallback (internal/process/next_tick.js:103:7)[39m
-        Action ID: [[1m1487805099387[22m, [1m100[22m:uImkcF4z, [1m0[22m]
+        Action ID: [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
 
 "
 `;
@@ -289,27 +289,27 @@ exports[`reports listen for production 2`] = `
 `;
 
 exports[`reports processed 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"actionId\\":[1487805099387,\\"100:uImkcF4z\\",0],\\"latency\\":500,\\"msg\\":\\"Action was processed\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"latency\\":500,\\"msg\\":\\"Action was processed\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
 exports[`reports processed 2`] = `
 "[42m[30m INFO [39m[49m  [1m[32mAction was processed[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Action ID: [[1m1487805099387[22m, [1m100[22m:uImkcF4z, [1m0[22m]
+        Action ID: [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
         Latency:   [1m500[22m ms
 
 "
 `;
 
 exports[`reports subscribed 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"channel\\":\\"user/100\\",\\"actionId\\":[1487805099387,\\"100:uImkcF4z\\",0],\\"msg\\":\\"Client was subscribed\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"channel\\":\\"user/100\\",\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"msg\\":\\"Client was subscribed\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
 exports[`reports subscribed 2`] = `
 "[42m[30m INFO [39m[49m  [1m[32mClient was subscribed[39m[22m [2mat 1970-01-01 00:00:00[22m
         Channel:   [1muser/100[22m
-        Action ID: [[1m1487805099387[22m, [1m100[22m:uImkcF4z, [1m0[22m]
+        Action ID: [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
 
 "
 `;
@@ -329,66 +329,66 @@ exports[`reports unauthenticated 2`] = `
 `;
 
 exports[`reports unknownType 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"type\\":\\"CHANGE_SER\\",\\"actionId\\":[1487805099387,\\"100:uImkcF4z\\",0],\\"msg\\":\\"Action with unknown type\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"type\\":\\"CHANGE_SER\\",\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"msg\\":\\"Action with unknown type\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
 exports[`reports unknownType 2`] = `
 "[43m[30m WARN [39m[49m  [1m[33mAction with unknown type[39m[22m [2mat 1970-01-01 00:00:00[22m
         Type:      [1mCHANGE_SER[22m
-        Action ID: [[1m1487805099387[22m, [1m100[22m:uImkcF4z, [1m0[22m]
+        Action ID: [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
 
 "
 `;
 
 exports[`reports unknownType from server 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":50,\\"type\\":\\"CHANGE_SER\\",\\"actionId\\":[1487805099387,\\"server:FnXaqDxY\\",0],\\"msg\\":\\"Action with unknown type\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"type\\":\\"CHANGE_SER\\",\\"actionId\\":\\"1487805099387 server:FnXaqDxY 0\\",\\"msg\\":\\"Action with unknown type\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
 exports[`reports unknownType from server 2`] = `
-"[41m[37m ERROR [39m[49m [1m[31mAction with unknown type[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[43m[30m WARN [39m[49m  [1m[33mAction with unknown type[39m[22m [2mat 1970-01-01 00:00:00[22m
         Type:      [1mCHANGE_SER[22m
-        Action ID: [[1m1487805099387[22m, [1mserver[22m:FnXaqDxY, [1m0[22m]
+        Action ID: [1m1487805099387[22m [1mserver[22m:FnXaqDxY [1m0[22m
 
 "
 `;
 
 exports[`reports unsubscribed 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"channel\\":\\"user/100\\",\\"actionId\\":[1487805099387,\\"100:uImkcF4z\\",0],\\"msg\\":\\"Client was unsubscribed\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"channel\\":\\"user/100\\",\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"msg\\":\\"Client was unsubscribed\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
 exports[`reports unsubscribed 2`] = `
 "[42m[30m INFO [39m[49m  [1m[32mClient was unsubscribed[39m[22m [2mat 1970-01-01 00:00:00[22m
         Channel:   [1muser/100[22m
-        Action ID: [[1m1487805099387[22m, [1m100[22m:uImkcF4z, [1m0[22m]
+        Action ID: [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
 
 "
 `;
 
 exports[`reports wrongChannel 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"actionId\\":[1487805099387,\\"100:uImkcF4z\\",0],\\"channel\\":\\"ser/100\\",\\"msg\\":\\"Wrong channel name\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"channel\\":\\"ser/100\\",\\"msg\\":\\"Wrong channel name\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
 exports[`reports wrongChannel 2`] = `
 "[43m[30m WARN [39m[49m  [1m[33mWrong channel name[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Action ID: [[1m1487805099387[22m, [1m100[22m:uImkcF4z, [1m0[22m]
+        Action ID: [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
         Channel:   [1mser/100[22m
 
 "
 `;
 
 exports[`reports wrongChannel without name 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"actionId\\":[1487805099387,\\"100:uImkcF4z\\",0],\\"msg\\":\\"Wrong channel name\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"msg\\":\\"Wrong channel name\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
 exports[`reports wrongChannel without name 2`] = `
 "[43m[30m WARN [39m[49m  [1m[33mWrong channel name[39m[22m [2mat 1970-01-01 00:00:00[22m
         Channel:   [1mundefined[22m
-        Action ID: [[1m1487805099387[22m, [1m100[22m:uImkcF4z, [1m0[22m]
+        Action ID: [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
 
 "
 `;

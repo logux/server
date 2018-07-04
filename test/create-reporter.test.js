@@ -189,7 +189,7 @@ it('reports add', () => {
       }
     },
     meta: {
-      id: [1487805099387, '100:uImkcF4z', 0],
+      id: '1487805099387 100:uImkcF4z 0',
       time: 1487805099387,
       reasons: ['lastValue', 'debug'],
       server: 'server:H1f8LAyzl',
@@ -200,57 +200,57 @@ it('reports add', () => {
 
 it('reports clean', () => {
   check('clean', {
-    actionId: [1487805099387, '100:uImkcF4z', 0]
+    actionId: '1487805099387 100:uImkcF4z 0'
   })
 })
 
 it('reports denied', () => {
   check('denied', {
-    actionId: [1487805099387, '100:uImkcF4z', 0]
+    actionId: '1487805099387 100:uImkcF4z 0'
   })
 })
 
 it('reports unknownType', () => {
   check('unknownType', {
-    type: 'CHANGE_SER', actionId: [1487805099387, '100:uImkcF4z', 0]
+    type: 'CHANGE_SER', actionId: '1487805099387 100:uImkcF4z 0'
   })
 })
 
 it('reports unknownType from server', () => {
   check('unknownType', {
     type: 'CHANGE_SER',
-    actionId: [1487805099387, 'server:FnXaqDxY', 0]
+    actionId: '1487805099387 server:FnXaqDxY 0'
   })
 })
 
 it('reports wrongChannel', () => {
   check('wrongChannel', {
-    actionId: [1487805099387, '100:uImkcF4z', 0],
+    actionId: '1487805099387 100:uImkcF4z 0',
     channel: 'ser/100'
   })
 })
 
 it('reports wrongChannel without name', () => {
   check('wrongChannel', {
-    channel: undefined, actionId: [1487805099387, '100:uImkcF4z', 0]
+    channel: undefined, actionId: '1487805099387 100:uImkcF4z 0'
   })
 })
 
 it('reports processed', () => {
   check('processed', {
-    actionId: [1487805099387, '100:uImkcF4z', 0], latency: 500
+    actionId: '1487805099387 100:uImkcF4z 0', latency: 500
   })
 })
 
 it('reports subscribed', () => {
   check('subscribed', {
-    channel: 'user/100', actionId: [1487805099387, '100:uImkcF4z', 0]
+    channel: 'user/100', actionId: '1487805099387 100:uImkcF4z 0'
   })
 })
 
 it('reports unsubscribed', () => {
   check('unsubscribed', {
-    channel: 'user/100', actionId: [1487805099387, '100:uImkcF4z', 0]
+    channel: 'user/100', actionId: '1487805099387 100:uImkcF4z 0'
   })
 })
 
@@ -301,7 +301,7 @@ it('reports error', () => {
 
 it('reports error from action', () => {
   check('error', {
-    actionId: [1487805099387, '100:uImkcF4z', 0],
+    actionId: '1487805099387 100:uImkcF4z 0',
     err: createError('Error', 'Some mistake')
   })
 })
