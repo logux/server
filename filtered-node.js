@@ -1,6 +1,6 @@
-const ServerSync = require('logux-core/server-sync')
+const ServerNode = require('logux-core/server-node')
 
-class FilteredSync extends ServerSync {
+class FilteredNode extends ServerNode {
   constructor (client, nodeId, log, connection, options) {
     super(nodeId, log, connection, options)
     this.client = client
@@ -34,4 +34,4 @@ class FilteredSync extends ServerSync {
   }
 }
 
-module.exports = FilteredSync
+module.exports = FilteredNode

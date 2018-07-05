@@ -668,7 +668,7 @@ it('reports about wrong channel name', () => {
   test.app.channel('foo', { access: () => true })
   test.app.nodeIds['10:uuid'] = {
     connection: { send: jest.fn() },
-    sync: { onAdd () { } }
+    node: { onAdd () { } }
   }
   return test.app.log.add(
     { type: 'logux/subscribe' }, { id: '1 10:uuid 0' }
@@ -722,7 +722,7 @@ it('allows to have custom channel name check', () => {
   })
   test.app.nodeIds['10:uuid'] = {
     connection: { send: jest.fn() },
-    sync: { onAdd () { } }
+    node: { onAdd () { } }
   }
   return test.app.log.add(
     { type: 'logux/subscribe', channel: 'foo' }
@@ -745,7 +745,7 @@ it('ignores subscription for other servers', () => {
 it('checks channel access', () => {
   const test = createReporter()
   const client = {
-    sync: { remoteSubprotocol: '0.0.0', onAdd: () => false }
+    node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
   }
   test.app.nodeIds['10:uuid'] = client
 
@@ -773,7 +773,7 @@ it('checks channel access', () => {
 it('reports about errors during channel authorization', () => {
   const test = createReporter()
   const client = {
-    sync: { remoteSubprotocol: '0.0.0', onAdd: () => false }
+    node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
   }
   test.app.nodeIds['10:uuid'] = client
 
@@ -803,7 +803,7 @@ it('reports about errors during channel authorization', () => {
 it('subscribes clients', () => {
   const test = createReporter()
   const client = {
-    sync: { remoteSubprotocol: '0.0.0', onAdd: () => false }
+    node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
   }
   test.app.nodeIds['10:uuid'] = client
 
@@ -890,7 +890,7 @@ it('subscribes clients', () => {
 it('keeps data between subscription steps', () => {
   app = createServer()
   const client = {
-    sync: { remoteSubprotocol: '0.0.0', onAdd: () => false }
+    node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
   }
   app.nodeIds['10:uuid'] = client
 
@@ -923,7 +923,7 @@ it('keeps data between subscription steps', () => {
 it('reports about errors during channel initialization', () => {
   const test = createReporter()
   const client = {
-    sync: { remoteSubprotocol: '0.0.0', onAdd: () => false }
+    node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
   }
   test.app.nodeIds['10:uuid'] = client
 
@@ -955,7 +955,7 @@ it('reports about errors during channel initialization', () => {
 it('loads initial actions during subscription', () => {
   const test = createReporter({ time: new TestTime() })
   const client = {
-    sync: { remoteSubprotocol: '0.0.0', onAdd: () => false }
+    node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
   }
   test.app.nodeIds['10:uuid'] = client
 

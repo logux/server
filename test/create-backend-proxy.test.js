@@ -40,9 +40,9 @@ function createClient (server) {
 
 function connectClient (server) {
   const client = createClient(server)
-  client.sync.now = () => 0
+  client.node.now = () => 0
   return client.connection.connect().then(() => {
-    const protocol = client.sync.localProtocol
+    const protocol = client.node.localProtocol
     client.connection.other().send(['connect', protocol, '10:uuid', 0])
     return client.connection.pair.wait('right')
   }).then(() => {

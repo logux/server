@@ -1,8 +1,8 @@
-const ClientSync = require('logux-core').ClientSync
+const ClientNode = require('logux-core').ClientNode
 const TestPair = require('logux-core').TestPair
 const TestTime = require('logux-core').TestTime
 
-const FilteredSync = require('../filtered-sync')
+const FilteredNode = require('../filtered-node')
 
 function createTest () {
   const time = new TestTime()
@@ -18,8 +18,8 @@ function createTest () {
 
   const data = { nodeId: '1:a', userId: '1' }
   const pair = new TestPair()
-  const client = new ClientSync('1:a', log1, pair.left)
-  const server = new FilteredSync(data, 'server', log2, pair.right)
+  const client = new ClientNode('1:a', log1, pair.left)
+  const server = new FilteredNode(data, 'server', log2, pair.right)
   return { client, server }
 }
 

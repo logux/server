@@ -412,7 +412,7 @@ class BaseServer {
    * @return {function} Unbind listener from event.
    *
    * @example
-   * sync.on('error', error => {
+   * server.on('error', error => {
    *   trackError(error)
    * })
    */
@@ -659,7 +659,7 @@ class BaseServer {
     if (meta.nodeIds) {
       for (const id of meta.nodeIds) {
         if (this.nodeIds[id]) {
-          this.nodeIds[id].sync.onAdd(action, meta)
+          this.nodeIds[id].node.onAdd(action, meta)
         }
       }
     }
@@ -668,7 +668,7 @@ class BaseServer {
       for (const userId of meta.users) {
         if (this.users[userId]) {
           for (const client of this.users[userId]) {
-            client.sync.onAdd(action, meta)
+            client.node.onAdd(action, meta)
           }
         }
       }
@@ -684,7 +684,7 @@ class BaseServer {
               filter = filter(ctx, action, meta)
             }
             if (filter && this.nodeIds[nodeId]) {
-              this.nodeIds[nodeId].sync.onAdd(action, meta)
+              this.nodeIds[nodeId].node.onAdd(action, meta)
             }
           }
         }
@@ -836,7 +836,7 @@ class BaseServer {
     if (meta.subprotocol) {
       subprotocol = meta.subprotocol
     } else if (this.nodeIds[nodeId]) {
-      subprotocol = this.nodeIds[nodeId].sync.remoteSubprotocol
+      subprotocol = this.nodeIds[nodeId].node.remoteSubprotocol
     }
 
     const ctx = new Context(nodeId, userId, subprotocol)

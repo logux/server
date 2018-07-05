@@ -20,7 +20,7 @@
     "subprotocol",
     "nodeId",
     "auth",
-    "ServerSync",
+    "ServerNode",
     "remoteAddress",
     "ServerConnection",
     "SemVer",

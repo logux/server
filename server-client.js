@@ -1,13 +1,13 @@
 const SyncError = require('logux-core').SyncError
 const semver = require('semver')
 
-const FilteredSync = require('./filtered-sync')
+const FilteredNode = require('./filtered-node')
 const forcePromise = require('./force-promise')
 const ALLOWED_META = require('./allowed-meta')
 
 function reportDetails (client) {
   return {
-    subprotocol: client.sync.remoteSubprotocol,
+    subprotocol: client.node.remoteSubprotocol,
     clientId: client.key,
     nodeId: client.nodeId
   }
@@ -95,13 +95,13 @@ class ServerClient {
     }
 
     /**
-     * Sync instance to synchronize logs.
-     * @type {ServerSync}
+     * Node instance to synchronize logs.
+     * @type {ServerNode}
      *
      * @example
-     * if (client.sync.state === 'synchronized')
+     * if (client.node.state === 'synchronized')
      */
-    this.sync = new FilteredSync(this, app.nodeId, app.log, connection, {
+    this.node = new FilteredNode(this, app.nodeId, app.log, connection, {
       credentials,
       subprotocol: app.options.subprotocol,
       inFilter: this.filter.bind(this),
@@ -112,21 +112,21 @@ class ServerClient {
       auth: this.auth.bind(this)
     })
 
-    this.sync.catch(err => {
+    this.node.catch(err => {
       this.app.reporter('error', reportClient(this, { err }))
     })
-    this.sync.on('connect', () => {
+    this.node.on('connect', () => {
       if (!this.isSubprotocol(this.app.options.supports)) {
-        throw new SyncError(this.sync, 'wrong-subprotocol', {
+        throw new SyncError(this.node, 'wrong-subprotocol', {
           supported: this.app.options.supports,
-          used: this.sync.remoteSubprotocol
+          used: this.node.remoteSubprotocol
         })
       }
     })
-    this.sync.on('state', () => {
-      if (!this.sync.connected && !this.destroyed) this.destroy()
+    this.node.on('state', () => {
+      if (!this.node.connected && !this.destroyed) this.destroy()
     })
-    this.sync.on('clientError', err => {
+    this.node.on('clientError', err => {
       if (err.type !== 'wrong-credentials') {
         this.app.reporter('error', reportClient(this, { err }))
       }
@@ -152,7 +152,7 @@ class ServerClient {
    * }
    */
   isSubprotocol (range) {
-    return semver.satisfies(this.sync.remoteSubprotocol, range)
+    return semver.satisfies(this.node.remoteSubprotocol, range)
   }
 
   /**
@@ -165,7 +165,7 @@ class ServerClient {
     if (!this.app.destroying && !this.zombie) {
       this.app.reporter('disconnect', reportClient(this))
     }
-    this.sync.destroy()
+    this.node.destroy()
     if (this.userId) {
       let users = this.app.users[this.userId]
       if (users) {
@@ -202,7 +202,7 @@ class ServerClient {
     return this.app.authenticator(this.userId, credentials, this)
       .then(result => {
         if (this.attempts() >= 3) {
-          return Promise.reject(new SyncError(this.sync, 'bruteforce'))
+          return Promise.reject(new SyncError(this.node, 'bruteforce'))
         }
 
         if (result) {
@@ -244,7 +244,7 @@ class ServerClient {
 
   inMap (action, meta) {
     if (!meta.subprotocol) {
-      meta.subprotocol = this.sync.remoteSubprotocol
+      meta.subprotocol = this.node.remoteSubprotocol
     }
     return Promise.resolve([action, meta])
   }

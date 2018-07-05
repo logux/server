@@ -311,7 +311,7 @@ it('reports error from client', () => {
   check('error', { clientId: '670', err })
 })
 
-it('reports error from sync', () => {
+it('reports error from node', () => {
   const err = new SyncError({ }, 'timeout', 5000, false)
   check('error', { nodeId: '100:uImkcF4z', err })
 })
