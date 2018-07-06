@@ -233,6 +233,10 @@ class BaseServer {
     this.on('error', (err, action, meta) => {
       if (meta) {
         this.reporter('error', { err, actionId: meta.id })
+      } else if (err.nodeId) {
+        this.reporter('error', { err, nodeId: err.nodeId })
+      } else if (err.clientId) {
+        this.reporter('error', { err, clientId: err.clientId })
       } else {
         this.reporter('error', { err, fatal: true })
       }

@@ -214,6 +214,28 @@ it('reports on wrong authentication', () => {
   })
 })
 
+it('reports about authentication error', () => {
+  const test = createReporter()
+  const error = new Error('test')
+  const errors = []
+  test.app.on('error', e => {
+    errors.push(e)
+  })
+  test.app.auth(() => Promise.reject(error))
+  const client = new ServerClient(test.app, createConnection(), 1)
+  return client.connection.connect().then(() => {
+    const protocol = client.node.localProtocol
+    client.connection.other().send(['connect', protocol, '10:uuid', 0])
+    return client.connection.pair.wait('right')
+  }).then(() => {
+    expect(test.names).toEqual(['connect', 'error', 'disconnect'])
+    expect(test.reports[1]).toEqual(['error', {
+      err: error, nodeId: '10:uuid'
+    }])
+    expect(errors).toEqual([error])
+  })
+})
+
 it('blocks authentication bruteforce', () => {
   const test = createReporter()
   test.app.auth(() => Promise.resolve(false))

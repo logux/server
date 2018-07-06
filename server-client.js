@@ -113,7 +113,7 @@ class ServerClient {
     })
 
     this.node.catch(err => {
-      this.app.reporter('error', reportClient(this, { err }))
+      this.app.emitter.emit('error', reportClient(this, err))
     })
     this.node.on('connect', () => {
       if (!this.isSubprotocol(this.app.options.supports)) {
@@ -128,7 +128,7 @@ class ServerClient {
     })
     this.node.on('clientError', err => {
       if (err.type !== 'wrong-credentials') {
-        this.app.reporter('error', reportClient(this, { err }))
+        this.app.emitter.emit('error', reportClient(this, err))
       }
     })
 
