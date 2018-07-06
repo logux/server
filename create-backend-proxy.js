@@ -63,20 +63,20 @@ function createBackendProxy (server, options) {
         }
       }, res => {
         let received = ''
-        let approved = false
+        let answer = false
         if (res.statusCode < 200 || res.statusCode > 299) {
           reject(
             new Error('Backend responsed with ' + res.statusCode + ' code'))
         } else {
           processing[meta.id] = waitForEnd(res)
           res.on('data', part => {
-            if (!approved) {
+            if (!answer) {
               received += part
               if (APPROVED.test(received)) {
-                approved = true
+                answer = true
                 resolve(true)
               } else if (FORBIDDEN.test(received)) {
-                approved = true
+                answer = true
                 delete processing[meta.id]
                 resolve(false)
               }
