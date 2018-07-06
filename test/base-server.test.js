@@ -331,9 +331,29 @@ it('creates a client manually', () => {
   expect(app.clients[1].remoteAddress).toEqual('127.0.0.1')
 })
 
-it('send debug message to clients on runtimeError', () => {
+it('sends debug message to clients on runtimeError', () => {
   app = createServer()
-  app.clients[1] = { connection: { send: jest.fn() }, destroy: () => false }
+  app.clients[1] = {
+    connection: {
+      connected: true,
+      send: jest.fn()
+    },
+    destroy: () => false
+  }
+  app.clients[2] = {
+    connection: {
+      connected: false,
+      send: jest.fn()
+    },
+    destroy: () => false
+  }
+  app.clients[3] = {
+    connection: {
+      connected: true,
+      send: () => { throw new Error() }
+    },
+    destroy: () => false
+  }
 
   const error = new Error('Test Error')
   error.stack = `${ error.stack.split('\n')[0] }\nfake stacktrace`
@@ -345,6 +365,7 @@ it('send debug message to clients on runtimeError', () => {
     'Error: Test Error\n' +
     'fake stacktrace'
   ])
+  expect(app.clients[2].connection.send).not.toHaveBeenCalled()
 })
 
 it('disconnects client on destroy', () => {
@@ -451,7 +472,7 @@ it('ignores unknown type for processed actions', () => {
 it('sends errors to clients in development', () => {
   const test = createReporter({ env: 'development' })
   test.app.clients[0] = {
-    connection: { send: jest.fn() },
+    connection: { connected: true, send: jest.fn() },
     destroy: () => false
   }
 

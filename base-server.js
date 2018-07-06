@@ -636,7 +636,11 @@ class BaseServer {
    */
   debugError (error) {
     for (const i in this.clients) {
-      this.clients[i].connection.send(['debug', 'error', error.stack])
+      if (this.clients[i].connection.connected) {
+        try {
+          this.clients[i].connection.send(['debug', 'error', error.stack])
+        } catch (e) { }
+      }
     }
   }
 
