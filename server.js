@@ -191,8 +191,7 @@ class Server extends BaseServer {
   }
 
   listen (...args) {
-    const origin = BaseServer.prototype.listen
-    return origin.apply(this, args).catch(err => {
+    return BaseServer.prototype.listen.apply(this, args).catch(err => {
       this.reporter('error', { err })
       process.exit(1)
     })
