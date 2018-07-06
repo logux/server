@@ -17,7 +17,7 @@ const OPTIONS = {
 }
 
 const ACTION = [
-  'action', { type: 'A' }, { id: '1 server:uuid 0', reasons: ['test'] }
+  'action', { type: 'A' }, { id: '1 server:rails 0', reasons: ['test'] }
 ]
 
 function createConnection () {
@@ -194,6 +194,25 @@ it('creates actions', () => {
     expect(code).toEqual(200)
     expect(app.log.actions()).toEqual([{ type: 'A' }])
     expect(sent).toEqual([])
+  })
+})
+
+it('creates and processes actions', () => {
+  const app = createServer(OPTIONS)
+  let processed = 0
+  app.type('A', {
+    access: () => true,
+    process () {
+      processed += 1
+    }
+  })
+  return app.listen().then(() => {
+    return send({ version: 0, password: '1234', commands: [ACTION] })
+  }).then(code => {
+    expect(code).toEqual(200)
+    expect(app.log.actions()).toEqual([{ type: 'A' }])
+    expect(sent).toEqual([])
+    expect(processed).toEqual(1)
   })
 })
 

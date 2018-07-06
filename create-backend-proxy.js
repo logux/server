@@ -141,6 +141,9 @@ function createBackendProxy (server, options) {
         return
       }
       Promise.all(data.commands.map(command => {
+        if (!server.types[command[1].type]) {
+          command[2].status = 'processed'
+        }
         return server.log.add(command[1], command[2])
       })).then(() => {
         res.end()
