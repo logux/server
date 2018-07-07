@@ -17,7 +17,7 @@
     "chalk": "^2.4.1",
     "logux-core": "logux/logux-core",
     "nanoevents": "^1.0.4",
-    "nanoid": "^1.0.4",
+    "nanoid": "^1.0.5",
     "semver": "^5.5.0",
     "strip-ansi": "^4.0.0",
     "url-pattern": "^1.0.3",
