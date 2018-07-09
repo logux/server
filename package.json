@@ -17,7 +17,7 @@
     "chalk": "^2.4.1",
     "logux-core": "logux/logux-core",
     "nanoevents": "^1.0.4",
-    "nanoid": "^1.0.5",
+    "nanoid": "^1.0.7",
     "semver": "^5.5.0",
     "strip-ansi": "^4.0.0",
     "url-pattern": "^1.0.3",
@@ -28,7 +28,7 @@
   "devDependencies": {
     "cross-spawn": "^6.0.5",
     "docdash": "^0.4.0",
-    "eslint": "^5.0.1",
+    "eslint": "^5.1.0",
     "eslint-ci": "^0.1.1",
     "eslint-config-logux": "^23.0.2",
     "eslint-config-standard": "^11.0.0",

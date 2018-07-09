@@ -144,6 +144,7 @@ function createBackendProxy (server, options) {
         if (!server.types[command[1].type]) {
           command[2].status = 'processed'
         }
+        command[2].backend = req.connection.remoteAddress
         return server.log.add(command[1], command[2])
       })).then(() => {
         res.end()

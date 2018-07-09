@@ -211,6 +211,7 @@ it('creates and processes actions', () => {
   }).then(code => {
     expect(code).toEqual(200)
     expect(app.log.actions()).toEqual([{ type: 'A' }])
+    expect(app.log.entries()[0][1].backend).toEqual('127.0.0.1')
     expect(sent).toEqual([])
     expect(processed).toEqual(1)
   })
