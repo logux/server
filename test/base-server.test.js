@@ -30,16 +30,17 @@ function createServer (options) {
       options[i] = DEFAULT_OPTIONS[i]
     }
   }
+  if (typeof options.time === 'undefined') {
+    options.time = new TestTime()
+    options.id = 'uuid'
+  }
   if (typeof options.port === 'undefined') {
     lastPort += 1
     options.port = lastPort
   }
 
   const created = new BaseServer(options)
-  created.nodeId = 'server:uuid'
   created.auth(() => true)
-  let lastId = 0
-  created.log.generateId = () => ++lastId + ' server:uuid 0'
 
   return created
 }
@@ -522,10 +523,10 @@ it('processes actions', () => {
     .then(() => Promise.resolve())
     .then(() => {
       expect(fired).toEqual([])
-      expect(test.app.log.store.created[0][1].status).toEqual('waiting')
+      expect(test.app.log.entries()[0][1].status).toEqual('waiting')
       return delay(30)
     }).then(() => {
-      expect(test.app.log.store.created[0][1].status).toEqual('processed')
+      expect(test.app.log.entries()[0][1].status).toEqual('processed')
       expect(processed).toEqual([{ type: 'FOO' }])
       expect(fired).toEqual([{ type: 'FOO' }])
       expect(test.names).toEqual(['add', 'processed'])
@@ -621,8 +622,7 @@ it('undos actions on client', () => {
     channels: ['user/1']
   }, 'magic')
   return Promise.resolve().then(() => {
-    const entries = app.log.store.created.map(i => i.slice(0, 2))
-    expect(entries).toEqual([
+    expect(app.log.entries()).toEqual([
       [
         {
           id: '1 1:uuid 0',
@@ -650,7 +650,7 @@ it('adds current subprotocol to meta', () => {
   app = createServer({ subprotocol: '1.0.0' })
   app.type('A', { access: () => true })
   return app.log.add({ type: 'A' }, { reasons: ['test'] }).then(() => {
-    expect(app.log.store.created[0][1].subprotocol).toEqual('1.0.0')
+    expect(app.log.entries()[0][1].subprotocol).toEqual('1.0.0')
   })
 })
 
@@ -661,7 +661,7 @@ it('adds current subprotocol only to own actions', () => {
     { type: 'A' },
     { id: '1 0:other 0', reasons: ['test'] }
   ).then(() => {
-    expect(app.log.store.created[0][1].subprotocol).toBeUndefined()
+    expect(app.log.entries()[0][1].subprotocol).toBeUndefined()
   })
 })
 
@@ -672,7 +672,7 @@ it('allows to override subprotocol in meta', () => {
     { type: 'A' },
     { subprotocol: '0.1.0', reasons: ['test'] }
   ).then(() => {
-    expect(app.log.store.created[0][1].subprotocol).toEqual('0.1.0')
+    expect(app.log.entries()[0][1].subprotocol).toEqual('0.1.0')
   })
 })
 

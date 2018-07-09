@@ -182,7 +182,7 @@ it('validates HTTP requests', () => {
     expect(codes).toEqual([
       405, 404, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 403
     ])
-    expect(app.log.store.created).toEqual([])
+    expect(app.log.actions()).toEqual([])
   })
 })
 

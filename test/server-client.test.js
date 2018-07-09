@@ -820,8 +820,8 @@ it('decompress subprotocol', () => {
     ])
     return client.node.connection.pair.wait('right')
   }).then(() => {
-    expect(app.log.store.created[0][1].subprotocol).toEqual('0.0.0')
-    expect(app.log.store.created[1][1].subprotocol).toEqual('2.0.0')
+    expect(app.log.entries()[0][1].subprotocol).toEqual('0.0.0')
+    expect(app.log.entries()[1][1].subprotocol).toEqual('2.0.0')
   })
 })
 
