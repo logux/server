@@ -204,6 +204,10 @@ class BaseServer {
         return
       }
 
+      if (this.isUseless(action, meta)) {
+        this.reporter('useless', { action, meta })
+      }
+
       this.sendAction(action, meta)
       if (meta.status === 'waiting') {
         let type = this.types[action.type]
@@ -970,6 +974,22 @@ class BaseServer {
       delete this.timeouts[id]
       callback()
     }, ms)
+  }
+
+  isUseless (action, meta) {
+    if (Array.isArray(meta.channels) && meta.channels.length > 0) {
+      return false
+    }
+    if (Array.isArray(meta.nodeIds) && meta.nodeIds.length > 0) {
+      return false
+    }
+    if (Array.isArray(meta.users) && meta.users.length > 0) {
+      return false
+    }
+    if (meta.status !== 'processed' || this.types[action.type]) {
+      return false
+    }
+    return true
   }
 }
 

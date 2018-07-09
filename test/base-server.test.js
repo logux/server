@@ -464,7 +464,9 @@ it('reports about unknown action type', () => {
 
 it('ignores unknown type for processed actions', () => {
   const test = createReporter()
-  return test.app.log.add({ type: 'A' }, { status: 'processed' }).then(() => {
+  return test.app.log.add(
+    { type: 'A' }, { status: 'processed', channels: ['a'] }
+  ).then(() => {
     expect(test.names).toEqual(['add', 'clean'])
   })
 })
@@ -1028,7 +1030,7 @@ it('loads initial actions during subscription', () => {
 
 it('does not need type definition for own actions', () => {
   const test = createReporter()
-  return test.app.log.add({ type: 'unknown' }).then(() => {
+  return test.app.log.add({ type: 'unknown' }, { users: ['10'] }).then(() => {
     expect(test.names).toEqual(['add', 'clean'])
     expect(test.reports[0][1].action.type).toEqual('unknown')
     expect(test.reports[0][1].meta.status).toEqual('processed')
@@ -1060,5 +1062,31 @@ it('sets default options for backend', () => {
     host: '127.0.0.1',
     port: 1338,
     url: 'http://127.0.0.1/rails'
+  })
+})
+
+it('reports about useless actions', () => {
+  const test = createReporter()
+  test.app.type('known', {
+    access: () => true,
+    process: () => true
+  })
+  test.app.channel('a', { access: () => true })
+  test.app.log.on('preadd', (action, meta) => {
+    meta.reasons.push('test')
+  })
+  return Promise.all([
+    test.app.log.add({ type: 'unknown' }, { status: 'processed' }),
+    test.app.log.add({ type: 'known' }),
+    test.app.log.add({ type: 'logux/subscribe', channel: 'a' }),
+    test.app.log.add({ type: 'known' }, { channels: ['a'] }),
+    test.app.log.add({ type: 'known' }, { users: ['10'] }),
+    test.app.log.add({ type: 'known' }, { nodeIds: ['10:uuid'] })
+  ]).then(() => {
+    expect(test.names).toEqual([
+      'add', 'useless',
+      'add', 'add', 'add', 'add', 'add',
+      'processed', 'processed', 'processed', 'processed'
+    ])
   })
 })

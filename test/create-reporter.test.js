@@ -315,3 +315,20 @@ it('reports error from node', () => {
   const err = new SyncError({ }, 'timeout', 5000, false)
   check('error', { nodeId: '100:uImkcF4z', err })
 })
+
+it('reports useless actions', () => {
+  check('useless', {
+    action: {
+      type: 'ADD_USER',
+      id: 100,
+      name: 'John'
+    },
+    meta: {
+      id: '1487805099387 100:uImkcF4z 0',
+      time: 1487805099387,
+      reasons: [],
+      server: 'server:H1f8LAyzl',
+      subprotocol: '1.0.0'
+    }
+  })
+})

@@ -367,6 +367,27 @@ exports[`reports unsubscribed 2`] = `
 "
 `;
 
+exports[`reports useless actions 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"action\\":{\\"type\\":\\"ADD_USER\\",\\"id\\":100,\\"name\\":\\"John\\"},\\"meta\\":{\\"id\\":\\"1487805099387 100:uImkcF4z 0\\",\\"time\\":1487805099387,\\"reasons\\":[],\\"server\\":\\"server:H1f8LAyzl\\",\\"subprotocol\\":\\"1.0.0\\"},\\"msg\\":\\"Useless action\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports useless actions 2`] = `
+"[43m[30m WARN [39m[49m  [1m[33mUseless action[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Action: 
+          type: \\"[1mADD_USER[22m\\"
+          id:   [1m100[22m
+          name: \\"[1mJohn[22m\\"
+        Meta:   
+          id:          [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
+          time:        [1m1487805099387[22m
+          reasons:     []
+          server:      \\"[1mserver:H1f8LAyzl[22m\\"
+          subprotocol: \\"[1m1.0.0[22m\\"
+
+"
+`;
+
 exports[`reports wrongChannel 1`] = `
 "{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"channel\\":\\"ser/100\\",\\"msg\\":\\"Wrong channel name\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "

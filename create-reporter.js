@@ -71,6 +71,8 @@ const REPORTERS = {
 
   unauthenticated: () => ({ level: 'warn', msg: 'Bad authentication' }),
 
+  useless: () => ({ level: 'warn', msg: 'Useless action' }),
+
   denied: () => ({ level: 'warn', msg: 'Action was denied' }),
 
   zombie: () => ({ level: 'warn', msg: 'Zombie client was disconnected' }),
