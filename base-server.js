@@ -179,7 +179,7 @@ class BaseServer {
         if (!meta.subprotocol) {
           meta.subprotocol = this.options.subprotocol
         }
-        if (!this.types[action.type] && !isLogux) {
+        if (!this.backend && !this.types[action.type] && !isLogux) {
           meta.status = 'processed'
         }
       }
@@ -815,6 +815,7 @@ class BaseServer {
   }
 
   markAsProcessed (meta) {
+    this.log.changeMeta(meta.id, { status: 'processed' })
     const nodeId = meta.id.split(' ')[1]
     if (!/^server:/.test(nodeId)) {
       this.log.add(

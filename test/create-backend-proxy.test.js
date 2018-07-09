@@ -278,6 +278,7 @@ it('notifies about actions and subscriptions', () => {
       { type: 'A' },
       { type: 'logux/subscribe', channel: 'a' }
     ])
+    expect(app.log.entries()[0][1].status).toEqual('waiting')
     expect(sent).toEqual([
       [
         'POST',
@@ -325,6 +326,7 @@ it('notifies about actions and subscriptions', () => {
       { type: 'logux/subscribe', channel: 'a' },
       { type: 'logux/processed', id: '2 10:uuid 0' }
     ])
+    expect(app.log.entries()[0][1].status).toEqual('processed')
   })
 })
 

@@ -520,8 +520,10 @@ it('processes actions', () => {
     .then(() => Promise.resolve())
     .then(() => {
       expect(fired).toEqual([])
+      expect(test.app.log.store.created[0][1].status).toEqual('waiting')
       return delay(30)
     }).then(() => {
+      expect(test.app.log.store.created[0][1].status).toEqual('processed')
       expect(processed).toEqual([{ type: 'FOO' }])
       expect(fired).toEqual([{ type: 'FOO' }])
       expect(test.names).toEqual(['add', 'processed'])
