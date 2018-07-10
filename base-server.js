@@ -395,11 +395,11 @@ class BaseServer {
     }).then(() => {
       this.reporter('listen', {
         loguxServer: pkg.version,
-        nodeId: this.nodeId,
         environment: this.env,
         subprotocol: this.options.subprotocol,
         supports: this.options.supports,
         server: !!this.options.server,
+        nodeId: this.nodeId,
         cert: !!this.options.cert,
         host: this.options.host,
         port: this.options.port

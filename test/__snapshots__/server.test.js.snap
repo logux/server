@@ -129,7 +129,7 @@ exports[`writes to custom bunyan log 1`] = `
 
 exports[`writes using custom reporter 1`] = `
 "Event: listen
-Details: {\\"loguxServer\\":\\"0.0.0\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"environment\\":\\"test\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"server\\":false,\\"cert\\":false,\\"host\\":\\"127.0.0.1\\",\\"port\\":2000}
+Details: {\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"test\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"server\\":false,\\"nodeId\\":\\"server:FnXaqDxY\\",\\"cert\\":false,\\"host\\":\\"127.0.0.1\\",\\"port\\":2000}
 Event: destroy
 Details: undefined
 "
