@@ -25,33 +25,32 @@ const ERROR_CODES = {
 }
 
 const REPORTERS = {
-  listen: record => {
+  listen: r => {
     const details = {
-      loguxServer: record.loguxServer,
-      environment: record.environment,
-      nodeId: record.nodeId,
-      subprotocol: record.subprotocol,
-      supports: record.supports
+      loguxServer: r.loguxServer,
+      environment: r.environment,
+      nodeId: r.nodeId,
+      subprotocol: r.subprotocol,
+      supports: r.supports
     }
 
-    if (record.environment === 'development') {
+    if (r.environment === 'development') {
       details.note = [
         'Server was started in non-secure development mode',
         'Press Ctrl-C to shutdown server'
       ]
     }
 
-    if (record.server) {
-      details.server = record.server
+    if (r.server) {
+      details.server = r.server
     } else {
-      const protocol = record.cert ? 'wss://' : 'ws://'
-      details.listen = `${ protocol }${ record.host }:${ record.port }`
+      const protocol = r.cert ? 'wss://' : 'ws://'
+      details.listen = `${ protocol }${ r.host }:${ r.port }`
     }
 
-    if (record.backendSend) {
-      details.backendListen = 'http://' +
-        (record.backendHost || '0.0.0.0') + ':' + (record.backendPort || 1338)
-      details.backendSend = record.backendSend
+    if (r.backendSend) {
+      details.backendListen = `http://${ r.backendHost }:${ r.backendPort }`
+      details.backendSend = r.backendSend
     }
 
     return { msg: 'Logux server is listening', details }
