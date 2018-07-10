@@ -249,7 +249,13 @@ it('supports object in SSL key', () => {
 })
 
 it('reporters on start listening', () => {
-  const test = createReporter()
+  const test = createReporter({
+    backend: {
+      host: '127.0.0.1',
+      port: 31338,
+      url: 'http://127.0.0.1:3000/logux'
+    }
+  })
 
   const promise = test.app.listen()
   expect(test.reports).toEqual([])
@@ -257,6 +263,9 @@ it('reporters on start listening', () => {
   return promise.then(() => {
     expect(test.reports).toEqual([
       ['listen', {
+        backendHost: '127.0.0.1',
+        backendPort: 31338,
+        backendSend: 'http://127.0.0.1:3000/logux',
         loguxServer: pkg.version,
         environment: 'test',
         nodeId: 'server:uuid',

@@ -394,6 +394,9 @@ class BaseServer {
       })
     }).then(() => {
       this.reporter('listen', {
+        backendHost: this.options.backend && this.options.backend.host,
+        backendPort: this.options.backend && this.options.backend.port,
+        backendSend: this.options.backend && this.options.backend.url,
         loguxServer: pkg.version,
         environment: this.env,
         subprotocol: this.options.subprotocol,

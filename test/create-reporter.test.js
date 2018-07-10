@@ -112,6 +112,9 @@ it('uses environment variable to detect environment', () => {
 
 it('reports listen', () => {
   check('listen', {
+    backendHost: '127.0.0.1',
+    backendPort: 31338,
+    backendSend: 'http://127.0.0.1:3000/logux',
     loguxServer: '0.0.0',
     environment: 'development',
     nodeId: 'server:FnXaqDxY',

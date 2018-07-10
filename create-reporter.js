@@ -48,6 +48,12 @@ const REPORTERS = {
       details.listen = `${ protocol }${ record.host }:${ record.port }`
     }
 
+    if (record.backendSend) {
+      details.backendListen = 'http://' +
+        (record.backendHost || '0.0.0.0') + ':' + (record.backendPort || 1338)
+      details.backendSend = record.backendSend
+    }
+
     return { msg: 'Logux server is listening', details }
   },
 
