@@ -28,7 +28,6 @@
   "devDependencies": {
     "clean-publish": "^1.0.7",
     "cross-spawn": "^6.0.5",
-    "docdash": "^0.4.0",
     "eslint": "^5.1.0",
     "eslint-ci": "^0.1.1",
     "eslint-config-logux": "^23.0.2",
@@ -52,10 +51,110 @@
     "spellcheck": "yarn docs && yaspeller-ci *.md docs/*.html",
     "clean": "rimraf docs/ coverage/",
     "lint": "eslint-ci *.js test/{**/,}*.js",
-    "docs": "jsdoc --configure .jsdocrc *.js",
+    "docs": "jsdoc -d docs/ *.js",
     "test": "jest --runInBand --coverage && yarn lint && yarn spellcheck"
   },
   "pre-commit": [
     "lint-staged"
-  ]
+  ],
+  "lint-staged": {
+    "*.md": "yaspeller-ci",
+    "*.js": "eslint"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coverageThreshold": {
+      "global": {
+        "statements": 100
+      }
+    },
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/server.js"
+    ]
+  },
+  "eslintConfig": {
+    "extends": "eslint-config-logux/node"
+  },
+  "yaspeller": {
+    "lang": "en",
+    "ignoreCapitalization": true,
+    "excludeFiles": [
+      "docs/*.js.html"
+    ],
+    "dictionary": [
+      "Logux",
+      "LOGUX",
+      "docdash",
+      "JSDoc",
+      "js",
+      "WSS",
+      "WebSocket",
+      "ws",
+      "env",
+      "BaseServer",
+      "UI",
+      "listenOptions",
+      "subprotocol",
+      "nodeId",
+      "auth",
+      "ServerNode",
+      "remoteAddress",
+      "ServerConnection",
+      "SemVer",
+      "npm",
+      "DevOps",
+      "PEM",
+      "Versioning",
+      "Wintermute",
+      "loadOptions",
+      "stacktrace",
+      "debugError",
+      "nanoevents",
+      "cli",
+      "CLI",
+      "bunyan",
+      "isServer",
+      "params",
+      "regexp",
+      "sendAction",
+      "TestTime",
+      "userId",
+      "Neuromancer",
+      "Anton",
+      "Savoskin",
+      "Pavel",
+      "Hanna",
+      "Stoliar",
+      "Artamonov",
+      "Mateusz",
+      "Derks",
+      "Fursov",
+      "Grigory",
+      "Moroz",
+      "Grigoriy",
+      "Beziuk",
+      "Mitin",
+      "Konstantin",
+      "Krivlenia",
+      "filterCreator",
+      "otherType",
+      "unknownType",
+      "wrongChannel",
+      "otherChannel",
+      "BackedSettings",
+      "backend",
+      "ChannelContext",
+      "ctx",
+      "GMT",
+      "Mon",
+      "Tue",
+      "Thu",
+      "Fri",
+      "cwd",
+      "MemoryStore",
+      "ENV",
+      "semver"
+    ]
+  }
 }

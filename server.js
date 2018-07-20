@@ -60,14 +60,14 @@ yargs
  * @param {number} [options.ping=10000] Milliseconds since last message to test
  *                                      connection by sending ping.
  * @param {BackedSettings} [options.backend] Settings to work with PHP,
-                                             Ruby on Rails, or other backend.
+ *                                           Ruby on Rails, or other backend.
  * @param {"human"|"json"|function} [options.reporter="human"]
  *                                  Report process/errors to CLI in bunyan JSON
  *                                  or in human readable format. It can be also
  *                                  a function to show current server status.
  * @param {Logger} [options.bunyan] Bunyan logger with custom settings.
- * @param {Store} [options.store] Store to save log. Will be `MemoryStore`,
- *                                by default.
+ * @param {Store} [options.store] Store to save log. Will be
+ *                                {@link MemoryStore}, by default.
  * @param {"production"|"development"} [options.env] Development or production
  *                                                   server mode. By default,
  *                                                   it will be taken from

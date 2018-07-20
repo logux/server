@@ -61,9 +61,9 @@ function optionError (msg) {
  * @param {number} [options.ping=10000] Milliseconds since last message to test
  *                                      connection by sending ping.
  * @param {BackedSettings} [options.backend] Settings to work with PHP,
-                                             Ruby on Rails, or other backend.
- * @param {Store} [options.store] Store to save log. Will be `MemoryStore`,
- *                                by default.
+ *                                           Ruby on Rails, or other backend.
+ * @param {Store} [options.store] Store to save log. Will be
+ *                                {@link MemoryStore}, by default.
  * @param {TestTime} [options.time] Test time to test server.
  * @param {string} [options.id] Custom random ID to be used in node ID.
  * @param {"production"|"development"} [options.env] Development or production
