@@ -26,6 +26,7 @@
     "yyyy-mm-dd": "^1.0.2"
   },
   "devDependencies": {
+    "clean-publish": "^1.0.7",
     "cross-spawn": "^6.0.5",
     "docdash": "^0.4.0",
     "eslint": "^5.1.0",
