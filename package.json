@@ -21,14 +21,14 @@
     "semver": "^5.5.0",
     "strip-ansi": "^4.0.0",
     "url-pattern": "^1.0.3",
-    "ws": "^5.2.2",
+    "ws": "^6.0.0",
     "yargs": "^12.0.1",
     "yyyy-mm-dd": "^1.0.2"
   },
   "devDependencies": {
     "clean-publish": "^1.0.7",
     "cross-spawn": "^6.0.5",
-    "eslint": "^5.1.0",
+    "eslint": "^5.2.0",
     "eslint-ci": "^0.1.1",
     "eslint-config-logux": "^23.0.4",
     "eslint-config-standard": "^11.0.0",
