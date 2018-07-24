@@ -207,7 +207,7 @@ exports[`reports error from action 2`] = `
 `;
 
 exports[`reports error from client 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"err\\":{\\"message\\":\\"Logux received timeout error (A timeout was reached (5000ms))\\",\\"name\\":\\"SyncError\\"},\\"clientId\\":\\"670\\",\\"msg\\":\\"Client error: A timeout was reached (5000ms)\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"clientId\\":\\"670\\",\\"msg\\":\\"Client error: A timeout was reached (5000ms)\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
@@ -219,7 +219,7 @@ exports[`reports error from client 2`] = `
 `;
 
 exports[`reports error from node 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"err\\":{\\"message\\":\\"A timeout was reached (5000ms)\\",\\"name\\":\\"SyncError\\"},\\"nodeId\\":\\"100:uImkcF4z\\",\\"msg\\":\\"Sync error: A timeout was reached (5000ms)\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"nodeId\\":\\"100:uImkcF4z\\",\\"msg\\":\\"Sync error: A timeout was reached (5000ms)\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
@@ -312,6 +312,18 @@ exports[`reports subscribed 2`] = `
 "[42m[30m INFO [39m[49m  [1m[32mClient was subscribed[39m[22m [2mat 1970-01-01 00:00:00[22m
         Channel:   [1muser/100[22m
         Action ID: [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
+
+"
+`;
+
+exports[`reports sync error 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":50,\\"err\\":{\\"message\\":\\"Logux received unknown-message error (Unknown message \`bad\` type)\\",\\"name\\":\\"SyncError\\"},\\"clientId\\":\\"670\\",\\"msg\\":\\"Logux received unknown-message error (Unknown message \`bad\` type)\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports sync error 2`] = `
+"[41m[37m ERROR [39m[49m [1m[31mLogux received unknown-message error (Unknown message [33mbad[31m type)[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Client ID: [1m670[22m
 
 "
 `;

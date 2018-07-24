@@ -128,7 +128,7 @@ class ServerClient {
     })
     this.node.on('clientError', err => {
       if (err.type !== 'wrong-credentials') {
-        this.app.emitter.emit('error', reportClient(this, err))
+        this.app.emitter.emit('clientError', reportClient(this, err))
       }
     })
 

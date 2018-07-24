@@ -252,8 +252,8 @@ it('blocks authentication bruteforce', () => {
   })).then(() => {
     expect(test.names.filter(i => i === 'disconnect')).toHaveLength(5)
     expect(test.names.filter(i => i === 'unauthenticated')).toHaveLength(3)
-    expect(test.names.filter(i => i === 'error')).toHaveLength(2)
-    test.reports.filter(i => i[0] === 'error').forEach(report => {
+    expect(test.names.filter(i => i === 'clientError')).toHaveLength(2)
+    test.reports.filter(i => i[0] === 'clientError').forEach(report => {
       expect(report[1].err.type).toEqual('bruteforce')
       expect(report[1].nodeId).toMatch(/(4|5):uuid/)
     })
@@ -263,7 +263,7 @@ it('blocks authentication bruteforce', () => {
   }).then(() => {
     expect(test.names.filter(i => i === 'disconnect')).toHaveLength(6)
     expect(test.names.filter(i => i === 'unauthenticated')).toHaveLength(4)
-    expect(test.names.filter(i => i === 'error')).toHaveLength(2)
+    expect(test.names.filter(i => i === 'clientError')).toHaveLength(2)
   })
 })
 
@@ -364,8 +364,8 @@ it('checks subprotocol', () => {
     ])
     return client.connection.pair.wait('right')
   }).then(() => {
-    expect(test.names).toEqual(['connect', 'error', 'disconnect'])
-    expect(test.reports[1]).toEqual(['error', {
+    expect(test.names).toEqual(['connect', 'clientError', 'disconnect'])
+    expect(test.reports[1]).toEqual(['clientError', {
       clientId: '1',
       err: new SyncError(client.node, 'wrong-subprotocol', {
         supported: '0.x', used: '1.0.0'

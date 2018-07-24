@@ -246,6 +246,13 @@ class BaseServer {
       }
       if (this.env === 'development') this.debugError(err)
     })
+    this.on('clientError', err => {
+      if (err.nodeId) {
+        this.reporter('clientError', { err, nodeId: err.nodeId })
+      } else if (err.clientId) {
+        this.reporter('clientError', { err, clientId: err.clientId })
+      }
+    })
 
     this.unbind = []
 
@@ -415,9 +422,10 @@ class BaseServer {
    * Supported events:
    *
    * * `error`: server error.
+   * * `clientError`: wrong client behaviour.
    * * `processed`: action processing was finished.
    *
-   * @param {"error"|"processed"} event The event name.
+   * @param {"error"|"clientError"|"processed"} event The event name.
    * @param {listener} listener The listener function.
    *
    * @return {function} Unbind listener from event.

@@ -92,6 +92,23 @@ const REPORTERS = {
     msg: 'Wrong channel name'
   }),
 
+  clientError: record => {
+    const result = {
+      level: 'warn', details: { }
+    }
+    if (record.err.received) {
+      result.msg = `Client error: ${ record.err.description }`
+    } else {
+      result.msg = `Sync error: ${ record.err.description }`
+    }
+    for (const i in record) {
+      if (i !== 'err') {
+        result.details[i] = record[i]
+      }
+    }
+    return result
+  },
+
   error: record => {
     const result = {
       level: record.fatal ? 'fatal' : 'error',
@@ -113,14 +130,7 @@ const REPORTERS = {
       delete result.details.err.stack
     }
 
-    const isClient = record.clientId || record.nodeId
-    if (isClient && record.err.name === 'SyncError') {
-      result.level = 'warn'
-      if (record.err.received) {
-        result.msg = `Client error: ${ record.err.description }`
-      } else {
-        result.msg = `Sync error: ${ record.err.description }`
-      }
+    if (record.err.name === 'SyncError') {
       delete result.details.err.stack
     }
 
