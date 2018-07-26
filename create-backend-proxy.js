@@ -82,6 +82,11 @@ function createBackendProxy (server, options) {
               }
             }
           })
+          res.on('end', () => {
+            if (!answer) {
+              reject(new Error(`Backend error with response "${ received }"`))
+            }
+          })
         }
       })
       req.on('error', reject)

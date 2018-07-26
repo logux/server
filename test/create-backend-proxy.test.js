@@ -110,6 +110,9 @@ const httpServer = http.createServer((req, res) => {
     } else if (data.commands[0][1].type === 'BAD') {
       res.write(JSON.stringify([['forbidden']]))
       res.end()
+    } else if (data.commands[0][1].type === 'ERROR') {
+      res.write('[[')
+      res.end()
     } else {
       res.write(JSON.stringify([['approved']]))
       delay(100).then(() => {
@@ -344,5 +347,24 @@ it('asks about action access', () => {
     expect(app.log.actions()).toEqual([
       { type: 'logux/undo', reason: 'denied', id: '1 10:uuid 0' }
     ])
+  })
+})
+
+it('reacts on backend errors', () => {
+  const app = createServer(OPTIONS)
+  let error
+  app.on('error', e => {
+    error = e
+  })
+  return connectClient(app).then(client => {
+    client.connection.other().send(['sync', 2,
+      { type: 'ERROR' }, { id: [1, '10:uuid', 0], time: 1 }
+    ])
+    return client.connection.pair.wait('right')
+  }).then(() => {
+    expect(app.log.actions()).toEqual([
+      { type: 'logux/undo', reason: 'error', id: '1 10:uuid 0' }
+    ])
+    expect(error.message).toEqual('Backend error with response "[["')
   })
 })
