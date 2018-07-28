@@ -218,15 +218,11 @@ class BaseServer {
           this.internalUnkownType(action, meta)
           return
         }
-        let processing
         if (type.process) {
-          processing = this.processAction(type, action, meta)
+          this.processAction(type, action, meta)
         } else {
-          processing = Promise.resolve()
-        }
-        processing.then(() => {
           this.markAsProcessed(meta)
-        })
+        }
       }
     })
     this.log.on('clean', (action, meta) => {
@@ -818,6 +814,7 @@ class BaseServer {
         actionId: meta.id,
         latency: Date.now() - start
       })
+      this.markAsProcessed(meta)
     }).catch(e => {
       this.log.changeMeta(meta.id, { status: 'error' })
       this.undo(meta, 'error')

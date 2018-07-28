@@ -103,20 +103,41 @@ const httpServer = http.createServer((req, res) => {
   })
   req.on('end', () => {
     const data = JSON.parse(body)
+    const actionId = data.commands[0][2].id
     sent.push([req.method, req.url, data])
     if (data.commands[0][1].type === 'NO') {
       res.statusCode = 404
       res.end()
     } else if (data.commands[0][1].type === 'BAD') {
-      res.write(JSON.stringify([['forbidden']]))
+      res.write(`[["forbidden","${ actionId }"]]`)
       res.end()
-    } else if (data.commands[0][1].type === 'ERROR') {
-      res.write('[[')
+    } else if (data.commands[0][1].type === 'AERROR') {
+      res.write(`[["error","${ actionId }"]]`)
+      res.end()
+    } else if (data.commands[0][1].type === 'PERROR') {
+      res.write(`[["approved","${ actionId }"]`)
+      delay(100).then(() => {
+        res.write(`,["error","${ actionId }"]]`)
+        res.end()
+      })
+    } else if (data.commands[0][1].type === 'BROKEN1') {
+      res.write(`[["approved","${ actionId }"]`)
+      res.end()
+    } else if (data.commands[0][1].type === 'BROKEN2') {
+      res.write(`[["approved","${ actionId }"],"processed"]`)
+      res.end()
+    } else if (data.commands[0][1].type === 'BROKEN3') {
+      res.write(`[["approved","${ actionId }"],[1]]`)
+      res.end()
+    } else if (data.commands[0][1].type === 'BROKEN4') {
+      res.write(`[["approved","${ actionId }"],["procesed","${ actionId }"]]`)
+      res.end()
+    } else if (data.commands[0][1].type === 'EMPTY') {
       res.end()
     } else {
-      res.write(JSON.stringify([['approved']]))
+      res.write(`[["approved","${ actionId }"]`)
       delay(100).then(() => {
-        res.write(JSON.stringify([['processed']]))
+        res.write(`,["processed","${ actionId }"]]`)
         res.end()
       })
     }
@@ -350,21 +371,64 @@ it('asks about action access', () => {
   })
 })
 
-it('reacts on backend errors', () => {
+it('reacts on wrong backend answer', () => {
   const app = createServer(OPTIONS)
-  let error
+  const errors = []
   app.on('error', e => {
-    error = e
+    errors.push(e.message)
   })
   return connectClient(app).then(client => {
     client.connection.other().send(['sync', 2,
-      { type: 'ERROR' }, { id: [1, '10:uuid', 0], time: 1 }
+      { type: 'EMPTY' }, { id: [1, '10:uuid', 0], time: 1 },
+      { type: 'BROKEN1' }, { id: [2, '10:uuid', 0], time: 1 },
+      { type: 'BROKEN2' }, { id: [3, '10:uuid', 0], time: 1 },
+      { type: 'BROKEN3' }, { id: [4, '10:uuid', 0], time: 1 },
+      { type: 'BROKEN4' }, { id: [5, '10:uuid', 0], time: 1 }
     ])
-    return client.connection.pair.wait('right')
+    return delay(100)
   }).then(() => {
     expect(app.log.actions()).toEqual([
-      { type: 'logux/undo', reason: 'error', id: '1 10:uuid 0' }
+      { type: 'BROKEN1' },
+      { type: 'BROKEN2' },
+      { type: 'BROKEN3' },
+      { type: 'BROKEN4' },
+      { type: 'logux/undo', reason: 'error', id: '1 10:uuid 0' },
+      { type: 'logux/undo', reason: 'error', id: '2 10:uuid 0' },
+      { type: 'logux/undo', reason: 'error', id: '3 10:uuid 0' },
+      { type: 'logux/undo', reason: 'error', id: '4 10:uuid 0' },
+      { type: 'logux/undo', reason: 'error', id: '5 10:uuid 0' }
     ])
-    expect(error.message).toEqual('Backend error with response "[["')
+    expect(errors).toEqual([
+      'Backend wrong answer',
+      'Backend wrong answer',
+      'Backend wrong answer',
+      'Backend wrong answer',
+      'Backend wrong answer'
+    ])
+  })
+})
+
+it('reacts on backend error', () => {
+  const app = createServer(OPTIONS)
+  const errors = []
+  app.on('error', e => {
+    errors.push(e.message)
+  })
+  return connectClient(app).then(client => {
+    client.connection.other().send(['sync', 3,
+      { type: 'AERROR' }, { id: [1, '10:uuid', 0], time: 1 },
+      { type: 'PERROR' }, { id: [2, '10:uuid', 0], time: 1 }
+    ])
+    return delay(220)
+  }).then(() => {
+    expect(app.log.actions()).toEqual([
+      { type: 'PERROR' },
+      { type: 'logux/undo', reason: 'error', id: '1 10:uuid 0' },
+      { type: 'logux/undo', reason: 'error', id: '2 10:uuid 0' }
+    ])
+    expect(errors).toEqual([
+      'Backend error during access control',
+      'Backend error during processing'
+    ])
   })
 })

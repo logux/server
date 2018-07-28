@@ -7,6 +7,7 @@ const MIN_VERSION = 0
 
 const FORBIDDEN = /^\[\s*\[\s*"forbidden"/
 const APPROVED = /^\[\s*\[\s*"approved"/
+const ERROR = /^\[\s*\[\s*"error"/
 
 function isValid (data) {
   if (typeof data !== 'object') return false
@@ -23,10 +24,21 @@ function isValid (data) {
   return true
 }
 
-function waitForEnd (res) {
-  return new Promise(resolve => {
-    res.on('end', resolve)
-  })
+function parseAnswer (str) {
+  let json
+  try {
+    json = JSON.parse(str)
+  } catch (e) {
+    return false
+  }
+  let answered = false
+  for (const command of json) {
+    if (!Array.isArray(command)) return false
+    if (typeof command[0] !== 'string') return false
+    if (command[0] === 'processed' || command[0] === 'error') answered = true
+  }
+  if (!answered) return false
+  return json
 }
 
 function createBackendProxy (server, options) {
@@ -51,6 +63,13 @@ function createBackendProxy (server, options) {
       commands: [['action', action, meta]]
     })
     const protocol = backend.protocol === 'https:' ? https : http
+
+    let processResolve, processReject
+    processing[meta.id] = new Promise((resolve, reject) => {
+      processResolve = resolve
+      processReject = reject
+    })
+
     return new Promise((resolve, reject) => {
       const req = protocol.request({
         method: 'POST',
@@ -63,28 +82,42 @@ function createBackendProxy (server, options) {
         }
       }, res => {
         let received = ''
-        let answer = false
+        let accessAnswer = false
         if (res.statusCode < 200 || res.statusCode > 299) {
+          delete processing[meta.id]
           reject(
             new Error('Backend responsed with ' + res.statusCode + ' code'))
         } else {
-          processing[meta.id] = waitForEnd(res)
           res.on('data', part => {
-            if (!answer) {
-              received += part
+            received += part
+            if (!accessAnswer) {
               if (APPROVED.test(received)) {
-                answer = true
+                accessAnswer = true
                 resolve(true)
               } else if (FORBIDDEN.test(received)) {
-                answer = true
+                accessAnswer = true
                 delete processing[meta.id]
                 resolve(false)
+              } else if (ERROR.test(received)) {
+                accessAnswer = true
+                delete processing[meta.id]
+                reject(new Error('Backend error during access control'))
               }
             }
           })
           res.on('end', () => {
-            if (!answer) {
-              reject(new Error(`Backend error with response "${ received }"`))
+            if (!accessAnswer) {
+              delete processing[meta.id]
+              reject(new Error('Backend wrong answer'))
+            } else if (processing[meta.id]) {
+              const json = parseAnswer(received)
+              if (!json) {
+                processReject(new Error('Backend wrong answer'))
+              } else if (json.some(i => i[0] === 'processed')) {
+                processResolve()
+              } else {
+                processReject(new Error('Backend error during processing'))
+              }
             }
           })
         }
@@ -97,6 +130,9 @@ function createBackendProxy (server, options) {
   function process (ctx, action, meta) {
     return processing[meta.id].then(() => {
       delete processing[meta.id]
+    }, e => {
+      delete processing[meta.id]
+      throw e
     })
   }
 
