@@ -2643,7 +2643,7 @@ log-update@^1.0.2:
 
 logux-core@logux/logux-core:
   version "0.2.2"
-  resolved "https://codeload.github.com/logux/logux-core/tar.gz/9fba460d5b65173e32d5a68809e626ee62a62693"
+  resolved "https://codeload.github.com/logux/logux-core/tar.gz/172d6544ad42da4968d61cfdd1a2ea9c7bb74c73"
   dependencies:
     nanoevents "^1.0.5"
 
