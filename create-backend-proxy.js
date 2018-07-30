@@ -56,7 +56,7 @@ function createBackendProxy (server, options) {
 
   let processing = []
 
-  function send (ctx, action, meta) {
+  function access (ctx, action, meta) {
     let body = JSON.stringify({
       version: VERSION,
       password: options.password,
@@ -136,15 +136,8 @@ function createBackendProxy (server, options) {
     })
   }
 
-  server.otherType({
-    access: send,
-    process
-  })
-
-  server.otherChannel({
-    access: send,
-    init: process
-  })
+  server.otherType({ access, process })
+  server.otherChannel({ access, init: process })
 
   let httpServer = http.createServer((req, res) => {
     if (req.method !== 'POST') {
