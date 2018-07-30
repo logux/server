@@ -1,6 +1,6 @@
-const https = require('https')
-const http = require('http')
-const url = require('url')
+let https = require('https')
+let http = require('http')
+let url = require('url')
 
 const VERSION = 0
 const MIN_VERSION = 0
@@ -15,7 +15,7 @@ function isValid (data) {
   if (data.version > MIN_VERSION) return false
   if (typeof data.password !== 'string') return false
   if (!Array.isArray(data.commands)) return false
-  for (const command of data.commands) {
+  for (let command of data.commands) {
     if (!Array.isArray(command)) return false
     if (command[0] !== 'action') return false
     if (typeof command[1] !== 'object') return false
@@ -32,7 +32,7 @@ function parseAnswer (str) {
     return false
   }
   let answered = false
-  for (const command of json) {
+  for (let command of json) {
     if (!Array.isArray(command)) return false
     if (typeof command[0] !== 'string') return false
     if (command[0] === 'processed' || command[0] === 'error') answered = true
@@ -52,17 +52,17 @@ function createBackendProxy (server, options) {
     throw new Error('You must set `backend.url` option with address to backend')
   }
 
-  const backend = url.parse(options.url)
+  let backend = url.parse(options.url)
 
-  const processing = []
+  let processing = []
 
   function send (ctx, action, meta) {
-    const body = JSON.stringify({
+    let body = JSON.stringify({
       version: VERSION,
       password: options.password,
       commands: [['action', action, meta]]
     })
-    const protocol = backend.protocol === 'https:' ? https : http
+    let protocol = backend.protocol === 'https:' ? https : http
 
     let processResolve, processReject
     processing[meta.id] = new Promise((resolve, reject) => {
@@ -71,7 +71,7 @@ function createBackendProxy (server, options) {
     })
 
     return new Promise((resolve, reject) => {
-      const req = protocol.request({
+      let req = protocol.request({
         method: 'POST',
         host: backend.hostname,
         port: backend.port,
@@ -110,7 +110,7 @@ function createBackendProxy (server, options) {
               delete processing[meta.id]
               reject(new Error('Backend wrong answer'))
             } else if (processing[meta.id]) {
-              const json = parseAnswer(received)
+              let json = parseAnswer(received)
               if (!json) {
                 processReject(new Error('Backend wrong answer'))
               } else if (json.some(i => i[0] === 'processed')) {
@@ -146,7 +146,7 @@ function createBackendProxy (server, options) {
     init: process
   })
 
-  const httpServer = http.createServer((req, res) => {
+  let httpServer = http.createServer((req, res) => {
     if (req.method !== 'POST') {
       res.statusCode = 405
       res.end()

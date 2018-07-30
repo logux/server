@@ -1,6 +1,6 @@
-const bunyan = require('bunyan')
+let bunyan = require('bunyan')
 
-const HumanFormatter = require('./human-formatter')
+let HumanFormatter = require('./human-formatter')
 
 const ERROR_CODES = {
   EADDRINUSE: e => ({
@@ -26,7 +26,7 @@ const ERROR_CODES = {
 
 const REPORTERS = {
   listen: r => {
-    const details = {
+    let details = {
       loguxServer: r.loguxServer,
       environment: r.environment,
       nodeId: r.nodeId,
@@ -44,7 +44,7 @@ const REPORTERS = {
     if (r.server) {
       details.server = r.server
     } else {
-      const protocol = r.cert ? 'wss://' : 'ws://'
+      let protocol = r.cert ? 'wss://' : 'ws://'
       details.listen = `${ protocol }${ r.host }:${ r.port }`
     }
 
@@ -93,7 +93,7 @@ const REPORTERS = {
   }),
 
   clientError: record => {
-    const result = {
+    let result = {
       level: 'warn', details: { }
     }
     if (record.err.received) {
@@ -101,7 +101,7 @@ const REPORTERS = {
     } else {
       result.msg = `Sync error: ${ record.err.description }`
     }
-    for (const i in record) {
+    for (let i in record) {
       if (i !== 'err') {
         result.details[i] = record[i]
       }
@@ -110,7 +110,7 @@ const REPORTERS = {
   },
 
   error: record => {
-    const result = {
+    let result = {
       level: record.fatal ? 'fatal' : 'error',
       msg: record.err.message,
       details: {
@@ -122,9 +122,9 @@ const REPORTERS = {
       }
     }
 
-    const helper = ERROR_CODES[record.err.code]
+    let helper = ERROR_CODES[record.err.code]
     if (helper) {
-      const help = helper(record.err)
+      let help = helper(record.err)
       result.msg = help.msg
       result.details.note = help.note
       delete result.details.err.stack
@@ -134,7 +134,7 @@ const REPORTERS = {
       delete result.details.err.stack
     }
 
-    for (const i in record) {
+    for (let i in record) {
       if (i !== 'err' && i !== 'fatal') {
         result.details[i] = record[i]
       }
@@ -151,8 +151,8 @@ function createReporter (options) {
   } else {
     let streams
     if (options.reporter === 'human') {
-      const env = options.env || process.env.NODE_ENV || 'development'
-      const color = env !== 'development' ? false : undefined
+      let env = options.env || process.env.NODE_ENV || 'development'
+      let color = env !== 'development' ? false : undefined
       streams = [
         {
           type: 'raw',
@@ -164,8 +164,8 @@ function createReporter (options) {
   }
 
   function reporter (type, details) {
-    const report = REPORTERS[type](details)
-    const level = report.level || 'info'
+    let report = REPORTERS[type](details)
+    let level = report.level || 'info'
     reporter.logger[level](report.details || details || { }, report.msg)
   }
   reporter.logger = logger

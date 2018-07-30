@@ -1,4 +1,4 @@
-const semver = require('semver')
+let semver = require('semver')
 
 /**
  * Action context.

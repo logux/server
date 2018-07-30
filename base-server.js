@@ -1,21 +1,21 @@
-const ServerConnection = require('logux-core').ServerConnection
-const MemoryStore = require('logux-core').MemoryStore
-const NanoEvents = require('nanoevents')
-const UrlPattern = require('url-pattern')
-const WebSocket = require('ws')
-const nanoid = require('nanoid')
-const https = require('https')
-const http = require('http')
-const path = require('path')
-const Log = require('logux-core').Log
-const fs = require('fs')
+let ServerConnection = require('logux-core').ServerConnection
+let MemoryStore = require('logux-core').MemoryStore
+let NanoEvents = require('nanoevents')
+let UrlPattern = require('url-pattern')
+let WebSocket = require('ws')
+let nanoid = require('nanoid')
+let https = require('https')
+let http = require('http')
+let path = require('path')
+let Log = require('logux-core').Log
+let fs = require('fs')
 
-const createBackendProxy = require('./create-backend-proxy')
-const forcePromise = require('./force-promise')
-const ServerClient = require('./server-client')
-const promisify = require('./promisify')
-const Context = require('./context')
-const pkg = require('./package.json')
+let createBackendProxy = require('./create-backend-proxy')
+let forcePromise = require('./force-promise')
+let ServerClient = require('./server-client')
+let promisify = require('./promisify')
+let Context = require('./context')
+let pkg = require('./package.json')
 
 const PEM_PREAMBLE = '-----BEGIN'
 
@@ -38,7 +38,7 @@ function readFile (root, file) {
 }
 
 function optionError (msg) {
-  const error = new Error(msg)
+  let error = new Error(msg)
   error.code = 'LOGUX_WRONG_OPTIONS'
   throw error
 }
@@ -150,7 +150,7 @@ class BaseServer {
 
     this.options.root = this.options.root || process.cwd()
 
-    const store = this.options.store || new MemoryStore()
+    let store = this.options.store || new MemoryStore()
 
     let log
     if (this.options.time) {
@@ -168,7 +168,7 @@ class BaseServer {
     this.log = log
 
     this.log.on('preadd', (action, meta) => {
-      const isLogux = action.type.slice(0, 6) === 'logux/'
+      let isLogux = action.type.slice(0, 6) === 'logux/'
       if (!meta.server) {
         meta.server = this.nodeId
       }
@@ -287,8 +287,8 @@ class BaseServer {
     }
 
     this.unbind.push(() => {
-      for (const i in this.clients) this.clients[i].destroy()
-      for (const i in this.timeouts) {
+      for (let i in this.clients) this.clients[i].destroy()
+      for (let i in this.timeouts) {
         clearTimeout(this.timeouts[i])
       }
     })
@@ -339,7 +339,7 @@ class BaseServer {
     if (this.options.server) {
       this.ws = new WebSocket.Server({ server: this.options.server })
     } else {
-      const before = []
+      let before = []
       if (this.options.key && !isPem(this.options.key)) {
         before.push(readFile(this.options.root, this.options.key))
       } else {
@@ -558,7 +558,7 @@ class BaseServer {
     if (!callbacks || !callbacks.access) {
       throw new Error(`Channel ${ pattern } must have access callback`)
     }
-    const channel = Object.assign({ }, callbacks)
+    let channel = Object.assign({ }, callbacks)
     if (typeof pattern === 'string') {
       channel.pattern = new UrlPattern(pattern)
     } else {
@@ -598,7 +598,7 @@ class BaseServer {
     if (this.otherSubscriber) {
       throw new Error(`Callbacks for unknown channel are already defined`)
     }
-    const channel = Object.assign({ }, callbacks)
+    let channel = Object.assign({ }, callbacks)
     channel.pattern = {
       match (name) {
         return [name]
@@ -621,7 +621,7 @@ class BaseServer {
    * }
    */
   undo (meta, reason) {
-    const undoMeta = { status: 'processed' }
+    let undoMeta = { status: 'processed' }
 
     if (meta.users) undoMeta.users = meta.users.slice(0)
     if (meta.reasons) undoMeta.reasons = meta.reasons.slice(0)
@@ -646,7 +646,7 @@ class BaseServer {
    * })
    */
   debugError (error) {
-    for (const i in this.clients) {
+    for (let i in this.clients) {
       if (this.clients[i].connection.connected) {
         try {
           this.clients[i].connection.send(['debug', 'error', error.stack])
@@ -676,7 +676,7 @@ class BaseServer {
    */
   sendAction (action, meta) {
     if (meta.nodeIds) {
-      for (const id of meta.nodeIds) {
+      for (let id of meta.nodeIds) {
         if (this.nodeIds[id]) {
           this.nodeIds[id].node.onAdd(action, meta)
         }
@@ -684,9 +684,9 @@ class BaseServer {
     }
 
     if (meta.users) {
-      for (const userId of meta.users) {
+      for (let userId of meta.users) {
         if (this.users[userId]) {
-          for (const client of this.users[userId]) {
+          for (let client of this.users[userId]) {
             client.node.onAdd(action, meta)
           }
         }
@@ -694,10 +694,10 @@ class BaseServer {
     }
 
     if (meta.channels) {
-      const ctx = this.createContext(meta)
-      for (const channel of meta.channels) {
+      let ctx = this.createContext(meta)
+      for (let channel of meta.channels) {
         if (this.subscribers[channel]) {
-          for (const nodeId in this.subscribers[channel]) {
+          for (let nodeId in this.subscribers[channel]) {
             let filter = this.subscribers[channel][nodeId]
             if (typeof filter === 'function') {
               filter = filter(ctx, action, meta)
@@ -724,7 +724,7 @@ class BaseServer {
    */
   addClient (connection) {
     this.lastClient += 1
-    const node = new ServerClient(this, connection, this.lastClient)
+    let node = new ServerClient(this, connection, this.lastClient)
     this.clients[this.lastClient] = node
     return this.lastClient
   }
@@ -805,8 +805,8 @@ class BaseServer {
   }
 
   processAction (type, action, meta) {
-    const start = Date.now()
-    const ctx = this.createContext(meta)
+    let start = Date.now()
+    let ctx = this.createContext(meta)
 
     this.processing += 1
     return forcePromise(() => type.process(ctx, action, meta)).then(() => {
@@ -828,7 +828,7 @@ class BaseServer {
 
   markAsProcessed (meta) {
     this.log.changeMeta(meta.id, { status: 'processed' })
-    const nodeId = meta.id.split(' ')[1]
+    let nodeId = meta.id.split(' ')[1]
     if (!/^server:/.test(nodeId)) {
       this.log.add(
         { type: 'logux/processed', id: meta.id },
@@ -837,7 +837,7 @@ class BaseServer {
   }
 
   getUserId (nodeId) {
-    const pos = nodeId.lastIndexOf(':')
+    let pos = nodeId.lastIndexOf(':')
     if (pos !== -1) {
       return nodeId.slice(0, pos)
     } else {
@@ -850,8 +850,8 @@ class BaseServer {
       return this.contexts[meta.id]
     }
 
-    const nodeId = meta.id.split(' ')[1]
-    const userId = this.getUserId(nodeId)
+    let nodeId = meta.id.split(' ')[1]
+    let userId = this.getUserId(nodeId)
 
     let subprotocol
     if (meta.subprotocol) {
@@ -860,7 +860,7 @@ class BaseServer {
       subprotocol = this.nodeIds[nodeId].node.remoteSubprotocol
     }
 
-    const ctx = new Context(nodeId, userId, subprotocol)
+    let ctx = new Context(nodeId, userId, subprotocol)
     return ctx
   }
 
@@ -876,7 +876,7 @@ class BaseServer {
     }
 
     let match
-    for (const i of channels) {
+    for (let i of channels) {
       if (i.pattern) {
         match = i.pattern.match(action.channel)
       } else {
@@ -885,7 +885,7 @@ class BaseServer {
 
       let subscribed = false
       if (match) {
-        const ctx = this.createContext(meta)
+        let ctx = this.createContext(meta)
         ctx.params = match
 
         forcePromise(() => {
@@ -900,9 +900,9 @@ class BaseServer {
             return false
           }
 
-          const filter = i.filter && i.filter(ctx, action, meta)
+          let filter = i.filter && i.filter(ctx, action, meta)
 
-          const client = this.nodeIds[ctx.nodeId]
+          let client = this.nodeIds[ctx.nodeId]
           if (!client) return false
 
           this.reporter('subscribed', {
@@ -945,7 +945,7 @@ class BaseServer {
       return
     }
 
-    const nodeId = meta.id.split(' ')[1]
+    let nodeId = meta.id.split(' ')[1]
     if (this.subscribers[action.channel]) {
       delete this.subscribers[action.channel][nodeId]
       if (Object.keys(this.subscribers[action.channel]).length === 0) {
@@ -968,7 +968,7 @@ class BaseServer {
 
   debugActionError (meta, msg) {
     if (this.env === 'development') {
-      const nodeId = meta.id.split(' ')[1]
+      let nodeId = meta.id.split(' ')[1]
       if (this.nodeIds[nodeId]) {
         this.nodeIds[nodeId].connection.send(['debug', 'error', msg])
       }
@@ -977,7 +977,7 @@ class BaseServer {
 
   setTimeout (callback, ms) {
     this.lastTimeout += 1
-    const id = this.lastTimeout
+    let id = this.lastTimeout
     this.timeouts[id] = setTimeout(() => {
       delete this.timeouts[id]
       callback()

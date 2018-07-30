@@ -1,13 +1,13 @@
-const ClientNode = require('logux-core').ClientNode
-const TestPair = require('logux-core').TestPair
-const TestTime = require('logux-core').TestTime
+let ClientNode = require('logux-core').ClientNode
+let TestPair = require('logux-core').TestPair
+let TestTime = require('logux-core').TestTime
 
-const FilteredNode = require('../filtered-node')
+let FilteredNode = require('../filtered-node')
 
 function createTest () {
-  const time = new TestTime()
-  const log1 = time.nextLog()
-  const log2 = time.nextLog()
+  let time = new TestTime()
+  let log1 = time.nextLog()
+  let log2 = time.nextLog()
 
   log1.on('preadd', (action, meta) => {
     meta.reasons.push('test')
@@ -16,10 +16,10 @@ function createTest () {
     meta.reasons.push('test')
   })
 
-  const data = { nodeId: '1:a', userId: '1' }
-  const pair = new TestPair()
-  const client = new ClientNode('1:a', log1, pair.left)
-  const server = new FilteredNode(data, 'server', log2, pair.right)
+  let data = { nodeId: '1:a', userId: '1' }
+  let pair = new TestPair()
+  let client = new ClientNode('1:a', log1, pair.left)
+  let server = new FilteredNode(data, 'server', log2, pair.right)
   return { client, server }
 }
 

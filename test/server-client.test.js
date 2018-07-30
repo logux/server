@@ -1,15 +1,15 @@
-const SyncError = require('logux-core').SyncError
-const TestPair = require('logux-core').TestPair
-const TestTime = require('logux-core').TestTime
-const delay = require('nanodelay')
+let SyncError = require('logux-core').SyncError
+let TestPair = require('logux-core').TestPair
+let TestTime = require('logux-core').TestTime
+let delay = require('nanodelay')
 
-const ServerClient = require('../server-client')
-const BaseServer = require('../base-server')
+let ServerClient = require('../server-client')
+let BaseServer = require('../base-server')
 
 let destroyable = []
 
 function createConnection () {
-  const pair = new TestPair()
+  let pair = new TestPair()
   pair.left.ws = {
     _socket: {
       remoteAddress: '127.0.0.1'
@@ -24,7 +24,7 @@ function createServer (opts) {
   opts.supports = '0.x'
   opts.time = new TestTime()
 
-  const server = new BaseServer(opts)
+  let server = new BaseServer(opts)
   server.auth(() => true)
   server.log.on('preadd', (action, meta) => {
     meta.reasons.push('test')
@@ -36,8 +36,8 @@ function createServer (opts) {
 }
 
 function createReporter (opts) {
-  const names = []
-  const reports = []
+  let names = []
+  let reports = []
 
   opts = opts || { }
   opts.reporter = (name, details) => {
@@ -45,13 +45,13 @@ function createReporter (opts) {
     reports.push([name, details])
   }
 
-  const app = createServer(opts)
+  let app = createServer(opts)
   return { app, reports, names }
 }
 
 function createClient (app) {
   app.lastClient += 1
-  const client = new ServerClient(app, createConnection(), app.lastClient)
+  let client = new ServerClient(app, createConnection(), app.lastClient)
   app.clients[app.lastClient] = client
   destroyable.push(client)
   return client
@@ -59,10 +59,10 @@ function createClient (app) {
 
 function connectClient (server, nodeId) {
   if (!nodeId) nodeId = '10:uuid'
-  const client = createClient(server)
+  let client = createClient(server)
   client.node.now = () => 0
   return client.connection.connect().then(() => {
-    const protocol = client.node.localProtocol
+    let protocol = client.node.localProtocol
     client.connection.other().send(['connect', protocol, nodeId, 0])
     return client.connection.pair.wait('right')
   }).then(() => {
@@ -84,14 +84,14 @@ afterEach(() => {
 })
 
 it('uses server options', () => {
-  const app = createServer({
+  let app = createServer({
     subprotocol: '0.0.1',
     supports: '0.x',
     timeout: 16000,
     ping: 8000
   })
   app.nodeId = 'server:uuid'
-  const client = new ServerClient(app, createConnection(), 1)
+  let client = new ServerClient(app, createConnection(), 1)
 
   expect(client.node.options.subprotocol).toEqual('0.0.1')
   expect(client.node.options.timeout).toEqual(16000)
@@ -100,24 +100,24 @@ it('uses server options', () => {
 })
 
 it('saves connection', () => {
-  const connection = createConnection()
-  const client = new ServerClient(createServer(), connection, 1)
+  let connection = createConnection()
+  let client = new ServerClient(createServer(), connection, 1)
   expect(client.connection).toBe(connection)
 })
 
 it('uses string key', () => {
-  const client = new ServerClient(createServer(), createConnection(), 1)
+  let client = new ServerClient(createServer(), createConnection(), 1)
   expect(client.key).toEqual('1')
   expect(typeof client.key).toEqual('string')
 })
 
 it('has remote address shortcut', () => {
-  const client = new ServerClient(createServer(), createConnection(), 1)
+  let client = new ServerClient(createServer(), createConnection(), 1)
   expect(client.remoteAddress).toEqual('127.0.0.1')
 })
 
 it('reports about connection', () => {
-  const test = createReporter()
+  let test = createReporter()
   new ServerClient(test.app, createConnection(), 1)
   expect(test.reports).toEqual([['connect', {
     clientId: '1', ipAddress: '127.0.0.1'
@@ -125,10 +125,10 @@ it('reports about connection', () => {
 })
 
 it('removes itself on destroy', () => {
-  const test = createReporter()
+  let test = createReporter()
 
-  const client1 = createClient(test.app)
-  const client2 = createClient(test.app)
+  let client1 = createClient(test.app)
+  let client2 = createClient(test.app)
 
   return Promise.all([
     client1.connection.connect(),
@@ -164,8 +164,8 @@ it('removes itself on destroy', () => {
 })
 
 it('reports client ID before authentication', () => {
-  const test = createReporter()
-  const client = createClient(test.app)
+  let test = createReporter()
+  let client = createClient(test.app)
 
   return client.connection.connect().then(() => {
     client.destroy()
@@ -174,9 +174,9 @@ it('reports client ID before authentication', () => {
 })
 
 it('does not report users disconnects on server destroy', () => {
-  const test = createReporter()
+  let test = createReporter()
 
-  const client = createClient(test.app)
+  let client = createClient(test.app)
 
   return client.connection.connect().then(() => {
     test.app.destroy()
@@ -188,7 +188,7 @@ it('does not report users disconnects on server destroy', () => {
 })
 
 it('destroys on disconnect', () => {
-  const client = createClient(createServer())
+  let client = createClient(createServer())
   client.destroy = jest.fn()
   return client.connection.connect().then(() => {
     client.connection.other().disconnect()
@@ -199,11 +199,11 @@ it('destroys on disconnect', () => {
 })
 
 it('reports on wrong authentication', () => {
-  const test = createReporter()
+  let test = createReporter()
   test.app.auth(() => Promise.resolve(false))
-  const client = new ServerClient(test.app, createConnection(), 1)
+  let client = new ServerClient(test.app, createConnection(), 1)
   return client.connection.connect().then(() => {
-    const protocol = client.node.localProtocol
+    let protocol = client.node.localProtocol
     client.connection.other().send(['connect', protocol, '10:uuid', 0])
     return client.connection.pair.wait('right')
   }).then(() => {
@@ -215,16 +215,16 @@ it('reports on wrong authentication', () => {
 })
 
 it('reports about authentication error', () => {
-  const test = createReporter()
-  const error = new Error('test')
-  const errors = []
+  let test = createReporter()
+  let error = new Error('test')
+  let errors = []
   test.app.on('error', e => {
     errors.push(e)
   })
   test.app.auth(() => Promise.reject(error))
-  const client = new ServerClient(test.app, createConnection(), 1)
+  let client = new ServerClient(test.app, createConnection(), 1)
   return client.connection.connect().then(() => {
-    const protocol = client.node.localProtocol
+    let protocol = client.node.localProtocol
     client.connection.other().send(['connect', protocol, '10:uuid', 0])
     return client.connection.pair.wait('right')
   }).then(() => {
@@ -237,12 +237,12 @@ it('reports about authentication error', () => {
 })
 
 it('blocks authentication bruteforce', () => {
-  const test = createReporter()
+  let test = createReporter()
   test.app.auth(() => Promise.resolve(false))
   function connect (num) {
-    const client = new ServerClient(test.app, createConnection(), num)
+    let client = new ServerClient(test.app, createConnection(), num)
     return client.connection.connect().then(() => {
-      const protocol = client.node.localProtocol
+      let protocol = client.node.localProtocol
       client.connection.other().send(['connect', protocol, num + ':uuid', 0])
       return client.connection.pair.wait('right')
     })
@@ -268,11 +268,11 @@ it('blocks authentication bruteforce', () => {
 })
 
 it('reports on server in user name', () => {
-  const test = createReporter()
+  let test = createReporter()
   test.app.auth(() => Promise.resolve(true))
-  const client = new ServerClient(test.app, createConnection(), 1)
+  let client = new ServerClient(test.app, createConnection(), 1)
   return client.connection.connect().then(() => {
-    const protocol = client.node.localProtocol
+    let protocol = client.node.localProtocol
     client.connection.other().send(['connect', protocol, 'server:uuid', 0])
     return client.connection.pair.wait('right')
   }).then(() => {
@@ -284,14 +284,14 @@ it('reports on server in user name', () => {
 })
 
 it('authenticates user', () => {
-  const test = createReporter()
+  let test = createReporter()
   test.app.auth((id, token, who) => Promise.resolve(
     token === 'token' && id === 'a:b' && who === client
   ))
-  const client = createClient(test.app)
+  let client = createClient(test.app)
 
   return client.connection.connect().then(() => {
-    const protocol = client.node.localProtocol
+    let protocol = client.node.localProtocol
     client.connection.other().send([
       'connect', protocol, 'a:b:uuid', 0, { credentials: 'token' }
     ])
@@ -310,12 +310,12 @@ it('authenticates user', () => {
 })
 
 it('supports non-promise authenticator', () => {
-  const app = createServer()
+  let app = createServer()
   app.auth((id, token) => token === 'token')
-  const client = createClient(app)
+  let client = createClient(app)
 
   return client.connection.connect().then(() => {
-    const protocol = client.node.localProtocol
+    let protocol = client.node.localProtocol
     client.connection.other().send([
       'connect', protocol, '10:uuid', 0, { credentials: 'token' }
     ])
@@ -326,11 +326,11 @@ it('supports non-promise authenticator', () => {
 })
 
 it('authenticates user without user name', () => {
-  const app = createServer()
-  const client = createClient(app)
+  let app = createServer()
+  let client = createClient(app)
 
   return client.connection.connect().then(() => {
-    const protocol = client.node.localProtocol
+    let protocol = client.node.localProtocol
     client.connection.other().send(['connect', protocol, 'uuid', 0])
     return client.connection.pair.wait('right')
   }).then(() => {
@@ -340,8 +340,8 @@ it('authenticates user without user name', () => {
 })
 
 it('reports about synchronization errors', () => {
-  const test = createReporter()
-  const client = createClient(test.app)
+  let test = createReporter()
+  let client = createClient(test.app)
   return client.connection.connect().then(() => {
     client.connection.other().send(['error', 'wrong-format'])
     return client.connection.pair.wait()
@@ -355,10 +355,10 @@ it('reports about synchronization errors', () => {
 })
 
 it('checks subprotocol', () => {
-  const test = createReporter()
-  const client = createClient(test.app)
+  let test = createReporter()
+  let client = createClient(test.app)
   return client.connection.connect().then(() => {
-    const protocol = client.node.localProtocol
+    let protocol = client.node.localProtocol
     client.connection.other().send([
       'connect', protocol, '10:uuid', 0, { subprotocol: '1.0.0' }
     ])
@@ -375,15 +375,15 @@ it('checks subprotocol', () => {
 })
 
 it('has method to check client subprotocol', () => {
-  const app = createServer()
-  const client = createClient(app)
+  let app = createServer()
+  let client = createClient(app)
   client.node.remoteSubprotocol = '1.0.1'
   expect(client.isSubprotocol('>= 1.0.0')).toBeTruthy()
   expect(client.isSubprotocol('< 1.0.0')).toBeFalsy()
 })
 
 it('sends server credentials in development', () => {
-  const app = createServer({ env: 'development' })
+  let app = createServer({ env: 'development' })
   return connectClient(app).then(client => {
     expect(sent(client)[0][4]).toEqual({
       credentials: { env: 'development' },
@@ -393,7 +393,7 @@ it('sends server credentials in development', () => {
 })
 
 it('does not send server credentials in production', () => {
-  const app = createServer({ env: 'production' })
+  let app = createServer({ env: 'production' })
   app.auth(() => Promise.resolve(true))
 
   return connectClient(app).then(client => {
@@ -402,10 +402,10 @@ it('does not send server credentials in production', () => {
 })
 
 it('disconnects zombie', () => {
-  const test = createReporter()
+  let test = createReporter()
 
-  const client1 = createClient(test.app)
-  const client2 = createClient(test.app)
+  let client1 = createClient(test.app)
+  let client2 = createClient(test.app)
 
   return client1.connection.connect().then(() => {
     client1.auth({ }, '10:uuid')
@@ -427,7 +427,7 @@ it('disconnects zombie', () => {
 })
 
 it('checks action creator', () => {
-  const test = createReporter()
+  let test = createReporter()
   test.app.type('GOOD', { access: () => true })
   test.app.type('BAD', { access: () => true })
 
@@ -452,7 +452,7 @@ it('checks action creator', () => {
 })
 
 it('allows subscribe and unsubscribe actions', () => {
-  const test = createReporter()
+  let test = createReporter()
   test.app.channel('a', { access: () => true })
 
   return connectClient(test.app).then(client => {
@@ -483,7 +483,7 @@ it('allows subscribe and unsubscribe actions', () => {
 })
 
 it('checks action meta', () => {
-  const test = createReporter()
+  let test = createReporter()
   test.app.type('GOOD', { access: () => true })
   test.app.type('BAD', { access: () => true })
 
@@ -519,7 +519,7 @@ it('checks action meta', () => {
 })
 
 it('ignores unknown action types', () => {
-  const test = createReporter()
+  let test = createReporter()
 
   return connectClient(test.app).then(client => {
     client.connection.other().send(['sync', 2,
@@ -539,7 +539,7 @@ it('ignores unknown action types', () => {
 })
 
 it('checks user access for action', () => {
-  const test = createReporter({ env: 'development' })
+  let test = createReporter({ env: 'development' })
   test.app.type('FOO', {
     access (ctx, action, meta) {
       expect(ctx.userId).toEqual('10')
@@ -574,8 +574,8 @@ it('checks user access for action', () => {
 })
 
 it('takes subprotocol from action meta', () => {
-  const app = createServer()
-  const subprotocols = []
+  let app = createServer()
+  let subprotocols = []
   app.type('FOO', {
     access: () => true,
     process (ctx) {
@@ -596,9 +596,9 @@ it('takes subprotocol from action meta', () => {
 })
 
 it('reports about errors in access callback', () => {
-  const err = new Error('test')
+  let err = new Error('test')
 
-  const test = createReporter()
+  let test = createReporter()
   test.app.type('FOO', {
     access () {
       throw err
@@ -628,7 +628,7 @@ it('reports about errors in access callback', () => {
 })
 
 it('sends old actions by node ID', () => {
-  const app = createServer()
+  let app = createServer()
   app.type('FOO', { access: () => true })
 
   return Promise.all([
@@ -649,7 +649,7 @@ it('sends old actions by node ID', () => {
 })
 
 it('sends new actions by node ID', () => {
-  const app = createServer()
+  let app = createServer()
   app.type('FOO', { access: () => true })
 
   return connectClient(app).then(client => {
@@ -671,7 +671,7 @@ it('sends new actions by node ID', () => {
 })
 
 it('sends old actions by user', () => {
-  const app = createServer()
+  let app = createServer()
   app.type('FOO', { access: () => true })
 
   return Promise.all([
@@ -691,7 +691,7 @@ it('sends old actions by user', () => {
 })
 
 it('sends new actions by user', () => {
-  const app = createServer()
+  let app = createServer()
   app.type('FOO', { access: () => true })
 
   return connectClient(app).then(client => {
@@ -711,7 +711,7 @@ it('sends new actions by user', () => {
 })
 
 it('sends new actions by channel', () => {
-  const app = createServer()
+  let app = createServer()
   app.type('FOO', { access: () => true })
   app.type('BAR', { access: () => true })
 
@@ -752,7 +752,7 @@ it('sends new actions by channel', () => {
 })
 
 it('sends old action only once', () => {
-  const app = createServer()
+  let app = createServer()
   app.type('FOO', { access: () => true })
 
   return Promise.all([
@@ -775,7 +775,7 @@ it('sends old action only once', () => {
 })
 
 it('sends debug back on unknown type', () => {
-  const app = createServer({ env: 'development' })
+  let app = createServer({ env: 'development' })
   return Promise.all([
     connectClient(app),
     connectClient(app, '20:uuid')
@@ -795,7 +795,7 @@ it('sends debug back on unknown type', () => {
 })
 
 it('does not send debug back on unknown type in production', () => {
-  const app = createServer({ env: 'production' })
+  let app = createServer({ env: 'production' })
   return connectClient(app).then(client => {
     return app.log.add({ type: 'U' }, { id: '1 10:uuid 0' }).then(() => {
       return client.node.connection.pair.wait('right')
@@ -806,7 +806,7 @@ it('does not send debug back on unknown type in production', () => {
 })
 
 it('decompress subprotocol', () => {
-  const app = createServer({ env: 'production' })
+  let app = createServer({ env: 'production' })
   app.type('A', { access: () => true })
 
   app.log.generateId()
@@ -826,8 +826,8 @@ it('decompress subprotocol', () => {
 })
 
 it('has custom processor for unknown type', () => {
-  const test = createReporter()
-  const calls = []
+  let test = createReporter()
+  let calls = []
   test.app.otherType({
     access () {
       calls.push('access')
@@ -852,7 +852,7 @@ it('has custom processor for unknown type', () => {
 })
 
 it('keeps data between processing steps', () => {
-  const app = createServer()
+  let app = createServer()
   let calls = 0
   app.type('A', {
     access (ctx) {
@@ -876,8 +876,8 @@ it('keeps data between processing steps', () => {
 })
 
 it('allows to reports about unknown type in custom processor', () => {
-  const test = createReporter()
-  const calls = []
+  let test = createReporter()
+  let calls = []
   test.app.otherType({
     access (ctx, action, meta) {
       calls.push('access')

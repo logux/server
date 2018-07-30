@@ -1,17 +1,17 @@
-const MemoryStore = require('logux-core').MemoryStore
-const WebSocket = require('ws')
-const TestTime = require('logux-core').TestTime
-const delay = require('nanodelay')
-const https = require('https')
-const http = require('http')
-const path = require('path')
-const Log = require('logux-core').Log
-const fs = require('fs')
+let MemoryStore = require('logux-core').MemoryStore
+let WebSocket = require('ws')
+let TestTime = require('logux-core').TestTime
+let delay = require('nanodelay')
+let https = require('https')
+let http = require('http')
+let path = require('path')
+let Log = require('logux-core').Log
+let fs = require('fs')
 
-const createBackendProxy = require('../create-backend-proxy')
-const BaseServer = require('../base-server')
-const promisify = require('../promisify')
-const pkg = require('../package.json')
+let createBackendProxy = require('../create-backend-proxy')
+let BaseServer = require('../base-server')
+let promisify = require('../promisify')
+let pkg = require('../package.json')
 
 jest.mock('../create-backend-proxy')
 
@@ -25,7 +25,7 @@ const KEY = path.join(__dirname, 'fixtures/key.pem')
 let lastPort = 9111
 function createServer (options) {
   if (!options) options = { }
-  for (const i in DEFAULT_OPTIONS) {
+  for (let i in DEFAULT_OPTIONS) {
     if (typeof options[i] === 'undefined') {
       options[i] = DEFAULT_OPTIONS[i]
     }
@@ -39,7 +39,7 @@ function createServer (options) {
     options.port = lastPort
   }
 
-  const created = new BaseServer(options)
+  let created = new BaseServer(options)
   created.auth(() => true)
 
   return created
@@ -48,7 +48,7 @@ function createServer (options) {
 let app, server
 
 function createReporter (opts) {
-  const result = { }
+  let result = { }
   result.names = []
   result.reports = []
 
@@ -63,7 +63,7 @@ function createReporter (opts) {
   return result
 }
 
-const originEnv = process.env.NODE_ENV
+let originEnv = process.env.NODE_ENV
 
 afterEach(() => {
   process.env.NODE_ENV = originEnv
@@ -146,7 +146,7 @@ it('creates log with default store', () => {
 })
 
 it('creates log with custom store', () => {
-  const store = new MemoryStore()
+  let store = new MemoryStore()
   app = new BaseServer({
     subprotocol: '0.0.0',
     supports: '0.x',
@@ -156,7 +156,7 @@ it('creates log with custom store', () => {
 })
 
 it('uses test time and ID', () => {
-  const store = new MemoryStore()
+  let store = new MemoryStore()
   app = new BaseServer({
     subprotocol: '0.0.0',
     supports: '0.x',
@@ -249,7 +249,7 @@ it('supports object in SSL key', () => {
 })
 
 it('reporters on start listening', () => {
-  const test = createReporter({
+  let test = createReporter({
     backend: {
       host: '127.0.0.1',
       port: 31338,
@@ -257,7 +257,7 @@ it('reporters on start listening', () => {
     }
   })
 
-  const promise = test.app.listen()
+  let promise = test.app.listen()
   expect(test.reports).toEqual([])
 
   return promise.then(() => {
@@ -281,7 +281,7 @@ it('reporters on start listening', () => {
 })
 
 it('reporters on log events', () => {
-  const test = createReporter()
+  let test = createReporter()
   test.app.type('A', { access: () => true })
   test.app.log.add({ type: 'A' })
   expect(test.reports).toEqual([
@@ -305,8 +305,8 @@ it('reporters on log events', () => {
 })
 
 it('reporters on destroying', () => {
-  const test = createReporter()
-  const promise = test.app.destroy()
+  let test = createReporter()
+  let promise = test.app.destroy()
   expect(test.reports).toEqual([['destroy', undefined]])
   return promise
 })
@@ -314,7 +314,7 @@ it('reporters on destroying', () => {
 it('creates a client on connection', () => {
   app = createServer()
   return app.listen().then(() => {
-    const ws = new WebSocket(`ws://127.0.0.1:${ app.options.port }`)
+    let ws = new WebSocket(`ws://127.0.0.1:${ app.options.port }`)
     return new Promise((resolve, reject) => {
       ws.onopen = resolve
       ws.onerror = reject
@@ -365,7 +365,7 @@ it('sends debug message to clients on runtimeError', () => {
     destroy: () => false
   }
 
-  const error = new Error('Test Error')
+  let error = new Error('Test Error')
   error.stack = `${ error.stack.split('\n')[0] }\nfake stacktrace`
 
   app.debugError(error)
@@ -392,7 +392,7 @@ it('accepts custom HTTP server', () => {
   return promisify(done => {
     server.listen(app.options.port, done)
   }).then(() => app.listen()).then(() => {
-    const ws = new WebSocket(`ws://localhost:${ app.options.port }`)
+    let ws = new WebSocket(`ws://localhost:${ app.options.port }`)
     return new Promise((resolve, reject) => {
       ws.onopen = resolve
       ws.onerror = reject
@@ -406,7 +406,7 @@ it('marks actions with own node ID', () => {
   app = createServer()
   app.type('A', { access: () => true })
 
-  const servers = []
+  let servers = []
   app.log.on('add', (action, meta) => {
     servers.push(meta.server)
   })
@@ -424,7 +424,7 @@ it('marks actions with waiting status', () => {
   app.type('A', { access: () => true })
   app.channel('a', { access: () => true })
 
-  const statuses = []
+  let statuses = []
   app.log.on('add', (action, meta) => {
     statuses.push(meta.status)
   })
@@ -460,7 +460,7 @@ it('requires access callback for type', () => {
 })
 
 it('reports about unknown action type', () => {
-  const test = createReporter()
+  let test = createReporter()
   return test.app.log.add(
     { type: 'UNKNOWN' }, { id: '1 10:uuid 0' }
   ).then(() => {
@@ -473,7 +473,7 @@ it('reports about unknown action type', () => {
 })
 
 it('ignores unknown type for processed actions', () => {
-  const test = createReporter()
+  let test = createReporter()
   return test.app.log.add(
     { type: 'A' }, { status: 'processed', channels: ['a'] }
   ).then(() => {
@@ -482,13 +482,13 @@ it('ignores unknown type for processed actions', () => {
 })
 
 it('sends errors to clients in development', () => {
-  const test = createReporter({ env: 'development' })
+  let test = createReporter({ env: 'development' })
   test.app.clients[0] = {
     connection: { connected: true, send: jest.fn() },
     destroy: () => false
   }
 
-  const err = new Error('Test')
+  let err = new Error('Test')
   err.stack = 'stack'
   test.app.emitter.emit('error', err)
 
@@ -509,9 +509,9 @@ it('does not send errors in non-development mode', () => {
 })
 
 it('processes actions', () => {
-  const test = createReporter()
-  const processed = []
-  const fired = []
+  let test = createReporter()
+  let processed = []
+  let fired = []
 
   test.app.type('FOO', {
     access: () => true,
@@ -549,7 +549,7 @@ it('has full events API', () => {
   app = createServer()
 
   let events = 0
-  const unbind = app.on('processed', () => {
+  let unbind = app.on('processed', () => {
     events += 1
   })
 
@@ -597,9 +597,9 @@ it('waits for last processing before destroy', () => {
 })
 
 it('reports about error during action processing', () => {
-  const test = createReporter()
+  let test = createReporter()
 
-  const err = new Error('Test')
+  let err = new Error('Test')
   app.type('FOO', {
     access: () => true,
     process () {
@@ -698,7 +698,7 @@ it('checks channel definition', () => {
 })
 
 it('reports about wrong channel name', () => {
-  const test = createReporter({ env: 'development' })
+  let test = createReporter({ env: 'development' })
   test.app.channel('foo', { access: () => true })
   test.app.nodeIds['10:uuid'] = {
     connection: { send: jest.fn() },
@@ -746,8 +746,8 @@ it('checks custom channel name subscriber', () => {
 })
 
 it('allows to have custom channel name check', () => {
-  const test = createReporter()
-  const channels = []
+  let test = createReporter()
+  let channels = []
   test.app.otherChannel({
     access (ctx, action, meta) {
       channels.push(ctx.params[0])
@@ -769,16 +769,16 @@ it('allows to have custom channel name check', () => {
 })
 
 it('ignores subscription for other servers', () => {
-  const test = createReporter()
-  const action = { type: 'logux/subscribe' }
+  let test = createReporter()
+  let action = { type: 'logux/subscribe' }
   return test.app.log.add(action, { server: 'server:other' }).then(() => {
     expect(test.names).toEqual(['add', 'clean'])
   })
 })
 
 it('checks channel access', () => {
-  const test = createReporter()
-  const client = {
+  let test = createReporter()
+  let client = {
     node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
   }
   test.app.nodeIds['10:uuid'] = client
@@ -805,13 +805,13 @@ it('checks channel access', () => {
 })
 
 it('reports about errors during channel authorization', () => {
-  const test = createReporter()
-  const client = {
+  let test = createReporter()
+  let client = {
     node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
   }
   test.app.nodeIds['10:uuid'] = client
 
-  const err = new Error()
+  let err = new Error()
   test.app.channel(/^user\/(\d+)$/, {
     access () {
       throw err
@@ -835,8 +835,8 @@ it('reports about errors during channel authorization', () => {
 })
 
 it('subscribes clients', () => {
-  const test = createReporter()
-  const client = {
+  let test = createReporter()
+  let client = {
     node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
   }
   test.app.nodeIds['10:uuid'] = client
@@ -923,7 +923,7 @@ it('subscribes clients', () => {
 
 it('keeps data between subscription steps', () => {
   app = createServer()
-  const client = {
+  let client = {
     node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
   }
   app.nodeIds['10:uuid'] = client
@@ -955,13 +955,13 @@ it('keeps data between subscription steps', () => {
 })
 
 it('reports about errors during channel initialization', () => {
-  const test = createReporter()
-  const client = {
+  let test = createReporter()
+  let client = {
     node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
   }
   test.app.nodeIds['10:uuid'] = client
 
-  const err = new Error()
+  let err = new Error()
   test.app.channel(/^user\/(\d+)$/, {
     access: () => true,
     init () {
@@ -987,8 +987,8 @@ it('reports about errors during channel initialization', () => {
 })
 
 it('loads initial actions during subscription', () => {
-  const test = createReporter({ time: new TestTime() })
-  const client = {
+  let test = createReporter({ time: new TestTime() })
+  let client = {
     node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
   }
   test.app.nodeIds['10:uuid'] = client
@@ -1038,7 +1038,7 @@ it('loads initial actions during subscription', () => {
 })
 
 it('does not need type definition for own actions', () => {
-  const test = createReporter()
+  let test = createReporter()
   return test.app.log.add({ type: 'unknown' }, { users: ['10'] }).then(() => {
     expect(test.names).toEqual(['add', 'clean'])
     expect(test.reports[0][1].action.type).toEqual('unknown')
@@ -1075,7 +1075,7 @@ it('sets default options for backend', () => {
 })
 
 it('reports about useless actions', () => {
-  const test = createReporter()
+  let test = createReporter()
   test.app.type('known', {
     access: () => true,
     process: () => true

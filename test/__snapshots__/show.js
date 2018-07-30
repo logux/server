@@ -2,21 +2,21 @@
 
 'use strict'
 
-const fs = require('fs')
-const path = require('path')
-const chalk = require('chalk')
+let chalk = require('chalk')
+let path = require('path')
+let fs = require('fs')
 
-const filter = process.argv[2]
+let filter = process.argv[2]
 
 function show (result) {
   Object.keys(result).sort().reverse().forEach(file => {
-    const test = file.replace(/\.test\.js\.snap$/, '')
+    let test = file.replace(/\.test\.js\.snap$/, '')
     result[file].split('exports[`')
       .filter(str => str.indexOf('// ') !== 0)
       .filter(str => !filter || str.indexOf(filter) !== -1)
       .forEach(str => {
         if (str.trim().length === 0) return
-        const parts = str.replace(/"\s*`;\s*$/, '').split(/`] = `\s*"?/)
+        let parts = str.replace(/"\s*`;\s*$/, '').split(/`] = `\s*"?/)
         let name = `${ test } ${ parts[0] }`
         if (test === 'create-reporter') {
           if (parts[1][0] === '{') return
@@ -32,9 +32,9 @@ function show (result) {
 
 fs.readdir(__dirname, (err, list) => {
   if (err) throw err
-  const snaps = list.filter(i => /\.snap$/.test(i))
+  let snaps = list.filter(i => /\.snap$/.test(i))
 
-  const result = { }
+  let result = { }
   snaps.forEach(file => {
     fs.readFile(path.join(__dirname, file), (err2, content) => {
       if (err2) throw err2

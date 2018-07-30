@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
-const delay = require('nanodelay')
-const chalk = require('chalk')
-const http = require('http')
+let delay = require('nanodelay')
+let chalk = require('chalk')
+let http = require('http')
 
 function send (action, meta) {
-  const body = JSON.stringify({
+  let body = JSON.stringify({
     version: 0,
     password: 'secret',
     commands: [
@@ -13,7 +13,7 @@ function send (action, meta) {
     ]
   })
   return new Promise((resolve, reject) => {
-    const req = http.request({
+    let req = http.request({
       method: 'POST',
       host: 'localhost',
       port: 1338,
@@ -34,15 +34,15 @@ function send (action, meta) {
   })
 }
 
-const server = http.createServer((req, res) => {
+let server = http.createServer((req, res) => {
   let body = ''
   req.on('data', data => {
     body += data
   })
   req.on('end', () => {
-    const data = JSON.parse(body)
-    const [type, action, meta] = data.commands[0]
-    const nodeIds = [meta.id.split(' ')[1]]
+    let data = JSON.parse(body)
+    let [type, action, meta] = data.commands[0]
+    let nodeIds = [meta.id.split(' ')[1]]
     let processing = delay(500).then(() => {
       res.write(`[["approved","${ meta.id }"]`)
     })

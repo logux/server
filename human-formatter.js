@@ -1,9 +1,9 @@
-const stripAnsi = require('strip-ansi')
-const yyyymmdd = require('yyyy-mm-dd')
-const stream = require('stream')
-const chalk = require('chalk')
-const path = require('path')
-const os = require('os')
+let stripAnsi = require('strip-ansi')
+let yyyymmdd = require('yyyy-mm-dd')
+let stream = require('stream')
+let chalk = require('chalk')
+let path = require('path')
+let os = require('os')
 
 const INDENT = '  '
 const PADDING = '        '
@@ -36,17 +36,17 @@ const LABELS = {
 }
 
 function rightPag (str, length) {
-  const add = length - stripAnsi(str).length
+  let add = length - stripAnsi(str).length
   for (let i = 0; i < add; i++) str += ' '
   return str
 }
 
 function label (c, type, color, labelBg, labelText, message) {
-  const labelFormat = c[labelBg][labelText]
-  const messageFormat = c.bold[color]
-  const pagged = rightPag(labelFormat(type), 8)
-  const time = c.dim(`at ${ yyyymmdd.withTime(new Date()) }`)
-  const highlighted = message.replace(/`([^`]+)`/, c.yellow('$1'))
+  let labelFormat = c[labelBg][labelText]
+  let messageFormat = c.bold[color]
+  let pagged = rightPag(labelFormat(type), 8)
+  let time = c.dim(`at ${ yyyymmdd.withTime(new Date()) }`)
+  let highlighted = message.replace(/`([^`]+)`/, c.yellow('$1'))
   return `${ pagged }${ messageFormat(highlighted) } ${ time }`
 }
 
@@ -60,7 +60,7 @@ function formatName (key) {
 }
 
 function formatNodeId (c, nodeId) {
-  const pos = nodeId.lastIndexOf(':')
+  let pos = nodeId.lastIndexOf(':')
   let id, random
   if (pos === -1) {
     return nodeId
@@ -84,31 +84,31 @@ function formatValue (c, value) {
 }
 
 function formatObject (c, obj) {
-  const items = Object.keys(obj).map(k => k + ': ' + formatValue(c, obj[k]))
+  let items = Object.keys(obj).map(k => k + ': ' + formatValue(c, obj[k]))
   return `{ ${ items.join(', ') } }`
 }
 
 function formatArray (c, array) {
-  const items = array.map(i => formatValue(c, i))
+  let items = array.map(i => formatValue(c, i))
   return `[${ items.join(', ') }]`
 }
 
 function formatActionId (c, id) {
-  const p = id.split(' ')
+  let p = id.split(' ')
   return `${ c.bold(p[0]) } ${ formatNodeId(c, p[1]) } ${ c.bold(p[2]) }`
 }
 
 function formatParams (c, params, parent) {
-  const maxName = params.reduce((max, param) => {
-    const name = param[0]
+  let maxName = params.reduce((max, param) => {
+    let name = param[0]
     return name.length > max ? name.length : max
   }, 0)
 
   return params.map(param => {
-    const name = param[0]
-    const value = param[1]
+    let name = param[0]
+    let value = param[1]
 
-    const start = PADDING + rightPag(`${ name }: `, maxName + 2)
+    let start = PADDING + rightPag(`${ name }: `, maxName + 2)
 
     if (name === 'Node ID') {
       return start + formatNodeId(c, value)
@@ -117,7 +117,7 @@ function formatParams (c, params, parent) {
     } else if (Array.isArray(value)) {
       return start + formatArray(c, value)
     } else if (typeof value === 'object' && value) {
-      const nested = Object.keys(value).map(key => [key, value[key]])
+      let nested = Object.keys(value).map(key => [key, value[key]])
       return start + NEXT_LINE + INDENT +
         formatParams(c, nested, name).split(NEXT_LINE).join(NEXT_LINE + INDENT)
     } else if (name === 'Latency' && !parent) {
@@ -131,10 +131,10 @@ function formatParams (c, params, parent) {
 }
 
 function splitByLength (string, max) {
-  const words = string.split(' ')
-  const lines = ['']
-  for (const word of words) {
-    const last = lines[lines.length - 1]
+  let words = string.split(' ')
+  let lines = ['']
+  for (let word of words) {
+    let last = lines[lines.length - 1]
     if (last.length + word.length > max) {
       lines.push(`${ word } `)
     } else {
@@ -146,14 +146,14 @@ function splitByLength (string, max) {
 
 function prettyStackTrace (c, stack, basepath) {
   return stack.split('\n').slice(1).map(i => {
-    const match = i.match(/\s+at ([^(]+) \(([^)]+)\)/)
-    const isSystem = !match || match[2].indexOf(basepath) !== 0
-    const isDependecy = match && match[2].indexOf('node_modules') !== -1
+    let match = i.match(/\s+at ([^(]+) \(([^)]+)\)/)
+    let isSystem = !match || match[2].indexOf(basepath) !== 0
+    let isDependecy = match && match[2].indexOf('node_modules') !== -1
     if (isSystem) {
       return c.red(i.replace(/^\s*/, PADDING))
     } else {
-      const func = match[1]
-      const relative = match[2].slice(basepath.length)
+      let func = match[1]
+      let relative = match[2].slice(basepath.length)
       if (isDependecy) {
         return c.red(`${ PADDING }at ${ func } (./${ relative })`)
       } else {
@@ -180,10 +180,10 @@ class HumanFormatter extends stream.Writable {
   }
 
   write (record) {
-    const c = this.chalk
-    const message = [LABELS[record.level](c, record.msg)]
+    let c = this.chalk
+    let message = [LABELS[record.level](c, record.msg)]
 
-    const params = Object.keys(record)
+    let params = Object.keys(record)
       .filter(i => !PARAMS_BLACKLIST[i])
       .map(key => [formatName(key), record[key]])
 

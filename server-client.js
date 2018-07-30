@@ -1,9 +1,9 @@
-const SyncError = require('logux-core').SyncError
-const semver = require('semver')
+let SyncError = require('logux-core').SyncError
+let semver = require('semver')
 
-const FilteredNode = require('./filtered-node')
-const forcePromise = require('./force-promise')
-const ALLOWED_META = require('./allowed-meta')
+let FilteredNode = require('./filtered-node')
+let forcePromise = require('./force-promise')
+let ALLOWED_META = require('./allowed-meta')
 
 function reportDetails (client) {
   return {
@@ -179,7 +179,7 @@ class ServerClient {
     }
     if (this.nodeId) {
       delete this.app.nodeIds[this.nodeId]
-      for (const i in this.app.subscribers) {
+      for (let i in this.app.subscribers) {
         delete this.app.subscribers[i][this.nodeId]
         if (Object.keys(this.app.subscribers[i]).length === 0) {
           delete this.app.subscribers[i]
@@ -192,7 +192,7 @@ class ServerClient {
   auth (credentials, nodeId) {
     this.nodeId = nodeId
 
-    const userId = this.app.getUserId(nodeId)
+    let userId = this.app.getUserId(nodeId)
     if (userId === 'server') {
       this.app.reporter('unauthenticated', reportDetails(this))
       return Promise.resolve(false)
@@ -206,7 +206,7 @@ class ServerClient {
         }
 
         if (result) {
-          const zombie = this.app.nodeIds[this.nodeId]
+          let zombie = this.app.nodeIds[this.nodeId]
           if (zombie) {
             zombie.zombie = true
             this.app.reporter('zombie', { nodeId: zombie.nodeId })
@@ -250,11 +250,11 @@ class ServerClient {
   }
 
   filter (action, meta) {
-    const ctx = this.app.createContext(meta)
+    let ctx = this.app.createContext(meta)
     this.app.contexts[meta.id] = ctx
 
-    const wrongUser = this.userId && this.userId !== ctx.userId
-    const wrongMeta = Object.keys(meta).some(i => {
+    let wrongUser = this.userId && this.userId !== ctx.userId
+    let wrongMeta = Object.keys(meta).some(i => {
       return ALLOWED_META.indexOf(i) === -1
     })
     if (wrongUser || wrongMeta) {
@@ -262,7 +262,7 @@ class ServerClient {
       return Promise.resolve(false)
     }
 
-    const type = action.type
+    let type = action.type
     if (type === 'logux/subscribe' || type === 'logux/unsubscribe') {
       return Promise.resolve(true)
     }

@@ -1,4 +1,4 @@
-const ServerNode = require('logux-core/server-node')
+let ServerNode = require('logux-core/server-node')
 
 class FilteredNode extends ServerNode {
   constructor (client, nodeId, log, connection, options) {
@@ -11,7 +11,7 @@ class FilteredNode extends ServerNode {
   }
 
   syncSinceQuery (lastSynced) {
-    const data = { added: 0, entries: [] }
+    let data = { added: 0, entries: [] }
     return this.log.each({ order: 'added' }, (action, meta) => {
       if (meta.added <= lastSynced) {
         return false

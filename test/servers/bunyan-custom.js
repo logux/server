@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
-const bunyan = require('bunyan')
-const Server = require('../../server')
+let bunyan = require('bunyan')
+let Server = require('../../server')
 
-const logger = bunyan.createLogger({
+let logger = bunyan.createLogger({
   name: 'logux-server-custom',
   customProp: '42'
 })
 
-const app = new Server({
+let app = new Server({
   subprotocol: '1.0.0',
   supports: '1.x',
   bunyan: logger,

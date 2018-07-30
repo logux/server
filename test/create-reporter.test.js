@@ -1,8 +1,8 @@
-const SyncError = require('logux-core').SyncError
-const bunyan = require('bunyan')
+let SyncError = require('logux-core').SyncError
+let bunyan = require('bunyan')
 
-const createReporter = require('../create-reporter')
-const HumanFormatter = require('../human-formatter')
+let createReporter = require('../create-reporter')
+let HumanFormatter = require('../human-formatter')
 
 class MemoryStream {
   constructor () {
@@ -22,16 +22,16 @@ function clean (str) {
 }
 
 function check (type, details) {
-  const json = new MemoryStream()
-  const jsonReporter = createReporter({
+  let json = new MemoryStream()
+  let jsonReporter = createReporter({
     bunyan: bunyan.createLogger({ name: 'test', pid: 21384, stream: json })
   })
 
   jsonReporter(type, details)
   expect(clean(json.string)).toMatchSnapshot()
 
-  const human = new MemoryStream()
-  const humanReporter = createReporter({
+  let human = new MemoryStream()
+  let humanReporter = createReporter({
     bunyan: bunyan.createLogger({
       pid: 21384,
       name: 'test',
@@ -51,7 +51,7 @@ function check (type, details) {
 }
 
 function createError (name, message) {
-  const err = new Error(message)
+  let err = new Error(message)
   err.name = name
   err.stack =
     `${ name }: ${ message }\n` +
@@ -62,51 +62,51 @@ function createError (name, message) {
   return err
 }
 
-const originEnv = process.env.NODE_ENV
+let originEnv = process.env.NODE_ENV
 afterEach(() => {
   process.env.NODE_ENV = originEnv
 })
 
 it('uses passed bunyan instance', () => {
-  const logger = bunyan.createLogger({ name: 'test' })
-  const reporter = createReporter({ bunyan: logger })
+  let logger = bunyan.createLogger({ name: 'test' })
+  let reporter = createReporter({ bunyan: logger })
   expect(reporter.logger).toEqual(logger)
 })
 
 it('creates JSON reporter', () => {
-  const logger = bunyan.createLogger({ name: 'test' })
-  const reporter = createReporter({ reporter: 'json' })
+  let logger = bunyan.createLogger({ name: 'test' })
+  let reporter = createReporter({ reporter: 'json' })
   expect(reporter.logger.streams).toEqual(logger.streams)
 })
 
 it('creates human reporter', () => {
-  const reporter = createReporter({ reporter: 'human', root: '/dir/' })
+  let reporter = createReporter({ reporter: 'human', root: '/dir/' })
   expect(reporter.logger.streams).toHaveLength(1)
-  const stream = reporter.logger.streams[0].stream
+  let stream = reporter.logger.streams[0].stream
   expect(stream instanceof HumanFormatter).toBeTruthy()
   expect(stream.basepath).toEqual('/dir/')
   expect(stream.chalk.enabled).toBeFalsy()
 })
 
 it('adds trailing slash to path', () => {
-  const reporter = createReporter({ reporter: 'human', root: '/dir' })
+  let reporter = createReporter({ reporter: 'human', root: '/dir' })
   expect(reporter.logger.streams[0].stream.basepath).toEqual('/dir/')
 })
 
 it('uses color in development', () => {
-  const reporter = createReporter({ env: 'development', reporter: 'human' })
+  let reporter = createReporter({ env: 'development', reporter: 'human' })
   expect(reporter.logger.streams[0].stream.chalk.enabled).toBeTruthy()
 })
 
 it('uses colors by default', () => {
   delete process.env.NODE_ENV
-  const reporter = createReporter({ reporter: 'human' })
+  let reporter = createReporter({ reporter: 'human' })
   expect(reporter.logger.streams[0].stream.chalk.enabled).toBeTruthy()
 })
 
 it('uses environment variable to detect environment', () => {
   process.env.NODE_ENV = 'production'
-  const reporter = createReporter({ reporter: 'human' })
+  let reporter = createReporter({ reporter: 'human' })
   expect(reporter.logger.streams[0].stream.chalk.enabled).toBeFalsy()
 })
 
@@ -282,7 +282,7 @@ it('reports EADDRINUSE error', () => {
 })
 
 it('reports LOGUX_UNKNOWN_OPTION error', () => {
-  const err = {
+  let err = {
     message: 'Unknown option `suprotocol` in server constructor',
     option: 'suprotocol',
     code: 'LOGUX_UNKNOWN_OPTION'
@@ -291,7 +291,7 @@ it('reports LOGUX_UNKNOWN_OPTION error', () => {
 })
 
 it('reports LOGUX_WRONG_OPTIONS error', () => {
-  const err = {
+  let err = {
     code: 'LOGUX_WRONG_OPTIONS',
     message: 'Missed client subprotocol requirements'
   }
@@ -310,17 +310,17 @@ it('reports error from action', () => {
 })
 
 it('reports sync error', () => {
-  const err = new SyncError({ }, 'unknown-message', 'bad', true)
+  let err = new SyncError({ }, 'unknown-message', 'bad', true)
   check('error', { clientId: '670', err })
 })
 
 it('reports error from client', () => {
-  const err = new SyncError({ }, 'timeout', 5000, true)
+  let err = new SyncError({ }, 'timeout', 5000, true)
   check('clientError', { clientId: '670', err })
 })
 
 it('reports error from node', () => {
-  const err = new SyncError({ }, 'timeout', 5000, false)
+  let err = new SyncError({ }, 'timeout', 5000, false)
   check('clientError', { nodeId: '100:uImkcF4z', err })
 })
 

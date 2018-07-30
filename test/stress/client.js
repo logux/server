@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 
-const { ClientNode, WsConnection, Log, MemoryStore } = require('logux-core')
-const ALLOWED_META = require('../../allowed-meta')
-const WebSocket = require('ws')
-const delay = require('nanodelay')
+let { ClientNode, WsConnection, Log, MemoryStore } = require('logux-core')
+let ALLOWED_META = require('../../allowed-meta')
+let WebSocket = require('ws')
+let delay = require('nanodelay')
 
 let index = 0
 let stop = false
 
 function map (action, meta) {
-  const filtered = { }
-  for (const i in meta) {
+  let filtered = { }
+  for (let i in meta) {
     if (ALLOWED_META.indexOf(i) !== -1) {
       filtered[i] = meta[i]
     }
@@ -19,17 +19,17 @@ function map (action, meta) {
 }
 
 function randomDelay (ms) {
-  const random = ms / 3
+  let random = ms / 3
   return delay(ms + (Math.random() * random))
 }
 
 function tick () {
   if (stop) return
 
-  const nodeId = `1:${ ++index }`
-  const connection = new WsConnection('ws://localhost:1337', WebSocket)
-  const log = new Log({ nodeId, store: new MemoryStore() })
-  const node = new ClientNode(nodeId, log, connection, {
+  let nodeId = `1:${ ++index }`
+  let connection = new WsConnection('ws://localhost:1337', WebSocket)
+  let log = new Log({ nodeId, store: new MemoryStore() })
+  let node = new ClientNode(nodeId, log, connection, {
     credentials: 'secret',
     subprotocol: '1.0.0',
     outMap: map

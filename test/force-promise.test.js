@@ -1,4 +1,4 @@
-const forcePromise = require('../force-promise')
+let forcePromise = require('../force-promise')
 
 it('executes Promise', () => {
   return forcePromise(() => Promise.resolve('result')).then(result => {
@@ -7,7 +7,7 @@ it('executes Promise', () => {
 })
 
 it('sends Promises error', () => {
-  const error = new Error()
+  let error = new Error()
   return forcePromise(() => Promise.resolve().then(() => {
     throw error
   })).catch(e => {
@@ -22,7 +22,7 @@ it('executes sync function', () => {
 })
 
 it('sends sync error', () => {
-  const error = new Error()
+  let error = new Error()
   return forcePromise(() => {
     throw error
   }).catch(e => {

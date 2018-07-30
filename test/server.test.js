@@ -1,7 +1,7 @@
-const spawn = require('cross-spawn')
-const path = require('path')
+let spawn = require('cross-spawn')
+let path = require('path')
 
-const Server = require('../server')
+let Server = require('../server')
 
 const DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
 
@@ -25,7 +25,7 @@ function start (name, args) {
 function check (name, args, kill) {
   return new Promise(resolve => {
     let out = ''
-    const server = spawn(path.join(__dirname, '/servers/', name), args)
+    let server = spawn(path.join(__dirname, '/servers/', name), args)
     server.stdout.on('data', chank => {
       out += chank
     })
@@ -58,8 +58,8 @@ function check (name, args, kill) {
 
 function checkOut (name, args) {
   return check(name, args, 'kill').then(result => {
-    const out = result[0]
-    const exit = result[1]
+    let out = result[0]
+    let exit = result[1]
     if (exit !== 0) {
       throw new Error(`Fall with:\n${ out }`)
     }
@@ -69,8 +69,8 @@ function checkOut (name, args) {
 
 function checkError (name, args) {
   return check(name, args).then(result => {
-    const out = result[0]
-    const exit = result[1]
+    let out = result[0]
+    let exit = result[1]
     expect(exit).toEqual(1)
     expect(out).toMatchSnapshot()
   })
@@ -84,7 +84,7 @@ afterEach(() => {
 })
 
 it('uses CLI args for options', () => {
-  const options = Server.loadOptions({
+  let options = Server.loadOptions({
     argv: [
       '',
       '--port', '31337',
@@ -102,7 +102,7 @@ it('uses CLI args for options', () => {
 })
 
 it('uses env for options', () => {
-  const options = Server.loadOptions({
+  let options = Server.loadOptions({
     argv: [],
     env: {
       LOGUX_HOST: '127.0.1.1',
@@ -117,7 +117,7 @@ it('uses env for options', () => {
 })
 
 it('uses combined options', () => {
-  const options = Server.loadOptions({
+  let options = Server.loadOptions({
     env: { LOGUX_CERT: './cert.pem' },
     argv: ['', '--key', './key.pem']
   }, { port: 31337 })
@@ -128,15 +128,15 @@ it('uses combined options', () => {
 })
 
 it('uses arg, env, options in given priority', () => {
-  const options1 = Server.loadOptions({
+  let options1 = Server.loadOptions({
     argv: ['', '--port', '31337'],
     env: { LOGUX_PORT: 21337 }
   }, { port: 11337 })
-  const options2 = Server.loadOptions({
+  let options2 = Server.loadOptions({
     argv: ['', '--port', '31337'],
     env: { LOGUX_PORT: 21337 }
   })
-  const options3 = Server.loadOptions({
+  let options3 = Server.loadOptions({
     argv: [],
     env: { LOGUX_PORT: 21337 }
   })

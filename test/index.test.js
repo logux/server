@@ -1,6 +1,6 @@
-const BaseServer = require('../base-server')
-const Server = require('../server')
-const index = require('../')
+let BaseServer = require('../base-server')
+let Server = require('../server')
+let index = require('../')
 
 it('has BaseServer class', () => {
   expect(index.BaseServer).toBe(BaseServer)
@@ -11,7 +11,7 @@ it('has Server class', () => {
 })
 
 it('has allowed meta keys list', () => {
-  for (const key of index.ALLOWED_META) {
+  for (let key of index.ALLOWED_META) {
     expect(typeof key).toEqual('string')
   }
 })

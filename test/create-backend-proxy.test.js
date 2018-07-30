@@ -1,10 +1,10 @@
-const TestTime = require('logux-core').TestTime
-const TestPair = require('logux-core').TestPair
-const delay = require('nanodelay')
-const http = require('http')
+let TestTime = require('logux-core').TestTime
+let TestPair = require('logux-core').TestPair
+let delay = require('nanodelay')
+let http = require('http')
 
-const ServerClient = require('../server-client')
-const BaseServer = require('../base-server')
+let ServerClient = require('../server-client')
+let BaseServer = require('../base-server')
 
 let destroyable = []
 let lastPort = 8111
@@ -21,7 +21,7 @@ const ACTION = [
 ]
 
 function createConnection () {
-  const pair = new TestPair()
+  let pair = new TestPair()
   pair.left.ws = {
     _socket: {
       remoteAddress: '127.0.0.1'
@@ -32,17 +32,17 @@ function createConnection () {
 
 function createClient (server) {
   server.lastClient += 1
-  const client = new ServerClient(server, createConnection(), server.lastClient)
+  let client = new ServerClient(server, createConnection(), server.lastClient)
   server.clients[server.lastClient] = client
   destroyable.push(client)
   return client
 }
 
 function connectClient (server) {
-  const client = createClient(server)
+  let client = createClient(server)
   client.node.now = () => 0
   return client.connection.connect().then(() => {
-    const protocol = client.node.localProtocol
+    let protocol = client.node.localProtocol
     client.connection.other().send(['connect', protocol, '10:uuid', 0])
     return client.connection.pair.wait('right')
   }).then(() => {
@@ -58,7 +58,7 @@ function createServer (options) {
   options.supports = '0.x'
   options.backend.port = lastPort + 1
 
-  const server = new BaseServer(options)
+  let server = new BaseServer(options)
   server.nodeId = 'server:uuid'
   server.auth(() => true)
   server.log.on('preadd', (action, meta) => {
@@ -73,7 +73,7 @@ function createServer (options) {
 function request ({ method, path, string, data }) {
   if (!string && data) string = JSON.stringify(data)
   return new Promise((resolve, reject) => {
-    const req = http.request({
+    let req = http.request({
       method: method || 'POST',
       host: '127.0.0.1',
       port: lastPort + 1,
@@ -96,14 +96,14 @@ function send (data) {
 
 let sent = []
 
-const httpServer = http.createServer((req, res) => {
+let httpServer = http.createServer((req, res) => {
   let body = ''
   req.on('data', data => {
     body += data
   })
   req.on('end', () => {
-    const data = JSON.parse(body)
-    const actionId = data.commands[0][2].id
+    let data = JSON.parse(body)
+    let actionId = data.commands[0][2].id
     sent.push([req.method, req.url, data])
     if (data.commands[0][1].type === 'NO') {
       res.statusCode = 404
@@ -183,7 +183,7 @@ it('checks url option', () => {
 })
 
 it('validates HTTP requests', () => {
-  const app = createServer(OPTIONS)
+  let app = createServer(OPTIONS)
   return app.listen().then(() => {
     return Promise.all([
       request({ method: 'GET', string: '' }),
@@ -211,7 +211,7 @@ it('validates HTTP requests', () => {
 })
 
 it('creates actions', () => {
-  const app = createServer(OPTIONS)
+  let app = createServer(OPTIONS)
   return app.listen().then(() => {
     return send({ version: 0, password: '1234', commands: [ACTION] })
   }).then(code => {
@@ -222,7 +222,7 @@ it('creates actions', () => {
 })
 
 it('creates and processes actions', () => {
-  const app = createServer(OPTIONS)
+  let app = createServer(OPTIONS)
   let processed = 0
   app.type('A', {
     access: () => true,
@@ -242,13 +242,13 @@ it('creates and processes actions', () => {
 })
 
 it('reports about network errors', () => {
-  const app = createServer({
+  let app = createServer({
     backend: {
       password: '1234',
       url: 'https://127.0.0.1:7110/'
     }
   })
-  const errors = []
+  let errors = []
   app.on('error', e => {
     errors.push(e.code)
   })
@@ -266,8 +266,8 @@ it('reports about network errors', () => {
 })
 
 it('reports bad HTTP answers', () => {
-  const app = createServer(OPTIONS)
-  const errors = []
+  let app = createServer(OPTIONS)
+  let errors = []
   app.on('error', e => {
     errors.push(e.message)
   })
@@ -285,7 +285,7 @@ it('reports bad HTTP answers', () => {
 })
 
 it('notifies about actions and subscriptions', () => {
-  const app = createServer(OPTIONS)
+  let app = createServer(OPTIONS)
   app.on('error', e => {
     throw e
   })
@@ -355,7 +355,7 @@ it('notifies about actions and subscriptions', () => {
 })
 
 it('asks about action access', () => {
-  const app = createServer(OPTIONS)
+  let app = createServer(OPTIONS)
   app.on('error', e => {
     throw e
   })
@@ -372,8 +372,8 @@ it('asks about action access', () => {
 })
 
 it('reacts on wrong backend answer', () => {
-  const app = createServer(OPTIONS)
-  const errors = []
+  let app = createServer(OPTIONS)
+  let errors = []
   app.on('error', e => {
     errors.push(e.message)
   })
@@ -409,8 +409,8 @@ it('reacts on wrong backend answer', () => {
 })
 
 it('reacts on backend error', () => {
-  const app = createServer(OPTIONS)
-  const errors = []
+  let app = createServer(OPTIONS)
+  let errors = []
   app.on('error', e => {
     errors.push(e.message)
   })

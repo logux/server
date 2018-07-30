@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-const Server = require('../../server')
+let Server = require('../../server')
 
-const app = new Server(
+let app = new Server(
   Server.loadOptions(process, {
     subprotocol: '1.0.0',
     support: '1.x',

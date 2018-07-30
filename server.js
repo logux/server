@@ -1,7 +1,7 @@
-const yargs = require('yargs')
+let yargs = require('yargs')
 
-const createReporter = require('./create-reporter')
-const BaseServer = require('./base-server')
+let createReporter = require('./create-reporter')
+let BaseServer = require('./base-server')
 
 const AVAILABLE_OPTIONS = [
   'subprotocol', 'supports', 'timeout', 'ping', 'root', 'store', 'server',
@@ -129,8 +129,8 @@ class Server extends BaseServer {
   static loadOptions (process, options) {
     options = options || { }
 
-    const argv = yargs.parse(process.argv)
-    const env = process.env
+    let argv = yargs.parse(process.argv)
+    let env = process.env
 
     options.host = options.host || argv.h || env.LOGUX_HOST
     options.port = parseInt(options.port || argv.p || env.LOGUX_PORT, 10)
@@ -149,7 +149,7 @@ class Server extends BaseServer {
     }
 
     let initialized = false
-    const onError = err => {
+    let onError = err => {
       if (initialized) {
         this.emitter.emit('error', err)
         if (!this.destroying) {
@@ -165,9 +165,9 @@ class Server extends BaseServer {
     process.on('uncaughtException', onError)
     process.on('unhandledRejection', onError)
 
-    for (const name in options) {
+    for (let name in options) {
       if (AVAILABLE_OPTIONS.indexOf(name) === -1) {
-        const error = new Error(
+        let error = new Error(
           `Unknown option \`${ name }\` in server constructor`)
         error.code = 'LOGUX_UNKNOWN_OPTION'
         error.option = name
@@ -178,7 +178,7 @@ class Server extends BaseServer {
     super(options)
     initialized = true
 
-    const onExit = () => {
+    let onExit = () => {
       this.destroy().then(() => {
         process.exit(0)
       })

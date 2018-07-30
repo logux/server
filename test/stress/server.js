@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 
-const memwatch = require('node-memwatch')
-const delay = require('nanodelay')
+let memwatch = require('node-memwatch')
+let delay = require('nanodelay')
 
-const Server = require('../../server')
+let Server = require('../../server')
 
 memwatch.on('leak', info => {
   throw new Error(info.reason)
 })
 
-const app = new Server({
+let app = new Server({
   subprotocol: '1.0.0',
   supports: '1.0.0',
   backend: {
