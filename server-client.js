@@ -117,7 +117,7 @@ class ServerClient {
     })
     this.node.on('connect', () => {
       if (!this.isSubprotocol(this.app.options.supports)) {
-        throw new SyncError(this.node, 'wrong-subprotocol', {
+        throw new SyncError('wrong-subprotocol', {
           supported: this.app.options.supports,
           used: this.node.remoteSubprotocol
         })
@@ -202,7 +202,7 @@ class ServerClient {
     return this.app.authenticator(this.userId, credentials, this)
       .then(result => {
         if (this.attempts() >= 3) {
-          return Promise.reject(new SyncError(this.node, 'bruteforce'))
+          return Promise.reject(new SyncError('bruteforce'))
         }
 
         if (result) {

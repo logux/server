@@ -310,17 +310,17 @@ it('reports error from action', () => {
 })
 
 it('reports sync error', () => {
-  let err = new SyncError({ }, 'unknown-message', 'bad', true)
+  let err = new SyncError('unknown-message', 'bad', true)
   check('error', { clientId: '670', err })
 })
 
 it('reports error from client', () => {
-  let err = new SyncError({ }, 'timeout', 5000, true)
+  let err = new SyncError('timeout', 5000, true)
   check('clientError', { clientId: '670', err })
 })
 
 it('reports error from node', () => {
-  let err = new SyncError({ }, 'timeout', 5000, false)
+  let err = new SyncError('timeout', 5000, false)
   check('clientError', { nodeId: '100:uImkcF4z', err })
 })
 

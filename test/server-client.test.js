@@ -349,7 +349,7 @@ it('reports about synchronization errors', () => {
     expect(test.names).toEqual(['connect', 'error'])
     expect(test.reports[1]).toEqual(['error', {
       clientId: '1',
-      err: new SyncError(client.node, 'wrong-format', undefined, true)
+      err: new SyncError('wrong-format', undefined, true)
     }])
   })
 })
@@ -367,7 +367,7 @@ it('checks subprotocol', () => {
     expect(test.names).toEqual(['connect', 'clientError', 'disconnect'])
     expect(test.reports[1]).toEqual(['clientError', {
       clientId: '1',
-      err: new SyncError(client.node, 'wrong-subprotocol', {
+      err: new SyncError('wrong-subprotocol', {
         supported: '0.x', used: '1.0.0'
       })
     }])
