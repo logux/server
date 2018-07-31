@@ -42,7 +42,6 @@
     "jsdoc": "^3.5.5",
     "lint-staged": "^7.2.0",
     "nanodelay": "^0.1.4",
-    "node-memwatch": "^1.0.1",
     "pre-commit": "^1.2.2",
     "rimraf": "^2.6.2",
     "yaspeller-ci": "^1.0.0"

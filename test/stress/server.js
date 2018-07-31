@@ -1,13 +1,8 @@
 #!/usr/bin/env node
 
-let memwatch = require('node-memwatch')
 let delay = require('nanodelay')
 
 let Server = require('../../server')
-
-memwatch.on('leak', info => {
-  throw new Error(info.reason)
-})
 
 let app = new Server({
   subprotocol: '1.0.0',
