@@ -922,6 +922,8 @@ it('allow to use different node ID', () => {
     return client.node.connection.pair.wait('right')
   }).then(() => {
     expect(calls).toEqual(1)
+    expect(app.log.entries()[1][0].type).toEqual('logux/processed')
+    expect(app.log.entries()[1][1].nodeIds).toEqual(['10:uuid'])
   })
 })
 

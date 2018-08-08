@@ -828,7 +828,7 @@ class BaseServer {
 
   markAsProcessed (meta) {
     this.log.changeMeta(meta.id, { status: 'processed' })
-    let nodeId = meta.id.split(' ')[1]
+    let nodeId = meta.proxy || meta.id.split(' ')[1]
     if (!/^server:/.test(nodeId)) {
       this.log.add(
         { type: 'logux/processed', id: meta.id },
