@@ -901,3 +901,39 @@ it('allows to reports about unknown type in custom processor', () => {
     expect(calls).toEqual(['access'])
   })
 })
+
+it('allow to use different node ID', () => {
+  let app = createServer()
+  let calls = 0
+  app.type('A', {
+    access (ctx, action, meta) {
+      expect(ctx.nodeId).toEqual('10:uuid')
+      expect(meta.id).toEqual('1 10:other 0')
+      expect(meta.proxy).toEqual('10:uuid')
+      calls += 1
+      return true
+    }
+  })
+  return connectClient(app).then(client => {
+    client.node.connection.other().send([
+      'sync', 1,
+      { type: 'A' }, { id: [1, '10:other', 0], time: 1 }
+    ])
+    return client.node.connection.pair.wait('right')
+  }).then(() => {
+    expect(calls).toEqual(1)
+  })
+})
+
+it('allow to use different node ID only with same user ID', () => {
+  let test = createReporter()
+  return connectClient(test.app).then(client => {
+    client.node.connection.other().send([
+      'sync', 1,
+      { type: 'A' }, { id: [1, '20:other', 0], time: 1 }
+    ])
+    return client.node.connection.pair.wait('right')
+  }).then(() => {
+    expect(test.names).toEqual(['connect', 'authenticated', 'denied', 'add'])
+  })
+})

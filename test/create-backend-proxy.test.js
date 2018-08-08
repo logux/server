@@ -296,7 +296,7 @@ it('notifies about actions and subscriptions', () => {
       { type: 'logux/subscribe', channel: 'a' },
       { id: [2, '10:uuid', 0], time: 2 }
     ])
-    return client.connection.pair.wait('right')
+    return delay(50)
   }).then(() => {
     expect(app.log.actions()).toEqual([
       { type: 'A' },
@@ -314,7 +314,7 @@ it('notifies about actions and subscriptions', () => {
             [
               'action',
               { type: 'A' },
-              { id: '1 10:uuid 0', time: 1 }
+              { id: '1 10:uuid 0', time: 1, subprotocol: '0.0.0' }
             ]
           ]
         }
@@ -363,7 +363,7 @@ it('asks about action access', () => {
     client.connection.other().send(['sync', 2,
       { type: 'BAD' }, { id: [1, '10:uuid', 0], time: 1 }
     ])
-    return client.connection.pair.wait('right')
+    return delay(50)
   }).then(() => {
     expect(app.log.actions()).toEqual([
       { type: 'logux/undo', reason: 'denied', id: '1 10:uuid 0' }

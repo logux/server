@@ -15,7 +15,7 @@
  * }
  */
 const ALLOWED_META = [
-  'id', 'time', 'nodeIds', 'users', 'channels', 'subprotocol'
+  'id', 'time', 'nodeIds', 'users', 'channels', 'subprotocol', 'proxy'
 ]
 
 module.exports = ALLOWED_META

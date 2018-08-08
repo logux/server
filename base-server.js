@@ -850,8 +850,9 @@ class BaseServer {
       return this.contexts[meta.id]
     }
 
-    let nodeId = meta.id.split(' ')[1]
-    let userId = this.getUserId(nodeId)
+    let originNodeId = meta.id.split(' ')[1]
+    let userId = this.getUserId(originNodeId)
+    let nodeId = meta.proxy || originNodeId
 
     let subprotocol
     if (meta.subprotocol) {

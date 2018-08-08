@@ -246,6 +246,9 @@ class ServerClient {
     if (!meta.subprotocol) {
       meta.subprotocol = this.node.remoteSubprotocol
     }
+    if (meta.id.split(' ')[1] !== this.nodeId) {
+      meta.proxy = this.nodeId
+    }
     return Promise.resolve([action, meta])
   }
 
@@ -253,7 +256,9 @@ class ServerClient {
     let ctx = this.app.createContext(meta)
     this.app.contexts[meta.id] = ctx
 
-    let wrongUser = this.userId && this.userId !== ctx.userId
+    let wrongUser = !this.userId ||
+      this.userId !== ctx.userId ||
+      (meta.proxy && this.app.getUserId(meta.proxy) !== ctx.userId)
     let wrongMeta = Object.keys(meta).some(i => {
       return ALLOWED_META.indexOf(i) === -1
     })
