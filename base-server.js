@@ -43,6 +43,12 @@ function optionError (msg) {
   throw error
 }
 
+function statusAnswer (req, res) {
+  if (req.method === 'GET' && req.url === '/status') {
+    res.end('OK')
+  }
+}
+
 /**
  * Basic Logux Server API without good UI. Use it only if you need
  * to create some special hacks on top of Logux Server.
@@ -355,16 +361,24 @@ class BaseServer {
         .then(() => Promise.all(before))
         .then(keys => new Promise((resolve, reject) => {
           if (keys[0] && keys[0].pem) {
-            this.http = https.createServer({ key: keys[0].pem, cert: keys[1] })
+            this.http = https.createServer(statusAnswer,
+              { key: keys[0].pem, cert: keys[1] })
           } else if (keys[0]) {
-            this.http = https.createServer({ key: keys[0], cert: keys[1] })
+            this.http = https.createServer(statusAnswer,
+              { key: keys[0], cert: keys[1] })
           } else {
-            this.http = http.createServer()
+            this.http = http.createServer(statusAnswer)
           }
 
-          this.ws = new WebSocket.Server({ server: this.http })
+          this.ws = new WebSocket.Server({ noServer: true })
 
-          this.ws.on('error', reject)
+          this.http.on('error', reject)
+
+          this.http.on('upgrade', (request, socket, head) => {
+            this.ws.handleUpgrade(request, socket, head, ws => {
+              this.ws.emit('connection', ws, request)
+            })
+          })
 
           this.http.listen(this.options.port, this.options.host, resolve)
         }))

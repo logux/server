@@ -44,8 +44,10 @@ const REPORTERS = {
     if (r.server) {
       details.server = r.server
     } else {
-      let protocol = r.cert ? 'wss://' : 'ws://'
-      details.listen = `${ protocol }${ r.host }:${ r.port }`
+      let wsProtocol = r.cert ? 'wss://' : 'ws://'
+      let httpProtocol = r.cert ? 'https://' : 'http://'
+      details.listen = `${ wsProtocol }${ r.host }:${ r.port }`
+      details.healthCheck = `${ httpProtocol }${ r.host }:${ r.port }/status`
     }
 
     if (r.backendSend) {
