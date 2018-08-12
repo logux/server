@@ -361,11 +361,15 @@ class BaseServer {
         .then(() => Promise.all(before))
         .then(keys => new Promise((resolve, reject) => {
           if (keys[0] && keys[0].pem) {
-            this.http = https.createServer(statusAnswer,
-              { key: keys[0].pem, cert: keys[1] })
+            this.http = https.createServer(
+              { key: keys[0].pem, cert: keys[1] },
+              statusAnswer
+            )
           } else if (keys[0]) {
-            this.http = https.createServer(statusAnswer,
-              { key: keys[0], cert: keys[1] })
+            this.http = https.createServer(
+              { key: keys[0], cert: keys[1] },
+              statusAnswer
+            )
           } else {
             this.http = http.createServer(statusAnswer)
           }
