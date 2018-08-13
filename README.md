@@ -165,8 +165,8 @@ Use `ws://localhost:1337` URL in [Logux Client].
 
 ### Get SSL Certificate
 
-Logux uses WebSockets for communicating between client and server.
-Without SSL, old proxies and firewalls can block WebSockets connection.
+Logux uses WebSocket for communicating between client and server.
+Without SSL, old proxies and firewalls can block WebSocket connection.
 Also, SSL will obviously help to prevent many attacks against your server.
 
 Probably the best way to get a free SSL certificate is [Let’s Encrypt].

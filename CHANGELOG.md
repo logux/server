@@ -53,7 +53,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Add node ID conflict fixing.
 * Export `ALLOWED_META`.
 * Better start error description (by Grigory Moroz).
-* Show Client ID in log for non-authed users.
+* Show Client ID in log for non-authenticated users.
 * Fix docs (by Grigoriy Beziuk, Nick Mitin and Konstantin Krivlenia).
 * Always use English for `--help` message.
 * Add security note for server output in development mode.

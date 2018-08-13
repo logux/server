@@ -81,8 +81,7 @@ function statusAnswer (req, res) {
  *                                                   be `"development"`.
  * @param {number} [options.pid] Process ID, to display in reporter.
  * @param {http.Server} [options.server] HTTP server to connect WebSocket
- *                                       server to it.
- *                                       Same as in ws.WebSocketServer.
+ *                                       server to it. Same as in `ws.Server`.
  * @param {number} [options.port=1337] Port to bind server. It will create
  *                                     HTTP server manually to connect
  *                                     WebSocket server to it.
