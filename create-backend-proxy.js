@@ -1,3 +1,4 @@
+let nanoid = require('nanoid')
 let https = require('https')
 let http = require('http')
 let url = require('url')
@@ -5,8 +6,10 @@ let url = require('url')
 const VERSION = 0
 const MIN_VERSION = 0
 
+const AUTHENTICATED = /^\[\s*\[\s*"authenticated"/
 const FORBIDDEN = /^\[\s*\[\s*"forbidden"/
 const APPROVED = /^\[\s*\[\s*"approved"/
+const DENIED = /^\[\s*\[\s*"denied"/
 const ERROR = /^\[\s*\[\s*"error"/
 
 function isValid (data) {
@@ -41,6 +44,61 @@ function parseAnswer (str) {
   return json
 }
 
+function send (backend, command, chulkCallback, endCallback) {
+  let body = JSON.stringify({
+    version: VERSION,
+    password: backend.password,
+    commands: [command]
+  })
+  let protocol = backend.protocol === 'https:' ? https : http
+  let resolved = false
+  let errored = false
+
+  return new Promise((resolve, reject) => {
+    let req = protocol.request({
+      method: 'POST',
+      host: backend.hostname,
+      port: backend.port,
+      path: backend.path,
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(body)
+      }
+    }, res => {
+      let received = ''
+      if (res.statusCode < 200 || res.statusCode > 299) {
+        errored = true
+        reject(new Error(`Backend responsed with ${ res.statusCode } code`))
+      } else {
+        res.on('data', part => {
+          received += part
+          if (!resolved) {
+            if (ERROR.test(received)) {
+              errored = true
+              reject(new Error('Backend error'))
+            } else {
+              let result = chulkCallback(received)
+              if (typeof result !== 'undefined') {
+                resolved = true
+                resolve(result)
+              }
+            }
+          }
+        })
+        res.on('end', () => {
+          if (!errored && resolved) {
+            if (endCallback) endCallback(received)
+          } else if (!errored) {
+            reject(new Error('Backend wrong answer'))
+          }
+        })
+      }
+    })
+    req.on('error', reject)
+    req.end(body)
+  })
+}
+
 function createBackendProxy (server, options) {
   if (!options.password) {
     throw new Error(
@@ -53,77 +111,40 @@ function createBackendProxy (server, options) {
   }
 
   let backend = url.parse(options.url)
+  backend.password = options.password
 
   let processing = []
 
   function access (ctx, action, meta) {
-    let body = JSON.stringify({
-      version: VERSION,
-      password: options.password,
-      commands: [['action', action, meta]]
-    })
-    let protocol = backend.protocol === 'https:' ? https : http
-
     let processResolve, processReject
     processing[meta.id] = new Promise((resolve, reject) => {
       processResolve = resolve
       processReject = reject
     })
 
-    return new Promise((resolve, reject) => {
-      let req = protocol.request({
-        method: 'POST',
-        host: backend.hostname,
-        port: backend.port,
-        path: backend.path,
-        headers: {
-          'Content-Type': 'application/json',
-          'Content-Length': Buffer.byteLength(body)
-        }
-      }, res => {
-        let received = ''
-        let accessAnswer = false
-        if (res.statusCode < 200 || res.statusCode > 299) {
-          delete processing[meta.id]
-          reject(
-            new Error('Backend responsed with ' + res.statusCode + ' code'))
+    return send(backend, ['action', action, meta], received => {
+      if (APPROVED.test(received)) {
+        return true
+      } else if (FORBIDDEN.test(received)) {
+        delete processing[meta.id]
+        return false
+      } else {
+        return undefined
+      }
+    }, response => {
+      if (processing[meta.id]) {
+        let json = parseAnswer(response)
+        if (!json) {
+          processReject(new Error('Backend wrong answer'))
+        } else if (json.some(i => i[0] === 'processed')) {
+          processResolve()
         } else {
-          res.on('data', part => {
-            received += part
-            if (!accessAnswer) {
-              if (APPROVED.test(received)) {
-                accessAnswer = true
-                resolve(true)
-              } else if (FORBIDDEN.test(received)) {
-                accessAnswer = true
-                delete processing[meta.id]
-                resolve(false)
-              } else if (ERROR.test(received)) {
-                accessAnswer = true
-                delete processing[meta.id]
-                reject(new Error('Backend error during access control'))
-              }
-            }
-          })
-          res.on('end', () => {
-            if (!accessAnswer) {
-              delete processing[meta.id]
-              reject(new Error('Backend wrong answer'))
-            } else if (processing[meta.id]) {
-              let json = parseAnswer(received)
-              if (!json) {
-                processReject(new Error('Backend wrong answer'))
-              } else if (json.some(i => i[0] === 'processed')) {
-                processResolve()
-              } else {
-                processReject(new Error('Backend error during processing'))
-              }
-            }
-          })
+          processReject(new Error('Backend error during processing'))
         }
-      })
-      req.on('error', reject)
-      req.end(body)
+      }
+    }).catch(e => {
+      delete processing[meta.id]
+      throw e
     })
   }
 
@@ -136,6 +157,17 @@ function createBackendProxy (server, options) {
     })
   }
 
+  server.auth((userId, credentials) => {
+    return send(backend, ['auth', userId, credentials, nanoid()], received => {
+      if (AUTHENTICATED.test(received)) {
+        return true
+      } else if (DENIED.test(received)) {
+        return false
+      } else {
+        return undefined
+      }
+    })
+  })
   server.otherType({ access, process })
   server.otherChannel({ access, init: process })
 

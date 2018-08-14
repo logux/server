@@ -38,19 +38,21 @@ function createClient (server) {
   return client
 }
 
-function connectClient (server) {
+function connectClient (server, credentials) {
   let client = createClient(server)
   client.node.now = () => 0
   return client.connection.connect().then(() => {
     let protocol = client.node.localProtocol
-    client.connection.other().send(['connect', protocol, '10:uuid', 0])
+    client.connection.other().send(['connect', protocol, '10:uuid', 0, {
+      credentials
+    }])
     return client.connection.pair.wait('right')
   }).then(() => {
     return client
   })
 }
 
-function createServer (options) {
+function createServerWithoutAuth (options) {
   lastPort += 2
   options.time = new TestTime()
   options.port = lastPort
@@ -60,13 +62,18 @@ function createServer (options) {
 
   let server = new BaseServer(options)
   server.nodeId = 'server:uuid'
-  server.auth(() => true)
   server.log.on('preadd', (action, meta) => {
     meta.reasons.push('test')
   })
 
   destroyable.push(server)
 
+  return server
+}
+
+function createServer (options) {
+  let server = createServerWithoutAuth(options)
+  server.auth(() => true)
   return server
 }
 
@@ -105,40 +112,44 @@ let httpServer = http.createServer((req, res) => {
     let data = JSON.parse(body)
     let actionId = data.commands[0][2].id
     sent.push([req.method, req.url, data])
-    if (data.commands[0][1].type === 'NO') {
+    if (data.commands[0][0] === 'auth') {
+      if (data.commands[0][1] === '10' && data.commands[0][2] === 'good') {
+        res.write(`[["authent`)
+        delay(100).then(() => {
+          res.end(`icated","${ data.commands[0][3] }"]]`)
+        })
+      } else {
+        res.end(`[["denied","${ data.commands[0][3] }"]]`)
+      }
+    } else if (data.commands[0][1].type === 'NO') {
       res.statusCode = 404
       res.end()
     } else if (data.commands[0][1].type === 'BAD') {
-      res.write(`[["forbidden","${ actionId }"]]`)
-      res.end()
+      res.end(`[["forbidden","${ actionId }"]]`)
     } else if (data.commands[0][1].type === 'AERROR') {
-      res.write(`[["error","${ actionId }"]]`)
-      res.end()
+      res.end(`[["error","${ actionId }"]]`)
     } else if (data.commands[0][1].type === 'PERROR') {
       res.write(`[["approved","${ actionId }"]`)
       delay(100).then(() => {
-        res.write(`,["error","${ actionId }"]]`)
-        res.end()
+        res.end(`,["error","${ actionId }"]]`)
       })
     } else if (data.commands[0][1].type === 'BROKEN1') {
-      res.write(`[["approved","${ actionId }"]`)
-      res.end()
+      res.end(`[["approved","${ actionId }"]`)
     } else if (data.commands[0][1].type === 'BROKEN2') {
-      res.write(`[["approved","${ actionId }"],"processed"]`)
-      res.end()
+      res.end(`[["approved","${ actionId }"],"processed"]`)
     } else if (data.commands[0][1].type === 'BROKEN3') {
-      res.write(`[["approved","${ actionId }"],[1]]`)
-      res.end()
+      res.end(`[["approved","${ actionId }"],[1]]`)
     } else if (data.commands[0][1].type === 'BROKEN4') {
-      res.write(`[["approved","${ actionId }"],["procesed","${ actionId }"]]`)
-      res.end()
+      res.end(`[["approved","${ actionId }"],["procesed","${ actionId }"]]`)
     } else if (data.commands[0][1].type === 'EMPTY') {
       res.end()
     } else {
-      res.write(`[["approved","${ actionId }"]`)
-      delay(100).then(() => {
-        res.write(`,["processed","${ actionId }"]]`)
-        res.end()
+      res.write(`[["appro`)
+      delay(1).then(() => {
+        res.write(`ved","${ actionId }"]`)
+        return delay(100)
+      }).then(() => {
+        res.end(`,["processed","${ actionId }"]]`)
       })
     }
   })
@@ -280,6 +291,38 @@ it('reports bad HTTP answers', () => {
     expect(errors).toEqual(['Backend responsed with 404 code'])
     expect(app.log.actions()).toEqual([
       { type: 'logux/undo', reason: 'error', id: '1 10:uuid 0' }
+    ])
+  })
+})
+
+it('authenticates user on backend', () => {
+  let app = createServerWithoutAuth(OPTIONS)
+  return connectClient(app, 'good').then(client => {
+    expect(client.connection.connected).toBeTruthy()
+    let authId = sent[0][2].commands[0][3]
+    expect(typeof authId).toEqual('string')
+    expect(sent).toEqual([
+      [
+        'POST',
+        '/path',
+        {
+          version: 0,
+          password: '1234',
+          commands: [
+            ['auth', '10', 'good', authId]
+          ]
+        }
+      ]
+    ])
+  })
+})
+
+it('checks user credentials', () => {
+  let app = createServerWithoutAuth(OPTIONS)
+  return connectClient(app, 'bad').then(client => {
+    expect(client.connection.connected).toBeFalsy()
+    expect(client.connection.pair.leftSent).toEqual([
+      ['error', 'wrong-credentials']
     ])
   })
 })
@@ -426,9 +469,6 @@ it('reacts on backend error', () => {
       { type: 'logux/undo', reason: 'error', id: '1 10:uuid 0' },
       { type: 'logux/undo', reason: 'error', id: '2 10:uuid 0' }
     ])
-    expect(errors).toEqual([
-      'Backend error during access control',
-      'Backend error during processing'
-    ])
+    expect(errors).toEqual(['Backend error', 'Backend error during processing'])
   })
 })
