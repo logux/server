@@ -12,6 +12,7 @@ let fs = require('fs')
 
 let startControlServer = require('./start-control-server')
 let bindBackendProxy = require('./bind-backend-proxy')
+let bindPrometheus = require('./bind-prometheus')
 let forcePromise = require('./force-promise')
 let ServerClient = require('./server-client')
 let promisify = require('./promisify')
@@ -289,12 +290,14 @@ class BaseServer {
 
     this.controls = {
       '/status': {
+        safe: true,
         request () {
           return { body: 'OK' }
         }
       }
     }
 
+    bindPrometheus(this)
     if (this.options.backend) {
       bindBackendProxy(this)
     }

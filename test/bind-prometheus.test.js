@@ -3,9 +3,10 @@ let http = require('http')
 let BaseServer = require('../base-server')
 
 let lastPort = 9111
-function createServer () {
+function createServer (controlPassword) {
   lastPort += 2
   let server = new BaseServer({
+    controlPassword,
     subprotocol: '0.0.0',
     controlPort: lastPort,
     supports: '0.x',
@@ -29,6 +30,7 @@ function request (method, path) {
       })
       res.on('end', () => {
         if (res.statusCode === 200) {
+          expect(res.headers['content-type']).toContain('text/plain')
           resolve(response)
         } else {
           let error = new Error(response)
@@ -50,31 +52,41 @@ afterEach(() => {
   })
 })
 
-it('has health check', () => {
-  app = createServer()
+it('has prometheus report', () => {
+  app = createServer('secret')
   return app.listen().then(() => {
-    return request('GET', '/status')
+    return request('GET', '/prometheus?secret')
   }).then(response => {
-    expect(response).toEqual('OK')
+    expect(response).toContain('nodejs_heap_size_total_bytes ')
   })
 })
 
-it('expects GET for health check', () => {
-  app = createServer()
+it('checks password', () => {
+  app = createServer('secret')
   return app.listen().then(() => {
-    return request('POST', '/status')
-  }).catch(err => {
-    expect(err.statusCode).toEqual(405)
-    expect(err.message).toEqual('Wrong method')
+    return request('GET', '/prometheus?wrong')
+  }).catch(error => {
+    expect(error.statusCode).toEqual(403)
+    expect(error.message).toEqual('Wrong password')
   })
 })
 
-it('response 404', () => {
-  app = createServer()
+it('shows help on template password', () => {
+  app = createServer('secret')
   return app.listen().then(() => {
-    return request('GET', '/unknown')
-  }).catch(err => {
-    expect(err.statusCode).toEqual(404)
-    expect(err.message).toEqual('Wrong path')
+    return request('GET', '/prometheus?PASSWORD')
+  }).catch(error => {
+    expect(error.statusCode).toEqual(400)
+    expect(error.message).toContain('real control password')
+  })
+})
+
+it('shows error on missed password', () => {
+  app = createServer(undefined)
+  return app.listen().then(() => {
+    return request('GET', '/prometheus?secret')
+  }).catch(error => {
+    expect(error.statusCode).toEqual(403)
+    expect(error.message).toContain('control password')
   })
 })

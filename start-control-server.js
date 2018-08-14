@@ -65,7 +65,29 @@ function startControlServer (app) {
         }
       })
     } else {
+      if (!rule.safe) {
+        if (!app.options.controlPassword) {
+          res.statusCode = 403
+          res.end('Set control password for Logux to give access to this page')
+          return
+        }
+        if (reqUrl.query === 'PASSWORD') {
+          res.statusCode = 400
+          res.end(
+            'Replace PASSWORD in URL to real control password ' +
+            'from Logux server options'
+          )
+          return
+        } else if (reqUrl.query !== app.options.controlPassword) {
+          res.statusCode = 403
+          res.end('Wrong password')
+          return
+        }
+      }
       let answer = rule.request(req)
+      for (let name in answer.headers) {
+        res.setHeader(name, answer.headers[name])
+      }
       res.end(answer.body)
     }
   })

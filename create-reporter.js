@@ -48,10 +48,13 @@ const REPORTERS = {
       details.listen = `${ wsProtocol }${ r.host }:${ r.port }/`
     }
 
-    details.healthCheck = `http://${ r.controlHost }:${ r.controlPort }/status`
+    let controlDomain = `http://${ r.controlHost }:${ r.controlPort }/`
+    details.healthCheck = controlDomain + 'status'
     if (r.controlProtected) {
-      details.backendListen = `http://${ r.controlHost }:${ r.controlPort }/`
+      details.prometheus = controlDomain + 'prometheus?PASSWORD'
+      details.backendListen = controlDomain
     }
+
     if (r.backend) {
       details.backendSend = r.backend
     }
