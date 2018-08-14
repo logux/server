@@ -257,6 +257,19 @@ class BaseServer {
         this.reporter('clientError', { err, clientId: err.clientId })
       }
     })
+    this.on('connected', client => {
+      this.reporter('connect', {
+        clientId: client.key,
+        ipAddress: client.remoteAddress
+      })
+    })
+    this.on('disconnected', client => {
+      if (client.nodeId) {
+        this.reporter('disconnect', { nodeId: client.nodeId })
+      } else {
+        this.reporter('disconnect', { clientId: client.key })
+      }
+    })
 
     this.unbind = []
 
@@ -429,9 +442,13 @@ class BaseServer {
    *
    * * `error`: server error.
    * * `clientError`: wrong client behaviour.
+   * * `connected`: new client was connected.
+   * * `disconnected`: client was disconnected.
    * * `processed`: action processing was finished.
    *
-   * @param {"error"|"clientError"|"processed"} event The event name.
+   * @param {
+   *          "error"|"clientError"|"connected"|"processed"|"disconnected"
+   *        } event The event name.
    * @param {listener} listener The listener function.
    *
    * @return {function} Unbind listener from event.
@@ -818,20 +835,20 @@ class BaseServer {
     let start = Date.now()
     let ctx = this.createContext(meta)
 
+    let latency
     this.processing += 1
     return forcePromise(() => type.process(ctx, action, meta)).then(() => {
-      this.reporter('processed', {
-        actionId: meta.id,
-        latency: Date.now() - start
-      })
+      latency = Date.now() - start
+      this.reporter('processed', { actionId: meta.id, latency })
       this.markAsProcessed(meta)
     }).catch(e => {
       this.log.changeMeta(meta.id, { status: 'error' })
       this.undo(meta, 'error')
       this.emitter.emit('error', e, action, meta)
     }).then(() => {
+      if (typeof latency === 'undefined') latency = Date.now() - start
       this.processing -= 1
-      this.emitter.emit('processed', action, meta)
+      this.emitter.emit('processed', action, meta, latency)
       delete this.contexts[meta.id]
     })
   }

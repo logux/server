@@ -520,7 +520,8 @@ it('processes actions', () => {
       })
     }
   })
-  test.app.on('processed', (action, meta) => {
+  test.app.on('processed', (action, meta, latency) => {
+    expect(typeof latency).toEqual('number')
     expect(meta.added).toEqual(1)
     fired.push(action)
   })

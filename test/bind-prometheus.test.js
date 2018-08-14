@@ -61,6 +61,23 @@ it('has prometheus report', () => {
   })
 })
 
+it('reports internal things', () => {
+  app = createServer('secret')
+  return app.listen().then(() => {
+    app.emitter.emit('connected', { })
+    app.emitter.emit('connected', { })
+    app.emitter.emit('processed', { }, { }, 50)
+    app.emitter.emit('processed', { }, { }, undefined)
+    app.emitter.emit('clientError', { })
+    app.emitter.emit('disconnected', { })
+    return request('GET', '/prometheus?secret')
+  }).then(response => {
+    expect(response).toContain('logux_clients_counter 1')
+    expect(response).toContain('logux_client_errors_counter 1')
+    expect(response).toContain('logux_request_processing_time_histogram_sum 50')
+  })
+})
+
 it('checks password', () => {
   app = createServer('secret')
   return app.listen().then(() => {

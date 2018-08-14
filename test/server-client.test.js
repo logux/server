@@ -118,14 +118,23 @@ it('has remote address shortcut', () => {
 
 it('reports about connection', () => {
   let test = createReporter()
+  let fired = []
+  test.app.on('connected', client => {
+    fired.push(client.key)
+  })
   new ServerClient(test.app, createConnection(), 1)
   expect(test.reports).toEqual([['connect', {
     clientId: '1', ipAddress: '127.0.0.1'
   }]])
+  expect(fired).toEqual(['1'])
 })
 
 it('removes itself on destroy', () => {
   let test = createReporter()
+  let fired = []
+  test.app.on('disconnected', client => {
+    fired.push(client.key)
+  })
 
   let client1 = createClient(test.app)
   let client2 = createClient(test.app)
@@ -160,6 +169,7 @@ it('removes itself on destroy', () => {
     expect(test.app.nodeIds).toEqual({ })
     expect(test.app.users).toEqual({ })
     expect(test.app.subscribers).toEqual({ })
+    expect(fired).toEqual(['1', '2'])
   })
 })
 

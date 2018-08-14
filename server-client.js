@@ -132,10 +132,7 @@ class ServerClient {
       }
     })
 
-    app.reporter('connect', {
-      clientId: this.key,
-      ipAddress: this.remoteAddress
-    })
+    this.app.emitter.emit('connected', this)
   }
 
   /**
@@ -163,7 +160,7 @@ class ServerClient {
   destroy () {
     this.destroyed = true
     if (!this.app.destroying && !this.zombie) {
-      this.app.reporter('disconnect', reportClient(this))
+      this.app.emitter.emit('disconnected', this)
     }
     this.node.destroy()
     if (this.userId) {
