@@ -14,7 +14,6 @@ function reportDetails (client) {
 }
 
 function reportClient (client, obj) {
-  if (!obj) obj = { }
   if (client.nodeId) {
     obj.nodeId = client.nodeId
   } else {
