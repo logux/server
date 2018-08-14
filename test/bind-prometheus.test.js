@@ -72,7 +72,7 @@ it('reports internal things', () => {
     app.emitter.emit('disconnected', { })
     return request('GET', '/prometheus?secret')
   }).then(response => {
-    expect(response).toContain('logux_clients_counter 1')
+    expect(response).toContain('logux_clients_gauge 1')
     expect(response).toContain('logux_client_errors_counter 1')
     expect(response).toContain('logux_request_processing_time_histogram_sum 50')
   })

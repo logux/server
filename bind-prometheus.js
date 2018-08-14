@@ -7,7 +7,7 @@ let processingTime = new prometheus.Histogram({
 })
 
 let clientCount = new prometheus.Gauge({
-  name: 'logux_clients_counter',
+  name: 'logux_clients_gauge',
   help: 'How many clients are online'
 })
 
