@@ -10,7 +10,8 @@ let path = require('path')
 let Log = require('logux-core').Log
 let fs = require('fs')
 
-let createBackendProxy = require('./create-backend-proxy')
+let startControlServer = require('./start-control-server')
+let bindBackendProxy = require('./bind-backend-proxy')
 let forcePromise = require('./force-promise')
 let ServerClient = require('./server-client')
 let promisify = require('./promisify')
@@ -41,12 +42,6 @@ function optionError (msg) {
   let error = new Error(msg)
   error.code = 'LOGUX_WRONG_OPTIONS'
   throw error
-}
-
-function statusAnswer (req, res) {
-  if (req.method === 'GET' && req.url === '/status') {
-    res.end('OK')
-  }
 }
 
 /**
@@ -191,7 +186,7 @@ class BaseServer {
         if (!meta.subprotocol) {
           meta.subprotocol = this.options.subprotocol
         }
-        if (!this.backend && !this.types[action.type] && !isLogux) {
+        if (!this.options.backend && !this.types[action.type] && !isLogux) {
           meta.status = 'processed'
         }
       }
@@ -292,8 +287,16 @@ class BaseServer {
     this.timeouts = { }
     this.lastTimeout = 0
 
+    this.controls = {
+      '/status': {
+        request () {
+          return { body: 'OK' }
+        }
+      }
+    }
+
     if (this.options.backend) {
-      this.backend = createBackendProxy(this)
+      bindBackendProxy(this)
     }
 
     this.unbind.push(() => {
@@ -365,42 +368,23 @@ class BaseServer {
         .then(() => Promise.all(before))
         .then(keys => new Promise((resolve, reject) => {
           if (keys[0] && keys[0].pem) {
-            this.http = https.createServer(
-              { key: keys[0].pem, cert: keys[1] },
-              statusAnswer
-            )
+            this.http = https.createServer({ key: keys[0].pem, cert: keys[1] })
           } else if (keys[0]) {
-            this.http = https.createServer(
-              { key: keys[0], cert: keys[1] },
-              statusAnswer
-            )
+            this.http = https.createServer({ key: keys[0], cert: keys[1] })
           } else {
-            this.http = http.createServer(statusAnswer)
+            this.http = http.createServer()
           }
 
-          this.ws = new WebSocket.Server({ noServer: true })
-
-          this.http.on('error', reject)
-
-          this.http.on('upgrade', (request, socket, head) => {
-            this.ws.handleUpgrade(request, socket, head, ws => {
-              this.ws.emit('connection', ws, request)
-            })
-          })
+          this.ws = new WebSocket.Server({ server: this.http })
+          this.ws.on('error', reject)
 
           this.http.listen(this.options.port, this.options.host, resolve)
         }))
     }
 
-    if (this.backend) {
-      promise = promise.then(() => {
-        return new Promise((resolve, reject) => {
-          this.backend.on('error', reject)
-          this.backend.listen(
-            this.options.controlPort, this.options.controlHost, resolve)
-        })
-      })
-    }
+    promise = promise.then(() => {
+      return startControlServer(this)
+    })
 
     this.unbind.push(() => promisify(done => {
       promise.then(() => {

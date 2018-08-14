@@ -35,6 +35,10 @@ function createServer (options) {
     lastPort += 1
     options.port = lastPort
   }
+  if (typeof options.controlPort === 'undefined') {
+    lastPort += 1
+    options.controlPort = lastPort
+  }
 
   let created = new BaseServer(options)
   created.auth(() => true)
@@ -1075,34 +1079,5 @@ it('reports about useless actions', () => {
       'add', 'add', 'add', 'add', 'add',
       'processed', 'processed', 'processed', 'processed'
     ])
-  })
-})
-
-it('has health check', () => {
-  app = createServer()
-  return app.listen().then(() => {
-    return new Promise((resolve, reject) => {
-      let req = http.request({
-        method: 'GET',
-        host: 'localhost',
-        port: app.options.port,
-        path: '/status'
-      }, res => {
-        if (res.statusCode !== 200) {
-          reject(new Error(`Response code ${ res.statusCode }`))
-          return
-        }
-        let answer = ''
-        res.on('data', chunk => {
-          answer += chunk
-        })
-        res.on('end', () => {
-          expect(answer).toEqual('OK')
-          resolve()
-        })
-      })
-      req.on('error', reject)
-      req.end()
-    })
   })
 })

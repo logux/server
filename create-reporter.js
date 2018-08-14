@@ -11,7 +11,7 @@ const ERROR_CODES = {
   }),
   EACCES: e => ({
     msg: `You are not allowed to run server on port \`:${ e.port }\``,
-    note: 'Try to change user (e.g. root) or use port >= 1024'
+    note: 'Try to change user or use port >= 1024'
   }),
   LOGUX_UNKNOWN_OPTION: e => ({
     msg: e.message,
@@ -45,13 +45,12 @@ const REPORTERS = {
       details.server = r.server
     } else {
       let wsProtocol = r.cert ? 'wss://' : 'ws://'
-      let httpProtocol = r.cert ? 'https://' : 'http://'
-      details.listen = `${ wsProtocol }${ r.host }:${ r.port }`
-      details.healthCheck = `${ httpProtocol }${ r.host }:${ r.port }/status`
+      details.listen = `${ wsProtocol }${ r.host }:${ r.port }/`
     }
 
+    details.healthCheck = `http://${ r.controlHost }:${ r.controlPort }/status`
     if (r.controlProtected) {
-      details.backendListen = `http://${ r.controlHost }:${ r.controlPort }`
+      details.backendListen = `http://${ r.controlHost }:${ r.controlPort }/`
     }
     if (r.backend) {
       details.backendSend = r.backend

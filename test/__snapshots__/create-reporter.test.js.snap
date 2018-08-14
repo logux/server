@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`reports EACCES error 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{},\\"note\\":\\"Try to change user (e.g. root) or use port >= 1024\\",\\"msg\\":\\"You are not allowed to run server on port \`:1337\`\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{},\\"note\\":\\"Try to change user or use port >= 1024\\",\\"msg\\":\\"You are not allowed to run server on port \`:1337\`\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
 exports[`reports EACCES error 2`] = `
 "[41m[37m FATAL [39m[49m [1m[31mYou are not allowed to run server on port [33m:1337[31m[39m[22m [2mat 1970-01-01 00:00:00[22m
-        [90mTry to change user (e.g. root) or use port >= 1024[39m
+        [90mTry to change user or use port >= 1024[39m
 
 "
 `;
@@ -231,7 +231,7 @@ exports[`reports error from node 2`] = `
 `;
 
 exports[`reports listen 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"development\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"0.0.0\\",\\"supports\\":\\"0.x\\",\\"note\\":[\\"Server was started in non-secure development mode\\",\\"Press Ctrl-C to shutdown server\\"],\\"listen\\":\\"ws://127.0.0.1:31337\\",\\"healthCheck\\":\\"http://127.0.0.1:31337/status\\",\\"backendListen\\":\\"http://127.0.0.1:31338\\",\\"backendSend\\":\\"http://127.0.0.1:3000/logux\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"development\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"0.0.0\\",\\"supports\\":\\"0.x\\",\\"note\\":[\\"Server was started in non-secure development mode\\",\\"Press Ctrl-C to shutdown server\\"],\\"listen\\":\\"ws://127.0.0.1:31337/\\",\\"healthCheck\\":\\"http://127.0.0.1:31338/status\\",\\"backendListen\\":\\"http://127.0.0.1:31338/\\",\\"backendSend\\":\\"http://127.0.0.1:3000/logux\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
@@ -243,10 +243,10 @@ exports[`reports listen 2`] = `
         Node ID:        [1mserver[22m:FnXaqDxY
         Subprotocol:    [1m0.0.0[22m
         Supports:       [1m0.x[22m
-        Health check:   [1mhttp://127.0.0.1:31337/status[22m
-        Backend listen: [1mhttp://127.0.0.1:31338[22m
+        Health check:   [1mhttp://127.0.0.1:31338/status[22m
+        Backend listen: [1mhttp://127.0.0.1:31338/[22m
         Backend send:   [1mhttp://127.0.0.1:3000/logux[22m
-        Listen:         [1mws://127.0.0.1:31337[22m
+        Listen:         [1mws://127.0.0.1:31337/[22m
         [90mServer was started in non-secure development mode[39m
         [90mPress Ctrl-C to shutdown server[39m
 
@@ -254,7 +254,7 @@ exports[`reports listen 2`] = `
 `;
 
 exports[`reports listen for custom domain 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"development\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"0.0.0\\",\\"supports\\":\\"0.x\\",\\"note\\":[\\"Server was started in non-secure development mode\\",\\"Press Ctrl-C to shutdown server\\"],\\"server\\":true,\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"development\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"0.0.0\\",\\"supports\\":\\"0.x\\",\\"note\\":[\\"Server was started in non-secure development mode\\",\\"Press Ctrl-C to shutdown server\\"],\\"server\\":true,\\"healthCheck\\":\\"http://127.0.0.1:31338/status\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
@@ -266,6 +266,7 @@ exports[`reports listen for custom domain 2`] = `
         Node ID:      [1mserver[22m:FnXaqDxY
         Subprotocol:  [1m0.0.0[22m
         Supports:     [1m0.x[22m
+        Health check: [1mhttp://127.0.0.1:31338/status[22m
         Listen:       [1mCustom HTTP server[22m
         [90mServer was started in non-secure development mode[39m
         [90mPress Ctrl-C to shutdown server[39m
@@ -274,7 +275,7 @@ exports[`reports listen for custom domain 2`] = `
 `;
 
 exports[`reports listen for production 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"production\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"0.0.0\\",\\"supports\\":\\"0.x\\",\\"listen\\":\\"wss://127.0.0.1:1337\\",\\"healthCheck\\":\\"https://127.0.0.1:1337/status\\",\\"backendListen\\":\\"http://127.0.0.1:31338\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"production\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"0.0.0\\",\\"supports\\":\\"0.x\\",\\"listen\\":\\"wss://127.0.0.1:1337/\\",\\"healthCheck\\":\\"http://127.0.0.1:31338/status\\",\\"backendListen\\":\\"http://127.0.0.1:31338/\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
@@ -286,9 +287,9 @@ exports[`reports listen for production 2`] = `
         Node ID:        [1mserver[22m:FnXaqDxY
         Subprotocol:    [1m0.0.0[22m
         Supports:       [1m0.x[22m
-        Health check:   [1mhttps://127.0.0.1:1337/status[22m
-        Backend listen: [1mhttp://127.0.0.1:31338[22m
-        Listen:         [1mwss://127.0.0.1:1337[22m
+        Health check:   [1mhttp://127.0.0.1:31338/status[22m
+        Backend listen: [1mhttp://127.0.0.1:31338/[22m
+        Listen:         [1mwss://127.0.0.1:1337/[22m
 
 "
 `;

@@ -4,28 +4,12 @@ let http = require('http')
 let url = require('url')
 
 const VERSION = 0
-const MIN_VERSION = 0
 
 const AUTHENTICATED = /^\[\s*\[\s*"authenticated"/
 const FORBIDDEN = /^\[\s*\[\s*"forbidden"/
 const APPROVED = /^\[\s*\[\s*"approved"/
 const DENIED = /^\[\s*\[\s*"denied"/
 const ERROR = /^\[\s*\[\s*"error"/
-
-function isValid (data) {
-  if (typeof data !== 'object') return false
-  if (typeof data.version !== 'number') return false
-  if (data.version > MIN_VERSION) return false
-  if (typeof data.password !== 'string') return false
-  if (!Array.isArray(data.commands)) return false
-  for (let command of data.commands) {
-    if (!Array.isArray(command)) return false
-    if (command[0] !== 'action') return false
-    if (typeof command[1] !== 'object') return false
-    if (typeof command[2] !== 'object') return false
-  }
-  return true
-}
 
 function parseAnswer (str) {
   let json
@@ -99,16 +83,16 @@ function send (backend, command, chulkCallback, endCallback) {
   })
 }
 
-function createBackendProxy (server) {
-  if (!server.options.controlPassword) {
+function bindBackendProxy (app) {
+  if (!app.options.controlPassword) {
     throw new Error(
       'If you set `backend` option you must also set strong password ' +
       'in `controlPassword` option for security reasons'
     )
   }
 
-  let backend = url.parse(server.options.backend)
-  backend.password = server.options.controlPassword
+  let backend = url.parse(app.options.backend)
+  backend.password = app.options.controlPassword
 
   let processing = []
 
@@ -154,7 +138,7 @@ function createBackendProxy (server) {
     })
   }
 
-  server.auth((userId, credentials) => {
+  app.auth((userId, credentials) => {
     return send(backend, ['auth', userId, credentials, nanoid()], received => {
       if (AUTHENTICATED.test(received)) {
         return true
@@ -165,63 +149,25 @@ function createBackendProxy (server) {
       }
     })
   })
-  server.otherType({ access, process })
-  server.otherChannel({ access, init: process })
+  app.otherType({ access, process })
+  app.otherChannel({ access, init: process })
 
-  let httpServer = http.createServer((req, res) => {
-    if (req.method !== 'POST') {
-      res.statusCode = 405
-      res.end()
-      return
+  app.controls['/'] = {
+    isValid (command) {
+      return command.length === 3 &&
+        command[0] === 'action' &&
+        typeof command[1] === 'object' &&
+        typeof command[2] === 'object' &&
+        typeof command[1].type === 'string'
+    },
+    command (command, req) {
+      if (!app.types[command[1].type]) {
+        command[2].status = 'processed'
+      }
+      command[2].backend = req.connection.remoteAddress
+      return app.log.add(command[1], command[2])
     }
-    if (req.url !== '/') {
-      res.statusCode = 404
-      res.end()
-      return
-    }
-
-    let body = ''
-    req.on('data', data => {
-      body += data
-    })
-    req.on('end', () => {
-      let data
-      try {
-        data = JSON.parse(body)
-      } catch (e) {
-        res.statusCode = 400
-        res.end()
-        return
-      }
-      if (!isValid(data)) {
-        res.statusCode = 400
-        res.end()
-        return
-      }
-      if (data.password !== server.options.controlPassword) {
-        res.statusCode = 403
-        res.end()
-        return
-      }
-      Promise.all(data.commands.map(command => {
-        if (!server.types[command[1].type]) {
-          command[2].status = 'processed'
-        }
-        command[2].backend = req.connection.remoteAddress
-        return server.log.add(command[1], command[2])
-      })).then(() => {
-        res.end()
-      })
-    })
-  })
-
-  server.unbind.push(() => {
-    return new Promise(resolve => {
-      httpServer.close(resolve)
-    })
-  })
-
-  return httpServer
+  }
 }
 
-module.exports = createBackendProxy
+module.exports = bindBackendProxy

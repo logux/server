@@ -144,7 +144,6 @@
       "unknownType",
       "wrongChannel",
       "otherChannel",
-      "BackedSettings",
       "backend",
       "ChannelContext",
       "ctx",
