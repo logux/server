@@ -26,12 +26,16 @@ exports[`disables colors for constructor errors 1`] = `
 
 exports[`shows help 1`] = `
 "Options:
-  --host, -h      Host to bind server.                                  [string]
-  --port, -p      Port to bind server                                   [number]
-  --key, -k       Path to SSL key                                       [string]
-  --cert, -c      Path to SSL certificate                               [string]
-  --reporter, -r  Reporter type              [string] [choices: \\"human\\", \\"json\\"]
-  --help          Show help                                            [boolean]
+  --host, -h          Host to bind server.                              [string]
+  --port, -p          Port to bind server                               [number]
+  --key               Path to SSL key                                   [string]
+  --cert              Path to SSL certificate                           [string]
+  --reporter, -r      Reporter type          [string] [choices: \\"human\\", \\"json\\"]
+  --backend           Backend to process actions and authentication     [string]
+  --control-host      Host to bind HTTP server to control Logux server  [string]
+  --control-port      Port to bind HTTP server to control Logux server  [number]
+  --control-password  Password to control Logux server                  [string]
+  --help              Show help                                        [boolean]
 
 Examples:
   options.js --port 31337 --host 127.0.0.1
@@ -39,6 +43,7 @@ Examples:
 
 Environment variables:
   LOGUX_HOST, LOGUX_PORT, LOGUX_KEY, LOGUX_CERT, LOGUX_REPORTER
+  LOGUX_CONTROL_HOST, LOGUX_CONTROL_PORT, LOGUX_CONTROL_PASSWORD
 "
 `;
 
@@ -130,7 +135,7 @@ exports[`writes to custom bunyan log 1`] = `
 
 exports[`writes using custom reporter 1`] = `
 "Event: listen
-Details: {\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"test\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"server\\":false,\\"nodeId\\":\\"server:FnXaqDxY\\",\\"cert\\":false,\\"host\\":\\"127.0.0.1\\",\\"port\\":2000}
+Details: {\\"controlProtected\\":false,\\"controlHost\\":\\"127.0.0.1\\",\\"controlPort\\":1338,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"test\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"server\\":false,\\"nodeId\\":\\"server:FnXaqDxY\\",\\"cert\\":false,\\"host\\":\\"127.0.0.1\\",\\"port\\":2000}
 Event: destroy
 Details: undefined
 "

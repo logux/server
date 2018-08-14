@@ -66,8 +66,13 @@ function statusAnswer (req, res) {
  *                                         to disconnect connection.
  * @param {number} [options.ping=10000] Milliseconds since last message to test
  *                                      connection by sending ping.
- * @param {BackedSettings} [options.backend] Settings to work with PHP,
- *                                           Ruby on Rails, or other backend.
+ * @param {string} [options.backend] URL to PHP, Ruby on Rails,
+ *                                   or other backend to process actions
+ *                                   and authentication.
+ * @param {number} [options.controlHost="127.0.0.1"] Host to bind HTTP server
+ *                                                   to control Logux server.
+ * @param {number} [options.controlPort=31338] Port to control the server.
+ * @param {string} [options.controlPassword] Password to control the server.
  * @param {Store} [options.store] Store to save log. Will be
  *                                {@link MemoryStore}, by default.
  * @param {TestTime} [options.time] Test time to test server.
@@ -143,6 +148,8 @@ class BaseServer {
       if (!this.options.port) this.options.port = 1337
       if (!this.options.host) this.options.host = '127.0.0.1'
     }
+    if (!this.options.controlPort) this.options.controlPort = 1338
+    if (!this.options.controlHost) this.options.controlHost = '127.0.0.1'
 
     /**
      * Server unique ID.
@@ -286,9 +293,7 @@ class BaseServer {
     this.lastTimeout = 0
 
     if (this.options.backend) {
-      if (!this.options.backend.port) this.options.backend.port = 1338
-      if (!this.options.backend.host) this.options.backend.host = '127.0.0.1'
-      this.backend = createBackendProxy(this, this.options.backend)
+      this.backend = createBackendProxy(this)
     }
 
     this.unbind.push(() => {
@@ -392,7 +397,7 @@ class BaseServer {
         return new Promise((resolve, reject) => {
           this.backend.on('error', reject)
           this.backend.listen(
-            this.options.backend.port, this.options.backend.host, resolve)
+            this.options.controlPort, this.options.controlHost, resolve)
         })
       })
     }
@@ -414,13 +419,14 @@ class BaseServer {
       })
     }).then(() => {
       this.reporter('listen', {
-        backendHost: this.options.backend && this.options.backend.host,
-        backendPort: this.options.backend && this.options.backend.port,
-        backendSend: this.options.backend && this.options.backend.url,
+        controlProtected: !!this.options.controlPassword,
+        controlHost: this.options.controlHost,
+        controlPort: this.options.controlPort,
         loguxServer: pkg.version,
         environment: this.env,
         subprotocol: this.options.subprotocol,
         supports: this.options.supports,
+        backend: this.options.backend,
         server: !!this.options.server,
         nodeId: this.nodeId,
         cert: !!this.options.cert,
@@ -878,8 +884,7 @@ class BaseServer {
       subprotocol = this.nodeIds[nodeId].node.remoteSubprotocol
     }
 
-    let ctx = new Context(nodeId, userId, subprotocol)
-    return ctx
+    return new Context(nodeId, userId, subprotocol)
   }
 
   subscribeAction (action, meta) {
@@ -1078,15 +1083,4 @@ module.exports = BaseServer
  * @param {Action} action The action data.
  * @param {Meta} meta The action metadata.
  * @return {Promise|undefined} Promise during initial actions loading.
- */
-
-/**
- * Settings for proxy actions to other backend.
- *
- * @typedef {object} BackedSettings
- * @property {string} url URL to send actions to backend.
- * @property {string} password Password to sign every request.
- * @property {number} [port=1338] Port to bind actions receiving server.
- * @param {string} [host="127.0.0.1"] IP-address to bind
- *                                    actions receiving server.
  */

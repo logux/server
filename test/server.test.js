@@ -89,7 +89,9 @@ it('uses CLI args for options', () => {
       '',
       '--port', '31337',
       '--host', '192.168.1.1',
-      '--reporter', 'json'
+      '--reporter', 'json',
+      '--backend', 'http://localhost:8080/logux',
+      '--control-password', 'secret'
     ],
     env: { }
   })
@@ -99,6 +101,8 @@ it('uses CLI args for options', () => {
   expect(options.reporter).toEqual('json')
   expect(options.cert).toBeUndefined()
   expect(options.key).toBeUndefined()
+  expect(options.backend).toEqual('http://localhost:8080/logux')
+  expect(options.controlPassword).toEqual('secret')
 })
 
 it('uses env for options', () => {
@@ -107,13 +111,17 @@ it('uses env for options', () => {
     env: {
       LOGUX_HOST: '127.0.1.1',
       LOGUX_PORT: 31337,
-      LOGUX_REPORTER: 'json'
+      LOGUX_REPORTER: 'json',
+      LOGUX_BACKEND: 'http://localhost:8080/logux',
+      LOGUX_CONTROL_PASSWORD: 'secret'
     }
   })
 
   expect(options.host).toEqual('127.0.1.1')
   expect(options.port).toEqual(31337)
   expect(options.reporter).toEqual('json')
+  expect(options.backend).toEqual('http://localhost:8080/logux')
+  expect(options.controlPassword).toEqual('secret')
 })
 
 it('uses combined options', () => {

@@ -8,12 +8,9 @@ let path = require('path')
 let Log = require('logux-core').Log
 let fs = require('fs')
 
-let createBackendProxy = require('../create-backend-proxy')
 let BaseServer = require('../base-server')
 let promisify = require('../promisify')
 let pkg = require('../package.json')
-
-jest.mock('../create-backend-proxy')
 
 const DEFAULT_OPTIONS = {
   subprotocol: '0.0.0',
@@ -180,19 +177,17 @@ it('throws without authenticator', () => {
   }).toThrowError(/authentication/)
 })
 
-it('uses 1337 port by default', () => {
+it('sets default ports and hosts', () => {
   app = createServer()
   expect(app.options.port).toEqual(1337)
+  expect(app.options.host).toEqual('127.0.0.1')
+  expect(app.options.controlPort).toEqual(1338)
+  expect(app.options.controlHost).toEqual('127.0.0.1')
 })
 
 it('uses user port', () => {
   app = createServer({ port: 31337 })
   expect(app.options.port).toEqual(31337)
-})
-
-it('uses 127.0.0.1 to bind server by default', () => {
-  app = createServer()
-  expect(app.options.host).toEqual('127.0.0.1')
 })
 
 it('throws a error on key without certificate', () => {
@@ -250,11 +245,8 @@ it('supports object in SSL key', () => {
 
 it('reporters on start listening', () => {
   let test = createReporter({
-    backend: {
-      host: '127.0.0.1',
-      port: 31338,
-      url: 'http://127.0.0.1:3000/logux'
-    }
+    controlPassword: 'a',
+    backend: 'http://127.0.0.1:3000/logux'
   })
 
   let promise = test.app.listen()
@@ -263,14 +255,15 @@ it('reporters on start listening', () => {
   return promise.then(() => {
     expect(test.reports).toEqual([
       ['listen', {
-        backendHost: '127.0.0.1',
-        backendPort: 31338,
-        backendSend: 'http://127.0.0.1:3000/logux',
+        controlProtected: true,
+        controlHost: '127.0.0.1',
+        controlPort: 1338,
         loguxServer: pkg.version,
         environment: 'test',
-        nodeId: 'server:uuid',
         subprotocol: '0.0.0',
         supports: '0.x',
+        backend: 'http://127.0.0.1:3000/logux',
+        nodeId: 'server:uuid',
         server: false,
         cert: false,
         host: '127.0.0.1',
@@ -1057,21 +1050,6 @@ it('checks callbacks in unknown type handler', () => {
   expect(() => {
     app.otherType({ access: () => true })
   }).toThrowError('Callbacks for unknown types are already defined')
-})
-
-it('sets default options for backend', () => {
-  app = createServer({
-    backend: {
-      password: 'a',
-      url: 'http://127.0.0.1/rails'
-    }
-  })
-  expect(createBackendProxy).toHaveBeenCalledWith(app, {
-    password: 'a',
-    host: '127.0.0.1',
-    port: 1338,
-    url: 'http://127.0.0.1/rails'
-  })
 })
 
 it('reports about useless actions', () => {

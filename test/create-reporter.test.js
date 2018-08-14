@@ -112,14 +112,15 @@ it('uses environment variable to detect environment', () => {
 
 it('reports listen', () => {
   check('listen', {
-    backendHost: '127.0.0.1',
-    backendPort: 31338,
-    backendSend: 'http://127.0.0.1:3000/logux',
+    controlProtected: true,
+    controlHost: '127.0.0.1',
+    controlPort: 31338,
     loguxServer: '0.0.0',
     environment: 'development',
-    nodeId: 'server:FnXaqDxY',
     subprotocol: '0.0.0',
     supports: '0.x',
+    backend: 'http://127.0.0.1:3000/logux',
+    nodeId: 'server:FnXaqDxY',
     server: false,
     cert: false,
     host: '127.0.0.1',
@@ -129,11 +130,14 @@ it('reports listen', () => {
 
 it('reports listen for production', () => {
   check('listen', {
+    controlProtected: true,
+    controlHost: '127.0.0.1',
+    controlPort: 31338,
     loguxServer: '0.0.0',
     environment: 'production',
-    nodeId: 'server:FnXaqDxY',
     subprotocol: '0.0.0',
     supports: '0.x',
+    nodeId: 'server:FnXaqDxY',
     server: false,
     cert: true,
     host: '127.0.0.1',
@@ -143,11 +147,13 @@ it('reports listen for production', () => {
 
 it('reports listen for custom domain', () => {
   check('listen', {
+    controlHost: '127.0.0.1',
+    controlPort: 31338,
     loguxServer: '0.0.0',
     environment: 'development',
-    nodeId: 'server:FnXaqDxY',
     subprotocol: '0.0.0',
     supports: '0.x',
+    nodeId: 'server:FnXaqDxY',
     server: true
   })
 })

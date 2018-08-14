@@ -99,19 +99,16 @@ function send (backend, command, chulkCallback, endCallback) {
   })
 }
 
-function createBackendProxy (server, options) {
-  if (!options.password) {
+function createBackendProxy (server) {
+  if (!server.options.controlPassword) {
     throw new Error(
-      'For security reasons you must set strong password ' +
-      'in `backend.password` option'
+      'If you set `backend` option you must also set strong password ' +
+      'in `controlPassword` option for security reasons'
     )
   }
-  if (!options.url) {
-    throw new Error('You must set `backend.url` option with address to backend')
-  }
 
-  let backend = url.parse(options.url)
-  backend.password = options.password
+  let backend = url.parse(server.options.backend)
+  backend.password = server.options.controlPassword
 
   let processing = []
 
@@ -201,7 +198,7 @@ function createBackendProxy (server, options) {
         res.end()
         return
       }
-      if (data.password !== options.password) {
+      if (data.password !== server.options.controlPassword) {
         res.statusCode = 403
         res.end()
         return

@@ -10,10 +10,8 @@ let destroyable = []
 let lastPort = 8111
 
 const OPTIONS = {
-  backend: {
-    password: '1234',
-    url: 'http://127.0.0.1:8110/path'
-  }
+  controlPassword: '1234',
+  backend: 'http://127.0.0.1:8110/path'
 }
 
 const ACTION = [
@@ -58,7 +56,7 @@ function createServerWithoutAuth (options) {
   options.port = lastPort
   options.subprotocol = '0.0.0'
   options.supports = '0.x'
-  options.backend.port = lastPort + 1
+  options.controlPort = lastPort + 1
 
   let server = new BaseServer(options)
   server.nodeId = 'server:uuid'
@@ -180,17 +178,11 @@ afterAll(() => {
 
 it('checks password option', () => {
   expect(() => {
-    createServer({ backend: { url: 'http://example.com' } })
+    createServer({ backend: 'http://example.com' })
   }).toThrowError(
-    'For security reasons you must set strong password ' +
-    'in `backend.password` option'
+    'If you set `backend` option you must also set strong password ' +
+    'in `controlPassword` option for security reasons'
   )
-})
-
-it('checks url option', () => {
-  expect(() => {
-    createServer({ backend: { password: '123' } })
-  }).toThrowError('You must set `backend.url` option with address to backend')
 })
 
 it('validates HTTP requests', () => {
@@ -254,10 +246,8 @@ it('creates and processes actions', () => {
 
 it('reports about network errors', () => {
   let app = createServer({
-    backend: {
-      password: '1234',
-      url: 'https://127.0.0.1:7110/'
-    }
+    controlPassword: '1234',
+    backend: 'https://127.0.0.1:7110/'
   })
   let errors = []
   app.on('error', e => {

@@ -50,9 +50,11 @@ const REPORTERS = {
       details.healthCheck = `${ httpProtocol }${ r.host }:${ r.port }/status`
     }
 
-    if (r.backendSend) {
-      details.backendListen = `http://${ r.backendHost }:${ r.backendPort }`
-      details.backendSend = r.backendSend
+    if (r.controlProtected) {
+      details.backendListen = `http://${ r.controlHost }:${ r.controlPort }`
+    }
+    if (r.backend) {
+      details.backendSend = r.backend
     }
 
     return { msg: 'Logux server is listening', details }

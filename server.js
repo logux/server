@@ -5,7 +5,8 @@ let BaseServer = require('./base-server')
 
 const AVAILABLE_OPTIONS = [
   'subprotocol', 'supports', 'timeout', 'ping', 'root', 'store', 'server',
-  'port', 'host', 'key', 'cert', 'env', 'bunyan', 'reporter', 'backend'
+  'port', 'host', 'key', 'cert', 'env', 'bunyan', 'reporter', 'backend',
+  'controlHost', 'controlPort', 'controlPassword'
 ]
 
 yargs
@@ -20,12 +21,10 @@ yargs
     type: 'number'
   })
   .option('key', {
-    alias: 'k',
     describe: 'Path to SSL key ',
     type: 'string'
   })
   .option('cert', {
-    alias: 'c',
     describe: 'Path to SSL certificate',
     type: 'string'
   })
@@ -35,9 +34,26 @@ yargs
     choices: ['human', 'json'],
     type: 'string'
   })
+  .option('backend', {
+    describe: 'Backend to process actions and authentication',
+    type: 'string'
+  })
+  .option('control-host', {
+    describe: 'Host to bind HTTP server to control Logux server',
+    type: 'string'
+  })
+  .option('control-port', {
+    describe: 'Port to bind HTTP server to control Logux server',
+    type: 'number'
+  })
+  .option('control-password', {
+    describe: 'Password to control Logux server',
+    type: 'string'
+  })
   .epilog(
-    'Environment variables: ' +
-    '\n  LOGUX_HOST, LOGUX_PORT, LOGUX_KEY, LOGUX_CERT, LOGUX_REPORTER'
+    'Environment variables: \n' +
+    '  LOGUX_HOST, LOGUX_PORT, LOGUX_KEY, LOGUX_CERT, LOGUX_REPORTER\n' +
+    '  LOGUX_CONTROL_HOST, LOGUX_CONTROL_PORT, LOGUX_CONTROL_PASSWORD'
   )
   .example('$0 --port 31337 --host 127.0.0.1')
   .example('LOGUX_PORT=1337 $0')
@@ -59,8 +75,13 @@ yargs
  *                                         to disconnect connection.
  * @param {number} [options.ping=10000] Milliseconds since last message to test
  *                                      connection by sending ping.
- * @param {BackedSettings} [options.backend] Settings to work with PHP,
- *                                           Ruby on Rails, or other backend.
+ * @param {string} [options.backend] URL to PHP, Ruby on Rails,
+ *                                   or other backend to process actions
+ *                                   and authentication.
+ * @param {number} [options.controlHost="127.0.0.1"] Host to bind HTTP server
+ *                                                   to control Logux server.
+ * @param {number} [options.controlPort=31338] Port to control the server.
+ * @param {string} [options.controlPassword] Password to control the server.
  * @param {"human"|"json"|function} [options.reporter="human"]
  *                                  Report process/errors to CLI in bunyan JSON
  *                                  or in human readable format. It can be also
@@ -133,9 +154,16 @@ class Server extends BaseServer {
 
     options.host = options.host || argv.h || env.LOGUX_HOST
     options.port = parseInt(options.port || argv.p || env.LOGUX_PORT, 10)
-    options.cert = options.cert || argv.c || env.LOGUX_CERT
-    options.key = options.key || argv.k || env.LOGUX_KEY
+    options.cert = options.cert || argv.cert || env.LOGUX_CERT
+    options.key = options.key || argv.key || env.LOGUX_KEY
     options.reporter = options.reporter || argv.r || env.LOGUX_REPORTER
+    options.backend = options.backend || argv.backend || env.LOGUX_BACKEND
+    options.controlHost = options.controlHost ||
+      argv['control-host'] || env.LOGUX_CONTROL_HOST
+    options.controlPort = parseInt(options.controlPort ||
+      argv['control-port'] || env.LOGUX_CONTROL_PORT)
+    options.controlPassword = options.controlPassword ||
+      argv['control-password'] || env.LOGUX_CONTROL_PASSWORD
     return options
   }
 
