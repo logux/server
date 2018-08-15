@@ -2,7 +2,7 @@ let http = require('http')
 
 let BaseServer = require('../base-server')
 
-let lastPort = 9111
+let lastPort = 7111
 function createServer (controlPassword) {
   lastPort += 2
   let server = new BaseServer({
