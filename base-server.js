@@ -67,7 +67,7 @@ function optionError (msg) {
  *                                   and authentication.
  * @param {number} [options.controlHost="127.0.0.1"] Host to bind HTTP server
  *                                                   to control Logux server.
- * @param {number} [options.controlPort=31338] Port to control the server.
+ * @param {number} [options.controlPort=1338] Port to control the server.
  * @param {string} [options.controlPassword] Password to control the server.
  * @param {Store} [options.store] Store to save log. Will be
  *                                {@link MemoryStore}, by default.
