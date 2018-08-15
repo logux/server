@@ -137,21 +137,24 @@ it('uses combined options', () => {
 
 it('uses arg, env, options in given priority', () => {
   let options1 = Server.loadOptions({
-    argv: ['', '--port', '31337'],
-    env: { LOGUX_PORT: 21337 }
-  }, { port: 11337 })
+    argv: ['', '--port', '31337'], env: { LOGUX_PORT: 21337 }
+  }, {
+    port: 11337 }
+  )
   let options2 = Server.loadOptions({
-    argv: ['', '--port', '31337'],
-    env: { LOGUX_PORT: 21337 }
+    argv: [], env: { LOGUX_PORT: 21337 }
+  }, {
+    port: 11337
   })
   let options3 = Server.loadOptions({
-    argv: [],
-    env: { LOGUX_PORT: 21337 }
+    argv: [], env: { }
+  }, {
+    port: 11337
   })
 
-  expect(options1.port).toEqual(11337)
-  expect(options2.port).toEqual(31337)
-  expect(options3.port).toEqual(21337)
+  expect(options1.port).toEqual(31337)
+  expect(options2.port).toEqual(21337)
+  expect(options3.port).toEqual(11337)
 })
 
 it('destroys everything on exit', () => checkOut('destroy.js'))

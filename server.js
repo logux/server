@@ -9,6 +9,32 @@ const AVAILABLE_OPTIONS = [
   'controlHost', 'controlPort', 'controlPassword'
 ]
 
+const ENVS = {
+  host: 'LOGUX_HOST',
+  port: 'LOGUX_PORT',
+  key: 'LOGUX_KEY',
+  cert: 'LOGUX_CERT',
+  reporter: 'LOGUX_REPORTER',
+  controlHost: 'LOGUX_CONTROL_HOST',
+  controlPort: 'LOGUX_CONTROL_PORT',
+  controlPassword: 'LOGUX_CONTROL_PASSWORD',
+  backend: 'LOGUX_BACKEND'
+}
+
+function envHelp () {
+  let lines = ['  ']
+  for (let key in ENVS) {
+    if (lines[lines.length - 1].length + ENVS[key].length + 2 > 80) {
+      lines.push('  ')
+    }
+    if (lines[lines.length - 1].length > 2) {
+      lines[lines.length - 1] += ', '
+    }
+    lines[lines.length - 1] += ENVS[key]
+  }
+  return lines.join('\n')
+}
+
 yargs
   .option('host', {
     alias: 'h',
@@ -50,11 +76,7 @@ yargs
     describe: 'Password to control Logux server',
     type: 'string'
   })
-  .epilog(
-    'Environment variables: \n' +
-    '  LOGUX_HOST, LOGUX_PORT, LOGUX_KEY, LOGUX_CERT, LOGUX_REPORTER\n' +
-    '  LOGUX_CONTROL_HOST, LOGUX_CONTROL_PORT, LOGUX_CONTROL_PASSWORD'
-  )
+  .epilog(`Environment variables: \n${ envHelp() }`)
   .example('$0 --port 31337 --host 127.0.0.1')
   .example('LOGUX_PORT=1337 $0')
   .locale('en')
@@ -135,7 +157,8 @@ class Server extends BaseServer {
    * Load options from command-line arguments and/or environment
    *
    * @param {object} process Current process object.
-   * @param {object} options Server options.
+   * @param {object} defaults Default server options. Arguments and environment
+   *                          variables will override them.
    * @return {object} Parsed options object.
    *
    * @example
@@ -146,25 +169,21 @@ class Server extends BaseServer {
    *   port: 31337
    * }))
    */
-  static loadOptions (process, options) {
-    options = options || { }
-
+  static loadOptions (process, defaults = { }) {
     let argv = yargs.parse(process.argv)
-    let env = process.env
+    let opts = { }
 
-    options.host = options.host || argv.h || env.LOGUX_HOST
-    options.port = parseInt(options.port || argv.p || env.LOGUX_PORT, 10)
-    options.cert = options.cert || argv.cert || env.LOGUX_CERT
-    options.key = options.key || argv.key || env.LOGUX_KEY
-    options.reporter = options.reporter || argv.r || env.LOGUX_REPORTER
-    options.backend = options.backend || argv.backend || env.LOGUX_BACKEND
-    options.controlHost = options.controlHost ||
-      argv['control-host'] || env.LOGUX_CONTROL_HOST
-    options.controlPort = parseInt(options.controlPort ||
-      argv['control-port'] || env.LOGUX_CONTROL_PORT)
-    options.controlPassword = options.controlPassword ||
-      argv['control-password'] || env.LOGUX_CONTROL_PASSWORD
-    return options
+    for (let name of AVAILABLE_OPTIONS) {
+      let arg = name.replace(/[A-Z]/g, char => '-' + char.toLowerCase())
+      opts[name] = argv[arg] ||
+                   process.env[ENVS[name]] ||
+                   defaults[name]
+    }
+
+    opts.port = parseInt(opts.port, 10)
+    opts.controlPort = parseInt(opts.controlPort, 10)
+
+    return opts
   }
 
   constructor (options) {
