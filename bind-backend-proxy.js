@@ -85,10 +85,9 @@ function send (backend, command, chulkCallback, endCallback) {
 
 function bindBackendProxy (app) {
   if (!app.options.controlPassword) {
-    throw new Error(
-      'If you set `backend` option you must also set strong password ' +
-      'in `controlPassword` option for security reasons'
-    )
+    let e = new Error('`backend` requires also `controlPassword` option')
+    e.code = 'LOGUX_NO_CONTROL_PASSWORD'
+    throw e
   }
 
   let backend = url.parse(app.options.backend)

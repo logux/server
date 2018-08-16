@@ -88,22 +88,12 @@ it('checks password', () => {
   })
 })
 
-it('shows help on template password', () => {
-  app = createServer('secret')
-  return app.listen().then(() => {
-    return request('GET', '/prometheus?PASSWORD')
-  }).catch(error => {
-    expect(error.statusCode).toEqual(400)
-    expect(error.message).toContain('real control password')
-  })
-})
-
 it('shows error on missed password', () => {
   app = createServer(undefined)
   return app.listen().then(() => {
     return request('GET', '/prometheus?secret')
   }).catch(error => {
     expect(error.statusCode).toEqual(403)
-    expect(error.message).toContain('control password')
+    expect(error.message).toContain('controlPassword')
   })
 })

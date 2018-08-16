@@ -1,7 +1,10 @@
-const MAX_VERSION = 0
-
 let http = require('http')
 let url = require('url')
+
+const MAX_VERSION = 0
+const NO_PASSWORD = 'Set `controlPassword` option for Logux ' +
+                    'to have access to this page.\n' +
+                    'Run `npx nanoid-cli` to generate secure password.'
 
 function isValidBody (body) {
   if (typeof body !== 'object') return false
@@ -68,15 +71,7 @@ function startControlServer (app) {
       if (!rule.safe) {
         if (!app.options.controlPassword) {
           res.statusCode = 403
-          res.end('Set control password for Logux to give access to this page')
-          return
-        }
-        if (reqUrl.query === 'PASSWORD') {
-          res.statusCode = 400
-          res.end(
-            'Replace PASSWORD in URL to real control password ' +
-            'from Logux server options'
-          )
+          res.end(NO_PASSWORD)
           return
         } else if (reqUrl.query !== app.options.controlPassword) {
           res.statusCode = 403

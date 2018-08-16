@@ -4,13 +4,13 @@ let HumanFormatter = require('./human-formatter')
 
 const ERROR_CODES = {
   EADDRINUSE: e => ({
-    msg: `Port \`:${ e.port }\` already in use`,
+    msg: `Port \`${ e.port }\` already in use`,
     note: 'Another Logux server or other app already running on this port. ' +
           'Maybe you didn’t not stop server from other project ' +
           'or previous version of this server was not killed.'
   }),
   EACCES: e => ({
-    msg: `You are not allowed to run server on port \`:${ e.port }\``,
+    msg: `You are not allowed to run server on port \`${ e.port }\``,
     note: 'Try to change user or use port >= 1024'
   }),
   LOGUX_UNKNOWN_OPTION: e => ({
@@ -21,6 +21,10 @@ const ERROR_CODES = {
   LOGUX_WRONG_OPTIONS: e => ({
     msg: e.message,
     note: 'Check server constructor and Logux Server documentation'
+  }),
+  LOGUX_NO_CONTROL_PASSWORD: e => ({
+    msg: e.message,
+    note: 'Run `npx nanoid-cli` to generate secure password'
   })
 }
 
@@ -50,8 +54,8 @@ const REPORTERS = {
 
     let controlDomain = `http://${ r.controlHost }:${ r.controlPort }/`
     details.healthCheck = controlDomain + 'status'
-    if (r.controlProtected) {
-      details.prometheus = controlDomain + 'prometheus?PASSWORD'
+    if (r.controlPassword) {
+      details.prometheus = controlDomain + 'prometheus?' + r.controlPassword
       details.backendListen = controlDomain
     }
 

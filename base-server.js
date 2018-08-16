@@ -419,7 +419,7 @@ class BaseServer {
       })
     }).then(() => {
       this.reporter('listen', {
-        controlProtected: !!this.options.controlPassword,
+        controlPassword: this.options.controlPassword,
         controlHost: this.options.controlHost,
         controlPort: this.options.controlPort,
         loguxServer: pkg.version,

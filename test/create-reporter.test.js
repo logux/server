@@ -112,7 +112,7 @@ it('uses environment variable to detect environment', () => {
 
 it('reports listen', () => {
   check('listen', {
-    controlProtected: true,
+    controlPassword: 'RhBaK0kuOBtqJalq2C4df',
     controlHost: '127.0.0.1',
     controlPort: 31338,
     loguxServer: '0.0.0',
@@ -130,7 +130,7 @@ it('reports listen', () => {
 
 it('reports listen for production', () => {
   check('listen', {
-    controlProtected: true,
+    controlPassword: 'RhBaK0kuOBtqJalq2C4df',
     controlHost: '127.0.0.1',
     controlPort: 31338,
     loguxServer: '0.0.0',
@@ -300,6 +300,14 @@ it('reports LOGUX_WRONG_OPTIONS error', () => {
   let err = {
     code: 'LOGUX_WRONG_OPTIONS',
     message: 'Missed client subprotocol requirements'
+  }
+  check('error', { fatal: true, err })
+})
+
+it('reports LOGUX_NO_CONTROL_PASSWORD error', () => {
+  let err = {
+    code: 'LOGUX_NO_CONTROL_PASSWORD',
+    message: '`backend` requires also `controlPassword` option'
   }
   check('error', { fatal: true, err })
 })

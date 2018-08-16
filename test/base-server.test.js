@@ -249,7 +249,7 @@ it('supports object in SSL key', () => {
 
 it('reporters on start listening', () => {
   let test = createReporter({
-    controlPassword: 'a',
+    controlPassword: 'secret',
     backend: 'http://127.0.0.1:3000/logux'
   })
 
@@ -259,7 +259,7 @@ it('reporters on start listening', () => {
   return promise.then(() => {
     expect(test.reports).toEqual([
       ['listen', {
-        controlProtected: true,
+        controlPassword: 'secret',
         controlHost: '127.0.0.1',
         controlPort: 1338,
         loguxServer: pkg.version,

@@ -197,6 +197,8 @@ it('shows help about unknown option', () => checkError('unknown.js'))
 
 it('shows help about missed option', () => checkError('missed.js'))
 
+it('shows help about missed password', () => checkError('no-password.js'))
+
 it('disables colors for constructor errors', () => {
   return checkError('missed.js', {
     env: Object.assign({ }, process.env, {

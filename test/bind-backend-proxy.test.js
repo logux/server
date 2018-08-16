@@ -179,10 +179,7 @@ afterAll(() => {
 it('checks password option', () => {
   expect(() => {
     createServer({ backend: 'http://example.com' })
-  }).toThrowError(
-    'If you set `backend` option you must also set strong password ' +
-    'in `controlPassword` option for security reasons'
-  )
+  }).toThrowError(/`controlPassword` option/)
 })
 
 it('validates HTTP requests', () => {

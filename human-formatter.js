@@ -46,7 +46,7 @@ function label (c, type, color, labelBg, labelText, message) {
   let messageFormat = c.bold[color]
   let pagged = rightPag(labelFormat(type), 8)
   let time = c.dim(`at ${ yyyymmdd.withTime(new Date()) }`)
-  let highlighted = message.replace(/`([^`]+)`/, c.yellow('$1'))
+  let highlighted = message.replace(/`([^`]+)`/g, c.yellow('$1'))
   return `${ pagged }${ messageFormat(highlighted) } ${ time }`
 }
 
@@ -84,13 +84,13 @@ function formatValue (c, value) {
 }
 
 function formatObject (c, obj) {
-  let items = Object.keys(obj).map(k => k + ': ' + formatValue(c, obj[k]))
-  return `{ ${ items.join(', ') } }`
+  let items = Object.keys(obj).map(k => `${ k }: ${ formatValue(c, obj[k]) }`)
+  return '{ ' + items.join(', ') + ' }'
 }
 
 function formatArray (c, array) {
   let items = array.map(i => formatValue(c, i))
-  return `[${ items.join(', ') }]`
+  return '[' + items.join(', ') + ']'
 }
 
 function formatActionId (c, id) {
@@ -205,6 +205,7 @@ class HumanFormatter extends stream.Writable {
     if (record.note) {
       let note = record.note
       if (typeof note === 'string') {
+        note = note.replace(/`([^`]+)`/g, c.bold('$1'))
         note = splitByLength(note, 80 - PADDING.length)
       }
       message.push(note.map(i => PADDING + c.grey(i)).join(NEXT_LINE))
