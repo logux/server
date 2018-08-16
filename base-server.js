@@ -1026,6 +1026,22 @@ class BaseServer {
     }
     return true
   }
+
+  rememberBadAuth (ip) {
+    this.authAttempts[ip] = (this.authAttempts[ip] || 0) + 1
+    this.setTimeout(() => {
+      if (this.authAttempts[ip] === 1) {
+        delete this.authAttempts[ip]
+      } else {
+        this.authAttempts[ip] -= 1
+      }
+    }, 3000)
+  }
+
+  isBruteforce (ip) {
+    let attempts = this.authAttempts[ip]
+    return attempts && attempts >= 3
+  }
 }
 
 module.exports = BaseServer

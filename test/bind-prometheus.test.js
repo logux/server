@@ -1,3 +1,4 @@
+let delay = require('nanodelay')
 let http = require('http')
 
 let BaseServer = require('../base-server')
@@ -95,5 +96,29 @@ it('shows error on missed password', () => {
   }).catch(error => {
     expect(error.statusCode).toEqual(403)
     expect(error.message).toContain('controlPassword')
+  })
+})
+
+it('has bruteforce protection', () => {
+  app = createServer('secret')
+  return app.listen().then(() => {
+    return request('GET', '/prometheus?wrong')
+  }).catch(error => {
+    expect(error.statusCode).toEqual(403)
+    return request('GET', '/prometheus?wrong')
+  }).catch(error => {
+    expect(error.statusCode).toEqual(403)
+    return request('GET', '/prometheus?wrong')
+  }).catch(error => {
+    expect(error.statusCode).toEqual(403)
+    return request('GET', '/prometheus?wrong')
+  }).catch(error => {
+    expect(error.statusCode).toEqual(429)
+  }).then(() => {
+    return delay(3050)
+  }).then(() => {
+    return request('GET', '/prometheus?wrong')
+  }).catch(error => {
+    expect(error.statusCode).toEqual(403)
   })
 })

@@ -197,7 +197,7 @@ class ServerClient {
 
     return this.app.authenticator(this.userId, credentials, this)
       .then(result => {
-        if (this.attempts() >= 3) {
+        if (this.app.isBruteforce(this.remoteAddress)) {
           return Promise.reject(new SyncError('bruteforce'))
         }
 
@@ -208,7 +208,6 @@ class ServerClient {
             this.app.reporter('zombie', { nodeId: zombie.nodeId })
             zombie.destroy()
           }
-          delete this.app.authAttempts[this.remoteAddress]
           this.app.nodeIds[this.nodeId] = this
           if (this.userId) {
             if (!this.app.users[this.userId]) this.app.users[this.userId] = []
@@ -217,21 +216,10 @@ class ServerClient {
           this.app.reporter('authenticated', reportDetails(this))
         } else {
           this.app.reporter('unauthenticated', reportDetails(this))
-          this.app.authAttempts[this.remoteAddress] = this.attempts() + 1
-          this.app.setTimeout(() => {
-            if (this.attempts() === 1) {
-              delete this.app.authAttempts[this.remoteAddress]
-            } else {
-              this.app.authAttempts[this.remoteAddress] -= 1
-            }
-          }, 3000)
+          this.app.rememberBadAuth(this.remoteAddress)
         }
         return result
       })
-  }
-
-  attempts () {
-    return this.app.authAttempts[this.remoteAddress] || 0
   }
 
   outMap (action, meta) {

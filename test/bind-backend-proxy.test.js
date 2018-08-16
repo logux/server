@@ -459,3 +459,26 @@ it('reacts on backend error', () => {
     expect(errors).toEqual(['Backend error', 'Backend error during processing'])
   })
 })
+
+it('has bruteforce protection', () => {
+  let app = createServer(OPTIONS)
+  return app.listen().then(() => {
+    return send({ version: 0, password: 'wrong', commands: [] })
+  }).then(code => {
+    expect(code).toEqual(403)
+    return send({ version: 0, password: 'wrong', commands: [] })
+  }).then(code => {
+    expect(code).toEqual(403)
+    return send({ version: 0, password: 'wrong', commands: [] })
+  }).then(code => {
+    expect(code).toEqual(403)
+    return send({ version: 0, password: 'wrong', commands: [] })
+  }).then(code => {
+    expect(code).toEqual(429)
+    return delay(3050)
+  }).then(() => {
+    return send({ version: 0, password: 'wrong', commands: [] })
+  }).then(code => {
+    expect(code).toEqual(403)
+  })
+})

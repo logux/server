@@ -51,9 +51,13 @@ function startControlServer (app) {
         } else if (body.version > MAX_VERSION) {
           res.statusCode = 400
           res.end('Unknown version')
+        } else if (app.isBruteforce(req.connection.remoteAddress)) {
+          res.statusCode = 429
+          res.end('Too many wrong password attempts')
         } else if (body.password !== app.options.controlPassword) {
           res.statusCode = 403
           res.end('Wrong password')
+          app.rememberBadAuth(req.connection.remoteAddress)
         } else {
           for (let i of body.commands) {
             if (!rule.isValid(i)) {
@@ -73,9 +77,14 @@ function startControlServer (app) {
           res.statusCode = 403
           res.end(NO_PASSWORD)
           return
+        } else if (app.isBruteforce(req.connection.remoteAddress)) {
+          res.statusCode = 429
+          res.end('Too many wrong password attempts')
+          return
         } else if (reqUrl.query !== app.options.controlPassword) {
           res.statusCode = 403
           res.end('Wrong password')
+          app.rememberBadAuth(req.connection.remoteAddress)
           return
         }
       }
