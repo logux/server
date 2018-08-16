@@ -120,9 +120,9 @@ yargs
  *                                                   be `"development"`.
  * @param {http.Server} [options.server] HTTP server to connect WebSocket
  *                                       server to it. Same as in `ws.Server`.
- * @param {number} [options.port=1337] Port to bind server. It will create
- *                                     HTTP server manually to connect
- *                                     WebSocket server to it.
+ * @param {number} [options.port=31337] Port to bind server. It will create
+ *                                      HTTP server manually to connect
+ *                                      WebSocket server to it.
  * @param {string} [options.host="127.0.0.1"] IP-address to bind server.
  * @param {string} [options.key] SSL key or path to it. Path could be relative
  *                               from server root. It is required in production

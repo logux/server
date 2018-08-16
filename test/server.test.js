@@ -87,7 +87,7 @@ it('uses CLI args for options', () => {
   let options = Server.loadOptions({
     argv: [
       '',
-      '--port', '31337',
+      '--port', '1337',
       '--host', '192.168.1.1',
       '--reporter', 'json',
       '--backend', 'http://localhost:8080/logux',
@@ -97,7 +97,7 @@ it('uses CLI args for options', () => {
   })
 
   expect(options.host).toEqual('192.168.1.1')
-  expect(options.port).toEqual(31337)
+  expect(options.port).toEqual(1337)
   expect(options.reporter).toEqual('json')
   expect(options.cert).toBeUndefined()
   expect(options.key).toBeUndefined()

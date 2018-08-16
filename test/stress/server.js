@@ -5,12 +5,10 @@ let delay = require('nanodelay')
 let Server = require('../../server')
 
 let app = new Server({
+  controlPassword: 'secret',
   subprotocol: '1.0.0',
   supports: '1.0.0',
-  backend: {
-    url: 'http://localhost:1339',
-    password: 'secret'
-  }
+  backend: 'http://localhost:31339'
 })
 
 app.auth((user, token) => {

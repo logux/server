@@ -67,7 +67,7 @@ function optionError (msg) {
  *                                   and authentication.
  * @param {number} [options.controlHost="127.0.0.1"] Host to bind HTTP server
  *                                                   to control Logux server.
- * @param {number} [options.controlPort=1338] Port to control the server.
+ * @param {number} [options.controlPort=31338] Port to control the server.
  * @param {string} [options.controlPassword] Password to control the server.
  * @param {Store} [options.store] Store to save log. Will be
  *                                {@link MemoryStore}, by default.
@@ -83,9 +83,9 @@ function optionError (msg) {
  * @param {number} [options.pid] Process ID, to display in reporter.
  * @param {http.Server} [options.server] HTTP server to connect WebSocket
  *                                       server to it. Same as in `ws.Server`.
- * @param {number} [options.port=1337] Port to bind server. It will create
- *                                     HTTP server manually to connect
- *                                     WebSocket server to it.
+ * @param {number} [options.port=31337] Port to bind server. It will create
+ *                                      HTTP server manually to connect
+ *                                      WebSocket server to it.
  * @param {string} [options.host="127.0.0.1"] IP-address to bind server.
  * @param {string} [options.key] SSL key or path to it. Path could be relative
  *                               from server root. It is required in production
@@ -141,10 +141,10 @@ class BaseServer {
     }
 
     if (!this.options.server) {
-      if (!this.options.port) this.options.port = 1337
+      if (!this.options.port) this.options.port = 31337
       if (!this.options.host) this.options.host = '127.0.0.1'
     }
-    if (!this.options.controlPort) this.options.controlPort = 1338
+    if (!this.options.controlPort) this.options.controlPort = 31338
     if (!this.options.controlHost) this.options.controlHost = '127.0.0.1'
 
     /**

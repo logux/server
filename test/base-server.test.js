@@ -183,15 +183,15 @@ it('throws without authenticator', () => {
 
 it('sets default ports and hosts', () => {
   app = createServer()
-  expect(app.options.port).toEqual(1337)
+  expect(app.options.port).toEqual(31337)
   expect(app.options.host).toEqual('127.0.0.1')
-  expect(app.options.controlPort).toEqual(1338)
+  expect(app.options.controlPort).toEqual(31338)
   expect(app.options.controlHost).toEqual('127.0.0.1')
 })
 
 it('uses user port', () => {
-  app = createServer({ port: 31337 })
-  expect(app.options.port).toEqual(31337)
+  app = createServer({ port: 1337 })
+  expect(app.options.port).toEqual(1337)
 })
 
 it('throws a error on key without certificate', () => {
@@ -261,7 +261,7 @@ it('reporters on start listening', () => {
       ['listen', {
         controlPassword: 'secret',
         controlHost: '127.0.0.1',
-        controlPort: 1338,
+        controlPort: 31338,
         loguxServer: pkg.version,
         environment: 'test',
         subprotocol: '0.0.0',

@@ -16,7 +16,7 @@ function send (action, meta) {
     let req = http.request({
       method: 'POST',
       host: 'localhost',
-      port: 1338,
+      port: 31338,
       headers: {
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(body)
@@ -75,4 +75,4 @@ let server = http.createServer((req, res) => {
   })
 })
 
-server.listen(1339)
+server.listen(31339)

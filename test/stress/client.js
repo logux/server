@@ -27,7 +27,7 @@ function tick () {
   if (stop) return
 
   let nodeId = `1:${ ++index }`
-  let connection = new WsConnection('ws://localhost:1337', WebSocket)
+  let connection = new WsConnection('ws://localhost:31337', WebSocket)
   let log = new Log({ nodeId, store: new MemoryStore() })
   let node = new ClientNode(nodeId, log, connection, {
     credentials: 'secret',

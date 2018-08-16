@@ -124,7 +124,7 @@ it('reports listen', () => {
     server: false,
     cert: false,
     host: '127.0.0.1',
-    port: '31337'
+    port: 31337
   })
 })
 
@@ -141,7 +141,7 @@ it('reports listen for production', () => {
     server: false,
     cert: true,
     host: '127.0.0.1',
-    port: '1337'
+    port: 31337
   })
 })
 
@@ -280,7 +280,7 @@ it('reports destroy', () => {
 })
 
 it('reports EACCES error', () => {
-  check('error', { fatal: true, err: { code: 'EACCES', port: 1337 } })
+  check('error', { fatal: true, err: { code: 'EACCES', port: 80 } })
 })
 
 it('reports EADDRINUSE error', () => {

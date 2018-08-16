@@ -158,7 +158,7 @@ You can run your server with:
 npm start
 ```
 
-Use `ws://localhost:1337` URL in [Logux Client].
+Use `ws://localhost:31337` URL in [Logux Client].
 
 [Logux Client]: https://github.com/logux/logux-client
 
