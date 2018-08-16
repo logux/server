@@ -2,7 +2,7 @@ let http = require('http')
 
 let BaseServer = require('../base-server')
 
-let lastPort = 8111
+let lastPort = 10111
 function createServer () {
   lastPort += 2
   let server = new BaseServer({
@@ -69,7 +69,7 @@ it('expects GET for health check', () => {
   })
 })
 
-it('response 404', () => {
+it('responses 404', () => {
   app = createServer()
   return app.listen().then(() => {
     return request('GET', '/unknown')
