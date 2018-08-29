@@ -62,6 +62,15 @@ it('has prometheus report', () => {
   })
 })
 
+it('supports wrong URL encoding', () => {
+  app = createServer('secret')
+  return app.listen().then(() => {
+    return request('GET', '/prometheus%3Fsecret')
+  }).then(response => {
+    expect(response).toContain('nodejs_heap_size_total_bytes ')
+  })
+})
+
 it('reports internal things', () => {
   app = createServer('secret')
   return app.listen().then(() => {

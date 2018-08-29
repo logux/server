@@ -20,7 +20,9 @@ function isValidBody (body) {
 
 function startControlServer (app) {
   let httpServer = http.createServer((req, res) => {
-    let reqUrl = url.parse(req.url)
+    let urlString = req.url
+    if (/^\/\w+%3F/.test(urlString)) urlString = decodeURIComponent(urlString)
+    let reqUrl = url.parse(urlString)
     let rule = app.controls[reqUrl.pathname]
     if (!rule) {
       res.statusCode = 404
