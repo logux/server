@@ -17,9 +17,9 @@
     "chalk": "^2.4.1",
     "logux-core": "logux/logux-core",
     "nanoevents": "^1.0.5",
-    "nanoid": "^1.2.0",
+    "nanoid": "^1.2.2",
     "prom-client": "^11.1.1",
-    "semver": "^5.5.0",
+    "semver": "^5.5.1",
     "strip-ansi": "^4.0.0",
     "url-pattern": "^1.0.3",
     "ws": "^6.0.0",
@@ -29,17 +29,17 @@
   "devDependencies": {
     "clean-publish": "^1.0.9",
     "cross-spawn": "^6.0.5",
-    "eslint": "^5.3.0",
+    "eslint": "^5.4.0",
     "eslint-ci": "^0.1.1",
-    "eslint-config-logux": "^24.0.0",
-    "eslint-config-standard": "^11.0.0",
+    "eslint-config-logux": "^25.0.1",
+    "eslint-config-standard": "^12.0.0",
     "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-jest": "^21.21.0",
+    "eslint-plugin-jest": "^21.22.0",
     "eslint-plugin-node": "^7.0.1",
     "eslint-plugin-prefer-let": "^1.0.1",
-    "eslint-plugin-promise": "^3.8.0",
+    "eslint-plugin-promise": "^4.0.0",
     "eslint-plugin-security": "^1.4.0",
-    "eslint-plugin-standard": "^3.1.0",
+    "eslint-plugin-standard": "^4.0.0",
     "jest": "^23.5.0",
     "jsdoc": "^3.5.5",
     "lint-staged": "^7.2.2",
@@ -76,7 +76,17 @@
     ]
   },
   "eslintConfig": {
-    "extends": "eslint-config-logux/node"
+    "extends": "eslint-config-logux/node",
+    "overrides": [
+      {
+        "files": [
+          "*.test.js"
+        ],
+        "rules": {
+          "jest/expect-expect": "off"
+        }
+      }
+    ]
   },
   "yaspeller": {
     "lang": "en",
