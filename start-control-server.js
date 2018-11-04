@@ -22,6 +22,7 @@ function startControlServer (app) {
   let httpServer = http.createServer((req, res) => {
     let urlString = req.url
     if (/^\/\w+%3F/.test(urlString)) urlString = decodeURIComponent(urlString)
+    /* eslint-disable-next-line node/no-deprecated-api */
     let reqUrl = url.parse(urlString)
     let rule = app.controls[reqUrl.pathname]
     if (!rule) {

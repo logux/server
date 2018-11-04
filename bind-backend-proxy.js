@@ -90,6 +90,7 @@ function bindBackendProxy (app) {
     throw e
   }
 
+  /* eslint-disable-next-line node/no-deprecated-api */
   let backend = url.parse(app.options.backend)
   backend.password = app.options.controlPassword
 
