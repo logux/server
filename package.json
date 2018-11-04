@@ -6,6 +6,13 @@
     "logux",
     "server"
   ],
+  "scripts": {
+    "spellcheck": "yarn docs && yaspeller-ci *.md docs/*.html",
+    "clean": "rimraf docs/ coverage/",
+    "lint": "eslint-ci *.js test/{**/,}*.js",
+    "docs": "jsdoc -d docs/ *.js",
+    "test": "jest --runInBand --coverage && yarn lint && yarn spellcheck"
+  },
   "author": "Andrey Sitnik <andrey@sitnik.ru>",
   "license": "MIT",
   "repository": "logux/logux-server",
@@ -47,13 +54,6 @@
     "nanodelay": "^0.1.4",
     "rimraf": "^2.6.2",
     "yaspeller-ci": "^1.0.0"
-  },
-  "scripts": {
-    "spellcheck": "yarn docs && yaspeller-ci *.md docs/*.html",
-    "clean": "rimraf docs/ coverage/",
-    "lint": "eslint-ci *.js test/{**/,}*.js",
-    "docs": "jsdoc -d docs/ *.js",
-    "test": "jest --runInBand --coverage && yarn lint && yarn spellcheck"
   },
   "husky": {
     "hooks": {
