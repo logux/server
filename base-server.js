@@ -243,8 +243,8 @@ class BaseServer {
         this.reporter('error', { err, actionId: meta.id })
       } else if (err.nodeId) {
         this.reporter('error', { err, nodeId: err.nodeId })
-      } else if (err.clientId) {
-        this.reporter('error', { err, clientId: err.clientId })
+      } else if (err.guestId) {
+        this.reporter('error', { err, guestId: err.guestId })
       } else {
         this.reporter('error', { err, fatal: true })
       }
@@ -253,13 +253,13 @@ class BaseServer {
     this.on('clientError', err => {
       if (err.nodeId) {
         this.reporter('clientError', { err, nodeId: err.nodeId })
-      } else if (err.clientId) {
-        this.reporter('clientError', { err, clientId: err.clientId })
+      } else if (err.guestId) {
+        this.reporter('clientError', { err, guestId: err.guestId })
       }
     })
     this.on('connected', client => {
       this.reporter('connect', {
-        clientId: client.key,
+        guestId: client.key,
         ipAddress: client.remoteAddress
       })
     })
@@ -267,7 +267,7 @@ class BaseServer {
       if (client.nodeId) {
         this.reporter('disconnect', { nodeId: client.nodeId })
       } else {
-        this.reporter('disconnect', { clientId: client.key })
+        this.reporter('disconnect', { guestId: client.key })
       }
     })
 

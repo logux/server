@@ -159,13 +159,13 @@ it('reports listen for custom domain', () => {
 })
 
 it('reports connect', () => {
-  check('connect', { clientId: '670', ipAddress: '10.110.6.56' })
+  check('connect', { guestId: '670', ipAddress: '10.110.6.56' })
 })
 
 it('reports authenticated', () => {
   check('authenticated', {
     subprotocol: '1.0.0',
-    clientId: '670',
+    guestId: '670',
     nodeId: 'admin:100:uImkcF4z'
   })
 })
@@ -173,7 +173,7 @@ it('reports authenticated', () => {
 it('reports authenticated without user ID', () => {
   check('authenticated', {
     subprotocol: '1.0.0',
-    clientId: '670',
+    guestId: '670',
     nodeId: 'uImkcF4z'
   })
 })
@@ -181,7 +181,7 @@ it('reports authenticated without user ID', () => {
 it('reports unauthenticated', () => {
   check('unauthenticated', {
     subprotocol: '1.0.0',
-    clientId: '670',
+    guestId: '670',
     nodeId: '100:uImkcF4z'
   })
 })
@@ -268,7 +268,7 @@ it('reports disconnect', () => {
 })
 
 it('reports disconnect from unauthenticated user', () => {
-  check('disconnect', { clientId: '670' })
+  check('disconnect', { guestId: '670' })
 })
 
 it('reports zombie', () => {
@@ -325,12 +325,12 @@ it('reports error from action', () => {
 
 it('reports sync error', () => {
   let err = new SyncError('unknown-message', 'bad', true)
-  check('error', { clientId: '670', err })
+  check('error', { guestId: '670', err })
 })
 
 it('reports error from client', () => {
   let err = new SyncError('timeout', 5000, true)
-  check('clientError', { clientId: '670', err })
+  check('clientError', { guestId: '670', err })
 })
 
 it('reports error from node', () => {

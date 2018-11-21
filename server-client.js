@@ -8,7 +8,7 @@ let ALLOWED_META = require('./allowed-meta')
 function reportDetails (client) {
   return {
     subprotocol: client.node.remoteSubprotocol,
-    clientId: client.key,
+    guestId: client.key,
     nodeId: client.nodeId
   }
 }
@@ -17,7 +17,7 @@ function reportClient (client, obj) {
   if (client.nodeId) {
     obj.nodeId = client.nodeId
   } else {
-    obj.clientId = client.key
+    obj.guestId = client.key
   }
   return obj
 }
