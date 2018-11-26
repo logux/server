@@ -244,8 +244,8 @@ class BaseServer {
         this.reporter('error', { err, actionId: meta.id })
       } else if (err.nodeId) {
         this.reporter('error', { err, nodeId: err.nodeId })
-      } else if (err.guestId) {
-        this.reporter('error', { err, guestId: err.guestId })
+      } else if (err.connectionId) {
+        this.reporter('error', { err, connectionId: err.connectionId })
       } else {
         this.reporter('error', { err, fatal: true })
       }
@@ -254,13 +254,13 @@ class BaseServer {
     this.on('clientError', err => {
       if (err.nodeId) {
         this.reporter('clientError', { err, nodeId: err.nodeId })
-      } else if (err.guestId) {
-        this.reporter('clientError', { err, guestId: err.guestId })
+      } else if (err.connectionId) {
+        this.reporter('clientError', { err, connectionId: err.connectionId })
       }
     })
     this.on('connected', client => {
       this.reporter('connect', {
-        guestId: client.key,
+        connectionId: client.key,
         ipAddress: client.remoteAddress
       })
     })
@@ -268,7 +268,7 @@ class BaseServer {
       if (client.nodeId) {
         this.reporter('disconnect', { nodeId: client.nodeId })
       } else {
-        this.reporter('disconnect', { guestId: client.key })
+        this.reporter('disconnect', { connectionId: client.key })
       }
     })
 
@@ -279,11 +279,11 @@ class BaseServer {
      * @type {ServerClient[]}
      *
      * @example
-     * for (let i in server.clients) {
-     *   console.log(server.clients[i].remoteAddress)
+     * for (let i in server.connected) {
+     *   console.log(server.connected[i].remoteAddress)
      * }
      */
-    this.clients = { }
+    this.connected = { }
     this.nodeIds = { }
     this.clientIds = { }
     this.users = { }
@@ -318,7 +318,7 @@ class BaseServer {
     }
 
     this.unbind.push(() => {
-      for (let i in this.clients) this.clients[i].destroy()
+      for (let i in this.connected) this.connected[i].destroy()
       for (let i in this.timeouts) {
         clearTimeout(this.timeouts[i])
       }
@@ -676,10 +676,10 @@ class BaseServer {
    * })
    */
   debugError (error) {
-    for (let i in this.clients) {
-      if (this.clients[i].connection.connected) {
+    for (let i in this.connected) {
+      if (this.connected[i].connection.connected) {
         try {
-          this.clients[i].connection.send(['debug', 'error', error.stack])
+          this.connected[i].connection.send(['debug', 'error', error.stack])
         } catch (e) { }
       }
     }
@@ -763,7 +763,7 @@ class BaseServer {
   addClient (connection) {
     this.lastClient += 1
     let node = new ServerClient(this, connection, this.lastClient)
-    this.clients[this.lastClient] = node
+    this.connected[this.lastClient] = node
     return this.lastClient
   }
 

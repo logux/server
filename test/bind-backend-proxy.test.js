@@ -31,7 +31,7 @@ function createConnection () {
 function createClient (server) {
   server.lastClient += 1
   let client = new ServerClient(server, createConnection(), server.lastClient)
-  server.clients[server.lastClient] = client
+  server.connected[server.lastClient] = client
   destroyable.push(client)
   return client
 }

@@ -52,7 +52,7 @@ function createReporter (opts) {
 function createClient (app) {
   app.lastClient += 1
   let client = new ServerClient(app, createConnection(), app.lastClient)
-  app.clients[app.lastClient] = client
+  app.connected[app.lastClient] = client
   destroyable.push(client)
   return client
 }
@@ -124,7 +124,7 @@ it('reports about connection', () => {
   })
   new ServerClient(test.app, createConnection(), 1)
   expect(test.reports).toEqual([['connect', {
-    guestId: '1', ipAddress: '127.0.0.1'
+    connectionId: '1', ipAddress: '127.0.0.1'
   }]])
   expect(fired).toEqual(['1'])
 })
@@ -165,7 +165,7 @@ it('removes itself on destroy', () => {
     expect(test.reports[4]).toEqual(['disconnect', { nodeId: '10:uuid' }])
 
     client2.destroy()
-    expect(test.app.clients).toEqual({ })
+    expect(test.app.connected).toEqual({ })
     expect(test.app.clientIds).toEqual({ })
     expect(test.app.nodeIds).toEqual({ })
     expect(test.app.users).toEqual({ })
@@ -180,7 +180,7 @@ it('reports client ID before authentication', () => {
 
   return client.connection.connect().then(() => {
     client.destroy()
-    expect(test.reports[1]).toEqual(['disconnect', { guestId: '1' }])
+    expect(test.reports[1]).toEqual(['disconnect', { connectionId: '1' }])
   })
 })
 
@@ -191,7 +191,7 @@ it('does not report users disconnects on server destroy', () => {
 
   return client.connection.connect().then(() => {
     test.app.destroy()
-    expect(test.app.clients).toEqual({ })
+    expect(test.app.connected).toEqual({ })
     expect(client.connection.connected).toBeFalsy()
     expect(test.names).toEqual(['connect', 'destroy'])
     expect(test.reports[1]).toEqual(['destroy', undefined])
@@ -220,7 +220,7 @@ it('reports on wrong authentication', () => {
   }).then(() => {
     expect(test.names).toEqual(['connect', 'unauthenticated', 'disconnect'])
     expect(test.reports[1]).toEqual(['unauthenticated', {
-      guestId: '1', nodeId: '10:uuid', subprotocol: '0.0.0'
+      connectionId: '1', nodeId: '10:uuid', subprotocol: '0.0.0'
     }])
   })
 })
@@ -289,7 +289,7 @@ it('reports on server in user name', () => {
   }).then(() => {
     expect(test.names).toEqual(['connect', 'unauthenticated', 'disconnect'])
     expect(test.reports[1]).toEqual(['unauthenticated', {
-      guestId: '1', nodeId: 'server:uuid', subprotocol: '0.0.0'
+      connectionId: '1', nodeId: 'server:uuid', subprotocol: '0.0.0'
     }])
   })
 })
@@ -317,7 +317,7 @@ it('authenticates user', () => {
     expect(test.app.users).toEqual({ 'a': [client] })
     expect(test.names).toEqual(['connect', 'authenticated'])
     expect(test.reports[1]).toEqual(['authenticated', {
-      guestId: '1', nodeId: 'a:b:uuid', subprotocol: '0.0.0'
+      connectionId: '1', nodeId: 'a:b:uuid', subprotocol: '0.0.0'
     }])
   })
 })
@@ -361,7 +361,7 @@ it('reports about synchronization errors', () => {
   }).then(() => {
     expect(test.names).toEqual(['connect', 'error'])
     expect(test.reports[1]).toEqual(['error', {
-      guestId: '1',
+      connectionId: '1',
       err: new SyncError('wrong-format', undefined, true)
     }])
   })
@@ -379,7 +379,7 @@ it('checks subprotocol', () => {
   }).then(() => {
     expect(test.names).toEqual(['connect', 'clientError', 'disconnect'])
     expect(test.reports[1]).toEqual(['clientError', {
-      guestId: '1',
+      connectionId: '1',
       err: new SyncError('wrong-subprotocol', {
         supported: '0.x', used: '1.0.0'
       })
@@ -427,7 +427,7 @@ it('disconnects zombie', () => {
     client2.auth({ }, '10:client:b')
     return Promise.resolve()
   }).then(() => {
-    expect(Object.keys(test.app.clients)).toEqual([client2.key])
+    expect(Object.keys(test.app.connected)).toEqual([client2.key])
     expect(test.names).toEqual([
       'connect',
       'connect',

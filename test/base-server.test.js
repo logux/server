@@ -317,8 +317,8 @@ it('creates a client on connection', () => {
       ws.onerror = reject
     })
   }).then(() => {
-    expect(Object.keys(app.clients)).toHaveLength(1)
-    expect(app.clients[1].remoteAddress).toEqual('127.0.0.1')
+    expect(Object.keys(app.connected)).toHaveLength(1)
+    expect(app.connected[1].remoteAddress).toEqual('127.0.0.1')
   })
 })
 
@@ -334,27 +334,27 @@ it('creates a client manually', () => {
       }
     }
   })
-  expect(Object.keys(app.clients)).toHaveLength(1)
-  expect(app.clients[1].remoteAddress).toEqual('127.0.0.1')
+  expect(Object.keys(app.connected)).toHaveLength(1)
+  expect(app.connected[1].remoteAddress).toEqual('127.0.0.1')
 })
 
 it('sends debug message to clients on runtimeError', () => {
   app = createServer()
-  app.clients[1] = {
+  app.connected[1] = {
     connection: {
       connected: true,
       send: jest.fn()
     },
     destroy: () => false
   }
-  app.clients[2] = {
+  app.connected[2] = {
     connection: {
       connected: false,
       send: jest.fn()
     },
     destroy: () => false
   }
-  app.clients[3] = {
+  app.connected[3] = {
     connection: {
       connected: true,
       send: () => { throw new Error() }
@@ -366,20 +366,20 @@ it('sends debug message to clients on runtimeError', () => {
   error.stack = `${ error.stack.split('\n')[0] }\nfake stacktrace`
 
   app.debugError(error)
-  expect(app.clients[1].connection.send).toBeCalledWith([
+  expect(app.connected[1].connection.send).toBeCalledWith([
     'debug',
     'error',
     'Error: Test Error\n' +
     'fake stacktrace'
   ])
-  expect(app.clients[2].connection.send).not.toHaveBeenCalled()
+  expect(app.connected[2].connection.send).not.toHaveBeenCalled()
 })
 
 it('disconnects client on destroy', () => {
   app = createServer()
-  app.clients[1] = { destroy: jest.fn() }
+  app.connected[1] = { destroy: jest.fn() }
   app.destroy()
-  expect(app.clients[1].destroy).toBeCalled()
+  expect(app.connected[1].destroy).toBeCalled()
 })
 
 it('accepts custom HTTP server', () => {
@@ -395,7 +395,7 @@ it('accepts custom HTTP server', () => {
       ws.onerror = reject
     })
   }).then(() => {
-    expect(Object.keys(app.clients)).toHaveLength(1)
+    expect(Object.keys(app.connected)).toHaveLength(1)
   })
 })
 
@@ -480,7 +480,7 @@ it('ignores unknown type for processed actions', () => {
 
 it('sends errors to clients in development', () => {
   let test = createReporter({ env: 'development' })
-  test.app.clients[0] = {
+  test.app.connected[0] = {
     connection: { connected: true, send: jest.fn() },
     destroy: () => false
   }
@@ -490,19 +490,19 @@ it('sends errors to clients in development', () => {
   test.app.emitter.emit('error', err)
 
   expect(test.reports).toEqual([['error', { err, fatal: true }]])
-  expect(test.app.clients[0].connection.send).toHaveBeenCalledWith(
+  expect(test.app.connected[0].connection.send).toHaveBeenCalledWith(
     ['debug', 'error', 'stack']
   )
 })
 
 it('does not send errors in non-development mode', () => {
   app = createServer({ env: 'production' })
-  app.clients[0] = {
+  app.connected[0] = {
     connection: { send: jest.fn() },
     destroy: () => false
   }
   app.emitter.emit('error', new Error('Test'))
-  expect(app.clients[0].connection.send).not.toHaveBeenCalled()
+  expect(app.connected[0].connection.send).not.toHaveBeenCalled()
 })
 
 it('processes actions', () => {

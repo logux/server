@@ -8,8 +8,8 @@ let parseNodeId = require('./parse-node-id')
 
 function reportDetails (client) {
   return {
+    connectionId: client.key,
     subprotocol: client.node.remoteSubprotocol,
-    guestId: client.key,
     nodeId: client.nodeId
   }
 }
@@ -18,7 +18,7 @@ function reportClient (client, obj) {
   if (client.nodeId) {
     obj.nodeId = client.nodeId
   } else {
-    obj.guestId = client.key
+    obj.connectionId = client.key
   }
   return obj
 }
@@ -28,10 +28,10 @@ function reportClient (client, obj) {
  *
  * @param {Server} app The server.
  * @param {ServerConnection} connection The Logux connection.
- * @param {number} key Client number used as `app.clients` key.
+ * @param {number} key Client number used as `app.connected` key.
  *
  * @example
- * const client = server.clients[0]
+ * const client = server.connected[0]
  */
 class ServerClient {
   constructor (app, connection, key) {
@@ -77,12 +77,12 @@ class ServerClient {
     this.connection = connection
 
     /**
-     * Client number used as `app.clients` key.
+     * Client number used as `app.connected` key.
      * @type {string}
      *
      * @example
      * function stillConnected (client) {
-     *   return !!app.clients[client.key]
+     *   return !!app.connected[client.key]
      * }
      */
     this.key = key.toString()
@@ -193,7 +193,7 @@ class ServerClient {
         }
       }
     }
-    delete this.app.clients[this.key]
+    delete this.app.connected[this.key]
   }
 
   auth (credentials, nodeId) {
