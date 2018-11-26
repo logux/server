@@ -154,7 +154,7 @@ it('removes itself on destroy', () => {
     return Promise.resolve()
   }).then(() => {
     client1.destroy()
-    expect(test.app.users).toEqual({ 10: [client2] })
+    expect(test.app.userIds).toEqual({ 10: [client2] })
     expect(test.app.subscribers).toEqual({
       'user/10': { '10:other': client2 }
     })
@@ -168,7 +168,7 @@ it('removes itself on destroy', () => {
     expect(test.app.connected).toEqual({ })
     expect(test.app.clientIds).toEqual({ })
     expect(test.app.nodeIds).toEqual({ })
-    expect(test.app.users).toEqual({ })
+    expect(test.app.userIds).toEqual({ })
     expect(test.app.subscribers).toEqual({ })
     expect(fired).toEqual(['1', '2'])
   })
@@ -314,7 +314,7 @@ it('authenticates user', () => {
     expect(client.node.authenticated).toBeTruthy()
     expect(test.app.nodeIds).toEqual({ 'a:b:uuid': client })
     expect(test.app.clientIds).toEqual({ 'a:b': client })
-    expect(test.app.users).toEqual({ 'a': [client] })
+    expect(test.app.userIds).toEqual({ 'a': [client] })
     expect(test.names).toEqual(['connect', 'authenticated'])
     expect(test.reports[1]).toEqual(['authenticated', {
       connectionId: '1', nodeId: 'a:b:uuid', subprotocol: '0.0.0'
@@ -348,7 +348,7 @@ it('authenticates user without user name', () => {
     return client.connection.pair.wait('right')
   }).then(() => {
     expect(client.userId).toBeUndefined()
-    expect(app.users).toEqual({ })
+    expect(app.userIds).toEqual({ })
   })
 })
 

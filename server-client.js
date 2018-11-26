@@ -171,13 +171,13 @@ class ServerClient {
     }
     this.node.destroy()
     if (this.userId) {
-      let users = this.app.users[this.userId]
+      let users = this.app.userIds[this.userId]
       if (users) {
         users = users.filter(i => i !== this)
         if (users.length === 0) {
-          delete this.app.users[this.userId]
+          delete this.app.userIds[this.userId]
         } else {
-          this.app.users[this.userId] = users
+          this.app.userIds[this.userId] = users
         }
       }
     }
@@ -223,8 +223,10 @@ class ServerClient {
           this.app.clientIds[this.clientId] = this
           this.app.nodeIds[this.nodeId] = this
           if (this.userId) {
-            if (!this.app.users[this.userId]) this.app.users[this.userId] = []
-            this.app.users[this.userId].push(this)
+            if (!this.app.userIds[this.userId]) {
+              this.app.userIds[this.userId] = []
+            }
+            this.app.userIds[this.userId].push(this)
           }
           this.app.reporter('authenticated', reportDetails(this))
         } else {

@@ -286,7 +286,7 @@ class BaseServer {
     this.connected = { }
     this.nodeIds = { }
     this.clientIds = { }
-    this.users = { }
+    this.userIds = { }
     this.types = { }
     this.processing = 0
 
@@ -723,8 +723,8 @@ class BaseServer {
 
     if (meta.users) {
       for (let userId of meta.users) {
-        if (this.users[userId]) {
-          for (let client of this.users[userId]) {
+        if (this.userIds[userId]) {
+          for (let client of this.userIds[userId]) {
             client.node.onAdd(action, meta)
           }
         }
