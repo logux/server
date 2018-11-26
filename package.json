@@ -15,7 +15,7 @@
   },
   "author": "Andrey Sitnik <andrey@sitnik.ru>",
   "license": "MIT",
-  "repository": "logux/logux-server",
+  "repository": "logux/server",
   "engines": {
     "node": ">=6.0.0"
   },
