@@ -578,7 +578,7 @@ class BaseServer {
    *     db.loadUser(ctx.params.id).then(user => {
    *       server.log.add(
    *         { type: 'USER_NAME', name: user.name },
-   *         { nodeIds: [ctx.nodeId] })
+   *         { clients: [ctx.clientId] })
    *     })
    *   }
    * })
@@ -653,8 +653,8 @@ class BaseServer {
     let undoMeta = { status: 'processed' }
 
     if (meta.users) undoMeta.users = meta.users.slice(0)
+    if (meta.nodes) undoMeta.nodes = meta.nodes.slice(0)
     if (meta.reasons) undoMeta.reasons = meta.reasons.slice(0)
-    if (meta.nodeIds) undoMeta.nodeIds = meta.nodeIds.slice(0)
     if (meta.channels) undoMeta.channels = meta.channels.slice(0)
 
     undoMeta.clients = [parseNodeId(meta.id).clientId]
@@ -705,8 +705,8 @@ class BaseServer {
    * })
    */
   sendAction (action, meta) {
-    if (meta.nodeIds) {
-      for (let id of meta.nodeIds) {
+    if (meta.nodes) {
+      for (let id of meta.nodes) {
         if (this.nodeIds[id]) {
           this.nodeIds[id].node.onAdd(action, meta)
         }
@@ -1013,20 +1013,11 @@ class BaseServer {
   }
 
   isUseless (action, meta) {
-    if (Array.isArray(meta.channels) && meta.channels.length > 0) {
-      return false
-    }
-    if (Array.isArray(meta.nodeIds) && meta.nodeIds.length > 0) {
-      return false
-    }
-    if (Array.isArray(meta.clients) && meta.clients.length > 0) {
-      return false
-    }
-    if (Array.isArray(meta.users) && meta.users.length > 0) {
-      return false
-    }
     if (meta.status !== 'processed' || this.types[action.type]) {
       return false
+    }
+    for (let i of ['channels', 'nodes', 'clients', 'users']) {
+      if (Array.isArray(meta[i]) && meta[i].length > 0) return false
     }
     return true
   }

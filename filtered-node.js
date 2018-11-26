@@ -21,8 +21,8 @@ class FilteredNode extends ServerNode {
         return false
       } else {
         if (
-          has(meta.nodeIds, this.client.nodeId) ||
           has(meta.clients, this.client.clientId) ||
+          has(meta.nodes, this.client.nodeId) ||
           has(meta.users, this.client.userId)
         ) {
           if (meta.added > data.added) data.added = meta.added

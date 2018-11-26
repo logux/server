@@ -624,9 +624,9 @@ it('undos actions on client', () => {
   app.undo({
     id: '1 1:client:uuid 0',
     users: ['3'],
+    nodes: ['2:client:uuid'],
     clients: ['2:client'],
     reasons: ['user/1/lastValue'],
-    nodeIds: ['2:client:uuid'],
     channels: ['user/1']
   }, 'magic')
   return Promise.resolve().then(() => {
@@ -642,10 +642,10 @@ it('undos actions on client', () => {
           time: 1,
           added: 1,
           users: ['3'],
+          nodes: ['2:client:uuid'],
           server: 'server:uuid',
           status: 'processed',
           clients: ['1:client', '2:client'],
-          nodeIds: ['2:client:uuid'],
           reasons: ['user/1/lastValue'],
           channels: ['user/1'],
           subprotocol: '0.0.0'
@@ -1084,7 +1084,7 @@ it('reports about useless actions', () => {
     test.app.log.add({ type: 'known' }, { channels: ['a'] }),
     test.app.log.add({ type: 'known' }, { users: ['10'] }),
     test.app.log.add({ type: 'known' }, { clients: ['10:client'] }),
-    test.app.log.add({ type: 'known' }, { nodeIds: ['10:client:uuid'] })
+    test.app.log.add({ type: 'known' }, { nodes: ['10:client:uuid'] })
   ]).then(() => {
     expect(test.names).toEqual([
       'add', 'useless',

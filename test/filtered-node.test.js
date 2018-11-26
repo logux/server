@@ -45,8 +45,8 @@ it('does not sync actions on add', () => {
 it('synchronizes only node-specific actions on connection', () => {
   test = createTest()
   return Promise.all([
-    test.server.log.add({ type: 'A' }, { nodeIds: ['1:A:B'] }),
-    test.server.log.add({ type: 'B' }, { nodeIds: ['1:a:b'] }),
+    test.server.log.add({ type: 'A' }, { nodes: ['1:A:B'] }),
+    test.server.log.add({ type: 'B' }, { nodes: ['1:a:b'] }),
     test.server.log.add({ type: 'C' })
   ]).then(() => {
     return test.client.connection.connect()
@@ -89,8 +89,8 @@ it('synchronizes only user-specific actions on connection', () => {
 
 it('still sends only new actions', () => {
   test = createTest()
-  return test.server.log.add({ type: 'A' }, { nodeIds: ['1:a:b'] }).then(() => {
-    return test.server.log.add({ type: 'B' }, { nodeIds: ['1:a:b'] })
+  return test.server.log.add({ type: 'A' }, { nodes: ['1:a:b'] }).then(() => {
+    return test.server.log.add({ type: 'B' }, { nodes: ['1:a:b'] })
   }).then(() => {
     test.client.lastReceived = 1
     return test.client.connection.connect()

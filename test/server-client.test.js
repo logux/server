@@ -512,7 +512,7 @@ it('checks action meta', () => {
         id: [2, '10:uuid', 0],
         time: 3,
         users: ['10'],
-        nodeIds: ['10:uuid'],
+        nodes: ['10:uuid'],
         clients: ['10:uuid'],
         channels: ['user:10']
       }
@@ -643,13 +643,11 @@ it('reports about errors in access callback', () => {
 
 it('sends old actions by node ID', () => {
   let app = createServer()
-  app.type('FOO', { access: () => true })
+  app.type('A', { access: () => true })
 
   return Promise.all([
-    app.log.add({ type: 'FOO' }, { id: '1 server:uuid 0' }),
-    app.log.add({ type: 'FOO' }, {
-      id: '2 server:uuid 0', nodeIds: ['10:uuid']
-    })
+    app.log.add({ type: 'A' }, { id: '1 server:uuid 0' }),
+    app.log.add({ type: 'A' }, { id: '2 server:uuid 0', nodes: ['10:uuid'] })
   ]).then(() => {
     return connectClient(app)
   }).then(client => {
@@ -657,7 +655,7 @@ it('sends old actions by node ID', () => {
     return client.node.waitFor('synchronized').then(() => {
       expect(sentNames(client)).toEqual(['connected', 'sync'])
       expect(sent(client)[1]).toEqual([
-        'sync', 2, { type: 'FOO' }, { id: [2, 'server:uuid', 0], time: 2 }
+        'sync', 2, { type: 'A' }, { id: [2, 'server:uuid', 0], time: 2 }
       ])
     })
   })
@@ -665,21 +663,19 @@ it('sends old actions by node ID', () => {
 
 it('sends new actions by node ID', () => {
   let app = createServer()
-  app.type('FOO', { access: () => true })
+  app.type('A', { access: () => true })
 
   return connectClient(app).then(client => {
     return Promise.all([
-      app.log.add({ type: 'FOO' }, { id: '1 server:uuid 0' }),
-      app.log.add({ type: 'FOO' }, {
-        id: '2 server:uuid 0', nodeIds: ['10:uuid']
-      })
+      app.log.add({ type: 'A' }, { id: '1 server:uuid 0' }),
+      app.log.add({ type: 'A' }, { id: '2 server:uuid 0', nodes: ['10:uuid'] })
     ]).then(() => {
       client.connection.other().send(['synced', 2])
       return client.node.waitFor('synchronized')
     }).then(() => {
       expect(sentNames(client)).toEqual(['connected', 'sync'])
       expect(sent(client)[1]).toEqual([
-        'sync', 2, { type: 'FOO' }, { id: [2, 'server:uuid', 0], time: 2 }
+        'sync', 2, { type: 'A' }, { id: [2, 'server:uuid', 0], time: 2 }
       ])
     })
   })
@@ -687,11 +683,11 @@ it('sends new actions by node ID', () => {
 
 it('sends old actions by client ID', () => {
   let app = createServer()
-  app.type('FOO', { access: () => true })
+  app.type('A', { access: () => true })
 
   return Promise.all([
-    app.log.add({ type: 'FOO' }, { id: '1 server:uuid 0' }),
-    app.log.add({ type: 'FOO' }, {
+    app.log.add({ type: 'A' }, { id: '1 server:uuid 0' }),
+    app.log.add({ type: 'A' }, {
       id: '2 server:uuid 0', clients: ['10:client']
     })
   ]).then(() => {
@@ -701,7 +697,7 @@ it('sends old actions by client ID', () => {
     return client.node.waitFor('synchronized').then(() => {
       expect(sentNames(client)).toEqual(['connected', 'sync'])
       expect(sent(client)[1]).toEqual([
-        'sync', 2, { type: 'FOO' }, { id: [2, 'server:uuid', 0], time: 2 }
+        'sync', 2, { type: 'A' }, { id: [2, 'server:uuid', 0], time: 2 }
       ])
     })
   })
@@ -709,12 +705,12 @@ it('sends old actions by client ID', () => {
 
 it('sends new actions by client ID', () => {
   let app = createServer()
-  app.type('FOO', { access: () => true })
+  app.type('A', { access: () => true })
 
   return connectClient(app, '10:client:uuid').then(client => {
     return Promise.all([
-      app.log.add({ type: 'FOO' }, { id: '1 server:uuid 0' }),
-      app.log.add({ type: 'FOO' }, {
+      app.log.add({ type: 'A' }, { id: '1 server:uuid 0' }),
+      app.log.add({ type: 'A' }, {
         id: '2 server:uuid 0', clients: ['10:client']
       })
     ]).then(() => {
@@ -723,7 +719,7 @@ it('sends new actions by client ID', () => {
     }).then(() => {
       expect(sentNames(client)).toEqual(['connected', 'sync'])
       expect(sent(client)[1]).toEqual([
-        'sync', 2, { type: 'FOO' }, { id: [2, 'server:uuid', 0], time: 2 }
+        'sync', 2, { type: 'A' }, { id: [2, 'server:uuid', 0], time: 2 }
       ])
     })
   })
@@ -731,11 +727,11 @@ it('sends new actions by client ID', () => {
 
 it('sends old actions by user', () => {
   let app = createServer()
-  app.type('FOO', { access: () => true })
+  app.type('A', { access: () => true })
 
   return Promise.all([
-    app.log.add({ type: 'FOO' }, { id: '1 server:uuid 0' }),
-    app.log.add({ type: 'FOO' }, { id: '2 server:uuid 0', users: ['10'] })
+    app.log.add({ type: 'A' }, { id: '1 server:uuid 0' }),
+    app.log.add({ type: 'A' }, { id: '2 server:uuid 0', users: ['10'] })
   ]).then(() => {
     return connectClient(app)
   }).then(client => {
@@ -743,7 +739,7 @@ it('sends old actions by user', () => {
     return client.node.waitFor('synchronized').then(() => {
       expect(sentNames(client)).toEqual(['connected', 'sync'])
       expect(sent(client)[1]).toEqual([
-        'sync', 2, { type: 'FOO' }, { id: [2, 'server:uuid', 0], time: 2 }
+        'sync', 2, { type: 'A' }, { id: [2, 'server:uuid', 0], time: 2 }
       ])
     })
   })
@@ -751,19 +747,19 @@ it('sends old actions by user', () => {
 
 it('sends new actions by user', () => {
   let app = createServer()
-  app.type('FOO', { access: () => true })
+  app.type('A', { access: () => true })
 
   return connectClient(app).then(client => {
     return Promise.all([
-      app.log.add({ type: 'FOO' }, { id: '1 server:uuid 0' }),
-      app.log.add({ type: 'FOO' }, { id: '2 server:uuid 0', users: ['10'] })
+      app.log.add({ type: 'A' }, { id: '1 server:uuid 0' }),
+      app.log.add({ type: 'A' }, { id: '2 server:uuid 0', users: ['10'] })
     ]).then(() => {
       client.connection.other().send(['synced', 2])
       return client.node.waitFor('synchronized')
     }).then(() => {
       expect(sentNames(client)).toEqual(['connected', 'sync'])
       expect(sent(client)[1]).toEqual([
-        'sync', 2, { type: 'FOO' }, { id: [2, 'server:uuid', 0], time: 2 }
+        'sync', 2, { type: 'A' }, { id: [2, 'server:uuid', 0], time: 2 }
       ])
     })
   })
@@ -818,7 +814,8 @@ it('sends old action only once', () => {
     app.log.add({ type: 'FOO' }, {
       id: '1 server:uuid 0',
       users: ['10', '10'],
-      nodeIds: ['10:uuid', '10:uuid']
+      nodes: ['10:uuid', '10:uuid'],
+      clients: ['10:uuid', '10:uuid']
     })
   ]).then(() => {
     return connectClient(app)

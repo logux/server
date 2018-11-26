@@ -42,7 +42,7 @@ let server = http.createServer((req, res) => {
   req.on('end', () => {
     let data = JSON.parse(body)
     let [type, action, meta] = data.commands[0]
-    let nodeIds = [meta.id.split(' ')[1]]
+    let nodes = [meta.id.split(' ')[1]]
     let processing = delay(500).then(() => {
       res.write(`[["approved","${ meta.id }"]`)
     })
@@ -51,9 +51,9 @@ let server = http.createServer((req, res) => {
         return delay(300)
       }).then(() => {
         return Promise.all([
-          send({ type: 'project/name', value: 'A' }, { nodeIds }),
-          send({ type: 'project/status', value: 'ok' }, { nodeIds }),
-          send({ type: 'project/payment', value: 'paid' }, { nodeIds })
+          send({ type: 'project/name', value: 'A' }, { nodes }),
+          send({ type: 'project/status', value: 'ok' }, { nodes }),
+          send({ type: 'project/payment', value: 'paid' }, { nodes })
         ])
       }).then(() => {
         process.stdout.write(chalk.green('S'))

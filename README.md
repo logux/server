@@ -103,7 +103,8 @@ By default other clients will not receive new actions.
 
 There are 3 ways to send new action to client.
 
-* Set `nodeIds: ['10:h40vj5']` in action’s metadata.
+* Set `clients: ['10:hjtrrt']` in action’s metadata.
+* Set `nodes: ['10:hjtrrt:h40vj5']` in action’s metadata.
 * Set `users: ['10']` in action’s metadata.
 * Using channels.
 
@@ -120,7 +121,7 @@ app.channel('user/:id', (params, action, meta, creator) => {
       app.log.add(
         { type: 'USER_NAME', name: user.name },
         {
-          nodeIds: [creator.nodeId],
+          clients: [creator.clientId],
           time: user.nameChangedAt * 1000
         })
     })
