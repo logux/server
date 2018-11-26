@@ -1,5 +1,5 @@
 {
-  "name": "logux-server",
+  "name": "@logux/server",
   "version": "0.2.9",
   "description": "Logux server-side framework",
   "keywords": [
