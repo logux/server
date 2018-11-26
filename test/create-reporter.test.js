@@ -1,4 +1,4 @@
-let SyncError = require('logux-core').SyncError
+let { SyncError } = require('@logux/core')
 let bunyan = require('bunyan')
 
 let createReporter = require('../create-reporter')

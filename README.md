@@ -35,7 +35,7 @@ npm init
 Install Logux Server:
 
 ```sh
-npm install --save logux-server logux-core
+npm install --save @logux/server @logux/core
 ```
 
 
@@ -80,7 +80,7 @@ app.type('CHANGE_NAME', {
 })
 ```
 
-Read [`logux-core`] docs for `app.log` API.
+Read [Logux Core] docs for `app.log` API.
 
 If you already have business logic written in PHP, Ruby, Java — don’t worry.
 You can do whatever you want in the action listener.
@@ -94,7 +94,7 @@ For one, you may just call the legacy REST API:
   }
 ```
 
-[`logux-core`]: https://github.com/logux/logux-core
+[Logux Core]: https://github.com/logux/core
 
 
 ### Control Data Access

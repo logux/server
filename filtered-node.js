@@ -1,4 +1,4 @@
-let ServerNode = require('logux-core/server-node')
+let { ServerNode } = require('@logux/core')
 
 function has (array, item) {
   return array && array.indexOf(item) !== -1

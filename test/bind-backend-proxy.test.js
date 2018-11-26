@@ -1,5 +1,4 @@
-let TestTime = require('logux-core').TestTime
-let TestPair = require('logux-core').TestPair
+let { TestTime, TestPair } = require('@logux/core')
 let delay = require('nanodelay')
 let http = require('http')
 

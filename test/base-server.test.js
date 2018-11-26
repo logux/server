@@ -1,11 +1,9 @@
-let MemoryStore = require('logux-core').MemoryStore
+let { MemoryStore, TestTime, Log } = require('@logux/core')
 let WebSocket = require('ws')
-let TestTime = require('logux-core').TestTime
 let delay = require('nanodelay')
 let https = require('https')
 let http = require('http')
 let path = require('path')
-let Log = require('logux-core').Log
 let fs = require('fs')
 
 let BaseServer = require('../base-server')

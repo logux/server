@@ -1,4 +1,4 @@
-let SyncError = require('logux-core').SyncError
+let { SyncError } = require('@logux/core')
 let semver = require('semver')
 
 let FilteredNode = require('./filtered-node')

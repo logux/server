@@ -1,6 +1,4 @@
-let ClientNode = require('logux-core').ClientNode
-let TestPair = require('logux-core').TestPair
-let TestTime = require('logux-core').TestTime
+let { ClientNode, TestPair, TestTime } = require('@logux/core')
 
 let FilteredNode = require('../filtered-node')
 

@@ -1,6 +1,4 @@
-let SyncError = require('logux-core').SyncError
-let TestPair = require('logux-core').TestPair
-let TestTime = require('logux-core').TestTime
+let { SyncError, TestPair, TestTime } = require('@logux/core')
 let delay = require('nanodelay')
 
 let ServerClient = require('../server-client')
@@ -200,7 +198,7 @@ it('does not report users disconnects on server destroy', () => {
 
 it('destroys on disconnect', () => {
   let client = createClient(createServer())
-  client.destroy = jest.fn()
+  jest.spyOn(client, 'destroy')
   return client.connection.connect().then(() => {
     client.connection.other().disconnect()
     return client.connection.pair.wait()
@@ -566,7 +564,7 @@ it('checks user access for action', () => {
   let client
   return connectClient(test.app).then(created => {
     client = created
-    client.connection.send = jest.fn(client.connection.send)
+    jest.spyOn(client.connection, 'send')
     client.connection.other().send(['sync', 2,
       { type: 'FOO' }, { id: [1, '10:uuid', 0], time: 1 },
       { type: 'FOO', bar: true }, { id: [1, '10:uuid', 1], time: 1 }
