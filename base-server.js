@@ -15,6 +15,7 @@ let bindBackendProxy = require('./bind-backend-proxy')
 let bindPrometheus = require('./bind-prometheus')
 let forcePromise = require('./force-promise')
 let ServerClient = require('./server-client')
+let parseNodeId = require('./parse-node-id')
 let promisify = require('./promisify')
 let Context = require('./context')
 let pkg = require('./package.json')
@@ -284,6 +285,7 @@ class BaseServer {
      */
     this.clients = { }
     this.nodeIds = { }
+    this.clientIds = { }
     this.users = { }
     this.types = { }
     this.processing = 0
@@ -652,10 +654,11 @@ class BaseServer {
 
     if (meta.users) undoMeta.users = meta.users.slice(0)
     if (meta.reasons) undoMeta.reasons = meta.reasons.slice(0)
+    if (meta.nodeIds) undoMeta.nodeIds = meta.nodeIds.slice(0)
     if (meta.channels) undoMeta.channels = meta.channels.slice(0)
 
-    undoMeta.nodeIds = [meta.id.split(' ')[1]]
-    if (meta.nodeIds) undoMeta.nodeIds = undoMeta.nodeIds.concat(meta.nodeIds)
+    undoMeta.clients = [parseNodeId(meta.id).clientId]
+    if (meta.clients) undoMeta.clients = undoMeta.clients.concat(meta.clients)
 
     this.log.add({ type: 'logux/undo', id: meta.id, reason }, undoMeta)
   }
@@ -706,6 +709,14 @@ class BaseServer {
       for (let id of meta.nodeIds) {
         if (this.nodeIds[id]) {
           this.nodeIds[id].node.onAdd(action, meta)
+        }
+      }
+    }
+
+    if (meta.clients) {
+      for (let id of meta.clients) {
+        if (this.clientIds[id]) {
+          this.clientIds[id].node.onAdd(action, meta)
         }
       }
     }
@@ -816,7 +827,7 @@ class BaseServer {
   internalUnkownType (action, meta) {
     this.log.changeMeta(meta.id, { status: 'error' })
     this.reporter('unknownType', { type: action.type, actionId: meta.id })
-    if (this.getUserId(meta.id.split(' ')[1]) !== 'server') {
+    if (parseNodeId(meta.id).userId !== 'server') {
       this.undo(meta, 'error')
     }
     this.debugActionError(meta, `Action with unknown type ${ action.type }`)
@@ -855,20 +866,12 @@ class BaseServer {
 
   markAsProcessed (meta) {
     this.log.changeMeta(meta.id, { status: 'processed' })
-    let nodeId = meta.proxy || meta.id.split(' ')[1]
-    if (!/^server:/.test(nodeId)) {
+    let data = parseNodeId(meta.id)
+    if (data.userId !== 'server') {
       this.log.add(
         { type: 'logux/processed', id: meta.id },
-        { nodeIds: [nodeId], status: 'processed' })
-    }
-  }
-
-  getUserId (nodeId) {
-    let pos = nodeId.lastIndexOf(':')
-    if (pos !== -1) {
-      return nodeId.slice(0, pos)
-    } else {
-      return undefined
+        { clients: [data.clientId], status: 'processed' }
+      )
     }
   }
 
@@ -877,18 +880,16 @@ class BaseServer {
       return this.contexts[meta.id]
     }
 
-    let originNodeId = meta.id.split(' ')[1]
-    let userId = this.getUserId(originNodeId)
-    let nodeId = meta.proxy || originNodeId
+    let data = parseNodeId(meta.id)
 
     let subprotocol
     if (meta.subprotocol) {
       subprotocol = meta.subprotocol
-    } else if (this.nodeIds[nodeId]) {
-      subprotocol = this.nodeIds[nodeId].node.remoteSubprotocol
+    } else if (this.clientIds[data.clientId]) {
+      subprotocol = this.clientIds[data.clientId].node.remoteSubprotocol
     }
 
-    return new Context(nodeId, userId, subprotocol)
+    return new Context(data.nodeId, data.clientId, data.userId, subprotocol)
   }
 
   subscribeAction (action, meta) {
@@ -929,7 +930,7 @@ class BaseServer {
 
           let filter = i.filter && i.filter(ctx, action, meta)
 
-          let client = this.nodeIds[ctx.nodeId]
+          let client = this.clientIds[ctx.clientId]
           if (!client) return false
 
           this.reporter('subscribed', {
@@ -995,9 +996,9 @@ class BaseServer {
 
   debugActionError (meta, msg) {
     if (this.env === 'development') {
-      let nodeId = meta.id.split(' ')[1]
-      if (this.nodeIds[nodeId]) {
-        this.nodeIds[nodeId].connection.send(['debug', 'error', msg])
+      let clientId = parseNodeId(meta.id).clientId
+      if (this.clientIds[clientId]) {
+        this.clientIds[clientId].connection.send(['debug', 'error', msg])
       }
     }
   }
@@ -1016,6 +1017,9 @@ class BaseServer {
       return false
     }
     if (Array.isArray(meta.nodeIds) && meta.nodeIds.length > 0) {
+      return false
+    }
+    if (Array.isArray(meta.clients) && meta.clients.length > 0) {
       return false
     }
     if (Array.isArray(meta.users) && meta.users.length > 0) {

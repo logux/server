@@ -1,5 +1,9 @@
 let ServerNode = require('logux-core/server-node')
 
+function has (array, item) {
+  return array && array.indexOf(item) !== -1
+}
+
 class FilteredNode extends ServerNode {
   constructor (client, nodeId, log, connection, options) {
     super(nodeId, log, connection, options)
@@ -16,17 +20,13 @@ class FilteredNode extends ServerNode {
       if (meta.added <= lastSynced) {
         return false
       } else {
-        let passed = false
-        if (meta.nodeIds && meta.nodeIds.indexOf(this.client.nodeId) !== -1) {
-          passed = true
-        }
-        if (meta.users && meta.users.indexOf(this.client.userId) !== -1) {
-          passed = true
-        }
-        if (passed) {
+        if (
+          has(meta.nodeIds, this.client.nodeId) ||
+          has(meta.clients, this.client.clientId) ||
+          has(meta.users, this.client.userId)
+        ) {
           if (meta.added > data.added) data.added = meta.added
           data.entries.push([action, meta])
-          return true
         }
         return true
       }

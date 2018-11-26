@@ -622,17 +622,18 @@ it('reports about error during action processing', () => {
 it('undos actions on client', () => {
   app = createServer()
   app.undo({
-    id: '1 1:uuid 0',
+    id: '1 1:client:uuid 0',
     users: ['3'],
+    clients: ['2:client'],
     reasons: ['user/1/lastValue'],
-    nodeIds: ['2:uuid'],
+    nodeIds: ['2:client:uuid'],
     channels: ['user/1']
   }, 'magic')
   return Promise.resolve().then(() => {
     expect(app.log.entries()).toEqual([
       [
         {
-          id: '1 1:uuid 0',
+          id: '1 1:client:uuid 0',
           type: 'logux/undo',
           reason: 'magic'
         },
@@ -643,7 +644,8 @@ it('undos actions on client', () => {
           users: ['3'],
           server: 'server:uuid',
           status: 'processed',
-          nodeIds: ['1:uuid', '2:uuid'],
+          clients: ['1:client', '2:client'],
+          nodeIds: ['2:client:uuid'],
           reasons: ['user/1/lastValue'],
           channels: ['user/1'],
           subprotocol: '0.0.0'
@@ -702,6 +704,7 @@ it('reports about wrong channel name', () => {
     connection: { send: jest.fn() },
     node: { onAdd () { } }
   }
+  test.app.clientIds['10:uuid'] = test.app.nodeIds['10:uuid']
   return test.app.log.add(
     { type: 'logux/subscribe' }, { id: '1 10:uuid 0' }
   ).then(() => {
@@ -756,6 +759,7 @@ it('allows to have custom channel name check', () => {
     connection: { send: jest.fn() },
     node: { onAdd () { } }
   }
+  test.app.clientIds['10:uuid'] = test.app.nodeIds['10:uuid']
   return test.app.log.add(
     { type: 'logux/subscribe', channel: 'foo' }
   ).then(() => {
@@ -780,6 +784,7 @@ it('checks channel access', () => {
     node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
   }
   test.app.nodeIds['10:uuid'] = client
+  test.app.clientIds['10:uuid'] = client
 
   test.app.channel(/^user\/(\d+)$/, {
     access (ctx) {
@@ -808,6 +813,7 @@ it('reports about errors during channel authorization', () => {
     node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
   }
   test.app.nodeIds['10:uuid'] = client
+  test.app.clientIds['10:uuid'] = client
 
   let err = new Error()
   test.app.channel(/^user\/(\d+)$/, {
@@ -837,15 +843,16 @@ it('subscribes clients', () => {
   let client = {
     node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
   }
-  test.app.nodeIds['10:uuid'] = client
+  test.app.nodeIds['10:a:uuid'] = client
+  test.app.clientIds['10:a'] = client
 
   let userSubsriptions = 0
   test.app.channel('user/:id', {
     access (ctx, action, meta) {
       expect(ctx.params.id).toEqual('10')
       expect(action.channel).toEqual('user/10')
-      expect(meta.id).toEqual('1 10:uuid 0')
-      expect(ctx.nodeId).toEqual('10:uuid')
+      expect(meta.id).toEqual('1 10:a:uuid 0')
+      expect(ctx.nodeId).toEqual('10:a:uuid')
       userSubsriptions += 1
       return true
     }
@@ -862,42 +869,42 @@ it('subscribes clients', () => {
   })
 
   return test.app.log.add(
-    { type: 'logux/subscribe', channel: 'user/10' }, { id: '1 10:uuid 0' }
+    { type: 'logux/subscribe', channel: 'user/10' }, { id: '1 10:a:uuid 0' }
   ).then(() => {
     return Promise.resolve()
   }).then(() => {
     expect(userSubsriptions).toEqual(1)
     expect(test.names).toEqual(['add', 'clean', 'subscribed', 'add', 'clean'])
     expect(test.reports[2][1]).toEqual({
-      actionId: '1 10:uuid 0', channel: 'user/10'
+      actionId: '1 10:a:uuid 0', channel: 'user/10'
     })
     expect(test.reports[3][1].action).toEqual({
-      type: 'logux/processed', id: '1 10:uuid 0'
+      type: 'logux/processed', id: '1 10:a:uuid 0'
     })
-    expect(test.reports[3][1].meta.nodeIds).toEqual(['10:uuid'])
+    expect(test.reports[3][1].meta.clients).toEqual(['10:a'])
     expect(test.reports[3][1].meta.status).toEqual('processed')
     expect(test.app.subscribers).toEqual({
       'user/10': {
-        '10:uuid': true
+        '10:a:uuid': true
       }
     })
     return test.app.log.add(
-      { type: 'logux/subscribe', channel: 'posts' }, { id: '2 10:uuid 0' }
+      { type: 'logux/subscribe', channel: 'posts' }, { id: '2 10:a:uuid 0' }
     )
   }).then(() => {
     return Promise.resolve()
   }).then(() => {
     expect(test.app.subscribers).toEqual({
       'user/10': {
-        '10:uuid': true
+        '10:a:uuid': true
       },
       'posts': {
-        '10:uuid': filter
+        '10:a:uuid': filter
       }
     })
     return test.app.log.add(
       { type: 'logux/unsubscribe', channel: 'user/10' },
-      { id: '3 10:uuid 0' }
+      { id: '3 10:a:uuid 0' }
     )
   }).then(() => {
     expect(test.names).toEqual([
@@ -906,14 +913,14 @@ it('subscribes clients', () => {
       'add', 'clean', 'add', 'unsubscribed', 'add', 'clean', 'clean'
     ])
     expect(test.reports[11][1]).toEqual({
-      actionId: '3 10:uuid 0', channel: 'user/10'
+      actionId: '3 10:a:uuid 0', channel: 'user/10'
     })
     expect(test.reports[12][1].action).toEqual({
-      type: 'logux/processed', id: '3 10:uuid 0'
+      type: 'logux/processed', id: '3 10:a:uuid 0'
     })
     expect(test.app.subscribers).toEqual({
       'posts': {
-        '10:uuid': filter
+        '10:a:uuid': filter
       }
     })
   })
@@ -925,6 +932,7 @@ it('keeps data between subscription steps', () => {
     node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
   }
   app.nodeIds['10:uuid'] = client
+  app.clientIds['10:uuid'] = client
 
   let subsriptions = 0
 
@@ -958,6 +966,7 @@ it('reports about errors during channel initialization', () => {
     node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
   }
   test.app.nodeIds['10:uuid'] = client
+  test.app.clientIds['10:uuid'] = client
 
   let err = new Error()
   test.app.channel(/^user\/(\d+)$/, {
@@ -990,6 +999,7 @@ it('loads initial actions during subscription', () => {
     node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
   }
   test.app.nodeIds['10:uuid'] = client
+  test.app.clientIds['10:uuid'] = client
 
   test.app.log.on('preadd', (action, meta) => {
     meta.reasons.push('test')
@@ -1073,12 +1083,13 @@ it('reports about useless actions', () => {
     test.app.log.add({ type: 'logux/subscribe', channel: 'a' }),
     test.app.log.add({ type: 'known' }, { channels: ['a'] }),
     test.app.log.add({ type: 'known' }, { users: ['10'] }),
-    test.app.log.add({ type: 'known' }, { nodeIds: ['10:uuid'] })
+    test.app.log.add({ type: 'known' }, { clients: ['10:client'] }),
+    test.app.log.add({ type: 'known' }, { nodeIds: ['10:client:uuid'] })
   ]).then(() => {
     expect(test.names).toEqual([
       'add', 'useless',
-      'add', 'add', 'add', 'add', 'add',
-      'processed', 'processed', 'processed', 'processed'
+      'add', 'add', 'add', 'add', 'add', 'add',
+      'processed', 'processed', 'processed', 'processed', 'processed'
     ])
   })
 })

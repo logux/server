@@ -175,7 +175,8 @@
       "channelAuthorizer",
       "authorizer",
       "authenticator",
-      "Example sendAction"
+      "Example sendAction",
+      "clientId"
     ]
   }
 }

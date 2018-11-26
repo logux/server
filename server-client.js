@@ -4,6 +4,7 @@ let semver = require('semver')
 let FilteredNode = require('./filtered-node')
 let forcePromise = require('./force-promise')
 let ALLOWED_META = require('./allowed-meta')
+let parseNodeId = require('./parse-node-id')
 
 function reportDetails (client) {
   return {
@@ -44,7 +45,14 @@ class ServerClient {
     this.userId = undefined
 
     /**
-     * Unique client’s node ID.
+     * Unique persistence machine ID.
+     * It will be undefined before correct authentication.
+     * @type {string|undefined}
+     */
+    this.clientId = undefined
+
+    /**
+     * Unique node ID.
      * It will be undefined before correct authentication.
      * @type {string|undefined}
      */
@@ -173,6 +181,9 @@ class ServerClient {
         }
       }
     }
+    if (this.clientId) {
+      delete this.app.clientIds[this.clientId]
+    }
     if (this.nodeId) {
       delete this.app.nodeIds[this.nodeId]
       for (let i in this.app.subscribers) {
@@ -187,13 +198,14 @@ class ServerClient {
 
   auth (credentials, nodeId) {
     this.nodeId = nodeId
+    let data = parseNodeId(nodeId)
+    this.clientId = data.clientId
+    this.userId = data.userId
 
-    let userId = this.app.getUserId(nodeId)
-    if (userId === 'server') {
+    if (nodeId === 'server' || data.userId === 'server') {
       this.app.reporter('unauthenticated', reportDetails(this))
       return Promise.resolve(false)
     }
-    if (typeof userId !== 'undefined') this.userId = userId
 
     return this.app.authenticator(this.userId, credentials, this)
       .then(result => {
@@ -202,12 +214,13 @@ class ServerClient {
         }
 
         if (result) {
-          let zombie = this.app.nodeIds[this.nodeId]
+          let zombie = this.app.clientIds[this.clientId]
           if (zombie) {
             zombie.zombie = true
             this.app.reporter('zombie', { nodeId: zombie.nodeId })
             zombie.destroy()
           }
+          this.app.clientIds[this.clientId] = this
           this.app.nodeIds[this.nodeId] = this
           if (this.userId) {
             if (!this.app.users[this.userId]) this.app.users[this.userId] = []
@@ -230,9 +243,6 @@ class ServerClient {
     if (!meta.subprotocol) {
       meta.subprotocol = this.node.remoteSubprotocol
     }
-    if (meta.id.split(' ')[1] !== this.nodeId) {
-      meta.proxy = this.nodeId
-    }
     return Promise.resolve([action, meta])
   }
 
@@ -240,12 +250,8 @@ class ServerClient {
     let ctx = this.app.createContext(meta)
     this.app.contexts[meta.id] = ctx
 
-    let wrongUser = !this.userId ||
-      this.userId !== ctx.userId ||
-      (meta.proxy && this.app.getUserId(meta.proxy) !== ctx.userId)
-    let wrongMeta = Object.keys(meta).some(i => {
-      return ALLOWED_META.indexOf(i) === -1
-    })
+    let wrongUser = !this.clientId || this.clientId !== ctx.clientId
+    let wrongMeta = Object.keys(meta).some(i => ALLOWED_META.indexOf(i) === -1)
     if (wrongUser || wrongMeta) {
       this.app.denyAction(meta)
       return Promise.resolve(false)

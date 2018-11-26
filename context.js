@@ -11,7 +11,7 @@ let semver = require('semver')
  * })
  */
 class Context {
-  constructor (nodeId, userId, subprotocol) {
+  constructor (nodeId, clientId, userId, subprotocol) {
     /**
      * Open structure to save some data between different steps of processing.
      * @type {object}
@@ -29,21 +29,14 @@ class Context {
      */
     this.data = { }
     /**
-     * Unique client’s node ID.
+     * Unique node ID.
      * @type {string}
      *
      * @example
      * server.nodeIds[node.nodeId]
      */
     this.nodeId = nodeId
-    /**
-     * Was action created by Logux server.
-     * @type {boolean}
-     *
-     * @example
-     * access: (ctx, action, meta) => ctx.isServer
-     */
-    this.isServer = /^server:/.test(nodeId)
+
     /**
      * User ID taken node ID.
      * @type {string|undefined}
@@ -54,6 +47,23 @@ class Context {
      * }
      */
     this.userId = userId
+    /**
+     * Unique persistence client ID.
+     * @type {string}
+     *
+     * @example
+     * server.clientIds[node.clientId]
+     */
+    this.clientId = clientId
+
+    /**
+     * Was action created by Logux server.
+     * @type {boolean}
+     *
+     * @example
+     * access: (ctx, action, meta) => ctx.isServer
+     */
+    this.isServer = userId === 'server'
 
     /**
      * Action creator application subprotocol version in SemVer format.

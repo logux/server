@@ -16,9 +16,9 @@ function createTest () {
     meta.reasons.push('test')
   })
 
-  let data = { nodeId: '1:a', userId: '1' }
+  let data = { nodeId: '1:a:b', userId: '1', clientId: '1:a' }
   let pair = new TestPair()
-  let client = new ClientNode('1:a', log1, pair.left)
+  let client = new ClientNode('1:a:b', log1, pair.left)
   let server = new FilteredNode(data, 'server', log2, pair.right)
   return { client, server }
 }
@@ -45,8 +45,23 @@ it('does not sync actions on add', () => {
 it('synchronizes only node-specific actions on connection', () => {
   test = createTest()
   return Promise.all([
-    test.server.log.add({ type: 'A' }, { nodeIds: ['1:b'] }),
-    test.server.log.add({ type: 'B' }, { nodeIds: ['1:a'] }),
+    test.server.log.add({ type: 'A' }, { nodeIds: ['1:A:B'] }),
+    test.server.log.add({ type: 'B' }, { nodeIds: ['1:a:b'] }),
+    test.server.log.add({ type: 'C' })
+  ]).then(() => {
+    return test.client.connection.connect()
+  }).then(() => {
+    return test.server.waitFor('synchronized')
+  }).then(() => {
+    expect(test.client.log.actions()).toEqual([{ type: 'B' }])
+  })
+})
+
+it('synchronizes only client-specific actions on connection', () => {
+  test = createTest()
+  return Promise.all([
+    test.server.log.add({ type: 'A' }, { clients: ['1:A'] }),
+    test.server.log.add({ type: 'B' }, { clients: ['1:a'] }),
     test.server.log.add({ type: 'C' })
   ]).then(() => {
     return test.client.connection.connect()
@@ -74,8 +89,8 @@ it('synchronizes only user-specific actions on connection', () => {
 
 it('still sends only new actions', () => {
   test = createTest()
-  return test.server.log.add({ type: 'A' }, { nodeIds: ['1:a'] }).then(() => {
-    return test.server.log.add({ type: 'B' }, { nodeIds: ['1:a'] })
+  return test.server.log.add({ type: 'A' }, { nodeIds: ['1:a:b'] }).then(() => {
+    return test.server.log.add({ type: 'B' }, { nodeIds: ['1:a:b'] })
   }).then(() => {
     test.client.lastReceived = 1
     return test.client.connection.connect()
