@@ -193,13 +193,14 @@ class BaseServer {
     })
 
     this.log.on('add', (action, meta) => {
+      let start = Date.now()
       this.reporter('add', { action, meta })
 
       if (this.destroying) return
 
       if (action.type === 'logux/subscribe') {
         if (meta.server === this.nodeId) {
-          this.subscribeAction(action, meta)
+          this.subscribeAction(action, meta, start)
         }
         return
       }
@@ -226,7 +227,7 @@ class BaseServer {
           return
         }
         if (type.process) {
-          this.processAction(type, action, meta)
+          this.processAction(type, action, meta, start)
         } else {
           this.markAsProcessed(meta)
         }
@@ -445,10 +446,11 @@ class BaseServer {
    * * `connected`: new client was connected.
    * * `disconnected`: client was disconnected.
    * * `processed`: action processing was finished.
+   * * `subscribed`: channel initial data was loaded.
    *
    * @param {
-   *          "error"|"clientError"|"connected"|"processed"|"disconnected"
-   *        } event The event name.
+   *   "error"|"clientError"|"connected"|"processed"|"subscribed"|"disconnected"
+   * } event The event name.
    * @param {listener} listener The listener function.
    *
    * @return {function} Unbind listener from event.
@@ -840,8 +842,7 @@ class BaseServer {
     this.debugActionError(meta, `Wrong channel name ${ action.channel }`)
   }
 
-  processAction (type, action, meta) {
-    let start = Date.now()
+  processAction (type, action, meta, start) {
     let ctx = this.createContext(meta)
 
     let latency
@@ -890,7 +891,7 @@ class BaseServer {
     return new Context(data.nodeId, data.clientId, data.userId, subprotocol)
   }
 
-  subscribeAction (action, meta) {
+  subscribeAction (action, meta, start) {
     if (typeof action.channel !== 'string') {
       this.wrongChannel(action, meta)
       return
@@ -942,12 +943,18 @@ class BaseServer {
           this.subscribers[action.channel][ctx.nodeId] = filter || true
           subscribed = true
 
+          let emitter = this.emitter
+          function emitSubscribed () {
+            emitter.emit('subscribed', action, meta, Date.now() - start)
+            return true
+          }
+
           if (i.init) {
             return forcePromise(() => {
               return i.init(ctx, action, meta)
-            }).then(() => true)
+            }).then(() => emitSubscribed())
           } else {
-            return true
+            return emitSubscribed()
           }
         }).then(access => {
           if (access) this.markAsProcessed(meta)

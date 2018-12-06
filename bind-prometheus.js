@@ -6,6 +6,12 @@ let processingTime = new prometheus.Histogram({
   buckets: [1, 50, 100, 500, 1000, 5000, 10000]
 })
 
+let subscribingTime = new prometheus.Histogram({
+  name: 'logux_request_subscribing_time_histogram',
+  help: 'How long channel initial data was loaded',
+  buckets: [1, 50, 100, 500, 1000, 5000, 10000]
+})
+
 let clientCount = new prometheus.Gauge({
   name: 'logux_clients_gauge',
   help: 'How many clients are online'
@@ -31,9 +37,10 @@ function bindPrometheus (app) {
   if (app.options.controlPassword) {
     prometheus.collectDefaultMetrics()
     app.on('processed', (action, meta, latency) => {
-      if (typeof latency === 'number') {
-        processingTime.observe(latency)
-      }
+      processingTime.observe(latency)
+    })
+    app.on('subscribed', (action, meta, latency) => {
+      subscribingTime.observe(latency)
     })
     app.on('connected', () => {
       clientCount.inc()

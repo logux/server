@@ -866,11 +866,20 @@ it('subscribes clients', () => {
     }
   })
 
+  let events = 0
+  test.app.on('subscribed', (action, meta, latency) => {
+    expect(action.type).toEqual('logux/subscribe')
+    expect(meta.id).toContain('10:a:uuid')
+    expect(latency).toBeCloseTo(25, -2)
+    events += 1
+  })
+
   return test.app.log.add(
     { type: 'logux/subscribe', channel: 'user/10' }, { id: '1 10:a:uuid 0' }
   ).then(() => {
     return Promise.resolve()
   }).then(() => {
+    expect(events).toEqual(1)
     expect(userSubsriptions).toEqual(1)
     expect(test.names).toEqual(['add', 'clean', 'subscribed', 'add', 'clean'])
     expect(test.reports[2][1]).toEqual({
@@ -892,6 +901,7 @@ it('subscribes clients', () => {
   }).then(() => {
     return Promise.resolve()
   }).then(() => {
+    expect(events).toEqual(2)
     expect(test.app.subscribers).toEqual({
       'user/10': {
         '10:a:uuid': true
