@@ -1,13 +1,24 @@
 let prometheus = require('prom-client')
 
+let requestsCount = new prometheus.Counter({
+  name: 'logux_request_counter',
+  help: 'How many action was processed',
+  labelNames: ['type']
+})
+
 let processingTime = new prometheus.Histogram({
   name: 'logux_request_processing_time_histogram',
   help: 'How long action was processed',
   buckets: [1, 50, 100, 500, 1000, 5000, 10000]
 })
 
+let subscriptionsCount = new prometheus.Counter({
+  name: 'logux_subscription_counter',
+  help: 'How many subscriptions was processed'
+})
+
 let subscribingTime = new prometheus.Histogram({
-  name: 'logux_request_subscribing_time_histogram',
+  name: 'logux_subscription_processing_time_histogram',
   help: 'How long channel initial data was loaded',
   buckets: [1, 50, 100, 500, 1000, 5000, 10000]
 })
@@ -35,11 +46,13 @@ function bindPrometheus (app) {
   }
 
   if (app.options.controlPassword) {
-    prometheus.collectDefaultMetrics()
+    prometheus.collectDefaultMetrics({ })
     app.on('processed', (action, meta, latency) => {
+      requestsCount.inc({ type: action.type })
       processingTime.observe(latency)
     })
     app.on('subscribed', (action, meta, latency) => {
+      subscriptionsCount.inc()
       subscribingTime.observe(latency)
     })
     app.on('connected', () => {

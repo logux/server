@@ -76,16 +76,18 @@ it('reports internal things', () => {
   return app.listen().then(() => {
     app.emitter.emit('connected', { })
     app.emitter.emit('connected', { })
-    app.emitter.emit('processed', { }, { }, 50)
+    app.emitter.emit('processed', { type: 'FOO' }, { }, 50)
     app.emitter.emit('subscribed', { }, { }, 5)
     app.emitter.emit('clientError', { })
     app.emitter.emit('disconnected', { })
     return request('GET', '/prometheus?secret')
-  }).then(response => {
-    expect(response).toContain('logux_clients_gauge 1')
-    expect(response).toContain('logux_client_errors_counter 1')
-    expect(response).toContain('logux_request_processing_time_histogram_sum 50')
-    expect(response).toContain('logux_request_subscribing_time_histogram_sum 5')
+  }).then(res => {
+    expect(res).toContain('logux_clients_gauge 1')
+    expect(res).toContain('logux_client_errors_counter 1')
+    expect(res).toContain('logux_request_counter{type="FOO"} 1')
+    expect(res).toContain('logux_request_processing_time_histogram_sum 50')
+    expect(res).toContain('logux_subscription_counter 1')
+    expect(res).toContain('logux_subscription_processing_time_histogram_sum 5')
   })
 })
 
