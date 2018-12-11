@@ -74,11 +74,14 @@ it('supports wrong URL encoding', () => {
 it('reports internal things', () => {
   app = createServer('secret')
   return app.listen().then(() => {
+    app.connected.one = { destroy: () => true }
+    app.connected.two = { destroy: () => true }
     app.emitter.emit('connected', { })
     app.emitter.emit('connected', { })
     app.emitter.emit('processed', { type: 'FOO' }, { }, 50)
     app.emitter.emit('subscribed', { }, { }, 5)
     app.emitter.emit('clientError', { })
+    delete app.connected.two
     app.emitter.emit('disconnected', { })
     return request('GET', '/prometheus?secret')
   }).then(res => {
