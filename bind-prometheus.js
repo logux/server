@@ -1,5 +1,9 @@
 let prometheus = require('prom-client')
 
+const TIMES = [
+  100, 500, 1000, 2500, 5000, 7500, 10000, 25000, 50000, 75000, 100000
+]
+
 let requestsCount = new prometheus.Counter({
   name: 'logux_request_counter',
   help: 'How many action was processed',
@@ -9,7 +13,7 @@ let requestsCount = new prometheus.Counter({
 let processingTime = new prometheus.Histogram({
   name: 'logux_request_processing_time_histogram',
   help: 'How long action was processed',
-  buckets: [100, 500, 1000, 2500, 5000, 7500, 10000, 25000, 50000]
+  buckets: TIMES
 })
 
 let subscriptionsCount = new prometheus.Counter({
@@ -20,7 +24,7 @@ let subscriptionsCount = new prometheus.Counter({
 let subscribingTime = new prometheus.Histogram({
   name: 'logux_subscription_processing_time_histogram',
   help: 'How long channel initial data was loaded',
-  buckets: [100, 500, 1000, 2500, 5000, 7500, 10000, 25000, 50000]
+  buckets: TIMES
 })
 
 let clientCount = new prometheus.Gauge({
