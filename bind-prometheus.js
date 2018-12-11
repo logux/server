@@ -56,10 +56,10 @@ function bindPrometheus (app) {
       subscribingTime.observe(latency)
     })
     app.on('connected', () => {
-      clientCount.inc()
+      clientCount.set(Object.keys(app.connected).length)
     })
     app.on('disconnected', () => {
-      clientCount.dec()
+      clientCount.set(Object.keys(app.connected).length)
     })
     app.on('clientError', () => {
       errorCount.inc()
