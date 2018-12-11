@@ -46,7 +46,7 @@ function bindPrometheus (app) {
   }
 
   if (app.options.controlPassword) {
-    prometheus.collectDefaultMetrics({ })
+    prometheus.collectDefaultMetrics()
     app.on('processed', (action, meta, latency) => {
       requestsCount.inc({ type: action.type })
       processingTime.observe(latency)
