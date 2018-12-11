@@ -264,10 +264,12 @@ class BaseServer {
       })
     })
     this.on('disconnected', client => {
-      if (client.nodeId) {
-        this.reporter('disconnect', { nodeId: client.nodeId })
-      } else {
-        this.reporter('disconnect', { connectionId: client.key })
+      if (!client.zombie) {
+        if (client.nodeId) {
+          this.reporter('disconnect', { nodeId: client.nodeId })
+        } else {
+          this.reporter('disconnect', { connectionId: client.key })
+        }
       }
     })
 

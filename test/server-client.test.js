@@ -431,7 +431,6 @@ it('disconnects zombie', () => {
       'connect',
       'authenticated',
       'zombie',
-      'disconnect',
       'authenticated'
     ])
     expect(test.reports[3]).toEqual(['zombie', { nodeId: '10:client:a' }])
