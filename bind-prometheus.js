@@ -9,7 +9,7 @@ let requestsCount = new prometheus.Counter({
 let processingTime = new prometheus.Histogram({
   name: 'logux_request_processing_time_histogram',
   help: 'How long action was processed',
-  buckets: [1, 50, 100, 500, 1000, 5000, 10000]
+  buckets: [100, 500, 1000, 2500, 5000, 7500, 10000, 2500, 50000]
 })
 
 let subscriptionsCount = new prometheus.Counter({
@@ -20,7 +20,7 @@ let subscriptionsCount = new prometheus.Counter({
 let subscribingTime = new prometheus.Histogram({
   name: 'logux_subscription_processing_time_histogram',
   help: 'How long channel initial data was loaded',
-  buckets: [1, 50, 100, 500, 1000, 5000, 10000]
+  buckets: [100, 500, 1000, 2500, 5000, 7500, 10000, 2500, 50000]
 })
 
 let clientCount = new prometheus.Gauge({
