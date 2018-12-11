@@ -166,7 +166,7 @@ class ServerClient {
    */
   destroy () {
     this.destroyed = true
-    if (!this.app.destroying && !this.zombie) {
+    if (!this.app.destroying) {
       this.app.emitter.emit('disconnected', this)
     }
     this.node.destroy()
