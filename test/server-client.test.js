@@ -905,30 +905,6 @@ it('has custom processor for unknown type', () => {
   })
 })
 
-it('keeps data between processing steps', () => {
-  let app = createServer()
-  let calls = 0
-  app.type('A', {
-    access (ctx) {
-      ctx.data.one = 1
-      return true
-    },
-    process (ctx) {
-      expect(ctx.data.one).toEqual(1)
-      calls += 1
-    }
-  })
-  return connectClient(app).then(client => {
-    client.node.connection.other().send([
-      'sync', 1,
-      { type: 'A' }, { id: [1, '10:uuid', 0], time: 1 }
-    ])
-    return client.node.connection.pair.wait('right')
-  }).then(() => {
-    expect(calls).toEqual(1)
-  })
-})
-
 it('allows to reports about unknown type in custom processor', () => {
   let test = createReporter()
   let calls = []

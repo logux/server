@@ -299,7 +299,6 @@ class BaseServer {
     this.authAttempts = { }
     this.unknownTypes = { }
     this.wrongChannels = { }
-    this.contexts = { }
 
     this.timeouts = { }
     this.lastTimeout = 0
@@ -861,7 +860,6 @@ class BaseServer {
       if (typeof latency === 'undefined') latency = Date.now() - start
       this.processing -= 1
       this.emitter.emit('processed', action, meta, latency)
-      delete this.contexts[meta.id]
     })
   }
 
@@ -877,10 +875,6 @@ class BaseServer {
   }
 
   createContext (meta) {
-    if (this.contexts[meta.id]) {
-      return this.contexts[meta.id]
-    }
-
     let data = parseNodeId(meta.id)
 
     let subprotocol

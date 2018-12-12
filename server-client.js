@@ -250,7 +250,6 @@ class ServerClient {
 
   filter (action, meta) {
     let ctx = this.app.createContext(meta)
-    this.app.contexts[meta.id] = ctx
 
     let wrongUser = !this.clientId || this.clientId !== ctx.clientId
     let wrongMeta = Object.keys(meta).some(i => ALLOWED_META.indexOf(i) === -1)
