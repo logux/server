@@ -66,7 +66,7 @@ function tick () {
   })
 }
 
-for (let i = 0; i < 500; i++) {
+for (let i = 0; i < 100; i++) {
   delay(Math.random() * 10000).then(() => {
     tick()
   })
