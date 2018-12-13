@@ -94,7 +94,7 @@ function bindBackendProxy (app) {
   let backend = url.parse(app.options.backend)
   backend.password = app.options.controlPassword
 
-  let processing = []
+  let processing = { }
 
   function access (ctx, action, meta) {
     let processResolve, processReject
