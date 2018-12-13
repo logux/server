@@ -318,6 +318,19 @@ it('notifies about actions and subscriptions', () => {
   app.on('error', e => {
     throw e
   })
+  let events = []
+  app.on('backendGranted', (action, meta, latency) => {
+    expect(typeof action.type).toEqual('string')
+    expect(typeof meta.id).toEqual('string')
+    expect(latency).toBeCloseTo(50, -2)
+    events.push('backendGranted')
+  })
+  app.on('backendProcessed', (action, meta, latency) => {
+    expect(typeof action.type).toEqual('string')
+    expect(typeof meta.id).toEqual('string')
+    expect(latency).toBeCloseTo(100, -2)
+    events.push('backendProcessed')
+  })
   return connectClient(app).then(client => {
     client.connection.other().send(['sync', 2,
       { type: 'A' },
@@ -380,6 +393,9 @@ it('notifies about actions and subscriptions', () => {
       { type: 'logux/processed', id: '2 10:uuid 0' }
     ])
     expect(app.log.entries()[0][1].status).toEqual('processed')
+    expect(events).toEqual([
+      'backendGranted', 'backendGranted', 'backendProcessed', 'backendProcessed'
+    ])
   })
 })
 

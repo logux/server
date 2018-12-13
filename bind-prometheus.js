@@ -43,6 +43,18 @@ let errorCount = new prometheus.Counter({
   help: 'How many client errors was fired'
 })
 
+let backendAccessTime = new prometheus.Histogram({
+  name: 'logux_backend_access_time_histogram',
+  help: 'How long it takes for backend to grant access',
+  buckets: TIMES
+})
+
+let backendProcessTime = new prometheus.Histogram({
+  name: 'logux_backend_responce_time_histogram',
+  help: 'How long it takes for backend to process action or subscriptions',
+  buckets: TIMES
+})
+
 function bindPrometheus (app) {
   app.controls['/prometheus'] = {
     request () {
@@ -76,6 +88,12 @@ function bindPrometheus (app) {
     })
     app.on('clientError', () => {
       errorCount.inc()
+    })
+    app.on('backendGranted', (action, meta, latency) => {
+      backendAccessTime.observe(latency)
+    })
+    app.on('backendProcessed', (action, meta, latency) => {
+      backendProcessTime.observe(latency)
     })
   }
 }

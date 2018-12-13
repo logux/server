@@ -81,6 +81,8 @@ it('reports internal things', () => {
     app.log.emitter.emit('add', { type: 'FOO' }, { })
     app.emitter.emit('processed', { type: 'FOO' }, { }, 50)
     app.emitter.emit('subscribed', { }, { }, 5)
+    app.emitter.emit('backendGranted', { }, { }, 100)
+    app.emitter.emit('backendProcessed', { }, { }, 115)
     app.emitter.emit('clientError', { })
     delete app.connected.two
     app.emitter.emit('disconnected', { })
@@ -93,6 +95,8 @@ it('reports internal things', () => {
     expect(res).toContain('logux_request_processing_time_histogram_sum 50')
     expect(res).toContain('logux_subscription_counter 1')
     expect(res).toContain('logux_subscription_processing_time_histogram_sum 5')
+    expect(res).toContain('logux_backend_access_time_histogram_sum 100')
+    expect(res).toContain('logux_backend_responce_time_histogram_sum 115')
   })
 })
 

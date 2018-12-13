@@ -103,8 +103,10 @@ function bindBackendProxy (app) {
       processReject = reject
     })
 
+    let start = Date.now()
     return send(backend, ['action', action, meta], received => {
       if (APPROVED.test(received)) {
+        app.emitter.emit('backendGranted', action, meta, Date.now() - start)
         return true
       } else if (FORBIDDEN.test(received)) {
         delete processing[meta.id]
@@ -114,6 +116,7 @@ function bindBackendProxy (app) {
       }
     }, response => {
       if (processing[meta.id]) {
+        app.emitter.emit('backendProcessed', action, meta, Date.now() - start)
         let json = parseAnswer(response)
         if (!json) {
           processReject(new Error('Backend wrong answer'))
