@@ -4,6 +4,12 @@ const TIMES = [
   100, 500, 1000, 2500, 5000, 7500, 10000, 25000, 50000, 75000, 100000
 ]
 
+let actionsCount = new prometheus.Counter({
+  name: 'logux_action_counter',
+  help: 'How many action was added',
+  labelNames: ['type']
+})
+
 let requestsCount = new prometheus.Counter({
   name: 'logux_request_counter',
   help: 'How many action was processed',
@@ -51,6 +57,9 @@ function bindPrometheus (app) {
 
   if (app.options.controlPassword) {
     prometheus.collectDefaultMetrics()
+    app.log.on('add', action => {
+      actionsCount.inc({ type: action.type })
+    })
     app.on('processed', (action, meta, latency) => {
       requestsCount.inc({ type: action.type })
       processingTime.observe(latency)
