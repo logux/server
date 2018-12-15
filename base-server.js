@@ -733,7 +733,7 @@ class BaseServer {
    * @example
    * server.log.on('add', (action, meta) => {
    *   if (meta.server === server.nodeId) {
-   *     sendToOtherServersByRedis(action, meta)
+   *     sendToOtherServers(action, meta)
    *   }
    * })
    * onReceivingFromOtherServer((action, meta) => {
