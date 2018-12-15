@@ -35,7 +35,8 @@ let subscribingTime = new prometheus.Histogram({
 
 let errorCount = new prometheus.Counter({
   name: 'logux_errors_counter',
-  help: 'How server errors was fired'
+  help: 'How many server errors was fired',
+  labelNames: ['name']
 })
 
 let clientCount = new prometheus.Gauge({
@@ -87,8 +88,12 @@ function bindPrometheus (app) {
       clientCount.set(Object.keys(app.connected).length)
     })
     app.on('error', e => {
-      if (e.name !== 'LoguxError' || e.type !== 'timeout') {
-        errorCount.inc()
+      if (e.name === 'LoguxError') {
+        if (e.type !== 'timeout') {
+          errorCount.inc({ name: 'LoguxError: ' + e.type })
+        }
+      } else {
+        errorCount.inc({ name: e.name })
       }
     })
     app.on('clientError', () => {
