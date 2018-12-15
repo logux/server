@@ -33,12 +33,17 @@ let subscribingTime = new prometheus.Histogram({
   buckets: TIMES
 })
 
+let errorCount = new prometheus.Counter({
+  name: 'logux_errors_counter',
+  help: 'How server errors was fired'
+})
+
 let clientCount = new prometheus.Gauge({
   name: 'logux_clients_gauge',
   help: 'How many clients are online'
 })
 
-let errorCount = new prometheus.Counter({
+let clientErrorCount = new prometheus.Counter({
   name: 'logux_client_errors_counter',
   help: 'How many client errors was fired'
 })
@@ -86,8 +91,11 @@ function bindPrometheus (app) {
     app.on('disconnected', () => {
       clientCount.set(Object.keys(app.connected).length)
     })
-    app.on('clientError', () => {
+    app.on('error', () => {
       errorCount.inc()
+    })
+    app.on('clientError', () => {
+      clientErrorCount.inc()
     })
     app.on('backendGranted', (action, meta, latency) => {
       backendAccessTime.observe(latency)

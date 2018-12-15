@@ -83,12 +83,14 @@ it('reports internal things', () => {
     app.emitter.emit('subscribed', { }, { }, 5)
     app.emitter.emit('backendGranted', { }, { }, 100)
     app.emitter.emit('backendProcessed', { }, { }, 115)
+    app.emitter.emit('error', { })
     app.emitter.emit('clientError', { })
     delete app.connected.two
     app.emitter.emit('disconnected', { })
     return request('GET', '/prometheus?secret')
   }).then(res => {
     expect(res).toContain('logux_clients_gauge 1')
+    expect(res).toContain('logux_errors_counter 1')
     expect(res).toContain('logux_client_errors_counter 1')
     expect(res).toContain('logux_action_counter{type="FOO"} 1')
     expect(res).toContain('logux_request_counter{type="FOO"} 1')
