@@ -3,6 +3,7 @@ let NanoEvents = require('nanoevents')
 let UrlPattern = require('url-pattern')
 let WebSocket = require('ws')
 let nanoid = require('nanoid')
+let redis = require('redis')
 let https = require('https')
 let http = require('http')
 let path = require('path')
@@ -64,6 +65,7 @@ function optionError (msg) {
  * @param {string} [options.backend] URL to PHP, Ruby on Rails,
  *                                   or other backend to process actions
  *                                   and authentication.
+ * @param {string} [option.redis] URL to Redis for Logux scaling.
  * @param {number} [options.controlHost="127.0.0.1"] Host to bind HTTP server
  *                                                   to control Logux server.
  * @param {number} [options.controlPort=31338] Port to control the server.
@@ -238,6 +240,9 @@ class BaseServer {
     })
 
     this.emitter = new NanoEvents()
+    this.on('fatal', err => {
+      this.reporter('error', { err, fatal: true })
+    })
     this.on('error', (err, action, meta) => {
       if (meta) {
         this.reporter('error', { err, actionId: meta.id })
@@ -245,8 +250,6 @@ class BaseServer {
         this.reporter('error', { err, nodeId: err.nodeId })
       } else if (err.connectionId) {
         this.reporter('error', { err, connectionId: err.connectionId })
-      } else {
-        this.reporter('error', { err, fatal: true })
       }
       if (this.env === 'development') this.debugError(err)
     })
@@ -315,6 +318,16 @@ class BaseServer {
     bindPrometheus(this)
     if (this.options.backend) {
       bindBackendProxy(this)
+    }
+
+    if (this.options.redis) {
+      this.redis = redis.createClient(this.options.redis)
+      this.redis.on('error', e => {
+        this.emitter.emit('fatal', e)
+      })
+      this.unbind.push(() => new Promise(resolve => {
+        this.redis.quit(resolve)
+      }))
     }
 
     this.unbind.push(() => {
@@ -431,6 +444,7 @@ class BaseServer {
         backend: this.options.backend,
         server: !!this.options.server,
         nodeId: this.nodeId,
+        redis: this.options.redis,
         cert: !!this.options.cert,
         host: this.options.host,
         port: this.options.port

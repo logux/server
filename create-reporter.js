@@ -63,6 +63,10 @@ const REPORTERS = {
       details.backendSend = r.backend
     }
 
+    if (r.redis) {
+      details.redis = r.redis
+    }
+
     return { msg: 'Logux server is listening', details }
   },
 

@@ -8,7 +8,7 @@ let app = new Server({
 })
 app.nodeId = 'server:FnXaqDxY'
 
-app.on('error', e => console.log(`Error event: ${ e.message }`))
+app.on('fatal', e => console.log(`Fatal event: ${ e.message }`))
 
 new Promise((resolve, reject) => {
   setTimeout(() => {

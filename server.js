@@ -6,7 +6,7 @@ let BaseServer = require('./base-server')
 const AVAILABLE_OPTIONS = [
   'subprotocol', 'supports', 'timeout', 'ping', 'root', 'store', 'server',
   'port', 'host', 'key', 'cert', 'env', 'bunyan', 'reporter', 'backend',
-  'controlHost', 'controlPort', 'controlPassword'
+  'controlHost', 'controlPort', 'controlPassword', 'redis'
 ]
 
 const ENVS = {
@@ -15,6 +15,7 @@ const ENVS = {
   key: 'LOGUX_KEY',
   cert: 'LOGUX_CERT',
   reporter: 'LOGUX_REPORTER',
+  redis: 'LOGUX_REDIS',
   controlHost: 'LOGUX_CONTROL_HOST',
   controlPort: 'LOGUX_CONTROL_PORT',
   controlPassword: 'LOGUX_CONTROL_PASSWORD',
@@ -76,6 +77,10 @@ yargs
     describe: 'Password to control Logux server',
     type: 'string'
   })
+  .option('redis', {
+    describe: 'URL to Redis for Logux scaling',
+    type: 'string'
+  })
   .epilog(`Environment variables: \n${ envHelp() }`)
   .example('$0 --port 31337 --host 127.0.0.1')
   .example('LOGUX_PORT=1337 $0')
@@ -100,6 +105,7 @@ yargs
  * @param {string} [options.backend] URL to PHP, Ruby on Rails,
  *                                   or other backend to process actions
  *                                   and authentication.
+ * @param {string} [option.redis] URL to Redis for Logux scaling.
  * @param {number} [options.controlHost="127.0.0.1"] Host to bind HTTP server
  *                                                   to control Logux server.
  * @param {number} [options.controlPort=31338] Port to control the server.
@@ -197,12 +203,7 @@ class Server extends BaseServer {
     let initialized = false
     let onError = err => {
       if (initialized) {
-        this.emitter.emit('error', err)
-        if (!this.destroying) {
-          this.destroy().then(() => {
-            process.exit(1)
-          })
-        }
+        this.emitter.emit('fatal', err)
       } else {
         options.reporter('error', { err, fatal: true })
         process.exit(1)
@@ -210,6 +211,20 @@ class Server extends BaseServer {
     }
     process.on('uncaughtException', onError)
     process.on('unhandledRejection', onError)
+
+    super(options)
+
+    this.on('fatal', () => {
+      if (initialized) {
+        if (!this.destroying) {
+          this.destroy().then(() => {
+            process.exit(1)
+          })
+        }
+      } else {
+        process.exit(1)
+      }
+    })
 
     for (let name in options) {
       if (AVAILABLE_OPTIONS.indexOf(name) === -1) {
@@ -221,7 +236,6 @@ class Server extends BaseServer {
       }
     }
 
-    super(options)
     initialized = true
 
     let onExit = () => {

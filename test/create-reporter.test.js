@@ -122,6 +122,7 @@ it('reports listen', () => {
     backend: 'http://127.0.0.1:3000/logux',
     nodeId: 'server:FnXaqDxY',
     server: false,
+    redis: undefined,
     cert: false,
     host: '127.0.0.1',
     port: 31337
@@ -139,6 +140,7 @@ it('reports listen for production', () => {
     supports: '0.x',
     nodeId: 'server:FnXaqDxY',
     server: false,
+    redis: '//localhost',
     cert: true,
     host: '127.0.0.1',
     port: 31337

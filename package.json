@@ -26,6 +26,7 @@
     "nanoevents": "^1.0.8",
     "nanoid": "^2.0.0",
     "prom-client": "^11.2.0",
+    "redis": "^2.8.0",
     "semver": "^5.6.0",
     "strip-ansi": "^5.0.0",
     "url-pattern": "^1.0.3",

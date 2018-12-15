@@ -248,7 +248,8 @@ it('supports object in SSL key', () => {
 it('reporters on start listening', () => {
   let test = createReporter({
     controlPassword: 'secret',
-    backend: 'http://127.0.0.1:3000/logux'
+    backend: 'http://127.0.0.1:3000/logux',
+    redis: '//localhost'
   })
 
   let promise = test.app.listen()
@@ -267,6 +268,7 @@ it('reporters on start listening', () => {
         backend: 'http://127.0.0.1:3000/logux',
         nodeId: 'server:uuid',
         server: false,
+        redis: '//localhost',
         cert: false,
         host: '127.0.0.1',
         port: test.app.options.port
@@ -371,6 +373,18 @@ it('sends debug message to clients on runtimeError', () => {
     'fake stacktrace'
   ])
   expect(app.connected[2].connection.send).not.toHaveBeenCalled()
+})
+
+it('shows errors from Redis', () => {
+  app = createServer({ redis: 'noserver' })
+  let fatals = []
+  app.on('fatal', e => {
+    fatals.push(e)
+  })
+  return delay(10).then(() => {
+    expect(fatals).toHaveLength(1)
+    expect(fatals[0].message).toContain('Redis connection to noserver failed')
+  })
 })
 
 it('disconnects client on destroy', () => {
@@ -485,9 +499,10 @@ it('sends errors to clients in development', () => {
 
   let err = new Error('Test')
   err.stack = 'stack'
+  err.nodeId = '10:uuid'
   test.app.emitter.emit('error', err)
 
-  expect(test.reports).toEqual([['error', { err, fatal: true }]])
+  expect(test.reports).toEqual([['error', { err, nodeId: '10:uuid' }]])
   expect(test.app.connected[0].connection.send).toHaveBeenCalledWith(
     ['debug', 'error', 'stack']
   )
