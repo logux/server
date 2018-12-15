@@ -5,5 +5,7 @@ node_js:
   - "10"
   - "8"
   - "6"
+services:
+  - redis-server
 git:
   depth: 5
