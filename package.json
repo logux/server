@@ -167,7 +167,8 @@
       "authorizer",
       "authenticator",
       "Example sendAction",
-      "clientId"
+      "clientId",
+      "Redis"
     ]
   }
 }
