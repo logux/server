@@ -1,4 +1,4 @@
-let { SyncError, TestPair, TestTime } = require('@logux/core')
+let { LoguxError, TestPair, TestTime } = require('@logux/core')
 let delay = require('nanodelay')
 
 let ServerClient = require('../server-client')
@@ -360,7 +360,7 @@ it('reports about synchronization errors', () => {
     expect(test.names).toEqual(['connect', 'error'])
     expect(test.reports[1]).toEqual(['error', {
       connectionId: '1',
-      err: new SyncError('wrong-format', undefined, true)
+      err: new LoguxError('wrong-format', undefined, true)
     }])
   })
 })
@@ -378,7 +378,7 @@ it('checks subprotocol', () => {
     expect(test.names).toEqual(['connect', 'clientError', 'disconnect'])
     expect(test.reports[1]).toEqual(['clientError', {
       connectionId: '1',
-      err: new SyncError('wrong-subprotocol', {
+      err: new LoguxError('wrong-subprotocol', {
         supported: '0.x', used: '1.0.0'
       })
     }])

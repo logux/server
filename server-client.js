@@ -1,4 +1,4 @@
-let { SyncError } = require('@logux/core')
+let { LoguxError } = require('@logux/core')
 let semver = require('semver')
 
 let FilteredNode = require('./filtered-node')
@@ -124,7 +124,7 @@ class ServerClient {
     })
     this.node.on('connect', () => {
       if (!this.isSubprotocol(this.app.options.supports)) {
-        throw new SyncError('wrong-subprotocol', {
+        throw new LoguxError('wrong-subprotocol', {
           supported: this.app.options.supports,
           used: this.node.remoteSubprotocol
         })
@@ -215,7 +215,7 @@ class ServerClient {
     return this.app.authenticator(this.userId, credentials, this)
       .then(result => {
         if (this.app.isBruteforce(this.remoteAddress)) {
-          return Promise.reject(new SyncError('bruteforce'))
+          return Promise.reject(new LoguxError('bruteforce'))
         }
 
         if (result) {

@@ -83,6 +83,8 @@ it('reports internal things', () => {
     app.emitter.emit('subscribed', { }, { }, 5)
     app.emitter.emit('backendGranted', { }, { }, 100)
     app.emitter.emit('backendProcessed', { }, { }, 115)
+    app.emitter.emit('error', { name: 'LoguxError', type: 'timeout' })
+    app.emitter.emit('error', { name: 'LoguxError', type: 'wrong-message' })
     app.emitter.emit('error', { })
     app.emitter.emit('clientError', { })
     delete app.connected.two
@@ -90,8 +92,7 @@ it('reports internal things', () => {
     return request('GET', '/prometheus?secret')
   }).then(res => {
     expect(res).toContain('logux_clients_gauge 1')
-    expect(res).toContain('logux_errors_counter 1')
-    expect(res).toContain('logux_client_errors_counter 1')
+    expect(res).toContain('logux_errors_counter 3')
     expect(res).toContain('logux_action_counter{type="FOO"} 1')
     expect(res).toContain('logux_request_counter{type="FOO"} 1')
     expect(res).toContain('logux_request_processing_time_histogram_sum 50')

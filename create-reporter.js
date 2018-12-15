@@ -144,7 +144,7 @@ const REPORTERS = {
       delete result.details.err.stack
     }
 
-    if (record.err.name === 'SyncError') {
+    if (record.err.name === 'LoguxError') {
       delete result.details.err.stack
     }
 

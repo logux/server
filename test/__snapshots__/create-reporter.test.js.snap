@@ -336,7 +336,7 @@ exports[`reports subscribed 2`] = `
 `;
 
 exports[`reports sync error 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":50,\\"err\\":{\\"message\\":\\"Logux received unknown-message error (Unknown message \`bad\` type)\\",\\"name\\":\\"SyncError\\"},\\"connectionId\\":\\"670\\",\\"msg\\":\\"Logux received unknown-message error (Unknown message \`bad\` type)\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":50,\\"err\\":{\\"message\\":\\"Logux received unknown-message error (Unknown message \`bad\` type)\\",\\"name\\":\\"LoguxError\\"},\\"connectionId\\":\\"670\\",\\"msg\\":\\"Logux received unknown-message error (Unknown message \`bad\` type)\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 

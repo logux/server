@@ -43,11 +43,6 @@ let clientCount = new prometheus.Gauge({
   help: 'How many clients are online'
 })
 
-let clientErrorCount = new prometheus.Counter({
-  name: 'logux_client_errors_counter',
-  help: 'How many client errors was fired'
-})
-
 let backendAccessTime = new prometheus.Histogram({
   name: 'logux_backend_access_time_histogram',
   help: 'How long it takes for backend to grant access',
@@ -91,11 +86,13 @@ function bindPrometheus (app) {
     app.on('disconnected', () => {
       clientCount.set(Object.keys(app.connected).length)
     })
-    app.on('error', () => {
-      errorCount.inc()
+    app.on('error', e => {
+      if (e.name !== 'LoguxError' || e.type !== 'timeout') {
+        errorCount.inc()
+      }
     })
     app.on('clientError', () => {
-      clientErrorCount.inc()
+      errorCount.inc()
     })
     app.on('backendGranted', (action, meta, latency) => {
       backendAccessTime.observe(latency)

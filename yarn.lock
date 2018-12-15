@@ -34,7 +34,7 @@
 
 "@logux/core@logux/core":
   version "0.2.2"
-  resolved "https://codeload.github.com/logux/core/tar.gz/2b2cefc3a8f20012fbd904a2807489383a751c97"
+  resolved "https://codeload.github.com/logux/core/tar.gz/6388add08fdce9d8f865afc19af5758810b3a27d"
   dependencies:
     nanoevents "^1.0.8"
 
