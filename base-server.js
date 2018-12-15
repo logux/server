@@ -333,7 +333,7 @@ class BaseServer {
       let createRedis = () => {
         let client = redis.createClient(this.options.redis)
         client.on('error', fatal)
-        this.unbind.push(new Promise(resolve => {
+        this.unbind.push(() => new Promise(resolve => {
           client.quit(resolve)
         }))
         return client
