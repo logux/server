@@ -467,7 +467,7 @@ it('allows subscribe and unsubscribe actions', () => {
   test.app.channel('a', { access: () => true })
 
   return connectClient(test.app).then(client => {
-    client.connection.other().send(['sync', 2,
+    client.connection.other().send(['sync', 3,
       { type: 'logux/subscribe', channel: 'a' },
       { id: [1, '10:uuid', 0], time: 1 },
       { type: 'logux/unsubscribe', channel: 'b' },
@@ -966,5 +966,43 @@ it('allows to use different node ID only with same client ID', () => {
     return client.node.connection.pair.wait('right')
   }).then(() => {
     expect(test.names).toEqual(['connect', 'authenticated', 'denied', 'add'])
+  })
+})
+
+it('resends actions between multiple servers by Redis', () => {
+  let app1 = createServer({ redis: '//localhost' })
+  let app2 = createServer({ redis: '//localhost' })
+
+  app1.on('fatal', e => {
+    throw e
+  })
+  app1.channel('a', { access: () => true })
+
+  return connectClient(app1, '10:client:uuid').then(client => {
+    app1.subscribeAction(
+      { type: 'logux/subscribe', channel: 'a' },
+      { id: '1 10:client:uuid 0', time: 1 }
+    )
+    return delay(10).then(() => {
+      app2.log.add({ type: 'A' }, { users: ['10'] })
+      app2.log.add({ type: 'B' }, { clients: ['10:client'] })
+      app2.log.add({ type: 'C' }, { nodes: ['10:client:uuid'] })
+      app2.log.add({ type: 'D' }, { channels: ['a'] })
+      return delay(10)
+    }).then(() => {
+      expect(sent(client)).toHaveLength(2 + 4)
+      app1.unsubscribeAction(
+        { type: 'logux/unsubscribe', channel: 'a' },
+        { id: '2 10:client:uuid 0', time: 2 }
+      )
+      return delay(10)
+    }).then(() => {
+      app2.log.add({ type: 'a' }, { users: ['20'] })
+      app2.log.add({ type: 'd' }, { channels: ['a'] })
+      return delay(10)
+    }).then(() => {
+      expect(sent(client)).toHaveLength(2 + 4 + 1)
+      client.destroy()
+    })
   })
 })

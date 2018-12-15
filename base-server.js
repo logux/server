@@ -219,6 +219,8 @@ class BaseServer {
       }
 
       this.sendAction(action, meta)
+      if (this.redisPub) this.sendToRedis(action, meta)
+
       if (meta.status === 'waiting') {
         let type = this.types[action.type]
         if (!type) {
@@ -321,13 +323,32 @@ class BaseServer {
     }
 
     if (this.options.redis) {
-      this.redis = redis.createClient(this.options.redis)
-      this.redis.on('error', e => {
-        this.emitter.emit('fatal', e)
+      let redisError = false
+      let fatal = e => {
+        if (!redisError) {
+          redisError = true
+          this.emitter.emit('fatal', e)
+        }
+      }
+      let createRedis = () => {
+        let client = redis.createClient(this.options.redis)
+        client.on('error', fatal)
+        this.unbind.push(new Promise(resolve => {
+          client.quit(resolve)
+        }))
+        return client
+      }
+
+      this.redisPub = createRedis()
+      this.redisSub = createRedis()
+
+      let prefix = '["' + this.nodeId + '",'
+      this.redisSub.on('message', (channel, message) => {
+        if (message.slice(0, prefix.length) !== prefix) {
+          let data = JSON.parse(message)
+          this.sendAction(data[1], data[2])
+        }
       })
-      this.unbind.push(() => new Promise(resolve => {
-        this.redis.quit(resolve)
-      }))
     }
 
     this.unbind.push(() => {
@@ -839,6 +860,30 @@ class BaseServer {
     this.wrongChannels[meta.id] = true
   }
 
+  sendToRedis (action, meta) {
+    let message = JSON.stringify([this.nodeId, action, meta])
+    if (meta.nodes) {
+      for (let id of meta.nodes) {
+        this.redisPub.publish('logux.nodes.' + id, message)
+      }
+    }
+    if (meta.clients) {
+      for (let id of meta.clients) {
+        this.redisPub.publish('logux.clients.' + id, message)
+      }
+    }
+    if (meta.users) {
+      for (let id of meta.users) {
+        this.redisPub.publish('logux.users.' + id, message)
+      }
+    }
+    if (meta.channels) {
+      for (let channel of meta.channels) {
+        this.redisPub.publish('logux.channels.' + channel, message)
+      }
+    }
+  }
+
   internalUnkownType (action, meta) {
     this.log.changeMeta(meta.id, { status: 'error' })
     this.reporter('unknownType', { type: action.type, actionId: meta.id })
@@ -949,6 +994,9 @@ class BaseServer {
 
           if (!this.subscribers[action.channel]) {
             this.subscribers[action.channel] = { }
+            if (this.redisSub) {
+              this.redisSub.subscribe('logux.channels.' + action.channel)
+            }
           }
           this.subscribers[action.channel][ctx.nodeId] = filter || true
           subscribed = true
@@ -994,6 +1042,10 @@ class BaseServer {
       if (Object.keys(this.subscribers[action.channel]).length === 0) {
         delete this.subscribers[action.channel]
       }
+    }
+
+    if (this.redisSub && !this.subscribers[action.channel]) {
+      this.redisSub.unsubscribe('logux.channels' + action.channel)
     }
 
     this.reporter('unsubscribed', {

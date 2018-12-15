@@ -183,14 +183,19 @@ class ServerClient {
     }
     if (this.clientId) {
       delete this.app.clientIds[this.clientId]
-    }
-    if (this.nodeId) {
       delete this.app.nodeIds[this.nodeId]
       for (let i in this.app.subscribers) {
         delete this.app.subscribers[i][this.nodeId]
         if (Object.keys(this.app.subscribers[i]).length === 0) {
           delete this.app.subscribers[i]
         }
+      }
+    }
+    if (this.app.redisSub && this.clientId && !this.app.destroying) {
+      this.app.redisSub.unsubscribe('logux.clients.' + this.clientId)
+      this.app.redisSub.unsubscribe('logux.nodes.' + this.nodeId)
+      if (this.userId && !this.app.userIds[this.userId]) {
+        this.app.redisSub.unsubscribe('logux.users.' + this.nodeId)
       }
     }
     delete this.app.connected[this.key]
@@ -227,6 +232,13 @@ class ServerClient {
               this.app.userIds[this.userId] = []
             }
             this.app.userIds[this.userId].push(this)
+          }
+          if (this.app.redisSub) {
+            this.app.redisSub.subscribe('logux.clients.' + this.clientId)
+            this.app.redisSub.subscribe('logux.nodes.' + this.nodeId)
+            if (this.userId && this.app.userIds[this.userId].length === 1) {
+              this.app.redisSub.subscribe('logux.users.' + this.userId)
+            }
           }
           this.app.reporter('authenticated', reportDetails(this))
         } else {
