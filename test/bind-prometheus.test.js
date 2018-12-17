@@ -78,6 +78,7 @@ it('reports internal things', () => {
     app.connected.two = { destroy: () => true }
     app.emitter.emit('connected', { })
     app.emitter.emit('connected', { })
+    app.emitter.emit('authenticated', 50)
     app.log.emitter.emit('add', { type: 'FOO' }, { })
     app.emitter.emit('processed', { type: 'FOO' }, { }, 50)
     app.emitter.emit('subscribed', { }, { }, 5)
@@ -100,6 +101,7 @@ it('reports internal things', () => {
     expect(res).toContain('logux_request_processing_time_histogram_sum 50')
     expect(res).toContain('logux_subscription_counter 1')
     expect(res).toContain('logux_subscription_processing_time_histogram_sum 5')
+    expect(res).toContain('logux_auth_processing_time_histogram_sum 50')
     expect(res).toContain('logux_backend_access_time_histogram_sum 100')
     expect(res).toContain('logux_backend_responce_time_histogram_sum 115')
   })

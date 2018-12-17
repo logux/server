@@ -299,6 +299,11 @@ it('authenticates user', () => {
   ))
   let client = createClient(test.app)
 
+  let authenticated = []
+  test.app.on('authenticated', latency => {
+    authenticated.push(latency)
+  })
+
   return client.connection.connect().then(() => {
     let protocol = client.node.localProtocol
     client.connection.other().send([
@@ -317,6 +322,8 @@ it('authenticates user', () => {
     expect(test.reports[1]).toEqual(['authenticated', {
       connectionId: '1', nodeId: 'a:b:uuid', subprotocol: '0.0.0'
     }])
+    expect(authenticated).toHaveLength(1)
+    expect(typeof authenticated[0]).toEqual('number')
   })
 })
 
