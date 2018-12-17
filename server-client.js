@@ -212,6 +212,7 @@ class ServerClient {
       return Promise.resolve(false)
     }
 
+    let start = Date.now()
     return this.app.authenticator(this.userId, credentials, this)
       .then(result => {
         if (this.app.isBruteforce(this.remoteAddress)) {
@@ -240,6 +241,7 @@ class ServerClient {
               this.app.redisSub.subscribe('logux.users.' + this.userId)
             }
           }
+          this.app.emitter.emit('authenticated', Date.now() - start)
           this.app.reporter('authenticated', reportDetails(this))
         } else {
           this.app.reporter('unauthenticated', reportDetails(this))

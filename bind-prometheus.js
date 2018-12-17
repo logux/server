@@ -16,6 +16,12 @@ let requestsCount = new prometheus.Counter({
   labelNames: ['type']
 })
 
+let authTime = new prometheus.Histogram({
+  name: 'logux_auth_processing_time_histogram',
+  help: 'How long auth was processed',
+  buckets: TIMES
+})
+
 let processingTime = new prometheus.Histogram({
   name: 'logux_request_processing_time_histogram',
   help: 'How long action was processed',
@@ -83,6 +89,9 @@ function bindPrometheus (app) {
     })
     app.on('connected', () => {
       clientCount.set(Object.keys(app.connected).length)
+    })
+    app.on('authenticated', latency => {
+      authTime.observe(latency)
     })
     app.on('disconnected', () => {
       clientCount.set(Object.keys(app.connected).length)
