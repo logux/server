@@ -85,8 +85,6 @@ it('reports internal things', () => {
     app.emitter.emit('subscriptionCancelled')
     app.emitter.emit('backendGranted', { }, { }, 100)
     app.emitter.emit('backendProcessed', { }, { }, 115)
-    app.emitter.emit('error', { name: 'LoguxError', type: 'timeout' })
-    app.emitter.emit('error', { name: 'LoguxError', type: 'timeout' })
     app.emitter.emit('error', { name: 'LoguxError', type: 'a' })
     app.emitter.emit('error', { name: 'Error' })
     app.emitter.emit('clientError', { })

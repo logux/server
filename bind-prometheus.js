@@ -106,9 +106,7 @@ function bindPrometheus (app) {
     })
     app.on('error', e => {
       if (e.name === 'LoguxError') {
-        if (e.type !== 'timeout') {
-          errorCount.inc({ name: 'LoguxError: ' + e.type })
-        }
+        errorCount.inc({ name: 'LoguxError: ' + e.type })
       } else {
         errorCount.inc({ name: e.name })
       }
