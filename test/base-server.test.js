@@ -949,7 +949,7 @@ it('subscribes clients', () => {
   })
 })
 
-it('keeps data between subscription steps', () => {
+it('cancels subscriptions on disconnect', () => {
   app = createServer()
   let client = {
     node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
@@ -957,20 +957,22 @@ it('keeps data between subscription steps', () => {
   app.nodeIds['10:uuid'] = client
   app.clientIds['10:uuid'] = client
 
-  let subsriptions = 0
+  let cancels = 0
+  app.on('subscriptionCancelled', () => {
+    cancels += 1
+  })
 
   app.channel('test', {
-    access (ctx) {
-      ctx.data.one = 1
+    access () {
+      delete app.clientIds['10:uuid']
+      delete app.nodeIds['10:uuid']
       return true
     },
-    filter (ctx) {
-      expect(ctx.data.one).toEqual(1)
-      return () => true
+    filter () {
+      throw new Error('no calls')
     },
-    init (ctx) {
-      expect(ctx.data.one).toEqual(1)
-      subsriptions += 1
+    init () {
+      throw new Error('no calls')
     }
   })
 
@@ -979,7 +981,7 @@ it('keeps data between subscription steps', () => {
   ).then(() => {
     return delay(10)
   }).then(() => {
-    expect(subsriptions).toEqual(1)
+    expect(cancels).toEqual(1)
   })
 })
 

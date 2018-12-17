@@ -982,10 +982,13 @@ class BaseServer {
             return false
           }
 
-          let filter = i.filter && i.filter(ctx, action, meta)
-
           let client = this.clientIds[ctx.clientId]
-          if (!client) return false
+          if (!client) {
+            this.emitter.emit('subscriptionCancelled')
+            return false
+          }
+
+          let filter = i.filter && i.filter(ctx, action, meta)
 
           this.reporter('subscribed', {
             actionId: meta.id,

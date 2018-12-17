@@ -33,6 +33,11 @@ let subscriptionsCount = new prometheus.Counter({
   help: 'How many subscriptions was processed'
 })
 
+let cancelCount = new prometheus.Counter({
+  name: 'logux_subscription_cancel_counter',
+  help: 'How many clients closed page before subscription was finished'
+})
+
 let subscribingTime = new prometheus.Histogram({
   name: 'logux_subscription_processing_time_histogram',
   help: 'How long channel initial data was loaded',
@@ -86,6 +91,9 @@ function bindPrometheus (app) {
     app.on('subscribed', (action, meta, latency) => {
       subscriptionsCount.inc()
       subscribingTime.observe(latency)
+    })
+    app.on('subscriptionCancelled', () => {
+      cancelCount.inc()
     })
     app.on('connected', () => {
       clientCount.set(Object.keys(app.connected).length)
