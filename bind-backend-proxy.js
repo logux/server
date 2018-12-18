@@ -59,7 +59,12 @@ function send (backend, command, chulkCallback, endCallback) {
           if (!resolved) {
             if (ERROR.test(received)) {
               errored = true
-              reject(new Error('Backend error'))
+              let error = new Error('Backend error during access check')
+              try {
+                let json = JSON.parse(received)
+                error.stack = json[0][1]
+              } catch (e) { }
+              reject(error)
             } else {
               let result = chulkCallback(received)
               if (typeof result !== 'undefined') {
@@ -123,7 +128,10 @@ function bindBackendProxy (app) {
         } else if (json.some(i => i[0] === 'processed')) {
           processResolve()
         } else {
-          processReject(new Error('Backend error during processing'))
+          let error = new Error('Backend error during processing')
+          let report = json.find(i => i[0] === 'error')
+          if (report) error.stack = report[1]
+          processReject(error)
         }
       }
     }).catch(e => {

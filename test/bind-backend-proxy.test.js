@@ -124,11 +124,11 @@ let httpServer = http.createServer((req, res) => {
     } else if (data.commands[0][1].type === 'BAD') {
       res.end(`[["forbidden","${ actionId }"]]`)
     } else if (data.commands[0][1].type === 'AERROR') {
-      res.end(`[["error","${ actionId }"]]`)
+      res.end(`[["error","stack"]]`)
     } else if (data.commands[0][1].type === 'PERROR') {
       res.write(`[["approved","${ actionId }"]`)
       delay(100).then(() => {
-        res.end(`,["error","${ actionId }"]]`)
+        res.end(`,["error","stack"]]`)
       })
     } else if (data.commands[0][1].type === 'BROKEN1') {
       res.end(`[["approved","${ actionId }"]`)
@@ -458,6 +458,7 @@ it('reacts on backend error', () => {
   let errors = []
   app.on('error', e => {
     errors.push(e.message)
+    expect(e.stack).toEqual('stack')
   })
   return connectClient(app).then(client => {
     client.connection.other().send(['sync', 3,
@@ -471,7 +472,9 @@ it('reacts on backend error', () => {
       { type: 'logux/undo', reason: 'error', id: '1 10:uuid 0' },
       { type: 'logux/undo', reason: 'error', id: '2 10:uuid 0' }
     ])
-    expect(errors).toEqual(['Backend error', 'Backend error during processing'])
+    expect(errors).toEqual([
+      'Backend error during access check', 'Backend error during processing'
+    ])
   })
 })
 
