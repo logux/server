@@ -109,6 +109,7 @@ function bindBackendProxy (app) {
     })
 
     let start = Date.now()
+    app.emitter.emit('backendSent', action, meta)
     return send(backend, ['action', action, meta], received => {
       if (APPROVED.test(received)) {
         app.emitter.emit('backendGranted', action, meta, Date.now() - start)

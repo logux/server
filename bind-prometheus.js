@@ -16,6 +16,11 @@ let requestsCount = new prometheus.Counter({
   labelNames: ['type']
 })
 
+let backendRequestsCount = new prometheus.Counter({
+  name: 'logux_backend_request_counter',
+  help: 'How many backend requests was processed'
+})
+
 let authTime = new prometheus.Histogram({
   name: 'logux_auth_processing_time_histogram',
   help: 'How long auth was processed',
@@ -113,6 +118,9 @@ function bindPrometheus (app) {
     })
     app.on('clientError', () => {
       errorCount.inc()
+    })
+    app.on('backendSent', () => {
+      backendRequestsCount.inc()
     })
     app.on('backendGranted', (action, meta, latency) => {
       backendAccessTime.observe(latency)

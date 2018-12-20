@@ -319,6 +319,11 @@ it('notifies about actions and subscriptions', () => {
     throw e
   })
   let events = []
+  app.on('backendSent', (action, meta) => {
+    expect(typeof action.type).toEqual('string')
+    expect(typeof meta.id).toEqual('string')
+    events.push('backendSent')
+  })
   app.on('backendGranted', (action, meta, latency) => {
     expect(typeof action.type).toEqual('string')
     expect(typeof meta.id).toEqual('string')
@@ -394,7 +399,9 @@ it('notifies about actions and subscriptions', () => {
     ])
     expect(app.log.entries()[0][1].status).toEqual('processed')
     expect(events).toEqual([
-      'backendGranted', 'backendGranted', 'backendProcessed', 'backendProcessed'
+      'backendSent', 'backendSent',
+      'backendGranted', 'backendGranted',
+      'backendProcessed', 'backendProcessed'
     ])
   })
 })
