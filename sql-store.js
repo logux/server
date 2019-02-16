@@ -57,22 +57,23 @@ function nextEntry (store, order, currentOffset) {
  * var dbConnection = new Sequelize('dbName', 'user', 'pass'...)
  * var log = new Log({ store: new SQLStore(dbConnection), nodeId })
  */
-function SQLStore (db, username, password, options) {
-  if (typeof db === 'string') {
-    this.db = new Sequelize(db, username, password, options)
-  } else if (db instanceof Sequelize) {
-    this.db = db
-  } else {
-    throw new Error('Expected database name or connection object for SQLStore')
+class SQLStore {
+  constructor (db, username, password, options) {
+    if (typeof db === 'string') {
+      this.db = new Sequelize(db, username, password, options)
+    } else if (db instanceof Sequelize) {
+      this.db = db
+    } else {
+      throw new Error(
+        'Expected database name or connection object for SQLStore'
+      )
+    }
+
+    if (!options) options = { }
+    this.prefix = options.prefix || 'logux'
   }
 
-  if (!options) options = { }
-  this.prefix = options.prefix || 'logux'
-}
-
-SQLStore.prototype = {
-
-  init: function init () {
+  init () {
     if (this.initing) return this.initing
 
     this.Log = this.db.define(`${ this.prefix }_logs`, {
@@ -155,9 +156,9 @@ SQLStore.prototype = {
     })
 
     return this.initing
-  },
+  }
 
-  get: function get (opts) {
+  get (opts) {
     return this.init().then(store => {
       let order = 'added'
       if (opts && opts.order) {
@@ -168,15 +169,15 @@ SQLStore.prototype = {
 
       return nextEntry(store, order, 0)
     })
-  },
+  }
 
-  has: function has (id) {
+  has (id) {
     return this.init().then(store => store.Log.findOne({
       where: { logId: id.toString() }
     })).then(result => !!result)
-  },
+  }
 
-  remove: function remove (id) {
+  remove (id) {
     return this.init().then(store => store.Log.findOne({
       where: { logId: id.toString() }
     }).then(entry => {
@@ -194,9 +195,9 @@ SQLStore.prototype = {
         }))
       }
     }))
-  },
+  }
 
-  add: function add (action, meta) {
+  add (action, meta) {
     let entry = {
       logId: meta.id.toString(),
       meta: JSON.stringify(meta),
@@ -224,9 +225,9 @@ SQLStore.prototype = {
         })
       }
     }))
-  },
+  }
 
-  changeMeta: function changeMeta (id, diff) {
+  changeMeta (id, diff) {
     return this.init().then(store => store.Log.findOne({
       where: { logId: id.toString() }
     }).then(entry => {
@@ -257,9 +258,9 @@ SQLStore.prototype = {
         return Promise.resolve(false)
       }
     }))
-  },
+  }
 
-  removeReason: function removeReason (reason, criteria, callback) {
+  removeReason (reason, criteria, callback) {
     let c = criteria
     return this.init().then(store => store.Reason
       .findAll({ where: { name: reason } })
@@ -299,25 +300,25 @@ SQLStore.prototype = {
           })
       })
     )
-  },
+  }
 
-  getLastAdded: function getLastAdded () {
+  getLastAdded () {
     return this.init().then(store => {
       let opts = { order: 'added DESC' }
       return store.Log.findOne(opts).then(entry => (entry ? entry.added : 0))
     })
-  },
+  }
 
-  getLastSynced: function getLastSynced () {
+  getLastSynced () {
     return this.init().then(store => store.Extra.findOne({
       where: { key: 'lastSynced' }
     }).then(entry => {
       let data = JSON.parse(entry.data)
       return { sent: data.sent, received: data.received }
     }))
-  },
+  }
 
-  setLastSynced: function setLastSynced (values) {
+  setLastSynced (values) {
     return this.init().then(store => store.Extra.findOne({
       where: { key: 'lastSynced' }
     }).then(entry => {
@@ -334,7 +335,7 @@ SQLStore.prototype = {
         where: { key: 'lastSynced' }
       })
     }))
-  },
+  }
 
   /**
    * Remove all database and data from `DB`.
@@ -344,10 +345,9 @@ SQLStore.prototype = {
    * @example
    * afterEach(() => this.store.destroy())
    */
-  destroy: function destroy () {
+  destroy () {
     return this.init().then(store => store.db.drop())
   }
-
 }
 
 module.exports = SQLStore
