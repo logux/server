@@ -1,12 +1,16 @@
 'use strict'
 
+const os = require('os')
 const Sequelize = require('sequelize')
 const { TestTime } = require('@logux/core')
 
-const pgDb = 'logux_test'
-const pgUser = 'postgres'
-const pgPass = ''
-const pgOpts = { dialect: 'postgres' }
+const dbName = 'logux_test'
+const dbUser = 'postgres'
+const dbPass = ''
+const dbOpts = {
+  dialect: 'sqlite',
+  storage: `${ os.tmpdir() }/database.sqlite`
+}
 
 const SQLStore = require('../sql-store')
 
@@ -22,12 +26,12 @@ afterEach(() => Promise.all([
 
 function connectDb (opts) {
   if (opts) {
-    opts.dialect = 'postgres'
+    opts = Object.assign({}, opts, dbOpts)
   } else {
-    opts = pgOpts
+    opts = dbOpts
   }
   opts.logging = false
-  return new SQLStore(pgDb, pgUser, pgPass, opts)
+  return new SQLStore(dbName, dbUser, dbPass, opts)
 }
 
 function all (request, list) {
@@ -59,7 +63,7 @@ it('fails without connection info', () => {
 })
 
 it('connects to db with Sequelize connection', () => {
-  let seq = new Sequelize(pgDb, pgUser, pgPass, pgOpts)
+  let seq = new Sequelize(dbName, dbUser, dbPass, dbOpts)
   store = new SQLStore(seq)
   return store.init().then(() => {
     expect(store.db.isDefined('logux_logs')).toBeTruthy()
@@ -98,7 +102,7 @@ it('updates last sent value', () => {
     .then(() => store.getLastSynced())
     .then(synced => expect(synced).toEqual({ sent: 2, received: 1 }))
     .then(() => {
-      other = new SQLStore(pgDb, pgUser, pgPass, pgOpts)
+      other = new SQLStore(dbName, dbUser, dbPass, dbOpts)
       return other.getLastSynced()
     })
     .then(synced => expect(synced).toEqual({ sent: 2, received: 1 }))
