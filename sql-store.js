@@ -36,7 +36,7 @@ function nextEntry (store, order, currentOffset) {
  *                                 against the database.
  *
  * @param {object} options Database connect options.
- * @param {string} [options.prefix='logux'] The prefix for logux tables.
+ * @param {string} [options.prefix='logux'] The prefix for Logux tables.
  * @param {string} [options.dialect='mysql'] The dialect of the database you
  *                                           are connecting to. One of
  *                                           mysql, postgres, sqlite and mssql.
