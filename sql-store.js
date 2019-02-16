@@ -3,15 +3,15 @@
 const Sequelize = require('sequelize')
 
 function nextEntry (store, order, currentOffset) {
-  const opts = {
+  let opts = {
     order: (`${ order } DESC`),
     offset: currentOffset,
     limit: 100
   }
   return store.Log.findAll(opts).then(entries => {
     if (entries.length > 0) {
-      const result = entries.map(entry => {
-        const meta = JSON.parse(entry.meta)
+      let result = entries.map(entry => {
+        let meta = JSON.parse(entry.meta)
         meta.added = entry.added
         return [JSON.parse(entry.action), meta]
       })
@@ -136,10 +136,10 @@ SQLStore.prototype = {
       ]
     })
 
-    const store = this
+    let store = this
 
     this.initing = this.db.sync().then(() => {
-      const lastSyncedData = JSON.stringify({ sent: 0, received: 0 })
+      let lastSyncedData = JSON.stringify({ sent: 0, received: 0 })
       return store.Extra.findOne({
         where: { key: 'lastSynced' }
       }).then(extra => {
@@ -188,7 +188,7 @@ SQLStore.prototype = {
         }).then(() => store.Reason.destroy({
           where: { logAdded: entry.added }
         }).then(() => {
-          const meta = JSON.parse(entry.meta)
+          let meta = JSON.parse(entry.meta)
           meta.added = entry.added
           return [JSON.parse(entry.action), meta]
         }))
@@ -197,7 +197,7 @@ SQLStore.prototype = {
   },
 
   add: function add (action, meta) {
-    const entry = {
+    let entry = {
       logId: meta.id.toString(),
       meta: JSON.stringify(meta),
       time: meta.time,
@@ -214,7 +214,7 @@ SQLStore.prototype = {
         return store.Log.create(entry).then(instance => {
           let reasons = meta.reasons || []
           reasons = reasons.map(reason => {
-            const reasonAttrs = { logAdded: instance.added, name: reason }
+            let reasonAttrs = { logAdded: instance.added, name: reason }
             return reasonAttrs
           })
           return store.Reason.bulkCreate(reasons).then(() => {
@@ -231,8 +231,8 @@ SQLStore.prototype = {
       where: { logId: id.toString() }
     }).then(entry => {
       if (entry) {
-        const meta = JSON.parse(entry.meta)
-        for (const key in diff) meta[key] = diff[key]
+        let meta = JSON.parse(entry.meta)
+        for (let key in diff) meta[key] = diff[key]
         if (diff.reasons) meta.reasons = diff.reasons
         return store.Log.update({
           meta: JSON.stringify(meta)
@@ -243,8 +243,8 @@ SQLStore.prototype = {
             return store.Reason.destroy({
               where: { logAdded: entry.added }
             }).then(() => {
-              const reasons = diff.reasons.map(reason => {
-                const reasonAttrs = { logAdded: entry.added, name: reason }
+              let reasons = diff.reasons.map(reason => {
+                let reasonAttrs = { logAdded: entry.added, name: reason }
                 return reasonAttrs
               })
               return store.Reason.bulkCreate(reasons)
@@ -260,50 +260,50 @@ SQLStore.prototype = {
   },
 
   removeReason: function removeReason (reason, criteria, callback) {
-    const c = criteria
+    let c = criteria
     return this.init().then(store => store.Reason
       .findAll({ where: { name: reason } })
       .then(reasons => {
-        const entriesAdded = reasons.map(r => r.logAdded)
+        let entriesAdded = reasons.map(r => r.logAdded)
         return store.Log.findAll({ where: { added: { in: entriesAdded } } })
-        .then(entries => {
-          const reasonsToDelete = []
-          return Promise.all(entries.map(entry => {
-            if (typeof c.minAdded !== 'undefined' && entry.added < c.minAdded) {
-              return Promise.resolve()
-            }
-            if (typeof c.maxAdded !== 'undefined' && entry.added > c.maxAdded) {
-              return Promise.resolve()
-            }
-            reasonsToDelete.push(entry.added)
-            const meta = JSON.parse(entry.meta)
-            if (meta.reasons.length === 1) {
-              meta.reasons = []
-              meta.added = entry.added
-              callback(JSON.parse(entry.action), meta)
-              return store.Log.destroy({
-                where: { added: entry.added }
-              })
-            } else {
-              meta.reasons.splice(meta.reasons.indexOf(reason), 1)
-              return store.Log.update({
-                meta: JSON.stringify(meta)
-              }, {
-                where: { added: entry.added }
-              })
-            }
-          }))
-          .then(() => store.Reason.destroy({
-            where: { logAdded: reasonsToDelete }
-          }))
-        })
+          .then(entries => {
+            let reasonsToDelete = []
+            return Promise.all(entries.map(entry => {
+              if (c.minAdded !== undefined && entry.added < c.minAdded) {
+                return Promise.resolve()
+              }
+              if (c.maxAdded !== undefined && entry.added > c.maxAdded) {
+                return Promise.resolve()
+              }
+              reasonsToDelete.push(entry.added)
+              let meta = JSON.parse(entry.meta)
+              if (meta.reasons.length === 1) {
+                meta.reasons = []
+                meta.added = entry.added
+                callback(JSON.parse(entry.action), meta)
+                return store.Log.destroy({
+                  where: { added: entry.added }
+                })
+              } else {
+                meta.reasons.splice(meta.reasons.indexOf(reason), 1)
+                return store.Log.update({
+                  meta: JSON.stringify(meta)
+                }, {
+                  where: { added: entry.added }
+                })
+              }
+            }))
+              .then(() => store.Reason.destroy({
+                where: { logAdded: reasonsToDelete }
+              }))
+          })
       })
     )
   },
 
   getLastAdded: function getLastAdded () {
     return this.init().then(store => {
-      const opts = { order: 'added DESC' }
+      let opts = { order: 'added DESC' }
       return store.Log.findOne(opts).then(entry => (entry ? entry.added : 0))
     })
   },
@@ -312,7 +312,7 @@ SQLStore.prototype = {
     return this.init().then(store => store.Extra.findOne({
       where: { key: 'lastSynced' }
     }).then(entry => {
-      const data = JSON.parse(entry.data)
+      let data = JSON.parse(entry.data)
       return { sent: data.sent, received: data.received }
     }))
   },
@@ -321,7 +321,7 @@ SQLStore.prototype = {
     return this.init().then(store => store.Extra.findOne({
       where: { key: 'lastSynced' }
     }).then(entry => {
-      const data = JSON.parse(entry.data)
+      let data = JSON.parse(entry.data)
       if (typeof values.sent !== 'undefined') {
         data.sent = values.sent
       }
