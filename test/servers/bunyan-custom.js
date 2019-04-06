@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 let bunyan = require('bunyan')
+
 let Server = require('../../server')
 
 let logger = bunyan.createLogger({

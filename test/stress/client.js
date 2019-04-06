@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
 let { ClientNode, WsConnection, Log, MemoryStore } = require('@logux/core')
-let ALLOWED_META = require('../../allowed-meta')
 let WebSocket = require('ws')
 let delay = require('nanodelay')
+
+let ALLOWED_META = require('../../allowed-meta')
 
 let index = 0
 let stop = false
