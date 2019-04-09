@@ -11,8 +11,8 @@ between client, server, and other clients.
 
 This repository contains Logux server with:
 
-Framework to write own server.
-Proxy between WebSocket and HTTP server on any other language.
+* Framework to write own server.
+* Proxy between WebSocket and HTTP server on any other language.
 
 <a href="https://evilmartians.com/?utm_source=logux-server">
   <img src="https://evilmartians.com/badges/sponsored-by-evil-martians.svg"
