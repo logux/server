@@ -17,7 +17,7 @@
   "license": "MIT",
   "repository": "logux/server",
   "engines": {
-    "node": ">=6.0.0"
+    "node": ">=10.0.0"
   },
   "dependencies": {
     "@logux/core": "^0.3.0",
