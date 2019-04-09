@@ -1,5 +1,3 @@
-'use strict'
-
 const Sequelize = require('sequelize')
 
 function nextEntry (store, order, currentOffset) {

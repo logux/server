@@ -1,5 +1,3 @@
-'use strict'
-
 const os = require('os')
 const Sequelize = require('sequelize')
 const { TestTime } = require('@logux/core')

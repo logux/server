@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 
-'use strict'
-
 let chalk = require('chalk')
 let path = require('path')
 let fs = require('fs')
