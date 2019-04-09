@@ -2,7 +2,7 @@ let nanoid = require('nanoid')
 let https = require('https')
 let http = require('http')
 
-const VERSION = 0
+const VERSION = 1
 
 const AUTHENTICATED = /^\[\s*\[\s*"authenticated"/
 const FORBIDDEN = /^\[\s*\[\s*"forbidden"/

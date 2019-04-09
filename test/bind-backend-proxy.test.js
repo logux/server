@@ -292,7 +292,7 @@ it('authenticates user on backend', () => {
         'POST',
         '/path',
         {
-          version: 0,
+          version: 1,
           password: '1234',
           commands: [
             ['auth', '10', 'good', authId]
@@ -355,7 +355,7 @@ it('notifies about actions and subscriptions', () => {
         'POST',
         '/path',
         {
-          version: 0,
+          version: 1,
           password: '1234',
           commands: [
             [
@@ -370,7 +370,7 @@ it('notifies about actions and subscriptions', () => {
         'POST',
         '/path',
         {
-          version: 0,
+          version: 1,
           password: '1234',
           commands: [
             [
