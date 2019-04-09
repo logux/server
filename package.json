@@ -28,7 +28,6 @@
     "prom-client": "^11.3.0",
     "redis": "^2.8.0",
     "semver": "^6.0.0",
-    "sequelize": "^5.2.13",
     "strip-ansi": "^5.2.0",
     "url-pattern": "^1.0.3",
     "ws": "^6.2.1",
@@ -55,9 +54,7 @@
     "jsdoc": "^3.5.5",
     "lint-staged": "^8.1.5",
     "nanodelay": "^0.1.4",
-    "pg": "^7.9.0",
     "rimraf": "^2.6.3",
-    "sqlite3": "^4.0.6",
     "yaspeller-ci": "^1.0.0"
   },
   "husky": {
@@ -173,12 +170,7 @@
       "Example sendAction",
       "clientId",
       "Redis",
-      "SQLStore",
       "precreated",
-      "postgres",
-      "sqlite",
-      "mssql",
-      "sequelize",
       "Feb",
       "logux"
     ]
