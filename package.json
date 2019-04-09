@@ -28,12 +28,12 @@
     "prom-client": "^11.3.0",
     "redis": "^2.8.0",
     "semver": "^6.0.0",
+    "sequelize": "^5.2.13",
     "strip-ansi": "^5.2.0",
     "url-pattern": "^1.0.3",
     "ws": "^6.2.1",
     "yargs": "^13.2.2",
-    "yyyy-mm-dd": "^1.0.2",
-    "sequelize": "^3.30.2"
+    "yyyy-mm-dd": "^1.0.2"
   },
   "devDependencies": {
     "@logux/eslint-config": "^28.0.0",
@@ -55,10 +55,10 @@
     "jsdoc": "^3.5.5",
     "lint-staged": "^8.1.5",
     "nanodelay": "^0.1.4",
+    "pg": "^7.9.0",
     "rimraf": "^2.6.3",
-    "yaspeller-ci": "^1.0.0",
     "sqlite3": "^4.0.6",
-    "pg": "^6.1.4"
+    "yaspeller-ci": "^1.0.0"
   },
   "husky": {
     "hooks": {
