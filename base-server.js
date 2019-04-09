@@ -377,10 +377,9 @@ class BaseServer {
    * @return {undefined}
    *
    * @example
-   * server.auth((userId, token) => {
-   *   return findUserByToken(token).then(user => {
-   *     return !!user && userId === user.id
-   *   })
+   * server.auth(async (userId, token) => {
+   *   const user = await findUserByToken(token)
+   *   return !!user && userId === user.id
    * })
    */
   auth (authenticator) {
@@ -563,17 +562,17 @@ class BaseServer {
    *
    * @example
    * server.otherType(
-   *   access (ctx, action, meta) {
-   *     return phpBackend.checkByHTTP(action, meta).then(response => {
-   *       if (response.code === 404) {
-   *         return this.unknownType(action, meta)
-   *       } else {
-   *         return response.body === 'granted'
-   *       }
-   *     })
+   *   async access (ctx, action, meta) {
+   *     const response = await phpBackend.checkByHTTP(action, meta)
+   *     if (response.code === 404) {
+   *       this.unknownType(action, meta)
+   *       retur false
+   *     } else {
+   *       return response.body === 'granted'
+   *     }
    *   }
-   *   process (ctx, action, meta) {
-   *     return phpBackend.sendHTTP(action, meta)
+   *   async process (ctx, action, meta) {
+   *     return await phpBackend.sendHTTP(action, meta)
    *   }
    * })
    */
@@ -610,12 +609,12 @@ class BaseServer {
    *       return !action.hidden
    *     }
    *   }
-   *   init (ctx, action, meta) {
-   *     db.loadUser(ctx.params.id).then(user => {
-   *       server.log.add(
-   *         { type: 'USER_NAME', name: user.name },
-   *         { clients: [ctx.clientId] })
-   *     })
+   *   async init (ctx, action, meta) {
+   *     const user = await db.loadUser(ctx.params.id)
+   *     server.log.add(
+   *       { type: 'USER_NAME', name: user.name },
+   *       { clients: [ctx.clientId] })
+   *     )
    *   }
    * })
    */
@@ -645,14 +644,14 @@ class BaseServer {
    *
    * @example
    * server.otherChannel({
-   *   access (ctx, action, meta) {
-   *     return phpBackend.checkChannel(ctx.params[0], ctx.userId).then(res => {
-   *       if (res.code === 404) {
-   *         this.wrongChannel(action, meta)
-   *       } else {
-   *         return response.body === 'granted'
-   *       }
-   *     })
+   *   async access (ctx, action, meta) {
+   *     const res = await phpBackend.checkChannel(ctx.params[0], ctx.userId)
+   *     if (res.code === 404) {
+   *       this.wrongChannel(action, meta)
+   *       return false
+   *     } else {
+   *       return response.body === 'granted'
+   *     }
    *   }
    * })
    */
@@ -844,14 +843,14 @@ class BaseServer {
    *
    * @example
    * server.otherChannel({
-   *   access (ctx, action, meta) {
-   *     return phpBackend.checkChannel(params[0], ctx.userId).then(res => {
-   *       if (res.code === 404) {
-   *         this.wrongChannel(action, meta)
-   *       } else {
-   *         return response.body === 'granted'
-   *       }
-   *     })
+   *   async access (ctx, action, meta) {
+   *     const res = phpBackend.checkChannel(params[0], ctx.userId)
+   *     if (res.code === 404) {
+   *       this.wrongChannel(action, meta)
+   *       return false
+   *     } else {
+   *       return response.body === 'granted'
+   *     }
    *   }
    * })
    */

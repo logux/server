@@ -42,8 +42,9 @@ class Context {
      * @type {string|undefined}
      *
      * @example
-     * access (ctx, action, meta) {
-     *   db.getUser(ctx.userId).then(user => user.admin)
+     * async access (ctx, action, meta) {
+     *   const user = await db.getUser(ctx.userId)
+     *   return user.admin
      * }
      */
     this.userId = userId
