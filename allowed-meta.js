@@ -3,7 +3,7 @@
  * @type {string[]}
  *
  * @example
- * const ALLOWED_META = require('logux-server/allowed-meta')
+ * const { ALLOWED_META } = require('@logux/server')
  * function outMap (action, meta) {
  *   const filtered = { }
  *   for (const i in meta) {

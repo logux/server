@@ -139,7 +139,7 @@ yargs
  *                                is highly recommended.
  *
  * @example
- * const Server = require('logux-server/server')
+ * const { Server } = require('@logux/server')
  *
  * const env = process.env.NODE_ENV || 'development'
  * const envOptions = {}

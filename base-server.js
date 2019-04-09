@@ -98,7 +98,7 @@ function optionError (msg) {
  * @param {function} [options.reporter] Function to show current server status.
  *
  * @example
- * const BaseServer = require('logux-server/base-server')
+ * const { BaseServer } = require('@logux/server')
  * class MyLoguxHack extends BaseServer {
  *   …
  * }
