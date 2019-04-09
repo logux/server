@@ -9,11 +9,11 @@
     "proxy"
   ],
   "scripts": {
-    "spellcheck": "yarn docs && yaspeller-ci *.md docs/*.html",
+    "spell": "yarn docs && yaspeller-ci *.md docs/*.html",
     "clean": "rimraf docs/ coverage/",
     "lint": "eslint-ci *.js test/{**/,}*.js",
     "docs": "jsdoc -d docs/ *.js",
-    "test": "jest --forceExit --runInBand --coverage && yarn lint && yarn spellcheck"
+    "test": "jest --forceExit --runInBand --coverage && yarn lint && yarn spell"
   },
   "author": "Andrey Sitnik <andrey@sitnik.ru>",
   "license": "MIT",
@@ -172,9 +172,9 @@
       "Example sendAction",
       "clientId",
       "Redis",
-      "precreated",
       "Feb",
-      "logux"
+      "logux",
+      "GraphQL"
     ]
   }
 }
