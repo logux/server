@@ -1,10 +1,12 @@
 {
   "name": "@logux/server",
   "version": "0.2.9",
-  "description": "Logux server-side framework",
+  "description": "Logux server",
   "keywords": [
     "logux",
-    "server"
+    "server",
+    "framework",
+    "proxy"
   ],
   "scripts": {
     "spellcheck": "yarn docs && yaspeller-ci *.md docs/*.html",
