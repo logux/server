@@ -1,7 +1,6 @@
 let nanoid = require('nanoid')
 let https = require('https')
 let http = require('http')
-let url = require('url')
 
 const VERSION = 0
 
@@ -43,7 +42,7 @@ function send (backend, command, chulkCallback, endCallback) {
       method: 'POST',
       host: backend.hostname,
       port: backend.port,
-      path: backend.path,
+      path: backend.pathname + backend.search,
       headers: {
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(body)
@@ -95,8 +94,7 @@ function bindBackendProxy (app) {
     throw e
   }
 
-  /* eslint-disable-next-line node/no-deprecated-api */
-  let backend = url.parse(app.options.backend)
+  let backend = new URL(app.options.backend)
   backend.password = app.options.controlPassword
 
   let processing = { }

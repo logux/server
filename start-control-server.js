@@ -1,5 +1,4 @@
 let http = require('http')
-let url = require('url')
 
 const MAX_VERSION = 0
 const NO_PASSWORD = 'Set `controlPassword` option for Logux ' +
@@ -22,8 +21,7 @@ function startControlServer (app) {
   let httpServer = http.createServer((req, res) => {
     let urlString = req.url
     if (/^\/\w+%3F/.test(urlString)) urlString = decodeURIComponent(urlString)
-    /* eslint-disable-next-line node/no-deprecated-api */
-    let reqUrl = url.parse(urlString)
+    let reqUrl = new URL(urlString, 'http://localhost')
     let rule = app.controls[reqUrl.pathname]
     if (!rule) {
       res.statusCode = 404
@@ -84,7 +82,7 @@ function startControlServer (app) {
           res.statusCode = 429
           res.end('Too many wrong password attempts')
           return
-        } else if (reqUrl.query !== app.options.controlPassword) {
+        } else if (reqUrl.search !== '?' + app.options.controlPassword) {
           res.statusCode = 403
           res.end('Wrong password')
           app.rememberBadAuth(req.connection.remoteAddress)
