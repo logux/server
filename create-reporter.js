@@ -13,18 +13,10 @@ const ERROR_CODES = {
     msg: `You are not allowed to run server on port \`${ e.port }\``,
     note: 'Try to change user or use port >= 1024'
   }),
-  LOGUX_UNKNOWN_OPTION: e => ({
-    msg: e.message,
-    note: 'Maybe there is a mistake in option name or this version ' +
-          'of Logux Server doesn’t support this option'
-  }),
-  LOGUX_WRONG_OPTIONS: e => ({
-    msg: e.message,
-    note: 'Check server constructor and Logux Server documentation'
-  }),
   LOGUX_NO_CONTROL_PASSWORD: e => ({
     msg: e.message,
-    note: 'Run `npx nanoid-cli` to generate secure password'
+    note: 'Call `npx nanoid-cli` and set result as `controlPassword` ' +
+          'or `LOGUX_CONTROL_PASSWORD` environment variable'
   })
 }
 
@@ -52,10 +44,9 @@ const REPORTERS = {
       details.listen = `${ wsProtocol }${ r.host }:${ r.port }/`
     }
 
-    let controlDomain = `http://${ r.controlHost }:${ r.controlPort }/`
-    details.healthCheck = controlDomain + 'status'
+    let controlDomain = `http://${ r.controlHost }:${ r.controlPort }`
+    details.healthCheck = controlDomain + '/status'
     if (r.controlPassword) {
-      details.prometheus = controlDomain + 'prometheus?' + r.controlPassword
       details.backendListen = controlDomain
     }
 
@@ -66,6 +57,8 @@ const REPORTERS = {
     if (r.redis) {
       details.redis = r.redis
     }
+
+    for (let i in r.notes) details[i] = r.notes[i]
 
     return { msg: 'Logux server is listening', details }
   },
@@ -142,6 +135,9 @@ const REPORTERS = {
       result.msg = help.msg
       result.details.note = help.note
       delete result.details.err.stack
+    } else if (record.err.logux) {
+      result.details.note = record.err.note
+      delete result.details.err
     }
 
     if (record.err.name === 'LoguxError') {

@@ -11,7 +11,6 @@ let fs = require('fs')
 
 let startControlServer = require('./start-control-server')
 let bindBackendProxy = require('./bind-backend-proxy')
-let bindPrometheus = require('./bind-prometheus')
 let forcePromise = require('./force-promise')
 let ServerClient = require('./server-client')
 let parseNodeId = require('./parse-node-id')
@@ -41,7 +40,8 @@ function readFile (root, file) {
 
 function optionError (msg) {
   let error = new Error(msg)
-  error.code = 'LOGUX_WRONG_OPTIONS'
+  error.logux = true
+  error.note = 'Check server constructor and Logux Server documentation'
   throw error
 }
 
@@ -317,7 +317,7 @@ class BaseServer {
       }
     }
 
-    bindPrometheus(this)
+    this.listenNotes = { }
     if (this.options.backend) {
       bindBackendProxy(this)
     }
@@ -465,6 +465,7 @@ class BaseServer {
         server: !!this.options.server,
         nodeId: this.nodeId,
         redis: this.options.redis,
+        notes: this.listenNotes,
         cert: !!this.options.cert,
         host: this.options.host,
         port: this.options.port

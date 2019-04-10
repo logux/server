@@ -1,11 +1,13 @@
+let delay = require('nanodelay')
 let http = require('http')
 
 let BaseServer = require('../base-server')
 
 let lastPort = 10111
-function createServer () {
+function createServer (controlPassword) {
   lastPort += 2
   let server = new BaseServer({
+    controlPassword,
     subprotocol: '0.0.0',
     controlPort: lastPort,
     supports: '0.x',
@@ -23,15 +25,15 @@ function request (method, path) {
       port: app.options.controlPort,
       path
     }, res => {
-      let response = ''
+      let body = ''
       res.on('data', chunk => {
-        response += chunk
+        body += chunk
       })
       res.on('end', () => {
         if (res.statusCode === 200) {
-          resolve(response)
+          resolve({ body, headers: res.headers })
         } else {
-          let error = new Error(response)
+          let error = new Error(body)
           error.statusCode = res.statusCode
           reject(error)
         }
@@ -55,7 +57,7 @@ it('has health check', () => {
   return app.listen().then(() => {
     return request('GET', '/status')
   }).then(response => {
-    expect(response).toEqual('OK')
+    expect(response.body).toEqual('OK')
   })
 })
 
@@ -76,5 +78,90 @@ it('responses 404', () => {
   }).catch(err => {
     expect(err.statusCode).toEqual(404)
     expect(err.message).toEqual('Wrong path')
+  })
+})
+
+it('checks password', () => {
+  app = createServer('secret')
+  app.controls['/test'] = {
+    request: () => ({ body: 'done' })
+  }
+  return app.listen().then(() => {
+    return request('GET', '/test%3Fsecret')
+  }).then(response => {
+    expect(response.body).toContain('done')
+    return request('GET', '/test?wrong')
+  }).catch(error => {
+    expect(error.statusCode).toEqual(403)
+    expect(error.message).toEqual('Wrong password')
+  })
+})
+
+it('supports wrong URL encoding', () => {
+  app = createServer('secret')
+  app.controls['/test'] = {
+    request: () => ({ body: 'done' })
+  }
+  return app.listen().then(() => {
+    return request('GET', '/test%3Fsecret')
+  }).then(response => {
+    expect(response.body).toContain('done')
+  })
+})
+
+it('shows error on missed password', () => {
+  app = createServer(undefined)
+  app.controls['/test'] = {
+    request: () => ({ body: 'done' })
+  }
+  return app.listen().then(() => {
+    return request('GET', '/test?secret')
+  }).catch(error => {
+    expect(error.statusCode).toEqual(403)
+    expect(error.message).toContain('controlPassword')
+  })
+})
+
+it('passes headers', () => {
+  app = createServer('secret')
+  app.controls['/test'] = {
+    request: () => ({
+      headers: {
+        'Content-Type': 'text/plain'
+      },
+      body: 'done'
+    })
+  }
+  return app.listen().then(() => {
+    return request('GET', '/test%3Fsecret')
+  }).then(response => {
+    expect(response.headers['content-type']).toContain('text/plain')
+  })
+})
+
+it('has bruteforce protection', () => {
+  app = createServer('secret')
+  app.controls['/test'] = {
+    request: () => ({ body: 'done' })
+  }
+  return app.listen().then(() => {
+    return request('GET', '/test?wrong')
+  }).catch(error => {
+    expect(error.statusCode).toEqual(403)
+    return request('GET', '/test?wrong')
+  }).catch(error => {
+    expect(error.statusCode).toEqual(403)
+    return request('GET', '/test?wrong')
+  }).catch(error => {
+    expect(error.statusCode).toEqual(403)
+    return request('GET', '/test?wrong')
+  }).catch(error => {
+    expect(error.statusCode).toEqual(429)
+  }).then(() => {
+    return delay(3050)
+  }).then(() => {
+    return request('GET', '/test?wrong')
+  }).catch(error => {
+    expect(error.statusCode).toEqual(403)
   })
 })

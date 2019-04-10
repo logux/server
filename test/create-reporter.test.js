@@ -122,6 +122,7 @@ it('reports listen', () => {
     backend: 'http://127.0.0.1:3000/logux',
     nodeId: 'server:FnXaqDxY',
     server: false,
+    notes: { },
     redis: undefined,
     cert: false,
     host: '127.0.0.1',
@@ -140,6 +141,7 @@ it('reports listen for production', () => {
     supports: '0.x',
     nodeId: 'server:FnXaqDxY',
     server: false,
+    notes: { },
     redis: '//localhost',
     cert: true,
     host: '127.0.0.1',
@@ -156,7 +158,10 @@ it('reports listen for custom domain', () => {
     subprotocol: '0.0.0',
     supports: '0.x',
     nodeId: 'server:FnXaqDxY',
-    server: true
+    server: true,
+    notes: {
+      prometheus: 'http://127.0.0.1:31338/prometheus'
+    }
   })
 })
 
@@ -289,27 +294,20 @@ it('reports EADDRINUSE error', () => {
   check('error', { fatal: true, err: { code: 'EADDRINUSE', port: 31337 } })
 })
 
-it('reports LOGUX_UNKNOWN_OPTION error', () => {
-  let err = {
-    message: 'Unknown option `suprotocol` in server constructor',
-    option: 'suprotocol',
-    code: 'LOGUX_UNKNOWN_OPTION'
-  }
-  check('error', { fatal: true, err })
-})
-
-it('reports LOGUX_WRONG_OPTIONS error', () => {
-  let err = {
-    code: 'LOGUX_WRONG_OPTIONS',
-    message: 'Missed client subprotocol requirements'
-  }
-  check('error', { fatal: true, err })
-})
-
 it('reports LOGUX_NO_CONTROL_PASSWORD error', () => {
   let err = {
     code: 'LOGUX_NO_CONTROL_PASSWORD',
     message: '`backend` requires also `controlPassword` option'
+  }
+  check('error', { fatal: true, err })
+})
+
+it('reports Logux error', () => {
+  let err = {
+    message: 'Unknown option `suprotocol` in server constructor',
+    logux: true,
+    note: 'Maybe there is a mistake in option name or this version ' +
+          'of Logux Server doesn’t support this option'
   }
   check('error', { fatal: true, err })
 })

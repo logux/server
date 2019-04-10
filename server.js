@@ -230,7 +230,9 @@ class Server extends BaseServer {
       if (AVAILABLE_OPTIONS.indexOf(name) === -1) {
         let error = new Error(
           `Unknown option \`${ name }\` in server constructor`)
-        error.code = 'LOGUX_UNKNOWN_OPTION'
+        error.logux = true
+        error.note = 'Maybe there is a mistake in option name or this ' +
+                     'version of Logux Server doesn’t support this option'
         error.option = name
         throw error
       }

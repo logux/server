@@ -252,6 +252,8 @@ it('reporters on start listening', () => {
     redis: '//localhost'
   })
 
+  test.app.listenNotes.prometheus = 'http://127.0.0.1:31338/prometheus'
+
   let promise = test.app.listen()
   expect(test.reports).toEqual([])
 
@@ -269,6 +271,9 @@ it('reporters on start listening', () => {
         nodeId: 'server:uuid',
         server: false,
         redis: '//localhost',
+        notes: {
+          prometheus: 'http://127.0.0.1:31338/prometheus'
+        },
         cert: false,
         host: '127.0.0.1',
         port: test.app.options.port

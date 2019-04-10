@@ -89,7 +89,7 @@ function send (backend, command, chulkCallback, endCallback) {
 
 function bindBackendProxy (app) {
   if (!app.options.controlPassword) {
-    let e = new Error('`backend` requires also `controlPassword` option')
+    let e = new Error('`backend` requires `controlPassword` option')
     e.code = 'LOGUX_NO_CONTROL_PASSWORD'
     throw e
   }

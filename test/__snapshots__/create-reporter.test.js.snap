@@ -27,38 +27,27 @@ exports[`reports EADDRINUSE error 2`] = `
 `;
 
 exports[`reports LOGUX_NO_CONTROL_PASSWORD error 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{\\"message\\":\\"\`backend\` requires also \`controlPassword\` option\\"},\\"note\\":\\"Run \`npx nanoid-cli\` to generate secure password\\",\\"msg\\":\\"\`backend\` requires also \`controlPassword\` option\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{\\"message\\":\\"\`backend\` requires also \`controlPassword\` option\\"},\\"note\\":\\"Call \`npx nanoid-cli\` and set result as \`controlPassword\` or \`LOGUX_CONTROL_PASSWORD\` environment variable\\",\\"msg\\":\\"\`backend\` requires also \`controlPassword\` option\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
 exports[`reports LOGUX_NO_CONTROL_PASSWORD error 2`] = `
 "[41m[37m FATAL [39m[49m [1m[31m[33mbackend[31m requires also [33mcontrolPassword[31m option[39m[22m [2mat 1970-01-01 00:00:00[22m
-        [90mRun [1mnpx nanoid-cli[22m to generate secure password[39m
+        [90mCall [1mnpx nanoid-cli[22m and set result as [1mcontrolPassword[22m[39m
+        [90mor [1mLOGUX_CONTROL_PASSWORD[22m environment variable[39m
 
 "
 `;
 
-exports[`reports LOGUX_UNKNOWN_OPTION error 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{\\"message\\":\\"Unknown option \`suprotocol\` in server constructor\\"},\\"note\\":\\"Maybe there is a mistake in option name or this version of Logux Server doesn’t support this option\\",\\"msg\\":\\"Unknown option \`suprotocol\` in server constructor\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+exports[`reports Logux error 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"note\\":\\"Maybe there is a mistake in option name or this version of Logux Server doesn’t support this option\\",\\"msg\\":\\"Unknown option \`suprotocol\` in server constructor\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
-exports[`reports LOGUX_UNKNOWN_OPTION error 2`] = `
+exports[`reports Logux error 2`] = `
 "[41m[37m FATAL [39m[49m [1m[31mUnknown option [33msuprotocol[31m in server constructor[39m[22m [2mat 1970-01-01 00:00:00[22m
         [90mMaybe there is a mistake in option name or this version of Logux Server[39m
         [90mdoesn’t support this option[39m
-
-"
-`;
-
-exports[`reports LOGUX_WRONG_OPTIONS error 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{\\"message\\":\\"Missed client subprotocol requirements\\"},\\"note\\":\\"Check server constructor and Logux Server documentation\\",\\"msg\\":\\"Missed client subprotocol requirements\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
-"
-`;
-
-exports[`reports LOGUX_WRONG_OPTIONS error 2`] = `
-"[41m[37m FATAL [39m[49m [1m[31mMissed client subprotocol requirements[39m[22m [2mat 1970-01-01 00:00:00[22m
-        [90mCheck server constructor and Logux Server documentation[39m
 
 "
 `;
@@ -243,7 +232,7 @@ exports[`reports error from node 2`] = `
 `;
 
 exports[`reports listen 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"development\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"0.0.0\\",\\"supports\\":\\"0.x\\",\\"note\\":[\\"Server was started in non-secure development mode\\",\\"Press Ctrl-C to shutdown server\\"],\\"listen\\":\\"ws://127.0.0.1:31337/\\",\\"healthCheck\\":\\"http://127.0.0.1:31338/status\\",\\"prometheus\\":\\"http://127.0.0.1:31338/prometheus?RhBaK0kuOBtqJalq2C4df\\",\\"backendListen\\":\\"http://127.0.0.1:31338/\\",\\"backendSend\\":\\"http://127.0.0.1:3000/logux\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"development\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"0.0.0\\",\\"supports\\":\\"0.x\\",\\"note\\":[\\"Server was started in non-secure development mode\\",\\"Press Ctrl-C to shutdown server\\"],\\"listen\\":\\"ws://127.0.0.1:31337/\\",\\"healthCheck\\":\\"http://127.0.0.1:31338/status\\",\\"backendListen\\":\\"http://127.0.0.1:31338\\",\\"backendSend\\":\\"http://127.0.0.1:3000/logux\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
@@ -256,8 +245,7 @@ exports[`reports listen 2`] = `
         Subprotocol:    [1m0.0.0[22m
         Supports:       [1m0.x[22m
         Health check:   [1mhttp://127.0.0.1:31338/status[22m
-        Prometheus:     [1mhttp://127.0.0.1:31338/prometheus?RhBaK0kuOBtqJalq2C4df[22m
-        Backend listen: [1mhttp://127.0.0.1:31338/[22m
+        Backend listen: [1mhttp://127.0.0.1:31338[22m
         Backend send:   [1mhttp://127.0.0.1:3000/logux[22m
         Listen:         [1mws://127.0.0.1:31337/[22m
         [90mServer was started in non-secure development mode[39m
@@ -267,7 +255,7 @@ exports[`reports listen 2`] = `
 `;
 
 exports[`reports listen for custom domain 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"development\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"0.0.0\\",\\"supports\\":\\"0.x\\",\\"note\\":[\\"Server was started in non-secure development mode\\",\\"Press Ctrl-C to shutdown server\\"],\\"server\\":true,\\"healthCheck\\":\\"http://127.0.0.1:31338/status\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"development\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"0.0.0\\",\\"supports\\":\\"0.x\\",\\"note\\":[\\"Server was started in non-secure development mode\\",\\"Press Ctrl-C to shutdown server\\"],\\"server\\":true,\\"healthCheck\\":\\"http://127.0.0.1:31338/status\\",\\"prometheus\\":\\"http://127.0.0.1:31338/prometheus\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
@@ -280,6 +268,7 @@ exports[`reports listen for custom domain 2`] = `
         Subprotocol:  [1m0.0.0[22m
         Supports:     [1m0.x[22m
         Health check: [1mhttp://127.0.0.1:31338/status[22m
+        Prometheus:   [1mhttp://127.0.0.1:31338/prometheus[22m
         Listen:       [1mCustom HTTP server[22m
         [90mServer was started in non-secure development mode[39m
         [90mPress Ctrl-C to shutdown server[39m
@@ -288,7 +277,7 @@ exports[`reports listen for custom domain 2`] = `
 `;
 
 exports[`reports listen for production 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"production\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"0.0.0\\",\\"supports\\":\\"0.x\\",\\"listen\\":\\"wss://127.0.0.1:31337/\\",\\"healthCheck\\":\\"http://127.0.0.1:31338/status\\",\\"prometheus\\":\\"http://127.0.0.1:31338/prometheus?RhBaK0kuOBtqJalq2C4df\\",\\"backendListen\\":\\"http://127.0.0.1:31338/\\",\\"redis\\":\\"//localhost\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"production\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"0.0.0\\",\\"supports\\":\\"0.x\\",\\"listen\\":\\"wss://127.0.0.1:31337/\\",\\"healthCheck\\":\\"http://127.0.0.1:31338/status\\",\\"backendListen\\":\\"http://127.0.0.1:31338\\",\\"redis\\":\\"//localhost\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
@@ -301,8 +290,7 @@ exports[`reports listen for production 2`] = `
         Subprotocol:    [1m0.0.0[22m
         Supports:       [1m0.x[22m
         Health check:   [1mhttp://127.0.0.1:31338/status[22m
-        Prometheus:     [1mhttp://127.0.0.1:31338/prometheus?RhBaK0kuOBtqJalq2C4df[22m
-        Backend listen: [1mhttp://127.0.0.1:31338/[22m
+        Backend listen: [1mhttp://127.0.0.1:31338[22m
         Redis:          [1m//localhost[22m
         Listen:         [1mwss://127.0.0.1:31337/[22m
 

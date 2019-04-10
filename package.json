@@ -28,7 +28,6 @@
     "chalk": "^2.4.2",
     "nanoevents": "^1.0.8",
     "nanoid": "^2.0.1",
-    "prom-client": "^11.3.0",
     "redis": "^2.8.0",
     "semver": "^6.0.0",
     "strip-ansi": "^5.2.0",
