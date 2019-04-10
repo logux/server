@@ -3,7 +3,6 @@ let NanoEvents = require('nanoevents')
 let UrlPattern = require('url-pattern')
 let WebSocket = require('ws')
 let nanoid = require('nanoid')
-let redis = require('redis')
 let https = require('https')
 let http = require('http')
 let path = require('path')
@@ -65,7 +64,7 @@ function optionError (msg) {
  * @param {string} [options.backend] URL to PHP, Ruby on Rails,
  *                                   or other backend to process actions
  *                                   and authentication.
- * @param {string} [option.redis] URL to Redis for Logux scaling.
+ * @param {string} [option.redis] URL to Redis for Logux Server Pro scaling.
  * @param {number} [options.controlHost="127.0.0.1"] Host to bind HTTP server
  *                                                   to control Logux server.
  * @param {number} [options.controlPort=31338] Port to control the server.
@@ -219,7 +218,6 @@ class BaseServer {
       }
 
       this.sendAction(action, meta)
-      if (this.redisPub) this.sendToRedis(action, meta)
 
       if (meta.status === 'waiting') {
         let type = this.types[action.type]
@@ -320,35 +318,6 @@ class BaseServer {
     this.listenNotes = { }
     if (this.options.backend) {
       bindBackendProxy(this)
-    }
-
-    if (this.options.redis) {
-      let redisError = false
-      let fatal = e => {
-        if (!redisError) {
-          redisError = true
-          this.emitter.emit('fatal', e)
-        }
-      }
-      let createRedis = () => {
-        let client = redis.createClient(this.options.redis)
-        client.on('error', fatal)
-        this.unbind.push(() => new Promise(resolve => {
-          client.quit(resolve)
-        }))
-        return client
-      }
-
-      this.redisPub = createRedis()
-      this.redisSub = createRedis()
-
-      let prefix = '["' + this.nodeId + '",'
-      this.redisSub.on('message', (channel, message) => {
-        if (message.slice(0, prefix.length) !== prefix) {
-          let data = JSON.parse(message)
-          this.sendAction(data[1], data[2])
-        }
-      })
     }
 
     this.unbind.push(() => {
@@ -485,7 +454,8 @@ class BaseServer {
    * * `subscribed`: channel initial data was loaded.
    *
    * @param {
-   *   "error"|"clientError"|"connected"|"processed"|"subscribed"|"disconnected"
+   *   "error"|"clientError"|"connected"|"processed"|"disconnected"|
+   *   "subscribing"|"subscribed"|"unsubscribed"
    * } event The event name.
    * @param {listener} listener The listener function.
    *
@@ -860,30 +830,6 @@ class BaseServer {
     this.wrongChannels[meta.id] = true
   }
 
-  sendToRedis (action, meta) {
-    let message = JSON.stringify([this.nodeId, action, meta])
-    if (meta.nodes) {
-      for (let id of meta.nodes) {
-        this.redisPub.publish('logux.nodes.' + id, message)
-      }
-    }
-    if (meta.clients) {
-      for (let id of meta.clients) {
-        this.redisPub.publish('logux.clients.' + id, message)
-      }
-    }
-    if (meta.users) {
-      for (let id of meta.users) {
-        this.redisPub.publish('logux.users.' + id, message)
-      }
-    }
-    if (meta.channels) {
-      for (let channel of meta.channels) {
-        this.redisPub.publish('logux.channels.' + channel, message)
-      }
-    }
-  }
-
   internalUnkownType (action, meta) {
     this.log.changeMeta(meta.id, { status: 'error' })
     this.reporter('unknownType', { type: action.type, actionId: meta.id })
@@ -997,9 +943,7 @@ class BaseServer {
 
           if (!this.subscribers[action.channel]) {
             this.subscribers[action.channel] = { }
-            if (this.redisSub) {
-              this.redisSub.subscribe('logux.channels.' + action.channel)
-            }
+            this.emitter.emit('subscribing', action, meta)
           }
           this.subscribers[action.channel][ctx.nodeId] = filter || true
           subscribed = true
@@ -1047,10 +991,7 @@ class BaseServer {
       }
     }
 
-    if (this.redisSub && !this.subscribers[action.channel]) {
-      this.redisSub.unsubscribe('logux.channels' + action.channel)
-    }
-
+    this.emitter.emit('unsubscribed', action, meta)
     this.reporter('unsubscribed', {
       actionId: meta.id,
       channel: action.channel

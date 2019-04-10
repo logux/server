@@ -18,8 +18,7 @@ const CERT = path.join(__dirname, 'fixtures/cert.pem')
 const KEY = path.join(__dirname, 'fixtures/key.pem')
 
 let lastPort = 9111
-function createServer (options) {
-  if (!options) options = { }
+function createServer (options = { }) {
   for (let i in DEFAULT_OPTIONS) {
     if (typeof options[i] === 'undefined') {
       options[i] = DEFAULT_OPTIONS[i]
@@ -380,18 +379,6 @@ it('sends debug message to clients on runtimeError', () => {
   expect(app.connected[2].connection.send).not.toHaveBeenCalled()
 })
 
-it('shows errors from Redis', () => {
-  app = createServer({ redis: 'noserver' })
-  let fatals = []
-  app.on('fatal', e => {
-    fatals.push(e)
-  })
-  return delay(10).then(() => {
-    expect(fatals).toHaveLength(1)
-    expect(fatals[0].message).toContain('Redis connection to noserver failed')
-  })
-})
-
 it('disconnects client on destroy', () => {
   app = createServer()
   app.connected[1] = { destroy: jest.fn() }
@@ -493,6 +480,17 @@ it('ignores unknown type for processed actions', () => {
   ).then(() => {
     expect(test.names).toEqual(['add', 'clean'])
   })
+})
+
+it('reports about fatal error', () => {
+  let test = createReporter({ env: 'development' })
+
+  let err = new Error('Test')
+  test.app.emitter.emit('fatal', err)
+
+  expect(test.reports).toEqual([
+    ['error', { err, fatal: true }]
+  ])
 })
 
 it('sends errors to clients in development', () => {

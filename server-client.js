@@ -166,9 +166,6 @@ class ServerClient {
    */
   destroy () {
     this.destroyed = true
-    if (!this.app.destroying) {
-      this.app.emitter.emit('disconnected', this)
-    }
     this.node.destroy()
     if (this.userId) {
       let users = this.app.userIds[this.userId]
@@ -191,12 +188,8 @@ class ServerClient {
         }
       }
     }
-    if (this.app.redisSub && this.clientId && !this.app.destroying) {
-      this.app.redisSub.unsubscribe('logux.clients.' + this.clientId)
-      this.app.redisSub.unsubscribe('logux.nodes.' + this.nodeId)
-      if (this.userId && !this.app.userIds[this.userId]) {
-        this.app.redisSub.unsubscribe('logux.users.' + this.nodeId)
-      }
+    if (!this.app.destroying) {
+      this.app.emitter.emit('disconnected', this)
     }
     delete this.app.connected[this.key]
   }
@@ -234,14 +227,7 @@ class ServerClient {
             }
             this.app.userIds[this.userId].push(this)
           }
-          if (this.app.redisSub) {
-            this.app.redisSub.subscribe('logux.clients.' + this.clientId)
-            this.app.redisSub.subscribe('logux.nodes.' + this.nodeId)
-            if (this.userId && this.app.userIds[this.userId].length === 1) {
-              this.app.redisSub.subscribe('logux.users.' + this.userId)
-            }
-          }
-          this.app.emitter.emit('authenticated', Date.now() - start)
+          this.app.emitter.emit('authenticated', this, Date.now() - start)
           this.app.reporter('authenticated', reportDetails(this))
         } else {
           this.app.reporter('unauthenticated', reportDetails(this))

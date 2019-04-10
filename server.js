@@ -78,7 +78,7 @@ yargs
     type: 'string'
   })
   .option('redis', {
-    describe: 'URL to Redis for Logux scaling',
+    describe: 'URL to Redis for Logux Server Pro scaling',
     type: 'string'
   })
   .epilog(`Environment variables: \n${ envHelp() }`)
@@ -105,7 +105,7 @@ yargs
  * @param {string} [options.backend] URL to PHP, Ruby on Rails,
  *                                   or other backend to process actions
  *                                   and authentication.
- * @param {string} [option.redis] URL to Redis for Logux scaling.
+ * @param {string} [option.redis] URL to Redis for Logux Server Pro scaling.
  * @param {number} [options.controlHost="127.0.0.1"] Host to bind HTTP server
  *                                                   to control Logux server.
  * @param {number} [options.controlPort=31338] Port to control the server.

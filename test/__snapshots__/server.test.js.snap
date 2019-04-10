@@ -35,7 +35,7 @@ exports[`shows help 1`] = `
   --control-host      Host to bind HTTP server to control Logux server  [string]
   --control-port      Port to bind HTTP server to control Logux server  [number]
   --control-password  Password to control Logux server                  [string]
-  --redis             URL to Redis for Logux scaling                    [string]
+  --redis             URL to Redis for Logux Server Pro scaling         [string]
   --help              Show help                                        [boolean]
 
 Examples:

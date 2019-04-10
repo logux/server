@@ -3,7 +3,5 @@ cache: yarn
 node_js:
   - node
   - "10"
-services:
-  - redis-server
 git:
   depth: 5
