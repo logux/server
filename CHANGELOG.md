@@ -1,6 +1,24 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.3
+* Rename project from `logux-server` to `@logux/server`.
+* Rename `meta.nodeIds` to `meta.nodes`.
+* Rename `Server#clients` to `Server#connected`.
+* Rename `Server#users` to `Server#userIds`.
+* Split subscription to `access`, `init`, and `filter` steps.
+* Add `ctx` to callbacks.
+* Remove Node.js 6 and 8 support.
+* `Server.loadOptions` now overrides default options.
+* Change default port from `:1337` to `:31337`.
+* Use Logux Core 0.3.
+* Add brute force protection.
+* Add built-in proxy mode.
+* Add HTTP health check API.
+* Answer `logux/processed` after action processing.
+* Add `ServerClient#clientId` and `meta.clients`.
+* Add warning about missed action callbacks.
+
 ## 0.2.9
 * Use `ws` instead of `uWS`.
 
