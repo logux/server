@@ -1,7 +1,7 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## 0.3
+## 0.3 “SHODAN”
 * Rename project from `logux-server` to `@logux/server`.
 * Rename `meta.nodeIds` to `meta.nodes`.
 * Rename `Server#clients` to `Server#connected`.
