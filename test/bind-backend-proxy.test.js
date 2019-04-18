@@ -123,6 +123,10 @@ let httpServer = http.createServer((req, res) => {
       res.end()
     } else if (data.commands[0][1].type === 'BAD') {
       res.end(`[["forbidden","${ actionId }"]]`)
+    } else if (data.commands[0][1].type === 'UNKNOWN') {
+      res.end(`[["unknownAction","${ actionId }"]]`)
+    } else if (data.commands[0][1].channel === 'unknown') {
+      res.end(`[["unknownChannel","${ actionId }"]]`)
     } else if (data.commands[0][1].type === 'AERROR') {
       res.end(`[["error","stack"]]`)
     } else if (data.commands[0][1].type === 'PERROR') {
@@ -421,6 +425,44 @@ it('asks about action access', () => {
       { type: 'logux/undo', reason: 'denied', id: '1 10:uuid 0' }
     ])
   })
+})
+
+it('reacts on unknown action', async () => {
+  let app = createServer({ ...OPTIONS, env: 'development' })
+  let errors = []
+  app.on('error', e => {
+    errors.push(e.message)
+  })
+  let client = await connectClient(app)
+  client.connection.other().send(['sync', 2,
+    { type: 'UNKNOWN' }, { id: [1, '10:uuid', 0], time: 1 }
+  ])
+  await delay(100)
+  expect(app.log.actions()).toEqual([
+    { type: 'logux/undo', reason: 'error', id: '1 10:uuid 0' }
+  ])
+  let debug = client.connection.pair.leftSent.find(i => i[0] === 'debug')
+  expect(debug).toEqual(['debug', 'error', 'Action with unknown type UNKNOWN'])
+})
+
+it('reacts on unknown channel', async () => {
+  let app = createServer({ ...OPTIONS, env: 'development' })
+  let errors = []
+  app.on('error', e => {
+    errors.push(e.message)
+  })
+  let client = await connectClient(app)
+  client.connection.other().send(['sync', 2,
+    { type: 'logux/subscribe', channel: 'unknown' },
+    { id: [1, '10:uuid', 0], time: 1 }
+  ])
+  await delay(100)
+  expect(app.log.actions()).toEqual([
+    { type: 'logux/subscribe', channel: 'unknown' },
+    { type: 'logux/undo', reason: 'error', id: '1 10:uuid 0' }
+  ])
+  let debug = client.connection.pair.leftSent.find(i => i[0] === 'debug')
+  expect(debug).toEqual(['debug', 'error', 'Wrong channel name unknown'])
 })
 
 it('reacts on wrong backend answer', () => {

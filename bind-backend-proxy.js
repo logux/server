@@ -4,6 +4,8 @@ let http = require('http')
 
 const VERSION = 1
 
+const UNKNOWN_CHANNEL = /^\[\s*\[\s*"unknownChannel"/
+const UNKNOWN_ACTION = /^\[\s*\[\s*"unknownAction"/
 const AUTHENTICATED = /^\[\s*\[\s*"authenticated"/
 const FORBIDDEN = /^\[\s*\[\s*"forbidden"/
 const APPROVED = /^\[\s*\[\s*"approved"/
@@ -114,6 +116,14 @@ function bindBackendProxy (app) {
         return true
       } else if (FORBIDDEN.test(received)) {
         delete processing[meta.id]
+        return false
+      } else if (UNKNOWN_ACTION.test(received)) {
+        delete processing[meta.id]
+        app.unknownType(action, meta)
+        return false
+      } else if (UNKNOWN_CHANNEL.test(received)) {
+        delete processing[meta.id]
+        app.wrongChannel(action, meta)
         return false
       } else {
         return undefined
