@@ -149,13 +149,15 @@ function bindBackendProxy (app) {
     })
   }
 
-  function process (ctx, action, meta) {
-    return processing[meta.id].then(() => {
+  async function process (ctx, action, meta) {
+    try {
+      let res = await processing[meta.id]
       delete processing[meta.id]
-    }, e => {
+      return res
+    } catch (e) {
       delete processing[meta.id]
       throw e
-    })
+    }
   }
 
   app.auth((userId, credentials) => {
