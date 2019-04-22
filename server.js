@@ -214,12 +214,11 @@ class Server extends BaseServer {
 
     super(options)
 
-    this.on('fatal', () => {
+    this.on('fatal', async () => {
       if (initialized) {
         if (!this.destroying) {
-          this.destroy().then(() => {
-            process.exit(1)
-          })
+          await this.destroy()
+          process.exit(1)
         }
       } else {
         process.exit(1)
@@ -240,10 +239,9 @@ class Server extends BaseServer {
 
     initialized = true
 
-    let onExit = () => {
-      this.destroy().then(() => {
-        process.exit(0)
-      })
+    let onExit = async () => {
+      await this.destroy()
+      process.exit(0)
     }
     process.on('SIGINT', onExit)
 
@@ -252,11 +250,14 @@ class Server extends BaseServer {
     })
   }
 
-  listen (...args) {
-    return BaseServer.prototype.listen.apply(this, args).catch(err => {
+  async listen (...args) {
+    try {
+      let result = await BaseServer.prototype.listen.apply(this, args)
+      return result
+    } catch (err) {
       this.reporter('error', { err })
       process.exit(1)
-    })
+    }
   }
 }
 
