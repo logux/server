@@ -194,7 +194,7 @@ class ServerClient {
     delete this.app.connected[this.key]
   }
 
-  auth (credentials, nodeId) {
+  async auth (credentials, nodeId) {
     this.nodeId = nodeId
     let data = parseNodeId(nodeId)
     this.clientId = data.clientId
@@ -202,39 +202,38 @@ class ServerClient {
 
     if (nodeId === 'server' || data.userId === 'server') {
       this.app.reporter('unauthenticated', reportDetails(this))
-      return Promise.resolve(false)
+      return false
     }
 
     let start = Date.now()
-    return this.app.authenticator(this.userId, credentials, this)
-      .then(result => {
-        if (this.app.isBruteforce(this.remoteAddress)) {
-          return Promise.reject(new LoguxError('bruteforce'))
-        }
+    let result = await this.app.authenticator(this.userId, credentials, this)
 
-        if (result) {
-          let zombie = this.app.clientIds[this.clientId]
-          if (zombie) {
-            zombie.zombie = true
-            this.app.reporter('zombie', { nodeId: zombie.nodeId })
-            zombie.destroy()
-          }
-          this.app.clientIds[this.clientId] = this
-          this.app.nodeIds[this.nodeId] = this
-          if (this.userId) {
-            if (!this.app.userIds[this.userId]) {
-              this.app.userIds[this.userId] = []
-            }
-            this.app.userIds[this.userId].push(this)
-          }
-          this.app.emitter.emit('authenticated', this, Date.now() - start)
-          this.app.reporter('authenticated', reportDetails(this))
-        } else {
-          this.app.reporter('unauthenticated', reportDetails(this))
-          this.app.rememberBadAuth(this.remoteAddress)
+    if (this.app.isBruteforce(this.remoteAddress)) {
+      throw new LoguxError('bruteforce')
+    }
+
+    if (result) {
+      let zombie = this.app.clientIds[this.clientId]
+      if (zombie) {
+        zombie.zombie = true
+        this.app.reporter('zombie', { nodeId: zombie.nodeId })
+        zombie.destroy()
+      }
+      this.app.clientIds[this.clientId] = this
+      this.app.nodeIds[this.nodeId] = this
+      if (this.userId) {
+        if (!this.app.userIds[this.userId]) {
+          this.app.userIds[this.userId] = []
         }
-        return result
-      })
+        this.app.userIds[this.userId].push(this)
+      }
+      this.app.emitter.emit('authenticated', this, Date.now() - start)
+      this.app.reporter('authenticated', reportDetails(this))
+    } else {
+      this.app.reporter('unauthenticated', reportDetails(this))
+      this.app.rememberBadAuth(this.remoteAddress)
+    }
+    return result
   }
 
   outMap (action, meta) {
