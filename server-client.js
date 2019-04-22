@@ -236,15 +236,15 @@ class ServerClient {
     return result
   }
 
-  outMap (action, meta) {
-    return Promise.resolve([action, { id: meta.id, time: meta.time }])
+  async outMap (action, meta) {
+    return [action, { id: meta.id, time: meta.time }]
   }
 
-  inMap (action, meta) {
+  async inMap (action, meta) {
     if (!meta.subprotocol) {
       meta.subprotocol = this.node.remoteSubprotocol
     }
-    return Promise.resolve([action, meta])
+    return [action, meta]
   }
 
   filter (action, meta) {
