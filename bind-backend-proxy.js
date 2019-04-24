@@ -101,7 +101,7 @@ function bindBackendProxy (app) {
 
   let processing = { }
 
-  function access (ctx, action, meta) {
+  async function access (ctx, action, meta) {
     let processResolve, processReject
     processing[meta.id] = new Promise((resolve, reject) => {
       processResolve = resolve
@@ -110,52 +110,57 @@ function bindBackendProxy (app) {
 
     let start = Date.now()
     app.emitter.emit('backendSent', action, meta)
-    return send(backend, ['action', action, meta], received => {
-      if (APPROVED.test(received)) {
-        app.emitter.emit('backendGranted', action, meta, Date.now() - start)
-        return true
-      } else if (FORBIDDEN.test(received)) {
-        delete processing[meta.id]
-        return false
-      } else if (UNKNOWN_ACTION.test(received)) {
-        delete processing[meta.id]
-        app.unknownType(action, meta)
-        return false
-      } else if (UNKNOWN_CHANNEL.test(received)) {
-        delete processing[meta.id]
-        app.wrongChannel(action, meta)
-        return false
-      } else {
-        return undefined
-      }
-    }, response => {
-      if (processing[meta.id]) {
-        app.emitter.emit('backendProcessed', action, meta, Date.now() - start)
-        let json = parseAnswer(response)
-        if (!json) {
-          processReject(new Error('Backend wrong answer'))
-        } else if (json.some(i => i[0] === 'processed')) {
-          processResolve()
+    try {
+      let result = await send(backend, ['action', action, meta], received => {
+        if (APPROVED.test(received)) {
+          app.emitter.emit('backendGranted', action, meta, Date.now() - start)
+          return true
+        } else if (FORBIDDEN.test(received)) {
+          delete processing[meta.id]
+          return false
+        } else if (UNKNOWN_ACTION.test(received)) {
+          delete processing[meta.id]
+          app.unknownType(action, meta)
+          return false
+        } else if (UNKNOWN_CHANNEL.test(received)) {
+          delete processing[meta.id]
+          app.wrongChannel(action, meta)
+          return false
         } else {
-          let error = new Error('Backend error during processing')
-          let report = json.find(i => i[0] === 'error')
-          if (report) error.stack = report[1]
-          processReject(error)
+          return undefined
         }
-      }
-    }).catch(e => {
+      }, response => {
+        if (processing[meta.id]) {
+          app.emitter.emit('backendProcessed', action, meta, Date.now() - start)
+          let json = parseAnswer(response)
+          if (!json) {
+            processReject(new Error('Backend wrong answer'))
+          } else if (json.some(i => i[0] === 'processed')) {
+            processResolve()
+          } else {
+            let error = new Error('Backend error during processing')
+            let report = json.find(i => i[0] === 'error')
+            if (report) error.stack = report[1]
+            processReject(error)
+          }
+        }
+      })
+      return result
+    } catch (e) {
       delete processing[meta.id]
       throw e
-    })
+    }
   }
 
-  function process (ctx, action, meta) {
-    return processing[meta.id].then(() => {
+  async function process (ctx, action, meta) {
+    try {
+      let res = await processing[meta.id]
       delete processing[meta.id]
-    }, e => {
+      return res
+    } catch (e) {
       delete processing[meta.id]
       throw e
-    })
+    }
   }
 
   app.auth((userId, credentials) => {

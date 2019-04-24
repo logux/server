@@ -848,24 +848,24 @@ class BaseServer {
     this.debugActionError(meta, `Wrong channel name ${ action.channel }`)
   }
 
-  processAction (type, action, meta, start) {
+  async processAction (type, action, meta, start) {
     let ctx = this.createContext(meta)
 
     let latency
     this.processing += 1
-    return forcePromise(() => type.process(ctx, action, meta)).then(() => {
+    try {
+      await type.process(ctx, action, meta)
       latency = Date.now() - start
       this.reporter('processed', { actionId: meta.id, latency })
       this.markAsProcessed(meta)
-    }).catch(e => {
+    } catch (e) {
       this.log.changeMeta(meta.id, { status: 'error' })
       this.undo(meta, 'error')
       this.emitter.emit('error', e, action, meta)
-    }).then(() => {
-      if (typeof latency === 'undefined') latency = Date.now() - start
-      this.processing -= 1
-      this.emitter.emit('processed', action, meta, latency)
-    })
+    }
+    if (typeof latency === 'undefined') latency = Date.now() - start
+    this.processing -= 1
+    this.emitter.emit('processed', action, meta, latency)
   }
 
   markAsProcessed (meta) {

@@ -14,9 +14,9 @@ class FilteredNode extends ServerNode {
     this.unbind.splice(0, 1)
   }
 
-  syncSinceQuery (lastSynced) {
+  async syncSinceQuery (lastSynced) {
     let data = { added: 0, entries: [] }
-    return this.log.each({ order: 'added' }, (action, meta) => {
+    await this.log.each({ order: 'added' }, (action, meta) => {
       if (meta.added <= lastSynced) {
         return false
       } else {
@@ -30,7 +30,8 @@ class FilteredNode extends ServerNode {
         }
         return true
       }
-    }).then(() => data)
+    })
+    return data
   }
 }
 
