@@ -63,15 +63,14 @@ function createReporter (opts) {
 
 let originEnv = process.env.NODE_ENV
 
-afterEach(() => {
+afterEach(async () => {
   process.env.NODE_ENV = originEnv
-  return Promise.all([
+  await Promise.all([
     app ? app.destroy() : true,
     server ? promisify(done => server.close(done)) : true
-  ]).then(() => {
-    app = undefined
-    server = undefined
-  })
+  ])
+  app = undefined
+  server = undefined
 })
 
 it('saves server options', () => {
@@ -308,18 +307,16 @@ it('reporters on destroying', () => {
   return promise
 })
 
-it('creates a client on connection', () => {
+it('creates a client on connection', async () => {
   app = createServer()
-  return app.listen().then(() => {
-    let ws = new WebSocket(`ws://127.0.0.1:${ app.options.port }`)
-    return new Promise((resolve, reject) => {
-      ws.onopen = resolve
-      ws.onerror = reject
-    })
-  }).then(() => {
-    expect(Object.keys(app.connected)).toHaveLength(1)
-    expect(app.connected[1].remoteAddress).toEqual('127.0.0.1')
+  await app.listen()
+  let ws = new WebSocket(`ws://127.0.0.1:${ app.options.port }`)
+  await new Promise((resolve, reject) => {
+    ws.onopen = resolve
+    ws.onerror = reject
   })
+  expect(Object.keys(app.connected)).toHaveLength(1)
+  expect(app.connected[1].remoteAddress).toEqual('127.0.0.1')
 })
 
 it('creates a client manually', () => {
@@ -382,21 +379,21 @@ it('disconnects client on destroy', () => {
   expect(app.connected[1].destroy).toBeCalled()
 })
 
-it('accepts custom HTTP server', () => {
+it('accepts custom HTTP server', async () => {
   server = http.createServer()
   app = createServer({ server })
 
-  return promisify(done => {
+  await promisify(done => {
     server.listen(app.options.port, done)
-  }).then(() => app.listen()).then(() => {
-    let ws = new WebSocket(`ws://localhost:${ app.options.port }`)
-    return new Promise((resolve, reject) => {
-      ws.onopen = resolve
-      ws.onerror = reject
-    })
-  }).then(() => {
-    expect(Object.keys(app.connected)).toHaveLength(1)
   })
+  await app.listen()
+  let ws = new WebSocket(`ws://localhost:${ app.options.port }`)
+  await new Promise((resolve, reject) => {
+    ws.onopen = resolve
+    ws.onerror = reject
+  })
+
+  expect(Object.keys(app.connected)).toHaveLength(1)
 })
 
 it('marks actions with own node ID', async () => {
@@ -597,7 +594,7 @@ it('waits for last processing before destroy', () => {
   })
 })
 
-it('reports about error during action processing', () => {
+it('reports about error during action processing', async () => {
   let test = createReporter()
 
   let err = new Error('Test')
@@ -608,21 +605,20 @@ it('reports about error during action processing', () => {
     }
   })
 
-  return app.log.add({ type: 'FOO' }, { reasons: ['test'] }).then(() => {
-    return delay(1)
-  }).then(() => {
-    expect(test.names).toEqual(['add', 'error', 'add'])
-    expect(test.reports[1]).toEqual(['error', {
-      actionId: '1 server:uuid 0',
-      err
-    }])
-    expect(test.reports[2][1].action).toEqual({
-      type: 'logux/undo', reason: 'error', id: '1 server:uuid 0'
-    })
+  await app.log.add({ type: 'FOO' }, { reasons: ['test'] })
+  await delay(1)
+
+  expect(test.names).toEqual(['add', 'error', 'add'])
+  expect(test.reports[1]).toEqual(['error', {
+    actionId: '1 server:uuid 0',
+    err
+  }])
+  expect(test.reports[2][1].action).toEqual({
+    type: 'logux/undo', reason: 'error', id: '1 server:uuid 0'
   })
 })
 
-it('undos actions on client', () => {
+it('undos actions on client', async () => {
   app = createServer()
   app.undo({
     id: '1 1:client:uuid 0',
@@ -632,60 +628,56 @@ it('undos actions on client', () => {
     reasons: ['user/1/lastValue'],
     channels: ['user/1']
   }, 'magic')
-  return Promise.resolve().then(() => {
-    expect(app.log.entries()).toEqual([
-      [
-        {
-          id: '1 1:client:uuid 0',
-          type: 'logux/undo',
-          reason: 'magic'
-        },
-        {
-          id: '1 server:uuid 0',
-          time: 1,
-          added: 1,
-          users: ['3'],
-          nodes: ['2:client:uuid'],
-          server: 'server:uuid',
-          status: 'processed',
-          clients: ['1:client', '2:client'],
-          reasons: ['user/1/lastValue'],
-          channels: ['user/1'],
-          subprotocol: '0.0.0'
-        }
-      ]
-    ])
-  })
+
+  expect(app.log.entries()).toEqual([
+    [
+      {
+        id: '1 1:client:uuid 0',
+        type: 'logux/undo',
+        reason: 'magic'
+      },
+      {
+        id: '1 server:uuid 0',
+        time: 1,
+        added: 1,
+        users: ['3'],
+        nodes: ['2:client:uuid'],
+        server: 'server:uuid',
+        status: 'processed',
+        clients: ['1:client', '2:client'],
+        reasons: ['user/1/lastValue'],
+        channels: ['user/1'],
+        subprotocol: '0.0.0'
+      }
+    ]
+  ])
 })
 
-it('adds current subprotocol to meta', () => {
+it('adds current subprotocol to meta', async () => {
   app = createServer({ subprotocol: '1.0.0' })
   app.type('A', { access: () => true })
-  return app.log.add({ type: 'A' }, { reasons: ['test'] }).then(() => {
-    expect(app.log.entries()[0][1].subprotocol).toEqual('1.0.0')
-  })
+  await app.log.add({ type: 'A' }, { reasons: ['test'] })
+  expect(app.log.entries()[0][1].subprotocol).toEqual('1.0.0')
 })
 
-it('adds current subprotocol only to own actions', () => {
+it('adds current subprotocol only to own actions', async () => {
   app = createServer({ subprotocol: '1.0.0' })
   app.type('A', { access: () => true })
-  return app.log.add(
+  await app.log.add(
     { type: 'A' },
     { id: '1 0:other 0', reasons: ['test'] }
-  ).then(() => {
-    expect(app.log.entries()[0][1].subprotocol).toBeUndefined()
-  })
+  )
+  expect(app.log.entries()[0][1].subprotocol).toBeUndefined()
 })
 
-it('allows to override subprotocol in meta', () => {
+it('allows to override subprotocol in meta', async () => {
   app = createServer({ subprotocol: '1.0.0' })
   app.type('A', { access: () => true })
-  return app.log.add(
+  await app.log.add(
     { type: 'A' },
     { subprotocol: '0.1.0', reasons: ['test'] }
-  ).then(() => {
-    expect(app.log.entries()[0][1].subprotocol).toEqual('0.1.0')
-  })
+  )
+  expect(app.log.entries()[0][1].subprotocol).toEqual('0.1.0')
 })
 
 it('checks channel definition', () => {
