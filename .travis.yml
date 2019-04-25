@@ -3,5 +3,3 @@ cache: yarn
 node_js:
   - node
   - "10"
-git:
-  depth: 5
