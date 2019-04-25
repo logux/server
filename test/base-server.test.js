@@ -166,9 +166,10 @@ it('uses test time and ID', () => {
   expect(app.log.generateId()).toEqual('1 server:uuid 0')
 })
 
-it('destroys application without runned server', () => {
+it('destroys application without runned server', async () => {
   app = new BaseServer(DEFAULT_OPTIONS)
-  return app.destroy().then(() => app.destroy())
+  await app.destroy()
+  app.destroy()
 })
 
 it('throws without authenticator', () => {
@@ -203,48 +204,44 @@ it('throws a error on certificate without key', () => {
   }).toThrowError(/set `key` option/)
 })
 
-it('uses HTTPS', () => {
+it('uses HTTPS', async () => {
   app = createServer({
     cert: fs.readFileSync(CERT),
     key: fs.readFileSync(KEY)
   })
-  return app.listen().then(() => {
-    expect(app.http instanceof https.Server).toBeTruthy()
-  })
+  await app.listen()
+  expect(app.http instanceof https.Server).toBeTruthy()
 })
 
-it('loads keys by absolute path', () => {
+it('loads keys by absolute path', async () => {
   app = createServer({
     cert: CERT,
     key: KEY
   })
-  return app.listen().then(() => {
-    expect(app.http instanceof https.Server).toBeTruthy()
-  })
+  await app.listen()
+  expect(app.http instanceof https.Server).toBeTruthy()
 })
 
-it('loads keys by relative path', () => {
+it('loads keys by relative path', async () => {
   app = createServer({
     root: __dirname,
     cert: 'fixtures/cert.pem',
     key: 'fixtures/key.pem'
   })
-  return app.listen().then(() => {
-    expect(app.http instanceof https.Server).toBeTruthy()
-  })
+  await app.listen()
+  expect(app.http instanceof https.Server).toBeTruthy()
 })
 
-it('supports object in SSL key', () => {
+it('supports object in SSL key', async () => {
   app = createServer({
     cert: fs.readFileSync(CERT),
     key: { pem: fs.readFileSync(KEY) }
   })
-  return app.listen().then(() => {
-    expect(app.http instanceof https.Server).toBeTruthy()
-  })
+  await app.listen()
+  expect(app.http instanceof https.Server).toBeTruthy()
 })
 
-it('reporters on start listening', () => {
+it('reporters on start listening', async () => {
   let test = createReporter({
     controlPassword: 'secret',
     backend: 'http://127.0.0.1:3000/logux',
@@ -256,29 +253,28 @@ it('reporters on start listening', () => {
   let promise = test.app.listen()
   expect(test.reports).toEqual([])
 
-  return promise.then(() => {
-    expect(test.reports).toEqual([
-      ['listen', {
-        controlPassword: 'secret',
-        controlHost: '127.0.0.1',
-        controlPort: 31338,
-        loguxServer: pkg.version,
-        environment: 'test',
-        subprotocol: '0.0.0',
-        supports: '0.x',
-        backend: 'http://127.0.0.1:3000/logux',
-        nodeId: 'server:uuid',
-        server: false,
-        redis: '//localhost',
-        notes: {
-          prometheus: 'http://127.0.0.1:31338/prometheus'
-        },
-        cert: false,
-        host: '127.0.0.1',
-        port: test.app.options.port
-      }]
-    ])
-  })
+  await promise
+  expect(test.reports).toEqual([
+    ['listen', {
+      controlPassword: 'secret',
+      controlHost: '127.0.0.1',
+      controlPort: 31338,
+      loguxServer: pkg.version,
+      environment: 'test',
+      subprotocol: '0.0.0',
+      supports: '0.x',
+      backend: 'http://127.0.0.1:3000/logux',
+      nodeId: 'server:uuid',
+      server: false,
+      redis: '//localhost',
+      notes: {
+        prometheus: 'http://127.0.0.1:31338/prometheus'
+      },
+      cert: false,
+      host: '127.0.0.1',
+      port: test.app.options.port
+    }]
+  ])
 })
 
 it('reporters on log events', () => {
@@ -403,7 +399,7 @@ it('accepts custom HTTP server', () => {
   })
 })
 
-it('marks actions with own node ID', () => {
+it('marks actions with own node ID', async () => {
   app = createServer()
   app.type('A', { access: () => true })
 
@@ -412,15 +408,14 @@ it('marks actions with own node ID', () => {
     servers.push(meta.server)
   })
 
-  return Promise.all([
+  await Promise.all([
     app.log.add({ type: 'A' }),
     app.log.add({ type: 'A' }, { server: 'server2' })
-  ]).then(() => {
-    expect(servers).toEqual([app.nodeId, 'server2'])
-  })
+  ])
+  expect(servers).toEqual([app.nodeId, 'server2'])
 })
 
-it('marks actions with waiting status', () => {
+it('marks actions with waiting status', async () => {
   app = createServer()
   app.type('A', { access: () => true })
   app.channel('a', { access: () => true })
@@ -430,13 +425,12 @@ it('marks actions with waiting status', () => {
     statuses.push(meta.status)
   })
 
-  return Promise.all([
+  await Promise.all([
     app.log.add({ type: 'A' }),
     app.log.add({ type: 'A' }, { status: 'processed' }),
     app.log.add({ type: 'logux/subscribe', channel: 'a' })
-  ]).then(() => {
-    expect(statuses).toEqual(['waiting', 'processed', undefined])
-  })
+  ])
+  expect(statuses).toEqual(['waiting', 'processed', undefined])
 })
 
 it('defines actions types', () => {
@@ -460,26 +454,24 @@ it('requires access callback for type', () => {
   }).toThrowError(/access callback/)
 })
 
-it('reports about unknown action type', () => {
+it('reports about unknown action type', async () => {
   let test = createReporter()
-  return test.app.log.add(
+  await test.app.log.add(
     { type: 'UNKNOWN' }, { id: '1 10:uuid 0' }
-  ).then(() => {
-    expect(test.names).toEqual(['add', 'unknownType', 'add', 'clean', 'clean'])
-    expect(test.reports[1]).toEqual(['unknownType', {
-      actionId: '1 10:uuid 0',
-      type: 'UNKNOWN'
-    }])
-  })
+  )
+  expect(test.names).toEqual(['add', 'unknownType', 'add', 'clean', 'clean'])
+  expect(test.reports[1]).toEqual(['unknownType', {
+    actionId: '1 10:uuid 0',
+    type: 'UNKNOWN'
+  }])
 })
 
-it('ignores unknown type for processed actions', () => {
+it('ignores unknown type for processed actions', async () => {
   let test = createReporter()
-  return test.app.log.add(
+  await test.app.log.add(
     { type: 'A' }, { status: 'processed', channels: ['a'] }
-  ).then(() => {
-    expect(test.names).toEqual(['add', 'clean'])
-  })
+  )
+  expect(test.names).toEqual(['add', 'clean'])
 })
 
 it('reports about fatal error', () => {
@@ -521,19 +513,18 @@ it('does not send errors in non-development mode', () => {
   expect(app.connected[0].connection.send).not.toHaveBeenCalled()
 })
 
-it('processes actions', () => {
+it('processes actions', async () => {
   let test = createReporter()
   let processed = []
   let fired = []
 
   test.app.type('FOO', {
     access: () => true,
-    process (ctx, action, meta) {
+    async process (ctx, action, meta) {
       expect(meta.added).toEqual(1)
       expect(ctx.isServer).toBeTruthy()
-      return delay(25).then(() => {
-        processed.push(action)
-      })
+      await delay(25)
+      processed.push(action)
     }
   })
   test.app.on('processed', (action, meta, latency) => {
@@ -542,21 +533,17 @@ it('processes actions', () => {
     fired.push(action)
   })
 
-  return test.app.log.add({ type: 'FOO' }, { reasons: ['test'] })
-    .then(() => Promise.resolve())
-    .then(() => {
-      expect(fired).toEqual([])
-      expect(test.app.log.entries()[0][1].status).toEqual('waiting')
-      return delay(30)
-    }).then(() => {
-      expect(test.app.log.entries()[0][1].status).toEqual('processed')
-      expect(processed).toEqual([{ type: 'FOO' }])
-      expect(fired).toEqual([{ type: 'FOO' }])
-      expect(test.names).toEqual(['add', 'processed'])
-      expect(Object.keys(test.reports[1][1])).toEqual(['actionId', 'latency'])
-      expect(test.reports[1][1].actionId).toEqual('1 server:uuid 0')
-      expect(test.reports[1][1].latency).toBeCloseTo(25, -2)
-    })
+  await test.app.log.add({ type: 'FOO' }, { reasons: ['test'] })
+  expect(fired).toEqual([])
+  expect(test.app.log.entries()[0][1].status).toEqual('waiting')
+  await delay(30)
+  expect(test.app.log.entries()[0][1].status).toEqual('processed')
+  expect(processed).toEqual([{ type: 'FOO' }])
+  expect(fired).toEqual([{ type: 'FOO' }])
+  expect(test.names).toEqual(['add', 'processed'])
+  expect(Object.keys(test.reports[1][1])).toEqual(['actionId', 'latency'])
+  expect(test.reports[1][1].actionId).toEqual('1 server:uuid 0')
+  expect(test.reports[1][1].latency).toBeCloseTo(25, -2)
 })
 
 it('has full events API', () => {
