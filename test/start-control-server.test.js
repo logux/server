@@ -46,83 +46,84 @@ function request (method, path) {
 
 let app
 
-afterEach(() => {
-  return app.destroy().then(() => {
-    app = undefined
-  })
+afterEach(async () => {
+  await app.destroy()
+  app = undefined
 })
 
-it('has health check', () => {
+it('has health check', async () => {
   app = createServer()
-  return app.listen().then(() => {
-    return request('GET', '/status')
-  }).then(response => {
-    expect(response.body).toEqual('OK')
-  })
+  await app.listen()
+  let response = await request('GET', '/status')
+
+  expect(response.body).toEqual('OK')
 })
 
-it('expects GET for health check', () => {
+it('expects GET for health check', async () => {
   app = createServer()
-  return app.listen().then(() => {
-    return request('POST', '/status')
-  }).catch(err => {
+  await app.listen()
+  try {
+    await request('POST', '/status')
+  } catch (err) {
     expect(err.statusCode).toEqual(405)
     expect(err.message).toEqual('Wrong method')
-  })
+  }
 })
 
-it('responses 404', () => {
+it('responses 404', async () => {
   app = createServer()
-  return app.listen().then(() => {
-    return request('GET', '/unknown')
-  }).catch(err => {
+  await app.listen()
+  try {
+    await request('GET', '/unknown')
+  } catch (err) {
     expect(err.statusCode).toEqual(404)
     expect(err.message).toEqual('Wrong path')
-  })
+  }
 })
 
-it('checks password', () => {
+it('checks password', async () => {
   app = createServer('secret')
   app.controls['/test'] = {
     request: () => ({ body: 'done' })
   }
-  return app.listen().then(() => {
-    return request('GET', '/test%3Fsecret')
-  }).then(response => {
+  try {
+    await app.listen()
+    let response = await request('GET', '/test%3Fsecret')
+
     expect(response.body).toContain('done')
-    return request('GET', '/test?wrong')
-  }).catch(error => {
+    await request('GET', '/test?wrong')
+  } catch (error) {
     expect(error.statusCode).toEqual(403)
     expect(error.message).toEqual('Wrong password')
-  })
+  }
 })
 
-it('supports wrong URL encoding', () => {
+it('supports wrong URL encoding', async () => {
   app = createServer('secret')
   app.controls['/test'] = {
     request: () => ({ body: 'done' })
   }
-  return app.listen().then(() => {
-    return request('GET', '/test%3Fsecret')
-  }).then(response => {
-    expect(response.body).toContain('done')
-  })
+  await app.listen()
+  let response = await request('GET', '/test%3Fsecret')
+
+  expect(response.body).toContain('done')
 })
 
-it('shows error on missed password', () => {
+it('shows error on missed password', async () => {
   app = createServer(undefined)
   app.controls['/test'] = {
     request: () => ({ body: 'done' })
   }
-  return app.listen().then(() => {
-    return request('GET', '/test?secret')
-  }).catch(error => {
+  try {
+    await app.listen()
+    await request('GET', '/test?secret')
+  } catch (error) {
     expect(error.statusCode).toEqual(403)
     expect(error.message).toContain('controlPassword')
-  })
+  }
 })
 
-it('passes headers', () => {
+it('passes headers', async () => {
   app = createServer('secret')
   app.controls['/test'] = {
     request: () => ({
@@ -132,36 +133,43 @@ it('passes headers', () => {
       body: 'done'
     })
   }
-  return app.listen().then(() => {
-    return request('GET', '/test%3Fsecret')
-  }).then(response => {
-    expect(response.headers['content-type']).toContain('text/plain')
-  })
+  await app.listen()
+  let response = await request('GET', '/test%3Fsecret')
+
+  expect(response.headers['content-type']).toContain('text/plain')
 })
 
-it('has bruteforce protection', () => {
+it('has bruteforce protection', async () => {
   app = createServer('secret')
   app.controls['/test'] = {
     request: () => ({ body: 'done' })
   }
-  return app.listen().then(() => {
-    return request('GET', '/test?wrong')
-  }).catch(error => {
+  await app.listen()
+  try {
+    await request('GET', '/test?wrong')
+  } catch (error) {
     expect(error.statusCode).toEqual(403)
-    return request('GET', '/test?wrong')
-  }).catch(error => {
+  }
+
+  try {
+    await request('GET', '/test?wrong')
+  } catch (error) {
     expect(error.statusCode).toEqual(403)
-    return request('GET', '/test?wrong')
-  }).catch(error => {
+  }
+  try {
+    await request('GET', '/test?wrong')
+  } catch (error) {
     expect(error.statusCode).toEqual(403)
-    return request('GET', '/test?wrong')
-  }).catch(error => {
+  }
+  try {
+    await request('GET', '/test?wrong')
+  } catch (error) {
     expect(error.statusCode).toEqual(429)
-  }).then(() => {
-    return delay(3050)
-  }).then(() => {
-    return request('GET', '/test?wrong')
-  }).catch(error => {
+  }
+  await delay(3050)
+  try {
+    await request('GET', '/test?wrong')
+  } catch (error) {
     expect(error.statusCode).toEqual(403)
-  })
+  }
 })
