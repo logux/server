@@ -56,24 +56,22 @@ function check (name, args, kill) {
   })
 }
 
-function checkOut (name, args) {
-  return check(name, args, 'kill').then(result => {
-    let out = result[0]
-    let exit = result[1]
-    if (exit !== 0) {
-      throw new Error(`Fall with:\n${ out }`)
-    }
-    expect(out).toMatchSnapshot()
-  })
+async function checkOut (name, args) {
+  let result = await check(name, args, 'kill')
+  let out = result[0]
+  let exit = result[1]
+  if (exit !== 0) {
+    throw new Error(`Fall with:\n${ out }`)
+  }
+  expect(out).toMatchSnapshot()
 }
 
-function checkError (name, args) {
-  return check(name, args).then(result => {
-    let out = result[0]
-    let exit = result[1]
-    expect(exit).toEqual(1)
-    expect(out).toMatchSnapshot()
-  })
+async function checkError (name, args) {
+  let result = await check(name, args)
+  let out = result[0]
+  let exit = result[1]
+  expect(exit).toEqual(1)
+  expect(out).toMatchSnapshot()
 }
 
 afterEach(() => {
@@ -163,10 +161,9 @@ it('uses arg, env, options in given priority', () => {
 
 it('destroys everything on exit', () => checkOut('destroy.js'))
 
-it('writes about unbind', () => {
-  return check('unbind.js', [], 'kill').then(result => {
-    expect(result[0]).toMatchSnapshot()
-  })
+it('writes about unbind', async () => {
+  let result = await check('unbind.js', [], 'kill')
+  expect(result[0]).toMatchSnapshot()
 })
 
 it('shows uncatch errors', () => checkError('throw.js'))
@@ -187,12 +184,11 @@ it('uses reporter param', () => checkOut('options.js', ['', '--r', 'json']))
 
 it('shows help', () => checkOut('options.js', ['', '--help']))
 
-it('shows help about port in use', () => {
-  return start('eaddrinuse.js').then(() => {
-    return check('eaddrinuse.js')
-  }).then(result => {
-    expect(result[0]).toMatchSnapshot()
-  })
+it('shows help about port in use', async () => {
+  await start('eaddrinuse.js')
+  let result = await check('eaddrinuse.js')
+
+  expect(result[0]).toMatchSnapshot()
 })
 
 it('shows help about privileged port', () => checkError('eacces.js'))
