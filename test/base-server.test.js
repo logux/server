@@ -921,7 +921,7 @@ it('subscribes clients', async () => {
   })
 })
 
-it('cancels subscriptions on disconnect', () => {
+it('cancels subscriptions on disconnect', async () => {
   app = createServer()
   let client = {
     node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
@@ -948,16 +948,15 @@ it('cancels subscriptions on disconnect', () => {
     }
   })
 
-  return app.log.add(
+  await app.log.add(
     { type: 'logux/subscribe', channel: 'test' }, { id: '1 10:uuid 0' }
-  ).then(() => {
-    return delay(10)
-  }).then(() => {
-    expect(cancels).toEqual(1)
-  })
+  )
+  await delay(10)
+
+  expect(cancels).toEqual(1)
 })
 
-it('reports about errors during channel initialization', () => {
+it('reports about errors during channel initialization', async () => {
   let test = createReporter()
   let client = {
     node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
@@ -973,24 +972,23 @@ it('reports about errors during channel initialization', () => {
     }
   })
 
-  return test.app.log.add(
+  await test.app.log.add(
     { type: 'logux/subscribe', channel: 'user/10' }, { id: '1 10:uuid 0' }
-  ).then(() => {
-    return delay(1)
-  }).then(() => {
-    expect(test.names).toEqual([
-      'add', 'clean', 'subscribed', 'error', 'add', 'clean',
-      'unsubscribed', 'add', 'clean'
-    ])
-    expect(test.reports[3][1]).toEqual({ actionId: '1 10:uuid 0', err })
-    expect(test.reports[4][1].action).toEqual({
-      type: 'logux/undo', id: '1 10:uuid 0', reason: 'error'
-    })
-    expect(test.app.subscribers).toEqual({ })
+  )
+  await delay(1)
+
+  expect(test.names).toEqual([
+    'add', 'clean', 'subscribed', 'error', 'add', 'clean',
+    'unsubscribed', 'add', 'clean'
+  ])
+  expect(test.reports[3][1]).toEqual({ actionId: '1 10:uuid 0', err })
+  expect(test.reports[4][1].action).toEqual({
+    type: 'logux/undo', id: '1 10:uuid 0', reason: 'error'
   })
+  expect(test.app.subscribers).toEqual({ })
 })
 
-it('loads initial actions during subscription', () => {
+it('loads initial actions during subscription', async () => {
   let test = createReporter({ time: new TestTime() })
   let client = {
     node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
@@ -1018,37 +1016,33 @@ it('loads initial actions during subscription', () => {
     }
   })
 
-  return test.app.log.add(
+  await test.app.log.add(
     { type: 'logux/subscribe', channel: 'user/10' }, { id: '1 10:uuid 0' }
-  ).then(() => {
-    return Promise.resolve()
-  }).then(() => {
-    expect(userLoaded).toEqual(1)
-    expect(test.app.subscribers).toEqual({
-      'user/10': {
-        '10:uuid': true
-      }
-    })
-    expect(test.app.log.actions()).toEqual([
-      { type: 'logux/subscribe', channel: 'user/10' }
-    ])
-    initializating()
-    return delay(1)
-  }).then(() => {
-    expect(test.app.log.actions()).toEqual([
-      { type: 'logux/subscribe', channel: 'user/10' },
-      { type: 'logux/processed', id: '1 10:uuid 0' }
-    ])
+  )
+  expect(userLoaded).toEqual(1)
+  expect(test.app.subscribers).toEqual({
+    'user/10': {
+      '10:uuid': true
+    }
   })
+  expect(test.app.log.actions()).toEqual([
+    { type: 'logux/subscribe', channel: 'user/10' }
+  ])
+  initializating()
+  await delay(1)
+
+  expect(test.app.log.actions()).toEqual([
+    { type: 'logux/subscribe', channel: 'user/10' },
+    { type: 'logux/processed', id: '1 10:uuid 0' }
+  ])
 })
 
-it('does not need type definition for own actions', () => {
+it('does not need type definition for own actions', async () => {
   let test = createReporter()
-  return test.app.log.add({ type: 'unknown' }, { users: ['10'] }).then(() => {
-    expect(test.names).toEqual(['add', 'clean'])
-    expect(test.reports[0][1].action.type).toEqual('unknown')
-    expect(test.reports[0][1].meta.status).toEqual('processed')
-  })
+  await test.app.log.add({ type: 'unknown' }, { users: ['10'] })
+  expect(test.names).toEqual(['add', 'clean'])
+  expect(test.reports[0][1].action.type).toEqual('unknown')
+  expect(test.reports[0][1].meta.status).toEqual('processed')
 })
 
 it('checks callbacks in unknown type handler', () => {
@@ -1064,7 +1058,7 @@ it('checks callbacks in unknown type handler', () => {
   }).toThrowError('Callbacks for unknown types are already defined')
 })
 
-it('reports about useless actions', () => {
+it('reports about useless actions', async () => {
   let test = createReporter()
   test.app.type('known', {
     access: () => true,
@@ -1074,7 +1068,7 @@ it('reports about useless actions', () => {
   test.app.log.on('preadd', (action, meta) => {
     meta.reasons.push('test')
   })
-  return Promise.all([
+  await Promise.all([
     test.app.log.add({ type: 'unknown' }, { status: 'processed' }),
     test.app.log.add({ type: 'known' }),
     test.app.log.add({ type: 'logux/subscribe', channel: 'a' }),
@@ -1082,11 +1076,10 @@ it('reports about useless actions', () => {
     test.app.log.add({ type: 'known' }, { users: ['10'] }),
     test.app.log.add({ type: 'known' }, { clients: ['10:client'] }),
     test.app.log.add({ type: 'known' }, { nodes: ['10:client:uuid'] })
-  ]).then(() => {
-    expect(test.names).toEqual([
-      'add', 'useless',
-      'add', 'add', 'add', 'add', 'add', 'add',
-      'processed', 'processed', 'processed', 'processed', 'processed'
-    ])
-  })
+  ])
+  expect(test.names).toEqual([
+    'add', 'useless',
+    'add', 'add', 'add', 'add', 'add', 'add',
+    'processed', 'processed', 'processed', 'processed', 'processed'
+  ])
 })
