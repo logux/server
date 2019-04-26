@@ -27,74 +27,66 @@ afterEach(() => {
   test.server.destroy()
 })
 
-it('does not sync actions on add', () => {
+it('does not sync actions on add', async () => {
   test = createTest()
-  return test.client.connection.connect().then(() => {
-    return test.client.waitFor('synchronized')
-  }).then(() => {
-    return test.server.log.add({ type: 'A' })
-  }).then(() => {
-    return test.server.waitFor('synchronized')
-  }).then(() => {
-    expect(test.client.log.actions()).toEqual([])
-  })
+  await test.client.connection.connect()
+  await test.client.waitFor('synchronized')
+  await test.server.log.add({ type: 'A' })
+  await test.server.waitFor('synchronized')
+  expect(test.client.log.actions()).toEqual([])
 })
 
-it('synchronizes only node-specific actions on connection', () => {
+it('synchronizes only node-specific actions on connection', async () => {
   test = createTest()
-  return Promise.all([
+  await Promise.all([
     test.server.log.add({ type: 'A' }, { nodes: ['1:A:B'] }),
     test.server.log.add({ type: 'B' }, { nodes: ['1:a:b'] }),
     test.server.log.add({ type: 'C' })
-  ]).then(() => {
-    return test.client.connection.connect()
-  }).then(() => {
-    return test.server.waitFor('synchronized')
-  }).then(() => {
-    expect(test.client.log.actions()).toEqual([{ type: 'B' }])
-  })
+  ])
+  await test.client.connection.connect()
+
+  await test.server.waitFor('synchronized')
+
+  expect(test.client.log.actions()).toEqual([{ type: 'B' }])
 })
 
-it('synchronizes only client-specific actions on connection', () => {
+it('synchronizes only client-specific actions on connection', async () => {
   test = createTest()
-  return Promise.all([
+  await Promise.all([
     test.server.log.add({ type: 'A' }, { clients: ['1:A'] }),
     test.server.log.add({ type: 'B' }, { clients: ['1:a'] }),
     test.server.log.add({ type: 'C' })
-  ]).then(() => {
-    return test.client.connection.connect()
-  }).then(() => {
-    return test.server.waitFor('synchronized')
-  }).then(() => {
-    expect(test.client.log.actions()).toEqual([{ type: 'B' }])
-  })
+  ])
+  await test.client.connection.connect()
+
+  await test.server.waitFor('synchronized')
+
+  expect(test.client.log.actions()).toEqual([{ type: 'B' }])
 })
 
-it('synchronizes only user-specific actions on connection', () => {
+it('synchronizes only user-specific actions on connection', async () => {
   test = createTest()
-  return Promise.all([
+  await Promise.all([
     test.server.log.add({ type: 'A' }, { users: ['2'] }),
     test.server.log.add({ type: 'B' }, { users: ['1'] }),
     test.server.log.add({ type: 'C' })
-  ]).then(() => {
-    return test.client.connection.connect()
-  }).then(() => {
-    return test.server.waitFor('synchronized')
-  }).then(() => {
-    expect(test.client.log.actions()).toEqual([{ type: 'B' }])
-  })
+  ])
+  await test.client.connection.connect()
+
+  await test.server.waitFor('synchronized')
+
+  expect(test.client.log.actions()).toEqual([{ type: 'B' }])
 })
 
-it('still sends only new actions', () => {
+it('still sends only new actions', async () => {
   test = createTest()
-  return test.server.log.add({ type: 'A' }, { nodes: ['1:a:b'] }).then(() => {
-    return test.server.log.add({ type: 'B' }, { nodes: ['1:a:b'] })
-  }).then(() => {
-    test.client.lastReceived = 1
-    return test.client.connection.connect()
-  }).then(() => {
-    return test.server.waitFor('synchronized')
-  }).then(() => {
-    expect(test.client.log.actions()).toEqual([{ type: 'B' }])
-  })
+  await test.server.log.add({ type: 'A' }, { nodes: ['1:a:b'] })
+  await test.server.log.add({ type: 'B' }, { nodes: ['1:a:b'] })
+
+  test.client.lastReceived = 1
+  await test.client.connection.connect()
+
+  await test.server.waitFor('synchronized')
+
+  expect(test.client.log.actions()).toEqual([{ type: 'B' }])
 })

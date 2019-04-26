@@ -6,22 +6,23 @@ it('makes promise from callback function', () => {
   })
 })
 
-it('sends first result to resolve', () => {
-  return promisify(done => {
+it('sends first result to resolve', async () => {
+  let result = await promisify(done => {
     setTimeout(() => {
       done(null, 'test')
     }, 1)
-  }).then(result => {
-    expect(result).toEqual('test')
   })
+  expect(result).toEqual('test')
 })
 
-it('rejects promise on error', () => {
-  return promisify(done => {
-    setTimeout(() => {
-      done(new Error('test'))
-    }, 1)
-  }).catch(err => {
+it('rejects promise on error', async () => {
+  try {
+    await promisify(done => {
+      setTimeout(() => {
+        done(new Error('test'))
+      }, 1)
+    })
+  } catch (err) {
     expect(err.message).toEqual('test')
-  })
+  }
 })
