@@ -867,7 +867,7 @@ it('subscribes clients', async () => {
   await test.app.log.add(
     { type: 'logux/subscribe', channel: 'user/10' }, { id: '1 10:a:uuid 0' }
   )
-
+  await Promise.resolve()
   expect(events).toEqual(1)
   expect(userSubsriptions).toEqual(1)
   expect(test.names).toEqual(['add', 'clean', 'subscribed', 'add', 'clean'])
