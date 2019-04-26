@@ -559,7 +559,7 @@ it('has full events API', () => {
   expect(events).toEqual(2)
 })
 
-it('waits for last processing before destroy', () => {
+it('waits for last processing before destroy', async () => {
   app = createServer()
 
   let started = 0
@@ -576,22 +576,21 @@ it('waits for last processing before destroy', () => {
   })
 
   let destroyed = false
-  return app.log.add({ type: 'FOO' }).then(() => {
-    app.destroy().then(() => {
-      destroyed = true
-    })
-    return Promise.resolve()
-  }).then(() => {
-    expect(destroyed).toBeFalsy()
-    expect(app.processing).toEqual(1)
-    return app.log.add({ type: 'FOO' })
-  }).then(() => {
-    expect(started).toEqual(1)
-    process()
-    return delay(1)
-  }).then(() => {
-    expect(destroyed).toBeTruthy()
+  await app.log.add({ type: 'FOO' })
+  app.destroy().then(() => {
+    destroyed = true
   })
+  await Promise.resolve()
+
+  expect(destroyed).toBeFalsy()
+  expect(app.processing).toEqual(1)
+  await app.log.add({ type: 'FOO' })
+
+  expect(started).toEqual(1)
+  process()
+  await delay(1)
+
+  expect(destroyed).toBeTruthy()
 })
 
 it('reports about error during action processing', async () => {
