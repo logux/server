@@ -39,39 +39,29 @@ let server = http.createServer((req, res) => {
   req.on('data', data => {
     body += data
   })
-  req.on('end', () => {
-    let data = JSON.parse(body)
-    let [type, action, meta] = data.commands[0]
-    let nodes = [meta.id.split(' ')[1]]
-    let processing = delay(500).then(() => {
+  req.on('end', async () => {
+    try {
+      let data = JSON.parse(body)
+      let [type, action, meta] = data.commands[0]
+      let nodes = [meta.id.split(' ')[1]]
+      await delay(500)
       res.write(`[["approved","${ meta.id }"]`)
-    })
-    if (type === 'action' && action.type === 'logux/subscribe') {
-      processing = processing.then(() => {
-        return delay(300)
-      }).then(() => {
-        return Promise.all([
-          send({ type: 'project/name', value: 'A' }, { nodes }),
-          send({ type: 'project/status', value: 'ok' }, { nodes }),
-          send({ type: 'project/payment', value: 'paid' }, { nodes })
-        ])
-      }).then(() => {
+      if (type === 'action' && action.type === 'logux/subscribe') {
+        await delay(300)
+        await send({ type: 'project/name', value: 'A' }, { nodes })
+        await send({ type: 'project/status', value: 'ok' }, { nodes })
+        await send({ type: 'project/payment', value: 'paid' }, { nodes })
         process.stdout.write(chalk.green('S'))
-      })
-    } else if (type === 'action' && action.type === 'project/name') {
-      processing = processing.then(() => {
-        return delay(500)
-      }).then(() => {
+      } else if (type === 'action' && action.type === 'project/name') {
+        await delay(500)
         process.stdout.write(chalk.yellow('A'))
-      })
-    }
-    processing.then(() => {
+      }
       res.write(`,["processed","${ meta.id }"]]`)
       res.end()
-    }).catch(e => {
+    } catch (e) {
       process.stderr.write(chalk.red(e.stack))
       process.exit(1)
-    })
+    }
   })
 })
 
