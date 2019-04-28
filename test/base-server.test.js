@@ -786,6 +786,7 @@ it('checks channel access', async () => {
   await test.app.log.add(
     { type: 'logux/subscribe', channel: 'user/10' }, { id: '1 10:uuid 0' }
   )
+  await delay(1)
 
   expect(test.names).toEqual(['add', 'clean', 'denied', 'add', 'clean'])
   expect(test.reports[2][1]).toEqual({ actionId: '1 10:uuid 0' })
@@ -886,6 +887,7 @@ it('subscribes clients', async () => {
   await test.app.log.add(
     { type: 'logux/subscribe', channel: 'posts' }, { id: '2 10:a:uuid 0' }
   )
+  await delay(1)
 
   expect(events).toEqual(2)
   expect(test.app.subscribers).toEqual({
@@ -1017,6 +1019,7 @@ it('loads initial actions during subscription', async () => {
   await test.app.log.add(
     { type: 'logux/subscribe', channel: 'user/10' }, { id: '1 10:uuid 0' }
   )
+  await delay(1)
   expect(userLoaded).toEqual(1)
   expect(test.app.subscribers).toEqual({
     'user/10': {

@@ -472,8 +472,8 @@ it('allows subscribe and unsubscribe actions', async () => {
     'add',
     'add',
     'unsubscribed',
-    'subscribed',
     'add',
+    'subscribed',
     'add'
   ])
   expect(test.reports[2][1].actionId).toEqual('3 10:uuid 0')
@@ -551,7 +551,7 @@ it('checks user access for action', async () => {
     { type: 'FOO' }, { id: [1, '10:uuid', 0], time: 1 },
     { type: 'FOO', bar: true }, { id: [1, '10:uuid', 1], time: 1 }
   ])
-  await client.connection.pair.wait('right')
+  await delay(10)
   expect(test.app.log.actions()).toEqual([
     { type: 'FOO', bar: true },
     { type: 'logux/undo', reason: 'denied', id: '1 10:uuid 0' },
@@ -560,7 +560,7 @@ it('checks user access for action', async () => {
   expect(test.names).toEqual([
     'connect', 'authenticated', 'denied', 'add', 'add', 'add'])
   expect(test.reports[2][1].actionId).toEqual('1 10:uuid 0')
-  expect(sent(client)[1]).toEqual([
+  expect(sent(client)[2]).toEqual([
     'debug', 'error', 'Action "1 10:uuid 0" was denied'
   ])
 })

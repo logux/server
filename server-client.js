@@ -247,19 +247,19 @@ class ServerClient {
     return [action, meta]
   }
 
-  filter (action, meta) {
+  async filter (action, meta) {
     let ctx = this.app.createContext(meta)
 
     let wrongUser = !this.clientId || this.clientId !== ctx.clientId
     let wrongMeta = Object.keys(meta).some(i => ALLOWED_META.indexOf(i) === -1)
     if (wrongUser || wrongMeta) {
       this.app.denyAction(meta)
-      return Promise.resolve(false)
+      return false
     }
 
     let type = action.type
     if (type === 'logux/subscribe' || type === 'logux/unsubscribe') {
-      return Promise.resolve(true)
+      return true
     }
 
     let processor = this.app.types[type]
@@ -268,24 +268,25 @@ class ServerClient {
     }
     if (!processor) {
       this.app.internalUnkownType(action, meta)
-      return Promise.resolve(false)
+      return false
     }
 
-    return forcePromise(() => processor.access(ctx, action, meta))
-      .then(result => {
-        if (this.app.unknownTypes[meta.id]) {
-          delete this.app.unknownTypes[meta.id]
-          return false
-        } else if (!result) {
-          this.app.denyAction(meta)
-          return false
-        } else {
-          return true
-        }
-      }).catch(e => {
-        this.app.undo(meta, 'error')
-        this.app.emitter.emit('error', e, action, meta)
-      })
+    try {
+      let result = await forcePromise(() => processor.access(ctx, action, meta))
+      if (this.app.unknownTypes[meta.id]) {
+        delete this.app.unknownTypes[meta.id]
+        return false
+      } else if (!result) {
+        this.app.denyAction(meta)
+        return false
+      } else {
+        return true
+      }
+    } catch (e) {
+      this.app.undo(meta, 'error')
+      this.app.emitter.emit('error', e, action, meta)
+      return false
+    }
   }
 }
 

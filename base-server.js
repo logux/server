@@ -871,7 +871,7 @@ class BaseServer {
     return new Context(data.nodeId, data.clientId, data.userId, subprotocol)
   }
 
-  subscribeAction (action, meta, start) {
+  async subscribeAction (action, meta, start) {
     if (typeof action.channel !== 'string') {
       this.wrongChannel(action, meta)
       return
@@ -892,25 +892,24 @@ class BaseServer {
 
       let subscribed = false
       if (match) {
-        let ctx = this.createContext(meta)
-        ctx.params = match
+        try {
+          let ctx = this.createContext(meta)
+          ctx.params = match
 
-        forcePromise(() => {
-          return i.access(ctx, action, meta)
-        }).then(access => {
+          let access = await forcePromise(() => i.access(ctx, action, meta))
           if (this.wrongChannels[meta.id]) {
             delete this.wrongChannels[meta.id]
-            return false
+            return
           }
           if (!access) {
             this.denyAction(meta)
-            return false
+            return
           }
 
           let client = this.clientIds[ctx.clientId]
           if (!client) {
             this.emitter.emit('subscriptionCancelled')
-            return false
+            return
           }
 
           let filter = i.filter && i.filter(ctx, action, meta)
@@ -927,28 +926,16 @@ class BaseServer {
           this.subscribers[action.channel][ctx.nodeId] = filter || true
           subscribed = true
 
-          let emitter = this.emitter
-          function emitSubscribed () {
-            emitter.emit('subscribed', action, meta, Date.now() - start)
-            return true
-          }
-
-          if (i.init) {
-            return forcePromise(() => {
-              return i.init(ctx, action, meta)
-            }).then(() => emitSubscribed())
-          } else {
-            return emitSubscribed()
-          }
-        }).then(access => {
-          if (access) this.markAsProcessed(meta)
-        }).catch(e => {
+          if (i.init) await forcePromise(() => i.init(ctx, action, meta))
+          this.emitter.emit('subscribed', action, meta, Date.now() - start)
+          this.markAsProcessed(meta)
+        } catch (e) {
           this.emitter.emit('error', e, action, meta)
           this.undo(meta, 'error')
           if (subscribed) {
             this.unsubscribeAction(action, meta)
           }
-        })
+        }
         break
       }
     }
