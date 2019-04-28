@@ -10,6 +10,6 @@ let app = new Server(
 )
 app.nodeId = 'server:FnXaqDxY'
 
-app.auth(() => Promise.resolve(true))
+app.auth(async () => true)
 
 app.listen()

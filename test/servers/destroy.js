@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+let delay = require('nanodelay')
+
 let Server = require('../../server')
 
 let app = new Server({
@@ -9,14 +11,12 @@ let app = new Server({
 })
 app.nodeId = 'server:FnXaqDxY'
 
-app.auth(() => Promise.resolve(true))
+app.auth(async () => true)
 
-app.unbind.push(() => new Promise(resolve => {
-  setTimeout(() => {
-    process.stderr.write(' Custom destroy task finished\n')
-    resolve()
-  }, 10)
-}))
+app.unbind.push(async () => {
+  await delay(10)
+  process.stderr.write(' Custom destroy task finished\n')
+})
 
 app.listen()
 
