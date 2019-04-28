@@ -4,14 +4,14 @@
  *
  * @example
  * const { ALLOWED_META } = require('@logux/server')
- * function outMap (action, meta) {
+ * async function outMap (action, meta) {
  *   const filtered = { }
  *   for (const i in meta) {
  *     if (ALLOWED_META.includes(i)) {
  *       filtered[i] = meta[i]
  *     }
  *   }
- *   return Promise.resolve([action, filtered])
+ *   return [action, filtered]
  * }
  */
 const ALLOWED_META = [
