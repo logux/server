@@ -22,9 +22,9 @@ function createTest () {
 }
 
 let test
-afterEach(() => {
-  test.client.destroy()
-  test.server.destroy()
+afterEach(async () => {
+  await test.client.destroy()
+  await test.server.destroy()
 })
 
 it('does not sync actions on add', async () => {
@@ -38,11 +38,9 @@ it('does not sync actions on add', async () => {
 
 it('synchronizes only node-specific actions on connection', async () => {
   test = createTest()
-  await Promise.all([
-    test.server.log.add({ type: 'A' }, { nodes: ['1:A:B'] }),
-    test.server.log.add({ type: 'B' }, { nodes: ['1:a:b'] }),
-    test.server.log.add({ type: 'C' })
-  ])
+  await test.server.log.add({ type: 'A' }, { nodes: ['1:A:B'] })
+  await test.server.log.add({ type: 'B' }, { nodes: ['1:a:b'] })
+  await test.server.log.add({ type: 'C' })
   await test.client.connection.connect()
 
   await test.server.waitFor('synchronized')
@@ -52,11 +50,9 @@ it('synchronizes only node-specific actions on connection', async () => {
 
 it('synchronizes only client-specific actions on connection', async () => {
   test = createTest()
-  await Promise.all([
-    test.server.log.add({ type: 'A' }, { clients: ['1:A'] }),
-    test.server.log.add({ type: 'B' }, { clients: ['1:a'] }),
-    test.server.log.add({ type: 'C' })
-  ])
+  await test.server.log.add({ type: 'A' }, { clients: ['1:A'] })
+  await test.server.log.add({ type: 'B' }, { clients: ['1:a'] })
+  await test.server.log.add({ type: 'C' })
   await test.client.connection.connect()
 
   await test.server.waitFor('synchronized')
@@ -66,11 +62,9 @@ it('synchronizes only client-specific actions on connection', async () => {
 
 it('synchronizes only user-specific actions on connection', async () => {
   test = createTest()
-  await Promise.all([
-    test.server.log.add({ type: 'A' }, { users: ['2'] }),
-    test.server.log.add({ type: 'B' }, { users: ['1'] }),
-    test.server.log.add({ type: 'C' })
-  ])
+  await test.server.log.add({ type: 'A' }, { users: ['2'] })
+  await test.server.log.add({ type: 'B' }, { users: ['1'] })
+  await test.server.log.add({ type: 'C' })
   await test.client.connection.connect()
 
   await test.server.waitFor('synchronized')

@@ -404,10 +404,8 @@ it('marks actions with own node ID', async () => {
     servers.push(meta.server)
   })
 
-  await Promise.all([
-    app.log.add({ type: 'A' }),
-    app.log.add({ type: 'A' }, { server: 'server2' })
-  ])
+  await app.log.add({ type: 'A' })
+  await app.log.add({ type: 'A' }, { server: 'server2' })
   expect(servers).toEqual([app.nodeId, 'server2'])
 })
 
@@ -421,11 +419,9 @@ it('marks actions with waiting status', async () => {
     statuses.push(meta.status)
   })
 
-  await Promise.all([
-    app.log.add({ type: 'A' }),
-    app.log.add({ type: 'A' }, { status: 'processed' }),
-    app.log.add({ type: 'logux/subscribe', channel: 'a' })
-  ])
+  await app.log.add({ type: 'A' })
+  await app.log.add({ type: 'A' }, { status: 'processed' })
+  await app.log.add({ type: 'logux/subscribe', channel: 'a' })
   expect(statuses).toEqual(['waiting', 'processed', undefined])
 })
 
@@ -579,7 +575,7 @@ it('waits for last processing before destroy', async () => {
   app.destroy().then(() => {
     destroyed = true
   })
-  await Promise.resolve()
+  await delay(1)
 
   expect(destroyed).toBeFalsy()
   expect(app.processing).toEqual(1)
@@ -867,7 +863,7 @@ it('subscribes clients', async () => {
   await test.app.log.add(
     { type: 'logux/subscribe', channel: 'user/10' }, { id: '1 10:a:uuid 0' }
   )
-  await Promise.resolve()
+  await delay(1)
   expect(events).toEqual(1)
   expect(userSubsriptions).toEqual(1)
   expect(test.names).toEqual(['add', 'clean', 'subscribed', 'add', 'clean'])
@@ -1069,18 +1065,16 @@ it('reports about useless actions', async () => {
   test.app.log.on('preadd', (action, meta) => {
     meta.reasons.push('test')
   })
-  await Promise.all([
-    test.app.log.add({ type: 'unknown' }, { status: 'processed' }),
-    test.app.log.add({ type: 'known' }),
-    test.app.log.add({ type: 'logux/subscribe', channel: 'a' }),
-    test.app.log.add({ type: 'known' }, { channels: ['a'] }),
-    test.app.log.add({ type: 'known' }, { users: ['10'] }),
-    test.app.log.add({ type: 'known' }, { clients: ['10:client'] }),
-    test.app.log.add({ type: 'known' }, { nodes: ['10:client:uuid'] })
-  ])
+  await test.app.log.add({ type: 'unknown' }, { status: 'processed' })
+  await test.app.log.add({ type: 'known' })
+  await test.app.log.add({ type: 'logux/subscribe', channel: 'a' })
+  await test.app.log.add({ type: 'known' }, { channels: ['a'] })
+  await test.app.log.add({ type: 'known' }, { users: ['10'] })
+  await test.app.log.add({ type: 'known' }, { clients: ['10:client'] })
+  await test.app.log.add({ type: 'known' }, { nodes: ['10:client:uuid'] })
   expect(test.names).toEqual([
     'add', 'useless',
-    'add', 'add', 'add', 'add', 'add', 'add',
-    'processed', 'processed', 'processed', 'processed', 'processed'
+    'add', 'processed', 'add', 'add',
+    'processed', 'add', 'processed', 'add', 'processed', 'add', 'processed'
   ])
 })

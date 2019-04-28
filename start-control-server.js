@@ -98,7 +98,8 @@ function startControlServer (app) {
 
   app.unbind.push(() => {
     return new Promise(resolve => {
-      httpServer.close(resolve)
+      httpServer.on('close', resolve)
+      httpServer.close()
     })
   })
 
