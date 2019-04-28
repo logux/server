@@ -1,19 +1,18 @@
 let { ServerConnection, MemoryStore, Log } = require('@logux/core')
+let { isAbsolute, join } = require('path')
+let { readFileSync } = require('fs')
 let NanoEvents = require('nanoevents')
 let UrlPattern = require('url-pattern')
 let WebSocket = require('ws')
 let nanoid = require('nanoid')
 let https = require('https')
 let http = require('http')
-let path = require('path')
-let fs = require('fs')
 
 let startControlServer = require('./start-control-server')
 let bindBackendProxy = require('./bind-backend-proxy')
 let forcePromise = require('./force-promise')
 let ServerClient = require('./server-client')
 let parseNodeId = require('./parse-node-id')
-let promisify = require('./promisify')
 let Context = require('./context')
 let pkg = require('./package.json')
 
@@ -27,14 +26,10 @@ function isPem (content) {
   }
 }
 
-function readFile (root, file) {
+function readFrom (root, file) {
   file = file.toString()
-  if (!path.isAbsolute(file)) {
-    file = path.join(root, file)
-  }
-  return promisify(done => {
-    fs.readFile(file, done)
-  })
+  if (!isAbsolute(file)) file = join(root, file)
+  return readFileSync(file)
 }
 
 function optionError (msg) {
@@ -362,83 +357,67 @@ class BaseServer {
    *
    * @return {Promise} When the server has been bound.
    */
-  listen () {
+  async listen () {
     if (!this.authenticator) {
       throw new Error('You must set authentication callback by server.auth()')
     }
 
-    let promise = Promise.resolve()
-
     if (this.options.server) {
       this.ws = new WebSocket.Server({ server: this.options.server })
     } else {
-      let before = []
-      if (this.options.key && !isPem(this.options.key)) {
-        before.push(readFile(this.options.root, this.options.key))
-      } else {
-        before.push(Promise.resolve(this.options.key))
-      }
-      if (this.options.cert && !isPem(this.options.cert)) {
-        before.push(readFile(this.options.root, this.options.cert))
-      } else {
-        before.push(Promise.resolve(this.options.cert))
-      }
+      let key = this.options.key
+      let cert = this.options.cert
+      if (key && !isPem(key)) key = readFrom(this.options.root, key)
+      if (cert && !isPem(cert)) cert = readFrom(this.options.root, cert)
 
-      promise = promise
-        .then(() => Promise.all(before))
-        .then(keys => new Promise((resolve, reject) => {
-          if (keys[0] && keys[0].pem) {
-            this.http = https.createServer({ key: keys[0].pem, cert: keys[1] })
-          } else if (keys[0]) {
-            this.http = https.createServer({ key: keys[0], cert: keys[1] })
-          } else {
-            this.http = http.createServer()
-          }
+      await new Promise((resolve, reject) => {
+        if (key && key.pem) {
+          this.http = https.createServer({ key: key.pem, cert })
+        } else if (key) {
+          this.http = https.createServer({ key, cert })
+        } else {
+          this.http = http.createServer()
+        }
 
-          this.ws = new WebSocket.Server({ server: this.http })
-          this.ws.on('error', reject)
+        this.ws = new WebSocket.Server({ server: this.http })
+        this.ws.on('error', reject)
 
-          this.http.listen(this.options.port, this.options.host, resolve)
-        }))
+        this.http.listen(this.options.port, this.options.host, resolve)
+      })
     }
 
-    promise = promise.then(() => {
-      return startControlServer(this)
-    })
+    await startControlServer(this)
 
-    this.unbind.push(() => promisify(done => {
-      promise.then(() => {
-        this.ws.close()
-        if (this.http) {
-          this.http.close(done)
-        } else {
-          done()
-        }
-      })
+    this.unbind.push(() => new Promise(resolve => {
+      this.ws.on('close', resolve)
+      this.ws.close()
     }))
+    if (this.http) {
+      this.unbind.push(() => new Promise(resolve => {
+        this.http.on('close', resolve)
+        this.http.close()
+      }))
+    }
 
-    return promise.then(() => {
-      this.ws.on('connection', ws => {
-        this.addClient(new ServerConnection(ws))
-      })
-    }).then(() => {
-      this.reporter('listen', {
-        controlPassword: this.options.controlPassword,
-        controlHost: this.options.controlHost,
-        controlPort: this.options.controlPort,
-        loguxServer: pkg.version,
-        environment: this.env,
-        subprotocol: this.options.subprotocol,
-        supports: this.options.supports,
-        backend: this.options.backend,
-        server: !!this.options.server,
-        nodeId: this.nodeId,
-        redis: this.options.redis,
-        notes: this.listenNotes,
-        cert: !!this.options.cert,
-        host: this.options.host,
-        port: this.options.port
-      })
+    this.ws.on('connection', ws => {
+      this.addClient(new ServerConnection(ws))
+    })
+    this.reporter('listen', {
+      controlPassword: this.options.controlPassword,
+      controlHost: this.options.controlHost,
+      controlPort: this.options.controlPort,
+      loguxServer: pkg.version,
+      environment: this.env,
+      subprotocol: this.options.subprotocol,
+      supports: this.options.supports,
+      backend: this.options.backend,
+      server: !!this.options.server,
+      nodeId: this.nodeId,
+      redis: this.options.redis,
+      notes: this.listenNotes,
+      cert: !!this.options.cert,
+      host: this.options.host,
+      port: this.options.port
     })
   }
 

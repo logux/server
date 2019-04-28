@@ -1,21 +1,20 @@
 let { MemoryStore, TestTime, Log } = require('@logux/core')
+let { readFileSync } = require('fs')
 let WebSocket = require('ws')
+let { join } = require('path')
 let delay = require('nanodelay')
 let https = require('https')
 let http = require('http')
-let path = require('path')
-let fs = require('fs')
 
 let BaseServer = require('../base-server')
-let promisify = require('../promisify')
 let pkg = require('../package.json')
 
 const DEFAULT_OPTIONS = {
   subprotocol: '0.0.0',
   supports: '0.x'
 }
-const CERT = path.join(__dirname, 'fixtures/cert.pem')
-const KEY = path.join(__dirname, 'fixtures/key.pem')
+const CERT = join(__dirname, 'fixtures/cert.pem')
+const KEY = join(__dirname, 'fixtures/key.pem')
 
 let lastPort = 9111
 function createServer (options = { }) {
@@ -65,12 +64,11 @@ let originEnv = process.env.NODE_ENV
 
 afterEach(async () => {
   process.env.NODE_ENV = originEnv
-  await Promise.all([
-    app ? app.destroy() : true,
-    server ? promisify(done => server.close(done)) : true
-  ])
-  app = undefined
-  server = undefined
+  if (app) {
+    await app.destroy()
+    app = undefined
+  }
+  if (server) server.close()
 })
 
 it('saves server options', () => {
@@ -172,10 +170,11 @@ it('destroys application without runned server', async () => {
 })
 
 it('throws without authenticator', () => {
+  expect.assertions(1)
   app = new BaseServer(DEFAULT_OPTIONS)
-  expect(() => {
-    app.listen()
-  }).toThrowError(/authentication/)
+  return app.listen().catch(e => {
+    expect(e.message).toMatch(/authentication/)
+  })
 })
 
 it('sets default ports and hosts', () => {
@@ -193,20 +192,20 @@ it('uses user port', () => {
 
 it('throws a error on key without certificate', () => {
   expect(() => {
-    app = createServer({ key: fs.readFileSync(KEY) })
+    app = createServer({ key: readFileSync(KEY) })
   }).toThrowError(/set `cert` option/)
 })
 
 it('throws a error on certificate without key', () => {
   expect(() => {
-    app = createServer({ cert: fs.readFileSync(CERT) })
+    app = createServer({ cert: readFileSync(CERT) })
   }).toThrowError(/set `key` option/)
 })
 
 it('uses HTTPS', async () => {
   app = createServer({
-    cert: fs.readFileSync(CERT),
-    key: fs.readFileSync(KEY)
+    cert: readFileSync(CERT),
+    key: readFileSync(KEY)
   })
   await app.listen()
   expect(app.http instanceof https.Server).toBeTruthy()
@@ -233,8 +232,8 @@ it('loads keys by relative path', async () => {
 
 it('supports object in SSL key', async () => {
   app = createServer({
-    cert: fs.readFileSync(CERT),
-    key: { pem: fs.readFileSync(KEY) }
+    cert: readFileSync(CERT),
+    key: { pem: readFileSync(KEY) }
   })
   await app.listen()
   expect(app.http instanceof https.Server).toBeTruthy()
@@ -383,16 +382,16 @@ it('accepts custom HTTP server', async () => {
   server = http.createServer()
   app = createServer({ server })
 
-  await promisify(done => {
-    server.listen(app.options.port, done)
+  await new Promise(resolve => {
+    server.listen(app.options.port, resolve)
   })
   await app.listen()
+
   let ws = new WebSocket(`ws://localhost:${ app.options.port }`)
   await new Promise((resolve, reject) => {
     ws.onopen = resolve
     ws.onerror = reject
   })
-
   expect(Object.keys(app.connected)).toHaveLength(1)
 })
 
