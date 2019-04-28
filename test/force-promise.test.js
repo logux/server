@@ -1,27 +1,27 @@
 let forcePromise = require('../force-promise')
 
-it('executes Promise', () => {
-  return forcePromise(() => Promise.resolve('result')).then(result => {
-    expect(result).toEqual('result')
-  })
+it('executes Promise', async () => {
+  let result = await forcePromise(() => Promise.resolve('result'))
+  expect(result).toEqual('result')
+})
+
+it('executes sync function', async () => {
+  let result = await forcePromise(() => 'result')
+  expect(result).toEqual('result')
 })
 
 it('sends Promises error', () => {
+  expect.assertions(1)
   let error = new Error()
-  return forcePromise(() => Promise.resolve().then(() => {
+  return forcePromise(async () => {
     throw error
-  })).catch(e => {
+  }).catch(e => {
     expect(e).toBe(error)
   })
 })
 
-it('executes sync function', () => {
-  return forcePromise(() => 'result').then(result => {
-    expect(result).toEqual('result')
-  })
-})
-
 it('sends sync error', () => {
+  expect.assertions(1)
   let error = new Error()
   return forcePromise(() => {
     throw error
