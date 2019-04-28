@@ -181,29 +181,37 @@ it('checks password option', () => {
 })
 
 it('validates HTTP requests', async () => {
+  let prefix = { version: 0, password: '1234' }
   let app = createServer(OPTIONS)
   await app.listen()
-  let codes = await Promise.all([
-    request({ method: 'GET', string: '' }),
-    request({ path: '/logux', string: '' }),
-    request({ string: '{' }),
-    request({ string: '""' }),
-    send({ }),
-    send({ version: 100, password: '1234', commands: [] }),
-    send({ version: 0, commands: [] }),
-    send({ version: 0, password: '1234', commands: {} }),
-    send({ version: 0, password: '1234', commands: [1] }),
-    send({ version: 0, password: '1234', commands: [[1]] }),
-    send({ version: 0, password: '1234', commands: [['f']] }),
-    send({ version: 0, password: '1234', commands: [['action'], 'f']
-    }),
-    send({ version: 0, password: '1234', commands: [['action', { }, 'f']] }),
-    send({ version: 0, password: 'wrong', commands: [] })
-  ])
-
-  expect(codes).toEqual([
-    405, 404, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 403
-  ])
+  expect(await request({ method: 'GET', string: '' }))
+    .toEqual(405)
+  expect(await request({ path: '/logux', string: '' }))
+    .toEqual(404)
+  expect(await request({ string: '{' }))
+    .toEqual(400)
+  expect(await request({ string: '""' }))
+    .toEqual(400)
+  expect(await send({ }))
+    .toEqual(400)
+  expect(await send({ version: 100, password: '1234', commands: [] }))
+    .toEqual(400)
+  expect(await send({ version: 0, commands: [] }))
+    .toEqual(400)
+  expect(await send({ ...prefix, commands: {} }))
+    .toEqual(400)
+  expect(await send({ ...prefix, commands: [1] }))
+    .toEqual(400)
+  expect(await send({ ...prefix, commands: [[1]] }))
+    .toEqual(400)
+  expect(await send({ ...prefix, commands: [['f']] }))
+    .toEqual(400)
+  expect(await send({ ...prefix, commands: [['action'], 'f'] }))
+    .toEqual(400)
+  expect(await send({ ...prefix, commands: [['action', { }, 'f']] }))
+    .toEqual(400)
+  expect(await send({ version: 0, password: 'wrong', commands: [] }))
+    .toEqual(403)
   expect(app.log.actions()).toEqual([])
 })
 
@@ -211,7 +219,6 @@ it('creates actions', async () => {
   let app = createServer(OPTIONS)
   await app.listen()
   let code = await send({ version: 0, password: '1234', commands: [ACTION] })
-
   expect(code).toEqual(200)
   expect(app.log.actions()).toEqual([{ type: 'A' }])
   expect(sent).toEqual([])
