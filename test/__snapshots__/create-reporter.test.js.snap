@@ -1,19 +1,23 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`reports EACCES error 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{},\\"note\\":\\"Try to change user or use port >= 1024\\",\\"msg\\":\\"You are not allowed to run server on port \`80\`\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{},\\"note\\":\\"Non-privileged users can't start a listening socket on ports below 1024. Try to change user or take another port.\\\\n\\\\n$ su - \`<username>\`\\\\n$ npm start -p 80\\",\\"msg\\":\\"You are not allowed to run server on port \`80\`\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
 exports[`reports EACCES error 2`] = `
 "[41m[37m FATAL [39m[49m [1m[31mYou are not allowed to run server on port [33m80[31m[39m[22m [2mat 1970-01-01 00:00:00[22m
-        [90mTry to change user or use port >= 1024[39m
+        [90mNon-privileged users can't start a listening socket on ports below 1024.[39m
+        [90mTry to change user or take another port.[39m
+        
+        [90m$ su - [1m<username>[22m[39m
+        [90m$ npm start -p 80[39m
 
 "
 `;
 
 exports[`reports EADDRINUSE error 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{},\\"note\\":\\"Another Logux server or other app already running on this port. Maybe you didn’t not stop server from other project or previous version of this server was not killed.\\",\\"msg\\":\\"Port \`31337\` already in use\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{},\\"note\\":\\"Another Logux server or other app already running on this port. Maybe you didn’t not stop server from other project or previous version of this server was not killed.\\\\n\\\\n$ su - root\\\\n# netstat -nlp | grep 31337\\\\nProto   Local Address   State    PID/Program name\\\\ntcp     0.0.0.0:31337    LISTEN   \`777\`/node\\\\n# sudo kill -9 \`777\`\\",\\"msg\\":\\"Port \`31337\` already in use\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
@@ -22,6 +26,12 @@ exports[`reports EADDRINUSE error 2`] = `
         [90mAnother Logux server or other app already running on this port.[39m
         [90mMaybe you didn’t not stop server from other project or previous version[39m
         [90mof this server was not killed.[39m
+        
+        [90m$ su - root[39m
+        [90m# netstat -nlp | grep 31337[39m
+        [90mProto   Local Address   State    PID/Program name[39m
+        [90mtcp     0.0.0.0:31337    LISTEN   [1m777[22m/node[39m
+        [90m# sudo kill -9 [1m777[22m[39m
 
 "
 `;
