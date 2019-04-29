@@ -1,6 +1,6 @@
 let http = require('http')
 
-const MAX_VERSION = 0
+const MAX_VERSION = 1
 const NO_PASSWORD = 'Set `controlPassword` option for Logux ' +
                     'to have access to this page.\n' +
                     'Run `npx nanoid-cli` to generate secure password.'
