@@ -1,6 +1,10 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.3.2
+* Fix backend proxy version (by Dmitry Salahutdinov).
+* Clean up code (by Vladimir Schedrin).
+
 ## 0.3.1
 * Fix support for `unknownAction` and `unknownChannel` commands from backend.
 
