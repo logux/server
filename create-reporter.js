@@ -23,7 +23,7 @@ const ERROR_CODES = {
     return {
       msg: `Port \`${ e.port }\` already in use`,
       note: 'Another Logux server or other app already running on this port. ' +
-            'Maybe you didn’t not stop server from other project ' +
+            'Probably you haven’t stopped server from other project ' +
             'or previous version of this server was not killed.\n\n' +
             (wayToFix[os.platform()] || '')
     }
