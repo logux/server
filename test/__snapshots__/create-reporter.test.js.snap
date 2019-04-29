@@ -17,7 +17,7 @@ exports[`reports EACCES error 2`] = `
 `;
 
 exports[`reports EADDRINUSE error 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{},\\"note\\":\\"Another Logux server or other app already running on this port. Probably you haven’t stopped server from other project or previous version of this server was not killed.\\\\n\\\\n$ sudo lsof -i 31337\\\\n$ sudo kill -9 \`<processid>\`\\",\\"msg\\":\\"Port \`31337\` already in use\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{},\\"note\\":\\"Another Logux server or other app already running on this port. Probably you haven’t stopped server from other project or previous version of this server was not killed.\\\\n\\\\n$ su - root\\\\n# netstat -nlp | grep 31337\\\\nProto   Local Address   State    PID/Program name\\\\ntcp     0.0.0.0:31337    LISTEN   \`777\`/node\\\\n# sudo kill -9 \`777\`\\",\\"msg\\":\\"Port \`31337\` already in use\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
@@ -27,8 +27,11 @@ exports[`reports EADDRINUSE error 2`] = `
         [90mProbably you haven’t stopped server from other project or previous[39m
         [90mversion of this server was not killed.[39m
         
-        [90m$ sudo lsof -i 31337[39m
-        [90m$ sudo kill -9 [1m<processid>[22m[39m
+        [90m$ su - root[39m
+        [90m# netstat -nlp | grep 31337[39m
+        [90mProto   Local Address   State    PID/Program name[39m
+        [90mtcp     0.0.0.0:31337    LISTEN   [1m777[22m/node[39m
+        [90m# sudo kill -9 [1m777[22m[39m
 
 "
 `;
