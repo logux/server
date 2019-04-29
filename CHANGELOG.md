@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.3.3
+* Improve popular error messages during server launch (by Igor Strebezhev).
+
 ## 0.3.2
 * Fix backend proxy version (by Dmitry Salahutdinov).
 * Clean up code (by Vladimir Schedrin).
