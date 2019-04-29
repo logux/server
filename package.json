@@ -7,7 +7,10 @@
     "server",
     "framework",
     "websocket",
-    "proxy"
+    "proxy",
+    "crdt",
+    "event sourcing",
+    "distributed systems"
   ],
   "scripts": {
     "docs": "documentation build *.js -f md -o api.md",
