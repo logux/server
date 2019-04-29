@@ -206,7 +206,8 @@ class HumanFormatter extends stream.Writable {
       let note = record.note
       if (typeof note === 'string') {
         note = note.replace(/`([^`]+)`/g, c.bold('$1'))
-        note = splitByLength(note, 80 - PADDING.length)
+        note = [].concat(...note.split('\n')
+          .map(row => splitByLength(row, 80 - PADDING.length)))
       }
       message.push(note.map(i => PADDING + c.grey(i)).join(NEXT_LINE))
     }
