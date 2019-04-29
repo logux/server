@@ -460,19 +460,10 @@ it('allows subscribe and unsubscribe actions', async () => {
   ])
   await client.connection.pair.wait('right')
 
-  expect(test.names).toEqual([
-    'connect',
-    'authenticated',
-    'unknownType',
-    'add',
-    'add',
-    'add',
-    'unsubscribed',
-    'add',
-    'subscribed',
-    'add'
-  ])
+  expect(test.names[2]).toEqual('unknownType')
   expect(test.reports[2][1].actionId).toEqual('3 10:uuid 0')
+  expect(test.names).toContain('unsubscribed')
+  expect(test.names).toContain('subscribed')
 })
 
 it('checks action meta', async () => {
@@ -556,7 +547,7 @@ it('checks user access for action', async () => {
   expect(test.names).toEqual([
     'connect', 'authenticated', 'denied', 'add', 'add', 'add'])
   expect(test.reports[2][1].actionId).toEqual('1 10:uuid 0')
-  expect(sent(client)[2]).toEqual([
+  expect(sent(client).find(i => i[0] === 'debug')).toEqual([
     'debug', 'error', 'Action "1 10:uuid 0" was denied'
   ])
 })
