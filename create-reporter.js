@@ -1,18 +1,48 @@
+let os = require('os')
 let bunyan = require('bunyan')
 
 let HumanFormatter = require('./human-formatter')
 
 const ERROR_CODES = {
-  EADDRINUSE: e => ({
-    msg: `Port \`${ e.port }\` already in use`,
-    note: 'Another Logux server or other app already running on this port. ' +
-          'Maybe you didn’t not stop server from other project ' +
-          'or previous version of this server was not killed.'
-  }),
-  EACCES: e => ({
-    msg: `You are not allowed to run server on port \`${ e.port }\``,
-    note: 'Try to change user or use port >= 1024'
-  }),
+  EADDRINUSE: e => {
+    let wayToFix = {
+      win32: 'Run `cmd.exe` as an administrator\n' +
+             'C:\\> netstat -a -b -n -o\n' +
+             'C:\\> taskkill /F /PID `<processid>`',
+      // macos
+      darwin: `$ sudo lsof -i ${ e.port }\n` +
+              '$ sudo kill -9 `<processid>`',
+      linux: '$ su - root\n' +
+             `# netstat -nlp | grep ${ e.port }\n` +
+             'Proto   Local Address   State    PID/Program name\n' +
+             `tcp     0.0.0.0:${ e.port }    LISTEN   \`777\`/node\n` +
+             '# sudo kill -9 `777`'
+      // todo: describe 'aix', 'freebsd', 'openbsd', 'sunos', 'android'
+    }
+
+    return {
+      msg: `Port \`${ e.port }\` already in use`,
+      note: 'Another Logux server or other app already running on this port. ' +
+            'Maybe you didn’t not stop server from other project ' +
+            'or previous version of this server was not killed.\n\n' +
+            (wayToFix[os.platform()] || '')
+    }
+  },
+  EACCES: (e, environment) => {
+    let wayToFix = {
+      development: 'In dev mode it can be done with sudo:\n' +
+                   '$ sudo npm start',
+      production: `$ su - \`<username>\`\n` +
+                  `$ npm start -p ${ e.port }`
+    }
+
+    return {
+      msg: `You are not allowed to run server on port \`${ e.port }\``,
+      note: `Non-privileged users can't start a listening socket on ports ` +
+            `below 1024. Try to change user or take another port.\n\n` +
+            (wayToFix[environment] || wayToFix.production)
+    }
+  },
   LOGUX_NO_CONTROL_PASSWORD: e => ({
     msg: e.message,
     note: 'Call `npx nanoid-cli` and set result as `controlPassword` ' +
@@ -131,7 +161,7 @@ const REPORTERS = {
 
     let helper = ERROR_CODES[record.err.code]
     if (helper) {
-      let help = helper(record.err)
+      let help = helper(record.err, record.environment)
       result.msg = help.msg
       result.details.note = help.note
       delete result.details.err.stack
