@@ -13,8 +13,8 @@
     "distributed systems"
   ],
   "scripts": {
-    "docs": "documentation build *.js -f md -o api.md",
-    "spell": "yarn docs && yaspeller-ci *.md",
+    "api": "documentation build *.js -f md -o api.md",
+    "spell": "yarn api && yaspeller-ci *.md",
     "clean": "rimraf api.md coverage/",
     "lint": "eslint-ci *.js test/{**/,}*.js",
     "test": "jest --forceExit --runInBand --coverage && yarn lint && yarn spell"
