@@ -621,12 +621,15 @@ it('undos actions on client', async () => {
     clients: ['2:client'],
     reasons: ['user/1/lastValue'],
     channels: ['user/1']
-  }, 'magic')
+  }, 'magic', {
+    one: 1
+  })
 
   expect(app.log.entries()).toEqual([
     [
       {
         id: '1 1:client:uuid 0',
+        one: 1,
         type: 'logux/undo',
         reason: 'magic'
       },

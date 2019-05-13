@@ -626,6 +626,7 @@ class BaseServer {
    *
    * @param {Meta} meta The action’s metadata.
    * @param {string} [reason] Optional code for reason.
+   * @param {object} [extra] Extra fields to `logux/undo` action.
    *
    * @return {undefined}
    *
@@ -634,7 +635,7 @@ class BaseServer {
    *   server.undo(meta)
    * }
    */
-  undo (meta, reason) {
+  undo (meta, reason, extra = { }) {
     let undoMeta = { status: 'processed' }
 
     if (meta.users) undoMeta.users = meta.users.slice(0)
@@ -645,7 +646,8 @@ class BaseServer {
     undoMeta.clients = [parseNodeId(meta.id).clientId]
     if (meta.clients) undoMeta.clients = undoMeta.clients.concat(meta.clients)
 
-    this.log.add({ type: 'logux/undo', id: meta.id, reason }, undoMeta)
+    let action = { ...extra, type: 'logux/undo', id: meta.id, reason }
+    this.log.add(action, undoMeta)
   }
 
   /**
