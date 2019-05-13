@@ -538,7 +538,7 @@ it('checks user access for action', async () => {
     { type: 'FOO' }, { id: [1, '10:uuid', 0], time: 1 },
     { type: 'FOO', bar: true }, { id: [1, '10:uuid', 1], time: 1 }
   ])
-  await delay(10)
+  await delay(50)
   expect(test.app.log.actions()).toEqual([
     { type: 'FOO', bar: true },
     { type: 'logux/undo', reason: 'denied', id: '1 10:uuid 0' },
