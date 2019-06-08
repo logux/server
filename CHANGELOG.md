@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.3.4
+* Update dependencies.
+
 ## 0.3.3
 * Improve popular error messages during server launch (by Igor Strebezhev).
 
