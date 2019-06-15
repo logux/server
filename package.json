@@ -29,6 +29,7 @@
     "@logux/core": "^0.3.1",
     "bunyan": "^1.8.12",
     "chalk": "^2.4.2",
+    "dotenv": "^8.0.0",
     "nanoevents": "^2.0.0",
     "nanoid": "^2.0.3",
     "semver": "^6.1.1",

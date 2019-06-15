@@ -1,3 +1,4 @@
+let dotenv = require('dotenv')
 let yargs = require('yargs')
 
 let createReporter = require('./create-reporter')
@@ -176,6 +177,7 @@ class Server extends BaseServer {
    * }))
    */
   static loadOptions (process, defaults = { }) {
+    dotenv.config()
     let argv = yargs.parse(process.argv)
     let opts = { }
 

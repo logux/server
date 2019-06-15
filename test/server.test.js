@@ -1,5 +1,5 @@
+let { join } = require('path')
 let spawn = require('cross-spawn')
-let path = require('path')
 
 let Server = require('../server')
 
@@ -9,7 +9,7 @@ let started
 
 function start (name, args) {
   return new Promise(resolve => {
-    started = spawn(path.join(__dirname, '/servers/', name), args)
+    started = spawn(join(__dirname, '/servers/', name), args)
     let running = false
     function callback () {
       if (!running) {
@@ -22,10 +22,10 @@ function start (name, args) {
   })
 }
 
-function check (name, args, kill) {
+function check (name, args, opts, kill) {
   return new Promise(resolve => {
     let out = ''
-    let server = spawn(path.join(__dirname, '/servers/', name), args)
+    let server = spawn(join(__dirname, '/servers/', name), args, opts)
     server.stdout.on('data', chank => {
       out += chank
     })
@@ -162,7 +162,7 @@ it('uses arg, env, options in given priority', () => {
 it('destroys everything on exit', () => checkOut('destroy.js'))
 
 it('writes about unbind', async () => {
-  let result = await check('unbind.js', [], 'kill')
+  let result = await check('unbind.js', [], { }, 'kill')
   expect(result[0]).toMatchSnapshot()
 })
 
@@ -181,6 +181,16 @@ it('uses environment variables for config', () => {
 })
 
 it('uses reporter param', () => checkOut('options.js', ['', '--r', 'json']))
+
+it('uses .env', async () => {
+  let result = await check(
+    'options.js',
+    [],
+    { cwd: join(__dirname, 'fixtures') },
+    'kill'
+  )
+  expect(result[0]).toMatchSnapshot()
+})
 
 it('shows help', () => checkOut('options.js', ['', '--help']))
 
