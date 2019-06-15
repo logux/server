@@ -94,7 +94,7 @@ class Context {
   }
 
   /**
-   * Senc action back to the client.
+   * Send action back to the client.
    *
    * @param {Action} action The action.
    * @param {Meta} [meta]   Action’s meta.

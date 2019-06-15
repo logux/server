@@ -140,7 +140,8 @@
       "WebSocket",
       "wrongChannel",
       "WSS",
-      "js"
+      "js",
+      "sendBack"
     ]
   }
 }
