@@ -182,7 +182,7 @@ it('uses environment variables for config', () => {
 
 it('uses reporter param', () => checkOut('options.js', ['', '--r', 'json']))
 
-it('uses .env', async () => {
+it('uses .env cwd', async () => {
   let result = await check(
     'options.js',
     [],
@@ -191,6 +191,8 @@ it('uses .env', async () => {
   )
   expect(result[0]).toMatchSnapshot()
 })
+
+it('uses .env from root', () => checkOut('root.js'))
 
 it('shows help', () => checkOut('options.js', ['', '--help']))
 

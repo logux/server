@@ -1,3 +1,4 @@
+let { join } = require('path')
 let dotenv = require('dotenv')
 let yargs = require('yargs')
 
@@ -177,7 +178,11 @@ class Server extends BaseServer {
    * }))
    */
   static loadOptions (process, defaults = { }) {
-    dotenv.config()
+    if (defaults.root) {
+      dotenv.config({ path: join(defaults.root, '.env') })
+    } else {
+      dotenv.config()
+    }
     let argv = yargs.parse(process.argv)
     let opts = { }
 
