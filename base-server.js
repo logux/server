@@ -870,7 +870,9 @@ class BaseServer {
       subprotocol = this.clientIds[data.clientId].node.remoteSubprotocol
     }
 
-    return new Context(data.nodeId, data.clientId, data.userId, subprotocol)
+    return new Context(
+      data.nodeId, data.clientId, data.userId, subprotocol, this
+    )
   }
 
   async subscribeAction (action, meta, start) {

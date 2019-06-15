@@ -11,7 +11,7 @@ let semver = require('semver')
  * })
  */
 class Context {
-  constructor (nodeId, clientId, userId, subprotocol) {
+  constructor (nodeId, clientId, userId, subprotocol, server) {
     /**
      * Open structure to save some data between different steps of processing.
      * @type {object}
@@ -66,6 +66,8 @@ class Context {
      */
     this.isServer = userId === 'server'
 
+    this.server = server
+
     /**
      * Action creator application subprotocol version in SemVer format.
      * Use @{link Creator#isSubprotocol} to check it.
@@ -89,6 +91,21 @@ class Context {
    */
   isSubprotocol (range) {
     return semver.satisfies(this.subprotocol, range)
+  }
+
+  /**
+   * Senc action back to the client.
+   *
+   * @param {Action} action The action.
+   * @param {Meta} [meta]   Action’s meta.
+   *
+   * @return {Promise} Promise until action was added to the server log.
+   *
+   * @example
+   * ctx.sendBack({ type: 'login/success', token })
+   */
+  sendBack (action, meta = { }) {
+    return this.server.log.add(action, { clientIds: [this.clientId], ...meta })
   }
 }
 
