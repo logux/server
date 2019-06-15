@@ -57,7 +57,7 @@ function check (name, args, opts, kill) {
 }
 
 async function checkOut (name, args) {
-  let result = await check(name, args, 'kill')
+  let result = await check(name, args, { }, 'kill')
   let out = result[0]
   let exit = result[1]
   if (exit !== 0) {
