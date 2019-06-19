@@ -22,7 +22,7 @@ function isPem (content) {
   if (typeof content === 'object' && content.pem) {
     return true
   } else {
-    return content.toString().trim().indexOf(PEM_PREAMBLE) === 0
+    return content.toString().trim().startsWith(PEM_PREAMBLE)
   }
 }
 

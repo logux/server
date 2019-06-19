@@ -10,8 +10,8 @@ function show (result) {
   Object.keys(result).sort().reverse().forEach(file => {
     let test = file.replace(/\.test\.js\.snap$/, '')
     result[file].split('exports[`')
-      .filter(str => str.indexOf('// ') !== 0)
-      .filter(str => !filter || str.indexOf(filter) !== -1)
+      .filter(str => !str.startsWith('// '))
+      .filter(str => !filter || str.includes(filter))
       .forEach(str => {
         if (str.trim().length === 0) return
         let parts = str.replace(/"\s*`;\s*$/, '').split(/`] = `\s*"?/)

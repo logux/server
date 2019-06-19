@@ -1,7 +1,7 @@
 let { ServerNode } = require('@logux/core')
 
 function has (array, item) {
-  return array && array.indexOf(item) !== -1
+  return array && array.includes(item)
 }
 
 class FilteredNode extends ServerNode {

@@ -147,8 +147,8 @@ function splitByLength (string, max) {
 function prettyStackTrace (c, stack, basepath) {
   return stack.split('\n').slice(1).map(i => {
     let match = i.match(/\s+at ([^(]+) \(([^)]+)\)/)
-    let isSystem = !match || match[2].indexOf(basepath) !== 0
-    let isDependecy = match && match[2].indexOf('node_modules') !== -1
+    let isSystem = !match || !match[2].startsWith(basepath)
+    let isDependecy = match && match[2].includes('node_modules')
     if (isSystem) {
       return c.red(i.replace(/^\s*/, PADDING))
     } else {

@@ -233,7 +233,7 @@ class Server extends BaseServer {
     })
 
     for (let name in options) {
-      if (AVAILABLE_OPTIONS.indexOf(name) === -1) {
+      if (!AVAILABLE_OPTIONS.includes(name)) {
         let error = new Error(
           `Unknown option \`${ name }\` in server constructor`)
         error.logux = true

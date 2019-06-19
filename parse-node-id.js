@@ -1,7 +1,5 @@
 module.exports = function parseNodeId (nodeId) {
-  if (nodeId.indexOf(' ') !== -1) {
-    nodeId = nodeId.split(' ')[1]
-  }
+  if (nodeId.includes(' ')) nodeId = nodeId.split(' ')[1]
   let parts = nodeId.split(':')
   if (parts.length === 1) {
     return { nodeId, userId: undefined, clientId: nodeId }

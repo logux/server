@@ -12,9 +12,7 @@ let stop = false
 function map (action, meta) {
   let filtered = { }
   for (let i in meta) {
-    if (ALLOWED_META.indexOf(i) !== -1) {
-      filtered[i] = meta[i]
-    }
+    if (ALLOWED_META.includes(i)) filtered[i] = meta[i]
   }
   return Promise.resolve([action, filtered])
 }
