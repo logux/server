@@ -470,8 +470,10 @@ class BaseServer {
    *
    * @param {string} name The action’s type.
    * @param {object} callbacks Callbacks for actions with this type.
-   * @param {authorizer} callback.access Check does user can do this action.
-   * @param {processor} [callback.process] Action business logic.
+   * @param {authorizer} callbacks.access Check does user can do this action.
+   * @param {resender} [callbacks.resend] Return object with keys for meta
+   *                                      to resend action to other users.
+   * @param {processor} [callbacks.process] Action business logic.
    *
    * @return {undefined}
    *
@@ -480,6 +482,9 @@ class BaseServer {
    *   access (ctx, action, meta) {
    *     return action.user === ctx.userId
    *   },
+   *   resend (ctx, action) {
+   *     return { channel: `user/${ action.user }` }
+   *   }
    *   process (ctx, action, meta) {
    *     if (isFirstOlder(lastNameChange(action.user), meta)) {
    *       return db.changeUserName({ id: action.user, name: action.name })
@@ -1038,6 +1043,14 @@ module.exports = BaseServer
  * @param {Meta} meta The action metadata.
  * @return {boolean|Promise} `true` or Promise with `true` if client are allowed
  *                           to use this action.
+ */
+
+/**
+ * @callback resender
+ * @param {Context} ctx Information about node, who create this action.
+ * @param {Action} action The action data.
+ * @param {Meta} meta The action metadata.
+ * @return {object|Promise} Object or Promise with object of meta’s keys.
  */
 
 /**

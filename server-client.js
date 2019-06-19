@@ -6,6 +6,8 @@ let forcePromise = require('./force-promise')
 let ALLOWED_META = require('./allowed-meta')
 let parseNodeId = require('./parse-node-id')
 
+const RESEND_META = ['channels', 'users', 'clients', 'nodes']
+
 function reportDetails (client) {
   return {
     connectionId: client.key,
@@ -244,6 +246,24 @@ class ServerClient {
     if (!meta.subprotocol) {
       meta.subprotocol = this.node.remoteSubprotocol
     }
+
+    for (let i of RESEND_META) delete meta[i]
+
+    let type = action.type
+    if (type !== 'logux/subscribe' && type !== 'logux/unsubscribe') {
+      let processor = this.app.types[type]
+      if (!processor) {
+        processor = this.app.otherProcessor
+      }
+      if (processor && processor.resend) {
+        let ctx = this.app.createContext(meta)
+        let keys = await forcePromise(() => processor.resend(ctx, action, meta))
+        for (let i of RESEND_META) {
+          if (keys[i]) meta[i] = keys[i]
+        }
+      }
+    }
+
     return [action, meta]
   }
 
@@ -251,7 +271,9 @@ class ServerClient {
     let ctx = this.app.createContext(meta)
 
     let wrongUser = !this.clientId || this.clientId !== ctx.clientId
-    let wrongMeta = Object.keys(meta).some(i => ALLOWED_META.indexOf(i) === -1)
+    let wrongMeta = Object.keys(meta).some(i => {
+      return !ALLOWED_META.includes(i) && !RESEND_META.includes(i)
+    })
     if (wrongUser || wrongMeta) {
       this.app.denyAction(meta)
       return false

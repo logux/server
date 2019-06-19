@@ -482,10 +482,7 @@ it('checks action meta', async () => {
     {
       id: [2, '10:uuid', 0],
       time: 3,
-      users: ['10'],
-      nodes: ['10:uuid'],
-      clients: ['10:uuid'],
-      channels: ['user:10']
+      subprotocol: '1.0.0'
     }
   ])
   await client.connection.pair.wait('right')
@@ -602,6 +599,44 @@ it('reports about errors in access callback', async () => {
     actionId: '1 10:uuid 0', err
   }])
   expect(throwed).toEqual(err)
+})
+
+it('adds resend keys', async () => {
+  let test = createReporter()
+  test.app.type('FOO', {
+    access: () => true,
+    resend (ctx, action, meta) {
+      expect(ctx.nodeId).toEqual('10:uuid')
+      expect(action.type).toEqual('FOO')
+      expect(meta.id).toEqual('1 10:uuid 0')
+      return {
+        nodes: ['1:client:other'],
+        clients: ['1:client'],
+        channels: ['a']
+      }
+    }
+  })
+
+  test.app.log.generateId()
+  test.app.log.generateId()
+
+  let client = await connectClient(test.app)
+  client.connection.other().send(['sync', 2,
+    { type: 'FOO' },
+    { id: [1, '10:uuid', 0], time: 1, users: ['2'] }
+  ])
+  await client.connection.pair.wait('right')
+
+  expect(test.app.log.actions()).toEqual([
+    { type: 'FOO' },
+    { type: 'logux/processed', id: '1 10:uuid 0' }
+  ])
+  expect(test.names).toEqual(['connect', 'authenticated', 'add', 'add'])
+  expect(test.reports[2][1].action.type).toEqual('FOO')
+  expect(test.reports[2][1].meta.nodes).toEqual(['1:client:other'])
+  expect(test.reports[2][1].meta.clients).toEqual(['1:client'])
+  expect(test.reports[2][1].meta.channels).toEqual(['a'])
+  expect(test.reports[2][1].meta.users).not.toBeDefined()
 })
 
 it('sends old actions by node ID', async () => {

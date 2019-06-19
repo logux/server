@@ -14,8 +14,6 @@
  *   return [action, filtered]
  * }
  */
-const ALLOWED_META = [
-  'id', 'time', 'nodes', 'clients', 'users', 'channels', 'subprotocol'
-]
+const ALLOWED_META = ['id', 'time', 'subprotocol']
 
 module.exports = ALLOWED_META
