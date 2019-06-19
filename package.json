@@ -141,7 +141,9 @@
       "wrongChannel",
       "WSS",
       "js",
-      "sendBack"
+      "sendBack",
+      "resender",
+      "meta’s"
     ]
   }
 }
