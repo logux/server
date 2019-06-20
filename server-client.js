@@ -251,15 +251,21 @@ class ServerClient {
 
     let type = action.type
     if (type !== 'logux/subscribe' && type !== 'logux/unsubscribe') {
-      let processor = this.app.types[type]
-      if (!processor) {
-        processor = this.app.otherProcessor
-      }
+      let processor = this.app.getProcessor(type)
       if (processor && processor.resend) {
         let ctx = this.app.createContext(meta)
-        let keys = await forcePromise(() => processor.resend(ctx, action, meta))
-        for (let i of RESEND_META) {
-          if (keys[i]) meta[i] = keys[i]
+        try {
+          let keys = await forcePromise(() => {
+            return processor.resend(ctx, action, meta)
+          })
+          for (let i of RESEND_META) {
+            if (keys[i]) meta[i] = keys[i]
+          }
+        } catch (e) {
+          this.app.undo(meta, 'error')
+          this.app.emitter.emit('error', e, action, meta)
+          this.app.finally(processor, ctx, action, meta)
+          return [false, false]
         }
       }
     }
@@ -268,6 +274,7 @@ class ServerClient {
   }
 
   async filter (action, meta) {
+    if (!action) return false
     let ctx = this.app.createContext(meta)
 
     let wrongUser = !this.clientId || this.clientId !== ctx.clientId
@@ -284,10 +291,7 @@ class ServerClient {
       return true
     }
 
-    let processor = this.app.types[type]
-    if (!processor) {
-      processor = this.app.otherProcessor
-    }
+    let processor = this.app.getProcessor(type)
     if (!processor) {
       this.app.internalUnkownType(action, meta)
       return false
@@ -307,6 +311,7 @@ class ServerClient {
     } catch (e) {
       this.app.undo(meta, 'error')
       this.app.emitter.emit('error', e, action, meta)
+      this.app.finally(processor, ctx, action, meta)
       return false
     }
   }

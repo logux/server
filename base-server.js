@@ -215,17 +215,15 @@ class BaseServer {
       this.sendAction(action, meta)
 
       if (meta.status === 'waiting') {
-        let type = this.types[action.type]
-        if (!type) {
-          type = this.otherProcessor
-        }
-        if (!type) {
+        let processor = this.getProcessor(action.type)
+        if (!processor) {
           this.internalUnkownType(action, meta)
           return
         }
-        if (type.process) {
-          this.processAction(type, action, meta, start)
+        if (processor.process) {
+          this.processAction(processor, action, meta, start)
         } else {
+          this.finally(processor, this.createContext(meta), action, meta)
           this.markAsProcessed(meta)
         }
       }
@@ -474,6 +472,9 @@ class BaseServer {
    * @param {resender} [callbacks.resend] Return object with keys for meta
    *                                      to resend action to other users.
    * @param {processor} [callbacks.process] Action business logic.
+   * @param {function} [callback.finally] Callback which will be run
+   *                                      on the end of action processing
+   *                                      or on an error.
    *
    * @return {undefined}
    *
@@ -511,7 +512,12 @@ class BaseServer {
    *
    * @param {object} callbacks Callbacks for actions with this type.
    * @param {authorizer} callback.access Check does user can do this action.
+   * @param {resender} [callbacks.resend] Return object with keys for meta
+   *                                      to resend action to other users.
    * @param {processor} [callback.process] Action business logic.
+   * @param {function} [callback.finally] Callback which will be run
+   *                                      on the end of action processing
+   *                                      or on an error.
    *
    * @return {undefined}
    *
@@ -551,6 +557,9 @@ class BaseServer {
    * @param {filterCreator} [callback.filter] Generates custom filter
    *                                          for channel’s actions.
    * @param {initialized} [callbacks.init] Creates actions with initial state.
+   * @param {function} [callback.finally] Callback which will be run
+   *                                      on the end of subscription processing
+   *                                      or on an error.
    *
    * @return {undefined}
    *
@@ -594,6 +603,9 @@ class BaseServer {
    * @param {filterCreator} [callback.filter] Generates custom filter
    *                                          for channel’s actions.
    * @param {initialized} [callbacks.init] Creates actions with initial state.
+   * @param {function} [callback.finally] Callback which will be run
+   *                                      on the end of subscription processing
+   *                                      or on an error.
    *
    * @return {undefined}
    *
@@ -834,13 +846,13 @@ class BaseServer {
     this.debugActionError(meta, `Wrong channel name ${ action.channel }`)
   }
 
-  async processAction (type, action, meta, start) {
+  async processAction (processor, action, meta, start) {
     let ctx = this.createContext(meta)
 
     let latency
     this.processing += 1
     try {
-      await type.process(ctx, action, meta)
+      await processor.process(ctx, action, meta)
       latency = Date.now() - start
       this.reporter('processed', { actionId: meta.id, latency })
       this.markAsProcessed(meta)
@@ -848,6 +860,8 @@ class BaseServer {
       this.log.changeMeta(meta.id, { status: 'error' })
       this.undo(meta, 'error')
       this.emitter.emit('error', e, action, meta)
+    } finally {
+      this.finally(processor, ctx, action, meta)
     }
     if (typeof latency === 'undefined') latency = Date.now() - start
     this.processing -= 1
@@ -901,10 +915,9 @@ class BaseServer {
 
       let subscribed = false
       if (match) {
+        let ctx = this.createContext(meta)
+        ctx.params = match
         try {
-          let ctx = this.createContext(meta)
-          ctx.params = match
-
           let access = await forcePromise(() => i.access(ctx, action, meta))
           if (this.wrongChannels[meta.id]) {
             delete this.wrongChannels[meta.id]
@@ -944,6 +957,8 @@ class BaseServer {
           if (subscribed) {
             this.unsubscribeAction(action, meta)
           }
+        } finally {
+          this.finally(i, ctx, action, meta)
         }
         break
       }
@@ -1022,6 +1037,25 @@ class BaseServer {
   isBruteforce (ip) {
     let attempts = this.authAttempts[ip]
     return attempts && attempts >= 3
+  }
+
+  getProcessor (type) {
+    let processor = this.types[type]
+    if (processor) {
+      return processor
+    } else {
+      return this.otherProcessor
+    }
+  }
+
+  finally (processor, ctx, action, meta) {
+    if (processor && processor.finally) {
+      try {
+        processor.finally(ctx, action, meta)
+      } catch (err) {
+        this.emitter.emit('error', err, action, meta)
+      }
+    }
   }
 }
 

@@ -921,3 +921,65 @@ it('allows to use different node ID only with same client ID', async () => {
 
   expect(test.names).toEqual(['connect', 'authenticated', 'denied', 'add'])
 })
+
+it('has finally callback', async () => {
+  let app = createServer()
+  let calls = []
+  let errors = []
+  app.on('error', e => {
+    errors.push(e.message)
+  })
+  app.type('A', {
+    access: () => true,
+    finally () {
+      calls.push('A')
+    }
+  })
+  app.type('B', {
+    access: () => true,
+    process: () => true,
+    finally () {
+      calls.push('B')
+    }
+  })
+  app.type('C', {
+    resend () {
+      throw new Error('C')
+    },
+    access: () => true,
+    finally () {
+      calls.push('C')
+    }
+  })
+  app.type('D', {
+    access () {
+      throw new Error('D')
+    },
+    finally () {
+      calls.push('D')
+    }
+  })
+  app.type('E', {
+    access: () => true,
+    process () {
+      throw new Error('E')
+    },
+    finally () {
+      calls.push('E')
+      throw new Error('EE')
+    }
+  })
+  let client = await connectClient(app, '10:client:uuid')
+  client.node.connection.other().send([
+    'sync', 2,
+    { type: 'A' }, { id: [1, '10:client:other', 0], time: 1 },
+    { type: 'B' }, { id: [2, '10:client:other', 0], time: 1 },
+    { type: 'C' }, { id: [3, '10:client:other', 0], time: 1 },
+    { type: 'D' }, { id: [4, '10:client:other', 0], time: 1 },
+    { type: 'E' }, { id: [5, '10:client:other', 0], time: 1 }
+  ])
+  await client.node.connection.pair.wait('right')
+
+  expect(calls).toEqual(['C', 'D', 'A', 'E', 'B'])
+  expect(errors).toEqual(['C', 'D', 'E', 'EE'])
+})
