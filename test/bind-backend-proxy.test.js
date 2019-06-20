@@ -206,7 +206,7 @@ it('checks password option', () => {
 })
 
 it('validates HTTP requests', async () => {
-  let prefix = { version: 0, password: '1234' }
+  let prefix = { version: 2, password: '1234' }
   let app = createServer(OPTIONS)
   await app.listen()
   expect(await request({ method: 'GET', string: '' }))
@@ -221,7 +221,7 @@ it('validates HTTP requests', async () => {
     .toEqual(400)
   expect(await send({ version: 100, password: '1234', commands: [] }))
     .toEqual(400)
-  expect(await send({ version: 0, commands: [] }))
+  expect(await send({ version: 2, commands: [] }))
     .toEqual(400)
   expect(await send({ ...prefix, commands: {} }))
     .toEqual(400)
@@ -235,7 +235,7 @@ it('validates HTTP requests', async () => {
     .toEqual(400)
   expect(await send({ ...prefix, commands: [['action', { }, 'f']] }))
     .toEqual(400)
-  expect(await send({ version: 0, password: 'wrong', commands: [] }))
+  expect(await send({ version: 2, password: 'wrong', commands: [] }))
     .toEqual(403)
   expect(app.log.actions()).toEqual([])
 })
@@ -243,7 +243,7 @@ it('validates HTTP requests', async () => {
 it('creates actions', async () => {
   let app = createServer(OPTIONS)
   await app.listen()
-  let code = await send({ version: 0, password: '1234', commands: [ACTION] })
+  let code = await send({ version: 2, password: '1234', commands: [ACTION] })
   expect(code).toEqual(200)
   expect(app.log.actions()).toEqual([{ type: 'A' }])
   expect(sent).toEqual([])
@@ -259,7 +259,7 @@ it('creates and processes actions', async () => {
     }
   })
   await app.listen()
-  let code = await send({ version: 0, password: '1234', commands: [ACTION] })
+  let code = await send({ version: 2, password: '1234', commands: [ACTION] })
 
   expect(code).toEqual(200)
   expect(app.log.actions()).toEqual([{ type: 'A' }])
@@ -318,7 +318,7 @@ it('authenticates user on backend', async () => {
       'POST',
       '/path',
       {
-        version: 1,
+        version: 2,
         password: '1234',
         commands: [
           ['auth', '10', 'good', authId]
@@ -401,7 +401,7 @@ it('notifies about actions and subscriptions', async () => {
       'POST',
       '/path',
       {
-        version: 1,
+        version: 2,
         password: '1234',
         commands: [
           [
@@ -416,7 +416,7 @@ it('notifies about actions and subscriptions', async () => {
       'POST',
       '/path',
       {
-        version: 1,
+        version: 2,
         password: '1234',
         commands: [
           [
@@ -598,21 +598,21 @@ it('reacts on backend error', async () => {
 it('has bruteforce protection', async () => {
   let app = createServer(OPTIONS)
   await app.listen()
-  let code = await send({ version: 0, password: 'wrong', commands: [] })
+  let code = await send({ version: 2, password: 'wrong', commands: [] })
 
   expect(code).toEqual(403)
-  code = await send({ version: 0, password: 'wrong', commands: [] })
+  code = await send({ version: 2, password: 'wrong', commands: [] })
 
   expect(code).toEqual(403)
-  code = await send({ version: 0, password: 'wrong', commands: [] })
+  code = await send({ version: 2, password: 'wrong', commands: [] })
 
   expect(code).toEqual(403)
-  code = await send({ version: 0, password: 'wrong', commands: [] })
+  code = await send({ version: 2, password: 'wrong', commands: [] })
 
   expect(code).toEqual(429)
   await delay(3050)
 
-  code = await send({ version: 0, password: 'wrong', commands: [] })
+  code = await send({ version: 2, password: 'wrong', commands: [] })
 
   expect(code).toEqual(403)
 })
