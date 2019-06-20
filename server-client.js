@@ -6,7 +6,12 @@ let forcePromise = require('./force-promise')
 let ALLOWED_META = require('./allowed-meta')
 let parseNodeId = require('./parse-node-id')
 
-const RESEND_META = ['channels', 'users', 'clients', 'nodes']
+const RESEND_META = [
+  'channel', 'channels',
+  'user', 'users',
+  'client', 'clients',
+  'node', 'nodes'
+]
 
 function reportDetails (client) {
   return {

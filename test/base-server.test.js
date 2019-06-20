@@ -1081,3 +1081,35 @@ it('reports about useless actions', async () => {
     'processed', 'add', 'processed', 'add', 'processed', 'add', 'processed'
   ])
 })
+
+it('has shortcuts for resend arrays', async () => {
+  let test = createReporter()
+  test.app.type('A', {
+    access: () => true,
+    process: () => true
+  })
+  test.app.log.on('preadd', (action, meta) => {
+    meta.reasons.push('test')
+  })
+  await test.app.log.add(
+    { type: 'A' }, { channel: 'a', user: '1', client: '1:1', node: '1:1:1' }
+  )
+  expect(test.app.log.entries()).toEqual([
+    [
+      { type: 'A' },
+      {
+        added: 1,
+        id: '1 server:uuid 0',
+        reasons: ['test'],
+        server: 'server:uuid',
+        status: 'processed',
+        subprotocol: '0.0.0',
+        channels: ['a'],
+        users: ['1'],
+        clients: ['1:1'],
+        nodes: ['1:1:1'],
+        time: 1
+      }
+    ]
+  ])
+})

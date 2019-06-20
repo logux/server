@@ -188,6 +188,24 @@ class BaseServer {
       }
     })
 
+    this.log.on('preadd', (action, meta) => {
+      if (meta.channel) {
+        meta.channels = [meta.channel]
+        delete meta.channel
+      }
+      if (meta.user) {
+        meta.users = [meta.user]
+        delete meta.user
+      }
+      if (meta.client) {
+        meta.clients = [meta.client]
+        delete meta.client
+      }
+      if (meta.node) {
+        meta.nodes = [meta.node]
+        delete meta.node
+      }
+    })
     this.log.on('add', (action, meta) => {
       let start = Date.now()
       this.reporter('add', { action, meta })
