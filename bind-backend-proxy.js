@@ -1,92 +1,77 @@
+let JSONStream = require('JSONStream')
 let nanoid = require('nanoid')
 let https = require('https')
 let http = require('http')
 
 const VERSION = 1
 
-const UNKNOWN_CHANNEL = /^\[\s*\[\s*"unknownChannel"/
-const UNKNOWN_ACTION = /^\[\s*\[\s*"unknownAction"/
-const AUTHENTICATED = /^\[\s*\[\s*"authenticated"/
-const FORBIDDEN = /^\[\s*\[\s*"forbidden"/
-const APPROVED = /^\[\s*\[\s*"approved"/
-const DENIED = /^\[\s*\[\s*"denied"/
-const ERROR = /^\[\s*\[\s*"error"/
-
-function parseAnswer (str) {
-  let json
-  try {
-    json = JSON.parse(str)
-  } catch (e) {
-    return false
+function isResendCorrect (data) {
+  if (!data || typeof data !== 'object') return false
+  for (let i in data) {
+    if (!Array.isArray(data[i])) return false
+    if (data[i].some(j => typeof j !== 'string')) return false
   }
-  let answered = false
-  for (let command of json) {
-    if (!Array.isArray(command)) return false
-    if (typeof command[0] !== 'string') return false
-    if (command[0] === 'processed' || command[0] === 'error') answered = true
-  }
-  if (!answered) return false
-  return json
+  return true
 }
 
-function send (backend, command, chulkCallback, endCallback) {
+function send (backend, command, events) {
   let body = JSON.stringify({
     version: VERSION,
     password: backend.password,
     commands: [command]
   })
   let protocol = backend.protocol === 'https:' ? https : http
-  let resolved = false
-  let errored = false
-
-  return new Promise((resolve, reject) => {
-    let req = protocol.request({
-      method: 'POST',
-      host: backend.hostname,
-      port: backend.port,
-      path: backend.pathname + backend.search,
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(body)
-      }
-    }, res => {
-      let received = ''
-      if (res.statusCode < 200 || res.statusCode > 299) {
-        errored = true
-        reject(new Error(`Backend responsed with ${ res.statusCode } code`))
-      } else {
-        res.on('data', part => {
-          received += part
-          if (!resolved) {
-            if (ERROR.test(received)) {
-              errored = true
-              let error = new Error('Backend error during access check')
-              try {
-                let json = JSON.parse(received)
-                error.stack = json[0][1]
-              } catch (e) { }
-              reject(error)
-            } else {
-              let result = chulkCallback(received)
-              if (typeof result !== 'undefined') {
-                resolved = true
-                resolve(result)
+  let req = protocol.request({
+    method: 'POST',
+    host: backend.hostname,
+    port: backend.port,
+    path: backend.pathname + backend.search,
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(body)
+    }
+  }, res => {
+    if (res.statusCode < 200 || res.statusCode > 299) {
+      events.error(new Error(`Backend responsed with ${ res.statusCode } code`))
+    } else {
+      let data = false
+      res
+        .pipe(JSONStream.parse('*'))
+        .on('data', answer => {
+          if (!Array.isArray(answer)) {
+            events.error(new Error('Wrong back-end answer'))
+          } else {
+            let [name, ...args] = answer
+            if (name === 'error') {
+              let err = new Error('Error on back-end server')
+              err.stack = args[0]
+              events.error(err)
+            } else if (events.filter(...args)) {
+              if (!events[name]) {
+                events.error(new Error('Unknown back-end answer'))
+              } else {
+                data = true
+                events[name](...args)
               }
             }
           }
         })
-        res.on('end', () => {
-          if (!errored && resolved) {
-            if (endCallback) endCallback(received)
-          } else if (!errored) {
-            reject(new Error('Backend wrong answer'))
+        .on('error', err => {
+          events.error(err)
+        })
+        .on('end', () => {
+          if (!data) {
+            events.error(new Error('Empty back-end answer'))
+          } else if (events.end) {
+            events.end()
           }
         })
-      }
-    })
-    req.on('error', reject)
-    req.end(body)
+    }
   })
+  req.on('error', err => {
+    events.error(err)
+  })
+  req.end(body)
 }
 
 function bindBackendProxy (app) {
@@ -99,83 +84,148 @@ function bindBackendProxy (app) {
   let backend = new URL(app.options.backend)
   backend.password = app.options.controlPassword
 
+  let resending = { }
+  let accessing = { }
   let processing = { }
 
-  async function access (ctx, action, meta) {
+  function sendAction (action, meta) {
+    let resendResolve
+    if (action.type !== 'logux/subscribe') {
+      resending[meta.id] = new Promise(resolve => {
+        resendResolve = resolve
+      })
+    }
+    let accessResolve, accessReject
+    accessing[meta.id] = new Promise((resolve, reject) => {
+      accessResolve = resolve
+      accessReject = reject
+    })
     let processResolve, processReject
     processing[meta.id] = new Promise((resolve, reject) => {
       processResolve = resolve
       processReject = reject
     })
 
+    let checked = false
+    let processed = false
+    let error = false
+    function currentReject (e) {
+      if (resendResolve) resendResolve()
+      if (checked) {
+        processReject(e)
+      } else {
+        accessReject(e)
+      }
+    }
+
     let start = Date.now()
     app.emitter.emit('backendSent', action, meta)
-    try {
-      let result = await send(backend, ['action', action, meta], received => {
-        if (APPROVED.test(received)) {
-          app.emitter.emit('backendGranted', action, meta, Date.now() - start)
-          return true
-        } else if (FORBIDDEN.test(received)) {
-          delete processing[meta.id]
-          return false
-        } else if (UNKNOWN_ACTION.test(received)) {
-          delete processing[meta.id]
-          app.unknownType(action, meta)
-          return false
-        } else if (UNKNOWN_CHANNEL.test(received)) {
-          delete processing[meta.id]
-          app.wrongChannel(action, meta)
-          return false
+    send(backend, ['action', action, meta], {
+      filter (id) {
+        return id === meta.id
+      },
+      resend (id, data) {
+        if (!isResendCorrect(data)) {
+          currentReject(new Error('Wrong resend data'))
+        } else if (checked) {
+          currentReject(new Error('Resend answer was sent after access'))
+        } else if (action.type === 'logux/subscribe') {
+          accessReject(new Error('Resend can be called on subscription'))
         } else {
-          return undefined
+          resendResolve(data)
         }
-      }, response => {
-        if (processing[meta.id]) {
+      },
+      approved () {
+        if (resendResolve) resendResolve()
+        app.emitter.emit('backendGranted', action, meta, Date.now() - start)
+        checked = true
+        accessResolve(true)
+      },
+      forbidden () {
+        if (resendResolve) resendResolve()
+        error = true
+        accessResolve(false)
+      },
+      processed () {
+        if (!checked) {
+          error = true
+          accessReject(new Error('Processed answer was sent before access'))
+        } else {
+          processed = true
           app.emitter.emit('backendProcessed', action, meta, Date.now() - start)
-          let json = parseAnswer(response)
-          if (!json) {
-            processReject(new Error('Backend wrong answer'))
-          } else if (json.some(i => i[0] === 'processed')) {
-            processResolve()
-          } else {
-            let error = new Error('Backend error during processing')
-            let report = json.find(i => i[0] === 'error')
-            if (report) error.stack = report[1]
-            processReject(error)
-          }
+          processResolve()
         }
-      })
-      return result
-    } catch (e) {
-      delete processing[meta.id]
-      throw e
-    }
-  }
-
-  async function process (ctx, action, meta) {
-    try {
-      let res = await processing[meta.id]
-      delete processing[meta.id]
-      return res
-    } catch (e) {
-      delete processing[meta.id]
-      throw e
-    }
-  }
-
-  app.auth((userId, credentials) => {
-    return send(backend, ['auth', userId, credentials, nanoid()], received => {
-      if (AUTHENTICATED.test(received)) {
-        return true
-      } else if (DENIED.test(received)) {
-        return false
-      } else {
-        return undefined
+      },
+      unknownAction () {
+        resendResolve()
+        error = true
+        app.unknownType(action, meta)
+        accessResolve(false)
+      },
+      unknownChannel () {
+        error = true
+        app.wrongChannel(action, meta)
+        accessResolve(false)
+      },
+      error (e) {
+        error = true
+        currentReject(e)
+      },
+      end () {
+        if (!error || !checked || !processed) {
+          currentReject(new Error('Back-end do not send required answers'))
+        }
       }
     })
+  }
+
+  app.auth((userId, credentials) => new Promise((resolve, reject) => {
+    let authId = nanoid()
+    send(backend, ['auth', userId, credentials, authId], {
+      filter (id) {
+        return id === authId
+      },
+      authenticated () {
+        resolve(true)
+      },
+      denied () {
+        resolve(false)
+      },
+      error (e) {
+        reject(e)
+      }
+    })
+  }))
+  app.otherType({
+    resend (ctx, action, meta) {
+      sendAction(action, meta)
+      return resending[meta.id]
+    },
+    access (ctx, action, meta) {
+      return accessing[meta.id]
+    },
+    process (ctx, action, meta) {
+      return processing[meta.id]
+    },
+    finally (ctx, action, meta) {
+      delete resending[meta.id]
+      delete accessing[meta.id]
+      delete processing[meta.id]
+    }
   })
-  app.otherType({ access, process })
-  app.otherChannel({ access, init: process })
+  app.otherChannel({
+    access (ctx, action, meta) {
+      sendAction(action, meta)
+      return accessing[meta.id]
+    },
+    init (ctx, action, meta) {
+      return processing[meta.id]
+    },
+    finally (ctx, action, meta) {
+      delete accessing[meta.id]
+      delete processing[meta.id]
+    }
+  })
 
   app.controls['/'] = {
     isValid (command) {

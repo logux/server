@@ -258,8 +258,10 @@ class ServerClient {
           let keys = await forcePromise(() => {
             return processor.resend(ctx, action, meta)
           })
-          for (let i of RESEND_META) {
-            if (keys[i]) meta[i] = keys[i]
+          if (keys) {
+            for (let i of RESEND_META) {
+              if (keys[i]) meta[i] = keys[i]
+            }
           }
         } catch (e) {
           this.app.undo(meta, 'error')

@@ -610,10 +610,16 @@ it('adds resend keys', async () => {
       expect(action.type).toEqual('FOO')
       expect(meta.id).toEqual('1 10:uuid 0')
       return {
+        users: ['1'],
         nodes: ['1:client:other'],
         clients: ['1:client'],
         channels: ['a']
       }
+    }
+  })
+  test.app.type('EMPTY', {
+    access: () => true,
+    resend () {
     }
   })
 
@@ -622,21 +628,27 @@ it('adds resend keys', async () => {
 
   let client = await connectClient(test.app)
   client.connection.other().send(['sync', 2,
-    { type: 'FOO' },
-    { id: [1, '10:uuid', 0], time: 1, users: ['2'] }
+    { type: 'FOO' }, { id: [1, '10:uuid', 0], time: 1, users: ['2'] },
+    { type: 'EMPTY' }, { id: [2, '10:uuid', 0], time: 2, users: ['2'] }
   ])
   await client.connection.pair.wait('right')
 
   expect(test.app.log.actions()).toEqual([
     { type: 'FOO' },
-    { type: 'logux/processed', id: '1 10:uuid 0' }
+    { type: 'EMPTY' },
+    { type: 'logux/processed', id: '1 10:uuid 0' },
+    { type: 'logux/processed', id: '2 10:uuid 0' }
   ])
-  expect(test.names).toEqual(['connect', 'authenticated', 'add', 'add'])
+  expect(test.names).toEqual([
+    'connect', 'authenticated', 'add', 'add', 'add', 'add'
+  ])
   expect(test.reports[2][1].action.type).toEqual('FOO')
   expect(test.reports[2][1].meta.nodes).toEqual(['1:client:other'])
   expect(test.reports[2][1].meta.clients).toEqual(['1:client'])
   expect(test.reports[2][1].meta.channels).toEqual(['a'])
-  expect(test.reports[2][1].meta.users).not.toBeDefined()
+  expect(test.reports[2][1].meta.users).toEqual(['1'])
+  expect(test.reports[3][1].action.type).toEqual('EMPTY')
+  expect(test.reports[3][1].meta.users).not.toBeDefined()
 })
 
 it('sends old actions by node ID', async () => {
@@ -971,7 +983,7 @@ it('has finally callback', async () => {
   })
   let client = await connectClient(app, '10:client:uuid')
   client.node.connection.other().send([
-    'sync', 2,
+    'sync', 5,
     { type: 'A' }, { id: [1, '10:client:other', 0], time: 1 },
     { type: 'B' }, { id: [2, '10:client:other', 0], time: 1 },
     { type: 'C' }, { id: [3, '10:client:other', 0], time: 1 },

@@ -113,6 +113,10 @@ let httpServer = http.createServer((req, res) => {
         res.write(`[["authent`)
         await delay(100)
         res.end(`icated","${ data.commands[0][3] }"]]`)
+      } else if (data.commands[0][2] === 'error') {
+        res.end(`[["error","stack"]]`)
+      } else if (data.commands[0][2] === 'empty') {
+        res.end('')
       } else {
         res.end(`[["denied","${ data.commands[0][3] }"]]`)
       }
@@ -139,14 +143,35 @@ let httpServer = http.createServer((req, res) => {
       res.end(`[["approved","${ actionId }"],[1]]`)
     } else if (data.commands[0][1].type === 'BROKEN4') {
       res.end(`[["approved","${ actionId }"],["procesed","${ actionId }"]]`)
+    } else if (data.commands[0][1].type === 'BROKEN5') {
+      res.end(':')
+    } else if (data.commands[0][1].type === 'BROKEN6') {
+      res.end(`[["resend","${ actionId }",{}],[["approved","${ actionId }"]]`)
+    } else if (data.commands[0][1].type === 'BROKEN7') {
+      res.end(`[["processed","${ actionId }"]]`)
+    } else if (data.commands[0][1].type === 'BROKEN8') {
+      res.end(`[["approved","${ actionId }"],["resend","${ actionId }",{}]]`)
+    } else if (data.commands[0][1].type === 'BROKEN9') {
+      res.end(`[["resend","${ actionId }",1]]`)
+    } else if (data.commands[0][1].type === 'BROKENA') {
+      res.end(`[["resend","${ actionId }",{"channels":1}]]`)
+    } else if (data.commands[0][1].type === 'BROKENB') {
+      res.end(`[["resend","${ actionId }",{"channels":[1]}]]`)
+    } else if (data.commands[0][1].channel === 'resend') {
+      res.end(`[["resend","${ actionId }",{}],[["approved","${ actionId }"]]`)
     } else if (data.commands[0][1].type === 'EMPTY') {
       res.end()
+    } else if (data.commands[0][1].type === 'RESEND') {
+      res.end(`[
+        ["resend","${ actionId }",{"channels":["A"]}],
+        ["approved","${ actionId }"],
+        ["processed","${ actionId }"]
+      ]`)
     } else {
       res.write(`[["appro`)
       await delay(1)
       res.write(`ved","${ actionId }"]`)
       await delay(100)
-
       res.end(`,["processed","${ actionId }"]]`)
     }
   })
@@ -246,7 +271,7 @@ it('creates and processes actions', async () => {
 it('reports about network errors', async () => {
   let app = createServer({
     controlPassword: '1234',
-    backend: 'https://127.0.0.1:7110/'
+    backend: 'https://localhost:7110/'
   })
   let errors = []
   app.on('error', e => {
@@ -312,6 +337,28 @@ it('checks user credentials', async () => {
   ])
 })
 
+it('process errors during authentication', async () => {
+  let app = createServerWithoutAuth(OPTIONS)
+  let errors = []
+  app.on('error', e => {
+    errors.push(e.message)
+  })
+  let client = await connectClient(app, 'error')
+  expect(client.connection.connected).toBeFalsy()
+  expect(errors).toEqual(['Error on back-end server'])
+})
+
+it('process wrong answer during authentication', async () => {
+  let app = createServerWithoutAuth(OPTIONS)
+  let errors = []
+  app.on('error', e => {
+    errors.push(e.message)
+  })
+  let client = await connectClient(app, 'empty')
+  expect(client.connection.connected).toBeFalsy()
+  expect(errors).toEqual(['Empty back-end answer'])
+})
+
 it('notifies about actions and subscriptions', async () => {
   let app = createServer(OPTIONS)
   app.on('error', e => {
@@ -326,13 +373,13 @@ it('notifies about actions and subscriptions', async () => {
   app.on('backendGranted', (action, meta, latency) => {
     expect(typeof action.type).toEqual('string')
     expect(typeof meta.id).toEqual('string')
-    expect(latency).toBeCloseTo(50, -2)
+    expect(latency > 1 && latency < 500).toBeTruthy()
     events.push('backendGranted')
   })
   app.on('backendProcessed', (action, meta, latency) => {
     expect(typeof action.type).toEqual('string')
     expect(typeof meta.id).toEqual('string')
-    expect(latency).toBeCloseTo(100, -2)
+    expect(latency > 1 && latency < 500).toBeTruthy()
     events.push('backendProcessed')
   })
   let client = await connectClient(app)
@@ -465,32 +512,62 @@ it('reacts on wrong backend answer', async () => {
     errors.push(e.message)
   })
   let client = await connectClient(app)
-  client.connection.other().send(['sync', 2,
-    { type: 'EMPTY' }, { id: [1, '10:uuid', 0], time: 1 },
-    { type: 'BROKEN1' }, { id: [2, '10:uuid', 0], time: 1 },
-    { type: 'BROKEN2' }, { id: [3, '10:uuid', 0], time: 1 },
-    { type: 'BROKEN3' }, { id: [4, '10:uuid', 0], time: 1 },
-    { type: 'BROKEN4' }, { id: [5, '10:uuid', 0], time: 1 }
+  let lastId = 0
+  function nextMeta () {
+    return { id: [++lastId, '10:uuid', 0], time: 1 }
+  }
+  client.connection.other().send(['sync', 8,
+    { type: 'EMPTY' }, nextMeta(),
+    { type: 'BROKEN1' }, nextMeta(),
+    { type: 'BROKEN2' }, nextMeta(),
+    { type: 'BROKEN3' }, nextMeta(),
+    { type: 'BROKEN4' }, nextMeta(),
+    { type: 'BROKEN5' }, nextMeta(),
+    { type: 'BROKEN6' }, nextMeta(),
+    { type: 'BROKEN7' }, nextMeta(),
+    { type: 'BROKEN8' }, nextMeta(),
+    { type: 'BROKEN9' }, nextMeta(),
+    { type: 'BROKENA' }, nextMeta(),
+    { type: 'BROKENB' }, nextMeta(),
+    { type: 'logux/subscribe', channel: 'resend' }, nextMeta()
   ])
   await delay(100)
 
   expect(app.log.actions()).toEqual([
+    { type: 'logux/subscribe', channel: 'resend' },
     { type: 'BROKEN1' },
     { type: 'BROKEN2' },
     { type: 'BROKEN3' },
     { type: 'BROKEN4' },
+    { type: 'BROKEN8' },
     { type: 'logux/undo', reason: 'error', id: '1 10:uuid 0' },
     { type: 'logux/undo', reason: 'error', id: '2 10:uuid 0' },
     { type: 'logux/undo', reason: 'error', id: '3 10:uuid 0' },
     { type: 'logux/undo', reason: 'error', id: '4 10:uuid 0' },
-    { type: 'logux/undo', reason: 'error', id: '5 10:uuid 0' }
+    { type: 'logux/undo', reason: 'error', id: '5 10:uuid 0' },
+    { type: 'logux/undo', reason: 'error', id: '6 10:uuid 0' },
+    { type: 'logux/undo', reason: 'error', id: '7 10:uuid 0' },
+    { type: 'logux/undo', reason: 'error', id: '8 10:uuid 0' },
+    { type: 'logux/undo', reason: 'error', id: '9 10:uuid 0' },
+    { type: 'logux/undo', reason: 'error', id: '10 10:uuid 0' },
+    { type: 'logux/undo', reason: 'error', id: '11 10:uuid 0' },
+    { type: 'logux/undo', reason: 'error', id: '12 10:uuid 0' },
+    { type: 'logux/undo', reason: 'error', id: '13 10:uuid 0' }
   ])
   expect(errors).toEqual([
-    'Backend wrong answer',
-    'Backend wrong answer',
-    'Backend wrong answer',
-    'Backend wrong answer',
-    'Backend wrong answer'
+    'Empty back-end answer',
+    'Back-end do not send required answers',
+    'Wrong back-end answer',
+    'Back-end do not send required answers',
+    'Unknown back-end answer',
+    'Unexpected COLON(":") in state VALUE',
+    'Back-end do not send required answers',
+    'Processed answer was sent before access',
+    'Resend answer was sent after access',
+    'Wrong resend data',
+    'Wrong resend data',
+    'Wrong resend data',
+    'Resend can be called on subscription'
   ])
 })
 
@@ -514,7 +591,7 @@ it('reacts on backend error', async () => {
     { type: 'logux/undo', reason: 'error', id: '2 10:uuid 0' }
   ])
   expect(errors).toEqual([
-    'Backend error during access check', 'Backend error during processing'
+    'Error on back-end server', 'Error on back-end server'
   ])
 })
 
@@ -538,4 +615,21 @@ it('has bruteforce protection', async () => {
   code = await send({ version: 0, password: 'wrong', commands: [] })
 
   expect(code).toEqual(403)
+})
+
+it('sets meta to resend', async () => {
+  let app = createServer(OPTIONS)
+  app.on('error', e => {
+    throw e
+  })
+  let client = await connectClient(app)
+  client.connection.other().send(['sync', 2,
+    { type: 'RESEND' }, { id: [1, '10:uuid', 0], time: 1 }
+  ])
+  await delay(50)
+  expect(app.log.actions()).toEqual([
+    { type: 'RESEND' },
+    { type: 'logux/processed', id: '1 10:uuid 0' }
+  ])
+  expect(app.log.entries()[0][1].channels).toEqual(['A'])
 })
