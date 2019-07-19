@@ -60,18 +60,18 @@ async function checkOut (name, args) {
   let result = await check(name, args, { }, 'kill')
   let out = result[0]
   let exit = result[1]
+  expect(out).toMatchSnapshot()
   if (exit !== 0) {
     throw new Error(`Fall with:\n${ out }`)
   }
-  expect(out).toMatchSnapshot()
 }
 
 async function checkError (name, args) {
   let result = await check(name, args)
   let out = result[0]
   let exit = result[1]
-  expect(exit).toEqual(1)
   expect(out).toMatchSnapshot()
+  expect(exit).toEqual(1)
 }
 
 afterEach(() => {
