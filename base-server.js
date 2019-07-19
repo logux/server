@@ -593,10 +593,7 @@ class BaseServer {
    *   }
    *   async init (ctx, action, meta) {
    *     const user = await db.loadUser(ctx.params.id)
-   *     server.log.add(
-   *       { type: 'USER_NAME', name: user.name },
-   *       { clients: [ctx.clientId] })
-   *     )
+   *     ctx.sendBack({ type: 'USER_NAME', name: user.name })
    *   }
    * })
    */
