@@ -34,6 +34,7 @@ function check (name, args, opts, kill) {
     })
     server.on('close', exit => {
       let fixed = out
+        .replace(/[^\n]+DeprecationWarning[^\n]+\n/gm, '')
         .replace(DATE, '1970-01-01 00:00:00')
         .replace(/"time":"[^"]+"/g, '"time":"1970-01-01T00:00:00.000Z"')
         .replace(/PID:(\s+)\d+/, 'PID:$121384')
