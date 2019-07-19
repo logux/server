@@ -914,7 +914,7 @@ it('subscribes clients', async () => {
     type: 'logux/processed', id: '3 10:a:uuid 0'
   })
   expect(test.app.subscribers).toEqual({
-    'posts': {
+    posts: {
       '10:a:uuid': filter
     }
   })

@@ -259,10 +259,10 @@ class Server extends BaseServer {
 
   async listen (...args) {
     try {
-      return await BaseServer.prototype.listen.apply(this, args)
+      return BaseServer.prototype.listen.apply(this, args)
     } catch (err) {
       this.reporter('error', { err })
-      process.exit(1)
+      return process.exit(1)
     }
   }
 }

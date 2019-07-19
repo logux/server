@@ -8,6 +8,7 @@ class MemoryStream {
   constructor () {
     this.string = ''
   }
+
   write (chunk) {
     this.string += chunk
   }

@@ -301,7 +301,7 @@ it('authenticates user', async () => {
   expect(client.node.authenticated).toBeTruthy()
   expect(test.app.nodeIds).toEqual({ 'a:b:uuid': client })
   expect(test.app.clientIds).toEqual({ 'a:b': client })
-  expect(test.app.userIds).toEqual({ 'a': [client] })
+  expect(test.app.userIds).toEqual({ a: [client] })
   expect(test.names).toEqual(['connect', 'authenticated'])
   expect(test.reports[1]).toEqual(['authenticated', {
     connectionId: '1', nodeId: 'a:b:uuid', subprotocol: '0.0.0'
