@@ -105,7 +105,7 @@ class Context {
    * ctx.sendBack({ type: 'login/success', token })
    */
   sendBack (action, meta = { }) {
-    return this.server.log.add(action, { clientIds: [this.clientId], ...meta })
+    return this.server.log.add(action, { clients: [this.clientId], ...meta })
   }
 }
 

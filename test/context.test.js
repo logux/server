@@ -43,9 +43,9 @@ it('sends action back', () => {
     }
   })
   expect(ctx.sendBack({ type: 'A' })).toEqual(1)
-  ctx.sendBack({ type: 'B' }, { reasons: ['1'], clientIds: [] })
+  ctx.sendBack({ type: 'B' }, { reasons: ['1'], clients: [] })
   expect(entries).toEqual([
-    [{ type: 'A' }, { clientIds: ['10:uuid'] }],
-    [{ type: 'B' }, { reasons: ['1'], clientIds: [] }]
+    [{ type: 'A' }, { clients: ['10:uuid'] }],
+    [{ type: 'B' }, { reasons: ['1'], clients: [] }]
   ])
 })
