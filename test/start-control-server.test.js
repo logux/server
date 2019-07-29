@@ -44,6 +44,15 @@ function request (method, path) {
   })
 }
 
+async function requestError (method, path) {
+  try {
+    await request(method, path)
+    return false
+  } catch (e) {
+    return e
+  }
+}
+
 let app
 
 afterEach(async () => {
@@ -62,23 +71,17 @@ it('has health check', async () => {
 it('expects GET for health check', async () => {
   app = createServer()
   await app.listen()
-  try {
-    await request('POST', '/status')
-  } catch (err) {
-    expect(err.statusCode).toEqual(405)
-    expect(err.message).toEqual('Wrong method')
-  }
+  let err = await requestError('POST', '/status')
+  expect(err.statusCode).toEqual(405)
+  expect(err.message).toEqual('Wrong method')
 })
 
 it('responses 404', async () => {
   app = createServer()
   await app.listen()
-  try {
-    await request('GET', '/unknown')
-  } catch (err) {
-    expect(err.statusCode).toEqual(404)
-    expect(err.message).toEqual('Wrong path')
-  }
+  let err = await requestError('GET', '/unknown')
+  expect(err.statusCode).toEqual(404)
+  expect(err.message).toEqual('Wrong path')
 })
 
 it('checks password', async () => {
@@ -86,16 +89,14 @@ it('checks password', async () => {
   app.controls['/test'] = {
     request: () => ({ body: 'done' })
   }
-  try {
-    await app.listen()
-    let response = await request('GET', '/test%3Fsecret')
+  await app.listen()
 
-    expect(response.body).toContain('done')
-    await request('GET', '/test?wrong')
-  } catch (error) {
-    expect(error.statusCode).toEqual(403)
-    expect(error.message).toEqual('Wrong password')
-  }
+  let response = await request('GET', '/test%3Fsecret')
+  expect(response.body).toContain('done')
+
+  let err = await requestError('GET', '/test?wrong')
+  expect(err.statusCode).toEqual(403)
+  expect(err.message).toEqual('Wrong password')
 })
 
 it('supports wrong URL encoding', async () => {
@@ -114,13 +115,10 @@ it('shows error on missed password', async () => {
   app.controls['/test'] = {
     request: () => ({ body: 'done' })
   }
-  try {
-    await app.listen()
-    await request('GET', '/test?secret')
-  } catch (error) {
-    expect(error.statusCode).toEqual(403)
-    expect(error.message).toContain('controlPassword')
-  }
+  await app.listen()
+  let err = await requestError('GET', '/test?secret')
+  expect(err.statusCode).toEqual(403)
+  expect(err.message).toContain('controlPassword')
 })
 
 it('passes headers', async () => {
@@ -145,31 +143,21 @@ it('has bruteforce protection', async () => {
     request: () => ({ body: 'done' })
   }
   await app.listen()
-  try {
-    await request('GET', '/test?wrong')
-  } catch (error) {
-    expect(error.statusCode).toEqual(403)
-  }
 
-  try {
-    await request('GET', '/test?wrong')
-  } catch (error) {
-    expect(error.statusCode).toEqual(403)
-  }
-  try {
-    await request('GET', '/test?wrong')
-  } catch (error) {
-    expect(error.statusCode).toEqual(403)
-  }
-  try {
-    await request('GET', '/test?wrong')
-  } catch (error) {
-    expect(error.statusCode).toEqual(429)
-  }
+  let err1 = await requestError('GET', '/test?wrong')
+  expect(err1.statusCode).toEqual(403)
+
+  let err2 = await requestError('GET', '/test?wrong')
+  expect(err2.statusCode).toEqual(403)
+
+  let err3 = await requestError('GET', '/test?wrong')
+  expect(err3.statusCode).toEqual(403)
+
+  let err4 = await requestError('GET', '/test?wrong')
+  expect(err4.statusCode).toEqual(429)
+
   await delay(3050)
-  try {
-    await request('GET', '/test?wrong')
-  } catch (error) {
-    expect(error.statusCode).toEqual(403)
-  }
+
+  let err5 = await requestError('GET', '/test?wrong')
+  expect(err5.statusCode).toEqual(403)
 })
