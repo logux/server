@@ -612,7 +612,7 @@ it('reports about error during action processing', async () => {
   })
 })
 
-it('undos actions on client', async () => {
+it('undoes actions on client', async () => {
   app = createServer()
   app.undo({
     id: '1 1:client:uuid 0',

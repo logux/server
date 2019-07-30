@@ -663,17 +663,17 @@ class BaseServer {
    * Undo action from client.
    *
    * @param {Meta} meta The action’s metadata.
-   * @param {string} [reason] Optional code for reason.
+   * @param {string} [reason='error'] Optional code for reason.
    * @param {object} [extra] Extra fields to `logux/undo` action.
    *
-   * @return {undefined}
+   * @return {Promise} When action was saved to the log.
    *
    * @example
    * if (couldNotFixConflict(action, meta)) {
    *   server.undo(meta)
    * }
    */
-  undo (meta, reason, extra = { }) {
+  undo (meta, reason = 'error', extra = { }) {
     let undoMeta = { status: 'processed' }
 
     if (meta.users) undoMeta.users = meta.users.slice(0)
@@ -685,7 +685,7 @@ class BaseServer {
     if (meta.clients) undoMeta.clients = undoMeta.clients.concat(meta.clients)
 
     let action = { ...extra, type: 'logux/undo', id: meta.id, reason }
-    this.log.add(action, undoMeta)
+    return this.log.add(action, undoMeta)
   }
 
   /**

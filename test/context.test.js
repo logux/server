@@ -1,9 +1,9 @@
 let parseNodeId = require('../parse-node-id')
 let Context = require('../context')
 
-function createContext (nodeId, subprotocol, server) {
-  let data = parseNodeId(nodeId)
-  return new Context(nodeId, data.clientId, data.userId, subprotocol, server)
+function createContext (nodeId, subprotocol, server, meta) {
+  let { clientId, userId } = parseNodeId(nodeId)
+  return new Context(nodeId, clientId, userId, subprotocol, server, meta)
 }
 
 it('has open data', () => {
@@ -36,8 +36,8 @@ it('sends action back', () => {
   let entries = []
   let ctx = createContext('10:uuid', '2.4.0', {
     log: {
-      add (action, meta) {
-        entries.push([action, meta])
+      add (...args) {
+        entries.push(args)
         return 1
       }
     }

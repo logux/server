@@ -66,14 +66,14 @@ class Context {
      */
     this.isServer = userId === 'server'
 
-    this.server = server
-
     /**
      * Action creator application subprotocol version in SemVer format.
      * Use @{link Creator#isSubprotocol} to check it.
      * @type {string|undefined}
      */
     this.subprotocol = subprotocol
+
+    this.server = server
   }
 
   /**
