@@ -58,7 +58,7 @@ function createServerWithoutAuth (options) {
 
   let server = new BaseServer(options)
   server.nodeId = 'server:uuid'
-  server.log.on('preadd', (action, meta) => {
+  server.on('preadd', (action, meta) => {
     meta.reasons.push('test')
   })
 

@@ -170,7 +170,7 @@ class BaseServer {
      */
     this.log = log
 
-    this.log.on('preadd', (action, meta) => {
+    this.on('preadd', (action, meta) => {
       let isLogux = action.type.slice(0, 6) === 'logux/'
       if (!meta.server) {
         meta.server = this.nodeId
@@ -186,9 +186,6 @@ class BaseServer {
           meta.status = 'processed'
         }
       }
-    })
-
-    this.log.on('preadd', (action, meta) => {
       if (meta.channel) {
         meta.channels = [meta.channel]
         delete meta.channel
@@ -206,7 +203,7 @@ class BaseServer {
         delete meta.node
       }
     })
-    this.log.on('add', (action, meta) => {
+    this.on('add', (action, meta) => {
       let start = Date.now()
       this.reporter('add', { action, meta })
 
@@ -246,7 +243,7 @@ class BaseServer {
         }
       }
     })
-    this.log.on('clean', (action, meta) => {
+    this.on('clean', (action, meta) => {
       this.reporter('clean', { actionId: meta.id })
     })
 
@@ -441,16 +438,21 @@ class BaseServer {
    * Subscribe for synchronization events. It implements nanoevents API.
    * Supported events:
    *
-   * * `error`: server error.
+   * * `error`: server error during action processing.
+   * * `fatal`: server error during loading.
    * * `clientError`: wrong client behaviour.
    * * `connected`: new client was connected.
    * * `disconnected`: client was disconnected.
+   * * `preadd`: action is going to be added to the log.
+   *   The best place to set `reasons`.
+   * * `add`: action was added to the log.
+   * * `clean`: action was cleaned from the log.
    * * `processed`: action processing was finished.
    * * `subscribed`: channel initial data was loaded.
    *
    * @param {
-   *   "error"|"clientError"|"connected"|"processed"|"disconnected"|
-   *   "subscribing"|"subscribed"|"unsubscribed"
+   *   "error"|"clientError"|"connected"|"processed"|"disconnected"|"fatal"|
+   *   "subscribing"|"subscribed"|"unsubscribed"|"preadd"|"add"|"clean"
    * } event The event name.
    * @param {listener} listener The listener function.
    *
@@ -462,7 +464,11 @@ class BaseServer {
    * })
    */
   on (event, listener) {
-    return this.emitter.on(event, listener)
+    if (event === 'preadd' || event === 'add' || event === 'clean') {
+      return this.log.emitter.on(event, listener)
+    } else {
+      return this.emitter.on(event, listener)
+    }
   }
 
   /**
@@ -714,7 +720,7 @@ class BaseServer {
    * @return {undefined}
    *
    * @example
-   * server.log.on('add', (action, meta) => {
+   * server.on('add', (action, meta) => {
    *   if (meta.server === server.nodeId) {
    *     sendToOtherServers(action, meta)
    *   }

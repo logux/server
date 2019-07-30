@@ -400,7 +400,7 @@ it('marks actions with own node ID', async () => {
   app.type('A', { access: () => true })
 
   let servers = []
-  app.log.on('add', (action, meta) => {
+  app.on('add', (action, meta) => {
     servers.push(meta.server)
   })
 
@@ -415,7 +415,7 @@ it('marks actions with waiting status', async () => {
   app.channel('a', { access: () => true })
 
   let statuses = []
-  app.log.on('add', (action, meta) => {
+  app.on('add', (action, meta) => {
     statuses.push(meta.status)
   })
 
@@ -995,7 +995,7 @@ it('loads initial actions during subscription', async () => {
   test.app.nodeIds['10:uuid'] = client
   test.app.clientIds['10:uuid'] = client
 
-  test.app.log.on('preadd', (action, meta) => {
+  test.app.on('preadd', (action, meta) => {
     meta.reasons.push('test')
   })
 
@@ -1065,7 +1065,7 @@ it('reports about useless actions', async () => {
     process: () => true
   })
   test.app.channel('a', { access: () => true })
-  test.app.log.on('preadd', (action, meta) => {
+  test.app.on('preadd', (action, meta) => {
     meta.reasons.push('test')
   })
   await test.app.log.add({ type: 'unknown' }, { status: 'processed' })
@@ -1088,7 +1088,7 @@ it('has shortcuts for resend arrays', async () => {
     access: () => true,
     process: () => true
   })
-  test.app.log.on('preadd', (action, meta) => {
+  test.app.on('preadd', (action, meta) => {
     meta.reasons.push('test')
   })
   await test.app.log.add(
