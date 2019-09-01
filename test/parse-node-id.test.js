@@ -36,7 +36,7 @@ it('parses node ID with false user', () => {
   expect(parseNodeId('false:client:uuid')).toEqual({
     nodeId: 'false:client:uuid',
     clientId: 'false:client',
-    userId: undefined
+    userId: false
   })
 })
 
