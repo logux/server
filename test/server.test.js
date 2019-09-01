@@ -139,10 +139,9 @@ it('uses combined options', () => {
 })
 
 it('uses arg, env, options in given priority', () => {
-  let options1 = Server.loadOptions({
-    argv: ['', '--port', '31337'], env: { LOGUX_PORT: 21337 }
-  }, {
-    port: 11337 }
+  let options1 = Server.loadOptions(
+    { argv: ['', '--port', '31337'], env: { LOGUX_PORT: 21337 } },
+    { port: 11337 }
   )
   let options2 = Server.loadOptions({
     argv: [], env: { LOGUX_PORT: 21337 }

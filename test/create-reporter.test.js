@@ -56,10 +56,10 @@ function createError (name, message) {
   err.name = name
   err.stack =
     `${ name }: ${ message }\n` +
-    `    at Object.<anonymous> (/dev/app/index.js:28:13)\n` +
-    `    at Module._compile (module.js:573:32)\n` +
-    `    at at runTest (/dev/app/node_modules/jest/index.js:50:10)\n` +
-    `    at process._tickCallback (internal/process/next_tick.js:103:7)`
+    '    at Object.<anonymous> (/dev/app/index.js:28:13)\n' +
+    '    at Module._compile (module.js:573:32)\n' +
+    '    at at runTest (/dev/app/node_modules/jest/index.js:50:10)\n' +
+    '    at process._tickCallback (internal/process/next_tick.js:103:7)'
   return err
 }
 

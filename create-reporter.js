@@ -32,14 +32,14 @@ const ERROR_CODES = {
     let wayToFix = {
       development: 'In dev mode it can be done with sudo:\n' +
                    '$ sudo npm start',
-      production: `$ su - \`<username>\`\n` +
+      production: '$ su - `<username>`\n' +
                   `$ npm start -p ${ e.port }`
     }
 
     return {
       msg: `You are not allowed to run server on port \`${ e.port }\``,
-      note: `Non-privileged users can't start a listening socket on ports ` +
-            `below 1024. Try to change user or take another port.\n\n` +
+      note: 'Non-privileged users can\'t start a listening socket on ports ' +
+            'below 1024. Try to change user or take another port.\n\n' +
             (wayToFix[environment] || wayToFix.production)
     }
   },

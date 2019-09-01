@@ -563,10 +563,10 @@ class BaseServer {
    */
   otherType (callbacks) {
     if (this.otherProcessor) {
-      throw new Error(`Callbacks for unknown types are already defined`)
+      throw new Error('Callbacks for unknown types are already defined')
     }
     if (!callbacks || !callbacks.access) {
-      throw new Error(`Unknown type must have access callback`)
+      throw new Error('Unknown type must have access callback')
     }
     this.otherProcessor = callbacks
   }
@@ -645,10 +645,10 @@ class BaseServer {
    */
   otherChannel (callbacks) {
     if (!callbacks || !callbacks.access) {
-      throw new Error(`Unknown channel must have access callback`)
+      throw new Error('Unknown channel must have access callback')
     }
     if (this.otherSubscriber) {
-      throw new Error(`Callbacks for unknown channel are already defined`)
+      throw new Error('Callbacks for unknown channel are already defined')
     }
     let channel = Object.assign({ }, callbacks)
     channel.pattern = {

@@ -110,11 +110,11 @@ let httpServer = http.createServer((req, res) => {
     sent.push([req.method, req.url, data])
     if (data.commands[0][0] === 'auth') {
       if (data.commands[0][1] === '10' && data.commands[0][2] === 'good') {
-        res.write(`[["authent`)
+        res.write('[["authent')
         await delay(100)
         res.end(`icated","${ data.commands[0][3] }"]]`)
       } else if (data.commands[0][2] === 'error') {
-        res.end(`[["error","stack"]]`)
+        res.end('[["error","stack"]]')
       } else if (data.commands[0][2] === 'empty') {
         res.end('')
       } else {
@@ -130,11 +130,11 @@ let httpServer = http.createServer((req, res) => {
     } else if (data.commands[0][1].channel === 'unknown') {
       res.end(`[["unknownChannel","${ actionId }"]]`)
     } else if (data.commands[0][1].type === 'AERROR') {
-      res.end(`[["error","stack"]]`)
+      res.end('[["error","stack"]]')
     } else if (data.commands[0][1].type === 'PERROR') {
       res.write(`[["approved","${ actionId }"]`)
       await delay(100)
-      res.end(`,["error","stack"]]`)
+      res.end(',["error","stack"]]')
     } else if (data.commands[0][1].type === 'BROKEN1') {
       res.end(`[["approved","${ actionId }"]`)
     } else if (data.commands[0][1].type === 'BROKEN2') {
@@ -168,7 +168,7 @@ let httpServer = http.createServer((req, res) => {
         ["processed","${ actionId }"]
       ]`)
     } else {
-      res.write(`[["appro`)
+      res.write('[["appro')
       await delay(1)
       res.write(`ved","${ actionId }"]`)
       await delay(100)
