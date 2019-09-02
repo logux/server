@@ -1,6 +1,17 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.5 “Icarus”
+* Add `Context#sendBack()` shortcut.
+* Add `finally` callback to `Server#type()`. and `Server#channel()`.
+* Add `resend` callback to `Server#type()`.
+* Use Backend Protocol 2.
+* Deny any re-send meta keys from clients (like `channels`).
+* Add singular re-send meta keys support (`channel`, `client`, etc).
+* Allow to listen `preadd` and `add` log events in `Server#on()`.
+* Use `error` as default reason in `Server#undo()`.
+* Set boolean `false` user ID on client IDs like `false:client:uuid`.
+
 ## 0.4 “Daedalus”
 * Add `.env` support.
 
