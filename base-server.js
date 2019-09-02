@@ -450,10 +450,7 @@ class BaseServer {
    * * `processed`: action processing was finished.
    * * `subscribed`: channel initial data was loaded.
    *
-   * @param {
-   *   "error"|"clientError"|"connected"|"processed"|"disconnected"|"fatal"|
-   *   "subscribing"|"subscribed"|"unsubscribed"|"preadd"|"add"|"clean"
-   * } event The event name.
+   * @param {string} event The event name.
    * @param {listener} listener The listener function.
    *
    * @return {function} Unbind listener from event.
