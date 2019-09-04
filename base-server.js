@@ -1084,8 +1084,7 @@ module.exports = BaseServer
  * @param {string} userId User ID.
  * @param {any} credentials The client credentials.
  * @param {Client} client Client object.
- * @return {boolean|Promise} `true` or Promise with `true`
- *                           if credentials was correct
+ * @return {boolean|Promise<boolean>} `true` if credentials was correct
  */
 
 /**
@@ -1093,8 +1092,8 @@ module.exports = BaseServer
  * @param {Context} ctx Information about node, who create this action.
  * @param {Action} action The action data.
  * @param {Meta} meta The action metadata.
- * @return {boolean|Promise} `true` or Promise with `true` if client are allowed
- *                           to use this action.
+ * @return {boolean|Promise<boolean>} `true` if client are allowed
+ *                                    to use this action.
  */
 
 /**
@@ -1102,7 +1101,7 @@ module.exports = BaseServer
  * @param {Context} ctx Information about node, who create this action.
  * @param {Action} action The action data.
  * @param {Meta} meta The action metadata.
- * @return {object|Promise} Object or Promise with object of meta’s keys.
+ * @return {object|Promise<object>} Meta’s keys.
  */
 
 /**
@@ -1126,8 +1125,8 @@ module.exports = BaseServer
  * @param {ChannelContext} ctx Information about node, who create this action.
  * @param {Action} action The action data.
  * @param {Meta} meta The action metadata.
- * @return {boolean|Promise} Promise with boolean.
- *                           On `false` subscription will be denied.
+ * @return {boolean|Promise<boolean>} `true` if client are allowed
+ *                                    to subscribe to this channel.
  */
 
 /**
