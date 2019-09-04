@@ -1042,6 +1042,22 @@ class BaseServer {
 module.exports = BaseServer
 
 /**
+ * @typedef {object} ResendMeta
+ * @property {string[]} channels
+ * @property {string} channel
+ * @property {string[]} users
+ * @property {string} user
+ * @property {string[]} clients
+ * @property {string} client
+ * @property {string[]} nodes
+ * @property {string} node
+ */
+
+/**
+* @typedef {ResendMeta|string|string[]} Resend
+*/
+
+/**
  * @callback authenticator
  * @param {string} userId User ID.
  * @param {any} credentials The client credentials.
@@ -1063,7 +1079,8 @@ module.exports = BaseServer
  * @param {Context} ctx Information about node, who create this action.
  * @param {Action} action The action data.
  * @param {Meta} meta The action metadata.
- * @return {object|Promise<object>} Meta’s keys.
+ * @return {Resend|Promise<Resend>} Meta’s keys or channel string
+ *                                  or channels arrays.
  */
 
 /**
