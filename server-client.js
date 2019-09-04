@@ -263,6 +263,11 @@ class ServerClient {
           let keys = await forcePromise(() => {
             return processor.resend(ctx, action, meta)
           })
+          if (typeof keys === 'string') {
+            keys = { channel: keys }
+          } else if (Array.isArray(keys)) {
+            keys = { channels: keys }
+          }
           if (keys) {
             for (let i of RESEND_META) {
               if (keys[i]) meta[i] = keys[i]

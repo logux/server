@@ -651,6 +651,35 @@ it('adds resend keys', async () => {
   expect(test.reports[3][1].meta.users).not.toBeDefined()
 })
 
+it('has shortcut for channels in resend', async () => {
+  let test = createReporter()
+  test.app.type('FOO', {
+    access: () => true,
+    resend () {
+      return 'a'
+    }
+  })
+  test.app.type('BOO', {
+    access: () => true,
+    resend () {
+      return ['b', 'c']
+    }
+  })
+
+  test.app.log.generateId()
+  test.app.log.generateId()
+
+  let client = await connectClient(test.app)
+  client.connection.other().send(['sync', 2,
+    { type: 'FOO' }, { id: [1, '10:uuid', 0], time: 1, users: ['2'] },
+    { type: 'BOO' }, { id: [2, '10:uuid', 0], time: 2, users: ['2'] }
+  ])
+  await client.connection.pair.wait('right')
+
+  expect(test.reports[2][1].meta.channels).toEqual(['a'])
+  expect(test.reports[3][1].meta.channels).toEqual(['b', 'c'])
+})
+
 it('sends old actions by node ID', async () => {
   let app = createServer()
   app.type('A', { access: () => true })
