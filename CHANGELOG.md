@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.5.1
+* Fix JSDoc.
+
 ## 0.5 “Icarus”
 * Add `Context#sendBack()` shortcut.
 * Add `finally` callback to `Server#type()`. and `Server#channel()`.
