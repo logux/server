@@ -16,8 +16,7 @@
     "api": "documentation build *.js -f md -o api.md",
     "spell": "yarn api && yaspeller-ci *.md",
     "clean": "rimraf api.md coverage/",
-    "lint": "eslint-ci *.js test/{**/,}*.js",
-    "test": "jest --forceExit --runInBand --coverage && yarn lint && yarn spell"
+    "test": "jest --forceExit --runInBand --coverage && eslint-ci . && size-limit && yarn spell"
   },
   "author": "Andrey Sitnik <andrey@sitnik.ru>",
   "license": "MIT",
@@ -41,7 +40,8 @@
     "yyyy-mm-dd": "^1.0.2"
   },
   "devDependencies": {
-    "@logux/eslint-config": "^31.0.2",
+    "@logux/eslint-config": "^31.0.1",
+    "@logux/sharec-config": "^0.4.4",
     "clean-publish": "^1.1.2",
     "cross-spawn": "^7.0.0",
     "documentation": "^12.1.1",
@@ -69,7 +69,7 @@
     }
   },
   "lint-staged": {
-    "*.md": "yaspeller-ci",
+    "*.md": "yaspeller",
     "*.js": "eslint"
   },
   "jest": {
@@ -146,5 +146,8 @@
       "resender",
       "meta’s"
     ]
+  },
+  "sharec": {
+    "version": "0.4.4"
   }
 }
