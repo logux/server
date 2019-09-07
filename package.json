@@ -16,7 +16,7 @@
     "api": "documentation build *.js -f md -o api.md",
     "spell": "yarn api && yaspeller-ci *.md",
     "clean": "rimraf api.md coverage/",
-    "test": "jest --forceExit --runInBand --coverage && eslint-ci . && size-limit && yarn spell"
+    "test": "jest --forceExit --runInBand --coverage && eslint-ci . && yarn spell"
   },
   "author": "Andrey Sitnik <andrey@sitnik.ru>",
   "license": "MIT",
