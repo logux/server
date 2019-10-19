@@ -1054,8 +1054,8 @@ module.exports = BaseServer
  */
 
 /**
-* @typedef {ResendMeta|string|string[]} Resend
-*/
+ * @typedef {ResendMeta|string|string[]} Resend
+ */
 
 /**
  * @callback authenticator
