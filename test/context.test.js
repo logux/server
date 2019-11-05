@@ -21,15 +21,15 @@ it('saves data', () => {
 
 it('detects servers', () => {
   let user = createContext('10:uuid', '2.4.0')
-  expect(user.isServer).toBeFalsy()
+  expect(user.isServer).toBe(false)
   let server = createContext('server:uuid', '2.4.0')
-  expect(server.isServer).toBeTruthy()
+  expect(server.isServer).toBe(true)
 })
 
 it('checks subprotocol', () => {
   let ctx = createContext('10:uuid', '2.4.0')
-  expect(ctx.isSubprotocol('^2.0')).toBeTruthy()
-  expect(ctx.isSubprotocol('>2.5')).toBeFalsy()
+  expect(ctx.isSubprotocol('^2.0')).toBe(true)
+  expect(ctx.isSubprotocol('>2.5')).toBe(false)
 })
 
 it('sends action back', () => {

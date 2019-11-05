@@ -202,7 +202,7 @@ afterAll(() => {
 it('checks password option', () => {
   expect(() => {
     createServer({ backend: 'http://example.com' })
-  }).toThrowError(/`controlPassword` option/)
+  }).toThrow(/`controlPassword` option/)
 })
 
 it('validates HTTP requests', async () => {
@@ -310,7 +310,7 @@ it('reports bad HTTP answers', async () => {
 it('authenticates user on backend', async () => {
   let app = createServerWithoutAuth(OPTIONS)
   let client = await connectClient(app, 'good')
-  expect(client.connection.connected).toBeTruthy()
+  expect(client.connection.connected).toBe(true)
   let authId = sent[0][2].commands[0][3]
   expect(typeof authId).toEqual('string')
   expect(sent).toEqual([
@@ -331,7 +331,7 @@ it('authenticates user on backend', async () => {
 it('checks user credentials', async () => {
   let app = createServerWithoutAuth(OPTIONS)
   let client = await connectClient(app, 'bad')
-  expect(client.connection.connected).toBeFalsy()
+  expect(client.connection.connected).toBe(false)
   expect(client.connection.pair.leftSent).toEqual([
     ['error', 'wrong-credentials']
   ])
@@ -344,7 +344,7 @@ it('process errors during authentication', async () => {
     errors.push(e.message)
   })
   let client = await connectClient(app, 'error')
-  expect(client.connection.connected).toBeFalsy()
+  expect(client.connection.connected).toBe(false)
   expect(errors).toEqual(['Error on back-end server'])
 })
 
@@ -355,7 +355,7 @@ it('process wrong answer during authentication', async () => {
     errors.push(e.message)
   })
   let client = await connectClient(app, 'empty')
-  expect(client.connection.connected).toBeFalsy()
+  expect(client.connection.connected).toBe(false)
   expect(errors).toEqual(['Empty back-end answer'])
 })
 
@@ -373,13 +373,13 @@ it('notifies about actions and subscriptions', async () => {
   app.on('backendGranted', (action, meta, latency) => {
     expect(typeof action.type).toEqual('string')
     expect(typeof meta.id).toEqual('string')
-    expect(latency > 1 && latency < 500).toBeTruthy()
+    expect(latency > 1 && latency < 500).toBe(true)
     events.push('backendGranted')
   })
   app.on('backendProcessed', (action, meta, latency) => {
     expect(typeof action.type).toEqual('string')
     expect(typeof meta.id).toEqual('string')
-    expect(latency > 1 && latency < 500).toBeTruthy()
+    expect(latency > 1 && latency < 500).toBe(true)
     events.push('backendProcessed')
   })
   let client = await connectClient(app)

@@ -151,7 +151,7 @@ it('removes itself on destroy', async () => {
   expect(test.app.subscribers).toEqual({
     'user/10': { '10:other': client2 }
   })
-  expect(client1.connection.connected).toBeFalsy()
+  expect(client1.connection.connected).toBe(false)
   expect(test.names).toEqual([
     'connect', 'connect', 'authenticated', 'authenticated', 'disconnect'
   ])
@@ -183,7 +183,7 @@ it('does not report users disconnects on server destroy', async () => {
   await client.connection.connect()
   test.app.destroy()
   expect(test.app.connected).toEqual({ })
-  expect(client.connection.connected).toBeFalsy()
+  expect(client.connection.connected).toBe(false)
   expect(test.names).toEqual(['connect', 'destroy'])
   expect(test.reports[1]).toEqual(['destroy', undefined])
 })
@@ -195,7 +195,7 @@ it('destroys on disconnect', async () => {
   client.connection.other().disconnect()
   await client.connection.pair.wait()
 
-  expect(client.destroy).toBeCalled()
+  expect(client.destroy).toHaveBeenCalledTimes(1)
 })
 
 it('reports on wrong authentication', async () => {
@@ -298,7 +298,7 @@ it('authenticates user', async () => {
   expect(client.userId).toEqual('a')
   expect(client.clientId).toEqual('a:b')
   expect(client.nodeId).toEqual('a:b:uuid')
-  expect(client.node.authenticated).toBeTruthy()
+  expect(client.node.authenticated).toBe(true)
   expect(test.app.nodeIds).toEqual({ 'a:b:uuid': client })
   expect(test.app.clientIds).toEqual({ 'a:b': client })
   expect(test.app.userIds).toEqual({ a: [client] })
@@ -323,7 +323,7 @@ it('supports non-promise authenticator', async () => {
   ])
   await client.connection.pair.wait('right')
 
-  expect(client.node.authenticated).toBeTruthy()
+  expect(client.node.authenticated).toBe(true)
 })
 
 it('authenticates user without user name', async () => {
@@ -376,8 +376,8 @@ it('has method to check client subprotocol', () => {
   let app = createServer()
   let client = createClient(app)
   client.node.remoteSubprotocol = '1.0.1'
-  expect(client.isSubprotocol('>= 1.0.0')).toBeTruthy()
-  expect(client.isSubprotocol('< 1.0.0')).toBeFalsy()
+  expect(client.isSubprotocol('>= 1.0.0')).toBe(true)
+  expect(client.isSubprotocol('< 1.0.0')).toBe(false)
 })
 
 it('sends server credentials in development', async () => {
@@ -763,7 +763,7 @@ it('sends new actions by channel', async () => {
   app.subscribers.bar = {
     '10:uuid': (ctx, action, meta) => {
       expect(meta.id).toContain(' server:x ')
-      expect(ctx.isServer).toBeTruthy()
+      expect(ctx.isServer).toBe(true)
       return !action.secret
     }
   }

@@ -90,13 +90,13 @@ it('generates node ID', () => {
 it('throws on missed subprotocol', () => {
   expect(() => {
     new BaseServer({ })
-  }).toThrowError(/Missed `subprotocol` option/)
+  }).toThrow(/Missed `subprotocol` option/)
 })
 
 it('throws on missed supported subprotocols', () => {
   expect(() => {
     new BaseServer({ subprotocol: '0.0.0' })
-  }).toThrowError(/Missed `supports` option/)
+  }).toThrow(/Missed `supports` option/)
 })
 
 it('sets development environment by default', () => {
@@ -136,8 +136,8 @@ it('uses user root', () => {
 
 it('creates log with default store', () => {
   app = new BaseServer(DEFAULT_OPTIONS)
-  expect(app.log instanceof Log).toBeTruthy()
-  expect(app.log.store instanceof MemoryStore).toBeTruthy()
+  expect(app.log instanceof Log).toBe(true)
+  expect(app.log.store instanceof MemoryStore).toBe(true)
 })
 
 it('creates log with custom store', () => {
@@ -193,13 +193,13 @@ it('uses user port', () => {
 it('throws a error on key without certificate', () => {
   expect(() => {
     app = createServer({ key: readFileSync(KEY) })
-  }).toThrowError(/set `cert` option/)
+  }).toThrow(/set `cert` option/)
 })
 
 it('throws a error on certificate without key', () => {
   expect(() => {
     app = createServer({ cert: readFileSync(CERT) })
-  }).toThrowError(/set `key` option/)
+  }).toThrow(/set `key` option/)
 })
 
 it('uses HTTPS', async () => {
@@ -208,7 +208,7 @@ it('uses HTTPS', async () => {
     key: readFileSync(KEY)
   })
   await app.listen()
-  expect(app.http instanceof https.Server).toBeTruthy()
+  expect(app.http instanceof https.Server).toBe(true)
 })
 
 it('loads keys by absolute path', async () => {
@@ -217,7 +217,7 @@ it('loads keys by absolute path', async () => {
     key: KEY
   })
   await app.listen()
-  expect(app.http instanceof https.Server).toBeTruthy()
+  expect(app.http instanceof https.Server).toBe(true)
 })
 
 it('loads keys by relative path', async () => {
@@ -227,7 +227,7 @@ it('loads keys by relative path', async () => {
     key: 'fixtures/key.pem'
   })
   await app.listen()
-  expect(app.http instanceof https.Server).toBeTruthy()
+  expect(app.http instanceof https.Server).toBe(true)
 })
 
 it('supports object in SSL key', async () => {
@@ -236,7 +236,7 @@ it('supports object in SSL key', async () => {
     key: { pem: readFileSync(KEY) }
   })
   await app.listen()
-  expect(app.http instanceof https.Server).toBeTruthy()
+  expect(app.http instanceof https.Server).toBe(true)
 })
 
 it('reporters on start listening', async () => {
@@ -362,7 +362,7 @@ it('sends debug message to clients on runtimeError', () => {
   error.stack = `${ error.stack.split('\n')[0] }\nfake stacktrace`
 
   app.debugError(error)
-  expect(app.connected[1].connection.send).toBeCalledWith([
+  expect(app.connected[1].connection.send).toHaveBeenCalledWith([
     'debug',
     'error',
     'Error: Test Error\n' +
@@ -375,7 +375,7 @@ it('disconnects client on destroy', () => {
   app = createServer()
   app.connected[1] = { destroy: jest.fn() }
   app.destroy()
-  expect(app.connected[1].destroy).toBeCalled()
+  expect(app.connected[1].destroy).toHaveBeenCalledTimes(1)
 })
 
 it('accepts custom HTTP server', async () => {
@@ -436,14 +436,14 @@ it('does not allow to define type twice', () => {
   app.type('FOO', { access: () => true })
   expect(() => {
     app.type('FOO', { access: () => true })
-  }).toThrowError(/already/)
+  }).toThrow(/already/)
 })
 
 it('requires access callback for type', () => {
   app = createServer()
   expect(() => {
     app.type('FOO')
-  }).toThrowError(/access callback/)
+  }).toThrow(/access callback/)
 })
 
 it('reports about unknown action type', async () => {
@@ -514,7 +514,7 @@ it('processes actions', async () => {
     access: () => true,
     async process (ctx, action, meta) {
       expect(meta.added).toEqual(1)
-      expect(ctx.isServer).toBeTruthy()
+      expect(ctx.isServer).toBe(true)
       await delay(25)
       processed.push(action)
     }
@@ -577,7 +577,7 @@ it('waits for last processing before destroy', async () => {
   })
   await delay(1)
 
-  expect(destroyed).toBeFalsy()
+  expect(destroyed).toBe(false)
   expect(app.processing).toEqual(1)
   await app.log.add({ type: 'FOO' })
 
@@ -585,7 +585,7 @@ it('waits for last processing before destroy', async () => {
   process()
   await delay(1)
 
-  expect(destroyed).toBeTruthy()
+  expect(destroyed).toBe(true)
 })
 
 it('reports about error during action processing', async () => {
@@ -682,11 +682,11 @@ it('checks channel definition', () => {
 
   expect(() => {
     app.channel('foo/:id')
-  }).toThrowError('Channel foo/:id must have access callback')
+  }).toThrow('Channel foo/:id must have access callback')
 
   expect(() => {
     app.channel(/^foo:/, { init: true })
-  }).toThrowError('Channel /^foo:/ must have access callback')
+  }).toThrow('Channel /^foo:/ must have access callback')
 })
 
 it('reports about wrong channel name', async () => {
@@ -729,12 +729,12 @@ it('checks custom channel name subscriber', () => {
 
   expect(() => {
     app.otherChannel()
-  }).toThrowError('Unknown channel must have access callback')
+  }).toThrow('Unknown channel must have access callback')
 
   app.otherChannel({ access: true })
   expect(() => {
     app.otherChannel({ access: true })
-  }).toThrowError('Callbacks for unknown channel are already defined')
+  }).toThrow('Callbacks for unknown channel are already defined')
 })
 
 it('allows to have custom channel name check', async () => {
@@ -1050,12 +1050,12 @@ it('checks callbacks in unknown type handler', () => {
 
   expect(() => {
     app.otherType({ process: () => true })
-  }).toThrowError('Unknown type must have access callback')
+  }).toThrow('Unknown type must have access callback')
 
   app.otherType({ access: () => true })
   expect(() => {
     app.otherType({ access: () => true })
-  }).toThrowError('Callbacks for unknown types are already defined')
+  }).toThrow('Callbacks for unknown types are already defined')
 })
 
 it('reports about useless actions', async () => {
