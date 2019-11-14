@@ -93,52 +93,50 @@ yargs
 /**
  * End-user API to create Logux server.
  *
- * @param {object} options Server options.
- * @param {string} options.subprotocol Server current application
- *                                     subprotocol version in SemVer format.
- * @param {string} options.supports npm’s version requirements for client
- *                                  subprotocol version.
- * @param {string} [options.root=process.cwd()] Application root to load files
- *                                              and show errors.
- * @param {number} [options.timeout=20000] Timeout in milliseconds
- *                                         to disconnect connection.
- * @param {number} [options.ping=10000] Milliseconds since last message to test
- *                                      connection by sending ping.
- * @param {string} [options.backend] URL to PHP, Ruby on Rails,
- *                                   or other backend to process actions
- *                                   and authentication.
- * @param {string} [option.redis] URL to Redis for Logux Server Pro scaling.
- * @param {number} [options.controlHost="127.0.0.1"] Host to bind HTTP server
- *                                                   to control Logux server.
- * @param {number} [options.controlPort=31338] Port to control the server.
- * @param {string} [options.controlPassword] Password to control the server.
- * @param {"human"|"json"|function} [options.reporter="human"]
+ * @param {object} opts Server options.
+ * @param {string} opts.subprotocol Server current application
+ *                                  subprotocol version in SemVer format.
+ * @param {string} opts.supports npm’s version requirements for client
+ *                               subprotocol version.
+ * @param {string} [opts.root=process.cwd()] Application root to load files
+ *                                           and show errors.
+ * @param {number} [opts.timeout=20000] Timeout in milliseconds
+ *                                      to disconnect connection.
+ * @param {number} [opts.ping=10000] Milliseconds since last message to test
+ *                                   connection by sending ping.
+ * @param {string} [opts.backend] URL to PHP, Ruby on Rails, or other backend
+ *                                to process actions and authentication.
+ * @param {string} [opts.redis] URL to Redis for Logux Server Pro scaling.
+ * @param {number} [opts.controlHost="127.0.0.1"] Host to bind HTTP server
+ *                                                to control Logux server.
+ * @param {number} [opts.controlPort=31338] Port to control the server.
+ * @param {string} [opts.controlPassword] Password to control the server.
+ * @param {"human"|"json"|function} [opts.reporter="human"]
  *                                  Report process/errors to CLI in bunyan JSON
  *                                  or in human readable format. It can be also
  *                                  a function to show current server status.
- * @param {Logger} [options.bunyan] Bunyan logger with custom settings.
- * @param {Store} [options.store] Store to save log. Will be
- *                                {@link MemoryStore}, by default.
- * @param {"production"|"development"} [options.env] Development or production
- *                                                   server mode. By default,
- *                                                   it will be taken from
- *                                                   `NODE_ENV` environment
- *                                                   variable. On empty
- *                                                   `NODE_ENV` it will
- *                                                   be `"development"`.
- * @param {http.Server} [options.server] HTTP server to connect WebSocket
- *                                       server to it. Same as in `ws.Server`.
- * @param {number} [options.port=31337] Port to bind server. It will create
- *                                      HTTP server manually to connect
- *                                      WebSocket server to it.
- * @param {string} [options.host="127.0.0.1"] IP-address to bind server.
- * @param {string} [options.key] SSL key or path to it. Path could be relative
- *                               from server root. It is required in production
- *                               mode, because WSS is highly recommended.
- * @param {string} [options.cert] SSL certificate or path to it. Path could
- *                                be relative from server root. It is required
- *                                in production mode, because WSS
- *                                is highly recommended.
+ * @param {Logger} [opts.bunyan] Bunyan logger with custom settings.
+ * @param {Store} [opts.store] Store to save log. Will be
+ *                             {@link MemoryStore}, by default.
+ * @param {"production"|"development"} [opts.env] Development or production
+ *                                                server mode. By default,
+ *                                                it will be taken from
+ *                                                `NODE_ENV` environment
+ *                                                variable. On empty `NODE_ENV`
+ *                                                it will be `"development"`.
+ * @param {http.Server} [opts.server] HTTP server to connect WebSocket
+ *                                    server to it. Same as in `ws.Server`.
+ * @param {number} [opts.port=31337] Port to bind server. It will create
+ *                                   HTTP server manually to connect
+ *                                   WebSocket server to it.
+ * @param {string} [opts.host="127.0.0.1"] IP-address to bind server.
+ * @param {string} [opts.key] SSL key or path to it. Path could be relative
+ *                            from server root. It is required in production
+ *                            mode, because WSS is highly recommended.
+ * @param {string} [opts.cert] SSL certificate or path to it. Path could
+ *                             be relative from server root. It is required
+ *                             in production mode, because WSS
+ *                             is highly recommended.
  *
  * @example
  * const { Server } = require('@logux/server')
@@ -199,12 +197,12 @@ class Server extends BaseServer {
     return opts
   }
 
-  constructor (options) {
-    if (!options) options = { }
+  constructor (opts) {
+    if (!opts) opts = { }
 
-    if (typeof options.reporter !== 'function') {
-      options.reporter = options.reporter || 'human'
-      options.reporter = createReporter(options)
+    if (typeof opts.reporter !== 'function') {
+      opts.reporter = opts.reporter || 'human'
+      opts.reporter = createReporter(opts)
     }
 
     let initialized = false
@@ -212,14 +210,14 @@ class Server extends BaseServer {
       if (initialized) {
         this.emitter.emit('fatal', err)
       } else {
-        options.reporter('error', { err, fatal: true })
+        opts.reporter('error', { err, fatal: true })
         process.exit(1)
       }
     }
     process.on('uncaughtException', onError)
     process.on('unhandledRejection', onError)
 
-    super(options)
+    super(opts)
 
     this.on('fatal', async () => {
       if (initialized) {
@@ -232,7 +230,7 @@ class Server extends BaseServer {
       }
     })
 
-    for (let name in options) {
+    for (let name in opts) {
       if (!AVAILABLE_OPTIONS.includes(name)) {
         let error = new Error(
           `Unknown option \`${ name }\` in server constructor`)

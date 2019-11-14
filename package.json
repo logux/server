@@ -146,7 +146,8 @@
       "sendBack",
       "resender",
       "meta’s",
-      "JSDoc"
+      "JSDoc",
+      "Redis"
     ]
   },
   "sharec": {

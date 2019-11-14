@@ -45,51 +45,49 @@ function optionError (msg) {
  *
  * In most use cases you should use {@link Server}.
  *
- * @param {object} options Server options.
- * @param {string} options.subprotocol Server current application
- *                                     subprotocol version in SemVer format.
- * @param {string} options.supports npm’s version requirements for client
- *                                  subprotocol version.
- * @param {string} [options.root=process.cwd()] Application root to load files
- *                                              and show errors.
- * @param {number} [options.timeout=20000] Timeout in milliseconds
- *                                         to disconnect connection.
- * @param {number} [options.ping=10000] Milliseconds since last message to test
- *                                      connection by sending ping.
- * @param {string} [options.backend] URL to PHP, Ruby on Rails,
- *                                   or other backend to process actions
- *                                   and authentication.
- * @param {string} [option.redis] URL to Redis for Logux Server Pro scaling.
- * @param {number} [options.controlHost="127.0.0.1"] Host to bind HTTP server
- *                                                   to control Logux server.
- * @param {number} [options.controlPort=31338] Port to control the server.
- * @param {string} [options.controlPassword] Password to control the server.
- * @param {Store} [options.store] Store to save log. Will be
- *                                {@link MemoryStore}, by default.
- * @param {TestTime} [options.time] Test time to test server.
- * @param {string} [options.id] Custom random ID to be used in node ID.
- * @param {"production"|"development"} [options.env] Development or production
- *                                                   server mode. By default,
- *                                                   it will be taken from
- *                                                   `NODE_ENV` environment
- *                                                   variable. On empty
- *                                                   `NODE_ENV` it will
- *                                                   be `"development"`.
- * @param {number} [options.pid] Process ID, to display in reporter.
- * @param {http.Server} [options.server] HTTP server to connect WebSocket
- *                                       server to it. Same as in `ws.Server`.
- * @param {number} [options.port=31337] Port to bind server. It will create
- *                                      HTTP server manually to connect
- *                                      WebSocket server to it.
- * @param {string} [options.host="127.0.0.1"] IP-address to bind server.
- * @param {string} [options.key] SSL key or path to it. Path could be relative
- *                               from server root. It is required in production
- *                               mode, because WSS is highly recommended.
- * @param {string} [options.cert] SSL certificate or path to it. Path could
- *                                be relative from server root. It is required
- *                                in production mode, because WSS
- *                                is highly recommended.
- * @param {function} [options.reporter] Function to show current server status.
+ * @param {object} opts Server options.
+ * @param {string} opts.subprotocol Server current application
+ *                                  subprotocol version in SemVer format.
+ * @param {string} opts.supports npm’s version requirements for client
+ *                               subprotocol version.
+ * @param {string} [opts.root=process.cwd()] Application root to load files
+ *                                           and show errors.
+ * @param {number} [opts.timeout=20000] Timeout in milliseconds
+ *                                      to disconnect connection.
+ * @param {number} [opts.ping=10000] Milliseconds since last message to test
+ *                                   connection by sending ping.
+ * @param {string} [opts.backend] URL to PHP, Ruby on Rails, or other backend
+ *                                to process actions and authentication.
+ * @param {string} [opts.redis] URL to Redis for Logux Server Pro scaling.
+ * @param {number} [opts.controlHost="127.0.0.1"] Host to bind HTTP server
+ *                                                to control Logux server.
+ * @param {number} [opts.controlPort=31338] Port to control the server.
+ * @param {string} [opts.controlPassword] Password to control the server.
+ * @param {Store} [opts.store] Store to save log. Will be
+ *                             {@link MemoryStore}, by default.
+ * @param {TestTime} [opts.time] Test time to test server.
+ * @param {string} [opts.id] Custom random ID to be used in node ID.
+ * @param {"production"|"development"} [opts.env] Development or production
+ *                                                server mode. By default,
+ *                                                it will be taken from
+ *                                                `NODE_ENV` environment
+ *                                                variable. On empty `NODE_ENV`
+ *                                                it will be `"development"`.
+ * @param {number} [opts.pid] Process ID, to display in reporter.
+ * @param {http.Server} [opts.server] HTTP server to connect WebSocket
+ *                                    server to it. Same as in `ws.Server`.
+ * @param {number} [opts.port=31337] Port to bind server. It will create
+ *                                   HTTP server manually to connect
+ *                                   WebSocket server to it.
+ * @param {string} [opts.host="127.0.0.1"] IP-address to bind server.
+ * @param {string} [opts.key] SSL key or path to it. Path could be relative
+ *                            from server root. It is required in production
+ *                            mode, because WSS is highly recommended.
+ * @param {string} [opts.cert] SSL certificate or path to it. Path could
+ *                             be relative from server root. It is required
+ *                             in production mode, because WSS
+ *                             is highly recommended.
+ * @param {function} [opts.reporter] Function to show current server status.
  *
  * @example
  * const { BaseServer } = require('@logux/server')
@@ -98,7 +96,7 @@ function optionError (msg) {
  * }
  */
 class BaseServer {
-  constructor (options) {
+  constructor (opts) {
     /**
      * Server options.
      * @type {object}
@@ -106,7 +104,7 @@ class BaseServer {
      * @example
      * console.log('Server options', server.options.subprotocol)
      */
-    this.options = options || { }
+    this.options = opts || { }
 
     this.reporter = this.options.reporter || function () { }
 
