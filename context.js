@@ -130,7 +130,7 @@ module.exports = Context
  *
  * @name params
  * @type {object}
- * @memberof ChannelContext
+ * @memberof ChannelContext#
  *
  * @example
  * server.channel('user/:id', {
