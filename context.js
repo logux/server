@@ -68,7 +68,7 @@ class Context {
 
     /**
      * Action creator application subprotocol version in SemVer format.
-     * Use @{link Creator#isSubprotocol} to check it.
+     * Use {@link Creator#isSubprotocol} to check it.
      * @type {string|undefined}
      */
     this.subprotocol = subprotocol
