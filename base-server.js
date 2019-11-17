@@ -1111,7 +1111,7 @@ module.exports = BaseServer
  */
 
 /**
- * @callback filter
+ * @callback channelFilter
  * @param {Context} ctx Information about node, who create this action.
  * @param {Action} action The action data.
  * @param {Meta} meta The action metadata.
@@ -1132,7 +1132,7 @@ module.exports = BaseServer
  * @param {ChannelContext} ctx Information about node, who create this action.
  * @param {Action} action The action data.
  * @param {Meta} meta The action metadata.
- * @return {filter|undefined} Actions filter.
+ * @return {channelFilter|undefined} Actions filter.
  */
 
 /**
