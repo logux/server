@@ -125,7 +125,7 @@
       "otherChannel",
       "otherType",
       "params",
-      "regexp",
+      "RegExp",
       "remoteAddress",
       "SemVer",
       "sendAction",

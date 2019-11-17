@@ -569,7 +569,7 @@ class BaseServer {
   /**
    * Define the channel.
    *
-   * @param {string|regexp} pattern Pattern or regular expression
+   * @param {string|RegExp} pattern Pattern or regular expression
    *                                for channel name.
    * @param {object} callbacks Callback during subscription process.
    * @param {channelAuthorizer} callbacks.access Checks user access for channel.
