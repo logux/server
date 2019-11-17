@@ -1081,7 +1081,7 @@ module.exports = BaseServer
  * @callback authenticator
  * @param {string} userId User ID.
  * @param {any} credentials The client credentials.
- * @param {Client} client Client object.
+ * @param {ServerClient} client Client object.
  * @return {boolean|Promise<boolean>} `true` if credentials was correct
  */
 
