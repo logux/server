@@ -170,7 +170,7 @@ class HumanFormatter extends stream.Writable {
     if (typeof options.color === 'undefined') {
       this.chalk = chalk
     } else {
-      this.chalk = new chalk.constructor({ enabled: options.color })
+      this.chalk = new chalk.Instance({ level: options.color ? 3 : 0 })
     }
 
     this.basepath = options.basepath || process.cwd()

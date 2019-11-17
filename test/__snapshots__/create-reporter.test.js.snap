@@ -6,7 +6,7 @@ exports[`reports EACCES error 1`] = `
 `;
 
 exports[`reports EACCES error 2`] = `
-"[41m[37m FATAL [39m[49m [1m[31mYou are not allowed to run server on port [33m80[31m[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[41m[37m FATAL [39m[49m [1m[31mYou are not allowed to run server on port [33m80[39m[31m[39m[22m [2mat 1970-01-01 00:00:00[22m
         [90mNon-privileged users can't start a listening socket on ports below 1024.[39m
         [90mTry to change user or take another port.[39m
         
@@ -22,7 +22,7 @@ exports[`reports EADDRINUSE error 1`] = `
 `;
 
 exports[`reports EADDRINUSE error 2`] = `
-"[41m[37m FATAL [39m[49m [1m[31mPort [33m31337[31m already in use[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[41m[37m FATAL [39m[49m [1m[31mPort [33m31337[39m[31m already in use[39m[22m [2mat 1970-01-01 00:00:00[22m
         [90mAnother Logux server or other app already running on this port.[39m
         [90mProbably you haven’t stopped server from other project or previous[39m
         [90mversion of this server was not killed.[39m
@@ -42,7 +42,7 @@ exports[`reports LOGUX_NO_CONTROL_PASSWORD error 1`] = `
 `;
 
 exports[`reports LOGUX_NO_CONTROL_PASSWORD error 2`] = `
-"[41m[37m FATAL [39m[49m [1m[31m[33mbackend[31m requires also [33mcontrolPassword[31m option[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[41m[37m FATAL [39m[49m [1m[31m[33mbackend[39m[31m requires also [33mcontrolPassword[39m[31m option[39m[22m [2mat 1970-01-01 00:00:00[22m
         [90mCall [1mnpx nanoid-cli[22m and set result as [1mcontrolPassword[22m[39m
         [90mor [1mLOGUX_CONTROL_PASSWORD[22m environment variable[39m
 
@@ -55,7 +55,7 @@ exports[`reports Logux error 1`] = `
 `;
 
 exports[`reports Logux error 2`] = `
-"[41m[37m FATAL [39m[49m [1m[31mUnknown option [33msuprotocol[31m in server constructor[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[41m[37m FATAL [39m[49m [1m[31mUnknown option [33msuprotocol[39m[31m in server constructor[39m[22m [2mat 1970-01-01 00:00:00[22m
         [90mMaybe there is a mistake in option name or this version of Logux Server[39m
         [90mdoesn’t support this option[39m
 
@@ -339,7 +339,7 @@ exports[`reports sync error 1`] = `
 `;
 
 exports[`reports sync error 2`] = `
-"[41m[37m ERROR [39m[49m [1m[31mLogux received unknown-message error (Unknown message [33mbad[31m type)[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[41m[37m ERROR [39m[49m [1m[31mLogux received unknown-message error (Unknown message [33mbad[39m[31m type)[39m[22m [2mat 1970-01-01 00:00:00[22m
         Connection ID: [1m670[22m
 
 "

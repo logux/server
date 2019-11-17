@@ -86,7 +86,7 @@ it('creates human reporter', () => {
   let stream = reporter.logger.streams[0].stream
   expect(stream instanceof HumanFormatter).toBe(true)
   expect(stream.basepath).toEqual('/dir/')
-  expect(stream.chalk.enabled).toBe(false)
+  expect(stream.chalk.level).toEqual(0)
 })
 
 it('adds trailing slash to path', () => {
@@ -96,19 +96,19 @@ it('adds trailing slash to path', () => {
 
 it('uses color in development', () => {
   let reporter = createReporter({ env: 'development', reporter: 'human' })
-  expect(reporter.logger.streams[0].stream.chalk.enabled).toBe(true)
+  expect(reporter.logger.streams[0].stream.chalk.level).toEqual(3)
 })
 
 it('uses colors by default', () => {
   delete process.env.NODE_ENV
   let reporter = createReporter({ reporter: 'human' })
-  expect(reporter.logger.streams[0].stream.chalk.enabled).toBe(true)
+  expect(reporter.logger.streams[0].stream.chalk.level).toEqual(3)
 })
 
 it('uses environment variable to detect environment', () => {
   process.env.NODE_ENV = 'production'
   let reporter = createReporter({ reporter: 'human' })
-  expect(reporter.logger.streams[0].stream.chalk.enabled).toBe(false)
+  expect(reporter.logger.streams[0].stream.chalk.level).toEqual(0)
 })
 
 it('reports listen', () => {
