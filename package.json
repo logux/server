@@ -147,7 +147,9 @@
       "resender",
       "meta’s",
       "JSDoc",
-      "Redis"
+      "Redis",
+      "channelFilter",
+      "BunyanLogger"
     ]
   },
   "sharec": {
