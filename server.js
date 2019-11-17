@@ -115,7 +115,7 @@ yargs
  *                                  Report process/errors to CLI in bunyan JSON
  *                                  or in human readable format. It can be also
  *                                  a function to show current server status.
- * @param {Logger} [opts.bunyan] Bunyan logger with custom settings.
+ * @param {BunyanLogger} [opts.bunyan] Bunyan logger with custom settings.
  * @param {Store} [opts.store] Store to save log. Will be
  *                             {@link MemoryStore}, by default.
  * @param {"production"|"development"} [opts.env] Development or production
