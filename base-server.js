@@ -571,7 +571,7 @@ class BaseServer {
    *
    * @param {string|regexp} pattern Pattern or regular expression
    *                                for channel name.
-   * @param {objects} callbacks Callback during subscription process.
+   * @param {object} callbacks Callback during subscription process.
    * @param {channelAuthorizer} callbacks.access Checks user access for channel.
    * @param {filterCreator} [callback.filter] Generates custom filter
    *                                          for channel’s actions.
@@ -614,7 +614,7 @@ class BaseServer {
   /**
    * Set callbacks for unknown channel subscription.
    *
-   * @param {objects} callbacks Callback during subscription process.
+   * @param {object} callbacks Callback during subscription process.
    * @param {channelAuthorizer} callbacks.access Checks user access for channel.
    * @param {filterCreator} [callback.filter] Generates custom filter
    *                                          for channel’s actions.
