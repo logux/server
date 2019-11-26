@@ -20,6 +20,7 @@
   },
   "author": "Andrey Sitnik <andrey@sitnik.ru>",
   "license": "MIT",
+  "homepage": "https://logux.io/",
   "repository": "logux/server",
   "engines": {
     "node": ">=10.0.0"
@@ -149,7 +150,8 @@
       "JSDoc",
       "Redis",
       "channelFilter",
-      "BunyanLogger"
+      "BunyanLogger",
+      "io"
     ]
   },
   "sharec": {
