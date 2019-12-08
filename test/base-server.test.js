@@ -84,7 +84,7 @@ it('generates node ID', () => {
     subprotocol: '0.0.0',
     supports: '0.x'
   })
-  expect(app.nodeId).toMatch(/server:[\w\d-_]+/)
+  expect(app.nodeId).toMatch(/server:\w+/)
 })
 
 it('throws on missed subprotocol', () => {
