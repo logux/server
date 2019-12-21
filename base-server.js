@@ -1,36 +1,17 @@
 let { ServerConnection, MemoryStore, Log } = require('@logux/core')
-let { isAbsolute, join } = require('path')
-let { readFileSync } = require('fs')
 let NanoEvents = require('nanoevents')
 let UrlPattern = require('url-pattern')
 let WebSocket = require('ws')
 let nanoid = require('nanoid')
-let https = require('https')
-let http = require('http')
 
 let startControlServer = require('./start-control-server')
 let bindBackendProxy = require('./bind-backend-proxy')
+let createHttpServer = require('./create-http-server')
 let forcePromise = require('./force-promise')
 let ServerClient = require('./server-client')
 let parseNodeId = require('./parse-node-id')
 let Context = require('./context')
 let pkg = require('./package.json')
-
-const PEM_PREAMBLE = '-----BEGIN'
-
-function isPem (content) {
-  if (typeof content === 'object' && content.pem) {
-    return true
-  } else {
-    return content.toString().trim().startsWith(PEM_PREAMBLE)
-  }
-}
-
-function readFrom (root, file) {
-  file = file.toString()
-  if (!isAbsolute(file)) file = join(root, file)
-  return readFileSync(file)
-}
 
 function optionError (msg) {
   let error = new Error(msg)
@@ -372,31 +353,14 @@ class BaseServer {
     if (!this.authenticator) {
       throw new Error('You must set authentication callback by server.auth()')
     }
-
-    if (this.options.server) {
-      this.ws = new WebSocket.Server({ server: this.options.server })
-    } else {
-      let key = this.options.key
-      let cert = this.options.cert
-      if (key && !isPem(key)) key = readFrom(this.options.root, key)
-      if (cert && !isPem(cert)) cert = readFrom(this.options.root, cert)
-
+    this.http = await createHttpServer(this.options)
+    this.ws = new WebSocket.Server({ server: this.http })
+    if (!this.options.server) {
       await new Promise((resolve, reject) => {
-        if (key && key.pem) {
-          this.http = https.createServer({ key: key.pem, cert })
-        } else if (key) {
-          this.http = https.createServer({ key, cert })
-        } else {
-          this.http = http.createServer()
-        }
-
-        this.ws = new WebSocket.Server({ server: this.http })
         this.ws.on('error', reject)
-
         this.http.listen(this.options.port, this.options.host, resolve)
       })
     }
-
     await startControlServer(this)
 
     this.unbind.push(() => new Promise(resolve => {
