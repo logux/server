@@ -39,6 +39,17 @@ module.exports = async function createHttpServer (opts) {
     } else {
       server = http.createServer()
     }
+
+    server.on('request', async (req, res) => {
+      if (req.method !== 'GET') {
+        res.writeHead(405).end('Wrong method')
+      } else if (req.url !== '/') {
+        res.writeHead(404).end('Not found')
+      } else {
+        res.setHeader('Content-Type', 'text/html')
+        res.end(await readFile(join(__dirname, 'hello.html')))
+      }
+    })
   }
 
   return server

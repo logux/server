@@ -1,9 +1,6 @@
 let { MemoryStore, TestTime, Log } = require('@logux/core')
-let { readFileSync } = require('fs')
 let WebSocket = require('ws')
-let { join } = require('path')
 let delay = require('nanodelay')
-let https = require('https')
 let http = require('http')
 
 let BaseServer = require('../base-server')
@@ -13,8 +10,6 @@ const DEFAULT_OPTIONS = {
   subprotocol: '0.0.0',
   supports: '0.x'
 }
-const CERT = join(__dirname, 'fixtures/cert.pem')
-const KEY = join(__dirname, 'fixtures/key.pem')
 
 let lastPort = 9111
 function createServer (options = { }) {
@@ -192,51 +187,14 @@ it('uses user port', () => {
 
 it('throws a error on key without certificate', () => {
   expect(() => {
-    app = createServer({ key: readFileSync(KEY) })
+    app = createServer({ key: '-----BEGIN' })
   }).toThrow(/set `cert` option/)
 })
 
 it('throws a error on certificate without key', () => {
   expect(() => {
-    app = createServer({ cert: readFileSync(CERT) })
+    app = createServer({ cert: '-----BEGIN' })
   }).toThrow(/set `key` option/)
-})
-
-it('uses HTTPS', async () => {
-  app = createServer({
-    cert: readFileSync(CERT),
-    key: readFileSync(KEY)
-  })
-  await app.listen()
-  expect(app.http instanceof https.Server).toBe(true)
-})
-
-it('loads keys by absolute path', async () => {
-  app = createServer({
-    cert: CERT,
-    key: KEY
-  })
-  await app.listen()
-  expect(app.http instanceof https.Server).toBe(true)
-})
-
-it('loads keys by relative path', async () => {
-  app = createServer({
-    root: __dirname,
-    cert: 'fixtures/cert.pem',
-    key: 'fixtures/key.pem'
-  })
-  await app.listen()
-  expect(app.http instanceof https.Server).toBe(true)
-})
-
-it('supports object in SSL key', async () => {
-  app = createServer({
-    cert: readFileSync(CERT),
-    key: { pem: readFileSync(KEY) }
-  })
-  await app.listen()
-  expect(app.http instanceof https.Server).toBe(true)
 })
 
 it('reporters on start listening', async () => {
