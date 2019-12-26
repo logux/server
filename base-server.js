@@ -911,7 +911,7 @@ class BaseServer {
             return
           }
 
-          let filter = i.filter && i.filter(ctx, action, meta)
+          let filter = i.filter && await i.filter(ctx, action, meta)
 
           this.reporter('subscribed', {
             actionId: meta.id,
