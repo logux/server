@@ -2,7 +2,6 @@ let { LoguxError } = require('@logux/core')
 let semver = require('semver')
 
 let FilteredNode = require('./filtered-node')
-let forcePromise = require('./force-promise')
 let ALLOWED_META = require('./allowed-meta')
 let parseNodeId = require('./parse-node-id')
 
@@ -260,9 +259,7 @@ class ServerClient {
       if (processor && processor.resend) {
         let ctx = this.app.createContext(meta)
         try {
-          let keys = await forcePromise(() => {
-            return processor.resend(ctx, action, meta)
-          })
+          let keys = await processor.resend(ctx, action, meta)
           if (typeof keys === 'string') {
             keys = { channel: keys }
           } else if (Array.isArray(keys)) {
@@ -310,7 +307,7 @@ class ServerClient {
     }
 
     try {
-      let result = await forcePromise(() => processor.access(ctx, action, meta))
+      let result = await processor.access(ctx, action, meta)
       if (this.app.unknownTypes[meta.id]) {
         delete this.app.unknownTypes[meta.id]
         return false

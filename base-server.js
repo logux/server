@@ -7,7 +7,6 @@ let nanoid = require('nanoid')
 let startControlServer = require('./start-control-server')
 let bindBackendProxy = require('./bind-backend-proxy')
 let createHttpServer = require('./create-http-server')
-let forcePromise = require('./force-promise')
 let ServerClient = require('./server-client')
 let parseNodeId = require('./parse-node-id')
 let Context = require('./context')
@@ -339,9 +338,7 @@ class BaseServer {
    * })
    */
   auth (authenticator) {
-    this.authenticator = function (...args) {
-      return forcePromise(() => authenticator(...args))
-    }
+    this.authenticator = authenticator
   }
 
   /**
@@ -898,7 +895,7 @@ class BaseServer {
         let ctx = this.createContext(meta)
         ctx.params = match
         try {
-          let access = await forcePromise(() => i.access(ctx, action, meta))
+          let access = await i.access(ctx, action, meta)
           if (this.wrongChannels[meta.id]) {
             delete this.wrongChannels[meta.id]
             return
@@ -928,7 +925,7 @@ class BaseServer {
           this.subscribers[action.channel][ctx.nodeId] = filter || true
           subscribed = true
 
-          if (i.init) await forcePromise(() => i.init(ctx, action, meta))
+          if (i.init) await i.init(ctx, action, meta)
           this.emitter.emit('subscribed', action, meta, Date.now() - start)
           this.markAsProcessed(meta)
         } catch (e) {

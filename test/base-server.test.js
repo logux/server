@@ -775,9 +775,9 @@ it('reports about errors during channel authorization', async () => {
 
   await async () => {}
 
-  expect(test.names).toEqual(['add', 'clean', 'error', 'add', 'clean'])
-  expect(test.reports[2][1]).toEqual({ actionId: '1 10:uuid 0', err })
-  expect(test.reports[3][1].action).toEqual({
+  expect(test.names).toEqual(['add', 'error', 'add', 'clean', 'clean'])
+  expect(test.reports[1][1]).toEqual({ actionId: '1 10:uuid 0', err })
+  expect(test.reports[2][1].action).toEqual({
     type: 'logux/undo', id: '1 10:uuid 0', reason: 'error'
   })
   expect(test.app.subscribers).toEqual({ })
