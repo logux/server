@@ -96,7 +96,7 @@ server.type('CHANGE_NAME', {
   }
 })
 
-app.listen()
+server.listen()
 ```
 
 [documentation]: https://github.com/logux/logux
