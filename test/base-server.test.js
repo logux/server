@@ -813,9 +813,8 @@ it('reports about errors during channel authorization', async () => {
   await test.app.log.add(
     { type: 'logux/subscribe', channel: 'user/10' }, { id: '1 10:uuid 0' }
   )
-  await async () => {}
-
-  await async () => {}
+  await Promise.resolve()
+  await Promise.resolve()
 
   expect(test.names).toEqual(['add', 'clean', 'error', 'add', 'clean'])
   expect(test.reports[2][1]).toEqual({ actionId: '1 10:uuid 0', err })
