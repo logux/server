@@ -62,6 +62,7 @@
     "jest": "^24.9.0",
     "lint-staged": "^9.5.0",
     "nanodelay": "^0.1.4",
+    "print-snapshots": "^0.1.0",
     "rimraf": "^3.0.0",
     "yaspeller-ci": "^1.0.1"
   },
