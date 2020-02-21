@@ -31,7 +31,7 @@
     "bunyan": "^1.8.12",
     "chalk": "^3.0.0",
     "dotenv": "^8.2.0",
-    "nanoevents": "^3.0.0",
+    "nanoevents": "^4.0.0",
     "nanoid": "^2.1.11",
     "semver": "^7.1.3",
     "strip-ansi": "^6.0.0",
