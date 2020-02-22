@@ -20,6 +20,10 @@ function optionError (msg) {
   throw error
 }
 
+function nodeToClient (nodeId) {
+  return nodeId.split(':').slice(0, 2).join(':')
+}
+
 /**
  * Basic Logux Server API without good UI. Use it only if you need
  * to create some special hacks on top of Logux Server.
@@ -716,16 +720,22 @@ class BaseServer {
     }
 
     if (meta.channels) {
-      let ctx = this.createContext(meta)
+      let clients = new Set()
+      let ctx
       for (let channel of meta.channels) {
         if (this.subscribers[channel]) {
           for (let nodeId in this.subscribers[channel]) {
-            let filter = this.subscribers[channel][nodeId]
-            if (typeof filter === 'function') {
-              filter = filter(ctx, action, meta)
-            }
-            if (filter && this.nodeIds[nodeId]) {
-              this.nodeIds[nodeId].node.onAdd(action, meta)
+            let clientId = nodeToClient(nodeId)
+            if (!clients.has(clientId)) {
+              let filter = this.subscribers[channel][nodeId]
+              if (typeof filter === 'function') {
+                if (!ctx) ctx = this.createContext(meta)
+                filter = filter(ctx, action, meta)
+              }
+              if (filter && this.clientIds[clientId]) {
+                clients.add(clientId)
+                this.clientIds[clientId].node.onAdd(action, meta)
+              }
             }
           }
         }

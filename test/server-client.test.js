@@ -786,6 +786,26 @@ it('sends new actions by channel', async () => {
   ])
 })
 
+it('works with channel according client ID', async () => {
+  let app = createServer()
+  app.type('FOO', { access: () => true })
+  app.type('BAR', { access: () => true })
+
+  let client = await connectClient(app, '10:uuid:a')
+  app.subscribers.foo = {
+    '10:uuid:b': true,
+    '10:uuid:c': true
+  }
+  await app.log.add({ type: 'FOO' }, { id: '2 server:x 0', channels: ['foo'] })
+  client.connection.other().send(['synced', 1])
+  await client.node.waitFor('synchronized')
+
+  expect(sentNames(client)).toEqual(['connected', 'sync'])
+  expect(sent(client)[1]).toEqual([
+    'sync', 1, { type: 'FOO' }, { id: [2, 'server:x', 0], time: 2 }
+  ])
+})
+
 it('sends old action only once', async () => {
   let app = createServer()
   app.type('FOO', { access: () => true })
