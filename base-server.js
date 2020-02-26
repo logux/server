@@ -1,5 +1,5 @@
 let { ServerConnection, MemoryStore, Log } = require('@logux/core')
-let NanoEvents = require('nanoevents')
+let createNanoEvents = require('nanoevents')
 let UrlPattern = require('url-pattern')
 let WebSocket = require('ws')
 let nanoid = require('nanoid')
@@ -230,7 +230,7 @@ class BaseServer {
       this.reporter('clean', { actionId: meta.id })
     })
 
-    this.emitter = new NanoEvents()
+    this.emitter = createNanoEvents()
     this.on('fatal', err => {
       this.reporter('error', { err, fatal: true })
     })
