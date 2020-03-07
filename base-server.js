@@ -1,5 +1,5 @@
 let { ServerConnection, MemoryStore, Log } = require('@logux/core')
-let createNanoEvents = require('nanoevents')
+let { createNanoEvents } = require('nanoevents')
 let UrlPattern = require('url-pattern')
 let WebSocket = require('ws')
 let nanoid = require('nanoid')
