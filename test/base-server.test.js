@@ -1,8 +1,8 @@
 let { MemoryStore, TestTime, Log } = require('@logux/core')
 let { readFileSync } = require('fs')
+let { delay } = require('nanodelay')
 let WebSocket = require('ws')
 let { join } = require('path')
-let delay = require('nanodelay')
 let https = require('https')
 let http = require('http')
 

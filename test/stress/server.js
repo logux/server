@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-let delay = require('nanodelay')
+let { delay } = require('nanodelay')
 
 let Server = require('../../server')
 

@@ -1,4 +1,4 @@
-let delay = require('nanodelay')
+let { delay } = require('nanodelay')
 let http = require('http')
 
 let BaseServer = require('../base-server')
