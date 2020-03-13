@@ -43,6 +43,7 @@
   "devDependencies": {
     "@logux/eslint-config": "^36.1.0",
     "@logux/sharec-config": "^0.5.7",
+    "@types/bunyan": "^1.8.6",
     "clean-publish": "^1.1.6",
     "cross-spawn": "^7.0.1",
     "documentation": "^12.1.4",
