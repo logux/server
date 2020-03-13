@@ -22,6 +22,7 @@
   "license": "MIT",
   "homepage": "https://logux.io/",
   "repository": "logux/server",
+  "types": "./index.d.ts",
   "engines": {
     "node": ">=10.0.0"
   },
