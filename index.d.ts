@@ -1,10 +1,13 @@
 import { Server as HTTPServer } from "http";
 import Logger from "bunyan";
 
+type MemoryStore = any; // TODO: import types from @logux/core
+type TestTime = any; // TODO: import types from @logux/core
+
 /**
  * BaseServer options.
  */
-export declare type LoguxBaseServerOptions = {
+export declare type LoguxServerBaseOptions = {
   /**
    * Server current application subprotocol version in SemVer format.
    */
@@ -137,14 +140,14 @@ export declare type LoguxBaseServerOptions = {
 /**
  * Server options.
  */
-export declare type LoguxServerOptions = LoguxBaseServerOptions & {
+export declare type LoguxServerOptions = LoguxServerBaseOptions & {
   /**
    * Report process/errors to CLI in bunyan JSON or in human readable
    * format. It can be also a function to show current server status.
    *
    * @default 'human'
    */
-  reporter?: "human" | "json" | LoguxBaseServerOptions["reporter"];
+  reporter?: "human" | "json" | LoguxServerBaseOptions["reporter"];
 
   /**
    * Bunyan logger with custom settings.
@@ -155,16 +158,102 @@ export declare type LoguxServerOptions = LoguxBaseServerOptions & {
 /**
  * The authentication callback.
  */
-export declare type LoguxAuthenticator = (
+export declare type LoguxServerAuthenticator = (
+  /**
+   * User ID.
+   */
   userId: number | string | false,
+
+  /**
+   * The client credentials.
+   */
   credentials: any | undefined,
+
+  /**
+   * Client object.
+   */
   server: HTTPServer
 ) => boolean | Promise<boolean>;
 
 /**
+ * Check does user can do this action.
+ */
+export declare type LoguxServerAuthorizer = (
+  ctx: Context,
+  action: Action,
+  meta: Meta
+) => boolean | Promise<boolean>;
+
+/**
+ * Return object with keys for meta to resend action to other users.
+ */
+export declare type LoguxServerResender = (
+  ctx: Context,
+  action: Action,
+  meta: Meta
+) => Object | Promise<Object>;
+
+/**
+ * Action business logic.
+ */
+export declare type LoguxServerProcessor = (
+  ctx: Context,
+  action: Action,
+  meta: Meta
+) => void | Promise<void>;
+
+/**
+ * Callback which will be run on the end of action/subscription
+ * processing or on an error.
+ */
+export declare type LoguxServerFinally = (
+  ctx: Context,
+  action: Action,
+  meta: Meta
+) => void;
+
+/**
+ * Generates custom filter for channel’s actions.
+ */
+export declare type LoguxServerFilterCreator = (
+  ctx: Context,
+  action: Action,
+  meta: Meta
+) => (ctx: Context, action: Action, meta: Meta) => boolean;
+
+/**
+ * Creates actions with initial state.
+ */
+export declare type LoguxServerInitialized = (
+  ctx: Context,
+  action: Action,
+  meta: Meta
+) => void | Promise<void>;
+
+/**
+ * Action type’s callbacks.
+ */
+export declare type LoguxServerTypeCallbacks = {
+  access: LoguxServerAuthorizer;
+  resend?: LoguxServerResender;
+  process?: LoguxServerProcessor;
+  finally?: LoguxServerFinally;
+};
+
+/**
+ * Channel callbacks.
+ */
+export declare type LoguxServerChannelCallbacks = {
+  access: LoguxServerAuthorizer;
+  filter?: LoguxServerFilterCreator;
+  init?: LoguxServerInitialized;
+  finally?: LoguxServerFinally;
+};
+
+/**
  * Logux action type
  */
-type LoguxAction = {
+type LoguxServerAction = {
   type: string;
   id?: string;
   channel?: string;
@@ -177,10 +266,10 @@ type LoguxAction = {
 /**
  * Logux meta type
  */
-type LoguxMeta = {
+type LoguxServerMeta = {
   id: string;
   time: number;
-  subprotocol: LoguxBaseServerOptions["subprotocol"];
+  subprotocol: LoguxServerBaseOptions["subprotocol"];
   reasons: string[];
   server: string;
   clients?: string[];
@@ -199,15 +288,15 @@ export declare const ALLOWED_META: string[];
  * In most use cases you should use {@link Server}.
  */
 export declare class BaseServer {
-  constructor(opts: LoguxBaseServerOptions);
+  constructor(opts: LoguxServerBaseOptions);
 
   /**
    * Set authenticate function. It will receive client credentials
    * and node ID. It should return a Promise with `true` or `false`.
    */
   public auth: (
-    authenticator: LoguxAuthenticator
-  ) => ReturnType<LoguxAuthenticator>;
+    authenticator: LoguxServerAuthenticator
+  ) => ReturnType<LoguxServerAuthenticator>;
 
   /**
    * Start WebSocket server and listen for clients.
@@ -236,7 +325,11 @@ export declare class BaseServer {
   ) => void;
   public on: (
     event: "error",
-    listener: (err: Error, action: LoguxAction, meta: LoguxMeta) => void
+    listener: (
+      err: Error,
+      action: LoguxServerAction,
+      meta: LoguxServerMeta
+    ) => void
   ) => void;
   public on: (
     event: "connected" | "disconnected",
@@ -244,13 +337,13 @@ export declare class BaseServer {
   ) => void;
   public on: (
     event: "preadd" | "add" | "clean",
-    listener: (action: LoguxAction, meta: LoguxMeta) => void
+    listener: (action: LoguxServerAction, meta: LoguxServerMeta) => void
   ) => void;
   public on: (
     event: "processed" | "subscribed",
     listener: (
-      action: LoguxAction,
-      meta: LoguxMeta,
+      action: LoguxServerAction,
+      meta: LoguxServerMeta,
       latencyMilliseconds: number
     ) => void
   ) => void;
@@ -259,6 +352,33 @@ export declare class BaseServer {
    * Stop server and unbind all listeners.
    */
   public destroy: () => Promise<void>;
+
+  /**
+   * Define action type’s callbacks.
+   */
+  public type: (name: string, callbacks: LoguxServerTypeCallbacks) => void;
+
+  /**
+   * Define callbacks for actions, which type was not defined
+   * by any {@link Server#type}. Useful for proxy or some hacks.
+   *
+   * Without this settings, server will call {@link Server#unknownType}
+   * on unknown type.
+   */
+  public otherType: (callbacks: LoguxServerTypeCallbacks) => void;
+
+  /**
+   * Define the channel.
+   */
+  public channel: (
+    pattern: string,
+    callbacks: LoguxServerChannelCallbacks
+  ) => void;
+
+  /**
+   * Set callbacks for unknown channel subscription.
+   */
+  public otherChannel: (callbacks: LoguxServerChannelCallbacks) => void;
 
   /**
    * Send runtime error stacktrace to all clients.
@@ -276,5 +396,5 @@ export declare class Server extends BaseServer {
   static loadOptions: (
     process: NodeJS.Process,
     defaults: LoguxServerOptions
-  ) => LoguxBaseServerOptions;
+  ) => LoguxServerBaseOptions;
 }
