@@ -1,8 +1,9 @@
 import { Server as HTTPServer } from "http";
 import Logger from "bunyan";
 
-type MemoryStore = any; // TODO: import types from @logux/core
 type TestTime = any; // TODO: import types from @logux/core
+type MemoryStore = any; // TODO: import types from @logux/core
+type ServerConnection = any; // TODO: import types from @logux/core
 
 /**
  * BaseServer options.
@@ -70,7 +71,9 @@ export declare type LoguxServerBaseOptions = {
   controlPassword?: string;
 
   /**
-   * Store to save log. Will be {@link MemoryStore}, by default.
+   * Store to save log.
+   *
+   * @default MemoryStore
    */
   store?: MemoryStore;
 
@@ -85,9 +88,7 @@ export declare type LoguxServerBaseOptions = {
   id?: string;
 
   /**
-   * Development or production server mode. By default, it will be taken
-   * from `NODE_ENV` environment variable. On empty `NODE_ENV` it will
-   * be `"development"`.
+   * Development or production server mode.
    *
    * @default process.env.NODE_ENV || 'development'
    */
@@ -285,7 +286,7 @@ export declare const ALLOWED_META: string[];
  * Basic Logux Server API without good UI. Use it only if you need
  * to create some special hacks on top of Logux Server.
  *
- * In most use cases you should use {@link Server}.
+ * In most use cases you should use Server.
  */
 export declare class BaseServer {
   constructor(opts: LoguxServerBaseOptions);
@@ -360,9 +361,10 @@ export declare class BaseServer {
 
   /**
    * Define callbacks for actions, which type was not defined
-   * by any {@link Server#type}. Useful for proxy or some hacks.
+   * by any Server.type
+   * Useful for proxy or some hacks.
    *
-   * Without this settings, server will call {@link Server#unknownType}
+   * Without this settings, server will call Server.unknownType
    * on unknown type.
    */
   public otherType: (callbacks: LoguxServerTypeCallbacks) => void;
@@ -371,7 +373,7 @@ export declare class BaseServer {
    * Define the channel.
    */
   public channel: (
-    pattern: string,
+    pattern: string | RegExp,
     callbacks: LoguxServerChannelCallbacks
   ) => void;
 
@@ -381,9 +383,57 @@ export declare class BaseServer {
   public otherChannel: (callbacks: LoguxServerChannelCallbacks) => void;
 
   /**
+   * Undo action from client.
+   */
+  public undo: (
+    meta: Meta,
+
+    /**
+     * Optional code for reason.
+     *
+     * @default 'error'
+     */
+    reason: string,
+
+    /**
+     * Extra fields to `logux/undo` action.
+     */
+    extra: Object
+  ) => Promise<void>;
+
+  /**
    * Send runtime error stacktrace to all clients.
    */
   public debugError: (error: Error) => void;
+
+  /**
+   * Send action, received by other server, to all clients of current server.
+   * This method is for multi-server configuration only.
+   */
+  public sendAction: (action: Action, meta: Meta) => void;
+
+  /**
+   * Add new client for server. You should call this method manually
+   * mostly for test purposes. Returned client ID.
+   */
+  public addClient: (connection: ServerConnection) => number;
+
+  /**
+   * If you receive action with unknown type, this method will mark this action
+   * with `error` status and undo it on the clients.
+   *
+   * If you didn’t set Server.otherType.
+   * Logux will call it automatically.
+   */
+  public unknownType: (action: Action, meta: Meta) => void;
+
+  /**
+   * Report that client try to subscribe for unknown channel.
+   *
+   * Logux call it automatically,
+   * if you will not set Server.otherChannel
+   */
+  public wrongChannel: (action: Action, meta: Meta) => void;
 }
 
 /**
@@ -397,4 +447,45 @@ export declare class Server extends BaseServer {
     process: NodeJS.Process,
     defaults: LoguxServerOptions
   ) => LoguxServerBaseOptions;
+}
+
+/**
+ * Information about node, who create this action.
+ */
+declare class Context<PatternParams extends Object | Array = {}> {
+  constructor(
+    /**
+     * Unique node ID.
+     */
+    nodeId: string,
+
+    /**
+     * Unique persistence client ID.
+     */
+    clientId: string,
+
+    /**
+     * User ID taken node ID.
+     */
+    userId: string | undefined,
+
+    subprotocol: LoguxServerBaseOptions["subprotocol"],
+    server: HTTPServer
+  );
+
+  /**
+   * Check creator subprotocol version. It uses `semver` npm package
+   * to parse requirements.
+   */
+  public isSubprotocol: (range: string) => boolean;
+
+  /**
+   * Send action back to the client.
+   */
+  public sendBack: (action: Action, meta: Meta) => Promise<void>;
+
+  /**
+   * Parsed variable parts of channel pattern.
+   */
+  public params?: PatternParams;
 }
