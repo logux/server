@@ -1,11 +1,35 @@
 import { Log, Store, ServerConnection, TestTime } from '@logux/core'
 import { Server as HTTPServer } from 'http'
 
-import { Context, ChannelContext } from './context'
+import { Context, ChannelContext, LoguxPatternParams } from './context'
 import { ServerClient } from './server-client'
 
-type Action = any // TODO
-type Meta = any // TODO
+/**
+ * Logux meta
+ */
+export type LoguxMeta = {
+  id: string
+  time: number
+  subprotocol: LoguxBaseServerOptions['subprotocol']
+  server: string
+  reasons: string[]
+  channels?: string[]
+  clients?: string[]
+  status?: 'waiting' | 'add' | 'clean' | 'processed' | 'subscribed'
+}
+
+/**
+ * Logux base action
+ */
+export type LoguxBaseAction = {
+  type: string
+  id?: string
+  channel?: string
+  since?: {
+    id: string
+    time: number
+  }
+}
 
 /**
  * BaseServer options.
@@ -209,7 +233,7 @@ export class BaseServer {
    * })
    * ```
    */
-  auth(authenticator: LoguxAuthenticator): void
+  auth<Credentials = any>(authenticator: LoguxAuthenticator<Credentials>): void
 
   /**
    * Start WebSocket server and listen for clients.
@@ -245,21 +269,25 @@ export class BaseServer {
    * ```
    */
   on(event: 'fatal' | 'clientError', listener: (err: Error) => void): void
-  on(
+  on<Action extends LoguxBaseAction = LoguxBaseAction>(
     event: 'error',
-    listener: (err: Error, action: Action, meta: Meta) => void
+    listener: (err: Error, action: Action, meta: LoguxMeta) => void
   ): void
   on(
     event: 'connected' | 'disconnected',
     listener: (server: ServerClient) => void
   ): void
-  on(
+  on<Action extends LoguxBaseAction = LoguxBaseAction>(
     event: 'preadd' | 'add' | 'clean',
-    listener: (action: Action, meta: Meta) => void
+    listener: (action: Action, meta: LoguxMeta) => void
   ): void
-  on(
+  on<Action extends LoguxBaseAction = LoguxBaseAction>(
     event: 'processed' | 'subscribed',
-    listener: (action: Action, meta: Meta, latencyMilliseconds: number) => void
+    listener: (
+      action: Action,
+      meta: LoguxMeta,
+      latencyMilliseconds: number
+    ) => void
   ): void
 
   /**
@@ -297,7 +325,10 @@ export class BaseServer {
    * })
    * ```
    */
-  type(name: string, callbacks: LoguxActionCallbacks): void
+  type<Action extends LoguxBaseAction = LoguxBaseAction>(
+    name: Action['type'],
+    callbacks: LoguxActionCallbacks<Action>
+  ): void
 
   /**
    * Define callbacks for actions, which type was not defined
@@ -325,7 +356,9 @@ export class BaseServer {
    * })
    * ```
    */
-  otherType(callbacks: LoguxActionCallbacks): void
+  otherType<Action extends LoguxBaseAction = LoguxBaseAction>(
+    callbacks: LoguxActionCallbacks<Action>
+  ): void
 
   /**
    * Define the channel.
@@ -350,7 +383,13 @@ export class BaseServer {
    * })
    * ```
    */
-  channel(pattern: string | RegExp, callbacks: LoguxChannelCallbacks): void
+  channel<
+    Action extends LoguxBaseAction = LoguxBaseAction,
+    PatternParams extends LoguxPatternParams = {}
+  >(
+    pattern: string | RegExp,
+    callbacks: LoguxChannelCallbacks<Action, PatternParams>
+  ): void
 
   /**
    * Set callbacks for unknown channel subscription.
@@ -371,7 +410,10 @@ export class BaseServer {
    * })
    * ```
    */
-  otherChannel(callbacks: LoguxChannelCallbacks): void
+  otherChannel<
+    Action extends LoguxBaseAction = LoguxBaseAction,
+    PatternParams extends LoguxPatternParams = {}
+  >(callbacks: LoguxChannelCallbacks<Action, PatternParams>): void
 
   /**
    * Undo action from client.
@@ -387,7 +429,7 @@ export class BaseServer {
    * }
    * ```
    */
-  undo(meta: Meta, reason?: string, extra?: Object): Promise<void>
+  undo(meta: LoguxMeta, reason?: string, extra?: Object): Promise<void>
 
   /**
    * Send runtime error stacktrace to all clients.
@@ -420,7 +462,10 @@ export class BaseServer {
    * })
    * ```
    */
-  sendAction(action: Action, meta: Meta): void
+  sendAction<Action extends LoguxBaseAction = LoguxBaseAction>(
+    action: Action,
+    meta: LoguxMeta
+  ): void
 
   /**
    * Add new client for server. You should call this method manually
@@ -457,7 +502,10 @@ export class BaseServer {
    * })
    * ```
    */
-  unknownType(action: Action, meta: Meta): void
+  unknownType<Action extends LoguxBaseAction = LoguxBaseAction>(
+    action: Action,
+    meta: LoguxMeta
+  ): void
 
   /**
    * Report that client try to subscribe for unknown channel.
@@ -482,7 +530,10 @@ export class BaseServer {
    * })
    * ```
    */
-  wrongChannel(action: Action, meta: Meta): void
+  wrongChannel<Action extends LoguxBaseAction = LoguxBaseAction>(
+    action: Action,
+    meta: LoguxMeta
+  ): void
 }
 
 /**
@@ -493,9 +544,9 @@ export class BaseServer {
  * @param client Client object.
  * @returns `true` if credentials was correct
  */
-export type LoguxAuthenticator = (
+export type LoguxAuthenticator<Credentials = any> = (
   userId: number | string | false,
-  credentials: any | undefined,
+  credentials: Credentials | undefined,
   server: ServerClient
 ) => boolean | Promise<boolean>
 
@@ -507,10 +558,12 @@ export type LoguxAuthenticator = (
  * @param meta The action metadata.
  * @returns `true` if client are allowed to use this action.
  */
-export type LoguxAuthorizer = (
+export type LoguxAuthorizer<
+  Action extends LoguxBaseAction = LoguxBaseAction
+> = (
   ctx: Context,
   action: Action,
-  meta: Meta
+  meta: LoguxMeta
 ) => boolean | Promise<boolean>
 
 /**
@@ -521,10 +574,10 @@ export type LoguxAuthorizer = (
  * @param meta The action metadata.
  * @returns Meta’s keys.
  */
-export type LoguxResender = (
+export type LoguxResender<Action extends LoguxBaseAction = LoguxBaseAction> = (
   ctx: Context,
   action: Action,
-  meta: Meta
+  meta: LoguxMeta
 ) => Object | Promise<Object>
 
 /**
@@ -535,21 +588,19 @@ export type LoguxResender = (
  * @param meta The action metadata.
  * @returns Promise when processing will be finished.
  */
-export type LoguxProcessor = (
+export type LoguxProcessor<Action extends LoguxBaseAction = LoguxBaseAction> = (
   ctx: Context,
   action: Action,
-  meta: Meta
+  meta: LoguxMeta
 ) => void | Promise<void>
 
 /**
  * Callback which will be run on the end of action processing
  * or on an error.
  */
-export type LoguxActionFinally = (
-  ctx: Context,
-  action: Action,
-  meta: Meta
-) => void
+export type LoguxActionFinally<
+  Action extends LoguxBaseAction = LoguxBaseAction
+> = (ctx: Context, action: Action, meta: LoguxMeta) => void
 
 /**
  * Channel filter callback
@@ -559,11 +610,9 @@ export type LoguxActionFinally = (
  * @param meta The action metadata.
  * @returns Should action be sent to client.
  */
-export type LoguxChannelFilter = (
-  ctx: Context,
-  action: Action,
-  meta: Meta
-) => boolean
+export type LoguxChannelFilter<
+  Action extends LoguxBaseAction = LoguxBaseAction
+> = (ctx: Context, action: Action, meta: LoguxMeta) => boolean
 
 /**
  * Channel authorizer callback
@@ -573,10 +622,13 @@ export type LoguxChannelFilter = (
  * @param meta The action metadata.
  * @returns `true` if client are allowed to subscribe to this channel.
  */
-export type LoguxChannelAuthorizer = (
-  ctx: ChannelContext,
+export type LoguxChannelAuthorizer<
+  Action extends LoguxBaseAction = LoguxBaseAction,
+  PatternParams extends LoguxPatternParams = {}
+> = (
+  ctx: ChannelContext<PatternParams>,
   action: Action,
-  meta: Meta
+  meta: LoguxMeta
 ) => boolean | Promise<boolean>
 
 /**
@@ -587,11 +639,14 @@ export type LoguxChannelAuthorizer = (
  * @param meta The action metadata.
  * @returns Actions filter.
  */
-export type LoguxFilterCreator = (
-  ctx: ChannelContext,
+export type LoguxFilterCreator<
+  Action extends LoguxBaseAction = LoguxBaseAction,
+  PatternParams extends LoguxPatternParams = {}
+> = (
+  ctx: ChannelContext<PatternParams>,
   action: Action,
-  meta: Meta
-) => LoguxChannelFilter | undefined
+  meta: LoguxMeta
+) => LoguxChannelFilter<Action> | undefined
 
 /**
  * Creates actions with initial state.
@@ -601,38 +656,49 @@ export type LoguxFilterCreator = (
  * @param meta The action metadata.
  * @returns Promise during initial actions loading.
  */
-export type LoguxInitialized = (
-  ctx: ChannelContext,
+export type LoguxInitialized<
+  Action extends LoguxBaseAction = LoguxBaseAction,
+  PatternParams extends LoguxPatternParams = {}
+> = (
+  ctx: ChannelContext<PatternParams>,
   action: Action,
-  meta: Meta
+  meta: LoguxMeta
 ) => void | Promise<void>
 
 /**
  * Callback which will be run on the end of subscription
  * processing or on an error.
  */
-export type LoguxSubscriptionFinally = (
-  ctx: ChannelContext,
+export type LoguxSubscriptionFinally<
+  Action extends LoguxBaseAction = LoguxBaseAction,
+  PatternParams extends LoguxPatternParams = {}
+> = (
+  ctx: ChannelContext<PatternParams>,
   action: Action,
-  meta: Meta
+  meta: LoguxMeta
 ) => void
 
 /**
  * Action type’s callbacks.
  */
-export type LoguxActionCallbacks = {
-  access: LoguxAuthorizer
-  resend?: LoguxResender
-  process?: LoguxProcessor
-  finally?: LoguxActionFinally
+export type LoguxActionCallbacks<
+  Action extends LoguxBaseAction = LoguxBaseAction
+> = {
+  access: LoguxAuthorizer<Action>
+  resend?: LoguxResender<Action>
+  process?: LoguxProcessor<Action>
+  finally?: LoguxActionFinally<Action>
 }
 
 /**
  * Channel callbacks.
  */
-export type LoguxChannelCallbacks = {
-  access: LoguxChannelAuthorizer
-  filter?: LoguxFilterCreator
-  init?: LoguxInitialized
-  finally?: LoguxSubscriptionFinally
+export type LoguxChannelCallbacks<
+  Action extends LoguxBaseAction = LoguxBaseAction,
+  PatternParams extends LoguxPatternParams = {}
+> = {
+  access: LoguxChannelAuthorizer<Action, PatternParams>
+  filter?: LoguxFilterCreator<Action, PatternParams>
+  init?: LoguxInitialized<Action, PatternParams>
+  finally?: LoguxSubscriptionFinally<Action, PatternParams>
 }

@@ -1,8 +1,8 @@
 import {
-  Action,
-  Meta,
   BaseServer,
-  LoguxBaseServerOptions
+  LoguxBaseAction,
+  LoguxBaseServerOptions,
+  LoguxMeta
 } from './base-server'
 
 /**
@@ -125,7 +125,10 @@ export class Context {
    * ctx.sendBack({ type: 'login/success', token })
    * ```
    */
-  sendBack(action: Action, meta: Meta): Promise<void>
+  sendBack<Action extends LoguxBaseAction = LoguxBaseAction>(
+    action: Action,
+    meta: LoguxMeta
+  ): Promise<void>
 }
 
 /**
@@ -140,7 +143,7 @@ export class Context {
  * ```
  */
 export class ChannelContext<
-  PatternParams extends Object | Array<string> = {}
+  PatternParams extends LoguxPatternParams = {}
 > extends Context {
   /**
    * Parsed variable parts of channel pattern.
@@ -162,3 +165,5 @@ export class ChannelContext<
    */
   params?: PatternParams
 }
+
+export type LoguxPatternParams = Object | Array<string>
