@@ -114,7 +114,6 @@ export class Context {
    *
    * @param action The action.
    * @param meta Action’s meta.
-   *
    * @returns Promise until action was added to the server log.
    *
    * ```js

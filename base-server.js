@@ -24,84 +24,12 @@ function nodeToClient (nodeId) {
   return nodeId.split(':').slice(0, 2).join(':')
 }
 
-/**
- * Basic Logux Server API without good UI. Use it only if you need
- * to create some special hacks on top of Logux Server.
- *
- * In most use cases you should use {@link Server}.
- *
- * @param {object} opts Server options.
- * @param {string} opts.subprotocol Server current application
- *                                  subprotocol version in SemVer format.
- * @param {string} opts.supports npm’s version requirements for client
- *                               subprotocol version.
- * @param {string} [opts.root=process.cwd()] Application root to load files
- *                                           and show errors.
- * @param {number} [opts.timeout=20000] Timeout in milliseconds
- *                                      to disconnect connection.
- * @param {number} [opts.ping=10000] Milliseconds since last message to test
- *                                   connection by sending ping.
- * @param {string} [opts.backend] URL to PHP, Ruby on Rails, or other backend
- *                                to process actions and authentication.
- * @param {string} [opts.redis] URL to Redis for Logux Server Pro scaling.
- * @param {number} [opts.controlHost="127.0.0.1"] Host to bind HTTP server
- *                                                to control Logux server.
- * @param {number} [opts.controlPort=31338] Port to control the server.
- * @param {string} [opts.controlPassword] Password to control the server.
- * @param {Store} [opts.store] Store to save log. Will be
- *                             {@link MemoryStore}, by default.
- * @param {TestTime} [opts.time] Test time to test server.
- * @param {string} [opts.id] Custom random ID to be used in node ID.
- * @param {"production"|"development"} [opts.env] Development or production
- *                                                server mode. By default,
- *                                                it will be taken from
- *                                                `NODE_ENV` environment
- *                                                variable. On empty `NODE_ENV`
- *                                                it will be `"development"`.
- * @param {number} [opts.pid] Process ID, to display in reporter.
- * @param {http.Server} [opts.server] HTTP server to connect WebSocket
- *                                    server to it. Same as in `ws.Server`.
- * @param {number} [opts.port=31337] Port to bind server. It will create
- *                                   HTTP server manually to connect
- *                                   WebSocket server to it.
- * @param {string} [opts.host="127.0.0.1"] IP-address to bind server.
- * @param {string} [opts.key] SSL key or path to it. Path could be relative
- *                            from server root. It is required in production
- *                            mode, because WSS is highly recommended.
- * @param {string} [opts.cert] SSL certificate or path to it. Path could
- *                             be relative from server root. It is required
- *                             in production mode, because WSS
- *                             is highly recommended.
- * @param {function} [opts.reporter] Function to show current server status.
- *
- * @example
- * const { BaseServer } = require('@logux/server')
- * class MyLoguxHack extends BaseServer {
- *   …
- * }
- */
 class BaseServer {
   constructor (opts) {
-    /**
-     * Server options.
-     * @type {object}
-     *
-     * @example
-     * console.log('Server options', server.options.subprotocol)
-     */
     this.options = opts || { }
 
     this.reporter = this.options.reporter || function () { }
 
-    /**
-     * Production or development mode.
-     * @type {"production"|"development"}
-     *
-     * @example
-     * if (server.env === 'development') {
-     *   logDebugData()
-     * }
-     */
     this.env = this.options.env || process.env.NODE_ENV || 'development'
 
     if (typeof this.options.subprotocol === 'undefined') {
@@ -125,13 +53,6 @@ class BaseServer {
     if (!this.options.controlPort) this.options.controlPort = 31338
     if (!this.options.controlHost) this.options.controlHost = '127.0.0.1'
 
-    /**
-     * Server unique ID.
-     * @type {string}
-     *
-     * @example
-     * console.log('Error was raised on ' + server.nodeId)
-     */
     this.nodeId = `server:${ this.options.id || nanoid(8) }`
 
     this.options.root = this.options.root || process.cwd()
@@ -144,13 +65,7 @@ class BaseServer {
     } else {
       log = new Log({ store, nodeId: this.nodeId })
     }
-    /**
-     * Server actions log.
-     * @type {Log}
-     *
-     * @example
-     * server.log.each(finder)
-     */
+
     this.log = log
 
     this.on('preadd', (action, meta) => {
@@ -269,15 +184,6 @@ class BaseServer {
 
     this.unbind = []
 
-    /**
-     * Connected clients.
-     * @type {ServerClient[]}
-     *
-     * @example
-     * for (let i in server.connected) {
-     *   console.log(server.connected[i].remoteAddress)
-     * }
-     */
     this.connected = { }
     this.nodeIds = { }
     this.clientIds = { }
@@ -328,31 +234,12 @@ class BaseServer {
     }))
   }
 
-  /**
-   * Set authenticate function. It will receive client credentials
-   * and node ID. It should return a Promise with `true` or `false`.
-   *
-   * @param {authenticator} authenticator The authentication callback.
-   *
-   * @return {undefined}
-   *
-   * @example
-   * server.auth(async (userId, token) => {
-   *   const user = await findUserByToken(token)
-   *   return !!user && userId === user.id
-   * })
-   */
   auth (authenticator) {
     this.authenticator = function (...args) {
       return forcePromise(() => authenticator(...args))
     }
   }
 
-  /**
-   * Start WebSocket server and listen for clients.
-   *
-   * @return {Promise} When the server has been bound.
-   */
   async listen () {
     if (!this.authenticator) {
       throw new Error('You must set authentication callback by server.auth()')
@@ -400,32 +287,6 @@ class BaseServer {
     })
   }
 
-  /**
-   * Subscribe for synchronization events. It implements nanoevents API.
-   * Supported events:
-   *
-   * * `error`: server error during action processing.
-   * * `fatal`: server error during loading.
-   * * `clientError`: wrong client behaviour.
-   * * `connected`: new client was connected.
-   * * `disconnected`: client was disconnected.
-   * * `preadd`: action is going to be added to the log.
-   *   The best place to set `reasons`.
-   * * `add`: action was added to the log.
-   * * `clean`: action was cleaned from the log.
-   * * `processed`: action processing was finished.
-   * * `subscribed`: channel initial data was loaded.
-   *
-   * @param {string} event The event name.
-   * @param {listener} listener The listener function.
-   *
-   * @return {function} Unbind listener from event.
-   *
-   * @example
-   * server.on('error', error => {
-   *   trackError(error)
-   * })
-   */
   on (event, listener) {
     if (event === 'preadd' || event === 'add' || event === 'clean') {
       return this.log.emitter.on(event, listener)
@@ -434,52 +295,12 @@ class BaseServer {
     }
   }
 
-  /**
-   * Stop server and unbind all listeners.
-   *
-   * @return {Promise} Promise when all listeners will be removed.
-   *
-   * @example
-   * afterEach(() => {
-   *   testServer.destroy()
-   * })
-   */
   destroy () {
     this.destroying = true
     this.reporter('destroy')
     return Promise.all(this.unbind.map(i => i()))
   }
 
-  /**
-   * Define action type’s callbacks.
-   *
-   * @param {string} name The action’s type.
-   * @param {object} callbacks Callbacks for actions with this type.
-   * @param {authorizer} callbacks.access Check does user can do this action.
-   * @param {resender} [callbacks.resend] Return object with keys for meta
-   *                                      to resend action to other users.
-   * @param {processor} [callbacks.process] Action business logic.
-   * @param {function} [callback.finally] Callback which will be run
-   *                                      on the end of action processing
-   *                                      or on an error.
-   *
-   * @return {undefined}
-   *
-   * @example
-   * server.type('CHANGE_NAME', {
-   *   access (ctx, action, meta) {
-   *     return action.user === ctx.userId
-   *   },
-   *   resend (ctx, action) {
-   *     return { channel: `user/${ action.user }` }
-   *   }
-   *   process (ctx, action, meta) {
-   *     if (isFirstOlder(lastNameChange(action.user), meta)) {
-   *       return db.changeUserName({ id: action.user, name: action.name })
-   *     }
-   *   }
-   * })
-   */
   type (name, callbacks) {
     if (this.types[name]) {
       throw new Error(`Action type ${ name } was already defined`)
@@ -490,40 +311,6 @@ class BaseServer {
     this.types[name] = callbacks
   }
 
-  /**
-   * Define callbacks for actions, which type was not defined
-   * by any {@link Server#type}. Useful for proxy or some hacks.
-   *
-   * Without this settings, server will call {@link Server#unknownType}
-   * on unknown type.
-   *
-   * @param {object} callbacks Callbacks for actions with this type.
-   * @param {authorizer} callback.access Check does user can do this action.
-   * @param {resender} [callbacks.resend] Return object with keys for meta
-   *                                      to resend action to other users.
-   * @param {processor} [callback.process] Action business logic.
-   * @param {function} [callback.finally] Callback which will be run
-   *                                      on the end of action processing
-   *                                      or on an error.
-   *
-   * @return {undefined}
-   *
-   * @example
-   * server.otherType(
-   *   async access (ctx, action, meta) {
-   *     const response = await phpBackend.checkByHTTP(action, meta)
-   *     if (response.code === 404) {
-   *       this.unknownType(action, meta)
-   *       retur false
-   *     } else {
-   *       return response.body === 'granted'
-   *     }
-   *   }
-   *   async process (ctx, action, meta) {
-   *     return await phpBackend.sendHTTP(action, meta)
-   *   }
-   * })
-   */
   otherType (callbacks) {
     if (this.otherProcessor) {
       throw new Error('Callbacks for unknown types are already defined')
@@ -534,38 +321,6 @@ class BaseServer {
     this.otherProcessor = callbacks
   }
 
-  /**
-   * Define the channel.
-   *
-   * @param {string|RegExp} pattern Pattern or regular expression
-   *                                for channel name.
-   * @param {object} callbacks Callback during subscription process.
-   * @param {channelAuthorizer} callbacks.access Checks user access for channel.
-   * @param {filterCreator} [callback.filter] Generates custom filter
-   *                                          for channel’s actions.
-   * @param {initialized} [callbacks.init] Creates actions with initial state.
-   * @param {function} [callback.finally] Callback which will be run
-   *                                      on the end of subscription processing
-   *                                      or on an error.
-   *
-   * @return {undefined}
-   *
-   * @example
-   * server.channel('user/:id', {
-   *   access (ctx, action, meta) {
-   *     return ctx.params.id === ctx.userId
-   *   }
-   *   filter (ctx, action, meta) {
-   *     return (otherCtx, otherAction, otherMeta) => {
-   *       return !action.hidden
-   *     }
-   *   }
-   *   async init (ctx, action, meta) {
-   *     const user = await db.loadUser(ctx.params.id)
-   *     ctx.sendBack({ type: 'USER_NAME', name: user.name })
-   *   }
-   * })
-   */
   channel (pattern, callbacks) {
     if (!callbacks || !callbacks.access) {
       throw new Error(`Channel ${ pattern } must have access callback`)
@@ -579,33 +334,6 @@ class BaseServer {
     this.channels.push(channel)
   }
 
-  /**
-   * Set callbacks for unknown channel subscription.
-   *
-   * @param {object} callbacks Callback during subscription process.
-   * @param {channelAuthorizer} callbacks.access Checks user access for channel.
-   * @param {filterCreator} [callback.filter] Generates custom filter
-   *                                          for channel’s actions.
-   * @param {initialized} [callbacks.init] Creates actions with initial state.
-   * @param {function} [callback.finally] Callback which will be run
-   *                                      on the end of subscription processing
-   *                                      or on an error.
-   *
-   * @return {undefined}
-   *
-   * @example
-   * server.otherChannel({
-   *   async access (ctx, action, meta) {
-   *     const res = await phpBackend.checkChannel(ctx.params[0], ctx.userId)
-   *     if (res.code === 404) {
-   *       this.wrongChannel(action, meta)
-   *       return false
-   *     } else {
-   *       return response.body === 'granted'
-   *     }
-   *   }
-   * })
-   */
   otherChannel (callbacks) {
     if (!callbacks || !callbacks.access) {
       throw new Error('Unknown channel must have access callback')
@@ -622,20 +350,6 @@ class BaseServer {
     this.otherSubscriber = channel
   }
 
-  /**
-   * Undo action from client.
-   *
-   * @param {Meta} meta The action’s metadata.
-   * @param {string} [reason='error'] Optional code for reason.
-   * @param {object} [extra] Extra fields to `logux/undo` action.
-   *
-   * @return {Promise} When action was saved to the log.
-   *
-   * @example
-   * if (couldNotFixConflict(action, meta)) {
-   *   server.undo(meta)
-   * }
-   */
   undo (meta, reason = 'error', extra = { }) {
     let undoMeta = { status: 'processed' }
 
@@ -651,18 +365,6 @@ class BaseServer {
     return this.log.add(action, undoMeta)
   }
 
-  /**
-   * Send runtime error stacktrace to all clients.
-   *
-   * @param {Error} error Runtime error instance.
-   *
-   * @return {undefined}
-   *
-   * @example
-   * process.on('uncaughtException', e => {
-   *   server.debugError(e)
-   * })
-   */
   debugError (error) {
     for (let i in this.connected) {
       if (this.connected[i].connection.connected) {
@@ -673,25 +375,6 @@ class BaseServer {
     }
   }
 
-  /**
-   * Send action, received by other server, to all clients of current server.
-   * This method is for multi-server configuration only.
-   *
-   * @param {Action} action New action.
-   * @param {Meta} meta Action’s metadata.
-   *
-   * @return {undefined}
-   *
-   * @example
-   * server.on('add', (action, meta) => {
-   *   if (meta.server === server.nodeId) {
-   *     sendToOtherServers(action, meta)
-   *   }
-   * })
-   * onReceivingFromOtherServer((action, meta) => {
-   *   server.sendAction(action, meta)
-   * })
-   */
   sendAction (action, meta) {
     if (meta.nodes) {
       for (let id of meta.nodes) {
@@ -743,17 +426,6 @@ class BaseServer {
     }
   }
 
-  /**
-   * Add new client for server. You should call this method manually
-   * mostly for test purposes.
-   *
-   * @param {Connection} connection Logux connection to client.
-   *
-   * @return {number} Client ID,
-   *
-   * @example
-   * server.addClient(test.right)
-   */
   addClient (connection) {
     this.lastClient += 1
     let node = new ServerClient(this, connection, this.lastClient)
@@ -761,58 +433,11 @@ class BaseServer {
     return this.lastClient
   }
 
-  /**
-   * If you receive action with unknown type, this method will mark this action
-   * with `error` status and undo it on the clients.
-   *
-   * If you didn’t set {@link Server#otherType},
-   * Logux will call it automatically.
-   *
-   * @param {Action} action The action with unknown type.
-   * @param {Meta} meta Action’s metadata.
-   *
-   * @return {undefined}
-   *
-   * @example
-   * server.otherType({
-   *   access (ctx, action, meta) {
-   *     if (action.type.startsWith('myapp/')) {
-   *       return proxy.access(action, meta)
-   *     } else {
-   *       server.unknownType(action, meta)
-   *     }
-   *   }
-   * })
-   */
   unknownType (action, meta) {
     this.internalUnkownType(action, meta)
     this.unknownTypes[meta.id] = true
   }
 
-  /**
-   * Report that client try to subscribe for unknown channel.
-   *
-   * Logux call it automatically,
-   * if you will not set {@link Server#otherChannel}.
-   *
-   * @param {Action} action The subscribe action.
-   * @param {Meta} meta Action’s metadata.
-   *
-   * @return {undefined}
-   *
-   * @example
-   * server.otherChannel({
-   *   async access (ctx, action, meta) {
-   *     const res = phpBackend.checkChannel(params[0], ctx.userId)
-   *     if (res.code === 404) {
-   *       this.wrongChannel(action, meta)
-   *       return false
-   *     } else {
-   *       return response.body === 'granted'
-   *     }
-   *   }
-   * })
-   */
   wrongChannel (action, meta) {
     this.internalWrongChannel(action, meta)
     this.wrongChannels[meta.id] = true
@@ -1050,69 +675,3 @@ class BaseServer {
 }
 
 module.exports = BaseServer
-
-/**
- * @callback authenticator
- * @param {string} userId User ID.
- * @param {any} credentials The client credentials.
- * @param {ServerClient} client Client object.
- * @return {boolean|Promise<boolean>} `true` if credentials was correct
- */
-
-/**
- * @callback authorizer
- * @param {Context} ctx Information about node, who create this action.
- * @param {Action} action The action data.
- * @param {Meta} meta The action metadata.
- * @return {boolean|Promise<boolean>} `true` if client are allowed
- *                                    to use this action.
- */
-
-/**
- * @callback resender
- * @param {Context} ctx Information about node, who create this action.
- * @param {Action} action The action data.
- * @param {Meta} meta The action metadata.
- * @return {object|Promise<object>} Meta’s keys.
- */
-
-/**
- * @callback processor
- * @param {Context} ctx Information about node, who create this action.
- * @param {Action} action The action data.
- * @param {Meta} meta The action metadata.
- * @return {Promise|undefined} Promise when processing will be finished.
- */
-
-/**
- * @callback channelFilter
- * @param {Context} ctx Information about node, who create this action.
- * @param {Action} action The action data.
- * @param {Meta} meta The action metadata.
- * @return {boolean} Should action be sent to client.
- */
-
-/**
- * @callback channelAuthorizer
- * @param {ChannelContext} ctx Information about node, who create this action.
- * @param {Action} action The action data.
- * @param {Meta} meta The action metadata.
- * @return {boolean|Promise<boolean>} `true` if client are allowed
- *                                    to subscribe to this channel.
- */
-
-/**
- * @callback filterCreator
- * @param {ChannelContext} ctx Information about node, who create this action.
- * @param {Action} action The action data.
- * @param {Meta} meta The action metadata.
- * @return {channelFilter|undefined} Actions filter.
- */
-
-/**
- * @callback initialized
- * @param {ChannelContext} ctx Information about node, who create this action.
- * @param {Action} action The action data.
- * @param {Meta} meta The action metadata.
- * @return {Promise|undefined} Promise during initial actions loading.
- */
