@@ -1,4 +1,9 @@
-import { Action, Meta, BaseServer } from './base-server'
+import {
+  Action,
+  Meta,
+  BaseServer,
+  LoguxBaseServerOptions
+} from './base-server'
 
 /**
  * Action context.
@@ -23,7 +28,7 @@ export class Context {
     nodeId: string,
     clientId: string,
     userId: string | undefined,
-    subprotocol: LoguxServerBaseOptions['subprotocol'],
+    subprotocol: LoguxBaseServerOptions['subprotocol'],
     server: BaseServer
   )
 
@@ -107,7 +112,7 @@ export class Context {
    * }
    * ```
    */
-  isSubprotocol: (range: string) => boolean
+  isSubprotocol(range: string): boolean
 
   /**
    * Send action back to the client.
@@ -120,7 +125,7 @@ export class Context {
    * ctx.sendBack({ type: 'login/success', token })
    * ```
    */
-  public sendBack: (action: Action, meta: Meta) => Promise<void>
+  sendBack(action: Action, meta: Meta): Promise<void>
 }
 
 /**
@@ -155,5 +160,5 @@ export class ChannelContext<
    * })
    * ```
    */
-  public params?: PatternParams
+  params?: PatternParams
 }

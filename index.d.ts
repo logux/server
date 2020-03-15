@@ -1,5 +1,6 @@
-export { ALLOWED_META } from "./allowed-meta";
-export { Server, LoguxServerOptions } from "./server";
+export { ALLOWED_META } from './allowed-meta'
+export { Server, LoguxServerOptions } from './server'
+export { ServerClient } from './server-client'
 export {
   BaseServer,
   LoguxActionCallbacks,
@@ -15,4 +16,4 @@ export {
   LoguxProcessor,
   LoguxResender,
   LoguxSubscriptionFinally,
-} from "./base-server";
+} from './base-server'

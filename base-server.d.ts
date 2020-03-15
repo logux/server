@@ -209,14 +209,14 @@ export class BaseServer {
    * })
    * ```
    */
-  auth: (authenticator: LoguxAuthenticator) => void
+  auth(authenticator: LoguxAuthenticator): void
 
   /**
    * Start WebSocket server and listen for clients.
    *
    * @returns When the server has been bound.
    */
-  listen: () => Promise<void>
+  listen(): Promise<void>
 
   /**
    * Subscribe for synchronization events. It implements nanoevents API.
@@ -244,23 +244,23 @@ export class BaseServer {
    * })
    * ```
    */
-  on: (event: 'fatal' | 'clientError', listener: (err: Error) => void) => void
-  on: (
+  on(event: 'fatal' | 'clientError', listener: (err: Error) => void): void
+  on(
     event: 'error',
     listener: (err: Error, action: Action, meta: Meta) => void
-  ) => void
-  on: (
+  ): void
+  on(
     event: 'connected' | 'disconnected',
     listener: (server: ServerClient) => void
-  ) => void
-  on: (
+  ): void
+  on(
     event: 'preadd' | 'add' | 'clean',
     listener: (action: Action, meta: Meta) => void
-  ) => void
-  on: (
+  ): void
+  on(
     event: 'processed' | 'subscribed',
     listener: (action: Action, meta: Meta, latencyMilliseconds: number) => void
-  ) => void
+  ): void
 
   /**
    * Stop server and unbind all listeners.
@@ -273,7 +273,7 @@ export class BaseServer {
    * })
    * ```
    */
-  destroy: () => Promise<void>
+  destroy(): Promise<void>
 
   /**
    * Define action type’s callbacks.
@@ -297,7 +297,7 @@ export class BaseServer {
    * })
    * ```
    */
-  type: (name: string, callbacks: LoguxActionCallbacks) => void
+  type(name: string, callbacks: LoguxActionCallbacks): void
 
   /**
    * Define callbacks for actions, which type was not defined
@@ -325,7 +325,7 @@ export class BaseServer {
    * })
    * ```
    */
-  otherType: (callbacks: LoguxActionCallbacks) => void
+  otherType(callbacks: LoguxActionCallbacks): void
 
   /**
    * Define the channel.
@@ -350,7 +350,7 @@ export class BaseServer {
    * })
    * ```
    */
-  channel: (pattern: string | RegExp, callbacks: LoguxChannelCallbacks) => void
+  channel(pattern: string | RegExp, callbacks: LoguxChannelCallbacks): void
 
   /**
    * Set callbacks for unknown channel subscription.
@@ -371,7 +371,7 @@ export class BaseServer {
    * })
    * ```
    */
-  otherChannel: (callbacks: LoguxChannelCallbacks) => void
+  otherChannel(callbacks: LoguxChannelCallbacks): void
 
   /**
    * Undo action from client.
@@ -387,11 +387,7 @@ export class BaseServer {
    * }
    * ```
    */
-  undo: (
-    meta: Meta,
-    reason?: string,
-    extra?: Object
-  ) => Promise<void>
+  undo(meta: Meta, reason?: string, extra?: Object): Promise<void>
 
   /**
    * Send runtime error stacktrace to all clients.
@@ -404,7 +400,7 @@ export class BaseServer {
    * })
    * ```
    */
-  debugError: (error: Error) => void
+  debugError(error: Error): void
 
   /**
    * Send action, received by other server, to all clients of current server.
@@ -424,7 +420,7 @@ export class BaseServer {
    * })
    * ```
    */
-  sendAction: (action: Action, meta: Meta) => void
+  sendAction(action: Action, meta: Meta): void
 
   /**
    * Add new client for server. You should call this method manually
@@ -437,7 +433,7 @@ export class BaseServer {
    * server.addClient(test.right)
    * ```
    */
-  addClient: (connection: ServerConnection) => number
+  addClient(connection: ServerConnection): number
 
   /**
    * If you receive action with unknown type, this method will mark this action
@@ -461,7 +457,7 @@ export class BaseServer {
    * })
    * ```
    */
-  unknownType: (action: Action, meta: Meta) => void
+  unknownType(action: Action, meta: Meta): void
 
   /**
    * Report that client try to subscribe for unknown channel.
@@ -486,7 +482,7 @@ export class BaseServer {
    * })
    * ```
    */
-  wrongChannel: (action: Action, meta: Meta) => void
+  wrongChannel(action: Action, meta: Meta): void
 }
 
 /**
