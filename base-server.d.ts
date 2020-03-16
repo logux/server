@@ -1,9 +1,10 @@
 import {
   Action as UserAction,
+  ID,
   Log,
   Meta,
-  Store,
   ServerConnection,
+  Store,
   TestTime
 } from '@logux/core'
 import { Server as HTTPServer } from 'http'
@@ -63,12 +64,12 @@ export type LoguxUnsubscribeAction = {
 
 export type LoguxProcessedAction = {
   type: 'logux/processed'
-  id?: string
+  id?: ID
 }
 
 export type LoguxUndoAction = {
   type: 'logux/undo'
-  id?: string
+  id?: ID
   reason?: string
 }
 
@@ -84,12 +85,12 @@ type ActionReporter = {
 }
 
 type SubscriptionReporter = {
-  actionId: Meta['id']
+  actionId: ID
   channel: string
 }
 
 type CleanReporter = {
-  actionId: Meta['id']
+  actionId: ID
 }
 
 type AuthenticationReporter = {
@@ -105,7 +106,7 @@ export type LoguxServerReporter = {
   error: {
     err: Error
     fatal?: true
-    actionId?: Meta['id']
+    actionId?: ID
     nodeId?: string
     connectionId?: string
   }
@@ -125,11 +126,11 @@ export type LoguxServerReporter = {
   destroy: void
   unknownType: {
     type: UserAction['type']
-    actionId: Meta['id']
+    actionId: ID
   }
   wrongChannel: SubscriptionReporter
   processed: {
-    actionId: Meta['id']
+    actionId: ID
     latency: number
   }
   subscribed: SubscriptionReporter
