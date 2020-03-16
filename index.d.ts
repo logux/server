@@ -3,11 +3,11 @@ export { Server, LoguxServerOptions } from './server'
 export { ServerClient } from './server-client'
 export {
   BaseServer,
+  LoguxAction,
   LoguxActionCallbacks,
   LoguxActionFinally,
   LoguxAuthenticator,
   LoguxAuthorizer,
-  LoguxBaseAction,
   LoguxBaseServerOptions,
   LoguxChannelAuthorizer,
   LoguxChannelCallbacks,
@@ -15,7 +15,12 @@ export {
   LoguxFilterCreator,
   LoguxInitialized,
   LoguxMeta,
+  LoguxProcessedAction,
   LoguxProcessor,
   LoguxResender,
+  LoguxSubscribeAction,
   LoguxSubscriptionFinally,
+  LoguxUndoAction,
+  LoguxUnsubscribeAction,
+  LoguxUserAction
 } from './base-server'

@@ -1,8 +1,8 @@
 import {
   BaseServer,
-  LoguxBaseAction,
   LoguxBaseServerOptions,
-  LoguxMeta
+  LoguxMeta,
+  LoguxUserAction
 } from './base-server'
 
 /**
@@ -125,7 +125,7 @@ export class Context {
    * @param meta Action’s meta.
    * @returns Promise until action was added to the server log.
    */
-  sendBack<Action extends LoguxBaseAction = LoguxBaseAction>(
+  sendBack<Action extends LoguxUserAction = LoguxUserAction>(
     action: Action,
     meta: LoguxMeta
   ): Promise<void>
