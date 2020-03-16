@@ -398,7 +398,7 @@ export type LoguxFilterCreator<
 ) => LoguxChannelFilter<A> | undefined
 
 /**
- * Creates actions with initial state.
+ * Send actions with initial state.
  *
  * @param ctx Information about node, who create this action.
  * @param action The action data.
