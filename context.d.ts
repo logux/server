@@ -1,6 +1,11 @@
-import { Action as UserAction } from '@logux/core'
+import { Action } from '@logux/core'
 
-import { BaseServer, LoguxBaseServerOptions, ServerMeta } from './base-server'
+import {
+  BaseServer,
+  LoguxBaseServerOptions,
+  LoguxPatternParams,
+  ServerMeta
+} from './base-server'
 
 /**
  * Action context.
@@ -122,8 +127,8 @@ export class Context {
    * @param meta Action’s meta.
    * @returns Promise until action was added to the server log.
    */
-  sendBack<Action extends UserAction = UserAction>(
-    action: Action,
+  sendBack<A extends Action = Action>(
+    action: A,
     meta: ServerMeta
   ): Promise<void>
 }
@@ -139,9 +144,7 @@ export class Context {
  * })
  * ```
  */
-export class ChannelContext<
-  PatternParams extends LoguxPatternParams = {}
-> extends Context {
+export class ChannelContext<P extends LoguxPatternParams = {}> extends Context {
   /**
    * Parsed variable parts of channel pattern.
    *
@@ -160,7 +163,5 @@ export class ChannelContext<
    * })
    * ```
    */
-  params?: PatternParams
+  params?: P
 }
-
-export type LoguxPatternParams = Object | Array<string>
