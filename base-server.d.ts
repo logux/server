@@ -75,6 +75,87 @@ export type LoguxAction =
   | LoguxProcessedAction
   | LoguxUndoAction
 
+type ActionReporter = {
+  action: LoguxUserAction | LoguxAction
+  meta: LoguxMeta
+}
+
+type SubscriptionReporter = {
+  actionId: Meta['id']
+  channel: string
+}
+
+type CleanReporter = {
+  actionId: Meta['id']
+}
+
+type AuthenticationReporter = {
+  connectionId: string
+  subprotocol: string
+  nodeId: string
+}
+
+export type LoguxServerReporter = {
+  add: ActionReporter
+  useless: ActionReporter
+  clean: CleanReporter
+  error: {
+    err: Error
+    fatal?: true
+    actionId?: Meta['id']
+    nodeId?: string
+    connectionId?: string
+  }
+  clientError: {
+    err: Error
+    nodeId?: string
+    connectionId?: string
+  }
+  connect: {
+    connectionId: string
+    ipAddress: string
+  }
+  disconnect: {
+    nodeId?: string
+    connectionId?: string
+  }
+  destroy: void
+  unknownType: {
+    type: LoguxUserAction['type']
+    actionId: Meta['id']
+  }
+  wrongChannel: SubscriptionReporter
+  processed: {
+    actionId: Meta['id']
+    latency: number
+  }
+  subscribed: SubscriptionReporter
+  unsubscribed: SubscriptionReporter
+  denied: CleanReporter
+  authenticated: AuthenticationReporter
+  unauthenticated: AuthenticationReporter
+  zombie: {
+    nodeId: string
+  }
+  listen: {
+    controlPassword: LoguxBaseServerOptions['controlPassword']
+    controlHost: LoguxBaseServerOptions['controlHost']
+    controlPort: LoguxBaseServerOptions['controlPort']
+    loguxServer: string
+    environment: LoguxBaseServerOptions['env']
+    subprotocol: LoguxBaseServerOptions['subprotocol']
+    supports: LoguxBaseServerOptions['supports']
+    backend: LoguxBaseServerOptions['backend']
+    server: boolean
+    nodeId: string
+    redis: LoguxBaseServerOptions['redis']
+    notes: Object
+    cert: boolean
+    host: LoguxBaseServerOptions['host']
+    port: LoguxBaseServerOptions['port']
+  }
+}
+
 export type LoguxBaseServerOptions = {
   /**
    * Server current application subprotocol version in SemVer format.
@@ -190,7 +271,10 @@ export type LoguxBaseServerOptions = {
   /**
    * Function to show current server status.
    */
-  reporter?: (event: string, payload: Object) => void
+  reporter?: <Event extends keyof LoguxServerReporter>(
+    event: Event,
+    payload: LoguxServerReporter[Event]
+  ) => void
 }
 
 /**

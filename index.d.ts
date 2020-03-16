@@ -18,6 +18,7 @@ export {
   LoguxProcessedAction,
   LoguxProcessor,
   LoguxResender,
+  LoguxServerReporter,
   LoguxSubscribeAction,
   LoguxSubscriptionFinally,
   LoguxUndoAction,
