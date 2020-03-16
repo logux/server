@@ -575,9 +575,9 @@ export class BaseServer {
     event: 'connected' | 'disconnected',
     listener: (server: ServerClient) => void
   ): void
-  on<A extends LoguxAction | Action = Action>(
+  on(
     event: 'preadd' | 'add' | 'clean',
-    listener: (action: A, meta: ServerMeta) => void
+    listener: (action: LoguxAction | Action, meta: ServerMeta) => void
   ): void
   on<A extends Action = Action>(
     event: 'processed',
@@ -658,9 +658,7 @@ export class BaseServer {
    *
    * @param callbacks Callbacks for actions with this type.
    */
-  otherType<A extends Action = Action>(
-    callbacks: LoguxActionCallbacks<A>
-  ): void
+  otherType(callbacks: LoguxActionCallbacks<Action>): void
 
   /**
    * Define the channel.
@@ -797,7 +795,7 @@ export class BaseServer {
    * @param action The action with unknown type.
    * @param meta Action’s metadata.
    */
-  unknownType<A extends Action = Action>(action: A, meta: ServerMeta): void
+  unknownType(action: Action, meta: ServerMeta): void
 
   /**
    * Report that client try to subscribe for unknown channel.
