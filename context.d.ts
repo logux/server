@@ -103,27 +103,27 @@ export class Context {
    * Check creator subprotocol version. It uses `semver` npm package
    * to parse requirements.
    *
-   * @param range npm’s version requirements.
-   * @returns Is version satisfies requirements.
-   *
    * ```js
    * if (ctx.isSubprotocol('2.x')) {
    *   useOldAPI()
    * }
    * ```
+   *
+   * @param range npm’s version requirements.
+   * @returns Is version satisfies requirements.
    */
   isSubprotocol(range: string): boolean
 
   /**
    * Send action back to the client.
    *
-   * @param action The action.
-   * @param meta Action’s meta.
-   * @returns Promise until action was added to the server log.
-   *
    * ```js
    * ctx.sendBack({ type: 'login/success', token })
    * ```
+   *
+   * @param action The action.
+   * @param meta Action’s meta.
+   * @returns Promise until action was added to the server log.
    */
   sendBack<Action extends LoguxBaseAction = LoguxBaseAction>(
     action: Action,

@@ -45,11 +45,6 @@ export class Server extends BaseServer {
   /**
    * Load options from command-line arguments and/or environment
    *
-   * @param process Current process object.
-   * @param defaults Default server options. Arguments and environment
-   *                 variables will override them.
-   * @returns Parsed options object.
-   *
    * ```js
    * const server = new Server(Server.loadOptions(process, {
    *   subprotocol: '1.0.0',
@@ -58,6 +53,11 @@ export class Server extends BaseServer {
    *   port: 31337
    * }))
    * ```
+   *
+   * @param process Current process object.
+   * @param defaults Default server options. Arguments and environment
+   *                 variables will override them.
+   * @returns Parsed options object.
    */
   static loadOptions: (
     process: NodeJS.Process,

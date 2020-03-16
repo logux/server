@@ -1,26 +1,45 @@
-import { Log, Store, ServerConnection, TestTime } from '@logux/core'
+import { Log, Meta, Store, ServerConnection, TestTime } from '@logux/core'
 import { Server as HTTPServer } from 'http'
 
 import { Context, ChannelContext, LoguxPatternParams } from './context'
 import { ServerClient } from './server-client'
 
-/**
- * Logux meta
- */
-export type LoguxMeta = {
-  id: string
-  time: number
-  subprotocol: LoguxBaseServerOptions['subprotocol']
+export type LoguxMeta = Meta & {
+  /**
+   * Action processing status
+   */
+  status?: 'waiting' | 'processed' | 'error'
+
+  /**
+   * Node ID of the server received the action.
+   */
   server: string
-  reasons: string[]
+
+  /**
+   * Array and channel string: all clients subscribed
+   * to listed channels will receive the action.
+   */
   channels?: string[]
+
+  /**
+   * Array and user string: all clients with listed user
+   * IDs will receive the action.
+   */
+  users?: string[]
+
+  /**
+   * Array and client string: all clients with listed client
+   * IDs will receive the action.
+   */
   clients?: string[]
-  status?: 'waiting' | 'add' | 'clean' | 'processed' | 'subscribed'
+
+  /**
+   * Array and node string: all clients with listed node
+   * IDs will receive the action.
+   */
+  nodes?: string[]
 }
 
-/**
- * Logux base action
- */
 export type LoguxBaseAction = {
   type: string
   id?: string
@@ -31,9 +50,6 @@ export type LoguxBaseAction = {
   }
 }
 
-/**
- * BaseServer options.
- */
 export type LoguxBaseServerOptions = {
   /**
    * Server current application subprotocol version in SemVer format.
@@ -153,390 +169,6 @@ export type LoguxBaseServerOptions = {
 }
 
 /**
- * Basic Logux Server API without good UI. Use it only if you need
- * to create some special hacks on top of Logux Server.
- *
- * In most use cases you should use {@link Server}.
- *
- * ```js
- * const { BaseServer } = require('@logux/server')
- * class MyLoguxHack extends BaseServer {
- *   …
- * }
- * ```
- */
-export class BaseServer {
-  constructor(opts: LoguxBaseServerOptions)
-
-  /**
-   * Server options.
-   *
-   * ```js
-   * console.log('Server options', server.options.subprotocol)
-   * ```
-   */
-  options: LoguxBaseServerOptions
-  reporter: LoguxBaseServerOptions['reporter'] | (() => void)
-
-  /**
-   * Production or development mode.
-   *
-   * ```js
-   * if (server.env === 'development') {
-   *   logDebugData()
-   * }
-   * ```
-   */
-  env: Required<LoguxBaseServerOptions['env']>
-
-  /**
-   * Server unique ID.
-   *
-   * ```js
-   * console.log('Error was raised on ' + server.nodeId)
-   * ```
-   */
-  nodeId: string
-
-  /**
-   * Server actions log.
-   *
-   * ```js
-   * server.log.each(finder)
-   * ```
-   */
-  log: Log
-
-  /**
-   * Connected clients.
-   *
-   * ```js
-   * for (let i in server.connected) {
-   *   console.log(server.connected[i].remoteAddress)
-   * }
-   * ```
-   */
-  connected: {
-    [key: string]: ServerClient
-  }
-
-  /**
-   * Set authenticate function. It will receive client credentials
-   * and node ID. It should return a Promise with `true` or `false`.
-   *
-   * @param authenticator The authentication callback.
-   *
-   * ```js
-   * server.auth(async (userId, token) => {
-   *   const user = await findUserByToken(token)
-   *   return !!user && userId === user.id
-   * })
-   * ```
-   */
-  auth<Credentials = any>(authenticator: LoguxAuthenticator<Credentials>): void
-
-  /**
-   * Start WebSocket server and listen for clients.
-   *
-   * @returns When the server has been bound.
-   */
-  listen(): Promise<void>
-
-  /**
-   * Subscribe for synchronization events. It implements nanoevents API.
-   * Supported events:
-   *
-   * * `error`: server error during action processing.
-   * * `fatal`: server error during loading.
-   * * `clientError`: wrong client behaviour.
-   * * `connected`: new client was connected.
-   * * `disconnected`: client was disconnected.
-   * * `preadd`: action is going to be added to the log.
-   *   The best place to set `reasons`.
-   * * `add`: action was added to the log.
-   * * `clean`: action was cleaned from the log.
-   * * `processed`: action processing was finished.
-   * * `subscribed`: channel initial data was loaded.
-   *
-   * @param event The event name.
-   * @param listener The listener function.
-   * @returns Unbind listener from event.
-   *
-   * ```js
-   * server.on('error', error => {
-   *   trackError(error)
-   * })
-   * ```
-   */
-  on(event: 'fatal' | 'clientError', listener: (err: Error) => void): void
-  on<Action extends LoguxBaseAction = LoguxBaseAction>(
-    event: 'error',
-    listener: (err: Error, action: Action, meta: LoguxMeta) => void
-  ): void
-  on(
-    event: 'connected' | 'disconnected',
-    listener: (server: ServerClient) => void
-  ): void
-  on<Action extends LoguxBaseAction = LoguxBaseAction>(
-    event: 'preadd' | 'add' | 'clean',
-    listener: (action: Action, meta: LoguxMeta) => void
-  ): void
-  on<Action extends LoguxBaseAction = LoguxBaseAction>(
-    event: 'processed' | 'subscribed',
-    listener: (
-      action: Action,
-      meta: LoguxMeta,
-      latencyMilliseconds: number
-    ) => void
-  ): void
-
-  /**
-   * Stop server and unbind all listeners.
-   *
-   * @returns Promise when all listeners will be removed.
-   *
-   * ```js
-   * afterEach(() => {
-   *   testServer.destroy()
-   * })
-   * ```
-   */
-  destroy(): Promise<void>
-
-  /**
-   * Define action type’s callbacks.
-   *
-   * @param name The action’s type.
-   * @param callbacks Callbacks for actions with this type.
-   *
-   * ```js
-   * server.type('CHANGE_NAME', {
-   *   access (ctx, action, meta) {
-   *     return action.user === ctx.userId
-   *   },
-   *   resend (ctx, action) {
-   *     return { channel: `user/${ action.user }` }
-   *   }
-   *   process (ctx, action, meta) {
-   *     if (isFirstOlder(lastNameChange(action.user), meta)) {
-   *       return db.changeUserName({ id: action.user, name: action.name })
-   *     }
-   *   }
-   * })
-   * ```
-   */
-  type<Action extends LoguxBaseAction = LoguxBaseAction>(
-    name: Action['type'],
-    callbacks: LoguxActionCallbacks<Action>
-  ): void
-
-  /**
-   * Define callbacks for actions, which type was not defined
-   * by any {@link Server#type}. Useful for proxy or some hacks.
-   *
-   * Without this settings, server will call {@link Server#unknownType}
-   * on unknown type.
-   *
-   * @param callbacks Callbacks for actions with this type.
-   *
-   * ```js
-   * server.otherType(
-   *   async access (ctx, action, meta) {
-   *     const response = await phpBackend.checkByHTTP(action, meta)
-   *     if (response.code === 404) {
-   *       this.unknownType(action, meta)
-   *       retur false
-   *     } else {
-   *       return response.body === 'granted'
-   *     }
-   *   }
-   *   async process (ctx, action, meta) {
-   *     return await phpBackend.sendHTTP(action, meta)
-   *   }
-   * })
-   * ```
-   */
-  otherType<Action extends LoguxBaseAction = LoguxBaseAction>(
-    callbacks: LoguxActionCallbacks<Action>
-  ): void
-
-  /**
-   * Define the channel.
-   *
-   * @param pattern Pattern or regular expression for channel name.
-   * @param callbacks Callback during subscription process.
-   *
-   * ```js
-   * server.channel('user/:id', {
-   *   access (ctx, action, meta) {
-   *     return ctx.params.id === ctx.userId
-   *   }
-   *   filter (ctx, action, meta) {
-   *     return (otherCtx, otherAction, otherMeta) => {
-   *       return !action.hidden
-   *     }
-   *   }
-   *   async init (ctx, action, meta) {
-   *     const user = await db.loadUser(ctx.params.id)
-   *     ctx.sendBack({ type: 'USER_NAME', name: user.name })
-   *   }
-   * })
-   * ```
-   */
-  channel<
-    Action extends LoguxBaseAction = LoguxBaseAction,
-    PatternParams extends LoguxPatternParams = {}
-  >(
-    pattern: string | RegExp,
-    callbacks: LoguxChannelCallbacks<Action, PatternParams>
-  ): void
-
-  /**
-   * Set callbacks for unknown channel subscription.
-   *
-   * @param callbacks Callback during subscription process.
-   *
-   *```js
-   * server.otherChannel({
-   *   async access (ctx, action, meta) {
-   *     const res = await phpBackend.checkChannel(ctx.params[0], ctx.userId)
-   *     if (res.code === 404) {
-   *       this.wrongChannel(action, meta)
-   *       return false
-   *     } else {
-   *       return response.body === 'granted'
-   *     }
-   *   }
-   * })
-   * ```
-   */
-  otherChannel<
-    Action extends LoguxBaseAction = LoguxBaseAction,
-    PatternParams extends LoguxPatternParams = {}
-  >(callbacks: LoguxChannelCallbacks<Action, PatternParams>): void
-
-  /**
-   * Undo action from client.
-   *
-   * @param meta The action’s metadata.
-   * @param reason Optional code for reason. Default is `'error'`
-   * @param extra Extra fields to `logux/undo` action.
-   * @returns When action was saved to the log.
-   *
-   * ```js
-   * if (couldNotFixConflict(action, meta)) {
-   *   server.undo(meta)
-   * }
-   * ```
-   */
-  undo(meta: LoguxMeta, reason?: string, extra?: Object): Promise<void>
-
-  /**
-   * Send runtime error stacktrace to all clients.
-   *
-   * @param error Runtime error instance.
-   *
-   * ```js
-   * process.on('uncaughtException', e => {
-   *   server.debugError(e)
-   * })
-   * ```
-   */
-  debugError(error: Error): void
-
-  /**
-   * Send action, received by other server, to all clients of current server.
-   * This method is for multi-server configuration only.
-   *
-   * @param action New action.
-   * @param meta Action’s metadata.
-   *
-   * ```js
-   * server.on('add', (action, meta) => {
-   *   if (meta.server === server.nodeId) {
-   *     sendToOtherServers(action, meta)
-   *   }
-   * })
-   * onReceivingFromOtherServer((action, meta) => {
-   *   server.sendAction(action, meta)
-   * })
-   * ```
-   */
-  sendAction<Action extends LoguxBaseAction = LoguxBaseAction>(
-    action: Action,
-    meta: LoguxMeta
-  ): void
-
-  /**
-   * Add new client for server. You should call this method manually
-   * mostly for test purposes.
-   *
-   * @param connection Logux connection to client.
-   * @returns Client ID,
-   *
-   * ```js
-   * server.addClient(test.right)
-   * ```
-   */
-  addClient(connection: ServerConnection): number
-
-  /**
-   * If you receive action with unknown type, this method will mark this action
-   * with `error` status and undo it on the clients.
-   *
-   * If you didn’t set {@link Server#otherType},
-   * Logux will call it automatically.
-   *
-   * @param action The action with unknown type.
-   * @param meta Action’s metadata.
-   *
-   * ```js
-   * server.otherType({
-   *   access (ctx, action, meta) {
-   *     if (action.type.startsWith('myapp/')) {
-   *       return proxy.access(action, meta)
-   *     } else {
-   *       server.unknownType(action, meta)
-   *     }
-   *   }
-   * })
-   * ```
-   */
-  unknownType<Action extends LoguxBaseAction = LoguxBaseAction>(
-    action: Action,
-    meta: LoguxMeta
-  ): void
-
-  /**
-   * Report that client try to subscribe for unknown channel.
-   *
-   * Logux call it automatically,
-   * if you will not set {@link Server#otherChannel}.
-   *
-   * @param action The subscribe action.
-   * @param meta Action’s metadata.
-   *
-   * ```js
-   * server.otherChannel({
-   *   async access (ctx, action, meta) {
-   *     const res = phpBackend.checkChannel(params[0], ctx.userId)
-   *     if (res.code === 404) {
-   *       this.wrongChannel(action, meta)
-   *       return false
-   *     } else {
-   *       return response.body === 'granted'
-   *     }
-   *   }
-   * })
-   * ```
-   */
-  wrongChannel<Action extends LoguxBaseAction = LoguxBaseAction>(
-    action: Action,
-    meta: LoguxMeta
-  ): void
-}
-
-/**
  * The authentication callback.
  *
  * @param userId User ID.
@@ -544,7 +176,7 @@ export class BaseServer {
  * @param client Client object.
  * @returns `true` if credentials was correct
  */
-export type LoguxAuthenticator<Credentials = any> = (
+export type LoguxAuthenticator<Credentials = string> = (
   userId: number | string | false,
   credentials: Credentials | undefined,
   server: ServerClient
@@ -701,4 +333,394 @@ export type LoguxChannelCallbacks<
   filter?: LoguxFilterCreator<Action, PatternParams>
   init?: LoguxInitialized<Action, PatternParams>
   finally?: LoguxSubscriptionFinally<Action, PatternParams>
+}
+
+/**
+ * Basic Logux Server API without good UI. Use it only if you need
+ * to create some special hacks on top of Logux Server.
+ *
+ * In most use cases you should use {@link Server}.
+ *
+ * ```js
+ * const { BaseServer } = require('@logux/server')
+ * class MyLoguxHack extends BaseServer {
+ *   …
+ * }
+ * ```
+ */
+export class BaseServer {
+  constructor(opts: LoguxBaseServerOptions)
+
+  /**
+   * Server options.
+   *
+   * ```js
+   * console.log('Server options', server.options.subprotocol)
+   * ```
+   */
+  options: LoguxBaseServerOptions
+
+  /**
+   * Function to show current server status.
+   */
+  reporter: LoguxBaseServerOptions['reporter'] | (() => void)
+
+  /**
+   * Production or development mode.
+   *
+   * ```js
+   * if (server.env === 'development') {
+   *   logDebugData()
+   * }
+   * ```
+   */
+  env: Required<LoguxBaseServerOptions['env']>
+
+  /**
+   * Server unique ID.
+   *
+   * ```js
+   * console.log('Error was raised on ' + server.nodeId)
+   * ```
+   */
+  nodeId: string
+
+  /**
+   * Server actions log.
+   *
+   * ```js
+   * server.log.each(finder)
+   * ```
+   */
+  log: Log
+
+  /**
+   * Connected clients.
+   *
+   * ```js
+   * for (let i in server.connected) {
+   *   console.log(server.connected[i].remoteAddress)
+   * }
+   * ```
+   */
+  connected: {
+    [key: string]: ServerClient
+  }
+
+  /**
+   * Set authenticate function. It will receive client credentials
+   * and node ID. It should return a Promise with `true` or `false`.
+   *
+   * ```js
+   * server.auth(async (userId, token) => {
+   *   const user = await findUserByToken(token)
+   *   return !!user && userId === user.id
+   * })
+   * ```
+   *
+   * @param authenticator The authentication callback.
+   */
+  auth<Credentials = string>(
+    authenticator: LoguxAuthenticator<Credentials>
+  ): void
+
+  /**
+   * Start WebSocket server and listen for clients.
+   *
+   * @returns When the server has been bound.
+   */
+  listen(): Promise<void>
+
+  /**
+   * Subscribe for synchronization events. It implements nanoevents API.
+   * Supported events:
+   *
+   * * `error`: server error during action processing.
+   * * `fatal`: server error during loading.
+   * * `clientError`: wrong client behaviour.
+   * * `connected`: new client was connected.
+   * * `disconnected`: client was disconnected.
+   * * `preadd`: action is going to be added to the log.
+   *   The best place to set `reasons`.
+   * * `add`: action was added to the log.
+   * * `clean`: action was cleaned from the log.
+   * * `processed`: action processing was finished.
+   * * `subscribed`: channel initial data was loaded.
+   *
+   * ```js
+   * server.on('error', error => {
+   *   trackError(error)
+   * })
+   * ```
+   *
+   * @param event The event name.
+   * @param listener The listener function.
+   * @returns Unbind listener from event.
+   */
+  on(event: 'fatal' | 'clientError', listener: (err: Error) => void): void
+  on<Action extends LoguxBaseAction = LoguxBaseAction>(
+    event: 'error',
+    listener: (err: Error, action: Action, meta: LoguxMeta) => void
+  ): void
+  on(
+    event: 'connected' | 'disconnected',
+    listener: (server: ServerClient) => void
+  ): void
+  on<Action extends LoguxBaseAction = LoguxBaseAction>(
+    event: 'preadd' | 'add' | 'clean',
+    listener: (action: Action, meta: LoguxMeta) => void
+  ): void
+  on<Action extends LoguxBaseAction = LoguxBaseAction>(
+    event: 'processed' | 'subscribed',
+    listener: (
+      action: Action,
+      meta: LoguxMeta,
+      latencyMilliseconds: number
+    ) => void
+  ): void
+
+  /**
+   * Stop server and unbind all listeners.
+   *
+   * ```js
+   * afterEach(() => {
+   *   testServer.destroy()
+   * })
+   * ```
+   *
+   * @returns Promise when all listeners will be removed.
+   */
+  destroy(): Promise<void>
+
+  /**
+   * Define action type’s callbacks.
+   *
+   * ```js
+   * server.type('CHANGE_NAME', {
+   *   access (ctx, action, meta) {
+   *     return action.user === ctx.userId
+   *   },
+   *   resend (ctx, action) {
+   *     return { channel: `user/${ action.user }` }
+   *   }
+   *   process (ctx, action, meta) {
+   *     if (isFirstOlder(lastNameChange(action.user), meta)) {
+   *       return db.changeUserName({ id: action.user, name: action.name })
+   *     }
+   *   }
+   * })
+   * ```
+   *
+   * @param name The action’s type.
+   * @param callbacks Callbacks for actions with this type.
+   */
+  type<Action extends LoguxBaseAction = LoguxBaseAction>(
+    name: Action['type'],
+    callbacks: LoguxActionCallbacks<Action>
+  ): void
+
+  /**
+   * Define callbacks for actions, which type was not defined
+   * by any {@link Server#type}. Useful for proxy or some hacks.
+   *
+   * Without this settings, server will call {@link Server#unknownType}
+   * on unknown type.
+   *
+   * ```js
+   * server.otherType(
+   *   async access (ctx, action, meta) {
+   *     const response = await phpBackend.checkByHTTP(action, meta)
+   *     if (response.code === 404) {
+   *       this.unknownType(action, meta)
+   *       retur false
+   *     } else {
+   *       return response.body === 'granted'
+   *     }
+   *   }
+   *   async process (ctx, action, meta) {
+   *     return await phpBackend.sendHTTP(action, meta)
+   *   }
+   * })
+   * ```
+   *
+   * @param callbacks Callbacks for actions with this type.
+   */
+  otherType<Action extends LoguxBaseAction = LoguxBaseAction>(
+    callbacks: LoguxActionCallbacks<Action>
+  ): void
+
+  /**
+   * Define the channel.
+   *
+   * ```js
+   * server.channel('user/:id', {
+   *   access (ctx, action, meta) {
+   *     return ctx.params.id === ctx.userId
+   *   }
+   *   filter (ctx, action, meta) {
+   *     return (otherCtx, otherAction, otherMeta) => {
+   *       return !action.hidden
+   *     }
+   *   }
+   *   async init (ctx, action, meta) {
+   *     const user = await db.loadUser(ctx.params.id)
+   *     ctx.sendBack({ type: 'USER_NAME', name: user.name })
+   *   }
+   * })
+   * ```
+   *
+   * @param pattern Pattern or regular expression for channel name.
+   * @param callbacks Callback during subscription process.
+   */
+  channel<
+    Action extends LoguxBaseAction = LoguxBaseAction,
+    PatternParams extends LoguxPatternParams = {}
+  >(
+    pattern: string | RegExp,
+    callbacks: LoguxChannelCallbacks<Action, PatternParams>
+  ): void
+
+  /**
+   * Set callbacks for unknown channel subscription.
+   *
+   *```js
+   * server.otherChannel({
+   *   async access (ctx, action, meta) {
+   *     const res = await phpBackend.checkChannel(ctx.params[0], ctx.userId)
+   *     if (res.code === 404) {
+   *       this.wrongChannel(action, meta)
+   *       return false
+   *     } else {
+   *       return response.body === 'granted'
+   *     }
+   *   }
+   * })
+   * ```
+   *
+   * @param callbacks Callback during subscription process.
+   */
+  otherChannel<
+    Action extends LoguxBaseAction = LoguxBaseAction,
+    PatternParams extends LoguxPatternParams = {}
+  >(callbacks: LoguxChannelCallbacks<Action, PatternParams>): void
+
+  /**
+   * Undo action from client.
+   *
+   * ```js
+   * if (couldNotFixConflict(action, meta)) {
+   *   server.undo(meta)
+   * }
+   * ```
+   *
+   * @param meta The action’s metadata.
+   * @param reason Optional code for reason. Default is `'error'`
+   * @param extra Extra fields to `logux/undo` action.
+   * @returns When action was saved to the log.
+   */
+  undo(meta: LoguxMeta, reason?: string, extra?: Object): Promise<void>
+
+  /**
+   * Send runtime error stacktrace to all clients.
+   *
+   * ```js
+   * process.on('uncaughtException', e => {
+   *   server.debugError(e)
+   * })
+   * ```
+   *
+   * @param error Runtime error instance.
+   */
+  debugError(error: Error): void
+
+  /**
+   * Send action, received by other server, to all clients of current server.
+   * This method is for multi-server configuration only.
+   *
+   * ```js
+   * server.on('add', (action, meta) => {
+   *   if (meta.server === server.nodeId) {
+   *     sendToOtherServers(action, meta)
+   *   }
+   * })
+   * onReceivingFromOtherServer((action, meta) => {
+   *   server.sendAction(action, meta)
+   * })
+   * ```
+   *
+   * @param action New action.
+   * @param meta Action’s metadata.
+   */
+  sendAction<Action extends LoguxBaseAction = LoguxBaseAction>(
+    action: Action,
+    meta: LoguxMeta
+  ): void
+
+  /**
+   * Add new client for server. You should call this method manually
+   * mostly for test purposes.
+   *
+   * ```js
+   * server.addClient(test.right)
+   * ```
+   *
+   * @param connection Logux connection to client.
+   * @returns Client ID.
+   */
+  addClient(connection: ServerConnection): number
+
+  /**
+   * If you receive action with unknown type, this method will mark this action
+   * with `error` status and undo it on the clients.
+   *
+   * If you didn’t set {@link Server#otherType},
+   * Logux will call it automatically.
+   *
+   * ```js
+   * server.otherType({
+   *   access (ctx, action, meta) {
+   *     if (action.type.startsWith('myapp/')) {
+   *       return proxy.access(action, meta)
+   *     } else {
+   *       server.unknownType(action, meta)
+   *     }
+   *   }
+   * })
+   * ```
+   *
+   * @param action The action with unknown type.
+   * @param meta Action’s metadata.
+   */
+  unknownType<Action extends LoguxBaseAction = LoguxBaseAction>(
+    action: Action,
+    meta: LoguxMeta
+  ): void
+
+  /**
+   * Report that client try to subscribe for unknown channel.
+   *
+   * Logux call it automatically,
+   * if you will not set {@link Server#otherChannel}.
+   *
+   * ```js
+   * server.otherChannel({
+   *   async access (ctx, action, meta) {
+   *     const res = phpBackend.checkChannel(params[0], ctx.userId)
+   *     if (res.code === 404) {
+   *       this.wrongChannel(action, meta)
+   *       return false
+   *     } else {
+   *       return response.body === 'granted'
+   *     }
+   *   }
+   * })
+   * ```
+   *
+   * @param action The subscribe action.
+   * @param meta Action’s metadata.
+   */
+  wrongChannel<Action extends LoguxBaseAction = LoguxBaseAction>(
+    action: Action,
+    meta: LoguxMeta
+  ): void
 }
