@@ -22,6 +22,5 @@ export {
   LoguxSubscriptionFinally,
   LoguxUndoAction,
   LoguxUnsubscribeAction,
-  LoguxUserAction,
   ServerMeta
 } from './base-server'

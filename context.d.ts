@@ -1,9 +1,6 @@
-import {
-  BaseServer,
-  LoguxBaseServerOptions,
-  ServerMeta,
-  LoguxUserAction
-} from './base-server'
+import { Action as UserAction } from '@logux/core'
+
+import { BaseServer, LoguxBaseServerOptions, ServerMeta } from './base-server'
 
 /**
  * Action context.
@@ -125,7 +122,7 @@ export class Context {
    * @param meta Action’s meta.
    * @returns Promise until action was added to the server log.
    */
-  sendBack<Action extends LoguxUserAction = LoguxUserAction>(
+  sendBack<Action extends UserAction = UserAction>(
     action: Action,
     meta: ServerMeta
   ): Promise<void>
