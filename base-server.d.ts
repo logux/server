@@ -289,9 +289,9 @@ export type LoguxBaseServerOptions = {
  * @param client Client object.
  * @returns `true` if credentials was correct
  */
-export type LoguxAuthenticator<Credentials = string> = (
+export type LoguxAuthenticator = (
   userId: string | false,
-  credentials: Credentials | undefined,
+  credentials: string | undefined,
   server: ServerClient
 ) => boolean | Promise<boolean>
 
@@ -533,9 +533,7 @@ export class BaseServer {
    *
    * @param authenticator The authentication callback.
    */
-  auth<Credentials = string>(
-    authenticator: LoguxAuthenticator<Credentials>
-  ): void
+  auth(authenticator: LoguxAuthenticator): void
 
   /**
    * Start WebSocket server and listen for clients.
