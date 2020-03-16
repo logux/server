@@ -290,7 +290,7 @@ export type LoguxBaseServerOptions = {
  * @returns `true` if credentials was correct
  */
 export type LoguxAuthenticator<Credentials = string> = (
-  userId: number | string | false,
+  userId: string | false,
   credentials: Credentials | undefined,
   server: ServerClient
 ) => boolean | Promise<boolean>
