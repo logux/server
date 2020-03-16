@@ -14,4 +14,4 @@
  * }
  * ```
  */
-export const ALLOWED_META: readonly ['id', 'time', 'subprotocol']
+export const ALLOWED_META: string[]
