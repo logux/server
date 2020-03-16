@@ -1,7 +1,7 @@
 import {
   BaseServer,
   LoguxBaseServerOptions,
-  LoguxMeta,
+  ServerMeta,
   LoguxUserAction
 } from './base-server'
 
@@ -127,7 +127,7 @@ export class Context {
    */
   sendBack<Action extends LoguxUserAction = LoguxUserAction>(
     action: Action,
-    meta: LoguxMeta
+    meta: ServerMeta
   ): Promise<void>
 }
 

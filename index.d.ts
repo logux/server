@@ -14,7 +14,6 @@ export {
   LoguxChannelFilter,
   LoguxFilterCreator,
   LoguxInitialized,
-  LoguxMeta,
   LoguxProcessedAction,
   LoguxProcessor,
   LoguxResender,
@@ -23,5 +22,6 @@ export {
   LoguxSubscriptionFinally,
   LoguxUndoAction,
   LoguxUnsubscribeAction,
-  LoguxUserAction
+  LoguxUserAction,
+  ServerMeta
 } from './base-server'

@@ -4,7 +4,7 @@ import { Server as HTTPServer } from 'http'
 import { Context, ChannelContext, LoguxPatternParams } from './context'
 import { ServerClient } from './server-client'
 
-export type LoguxMeta = Meta & {
+export type ServerMeta = Meta & {
   /**
    * Action processing status
    */
@@ -77,7 +77,7 @@ export type LoguxAction =
 
 type ActionReporter = {
   action: LoguxUserAction | LoguxAction
-  meta: LoguxMeta
+  meta: ServerMeta
 }
 
 type SubscriptionReporter = {
@@ -304,7 +304,7 @@ export type LoguxAuthorizer<
 > = (
   ctx: Context,
   action: Action,
-  meta: LoguxMeta
+  meta: ServerMeta
 ) => boolean | Promise<boolean>
 
 /**
@@ -318,7 +318,7 @@ export type LoguxAuthorizer<
 export type LoguxResender<Action extends LoguxUserAction = LoguxUserAction> = (
   ctx: Context,
   action: Action,
-  meta: LoguxMeta
+  meta: ServerMeta
 ) => Object | Promise<Object>
 
 /**
@@ -332,7 +332,7 @@ export type LoguxResender<Action extends LoguxUserAction = LoguxUserAction> = (
 export type LoguxProcessor<Action extends LoguxUserAction = LoguxUserAction> = (
   ctx: Context,
   action: Action,
-  meta: LoguxMeta
+  meta: ServerMeta
 ) => void | Promise<void>
 
 /**
@@ -341,7 +341,7 @@ export type LoguxProcessor<Action extends LoguxUserAction = LoguxUserAction> = (
  */
 export type LoguxActionFinally<
   Action extends LoguxUserAction = LoguxUserAction
-> = (ctx: Context, action: Action, meta: LoguxMeta) => void
+> = (ctx: Context, action: Action, meta: ServerMeta) => void
 
 /**
  * Channel filter callback
@@ -353,7 +353,7 @@ export type LoguxActionFinally<
  */
 export type LoguxChannelFilter<
   Action extends LoguxUserAction = LoguxUserAction
-> = (ctx: Context, action: Action, meta: LoguxMeta) => boolean
+> = (ctx: Context, action: Action, meta: ServerMeta) => boolean
 
 /**
  * Channel authorizer callback
@@ -369,7 +369,7 @@ export type LoguxChannelAuthorizer<
 > = (
   ctx: ChannelContext<PatternParams>,
   action: Action,
-  meta: LoguxMeta
+  meta: ServerMeta
 ) => boolean | Promise<boolean>
 
 /**
@@ -386,7 +386,7 @@ export type LoguxFilterCreator<
 > = (
   ctx: ChannelContext<PatternParams>,
   action: Action,
-  meta: LoguxMeta
+  meta: ServerMeta
 ) => LoguxChannelFilter<Action> | undefined
 
 /**
@@ -403,7 +403,7 @@ export type LoguxInitialized<
 > = (
   ctx: ChannelContext<PatternParams>,
   action: Action,
-  meta: LoguxMeta
+  meta: ServerMeta
 ) => void | Promise<void>
 
 /**
@@ -416,7 +416,7 @@ export type LoguxSubscriptionFinally<
 > = (
   ctx: ChannelContext<PatternParams>,
   action: Action,
-  meta: LoguxMeta
+  meta: ServerMeta
 ) => void
 
 /**
@@ -569,7 +569,7 @@ export class BaseServer {
   on(event: 'fatal' | 'clientError', listener: (err: Error) => void): void
   on<Action extends LoguxUserAction = LoguxUserAction>(
     event: 'error',
-    listener: (err: Error, action: Action, meta: LoguxMeta) => void
+    listener: (err: Error, action: Action, meta: ServerMeta) => void
   ): void
   on(
     event: 'connected' | 'disconnected',
@@ -577,13 +577,13 @@ export class BaseServer {
   ): void
   on<Action extends LoguxAction | LoguxUserAction = LoguxUserAction>(
     event: 'preadd' | 'add' | 'clean',
-    listener: (action: Action, meta: LoguxMeta) => void
+    listener: (action: Action, meta: ServerMeta) => void
   ): void
   on<Action extends LoguxUserAction = LoguxUserAction>(
     event: 'processed',
     listener: (
       action: Action,
-      meta: LoguxMeta,
+      meta: ServerMeta,
       latencyMilliseconds: number
     ) => void
   ): void
@@ -591,7 +591,7 @@ export class BaseServer {
     event: 'subscribed',
     listener: (
       action: LoguxSubscribeAction,
-      meta: LoguxMeta,
+      meta: ServerMeta,
       latencyMilliseconds: number
     ) => void
   ): void
@@ -735,7 +735,7 @@ export class BaseServer {
    * @param extra Extra fields to `logux/undo` action.
    * @returns When action was saved to the log.
    */
-  undo(meta: LoguxMeta, reason?: string, extra?: Object): Promise<void>
+  undo(meta: ServerMeta, reason?: string, extra?: Object): Promise<void>
 
   /**
    * Send runtime error stacktrace to all clients.
@@ -770,7 +770,7 @@ export class BaseServer {
    */
   sendAction<Action extends LoguxUserAction = LoguxUserAction>(
     action: Action,
-    meta: LoguxMeta
+    meta: ServerMeta
   ): void
 
   /**
@@ -810,7 +810,7 @@ export class BaseServer {
    */
   unknownType<Action extends LoguxUserAction = LoguxUserAction>(
     action: Action,
-    meta: LoguxMeta
+    meta: ServerMeta
   ): void
 
   /**
@@ -838,6 +838,6 @@ export class BaseServer {
    */
   wrongChannel<Action extends LoguxUserAction = LoguxUserAction>(
     action: Action,
-    meta: LoguxMeta
+    meta: ServerMeta
   ): void
 }
