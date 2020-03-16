@@ -160,6 +160,17 @@ export type LoguxServerReporter = {
   }
 }
 
+export type LoguxResend = {
+  channel?: string
+  channels?: string[]
+  user?: string
+  users?: string[]
+  client?: string
+  clients?: string[]
+  node?: string
+  nodes?: string[]
+}
+
 export type LoguxPatternParams = Object | Array<string>
 
 export type LoguxBaseServerOptions = {
@@ -323,7 +334,7 @@ export type LoguxResender<A extends Action = Action> = (
   ctx: Context,
   action: A,
   meta: ServerMeta
-) => Object | Promise<Object>
+) => LoguxResend | Promise<LoguxResend>
 
 /**
  * Action business logic.

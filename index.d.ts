@@ -16,6 +16,7 @@ export {
   LoguxInitialized,
   LoguxProcessedAction,
   LoguxProcessor,
+  LoguxResend,
   LoguxResender,
   LoguxServerReporter,
   LoguxSubscribeAction,
