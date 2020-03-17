@@ -16,7 +16,7 @@
     "api": "documentation build *.js -f md -o api.md",
     "spell": "yarn api && yaspeller-ci *.md",
     "clean": "rimraf api.md coverage/",
-    "test": "jest-ci --forceExit --runInBand --coverage && eslint-ci . && yarn spell"
+    "test": "jest-ci --forceExit --runInBand --coverage && eslint-ci . && check-dts && yarn spell"
   },
   "author": "Andrey Sitnik <andrey@sitnik.ru>",
   "license": "MIT",
@@ -30,6 +30,7 @@
     "JSONStream": "^1.3.5",
     "bunyan": "^1.8.12",
     "chalk": "^3.0.0",
+    "check-dts": "^0.1.4",
     "dotenv": "^8.2.0",
     "nanoevents": "^5.0.0",
     "nanoid": "^2.1.11",
