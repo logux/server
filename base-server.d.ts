@@ -172,6 +172,7 @@ export type LoguxResend = {
 }
 
 export type LoguxPatternParams = Object | Array<string>
+export type ContextData = Object
 
 export type LoguxBaseServerOptions = {
   /**
@@ -316,8 +317,11 @@ export type LoguxAuthenticator = (
  * @param meta The action metadata.
  * @returns `true` if client are allowed to use this action.
  */
-export type LoguxAuthorizer<A extends Action = Action> = (
-  ctx: Context,
+export type LoguxAuthorizer<
+  A extends Action = Action,
+  D extends ContextData = {}
+> = (
+  ctx: Context<D>,
   action: A,
   meta: ServerMeta
 ) => boolean | Promise<boolean>
@@ -330,8 +334,11 @@ export type LoguxAuthorizer<A extends Action = Action> = (
  * @param meta The action metadata.
  * @returns Meta’s keys.
  */
-export type LoguxResender<A extends Action = Action> = (
-  ctx: Context,
+export type LoguxResender<
+  A extends Action = Action,
+  D extends ContextData = {}
+> = (
+  ctx: Context<D>,
   action: A,
   meta: ServerMeta
 ) => LoguxResend | Promise<LoguxResend>
@@ -344,21 +351,19 @@ export type LoguxResender<A extends Action = Action> = (
  * @param meta The action metadata.
  * @returns Promise when processing will be finished.
  */
-export type LoguxProcessor<A extends Action = Action> = (
-  ctx: Context,
-  action: A,
-  meta: ServerMeta
-) => void | Promise<void>
+export type LoguxProcessor<
+  A extends Action = Action,
+  D extends ContextData = {}
+> = (ctx: Context<D>, action: A, meta: ServerMeta) => void | Promise<void>
 
 /**
  * Callback which will be run on the end of action processing
  * or on an error.
  */
-export type LoguxActionFinally<A extends Action = Action> = (
-  ctx: Context,
-  action: A,
-  meta: ServerMeta
-) => void
+export type LoguxActionFinally<
+  A extends Action = Action,
+  D extends ContextData = {}
+> = (ctx: Context<D>, action: A, meta: ServerMeta) => void
 
 /**
  * Channel filter callback
@@ -368,11 +373,10 @@ export type LoguxActionFinally<A extends Action = Action> = (
  * @param meta The action metadata.
  * @returns Should action be sent to client.
  */
-export type LoguxChannelFilter<A extends Action = Action> = (
-  ctx: Context,
-  action: A,
-  meta: ServerMeta
-) => boolean
+export type LoguxChannelFilter<
+  A extends Action = Action,
+  D extends ContextData = {}
+> = (ctx: Context<D>, action: A, meta: ServerMeta) => boolean
 
 /**
  * Channel authorizer callback
@@ -384,9 +388,10 @@ export type LoguxChannelFilter<A extends Action = Action> = (
  */
 export type LoguxChannelAuthorizer<
   A extends Action = Action,
+  D extends ContextData = {},
   P extends LoguxPatternParams = {}
 > = (
-  ctx: ChannelContext<P>,
+  ctx: ChannelContext<D, P>,
   action: A,
   meta: ServerMeta
 ) => boolean | Promise<boolean>
@@ -401,9 +406,10 @@ export type LoguxChannelAuthorizer<
  */
 export type LoguxFilterCreator<
   A extends Action = Action,
+  D extends ContextData = {},
   P extends LoguxPatternParams = {}
 > = (
-  ctx: ChannelContext<P>,
+  ctx: ChannelContext<D, P>,
   action: A,
   meta: ServerMeta
 ) => LoguxChannelFilter<A> | undefined
@@ -418,9 +424,10 @@ export type LoguxFilterCreator<
  */
 export type LoguxInitialized<
   A extends Action = Action,
+  D extends ContextData = {},
   P extends LoguxPatternParams = {}
 > = (
-  ctx: ChannelContext<P>,
+  ctx: ChannelContext<D, P>,
   action: A,
   meta: ServerMeta
 ) => void | Promise<void>
@@ -431,8 +438,9 @@ export type LoguxInitialized<
  */
 export type LoguxSubscriptionFinally<
   A extends Action = Action,
+  D extends ContextData = {},
   P extends LoguxPatternParams = {}
-> = (ctx: ChannelContext<P>, action: A, meta: ServerMeta) => void
+> = (ctx: ChannelContext<D, P>, action: A, meta: ServerMeta) => void
 
 /**
  * Action type’s callbacks.
@@ -449,12 +457,13 @@ export type LoguxActionCallbacks<A extends Action = Action> = {
  */
 export type LoguxChannelCallbacks<
   A extends Action = Action,
+  D extends ContextData = {},
   P extends LoguxPatternParams = {}
 > = {
-  access: LoguxChannelAuthorizer<A, P>
-  filter?: LoguxFilterCreator<A, P>
-  init?: LoguxInitialized<A, P>
-  finally?: LoguxSubscriptionFinally<A, P>
+  access: LoguxChannelAuthorizer<A, D, P>
+  filter?: LoguxFilterCreator<A, D, P>
+  init?: LoguxInitialized<A, D, P>
+  finally?: LoguxSubscriptionFinally<A, D, P>
 }
 
 /**
@@ -694,10 +703,11 @@ export class BaseServer {
    * @param pattern Pattern or regular expression for channel name.
    * @param callbacks Callback during subscription process.
    */
-  channel<A extends Action = Action, P extends LoguxPatternParams = {}>(
-    pattern: string | RegExp,
-    callbacks: LoguxChannelCallbacks<A, P>
-  ): void
+  channel<
+    A extends Action = Action,
+    D extends ContextData = {},
+    P extends LoguxPatternParams = {}
+  >(pattern: string | RegExp, callbacks: LoguxChannelCallbacks<A, D, P>): void
 
   /**
    * Set callbacks for unknown channel subscription.
@@ -718,9 +728,11 @@ export class BaseServer {
    *
    * @param callbacks Callback during subscription process.
    */
-  otherChannel<A extends Action = Action, P extends LoguxPatternParams = {}>(
-    callbacks: LoguxChannelCallbacks<A, P>
-  ): void
+  otherChannel<
+    A extends Action = Action,
+    D extends ContextData = {},
+    P extends LoguxPatternParams = {}
+  >(callbacks: LoguxChannelCallbacks<A, D, P>): void
 
   /**
    * Undo action from client.

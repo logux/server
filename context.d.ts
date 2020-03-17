@@ -2,6 +2,7 @@ import { Action } from '@logux/core'
 
 import {
   BaseServer,
+  ContextData,
   LoguxBaseServerOptions,
   LoguxPatternParams,
   ServerMeta
@@ -18,7 +19,7 @@ import {
  * })
  * ```
  */
-export class Context {
+export class Context<D extends ContextData = {}> {
   /**
    * @param nodeId Unique node ID.
    * @param clientId Unique persistence client ID.
@@ -49,7 +50,7 @@ export class Context {
    * })
    * ```
    */
-  data: Object
+  data: D
 
   /**
    * Unique node ID.
@@ -144,7 +145,10 @@ export class Context {
  * })
  * ```
  */
-export class ChannelContext<P extends LoguxPatternParams = {}> extends Context {
+export class ChannelContext<
+  D extends ContextData = {},
+  P extends LoguxPatternParams = {}
+> extends Context<D> {
   /**
    * Parsed variable parts of channel pattern.
    *
