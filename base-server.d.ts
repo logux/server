@@ -24,28 +24,44 @@ export type ServerMeta = Meta & {
   server: string
 
   /**
-   * Array and channel string: all clients subscribed
-   * to listed channels will receive the action.
+   * All clients subscribed to listed channels will receive the action.
    */
   channels?: string[]
 
   /**
-   * Array and user string: all clients with listed user
-   * IDs will receive the action.
+   * All clients subscribed to channel will receive the action.
+   */
+  channel?: string
+
+  /**
+   * All clients with listed user IDs will receive the action.
    */
   users?: string[]
 
   /**
-   * Array and client string: all clients with listed client
-   * IDs will receive the action.
+   * All clients with listed user ID will receive the action.
+   */
+  user?: string
+
+  /**
+   * All clients with listed client IDs will receive the action.
    */
   clients?: string[]
 
   /**
-   * Array and node string: all clients with listed node
-   * IDs will receive the action.
+   * All clients with listed client ID will receive the action.
+   */
+  client?: string
+
+  /**
+   * All clients with listed node IDs will receive the action.
    */
   nodes?: string[]
+
+  /**
+   * All clients with listed node ID will receive the action.
+   */
+  node?: string
 }
 
 export type LoguxSubscribeAction = {
