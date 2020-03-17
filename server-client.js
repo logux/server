@@ -30,77 +30,15 @@ function reportClient (client, obj) {
   return obj
 }
 
-/**
- * Logux client connected to server.
- *
- * @param {Server} app The server.
- * @param {ServerConnection} connection The Logux connection.
- * @param {number} key Client number used as `app.connected` key.
- *
- * @example
- * const client = server.connected[0]
- */
 class ServerClient {
   constructor (app, connection, key) {
     this.app = app
-
-    /**
-     * User ID. It will be filled from client’s node ID.
-     * It will be undefined before correct authentication.
-     * @type {string|undefined}
-     */
     this.userId = undefined
-
-    /**
-     * Unique persistence machine ID.
-     * It will be undefined before correct authentication.
-     * @type {string|undefined}
-     */
     this.clientId = undefined
-
-    /**
-     * Unique node ID.
-     * It will be undefined before correct authentication.
-     * @type {string|undefined}
-     */
     this.nodeId = undefined
-
-    /**
-     * Does server process some action from client.
-     * @type {boolean}
-     *
-     * @example
-     * console.log('Clients in processing:', clients.map(i => i.processing))
-     */
     this.processing = false
-
-    /**
-     * The Logux wrapper to WebSocket connection.
-     * @type {ServerConnection}
-     *
-     * @example
-     * console.log(client.connection.ws.upgradeReq.headers)
-     */
     this.connection = connection
-
-    /**
-     * Client number used as `app.connected` key.
-     * @type {string}
-     *
-     * @example
-     * function stillConnected (client) {
-     *   return !!app.connected[client.key]
-     * }
-     */
     this.key = key.toString()
-
-    /**
-     * Client IP address.
-     * @type {string}
-     *
-     * @example
-     * const clientCity = detectLocation(client.remoteAddress)
-     */
     this.remoteAddress = connection.ws._socket.remoteAddress
 
     let credentials
@@ -108,13 +46,6 @@ class ServerClient {
       credentials = { env: 'development' }
     }
 
-    /**
-     * Node instance to synchronize logs.
-     * @type {ServerNode}
-     *
-     * @example
-     * if (client.node.state === 'synchronized')
-     */
     this.node = new FilteredNode(this, app.nodeId, app.log, connection, {
       credentials,
       subprotocol: app.options.subprotocol,
@@ -149,28 +80,10 @@ class ServerClient {
     this.app.emitter.emit('connected', this)
   }
 
-  /**
-   * Check client subprotocol version. It uses `semver` npm package
-   * to parse requirements.
-   *
-   * @param {string} range npm’s version requirements.
-   *
-   * @return {boolean} Is version satisfies requirements.
-   *
-   * @example
-   * if (client.isSubprotocol('4.x')) {
-   *   useOldAPI()
-   * }
-   */
   isSubprotocol (range) {
     return semver.satisfies(this.node.remoteSubprotocol, range)
   }
 
-  /**
-   * Disconnect client.
-   *
-   * @return {undefined}
-   */
   destroy () {
     this.destroyed = true
     this.node.destroy()
