@@ -1,12 +1,6 @@
 import { Action } from '@logux/core'
 
-import {
-  BaseServer,
-  ContextData,
-  LoguxBaseServerOptions,
-  LoguxPatternParams,
-  ServerMeta
-} from './base-server'
+import { BaseServer, BaseServerOptions, ServerMeta } from './base-server'
 
 /**
  * Action context.
@@ -19,7 +13,7 @@ import {
  * })
  * ```
  */
-export class Context<D extends ContextData = {}> {
+export class Context<D = { }> {
   /**
    * @param nodeId Unique node ID.
    * @param clientId Unique persistence client ID.
@@ -31,7 +25,7 @@ export class Context<D extends ContextData = {}> {
     nodeId: string,
     clientId: string,
     userId: string | undefined,
-    subprotocol: LoguxBaseServerOptions['subprotocol'],
+    subprotocol: BaseServerOptions['subprotocol'],
     server: BaseServer
   )
 
@@ -95,7 +89,7 @@ export class Context<D extends ContextData = {}> {
    * Action creator application subprotocol version in SemVer format.
    * Use {@link Context#isSubprotocol} to check it.
    */
-  subprotocol: string | undefined
+  subprotocol: string
 
   /**
    * Logux server
@@ -115,7 +109,7 @@ export class Context<D extends ContextData = {}> {
    * @param range npm’s version requirements.
    * @returns Is version satisfies requirements.
    */
-  isSubprotocol(range: string): boolean
+  isSubprotocol (range: string): boolean
 
   /**
    * Send action back to the client.
@@ -128,10 +122,7 @@ export class Context<D extends ContextData = {}> {
    * @param meta Action’s meta.
    * @returns Promise until action was added to the server log.
    */
-  sendBack<A extends Action = Action>(
-    action: A,
-    meta: ServerMeta
-  ): Promise<void>
+  sendBack (action: Action, meta: ServerMeta): Promise<void>
 }
 
 /**
@@ -145,10 +136,7 @@ export class Context<D extends ContextData = {}> {
  * })
  * ```
  */
-export class ChannelContext<
-  D extends ContextData = {},
-  P extends LoguxPatternParams = {}
-> extends Context<D> {
+export class ChannelContext<D = {}, P = {} | string[]> extends Context<D> {
   /**
    * Parsed variable parts of channel pattern.
    *

@@ -1,17 +1,17 @@
 import Logger from 'bunyan'
 
-import { BaseServer, LoguxBaseServerOptions } from './base-server'
+import { BaseServer, BaseServerOptions } from './base-server'
 
 /**
  * BaseServer options.
  */
-export type LoguxServerOptions = LoguxBaseServerOptions & {
+export type LoguxServerOptions = BaseServerOptions & {
   /**
    * Report process/errors to CLI in bunyan JSON or in human readable
    * format. It can be also a function to show current server status.
    * Default is `'human'`.
    */
-  reporter?: 'human' | 'json' | LoguxBaseServerOptions['reporter']
+  reporter?: 'human' | 'json' | BaseServerOptions['reporter']
 
   /**
    * Bunyan logger with custom settings.

@@ -5245,11 +5245,6 @@ nanodelay@^1.0.0:
   resolved "https://registry.yarnpkg.com/nanodelay/-/nanodelay-1.0.0.tgz#9353b46f681acd5fa59170c77168328250663af6"
   integrity sha512-pE936ePwVYuUD9zM2ubfJGG7uYbEE1MrfhPqjQalQ6/ENqTvkaLZsinvnTZV4X9zPhJAQy2FulBVWjKBEJUleQ==
 
-nanoevents@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/nanoevents/-/nanoevents-5.0.0.tgz#fe100e4a308983ff46a9af6d6303c862e0182366"
-  integrity sha512-NIJlgE1RiwNMK3TZ8xxs/AIFBpYyF7Drx4Cm87JmmGZAkmlMvc7QwxpNF2eptr3LKb+j7lhl3nhHNI4eWLmGrA==
-
 nanoevents@^5.1.0:
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/nanoevents/-/nanoevents-5.1.0.tgz#cef2c1b91e68137faf930861b0df6edf53c55193"
