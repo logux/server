@@ -675,7 +675,7 @@ it('sends new actions by node ID', async () => {
   await app.log.add({ type: 'A' }, { id: '1 server:x 0' })
   await app.log.add({ type: 'A' }, { id: '2 server:x 0', nodes: ['10:uuid'] })
   client.connection.other().send(['synced', 2])
-  await client.node.waitFor('synchronized')
+  await delay(1)
 
   expect(sentNames(client)).toEqual(['connected', 'sync'])
   expect(sent(client)[1]).toEqual([
@@ -711,7 +711,7 @@ it('sends new actions by client ID', async () => {
     { type: 'A' }, { id: '2 server:x 0', clients: ['10:client'] }
   )
   client.connection.other().send(['synced', 2])
-  await client.node.waitFor('synchronized')
+  await delay(1)
 
   expect(sentNames(client)).toEqual(['connected', 'sync'])
   expect(sent(client)[1]).toEqual([
@@ -743,7 +743,7 @@ it('sends new actions by user', async () => {
   await app.log.add({ type: 'A' }, { id: '1 server:x 0' })
   await app.log.add({ type: 'A' }, { id: '2 server:x 0', users: ['10'] })
   client.connection.other().send(['synced', 2])
-  await client.node.waitFor('synchronized')
+  await delay(1)
 
   expect(sentNames(client)).toEqual(['connected', 'sync'])
   expect(sent(client)[1]).toEqual([
@@ -798,7 +798,7 @@ it('works with channel according client ID', async () => {
   }
   await app.log.add({ type: 'FOO' }, { id: '2 server:x 0', channels: ['foo'] })
   client.connection.other().send(['synced', 1])
-  await client.node.waitFor('synchronized')
+  await delay(1)
 
   expect(sentNames(client)).toEqual(['connected', 'sync'])
   expect(sent(client)[1]).toEqual([
