@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@logux/core": "logux/core",
+    "@types/bunyan": "^1.8.6",
     "JSONStream": "^1.3.5",
     "bunyan": "^1.8.12",
     "chalk": "^3.0.0",
@@ -42,7 +43,6 @@
   "devDependencies": {
     "@logux/eslint-config": "^36.1.1",
     "@logux/sharec-config": "^0.6.2",
-    "@types/bunyan": "^1.8.6",
     "check-dts": "^0.1.3",
     "cross-spawn": "^7.0.1",
     "dual-publish": "^0.5.1",
