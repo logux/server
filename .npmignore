@@ -1,7 +1,7 @@
 yarn-error.log
 yarn.lock
+
 .editorconfig
 test/
 coverage/
 .travis.yml
-api.md

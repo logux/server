@@ -13,9 +13,8 @@
     "distributed systems"
   ],
   "scripts": {
-    "api": "documentation build *.js -f md -o api.md",
-    "spell": "yarn api && yaspeller-ci *.md",
-    "clean": "rimraf api.md coverage/",
+    "spell": "yaspeller-ci *.md",
+    "clean": "rimraf coverage/",
     "test": "jest-ci --forceExit --runInBand --coverage && eslint-ci . && check-dts && yarn spell"
   },
   "author": "Andrey Sitnik <andrey@sitnik.ru>",
@@ -47,7 +46,6 @@
     "@types/bunyan": "^1.8.6",
     "clean-publish": "^1.1.6",
     "cross-spawn": "^7.0.1",
-    "documentation": "^12.1.4",
     "eslint": "^6.8.0",
     "eslint-ci": "^1.0.0",
     "eslint-config-standard": "^14.1.0",
