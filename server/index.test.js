@@ -1,7 +1,7 @@
 let { join } = require('path')
 let spawn = require('cross-spawn')
 
-let Server = require('../server')
+let { Server } = require('..')
 
 const DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
 
@@ -9,7 +9,7 @@ let started
 
 function start (name, args) {
   return new Promise(resolve => {
-    started = spawn(join(__dirname, '/servers/', name), args)
+    started = spawn(join(__dirname, '../test/servers/', name), args)
     let running = false
     function callback () {
       if (!running) {
@@ -25,7 +25,7 @@ function start (name, args) {
 function check (name, args, opts, kill) {
   return new Promise(resolve => {
     let out = ''
-    let server = spawn(join(__dirname, '/servers/', name), args, opts)
+    let server = spawn(join(__dirname, '../test/servers/', name), args, opts)
     server.stdout.on('data', chank => {
       out += chank
     })
@@ -186,7 +186,7 @@ it('uses .env cwd', async () => {
   let result = await check(
     'options.js',
     [],
-    { cwd: join(__dirname, 'fixtures') },
+    { cwd: join(__dirname, '../test/fixtures') },
     'kill'
   )
   expect(result[0]).toMatchSnapshot()

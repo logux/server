@@ -4,7 +4,7 @@ let { ClientNode, WsConnection, Log, MemoryStore } = require('@logux/core')
 let { delay } = require('nanodelay')
 let WebSocket = require('ws')
 
-let ALLOWED_META = require('../../allowed-meta')
+let { ALLOWED_META } = require('../..')
 
 let index = 0
 let stop = false

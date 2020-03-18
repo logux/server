@@ -2,7 +2,7 @@
 
 let { delay } = require('nanodelay')
 
-let Server = require('../../server')
+let { Server } = require('../..')
 
 let app = new Server({
   subprotocol: '1.0.0',

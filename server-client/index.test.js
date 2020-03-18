@@ -1,7 +1,7 @@
 let { LoguxError, TestPair, TestTime } = require('@logux/core')
 let { delay } = require('nanodelay')
 
-let ServerClient = require('../server-client')
+let ServerClient = require('.')
 let BaseServer = require('../base-server')
 
 let destroyable = []

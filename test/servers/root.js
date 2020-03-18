@@ -2,7 +2,7 @@
 
 let { join } = require('path')
 
-let Server = require('../../server')
+let { Server } = require('../..')
 
 let app = new Server(
   Server.loadOptions(process, {

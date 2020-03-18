@@ -85,7 +85,7 @@
     },
     "coveragePathIgnorePatterns": [
       "/node_modules/",
-      "/server.js"
+      "/server/index.js"
     ]
   },
   "eslintConfig": {

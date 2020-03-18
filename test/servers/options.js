@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-let Server = require('../../server')
+let { Server } = require('../..')
 
 let app = new Server(
   Server.loadOptions(process, {

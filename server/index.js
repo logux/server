@@ -2,8 +2,8 @@ let { join } = require('path')
 let dotenv = require('dotenv')
 let yargs = require('yargs')
 
-let createReporter = require('./create-reporter')
-let BaseServer = require('./base-server')
+let createReporter = require('../create-reporter')
+let BaseServer = require('../base-server')
 
 const AVAILABLE_OPTIONS = [
   'subprotocol', 'supports', 'timeout', 'ping', 'root', 'store', 'server',

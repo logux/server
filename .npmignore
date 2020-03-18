@@ -5,3 +5,8 @@ yarn.lock
 test/
 coverage/
 .travis.yml
+
+**/*.test.js
+**/types.ts
+**/errors.ts
+__snapshots__

@@ -1,10 +1,10 @@
 let { LoguxError } = require('@logux/core')
 let semver = require('semver')
 
-let FilteredNode = require('./filtered-node')
-let forcePromise = require('./force-promise')
-let ALLOWED_META = require('./allowed-meta')
-let parseNodeId = require('./parse-node-id')
+let FilteredNode = require('../filtered-node')
+let forcePromise = require('../force-promise')
+let ALLOWED_META = require('../allowed-meta')
+let parseNodeId = require('../parse-node-id')
 
 const RESEND_META = [
   'channel', 'channels',

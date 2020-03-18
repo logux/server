@@ -1,17 +1,11 @@
 import {
-  Action,
-  ID,
-  Log,
-  Meta,
-  ServerConnection,
-  Store,
-  TestTime
+  Action, ID, Log, Meta, ServerConnection, Store, TestTime
 } from '@logux/core'
 import { Server as HTTPServer } from 'http'
 import { Unsubscribe } from 'nanoevents'
 
-import { Context, ChannelContext } from './context'
-import { ServerClient } from './server-client'
+import { Context, ChannelContext } from '../context'
+import { ServerClient } from '../server-client'
 
 export type ServerMeta = Meta & {
   /**

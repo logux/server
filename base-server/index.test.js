@@ -6,15 +6,16 @@ let { join } = require('path')
 let https = require('https')
 let http = require('http')
 
-let BaseServer = require('../base-server')
 let pkg = require('../package.json')
+
+let { BaseServer } = require('..')
 
 const DEFAULT_OPTIONS = {
   subprotocol: '0.0.0',
   supports: '0.x'
 }
-const CERT = join(__dirname, 'fixtures/cert.pem')
-const KEY = join(__dirname, 'fixtures/key.pem')
+const CERT = join(__dirname, '../test/fixtures/cert.pem')
+const KEY = join(__dirname, '../test/fixtures/key.pem')
 
 let lastPort = 9111
 function createServer (options = { }) {
@@ -222,7 +223,7 @@ it('loads keys by absolute path', async () => {
 
 it('loads keys by relative path', async () => {
   app = createServer({
-    root: __dirname,
+    root: join(__dirname, '../test/'),
     cert: 'fixtures/cert.pem',
     key: 'fixtures/key.pem'
   })

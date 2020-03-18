@@ -1,7 +1,7 @@
 let os = require('os')
 let bunyan = require('bunyan')
 
-let HumanFormatter = require('./human-formatter')
+let HumanFormatter = require('../human-formatter')
 
 const ERROR_CODES = {
   EADDRINUSE: e => {

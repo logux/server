@@ -2,7 +2,7 @@
 
 let bunyan = require('bunyan')
 
-let Server = require('../../server')
+let { Server } = require('../..')
 
 let logger = bunyan.createLogger({
   name: 'logux-server-custom',
