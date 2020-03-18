@@ -1,6 +1,6 @@
 import { ServerConnection, ServerNode } from '@logux/core'
 
-import { BaseServer } from '../base-server'
+import BaseServer from '../base-server'
 
 /**
  * Logux client connected to server.
@@ -9,7 +9,7 @@ import { BaseServer } from '../base-server'
  * const client = server.connected[0]
  * ```
  */
-export class ServerClient {
+export default class ServerClient {
   /**
    * @param app The server.
    * @param connection The Logux connection.

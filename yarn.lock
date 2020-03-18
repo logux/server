@@ -1449,17 +1449,6 @@ dtrace-provider@~0.8:
   dependencies:
     nan "^2.14.0"
 
-dual-publish@^0.5.1:
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/dual-publish/-/dual-publish-0.5.2.tgz#e7f728ccc5c83c984fc0c472fc6c2afad45b88d2"
-  integrity sha512-XbcYg1my9FGVuj2wAJBoiMmFxKaw84FzP5FUy2HkXW5zajsq4WQ4gZNbPyCsr3dUoVWKi0J4KlshNj79QdtLhw==
-  dependencies:
-    chalk "^3.0.0"
-    clean-publish "^1.1.6"
-    globby "^11.0.0"
-    line-column "^1.0.2"
-    rimraf "^3.0.2"
-
 ecc-jsbn@~0.1.1:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/ecc-jsbn/-/ecc-jsbn-0.1.2.tgz#3a83a904e54353287874c564b7549386849a98c9"

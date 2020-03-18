@@ -1,6 +1,6 @@
 import { Action } from '@logux/core'
 
-import { BaseServer, BaseServerOptions, ServerMeta } from '../base-server'
+import BaseServer, { BaseServerOptions, ServerMeta } from '../base-server'
 
 /**
  * Action context.
@@ -13,7 +13,7 @@ import { BaseServer, BaseServerOptions, ServerMeta } from '../base-server'
  * })
  * ```
  */
-export class Context<D = { }> {
+export default class Context<D = { }> {
   /**
    * @param nodeId Unique node ID.
    * @param clientId Unique persistence client ID.
@@ -122,7 +122,7 @@ export class Context<D = { }> {
    * @param meta Action’s meta.
    * @returns Promise until action was added to the server log.
    */
-  sendBack (action: Action, meta: ServerMeta): Promise<void>
+  sendBack (action: Action, meta?: ServerMeta): Promise<void>
 }
 
 /**
@@ -155,5 +155,5 @@ export class ChannelContext<D = {}, P = {} | string[]> extends Context<D> {
    * })
    * ```
    */
-  params?: P
+  params: P
 }

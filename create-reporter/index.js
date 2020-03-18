@@ -1,5 +1,5 @@
-let os = require('os')
 let bunyan = require('bunyan')
+let os = require('os')
 
 let HumanFormatter = require('../human-formatter')
 

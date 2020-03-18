@@ -1,11 +1,11 @@
 import Logger from 'bunyan'
 
-import { BaseServer, BaseServerOptions } from '../base-server'
+import BaseServer, { BaseServerOptions } from '../base-server'
 
 /**
  * BaseServer options.
  */
-export type LoguxServerOptions = BaseServerOptions & {
+export type ServerOptions = BaseServerOptions & {
   /**
    * Report process/errors to CLI in bunyan JSON or in human readable
    * format. It can be also a function to show current server status.
@@ -41,7 +41,7 @@ export type LoguxServerOptions = BaseServerOptions & {
  * server.listen()
  * ```
  */
-export class Server extends BaseServer {
+export default class Server extends BaseServer {
   /**
    * Load options from command-line arguments and/or environment
    *
@@ -61,8 +61,8 @@ export class Server extends BaseServer {
    */
   static loadOptions: (
     process: NodeJS.Process,
-    defaults: LoguxServerOptions
-  ) => LoguxServerOptions
+    defaults: ServerOptions
+  ) => ServerOptions
 
-  constructor (opts: LoguxServerOptions)
+  constructor (opts: ServerOptions)
 }

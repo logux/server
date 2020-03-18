@@ -14,4 +14,6 @@
  * }
  * ```
  */
-export const ALLOWED_META: string[]
+declare const ALLOWED_META: string[]
+
+export default ALLOWED_META

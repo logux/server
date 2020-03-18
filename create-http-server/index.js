@@ -22,7 +22,7 @@ function readFrom (root, file) {
   return readFile(file)
 }
 
-module.exports = async function createHttpServer (opts) {
+async function createHttpServer (opts) {
   let server
   if (opts.server) {
     server = opts.server
@@ -43,3 +43,5 @@ module.exports = async function createHttpServer (opts) {
 
   return server
 }
+
+module.exports = createHttpServer

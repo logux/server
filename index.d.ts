@@ -1,5 +1,11 @@
+import ServerClient from './server-client'
+import ALLOWED_META from './allowed-meta'
+import BaseServer from './base-server'
+import Server from './server'
+
+export { Action } from '@logux/core'
+
 export {
-  BaseServer,
   LoguxAction,
   LoguxProcessedAction,
   Reporters,
@@ -8,6 +14,11 @@ export {
   LoguxUnsubscribeAction,
   ServerMeta
 } from './base-server'
-export { Server, LoguxServerOptions } from './server'
-export { ALLOWED_META } from './allowed-meta'
-export { ServerClient } from './server-client'
+export { ServerOptions } from './server'
+
+export {
+  ServerClient,
+  ALLOWED_META,
+  BaseServer,
+  Server
+}

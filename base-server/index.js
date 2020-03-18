@@ -1,8 +1,11 @@
 let { ServerConnection, MemoryStore, Log } = require('@logux/core')
 let { createNanoEvents } = require('nanoevents')
+let { promisify } = require('util')
 let UrlPattern = require('url-pattern')
 let WebSocket = require('ws')
+let { join } = require('path')
 let nanoid = require('nanoid')
+let fs = require('fs')
 
 let startControlServer = require('../start-control-server')
 let bindBackendProxy = require('../bind-backend-proxy')
@@ -11,7 +14,8 @@ let forcePromise = require('../force-promise')
 let ServerClient = require('../server-client')
 let parseNodeId = require('../parse-node-id')
 let Context = require('../context')
-let pkg = require('../package.json')
+
+let readFile = promisify(fs.readFile)
 
 function optionError (msg) {
   let error = new Error(msg)
@@ -264,6 +268,8 @@ class BaseServer {
         this.http.close()
       }))
     }
+
+    let pkg = JSON.parse(await readFile(join(__dirname, '../package.json')))
 
     this.ws.on('connection', ws => {
       this.addClient(new ServerConnection(ws))

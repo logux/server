@@ -4,8 +4,8 @@ import {
 import { Server as HTTPServer } from 'http'
 import { Unsubscribe } from 'nanoevents'
 
-import { Context, ChannelContext } from '../context'
-import { ServerClient } from '../server-client'
+import Context, { ChannelContext } from '../context'
+import ServerClient from '../server-client'
 
 export type ServerMeta = Meta & {
   /**
@@ -451,7 +451,7 @@ type ChannelCallbacks<A, D, P> = {
  * }
  * ```
  */
-export class BaseServer {
+export default class BaseServer {
   constructor(opts: BaseServerOptions)
 
   /**
@@ -626,8 +626,8 @@ export class BaseServer {
    * @param name The action’s type.
    * @param callbacks Callbacks for actions with this type.
    */
-  type<A = Action, D = { }> (
-    name: string,
+  type<A extends Action = Action, D = { }> (
+    name: A['type'],
     callbacks: ActionCallbacks<A, D>
   ): void
 
@@ -683,14 +683,14 @@ export class BaseServer {
    * @param callbacks Callback during subscription process.
    */
   channel<
-    A = Action,
+    P = { },
     D = { },
-    P = { }
+    A = LoguxSubscribeAction
   > (pattern: string, callbacks: ChannelCallbacks<A, D, P>): void
   channel<
-    A = Action,
+    P = string[],
     D = { },
-    P = string[]
+    A = LoguxSubscribeAction
   > (pattern: RegExp, callbacks: ChannelCallbacks<A, D, P>): void
 
   /**
@@ -713,8 +713,8 @@ export class BaseServer {
    * @param callbacks Callback during subscription process.
    */
   otherChannel<
-    A = Action,
-    D = { }
+    D = { },
+    A = LoguxSubscribeAction,
   > (callbacks: ChannelCallbacks<A, D, { }>): void
 
   /**
