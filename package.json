@@ -24,6 +24,13 @@
   "engines": {
     "node": ">=10.0.0"
   },
+  "exports": {
+    ".": {
+      "require": "./index.js",
+      "import": "./index.mjs"
+    },
+    "./": "./"
+  },
   "dependencies": {
     "@logux/core": "logux/core",
     "@types/bunyan": "^1.8.6",
