@@ -454,6 +454,9 @@ type ChannelCallbacks<A, D, P> = {
  * ```
  */
 export default class BaseServer {
+  /**
+   * @param opts Server options.
+   */
   constructor(opts: BaseServerOptions)
 
   /**

@@ -64,5 +64,8 @@ export default class Server extends BaseServer {
     defaults: ServerOptions
   ) => ServerOptions
 
+  /**
+   * @param opts Server options.
+   */
   constructor (opts: ServerOptions)
 }
