@@ -1,6 +1,6 @@
 import Logger from 'bunyan'
 
-import BaseServer, { BaseServerOptions } from '../base-server'
+import BaseServer, { Reporter } from '../base-server'
 
 /**
  * BaseServer options.
@@ -11,7 +11,7 @@ export type ServerOptions = BaseServerOptions & {
    * format. It can be also a function to show current server status.
    * Default is `'human'`.
    */
-  reporter?: 'human' | 'json' | BaseServerOptions['reporter']
+  reporter?: 'human' | 'json' | Reporter
 
   /**
    * Bunyan logger with custom settings.

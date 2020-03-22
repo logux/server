@@ -25,7 +25,7 @@ export default class Context<D = { }> {
     nodeId: string,
     clientId: string,
     userId: string | undefined,
-    subprotocol: BaseServerOptions['subprotocol'],
+    subprotocol: string,
     server: BaseServer
   )
 

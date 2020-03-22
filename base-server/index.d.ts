@@ -110,7 +110,7 @@ type AuthenticationReporter = {
   nodeId: string
 }
 
-export type Reporters = {
+type ReportersArguments = {
   add: ActionReporter
   useless: ActionReporter
   clean: CleanReporter
@@ -136,7 +136,7 @@ export type Reporters = {
   }
   destroy: void
   unknownType: {
-    type: Action['type']
+    type: string
     actionId: ID
   }
   wrongChannel: SubscriptionReporter
@@ -153,23 +153,27 @@ export type Reporters = {
     nodeId: string
   }
   listen: {
-    controlPassword: BaseServerOptions['controlPassword']
-    controlHost: BaseServerOptions['controlHost']
-    controlPort: BaseServerOptions['controlPort']
+    controlPassword: string
+    controlHost: string
+    controlPort: string
     loguxServer: string
-    environment: BaseServerOptions['env']
-    subprotocol: BaseServerOptions['subprotocol']
-    supports: BaseServerOptions['supports']
-    backend: BaseServerOptions['backend']
+    environment: 'production' | 'development'
+    subprotocol: string
+    supports: string
+    backend: string
     server: boolean
     nodeId: string
-    redis: BaseServerOptions['redis']
+    redis: string
     notes: Object
     cert: boolean
-    host: BaseServerOptions['host']
-    port: BaseServerOptions['port']
+    host: string
+    port: string
   }
 }
+
+export type Reporter = <E extends keyof Reporters> (
+  event: E, payload: Reporters[E]
+) => void
 
 export type Resend = {
   channel?: string
@@ -297,9 +301,7 @@ export type BaseServerOptions = {
   /**
    * Function to show current server status.
    */
-  reporter?: <E extends keyof Reporters> (
-    event: E, payload: Reporters[E]
-  ) => void
+  reporter?: Reporter
 }
 
 /**
@@ -466,7 +468,7 @@ export default class BaseServer {
   /**
    * Function to show current server status.
    */
-  reporter: BaseServerOptions['reporter'] | (() => void)
+  reporter: Reporter | (() => void)
 
   /**
    * Production or development mode.
@@ -477,7 +479,7 @@ export default class BaseServer {
    * }
    * ```
    */
-  env: Required<BaseServerOptions['env']>
+  env: 'production' | 'development'
 
   /**
    * Server unique ID.

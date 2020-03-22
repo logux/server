@@ -8,7 +8,7 @@ export { Action } from '@logux/core'
 export {
   LoguxAction,
   LoguxProcessedAction,
-  Reporters,
+  Reporter,
   LoguxSubscribeAction,
   LoguxUndoAction,
   LoguxUnsubscribeAction,
