@@ -1,6 +1,6 @@
 import Logger from 'bunyan'
 
-import BaseServer, { Reporter } from '../base-server'
+import BaseServer, { Reporter, BaseServerOptions } from '../base-server'
 
 /**
  * BaseServer options.

@@ -171,8 +171,8 @@ type ReportersArguments = {
   }
 }
 
-export type Reporter = <E extends keyof Reporters> (
-  event: E, payload: Reporters[E]
+export type Reporter = <E extends keyof ReportersArguments> (
+  event: E, payload: ReportersArguments[E]
 ) => void
 
 export type Resend = {
