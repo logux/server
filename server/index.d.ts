@@ -59,10 +59,10 @@ export default class Server extends BaseServer {
    *                 variables will override them.
    * @returns Parsed options object.
    */
-  static loadOptions: (
+  static loadOptions (
     process: NodeJS.Process,
     defaults: ServerOptions
-  ) => ServerOptions
+  ): ServerOptions
 
   /**
    * @param opts Server options.
