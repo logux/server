@@ -17,6 +17,9 @@ export default class ServerClient {
    */
   constructor(app: BaseServer, connection: ServerConnection, key: number)
 
+  /**
+   * Server, which received client.
+   */
   app: BaseServer
 
   /**
