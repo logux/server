@@ -471,7 +471,7 @@ export default class BaseServer {
   /**
    * Function to show current server status.
    */
-  reporter: Reporter | (() => void)
+  reporter: Reporter
 
   /**
    * Production or development mode.
