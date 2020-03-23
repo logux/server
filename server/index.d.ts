@@ -1,4 +1,4 @@
-import Logger from 'bunyan'
+import { Logger as BunyanLogger } from 'bunyan'
 
 import BaseServer, { Reporter, BaseServerOptions } from '../base-server'
 
@@ -16,7 +16,7 @@ export type ServerOptions = BaseServerOptions & {
   /**
    * Bunyan logger with custom settings.
    */
-  bunyan?: Logger
+  bunyan?: BunyanLogger
 }
 
 /**
