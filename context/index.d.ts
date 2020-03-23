@@ -12,6 +12,8 @@ import BaseServer, { BaseServerOptions, ServerMeta } from '../base-server'
  *   }
  * })
  * ```
+ *
+ * @template D Type for `ctx.data`.
  */
 export default class Context<D = { }> {
   /**

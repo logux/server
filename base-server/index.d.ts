@@ -630,6 +630,9 @@ export default class BaseServer {
    *
    * @param name The action’s type.
    * @param callbacks Callbacks for actions with this type.
+   *
+   * @template A Action’s type.
+   * @template D Type for `ctx.data`.
    */
   type<A extends Action = Action, D = { }> (
     name: A['type'],
@@ -661,6 +664,8 @@ export default class BaseServer {
    * ```
    *
    * @param callbacks Callbacks for actions with this type.
+   *
+   * @template D Type for `ctx.data`.
    */
   otherType<D = { }> (callbacks: ActionCallbacks<Action, D>): void
 
@@ -686,6 +691,10 @@ export default class BaseServer {
    *
    * @param pattern Pattern or regular expression for channel name.
    * @param callbacks Callback during subscription process.
+   *
+   * @template P Type for `ctx.params`.
+   * @template D Type for `ctx.data`.
+   * @template A `logux/subscribe` Action’s type.
    */
   channel<
     P = { },
@@ -716,6 +725,9 @@ export default class BaseServer {
    * ```
    *
    * @param callbacks Callback during subscription process.
+   *
+   * @template D Type for `ctx.data`.
+   * @template A `logux/subscribe` Action’s type.
    */
   otherChannel<
     D = { },
