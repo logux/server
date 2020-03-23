@@ -374,7 +374,7 @@ type actionFinally<A, D> = (
  * @param meta The action metadata.
  * @returns Should action be sent to client.
  */
-type filter = (
+type channelFilter = (
   ctx: Context<{ }>, action: Action, meta: ServerMeta
 ) => boolean
 
@@ -400,7 +400,7 @@ type channelAuthorizer<A, D, P> = (
  */
 type filterCreator<A, D, P> = (
   ctx: ChannelContext<D, P>, action: A, meta: ServerMeta
-) => filter | undefined
+) => channelFilter | undefined
 
 /**
  * Send actions with initial state.
