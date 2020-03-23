@@ -1,4 +1,4 @@
-import { Logger as BunyanLogger } from 'bunyan'
+import BunyanLogger from 'bunyan'
 
 import BaseServer, { Reporter, BaseServerOptions } from '../base-server'
 
