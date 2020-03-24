@@ -312,7 +312,7 @@ export type BaseServerOptions = {
  * @param client Client object.
  * @returns `true` if credentials was correct
  */
-type authenticator = (
+type Authenticator = (
   userId: string | false,
   credentials: string | undefined,
   server: ServerClient
@@ -326,7 +326,7 @@ type authenticator = (
  * @param meta The action metadata.
  * @returns `true` if client are allowed to use this action.
  */
-type authorizer<A, D> = (
+type Authorizer<A, D> = (
   ctx: Context<D>, action: A, meta: ServerMeta
 ) => boolean | Promise<boolean>
 
@@ -338,7 +338,7 @@ type authorizer<A, D> = (
  * @param meta The action metadata.
  * @returns Meta’s keys.
  */
-type resender<A, D> = (
+type Resender<A, D> = (
   ctx: Context<D>, action: A, meta: ServerMeta
 ) => Resend | Promise<Resend>
 
@@ -350,7 +350,7 @@ type resender<A, D> = (
  * @param meta The action metadata.
  * @returns Promise when processing will be finished.
  */
-type processor<A = Action, D = { }> = (
+type Processor<A = Action, D = { }> = (
   ctx: Context<D>, action: A, meta: ServerMeta
 ) => void | Promise<void>
 
@@ -362,7 +362,7 @@ type processor<A = Action, D = { }> = (
  * @param action The action data.
  * @param meta The action metadata.
  */
-type actionFinally<A, D> = (
+type ActionFinally<A, D> = (
   ctx: Context<D>, action: A, meta: ServerMeta
 ) => void
 
@@ -374,7 +374,7 @@ type actionFinally<A, D> = (
  * @param meta The action metadata.
  * @returns Should action be sent to client.
  */
-type channelFilter = (
+type ChannelFilter = (
   ctx: Context<{ }>, action: Action, meta: ServerMeta
 ) => boolean
 
@@ -386,7 +386,7 @@ type channelFilter = (
  * @param meta The action metadata.
  * @returns `true` if client are allowed to subscribe to this channel.
  */
-type channelAuthorizer<A, D, P> = (
+type ChannelAuthorizer<A, D, P> = (
   ctx: ChannelContext<D, P>, action: A, meta: ServerMeta
 ) => boolean | Promise<boolean>
 
@@ -398,9 +398,9 @@ type channelAuthorizer<A, D, P> = (
  * @param meta The action metadata.
  * @returns Actions filter.
  */
-type filterCreator<A, D, P> = (
+type FilterCreator<A, D, P> = (
   ctx: ChannelContext<D, P>, action: A, meta: ServerMeta
-) => channelFilter | undefined
+) => ChannelFilter | undefined
 
 /**
  * Send actions with initial state.
@@ -427,15 +427,15 @@ type channelFinally<A, D, P> = (
 ) => void
 
 type ActionCallbacks<A, D> = {
-  access: authorizer<A, D>
-  resend?: resender<A, D>
-  process?: processor<A, D>
-  finally?: actionFinally<A, D>
+  access: Authorizer<A, D>
+  resend?: Resender<A, D>
+  process?: Processor<A, D>
+  finally?: ActionFinally<A, D>
 }
 
 type ChannelCallbacks<A, D, P> = {
-  access: channelAuthorizer<A, D, P>
-  filter?: filterCreator<A, D, P>
+  access: ChannelAuthorizer<A, D, P>
+  filter?: FilterCreator<A, D, P>
   init?: channelInitialized<A, D, P>
   finally?: channelFinally<A, D, P>
 }
@@ -528,7 +528,7 @@ export default class BaseServer {
    *
    * @param authenticator The authentication callback.
    */
-  auth (authenticator: authenticator): void
+  auth (authenticator: Authenticator): void
 
   /**
    * Start WebSocket server and listen for clients.
