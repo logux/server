@@ -1,5 +1,5 @@
 import {
-  Action, ID, Log, Meta, ServerConnection, Store, TestTime
+  Action, AnyAction, ID, Log, Meta, ServerConnection, Store, TestTime
 } from '@logux/core'
 import { Server as HTTPServer } from 'http'
 import { Unsubscribe } from 'nanoevents'
@@ -644,7 +644,7 @@ export default class BaseServer {
    * @template A Action’s type.
    * @template D Type for `ctx.data`.
    */
-  type<A extends Action = Action, D extends object = { }> (
+  type<A extends Action = AnyAction, D extends object = { }> (
     name: A['type'],
     callbacks: ActionCallbacks<A, D>
   ): void

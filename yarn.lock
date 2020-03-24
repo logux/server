@@ -392,9 +392,9 @@
 
 "@logux/core@logux/core":
   version "0.3.5"
-  resolved "https://codeload.github.com/logux/core/tar.gz/9a5e024b301791c695298ddde4df0565036ea055"
+  resolved "https://codeload.github.com/logux/core/tar.gz/8ca7552752b6a31d1672e8b2c358285363d8d998"
   dependencies:
-    nanoevents "^5.1.0"
+    nanoevents "^5.1.5"
 
 "@logux/eslint-config@^36.1.1":
   version "36.1.1"
@@ -3665,7 +3665,7 @@ nanodelay@^1.0.1:
   resolved "https://registry.yarnpkg.com/nanodelay/-/nanodelay-1.0.1.tgz#efd11374a69f15a120d785fcf26869fe1bcdce0a"
   integrity sha512-KEfGZBAVg+DxO/IzOYfZ+2kZ0TWy15aUBFjez5VzjQfemS4rn5JIzPO67mPollKXyzq2Bj2TJF9/j13RC02qYg==
 
-nanoevents@^5.1.0, nanoevents@^5.1.5:
+nanoevents@^5.1.5:
   version "5.1.5"
   resolved "https://registry.yarnpkg.com/nanoevents/-/nanoevents-5.1.5.tgz#ad9854a531c4240296f21e8362c9e51f9ebde528"
   integrity sha512-4uRsi3eXxPLQfiXSWPstkS2opiYqRP7mkqh2KDWr24/IwJnqdCLL41ljl86rYW6LxN0w6B6PlwoClAH8o17hBQ==
