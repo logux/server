@@ -164,7 +164,7 @@ type ReportersArguments = {
     server: boolean
     nodeId: string
     redis: string
-    notes: Object
+    notes: object
     cert: boolean
     host: string
     port: string
@@ -748,7 +748,7 @@ export default class BaseServer {
    * @param extra Extra fields to `logux/undo` action.
    * @returns When action was saved to the log.
    */
-  undo (meta: ServerMeta, reason?: string, extra?: Object): Promise<void>
+  undo (meta: ServerMeta, reason?: string, extra?: object): Promise<void>
 
   /**
    * Send runtime error stacktrace to all clients.
