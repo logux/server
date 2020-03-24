@@ -410,7 +410,7 @@ type FilterCreator<A, D, P> = (
  * @param meta The action metadata.
  * @returns Promise during initial actions loading.
  */
-type channelInitialized<A, D, P> = (
+type ChannelInitialized<A, D, P> = (
   ctx: ChannelContext<D, P>, action: A, meta: ServerMeta
 ) => void | Promise<void>
 
@@ -422,7 +422,7 @@ type channelInitialized<A, D, P> = (
  * @param action The action data.
  * @param meta The action metadata.
  */
-type channelFinally<A, D, P> = (
+type ChannelFinally<A, D, P> = (
   ctx: ChannelContext<D, P>, action: A, meta: ServerMeta
 ) => void
 
@@ -436,8 +436,8 @@ type ActionCallbacks<A, D> = {
 type ChannelCallbacks<A, D, P> = {
   access: ChannelAuthorizer<A, D, P>
   filter?: FilterCreator<A, D, P>
-  init?: channelInitialized<A, D, P>
-  finally?: channelFinally<A, D, P>
+  init?: ChannelInitialized<A, D, P>
+  finally?: ChannelFinally<A, D, P>
 }
 
 /**
