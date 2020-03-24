@@ -38,6 +38,8 @@ type UserParams = {
   id: string
 }
 
+type BadParams = number
+
 server.type<UserRenameAction, UserData>('user/rename', {
   access (ctx, action) {
     ctx.data.user = new User(action.userId)
@@ -67,11 +69,18 @@ server.type('user/changeId', {
   }
 })
 
-// THROWS No overload matches this call.
+// THROWS '"bad"' is not assignable to parameter of type '"user/rename"'.
+server.type<UserRenameAction>('bad', {
+  access () {
+    return true
+  }
+})
+
 server.channel<UserParams, UserData, UserSubscribeAction>('user/:id', {
   access () {
     return true
   },
+  // THROWS undefined>' is not assignable to type 'FilterCreator
   async filter (_, action) {
     if (action.fields) {
       return (_, otherAction) => {
@@ -96,5 +105,12 @@ server.channel(/admin:\d/, {
     console.log(meta.id, action.since)
     // THROWS Property 'id' does not exist on type 'string[]'.
     return ctx.params.id === ctx.userId
+  }
+})
+
+// THROWS Type 'number' does not satisfy the constraint 'string[]'.
+server.channel<BadParams>('posts', {
+  access () {
+    return true
   }
 })

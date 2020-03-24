@@ -15,7 +15,7 @@ import BaseServer, { BaseServerOptions, ServerMeta } from '../base-server'
  *
  * @template D Type for `ctx.data`.
  */
-export default class Context<D = { }> {
+export default class Context<D extends object> {
   /**
    * @param nodeId Unique node ID.
    * @param clientId Unique persistence client ID.
@@ -138,7 +138,9 @@ export default class Context<D = { }> {
  * })
  * ```
  */
-export class ChannelContext<D = {}, P = {} | string[]> extends Context<D> {
+export class ChannelContext<
+  D extends object, P extends object | string[]
+> extends Context<D> {
   /**
    * Parsed variable parts of channel pattern.
    *

@@ -326,7 +326,7 @@ type Authenticator = (
  * @param meta The action metadata.
  * @returns `true` if client are allowed to use this action.
  */
-type Authorizer<A, D> = (
+type Authorizer<A extends Action, D extends object> = (
   ctx: Context<D>, action: A, meta: ServerMeta
 ) => boolean | Promise<boolean>
 
@@ -338,7 +338,7 @@ type Authorizer<A, D> = (
  * @param meta The action metadata.
  * @returns Meta’s keys.
  */
-type Resender<A, D> = (
+type Resender<A extends Action, D extends object> = (
   ctx: Context<D>, action: A, meta: ServerMeta
 ) => Resend | Promise<Resend>
 
@@ -350,7 +350,7 @@ type Resender<A, D> = (
  * @param meta The action metadata.
  * @returns Promise when processing will be finished.
  */
-type Processor<A = Action, D = { }> = (
+type Processor<A extends Action, D extends object> = (
   ctx: Context<D>, action: A, meta: ServerMeta
 ) => void | Promise<void>
 
@@ -362,7 +362,7 @@ type Processor<A = Action, D = { }> = (
  * @param action The action data.
  * @param meta The action metadata.
  */
-type ActionFinally<A, D> = (
+type ActionFinally<A extends Action, D extends object> = (
   ctx: Context<D>, action: A, meta: ServerMeta
 ) => void
 
@@ -386,7 +386,9 @@ type ChannelFilter = (
  * @param meta The action metadata.
  * @returns `true` if client are allowed to subscribe to this channel.
  */
-type ChannelAuthorizer<A, D, P> = (
+type ChannelAuthorizer<
+  A extends Action, D extends object, P extends object | string[]
+> = (
   ctx: ChannelContext<D, P>, action: A, meta: ServerMeta
 ) => boolean | Promise<boolean>
 
@@ -398,7 +400,9 @@ type ChannelAuthorizer<A, D, P> = (
  * @param meta The action metadata.
  * @returns Actions filter.
  */
-type FilterCreator<A, D, P> = (
+type FilterCreator<
+  A extends Action, D extends object, P extends object | string[]
+> = (
   ctx: ChannelContext<D, P>, action: A, meta: ServerMeta
 ) => ChannelFilter | undefined
 
@@ -410,7 +414,9 @@ type FilterCreator<A, D, P> = (
  * @param meta The action metadata.
  * @returns Promise during initial actions loading.
  */
-type ChannelInitialized<A, D, P> = (
+type ChannelInitialized<
+  A extends Action, D extends object, P extends object | string[]
+> = (
   ctx: ChannelContext<D, P>, action: A, meta: ServerMeta
 ) => void | Promise<void>
 
@@ -422,18 +428,22 @@ type ChannelInitialized<A, D, P> = (
  * @param action The action data.
  * @param meta The action metadata.
  */
-type ChannelFinally<A, D, P> = (
+type ChannelFinally<
+  A extends Action, D extends object, P extends object | string[]
+> = (
   ctx: ChannelContext<D, P>, action: A, meta: ServerMeta
 ) => void
 
-type ActionCallbacks<A, D> = {
+type ActionCallbacks<A extends Action, D extends object> = {
   access: Authorizer<A, D>
   resend?: Resender<A, D>
   process?: Processor<A, D>
   finally?: ActionFinally<A, D>
 }
 
-type ChannelCallbacks<A, D, P> = {
+type ChannelCallbacks<
+  A extends Action, D extends object, P extends object | string[]
+> = {
   access: ChannelAuthorizer<A, D, P>
   filter?: FilterCreator<A, D, P>
   init?: ChannelInitialized<A, D, P>
@@ -634,7 +644,7 @@ export default class BaseServer {
    * @template A Action’s type.
    * @template D Type for `ctx.data`.
    */
-  type<A extends Action = Action, D = { }> (
+  type<A extends Action = Action, D extends object = { }> (
     name: A['type'],
     callbacks: ActionCallbacks<A, D>
   ): void
@@ -667,7 +677,9 @@ export default class BaseServer {
    *
    * @template D Type for `ctx.data`.
    */
-  otherType<D = { }> (callbacks: ActionCallbacks<Action, D>): void
+  otherType<
+    D extends object = { }
+  > (callbacks: ActionCallbacks<Action, D>): void
 
   /**
    * Define the channel.
@@ -697,14 +709,14 @@ export default class BaseServer {
    * @template A `logux/subscribe` Action’s type.
    */
   channel<
-    P = { },
-    D = { },
-    A = LoguxSubscribeAction
+    P extends object = { },
+    D extends object = { },
+    A extends LoguxSubscribeAction = LoguxSubscribeAction
   > (pattern: string, callbacks: ChannelCallbacks<A, D, P>): void
   channel<
-    P = string[],
-    D = { },
-    A = LoguxSubscribeAction
+    P extends string[] = string[],
+    D extends object = { },
+    A extends LoguxSubscribeAction = LoguxSubscribeAction
   > (pattern: RegExp, callbacks: ChannelCallbacks<A, D, P>): void
 
   /**
@@ -730,9 +742,8 @@ export default class BaseServer {
    * @template A `logux/subscribe` Action’s type.
    */
   otherChannel<
-    D = { },
-    A = LoguxSubscribeAction,
-  > (callbacks: ChannelCallbacks<A, D, { }>): void
+    D extends object = { },
+  > (callbacks: ChannelCallbacks<LoguxSubscribeAction, D, { }>): void
 
   /**
    * Undo action from client.

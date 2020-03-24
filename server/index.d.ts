@@ -2,9 +2,6 @@ import BunyanLogger from 'bunyan'
 
 import BaseServer, { Reporter, BaseServerOptions } from '../base-server'
 
-/**
- * BaseServer options.
- */
 export type ServerOptions = BaseServerOptions & {
   /**
    * Report process/errors to CLI in bunyan JSON or in human readable
