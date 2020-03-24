@@ -44,7 +44,7 @@ server.type<UserRenameAction, UserData>('user/rename', {
     return true
   },
 
-  // THROWS is not assignable to type 'resender
+  // THROWS is not assignable to type 'Resender
   resend (_, action) {
     return {
       subscriptions: `user/${ action.userId }`
