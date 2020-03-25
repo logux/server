@@ -312,11 +312,13 @@ export type BaseServerOptions = {
  * @param client Client object.
  * @returns `true` if credentials was correct
  */
-type Authenticator = (
-  userId: string | false,
-  credentials: string | undefined,
-  server: ServerClient
-) => boolean | Promise<boolean>
+interface Authenticator {
+  (
+    userId: string | false,
+    credentials: string | undefined,
+    server: ServerClient
+  ): boolean | Promise<boolean>
+}
 
 /**
  * Check does user can do this action.
@@ -326,9 +328,9 @@ type Authenticator = (
  * @param meta The action metadata.
  * @returns `true` if client are allowed to use this action.
  */
-type Authorizer<A extends Action, D extends object> = (
-  ctx: Context<D>, action: A, meta: ServerMeta
-) => boolean | Promise<boolean>
+interface Authorizer<A extends Action, D extends object> {
+  (ctx: Context<D>, action: A, meta: ServerMeta): boolean | Promise<boolean>
+}
 
 /**
  * Return object with keys for meta to resend action to other users.
@@ -338,9 +340,9 @@ type Authorizer<A extends Action, D extends object> = (
  * @param meta The action metadata.
  * @returns Meta’s keys.
  */
-type Resender<A extends Action, D extends object> = (
-  ctx: Context<D>, action: A, meta: ServerMeta
-) => Resend | Promise<Resend>
+interface Resender<A extends Action, D extends object> {
+  (ctx: Context<D>, action: A, meta: ServerMeta): Resend | Promise<Resend>
+}
 
 /**
  * Action business logic.
@@ -350,9 +352,9 @@ type Resender<A extends Action, D extends object> = (
  * @param meta The action metadata.
  * @returns Promise when processing will be finished.
  */
-type Processor<A extends Action, D extends object> = (
-  ctx: Context<D>, action: A, meta: ServerMeta
-) => void | Promise<void>
+interface Processor<A extends Action, D extends object> {
+  (ctx: Context<D>, action: A, meta: ServerMeta): void | Promise<void>
+}
 
 /**
  * Callback which will be run on the end of subscription
@@ -362,9 +364,9 @@ type Processor<A extends Action, D extends object> = (
  * @param action The action data.
  * @param meta The action metadata.
  */
-type ActionFinally<A extends Action, D extends object> = (
-  ctx: Context<D>, action: A, meta: ServerMeta
-) => void
+interface ActionFinally<A extends Action, D extends object> {
+  (ctx: Context<D>, action: A, meta: ServerMeta): void
+}
 
 /**
  * Channel filter callback
@@ -374,9 +376,9 @@ type ActionFinally<A extends Action, D extends object> = (
  * @param meta The action metadata.
  * @returns Should action be sent to client.
  */
-type ChannelFilter = (
-  ctx: Context<{ }>, action: Action, meta: ServerMeta
-) => boolean
+interface ChannelFilter {
+  (ctx: Context<{ }>, action: Action, meta: ServerMeta): boolean
+}
 
 /**
  * Channel authorizer callback
@@ -386,11 +388,13 @@ type ChannelFilter = (
  * @param meta The action metadata.
  * @returns `true` if client are allowed to subscribe to this channel.
  */
-type ChannelAuthorizer<
+interface ChannelAuthorizer<
   A extends Action, D extends object, P extends object | string[]
-> = (
-  ctx: ChannelContext<D, P>, action: A, meta: ServerMeta
-) => boolean | Promise<boolean>
+> {
+  (
+    ctx: ChannelContext<D, P>, action: A, meta: ServerMeta
+  ): boolean | Promise<boolean>
+}
 
 /**
  * Generates custom filter for channel’s actions.
@@ -400,11 +404,11 @@ type ChannelAuthorizer<
  * @param meta The action metadata.
  * @returns Actions filter.
  */
-type FilterCreator<
+interface FilterCreator<
   A extends Action, D extends object, P extends object | string[]
-> = (
-  ctx: ChannelContext<D, P>, action: A, meta: ServerMeta
-) => ChannelFilter | undefined
+> {
+  (ctx: ChannelContext<D, P>, action: A, meta: ServerMeta): ChannelFilter | void
+}
 
 /**
  * Send actions with initial state.
@@ -414,11 +418,11 @@ type FilterCreator<
  * @param meta The action metadata.
  * @returns Promise during initial actions loading.
  */
-type ChannelInitialized<
+interface ChannelInitialized<
   A extends Action, D extends object, P extends object | string[]
-> = (
-  ctx: ChannelContext<D, P>, action: A, meta: ServerMeta
-) => void | Promise<void>
+> {
+  (ctx: ChannelContext<D, P>, action: A, meta: ServerMeta): void | Promise<void>
+}
 
 /**
  * Callback which will be run on the end of subscription
@@ -428,11 +432,11 @@ type ChannelInitialized<
  * @param action The action data.
  * @param meta The action metadata.
  */
-type ChannelFinally<
+interface ChannelFinally<
   A extends Action, D extends object, P extends object | string[]
-> = (
-  ctx: ChannelContext<D, P>, action: A, meta: ServerMeta
-) => void
+> {
+  (ctx: ChannelContext<D, P>, action: A, meta: ServerMeta): void
+}
 
 type ActionCallbacks<A extends Action, D extends object> = {
   access: Authorizer<A, D>
