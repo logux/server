@@ -1,5 +1,5 @@
 let JSONStream = require('JSONStream')
-let nanoid = require('nanoid')
+let { nanoid } = require('nanoid')
 let https = require('https')
 let http = require('http')
 
