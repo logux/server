@@ -65,4 +65,13 @@ export default class Server extends BaseServer {
    * @param opts Server options.
    */
   constructor (opts: ServerOptions)
+
+  /**
+   * Server options.
+   *
+   * ```js
+   * console.log('Server options', server.options.subprotocol)
+   * ```
+   */
+  options: ServerOptions
 }
