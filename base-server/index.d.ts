@@ -407,7 +407,9 @@ interface ChannelAuthorizer<
 interface FilterCreator<
   A extends Action, D extends object, P extends object | string[]
 > {
-  (ctx: ChannelContext<D, P>, action: A, meta: ServerMeta): ChannelFilter | void
+  (
+    ctx: ChannelContext<D, P>, action: A, meta: ServerMeta
+  ): Promise<ChannelFilter> | ChannelFilter | void
 }
 
 /**
