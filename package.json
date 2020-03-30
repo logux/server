@@ -1,6 +1,6 @@
 {
   "name": "@logux/server",
-  "version": "0.5.3",
+  "version": "0.6.0",
   "description": "Build own Logux server or make proxy between WebSocket and HTTP backend on any language",
   "keywords": [
     "logux",
@@ -115,7 +115,9 @@
       "Bunyan",
       "GraphQL",
       "WebSocket",
-      "io"
+      "io",
+      "ES",
+      "TypeDoc"
     ]
   },
   "sharec": {

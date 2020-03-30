@@ -1,6 +1,11 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.6 “Helios”
+* Add ES modules support.
+* Add TypeScript definitions (by Kirill Neruchev).
+* Move API docs from JSDoc to TypeDoc.
+
 ## 0.5.3
 * Fix Nano Events API.
 
