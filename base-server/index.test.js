@@ -6,9 +6,8 @@ let { join } = require('path')
 let https = require('https')
 let http = require('http')
 
-let pkg = require('../package.json')
-
 let { BaseServer } = require('..')
+let pkg = require('../package.json')
 
 const DEFAULT_OPTIONS = {
   subprotocol: '0.0.0',
