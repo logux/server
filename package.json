@@ -10,7 +10,8 @@
     "proxy",
     "crdt",
     "event sourcing",
-    "distributed systems"
+    "distributed systems",
+    "collaborative"
   ],
   "scripts": {
     "spell": "yaspeller-ci *.md",
