@@ -1090,3 +1090,28 @@ it('does not resend actions back', async () => {
   expect(actions(client1)).toEqual([])
   expect(actions(client2)).toEqual([{ type: 'A' }, { type: 'C' }])
 })
+
+it('keeps context', async () => {
+  let app = createServer()
+  app.type('A', {
+    access (ctx) {
+      ctx.data.a = 1
+      return true
+    },
+    process (ctx) {
+      expect(ctx.data.a).toEqual(1)
+    },
+    finally (ctx) {
+      expect(ctx.data.a).toEqual(1)
+    }
+  })
+
+  let client = await connectClient(app, '10:1:uuid')
+  client.node.connection.other().send([
+    'sync', 1, { type: 'A' }, { id: [1, '10:1:uuid', 0], time: 1 }
+  ])
+  await client.node.connection.pair.wait('right')
+  await delay(1)
+
+  expect(sent(client)[2][2].type).toEqual('logux/processed')
+})

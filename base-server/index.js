@@ -69,6 +69,7 @@ class BaseServer {
       log = new Log({ store, nodeId: this.nodeId })
     }
 
+    this.contexts = { }
     this.log = log
 
     this.on('preadd', (action, meta) => {
@@ -441,6 +442,7 @@ class BaseServer {
   }
 
   internalUnkownType (action, meta) {
+    delete this.contexts[meta.id]
     this.log.changeMeta(meta.id, { status: 'error' })
     this.reporter('unknownType', { type: action.type, actionId: meta.id })
     if (parseNodeId(meta.id).userId !== 'server') {
@@ -450,6 +452,7 @@ class BaseServer {
   }
 
   internalWrongChannel (action, meta) {
+    delete this.contexts[meta.id]
     this.reporter('wrongChannel', {
       actionId: meta.id,
       channel: action.channel
@@ -492,18 +495,21 @@ class BaseServer {
   }
 
   createContext (meta) {
-    let data = parseNodeId(meta.id)
+    if (!this.contexts[meta.id]) {
+      let data = parseNodeId(meta.id)
 
-    let subprotocol
-    if (meta.subprotocol) {
-      subprotocol = meta.subprotocol
-    } else if (this.clientIds[data.clientId]) {
-      subprotocol = this.clientIds[data.clientId].node.remoteSubprotocol
+      let subprotocol
+      if (meta.subprotocol) {
+        subprotocol = meta.subprotocol
+      } else if (this.clientIds[data.clientId]) {
+        subprotocol = this.clientIds[data.clientId].node.remoteSubprotocol
+      }
+
+      this.contexts[meta.id] = new Context(
+        data.nodeId, data.clientId, data.userId, subprotocol, this
+      )
     }
-
-    return new Context(
-      data.nodeId, data.clientId, data.userId, subprotocol, this
-    )
+    return this.contexts[meta.id]
   }
 
   async subscribeAction (action, meta, start) {
@@ -599,6 +605,7 @@ class BaseServer {
       channel: action.channel
     })
     this.markAsProcessed(meta)
+    delete this.contexts[meta.id]
   }
 
   denyAction (meta) {
@@ -661,6 +668,7 @@ class BaseServer {
   }
 
   finally (processor, ctx, action, meta) {
+    delete this.contexts[meta.id]
     if (processor && processor.finally) {
       try {
         processor.finally(ctx, action, meta)

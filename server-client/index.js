@@ -199,6 +199,7 @@ class ServerClient {
       return !ALLOWED_META.includes(i) && !RESEND_META.includes(i)
     })
     if (wrongUser || wrongMeta) {
+      delete this.app.contexts[meta.id]
       this.denyBack(meta)
       return false
     }
@@ -218,8 +219,10 @@ class ServerClient {
       let result = await processor.access(ctx, action, meta)
       if (this.app.unknownTypes[meta.id]) {
         delete this.app.unknownTypes[meta.id]
+        this.app.finally(processor, ctx, action, meta)
         return false
       } else if (!result) {
+        this.app.finally(processor, ctx, action, meta)
         this.denyBack(meta)
         return false
       } else {
