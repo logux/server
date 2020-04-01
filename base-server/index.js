@@ -354,17 +354,9 @@ class BaseServer {
   }
 
   undo (meta, reason = 'error', extra = { }) {
-    let undoMeta = { status: 'processed' }
-
-    if (meta.users) undoMeta.users = meta.users.slice(0)
-    if (meta.nodes) undoMeta.nodes = meta.nodes.slice(0)
-    if (meta.reasons) undoMeta.reasons = meta.reasons.slice(0)
-    if (meta.channels) undoMeta.channels = meta.channels.slice(0)
-
-    undoMeta.clients = [parseNodeId(meta.id).clientId]
-    if (meta.clients) undoMeta.clients = undoMeta.clients.concat(meta.clients)
-
-    let action = { ...extra, type: 'logux/undo', id: meta.id, reason }
+    let clientId = parseNodeId(meta.id).clientId
+    let [action, undoMeta] = this.buildUndo(meta, reason, extra)
+    undoMeta.clients = (undoMeta.clients || []).concat([clientId])
     return this.log.add(action, undoMeta)
   }
 
@@ -674,6 +666,19 @@ class BaseServer {
         this.emitter.emit('error', err, action, meta)
       }
     }
+  }
+
+  buildUndo (meta, reason, extra) {
+    let undoMeta = { status: 'processed' }
+
+    if (meta.users) undoMeta.users = meta.users.slice(0)
+    if (meta.nodes) undoMeta.nodes = meta.nodes.slice(0)
+    if (meta.clients) undoMeta.clients = meta.clients.slice(0)
+    if (meta.reasons) undoMeta.reasons = meta.reasons.slice(0)
+    if (meta.channels) undoMeta.channels = meta.channels.slice(0)
+
+    let action = { ...extra, type: 'logux/undo', id: meta.id, reason }
+    return [action, undoMeta]
   }
 }
 

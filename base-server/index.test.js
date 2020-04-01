@@ -641,7 +641,7 @@ it('undoes actions on client', async () => {
         nodes: ['2:client:uuid'],
         server: 'server:uuid',
         status: 'processed',
-        clients: ['1:client', '2:client'],
+        clients: ['2:client', '1:client'],
         reasons: ['user/1/lastValue'],
         channels: ['user/1'],
         subprotocol: '0.0.0'

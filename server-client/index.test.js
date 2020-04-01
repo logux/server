@@ -73,6 +73,20 @@ function sentNames (client) {
   return sent(client).map(i => i[0])
 }
 
+function actions (client) {
+  let received = []
+  sent(client).forEach(i => {
+    if (i[0] === 'sync') {
+      for (let j = 2; j < i.length; j += 2) {
+        if (i[j].type !== 'logux/processed') {
+          received.push(i[j])
+        }
+      }
+    }
+  })
+  return received
+}
+
 afterEach(() => {
   destroyable.forEach(i => i.destroy())
   destroyable = []
@@ -1014,4 +1028,65 @@ it('has finally callback', async () => {
 
   expect(calls).toEqual(['C', 'D', 'A', 'E', 'B'])
   expect(errors).toEqual(['C', 'D', 'E', 'EE'])
+})
+
+it('sends error to author', async () => {
+  let app = createServer()
+  app.type('A', { access: () => true })
+  let client1 = await connectClient(app, '10:1:uuid')
+  let client2 = await connectClient(app, '10:2:uuid')
+
+  client2.node.connection.other().send([
+    'sync', 1, { type: 'A' }, { id: [1, '10:1:uuid', 0], time: 1 }
+  ])
+  await client2.node.connection.pair.wait('right')
+  await delay(1)
+
+  expect(sent(client1)).toHaveLength(1)
+  expect(sent(client2)).toHaveLength(3)
+})
+
+it('does not resend actions back', async () => {
+  let app = createServer()
+
+  app.type('A', {
+    access: () => true,
+    resend: () => ({ users: ['10'] })
+  })
+  app.type('B', {
+    access: () => true,
+    resend: () => ({ clients: ['10:1'] })
+  })
+  app.type('C', {
+    access: () => true,
+    resend: () => ({ channels: ['all'] })
+  })
+  app.channel('all', { access: () => true })
+
+  let client1 = await connectClient(app, '10:1:uuid')
+  let client2 = await connectClient(app, '10:2:uuid')
+
+  client1.node.connection.other().send([
+    'sync', 1,
+    { type: 'logux/subscribe', channel: 'all' },
+    { id: [1, '10:1:uuid', 0], time: 1 }
+  ])
+  client2.node.connection.other().send([
+    'sync', 1,
+    { type: 'logux/subscribe', channel: 'all' },
+    { id: [1, '10:2:uuid', 0], time: 1 }
+  ])
+  await client2.node.connection.pair.wait('right')
+
+  client1.node.connection.other().send([
+    'sync', 4,
+    { type: 'A' }, { id: [2, '10:1:uuid', 0], time: 2 },
+    { type: 'B' }, { id: [3, '10:1:uuid', 0], time: 3 },
+    { type: 'C' }, { id: [4, '10:1:uuid', 0], time: 4 }
+  ])
+  await client1.node.connection.pair.wait('right')
+  await delay(1)
+
+  expect(actions(client1)).toEqual([])
+  expect(actions(client2)).toEqual([{ type: 'A' }, { type: 'C' }])
 })

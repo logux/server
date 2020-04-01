@@ -199,7 +199,7 @@ class ServerClient {
       return !ALLOWED_META.includes(i) && !RESEND_META.includes(i)
     })
     if (wrongUser || wrongMeta) {
-      this.app.denyAction(meta)
+      this.denyBack(meta)
       return false
     }
 
@@ -220,7 +220,7 @@ class ServerClient {
         delete this.app.unknownTypes[meta.id]
         return false
       } else if (!result) {
-        this.app.denyAction(meta)
+        this.denyBack(meta)
         return false
       } else {
         return true
@@ -231,6 +231,14 @@ class ServerClient {
       this.app.finally(processor, ctx, action, meta)
       return false
     }
+  }
+
+  denyBack (meta) {
+    this.app.reporter('denied', { actionId: meta.id })
+    let [action, undoMeta] = this.app.buildUndo(meta, 'denied', { })
+    undoMeta.clients = (undoMeta.clients || []).concat([this.clientId])
+    this.app.log.add(action, undoMeta)
+    this.app.debugActionError(meta, `Action "${ meta.id }" was denied`)
   }
 }
 
