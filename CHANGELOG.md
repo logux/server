@@ -1,6 +1,10 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.6.1
+* Keep context between steps.
+* Fix re-sending actions back to the author.
+
 ## 0.6 “Helios”
 * Add ES modules support.
 * Add TypeScript definitions (by Kirill Neruchev).
