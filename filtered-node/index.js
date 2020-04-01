@@ -12,6 +12,8 @@ class FilteredNode extends ServerNode {
     // Remove add event listener
     this.unbind[0]()
     this.unbind.splice(0, 1)
+
+    delete this.received
   }
 
   async syncSinceQuery (lastSynced) {

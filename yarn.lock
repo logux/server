@@ -388,10 +388,10 @@
     "@types/yargs" "^15.0.0"
     chalk "^3.0.0"
 
-"@logux/core@^0.4.0":
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/@logux/core/-/core-0.4.0.tgz#fd7a346e59714c937eabf7b91d881bb669b7c7e5"
-  integrity sha512-F8NSQpChmHicn44xO5GJ98+eAUVzlrokSNH0mtD1+bqZjCXT6jVsBg9oPKrb7ntZki9UfgTh8tunfjp0gj10Uw==
+"@logux/core@^0.4.1":
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/@logux/core/-/core-0.4.1.tgz#7e184c60e98fd4305586c136fcdfb071cc3ddf18"
+  integrity sha512-TcdIpIy8IpKhlDYtQ3CNhhurM0pviQFgz9z69BqO5M10pzbnTRh7BsaxJxe5LIKuQl7FGO+tz2rG4YZHVb9ldg==
   dependencies:
     nanoevents "^5.1.5"
 
