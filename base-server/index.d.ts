@@ -314,7 +314,7 @@ export type BaseServerOptions = {
  */
 interface Authenticator {
   (
-    userId: string | false,
+    userId: string | "false",
     credentials: string | undefined,
     server: ServerClient
   ): boolean | Promise<boolean>
@@ -668,7 +668,7 @@ export default class BaseServer {
    *     const response = await phpBackend.checkByHTTP(action, meta)
    *     if (response.code === 404) {
    *       this.unknownType(action, meta)
-   *       retur false
+   *       return false
    *     } else {
    *       return response.body === 'granted'
    *     }
