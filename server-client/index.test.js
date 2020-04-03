@@ -790,6 +790,7 @@ it('sends new actions by channel', async () => {
   client.connection.other().send(['synced', 2])
   client.connection.other().send(['synced', 4])
   await client.node.waitFor('synchronized')
+  await delay(1)
 
   expect(sentNames(client)).toEqual(['connected', 'sync', 'sync'])
   expect(sent(client)[1]).toEqual([
