@@ -308,14 +308,14 @@ export type BaseServerOptions = {
  * The authentication callback.
  *
  * @param userId User ID.
- * @param credentials The client credentials.
+ * @param token The client credentials.
  * @param client Client object.
  * @returns `true` if credentials was correct
  */
 interface Authenticator {
   (
-    userId: string | "false",
-    credentials: string | undefined,
+    userId: string,
+    token: string,
     server: ServerClient
   ): boolean | Promise<boolean>
 }
