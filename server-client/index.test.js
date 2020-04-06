@@ -813,7 +813,7 @@ it('works with channel according client ID', async () => {
   }
   await app.log.add({ type: 'FOO' }, { id: '2 server:x 0', channels: ['foo'] })
   client.connection.other().send(['synced', 1])
-  await delay(1)
+  await delay(10)
 
   expect(sentNames(client)).toEqual(['connected', 'sync'])
   expect(sent(client)[1]).toEqual([
