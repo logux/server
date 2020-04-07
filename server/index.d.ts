@@ -1,4 +1,4 @@
-import BunyanLogger from 'bunyan'
+import BunyanLogger = require('bunyan')
 
 import BaseServer, { Reporter, BaseServerOptions } from '../base-server'
 
