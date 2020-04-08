@@ -435,6 +435,29 @@ it('disconnects zombie', async () => {
   expect(test.reports[3]).toEqual(['zombie', { nodeId: '10:client:a' }])
 })
 
+it('checks action access', async () => {
+  let test = createReporter()
+  let finalled = 0
+  test.app.type('FOO', {
+    access: () => false,
+    finally () {
+      finalled += 1
+    }
+  })
+
+  let client = await connectClient(test.app)
+  client.connection.other().send(['sync', 2,
+    { type: 'FOO' }, { id: [1, '10:uuid', 0], time: 1 }
+  ])
+  await client.connection.pair.wait('right')
+
+  expect(test.names).toEqual(['connect', 'authenticated', 'denied', 'add'])
+  expect(test.app.log.actions()).toEqual([
+    { type: 'logux/undo', id: '1 10:uuid 0', reason: 'denied' }
+  ])
+  expect(finalled).toEqual(1)
+})
+
 it('checks action creator', async () => {
   let test = createReporter()
   test.app.type('GOOD', { access: () => true })
@@ -588,9 +611,13 @@ it('reports about errors in access callback', async () => {
   let err = new Error('test')
 
   let test = createReporter()
+  let finalled = 0
   test.app.type('FOO', {
     access () {
       throw err
+    },
+    finally () {
+      finalled += 1
     }
   })
 
@@ -613,6 +640,7 @@ it('reports about errors in access callback', async () => {
     actionId: '1 10:uuid 0', err
   }])
   expect(throwed).toEqual(err)
+  expect(finalled).toEqual(1)
 })
 
 it('adds resend keys', async () => {

@@ -775,10 +775,15 @@ it('checks channel access', async () => {
   test.app.nodeIds['10:uuid'] = client
   test.app.clientIds['10:uuid'] = client
 
+  let finalled = 0
+
   test.app.channel(/^user\/(\d+)$/, {
     async access (ctx) {
       expect(ctx.params[1]).toEqual('10')
       return false
+    },
+    finally () {
+      finalled += 1
     }
   })
 
@@ -793,6 +798,7 @@ it('checks channel access', async () => {
     type: 'logux/undo', id: '1 10:uuid 0', reason: 'denied'
   })
   expect(test.app.subscribers).toEqual({ })
+  expect(finalled).toEqual(1)
 })
 
 it('reports about errors during channel authorization', async () => {
