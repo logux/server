@@ -113,7 +113,7 @@ it('uses environment variable to detect environment', () => {
 
 it('reports listen', () => {
   check('listen', {
-    controlPassword: 'RhBaK0kuOBtqJalq2C4df',
+    controlSecret: 'RhBaK0kuOBtqJalq2C4df',
     controlHost: '127.0.0.1',
     controlPort: 31338,
     loguxServer: '0.0.0',
@@ -133,7 +133,7 @@ it('reports listen', () => {
 
 it('reports listen for production', () => {
   check('listen', {
-    controlPassword: 'RhBaK0kuOBtqJalq2C4df',
+    controlSecret: 'RhBaK0kuOBtqJalq2C4df',
     controlHost: '127.0.0.1',
     controlPort: 31338,
     loguxServer: '0.0.0',
@@ -295,10 +295,10 @@ it('reports EADDRINUSE error', () => {
   check('error', { fatal: true, err: { code: 'EADDRINUSE', port: 31337 } })
 })
 
-it('reports LOGUX_NO_CONTROL_PASSWORD error', () => {
+it('reports LOGUX_NO_CONTROL_SECRET error', () => {
   let err = {
-    code: 'LOGUX_NO_CONTROL_PASSWORD',
-    message: '`backend` requires also `controlPassword` option'
+    code: 'LOGUX_NO_CONTROL_SECRET',
+    message: '`backend` requires also `controlSecret` option'
   }
   check('error', { fatal: true, err })
 })

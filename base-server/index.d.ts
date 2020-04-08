@@ -153,7 +153,7 @@ type ReportersArguments = {
     nodeId: string
   }
   listen: {
-    controlPassword: string
+    controlSecret: string
     controlHost: string
     controlPort: string
     loguxServer: string
@@ -238,9 +238,9 @@ export type BaseServerOptions = {
   controlPort?: number
 
   /**
-   * Password to control the server.
+   * Secret to control the server.
    */
-  controlPassword?: string
+  controlSecret?: string
 
   /**
    * Store to save log. Will be {@link @logux/core:MemoryStore}, by default.

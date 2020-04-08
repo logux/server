@@ -91,7 +91,7 @@ it('uses CLI args for options', () => {
       '--reporter', 'json',
       '--redis', '//localhost',
       '--backend', 'http://localhost:8080/logux',
-      '--control-password', 'secret'
+      '--control-secret', 'secret'
     ],
     env: { }
   })
@@ -103,7 +103,7 @@ it('uses CLI args for options', () => {
   expect(options.key).toBeUndefined()
   expect(options.redis).toEqual('//localhost')
   expect(options.backend).toEqual('http://localhost:8080/logux')
-  expect(options.controlPassword).toEqual('secret')
+  expect(options.controlSecret).toEqual('secret')
 })
 
 it('uses env for options', () => {
@@ -115,7 +115,7 @@ it('uses env for options', () => {
       LOGUX_REPORTER: 'json',
       LOGUX_REDIS: '//localhost',
       LOGUX_BACKEND: 'http://localhost:8080/logux',
-      LOGUX_CONTROL_PASSWORD: 'secret'
+      LOGUX_CONTROL_SECRET: 'secret'
     }
   })
 
@@ -124,7 +124,7 @@ it('uses env for options', () => {
   expect(options.reporter).toEqual('json')
   expect(options.redis).toEqual('//localhost')
   expect(options.backend).toEqual('http://localhost:8080/logux')
-  expect(options.controlPassword).toEqual('secret')
+  expect(options.controlSecret).toEqual('secret')
 })
 
 it('uses combined options', () => {
@@ -209,7 +209,7 @@ it('shows help about unknown option', () => checkError('unknown.js'))
 
 it('shows help about missed option', () => checkError('missed.js'))
 
-it('shows help about missed password', () => checkError('no-password.js'))
+it('shows help about missed secret', () => checkError('no-secret.js'))
 
 it('disables colors for constructor errors', () => {
   return checkError('missed.js', {

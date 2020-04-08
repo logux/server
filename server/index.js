@@ -8,7 +8,7 @@ let BaseServer = require('../base-server')
 const AVAILABLE_OPTIONS = [
   'subprotocol', 'supports', 'timeout', 'ping', 'root', 'store', 'server',
   'port', 'host', 'key', 'cert', 'env', 'bunyan', 'reporter', 'backend',
-  'controlHost', 'controlPort', 'controlPassword', 'redis'
+  'controlHost', 'controlPort', 'controlSecret', 'redis'
 ]
 
 const ENVS = {
@@ -20,7 +20,7 @@ const ENVS = {
   redis: 'LOGUX_REDIS',
   controlHost: 'LOGUX_CONTROL_HOST',
   controlPort: 'LOGUX_CONTROL_PORT',
-  controlPassword: 'LOGUX_CONTROL_PASSWORD',
+  controlSecret: 'LOGUX_CONTROL_SECRET',
   backend: 'LOGUX_BACKEND'
 }
 
@@ -75,8 +75,8 @@ yargs
     describe: 'Port to bind HTTP server to control Logux server',
     type: 'number'
   })
-  .option('control-password', {
-    describe: 'Password to control Logux server',
+  .option('control-secret', {
+    describe: 'Secret to control Logux server',
     type: 'string'
   })
   .option('redis', {

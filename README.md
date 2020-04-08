@@ -41,7 +41,7 @@ const { Server } = require('@logux/server')
 
 const server = new Server(
   Server.loadOptions(process, {
-    controlPassword: 'secret',
+    controlSecret: 'secret',
     subprotocol: '1.0.0',
     supports: '0.6.2',
     backend: 'http://localhost:3000/logux',

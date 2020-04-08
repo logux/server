@@ -4,10 +4,10 @@ let http = require('http')
 let BaseServer = require('../base-server')
 
 let lastPort = 10111
-function createServer (controlPassword) {
+function createServer (controlSecret) {
   lastPort += 2
   let server = new BaseServer({
-    controlPassword,
+    controlSecret,
     subprotocol: '0.0.0',
     controlPort: lastPort,
     supports: '0.x',
@@ -84,7 +84,7 @@ it('responses 404', async () => {
   expect(err.message).toEqual('Wrong path')
 })
 
-it('checks password', async () => {
+it('checks secret', async () => {
   app = createServer('secret')
   app.controls['/test'] = {
     request: () => ({ body: 'done' })
@@ -96,7 +96,7 @@ it('checks password', async () => {
 
   let err = await requestError('GET', '/test?wrong')
   expect(err.statusCode).toEqual(403)
-  expect(err.message).toEqual('Wrong password')
+  expect(err.message).toEqual('Wrong secret')
 })
 
 it('supports wrong URL encoding', async () => {
@@ -110,7 +110,7 @@ it('supports wrong URL encoding', async () => {
   expect(response.body).toContain('done')
 })
 
-it('shows error on missed password', async () => {
+it('shows error on missed secret', async () => {
   app = createServer(undefined)
   app.controls['/test'] = {
     request: () => ({ body: 'done' })
@@ -118,7 +118,7 @@ it('shows error on missed password', async () => {
   await app.listen()
   let err = await requestError('GET', '/test?secret')
   expect(err.statusCode).toEqual(403)
-  expect(err.message).toContain('controlPassword')
+  expect(err.message).toContain('controlSecret')
 })
 
 it('passes headers', async () => {

@@ -5,7 +5,7 @@ let { delay } = require('nanodelay')
 let { Server } = require('../..')
 
 let app = new Server({
-  controlPassword: 'secret',
+  controlSecret: 'secret',
   subprotocol: '1.0.0',
   supports: '1.0.0',
   backend: 'http://localhost:31339'

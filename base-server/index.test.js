@@ -241,7 +241,7 @@ it('supports object in SSL key', async () => {
 
 it('reporters on start listening', async () => {
   let test = createReporter({
-    controlPassword: 'secret',
+    controlSecret: 'secret',
     backend: 'http://127.0.0.1:3000/logux',
     redis: '//localhost'
   })
@@ -254,7 +254,7 @@ it('reporters on start listening', async () => {
   await promise
   expect(test.reports).toEqual([
     ['listen', {
-      controlPassword: 'secret',
+      controlSecret: 'secret',
       controlHost: '127.0.0.1',
       controlPort: 31338,
       loguxServer: pkg.version,

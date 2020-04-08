@@ -7,7 +7,7 @@ let http = require('http')
 function send (action, meta) {
   let body = JSON.stringify({
     version: 0,
-    password: 'secret',
+    secret: 'secret',
     commands: [
       ['action', action, meta]
     ]

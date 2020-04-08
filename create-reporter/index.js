@@ -43,10 +43,10 @@ const ERROR_CODES = {
             (wayToFix[environment] || wayToFix.production)
     }
   },
-  LOGUX_NO_CONTROL_PASSWORD: e => ({
+  LOGUX_NO_CONTROL_SECRET: e => ({
     msg: e.message,
-    note: 'Call `npx nanoid-cli` and set result as `controlPassword` ' +
-          'or `LOGUX_CONTROL_PASSWORD` environment variable'
+    note: 'Call `npx nanoid-cli` and set result as `controlSecret` ' +
+          'or `LOGUX_CONTROL_SECRET` environment variable'
   })
 }
 
@@ -76,7 +76,7 @@ const REPORTERS = {
 
     let controlDomain = `http://${ r.controlHost }:${ r.controlPort }`
     details.healthCheck = controlDomain + '/status'
-    if (r.controlPassword) {
+    if (r.controlSecret) {
       details.backendListen = controlDomain
     }
 

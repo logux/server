@@ -26,17 +26,17 @@ exports[`disables colors for constructor errors 1`] = `
 
 exports[`shows help 1`] = `
 "Options:
-  --host, -h          Host to bind server.                              [string]
-  --port, -p          Port to bind server                               [number]
-  --key               Path to SSL key                                   [string]
-  --cert              Path to SSL certificate                           [string]
-  --reporter, -r      Reporter type          [string] [choices: \\"human\\", \\"json\\"]
-  --backend           Backend to process actions and authentication     [string]
-  --control-host      Host to bind HTTP server to control Logux server  [string]
-  --control-port      Port to bind HTTP server to control Logux server  [number]
-  --control-password  Password to control Logux server                  [string]
-  --redis             URL to Redis for Logux Server Pro scaling         [string]
-  --help              Show help                                        [boolean]
+  --host, -h        Host to bind server.                                [string]
+  --port, -p        Port to bind server                                 [number]
+  --key             Path to SSL key                                     [string]
+  --cert            Path to SSL certificate                             [string]
+  --reporter, -r    Reporter type            [string] [choices: \\"human\\", \\"json\\"]
+  --backend         Backend to process actions and authentication       [string]
+  --control-host    Host to bind HTTP server to control Logux server    [string]
+  --control-port    Port to bind HTTP server to control Logux server    [number]
+  --control-secret  Secret to control Logux server                      [string]
+  --redis           URL to Redis for Logux Server Pro scaling           [string]
+  --help            Show help                                          [boolean]
 
 Examples:
   options.js --port 31337 --host 127.0.0.1
@@ -44,7 +44,7 @@ Examples:
 
 Environment variables:
   LOGUX_HOST, LOGUX_PORT, LOGUX_KEY, LOGUX_CERT, LOGUX_REPORTER, LOGUX_REDIS
-  LOGUX_CONTROL_HOST, LOGUX_CONTROL_PORT, LOGUX_CONTROL_PASSWORD, LOGUX_BACKEND
+  LOGUX_CONTROL_HOST, LOGUX_CONTROL_PORT, LOGUX_CONTROL_SECRET, LOGUX_BACKEND
 "
 `;
 
@@ -55,10 +55,10 @@ exports[`shows help about missed option 1`] = `
 "
 `;
 
-exports[`shows help about missed password 1`] = `
-" FATAL  backend requires controlPassword option at 1970-01-01 00:00:00
-        Call npx nanoid-cli and set result as controlPassword or
-        LOGUX_CONTROL_PASSWORD environment variable
+exports[`shows help about missed secret 1`] = `
+" FATAL  backend requires controlSecret option at 1970-01-01 00:00:00
+        Call npx nanoid-cli and set result as controlSecret or
+        LOGUX_CONTROL_SECRET environment variable
 
 "
 `;

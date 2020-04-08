@@ -17,8 +17,8 @@ function isResendCorrect (data) {
 function send (backend, command, events) {
   let body = JSON.stringify({
     version: VERSION,
-    password: backend.password,
-    commands: [command]
+    commands: [command],
+    secret: backend.secret
   })
   let protocol = backend.protocol === 'https:' ? https : http
   let req = protocol.request({
@@ -75,14 +75,14 @@ function send (backend, command, events) {
 }
 
 function bindBackendProxy (app) {
-  if (!app.options.controlPassword) {
-    let e = new Error('`backend` requires `controlPassword` option')
-    e.code = 'LOGUX_NO_CONTROL_PASSWORD'
+  if (!app.options.controlSecret) {
+    let e = new Error('`backend` requires `controlSecret` option')
+    e.code = 'LOGUX_NO_CONTROL_SECRET'
     throw e
   }
 
   let backend = new URL(app.options.backend)
-  backend.password = app.options.controlPassword
+  backend.secret = app.options.controlSecret
 
   let resending = { }
   let accessing = { }

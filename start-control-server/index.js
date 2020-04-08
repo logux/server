@@ -1,14 +1,14 @@
 let http = require('http')
 
 const MAX_VERSION = 2
-const NO_PASSWORD = 'Set `controlPassword` option for Logux ' +
-                    'to have access to this page.\n' +
-                    'Run `npx nanoid-cli` to generate secure password.'
+const NO_SECRET = 'Set `controlSecret` option for Logux ' +
+                  'to have access to this page.\n' +
+                  'Run `npx nanoid-cli` to generate secure secret.'
 
 function isValidBody (body) {
   if (typeof body !== 'object') return false
   if (typeof body.version !== 'number') return false
-  if (typeof body.password !== 'string') return false
+  if (typeof body.secret !== 'string') return false
   if (!Array.isArray(body.commands)) return false
   for (let command of body.commands) {
     if (!Array.isArray(command)) return false
@@ -54,10 +54,10 @@ function startControlServer (app) {
           res.end('Unknown version')
         } else if (app.isBruteforce(req.connection.remoteAddress)) {
           res.statusCode = 429
-          res.end('Too many wrong password attempts')
-        } else if (body.password !== app.options.controlPassword) {
+          res.end('Too many wrong secret attempts')
+        } else if (body.secret !== app.options.controlSecret) {
           res.statusCode = 403
-          res.end('Wrong password')
+          res.end('Wrong secret')
           app.rememberBadAuth(req.connection.remoteAddress)
         } else {
           for (let i of body.commands) {
@@ -73,17 +73,17 @@ function startControlServer (app) {
       })
     } else {
       if (!rule.safe) {
-        if (!app.options.controlPassword) {
+        if (!app.options.controlSecret) {
           res.statusCode = 403
-          res.end(NO_PASSWORD)
+          res.end(NO_SECRET)
           return
         } else if (app.isBruteforce(req.connection.remoteAddress)) {
           res.statusCode = 429
-          res.end('Too many wrong password attempts')
+          res.end('Too many wrong secret attempts')
           return
-        } else if (reqUrl.search !== '?' + app.options.controlPassword) {
+        } else if (reqUrl.search !== '?' + app.options.controlSecret) {
           res.statusCode = 403
-          res.end('Wrong password')
+          res.end('Wrong secret')
           app.rememberBadAuth(req.connection.remoteAddress)
           return
         }

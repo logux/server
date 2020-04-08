@@ -273,7 +273,7 @@ class BaseServer {
       this.addClient(new ServerConnection(ws))
     })
     this.reporter('listen', {
-      controlPassword: this.options.controlPassword,
+      controlSecret: this.options.controlSecret,
       controlHost: this.options.controlHost,
       controlPort: this.options.controlPort,
       loguxServer: pkg.version,
