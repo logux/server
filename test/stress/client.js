@@ -29,9 +29,9 @@ async function tick () {
   let connection = new WsConnection('ws://localhost:31337', WebSocket)
   let log = new Log({ nodeId, store: new MemoryStore() })
   let node = new ClientNode(nodeId, log, connection, {
-    credentials: 'secret',
     subprotocol: '1.0.0',
-    outMap: map
+    outMap: map,
+    token: 'secret'
   })
 
   node.on('clientError', e => {

@@ -40,18 +40,16 @@ class ServerClient {
     this.key = key.toString()
     this.remoteAddress = connection.ws._socket.remoteAddress
 
-    let credentials
-    if (this.app.env === 'development') {
-      credentials = { env: 'development' }
-    }
+    let token
+    if (this.app.env === 'development') token = 'development'
 
     this.node = new FilteredNode(this, app.nodeId, app.log, connection, {
-      credentials,
       subprotocol: app.options.subprotocol,
       inFilter: this.filter.bind(this),
       timeout: app.options.timeout,
       outMap: this.outMap.bind(this),
       inMap: this.inMap.bind(this),
+      token,
       ping: app.options.ping,
       auth: this.auth.bind(this)
     })
@@ -113,7 +111,7 @@ class ServerClient {
     delete this.app.connected[this.key]
   }
 
-  async auth (credentials, nodeId) {
+  async auth (nodeId, token) {
     this.nodeId = nodeId
     let data = parseNodeId(nodeId)
     this.clientId = data.clientId
@@ -125,7 +123,7 @@ class ServerClient {
     }
 
     let start = Date.now()
-    let result = await this.app.authenticator(this.userId, credentials, this)
+    let result = await this.app.authenticator(this.userId, token, this)
 
     if (this.app.isBruteforce(this.remoteAddress)) {
       throw new LoguxError('bruteforce')

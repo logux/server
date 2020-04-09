@@ -35,14 +35,14 @@ function createClient (server) {
   return client
 }
 
-async function connectClient (server, credentials) {
+async function connectClient (server, token) {
   let client = createClient(server)
   client.node.now = () => 0
   await client.connection.connect()
   let protocol = client.node.localProtocol
-  client.connection.other().send(['connect', protocol, '10:uuid', 0, {
-    credentials
-  }])
+  client.connection.other().send(
+    ['connect', protocol, '10:uuid', 0, { token }]
+  )
   await client.connection.pair.wait('right')
 
   return client

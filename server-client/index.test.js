@@ -150,8 +150,8 @@ it('removes itself on destroy', async () => {
 
   await client1.connection.connect()
   await client2.connection.connect()
-  client1.auth({ }, '10:uuid')
-  client2.auth({ }, '10:other')
+  client1.auth('10:uuid', { })
+  client2.auth('10:other', { })
   test.app.subscribers = {
     'user/10': {
       '10:uuid': client1,
@@ -305,7 +305,7 @@ it('authenticates user', async () => {
   await client.connection.connect()
   let protocol = client.node.localProtocol
   client.connection.other().send([
-    'connect', protocol, 'a:b:uuid', 0, { credentials: 'token' }
+    'connect', protocol, 'a:b:uuid', 0, { token: 'token' }
   ])
   await client.connection.pair.wait('right')
 
@@ -333,7 +333,7 @@ it('supports non-promise authenticator', async () => {
   await client.connection.connect()
   let protocol = client.node.localProtocol
   client.connection.other().send([
-    'connect', protocol, '10:uuid', 0, { credentials: 'token' }
+    'connect', protocol, '10:uuid', 0, { token: 'token' }
   ])
   await client.connection.pair.wait('right')
 
@@ -394,16 +394,16 @@ it('has method to check client subprotocol', () => {
   expect(client.isSubprotocol('< 1.0.0')).toBe(false)
 })
 
-it('sends server credentials in development', async () => {
+it('sends server environment in development', async () => {
   let app = createServer({ env: 'development' })
   let client = await connectClient(app)
   expect(sent(client)[0][4]).toEqual({
-    credentials: { env: 'development' },
-    subprotocol: '0.0.1'
+    subprotocol: '0.0.1',
+    token: 'development'
   })
 })
 
-it('does not send server credentials in production', async () => {
+it('does not send server environment in production', async () => {
   let app = createServer({ env: 'production' })
   app.auth(async () => true)
 
@@ -418,10 +418,10 @@ it('disconnects zombie', async () => {
   let client2 = createClient(test.app)
 
   await client1.connection.connect()
-  client1.auth({ }, '10:client:a')
+  client1.auth('10:client:a', { })
   await client2.connection.connect()
 
-  client2.auth({ }, '10:client:b')
+  client2.auth('10:client:b', { })
   await delay(0)
 
   expect(Object.keys(test.app.connected)).toEqual([client2.key])
