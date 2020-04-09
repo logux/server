@@ -8,7 +8,6 @@ exports[`destroys everything on exit 1`] = `
         Node ID:      server:FnXaqDxY
         Subprotocol:  1.0.0
         Supports:     1.x
-        Health check: http://127.0.0.1:31338/status
         Listen:       ws://127.0.0.1:2000/
 
  INFO   Shutting down Logux server at 1970-01-01 00:00:00
@@ -44,7 +43,7 @@ Examples:
 
 Environment variables:
   LOGUX_HOST, LOGUX_PORT, LOGUX_KEY, LOGUX_CERT, LOGUX_REPORTER, LOGUX_REDIS
-  LOGUX_CONTROL_HOST, LOGUX_CONTROL_PORT, LOGUX_CONTROL_SECRET, LOGUX_BACKEND
+  LOGUX_CONTROL_SECRET, LOGUX_BACKEND
 "
 `;
 
@@ -128,7 +127,6 @@ exports[`uses .env cwd 1`] = `
         Node ID:      server:FnXaqDxY
         Subprotocol:  1.0.0
         Supports:     1.x
-        Health check: http://127.0.0.1:31338/status
         Listen:       ws://127.0.0.1:3334/
 
  INFO   Shutting down Logux server at 1970-01-01 00:00:00
@@ -144,7 +142,6 @@ exports[`uses .env from root 1`] = `
         Node ID:      server:FnXaqDxY
         Subprotocol:  1.0.0
         Supports:     1.x
-        Health check: http://127.0.0.1:31338/status
         Listen:       ws://127.0.0.1:3334/
 
  INFO   Shutting down Logux server at 1970-01-01 00:00:00
@@ -153,13 +150,13 @@ exports[`uses .env from root 1`] = `
 `;
 
 exports[`uses environment variables for config 1`] = `
-"{\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"test\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"listen\\":\\"ws://127.0.0.1:31337/\\",\\"healthCheck\\":\\"http://127.0.0.1:31338/status\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"test\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"listen\\":\\"ws://127.0.0.1:31337/\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 {\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"msg\\":\\"Shutting down Logux server\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
 exports[`uses reporter param 1`] = `
-"{\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"test\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"listen\\":\\"ws://127.0.0.1:31337/\\",\\"healthCheck\\":\\"http://127.0.0.1:31338/status\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"test\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"listen\\":\\"ws://127.0.0.1:31337/\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 {\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"msg\\":\\"Shutting down Logux server\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
@@ -176,20 +173,20 @@ exports[`writes about unbind 1`] = `
 `;
 
 exports[`writes to bunyan log 1`] = `
-"{\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"test\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"listen\\":\\"ws://127.0.0.1:2000/\\",\\"healthCheck\\":\\"http://127.0.0.1:31338/status\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"test\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"listen\\":\\"ws://127.0.0.1:2000/\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 {\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"msg\\":\\"Shutting down Logux server\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
 exports[`writes to custom bunyan log 1`] = `
-"{\\"name\\":\\"logux-server-custom\\",\\"customProp\\":\\"42\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"test\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"listen\\":\\"ws://127.0.0.1:2000/\\",\\"healthCheck\\":\\"http://127.0.0.1:31338/status\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"logux-server-custom\\",\\"customProp\\":\\"42\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"test\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"listen\\":\\"ws://127.0.0.1:2000/\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 {\\"name\\":\\"logux-server-custom\\",\\"customProp\\":\\"42\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"msg\\":\\"Shutting down Logux server\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
 exports[`writes using custom reporter 1`] = `
 "Event: listen
-Details: {\\"controlHost\\":\\"127.0.0.1\\",\\"controlPort\\":31338,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"test\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"server\\":false,\\"nodeId\\":\\"server:FnXaqDxY\\",\\"notes\\":{},\\"cert\\":false,\\"host\\":\\"127.0.0.1\\",\\"port\\":2000}
+Details: {\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"test\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"server\\":false,\\"nodeId\\":\\"server:FnXaqDxY\\",\\"notes\\":{},\\"cert\\":false,\\"host\\":\\"127.0.0.1\\",\\"port\\":2000}
 Event: destroy
 Details: undefined
 "

@@ -31,10 +31,6 @@ function createServer (options = { }) {
     lastPort += 1
     options.port = lastPort
   }
-  if (typeof options.controlPort === 'undefined') {
-    lastPort += 1
-    options.controlPort = lastPort
-  }
 
   let created = new BaseServer(options)
   created.auth(() => true)
@@ -181,8 +177,6 @@ it('sets default ports and hosts', () => {
   app = createServer()
   expect(app.options.port).toEqual(31337)
   expect(app.options.host).toEqual('127.0.0.1')
-  expect(app.options.controlPort).toEqual(31338)
-  expect(app.options.controlHost).toEqual('127.0.0.1')
 })
 
 it('uses user port', () => {
@@ -255,8 +249,6 @@ it('reporters on start listening', async () => {
   expect(test.reports).toEqual([
     ['listen', {
       controlSecret: 'secret',
-      controlHost: '127.0.0.1',
-      controlPort: 31338,
       loguxServer: pkg.version,
       environment: 'test',
       subprotocol: '0.0.0',

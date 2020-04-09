@@ -114,8 +114,6 @@ it('uses environment variable to detect environment', () => {
 it('reports listen', () => {
   check('listen', {
     controlSecret: 'RhBaK0kuOBtqJalq2C4df',
-    controlHost: '127.0.0.1',
-    controlPort: 31338,
     loguxServer: '0.0.0',
     environment: 'development',
     subprotocol: '0.0.0',
@@ -134,8 +132,6 @@ it('reports listen', () => {
 it('reports listen for production', () => {
   check('listen', {
     controlSecret: 'RhBaK0kuOBtqJalq2C4df',
-    controlHost: '127.0.0.1',
-    controlPort: 31338,
     loguxServer: '0.0.0',
     environment: 'production',
     subprotocol: '0.0.0',
@@ -152,8 +148,6 @@ it('reports listen for production', () => {
 
 it('reports listen for custom domain', () => {
   check('listen', {
-    controlHost: '127.0.0.1',
-    controlPort: 31338,
     loguxServer: '0.0.0',
     environment: 'development',
     subprotocol: '0.0.0',

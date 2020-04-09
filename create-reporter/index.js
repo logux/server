@@ -74,10 +74,8 @@ const REPORTERS = {
       details.listen = `${ wsProtocol }${ r.host }:${ r.port }/`
     }
 
-    let controlDomain = `http://${ r.controlHost }:${ r.controlPort }`
-    details.healthCheck = controlDomain + '/status'
     if (r.controlSecret) {
-      details.backendListen = controlDomain
+      details.backendListen = `http://${ r.host }:${ r.port }`
     }
 
     if (r.backend) {

@@ -227,7 +227,7 @@ function bindBackendProxy (app) {
     }
   })
 
-  app.controls['/'] = {
+  app.controls['POST /'] = {
     isValid (command) {
       return command.length === 3 &&
         command[0] === 'action' &&

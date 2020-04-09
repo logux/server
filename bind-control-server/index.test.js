@@ -1,17 +1,18 @@
+let { ClientNode, Log, MemoryStore, WsConnection } = require('@logux/core')
 let { delay } = require('nanodelay')
+let WebSocket = require('ws')
 let http = require('http')
 
 let BaseServer = require('../base-server')
 
 let lastPort = 10111
-function createServer (controlSecret) {
-  lastPort += 2
+function createServer (opts = { }) {
+  lastPort += 1
   let server = new BaseServer({
-    controlSecret,
     subprotocol: '0.0.0',
-    controlPort: lastPort,
     supports: '0.x',
-    port: lastPort - 1
+    port: lastPort,
+    ...opts
   })
   server.auth(() => true)
   return server
@@ -22,7 +23,7 @@ function request (method, path) {
     let req = http.request({
       method,
       host: 'localhost',
-      port: app.options.controlPort,
+      port: app.options.port,
       path
     }, res => {
       let body = ''
@@ -61,19 +62,10 @@ afterEach(async () => {
 })
 
 it('has health check', async () => {
-  app = createServer()
+  app = createServer({ controlSecret: 'secret', backend: 'http://localhost/' })
   await app.listen()
-  let response = await request('GET', '/status')
-
+  let response = await request('GET', '/')
   expect(response.body).toEqual('OK')
-})
-
-it('expects GET for health check', async () => {
-  app = createServer()
-  await app.listen()
-  let err = await requestError('POST', '/status')
-  expect(err.statusCode).toEqual(405)
-  expect(err.message).toEqual('Wrong method')
 })
 
 it('responses 404', async () => {
@@ -85,8 +77,8 @@ it('responses 404', async () => {
 })
 
 it('checks secret', async () => {
-  app = createServer('secret')
-  app.controls['/test'] = {
+  app = createServer({ controlSecret: 'secret' })
+  app.controls['GET /test'] = {
     request: () => ({ body: 'done' })
   }
   await app.listen()
@@ -100,8 +92,8 @@ it('checks secret', async () => {
 })
 
 it('supports wrong URL encoding', async () => {
-  app = createServer('secret')
-  app.controls['/test'] = {
+  app = createServer({ controlSecret: 'secret' })
+  app.controls['GET /test'] = {
     request: () => ({ body: 'done' })
   }
   await app.listen()
@@ -111,8 +103,8 @@ it('supports wrong URL encoding', async () => {
 })
 
 it('shows error on missed secret', async () => {
-  app = createServer(undefined)
-  app.controls['/test'] = {
+  app = createServer({ controlSecret: undefined })
+  app.controls['GET /test'] = {
     request: () => ({ body: 'done' })
   }
   await app.listen()
@@ -122,8 +114,8 @@ it('shows error on missed secret', async () => {
 })
 
 it('passes headers', async () => {
-  app = createServer('secret')
-  app.controls['/test'] = {
+  app = createServer({ controlSecret: 'secret' })
+  app.controls['GET /test'] = {
     request: () => ({
       headers: {
         'Content-Type': 'text/plain'
@@ -138,8 +130,8 @@ it('passes headers', async () => {
 })
 
 it('has bruteforce protection', async () => {
-  app = createServer('secret')
-  app.controls['/test'] = {
+  app = createServer({ controlSecret: 'secret' })
+  app.controls['GET /test'] = {
     request: () => ({ body: 'done' })
   }
   await app.listen()
@@ -160,4 +152,17 @@ it('has bruteforce protection', async () => {
 
   let err5 = await requestError('GET', '/test?wrong')
   expect(err5.statusCode).toEqual(403)
+})
+
+it('does not break WebSocket', async () => {
+  app = createServer({ controlSecret: 'secret' })
+  await app.listen()
+
+  let nodeId = '10:client:node'
+  let log = new Log({ store: new MemoryStore(), nodeId })
+  let con = new WsConnection('ws://localhost:' + app.options.port, WebSocket)
+  let node = new ClientNode(nodeId, log, con)
+
+  node.connection.connect()
+  await node.waitFor('synchronized')
 })

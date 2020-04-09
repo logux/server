@@ -7,7 +7,7 @@ let WebSocket = require('ws')
 let { join } = require('path')
 let fs = require('fs')
 
-let startControlServer = require('../start-control-server')
+let bindControlServer = require('../bind-control-server')
 let bindBackendProxy = require('../bind-backend-proxy')
 let createHttpServer = require('../create-http-server')
 let ServerClient = require('../server-client')
@@ -53,8 +53,6 @@ class BaseServer {
       if (!this.options.port) this.options.port = 31337
       if (!this.options.host) this.options.host = '127.0.0.1'
     }
-    if (!this.options.controlPort) this.options.controlPort = 31338
-    if (!this.options.controlHost) this.options.controlHost = '127.0.0.1'
 
     this.nodeId = `server:${ this.options.id || nanoid(8) }`
 
@@ -208,11 +206,9 @@ class BaseServer {
     this.lastTimeout = 0
 
     this.controls = {
-      '/status': {
+      'GET /': {
         safe: true,
-        request () {
-          return { body: 'OK' }
-        }
+        request: () => ({ body: 'OK' })
       }
     }
 
@@ -254,7 +250,7 @@ class BaseServer {
         this.http.listen(this.options.port, this.options.host, resolve)
       })
     }
-    await startControlServer(this)
+    await bindControlServer(this)
 
     this.unbind.push(() => new Promise(resolve => {
       this.ws.on('close', resolve)
@@ -274,8 +270,6 @@ class BaseServer {
     })
     this.reporter('listen', {
       controlSecret: this.options.controlSecret,
-      controlHost: this.options.controlHost,
-      controlPort: this.options.controlPort,
       loguxServer: pkg.version,
       environment: this.env,
       subprotocol: this.options.subprotocol,

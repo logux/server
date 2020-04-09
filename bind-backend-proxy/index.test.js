@@ -49,12 +49,11 @@ async function connectClient (server, credentials) {
 }
 
 function createServerWithoutAuth (options) {
-  lastPort += 2
+  lastPort += 1
   options.time = new TestTime()
   options.port = lastPort
   options.subprotocol = '0.0.0'
   options.supports = '0.x'
-  options.controlPort = lastPort + 1
 
   let server = new BaseServer(options)
   server.nodeId = 'server:uuid'
@@ -79,7 +78,7 @@ function request ({ method, path, string, data }) {
     let req = http.request({
       method: method || 'POST',
       host: '127.0.0.1',
-      port: lastPort + 1,
+      port: lastPort,
       path: path || '/',
       headers: {
         'Content-Type': 'application/json',
@@ -209,7 +208,7 @@ it('validates HTTP requests', async () => {
   let prefix = { version: 2, secret: '1234' }
   let app = createServer(OPTIONS)
   await app.listen()
-  expect(await request({ method: 'GET', string: '' }))
+  expect(await request({ method: 'PUT', string: '' }))
     .toEqual(405)
   expect(await request({ path: '/logux', string: '' }))
     .toEqual(404)

@@ -8,7 +8,7 @@ let BaseServer = require('../base-server')
 const AVAILABLE_OPTIONS = [
   'subprotocol', 'supports', 'timeout', 'ping', 'root', 'store', 'server',
   'port', 'host', 'key', 'cert', 'env', 'bunyan', 'reporter', 'backend',
-  'controlHost', 'controlPort', 'controlSecret', 'redis'
+  'controlSecret', 'redis'
 ]
 
 const ENVS = {
@@ -18,8 +18,6 @@ const ENVS = {
   cert: 'LOGUX_CERT',
   reporter: 'LOGUX_REPORTER',
   redis: 'LOGUX_REDIS',
-  controlHost: 'LOGUX_CONTROL_HOST',
-  controlPort: 'LOGUX_CONTROL_PORT',
   controlSecret: 'LOGUX_CONTROL_SECRET',
   backend: 'LOGUX_BACKEND'
 }
@@ -108,8 +106,6 @@ class Server extends BaseServer {
     }
 
     opts.port = parseInt(opts.port, 10)
-    opts.controlPort = parseInt(opts.controlPort, 10)
-
     return opts
   }
 

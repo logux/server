@@ -154,8 +154,6 @@ type ReportersArguments = {
   }
   listen: {
     controlSecret: string
-    controlHost: string
-    controlPort: string
     loguxServer: string
     environment: 'production' | 'development'
     subprotocol: string
@@ -225,17 +223,6 @@ export type BaseServerOptions = {
    * URL to Redis for Logux Server Pro scaling.
    */
   redis?: string
-
-  /**
-   * Host to bind HTTP server to control Logux server.
-   * Default is `127.0.0.1`.
-   */
-  controlHost?: string
-
-  /**
-   * Port to control the server. Default is `31338`.
-   */
-  controlPort?: number
 
   /**
    * Secret to control the server.

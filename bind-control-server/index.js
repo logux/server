@@ -1,5 +1,3 @@
-let http = require('http')
-
 const MAX_VERSION = 2
 const NO_SECRET = 'Set `controlSecret` option for Logux ' +
                   'to have access to this page.\n' +
@@ -17,21 +15,21 @@ function isValidBody (body) {
   return true
 }
 
-function startControlServer (app) {
-  let httpServer = http.createServer((req, res) => {
+function bindControlServer (app) {
+  app.http.on('request', (req, res) => {
     let urlString = req.url
     if (/^\/\w+%3F/.test(urlString)) urlString = decodeURIComponent(urlString)
     let reqUrl = new URL(urlString, 'http://localhost')
-    let rule = app.controls[reqUrl.pathname]
+    let rule = app.controls[req.method + ' ' + reqUrl.pathname]
     if (!rule) {
-      res.statusCode = 404
-      res.end('Wrong path')
-    } else if (rule.command && req.method !== 'POST') {
-      res.statusCode = 405
-      res.end('Wrong method')
-    } else if (rule.request && req.method !== 'GET') {
-      res.statusCode = 405
-      res.end('Wrong method')
+      let accepts = Object.keys(app.controls)
+      if (accepts.find(i => i.endsWith(' ' + reqUrl.pathname))) {
+        res.statusCode = 405
+        res.end('Wrong method')
+      } else {
+        res.statusCode = 404
+        res.end('Wrong path')
+      }
     } else if (req.method !== 'GET') {
       let json = ''
       req.on('data', chunk => {
@@ -95,18 +93,6 @@ function startControlServer (app) {
       res.end(answer.body)
     }
   })
-
-  app.unbind.push(() => {
-    return new Promise(resolve => {
-      httpServer.on('close', resolve)
-      httpServer.close()
-    })
-  })
-
-  return new Promise((resolve, reject) => {
-    httpServer.on('error', reject)
-    httpServer.listen(app.options.controlPort, app.options.controlHost, resolve)
-  })
 }
 
-module.exports = startControlServer
+module.exports = bindControlServer
