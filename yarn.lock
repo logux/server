@@ -387,9 +387,10 @@
     "@types/yargs" "^15.0.0"
     chalk "^3.0.0"
 
-"@logux/core@logux/core#next":
-  version "0.4.2"
-  resolved "https://codeload.github.com/logux/core/tar.gz/139e3effac0cb1c36e6dc99a526d4762f835089f"
+"@logux/core@^0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@logux/core/-/core-0.5.0.tgz#d78cc4534c1b8c3040d4fef8b4b8a8485718b3a8"
+  integrity sha512-9N5usdpi1ya27MQQTJV3S3QofAXc1B7/YNhhUNoLErOnijs4sdI83JlSxz+UWGHwGxeARWCqZMySDIqgtVC3Bw==
   dependencies:
     nanoevents "^5.1.5"
 
