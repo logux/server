@@ -1,6 +1,16 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.7 “Eliza Cassan”
+* Use Logux Core 0.5 and WebSocket Protocol 3.
+* Use Back-end Protocol 3.
+* Use the same port for WebSocket and control.
+* Rename `LOGUX_CONTROL_PASSWORD` to `LOGUX_CONTROL_SECRET`.
+* Rename `opts.controlPassword` to `opts.controlSecret`.
+* User ID must be always a string.
+* Add IP address check for control requests.
+* Fix types.
+
 ## 0.6.1
 * Keep context between steps.
 * Fix re-sending actions back to the author.
