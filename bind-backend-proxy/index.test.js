@@ -130,11 +130,11 @@ let httpServer = http.createServer((req, res) => {
     } else if (data.commands[0][1].channel === 'unknown') {
       res.end(`[["unknownChannel","${ actionId }"]]`)
     } else if (data.commands[0][1].type === 'AERROR') {
-      res.end('[["error","stack"]]')
+      res.end(`[["error","${ actionId }","stack"]]`)
     } else if (data.commands[0][1].type === 'PERROR') {
       res.write(`[["approved","${ actionId }"]`)
       await delay(100)
-      res.end(',["error","stack"]]')
+      res.end(`,["error","${ actionId }","stack"]]`)
     } else if (data.commands[0][1].type === 'BROKEN1') {
       res.end(`[["approved","${ actionId }"]`)
     } else if (data.commands[0][1].type === 'BROKEN2') {

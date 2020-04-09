@@ -44,7 +44,7 @@ function send (backend, command, events) {
             let [name, ...args] = answer
             if (name === 'error') {
               let err = new Error('Error on back-end server')
-              err.stack = args[0]
+              err.stack = args[1]
               events.error(err)
             } else if (events.filter(...args)) {
               if (!events[name]) {
