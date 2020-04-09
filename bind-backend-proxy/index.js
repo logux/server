@@ -3,7 +3,7 @@ let { nanoid } = require('nanoid')
 let https = require('https')
 let http = require('http')
 
-const VERSION = 2
+const VERSION = 3
 
 function isResendCorrect (data) {
   if (!data || typeof data !== 'object') return false

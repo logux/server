@@ -317,7 +317,7 @@ it('authenticates user on backend', async () => {
       'POST',
       '/path',
       {
-        version: 2,
+        version: 3,
         secret: '1234',
         commands: [
           ['auth', '10', 'good', authId]
@@ -400,7 +400,7 @@ it('notifies about actions and subscriptions', async () => {
       'POST',
       '/path',
       {
-        version: 2,
+        version: 3,
         secret: '1234',
         commands: [
           [
@@ -415,7 +415,7 @@ it('notifies about actions and subscriptions', async () => {
       'POST',
       '/path',
       {
-        version: 2,
+        version: 3,
         secret: '1234',
         commands: [
           [
