@@ -154,6 +154,7 @@ type ReportersArguments = {
   }
   listen: {
     controlSecret: string
+    controlMask: string,
     loguxServer: string
     environment: 'production' | 'development'
     subprotocol: string
@@ -228,6 +229,11 @@ export type BaseServerOptions = {
    * Secret to control the server.
    */
   controlSecret?: string
+
+  /**
+   * CIDR masks for IP address, where control requests could came from.
+   */
+  controlMask?: string
 
   /**
    * Store to save log. Will be {@link @logux/core:MemoryStore}, by default.

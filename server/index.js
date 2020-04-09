@@ -8,7 +8,7 @@ let BaseServer = require('../base-server')
 const AVAILABLE_OPTIONS = [
   'subprotocol', 'supports', 'timeout', 'ping', 'root', 'store', 'server',
   'port', 'host', 'key', 'cert', 'env', 'bunyan', 'reporter', 'backend',
-  'controlSecret', 'redis'
+  'controlMask', 'controlSecret', 'redis'
 ]
 
 const ENVS = {
@@ -18,6 +18,7 @@ const ENVS = {
   cert: 'LOGUX_CERT',
   reporter: 'LOGUX_REPORTER',
   redis: 'LOGUX_REDIS',
+  controlMask: 'LOGUX_CONTROL_MASK',
   controlSecret: 'LOGUX_CONTROL_SECRET',
   backend: 'LOGUX_BACKEND'
 }
@@ -65,16 +66,12 @@ yargs
     describe: 'Backend to process actions and authentication',
     type: 'string'
   })
-  .option('control-host', {
-    describe: 'Host to bind HTTP server to control Logux server',
-    type: 'string'
-  })
-  .option('control-port', {
-    describe: 'Port to bind HTTP server to control Logux server',
-    type: 'number'
-  })
   .option('control-secret', {
     describe: 'Secret to control Logux server',
+    type: 'string'
+  })
+  .option('control-mask', {
+    describe: 'CIDR masks for IP addresses of control servers',
     type: 'string'
   })
   .option('redis', {

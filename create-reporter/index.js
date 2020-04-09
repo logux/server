@@ -9,7 +9,6 @@ const ERROR_CODES = {
       win32: 'Run `cmd.exe` as an administrator\n' +
              'C:\\> netstat -a -b -n -o\n' +
              'C:\\> taskkill /F /PID `<processid>`',
-      // macos
       darwin: `$ sudo lsof -i ${ e.port }\n` +
               '$ sudo kill -9 `<processid>`',
       linux: '$ su - root\n' +
@@ -17,7 +16,6 @@ const ERROR_CODES = {
              'Proto   Local Address   State    PID/Program name\n' +
              `tcp     0.0.0.0:${ e.port }    LISTEN   \`777\`/node\n` +
              '# sudo kill -9 `777`'
-      // todo: describe 'aix', 'freebsd', 'openbsd', 'sunos', 'android'
     }
 
     return {
@@ -75,7 +73,8 @@ const REPORTERS = {
     }
 
     if (r.controlSecret) {
-      details.backendListen = `http://${ r.host }:${ r.port }`
+      details.controlListen = `http://${ r.host }:${ r.port }/`
+      details.controlMask = r.controlMask
     }
 
     if (r.backend) {

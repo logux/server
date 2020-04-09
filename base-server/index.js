@@ -57,6 +57,7 @@ class BaseServer {
     this.nodeId = `server:${ this.options.id || nanoid(8) }`
 
     this.options.root = this.options.root || process.cwd()
+    this.options.controlMask = this.options.controlMask || '127.0.0.1/8'
 
     let store = this.options.store || new MemoryStore()
 
@@ -270,6 +271,7 @@ class BaseServer {
     })
     this.reporter('listen', {
       controlSecret: this.options.controlSecret,
+      controlMask: this.options.controlMask,
       loguxServer: pkg.version,
       environment: this.env,
       subprotocol: this.options.subprotocol,

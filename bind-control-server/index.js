@@ -1,5 +1,7 @@
+let ip = require('ip')
+
 const MAX_VERSION = 2
-const NO_SECRET = 'Set `controlSecret` option for Logux ' +
+const NO_SECRET = 'Set LOGUX_CONTROL_SECRET environment variable for Logux ' +
                   'to have access to this page.\n' +
                   'Run `npx nanoid-cli` to generate secure secret.'
 
@@ -16,11 +18,20 @@ function isValidBody (body) {
 }
 
 function bindControlServer (app) {
+  let masks = app.options.controlMask.split(/,\s*/).map(i => ip.cidrSubnet(i))
   app.http.on('request', (req, res) => {
+    let ipAddress = req.connection.remoteAddress
+    if (masks.every(i => !i.contains(ipAddress))) {
+      res.statusCode = 403
+      res.end('IP address is not in LOGUX_CONTROL_MASK/controlMask')
+      return
+    }
+
     let urlString = req.url
     if (/^\/\w+%3F/.test(urlString)) urlString = decodeURIComponent(urlString)
     let reqUrl = new URL(urlString, 'http://localhost')
     let rule = app.controls[req.method + ' ' + reqUrl.pathname]
+
     if (!rule) {
       let accepts = Object.keys(app.controls)
       if (accepts.find(i => i.endsWith(' ' + reqUrl.pathname))) {

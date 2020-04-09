@@ -110,7 +110,7 @@ it('shows error on missed secret', async () => {
   await app.listen()
   let err = await requestError('GET', '/test?secret')
   expect(err.statusCode).toEqual(403)
-  expect(err.message).toContain('controlSecret')
+  expect(err.message).toContain('LOGUX_CONTROL_SECRET')
 })
 
 it('passes headers', async () => {
@@ -155,7 +155,10 @@ it('has bruteforce protection', async () => {
 })
 
 it('does not break WebSocket', async () => {
-  app = createServer({ controlSecret: 'secret' })
+  app = createServer({
+    controlSecret: 'secret',
+    controlMask: '128.0.0.1/8, 127.1.0.0/16'
+  })
   await app.listen()
 
   let nodeId = '10:client:node'
@@ -165,4 +168,12 @@ it('does not break WebSocket', async () => {
 
   node.connection.connect()
   await node.waitFor('synchronized')
+})
+
+it('checks incoming IP address', async () => {
+  app = createServer({ controlMask: '128.0.0.1/8, 127.1.0.0/16' })
+  await app.listen()
+  let err = await requestError('GET', '/')
+  expect(err.statusCode).toEqual(403)
+  expect(err.message).toContain('LOGUX_CONTROL_MASK')
 })

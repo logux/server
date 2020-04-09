@@ -249,6 +249,7 @@ it('reporters on start listening', async () => {
   expect(test.reports).toEqual([
     ['listen', {
       controlSecret: 'secret',
+      controlMask: '127.0.0.1/8',
       loguxServer: pkg.version,
       environment: 'test',
       subprotocol: '0.0.0',
