@@ -83,7 +83,7 @@ server.channel<UserParams, UserData, UserSubscribeAction>('user/:id', {
   // THROWS undefined>' is not assignable to type 'FilterCreator
   async filter (_, action) {
     if (action.fields) {
-      return (_, otherAction) => {
+      return (_: any, otherAction: Action) => {
         return action.fields.includes('name') &&
                otherAction.type === 'user/rename'
       }
