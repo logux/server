@@ -43,7 +43,7 @@ const ERROR_CODES = {
   },
   LOGUX_NO_CONTROL_SECRET: e => ({
     msg: e.message,
-    note: 'Call `npx nanoid-cli` and set result as `controlSecret` ' +
+    note: 'Call `npx nanoid` and set result as `controlSecret` ' +
           'or `LOGUX_CONTROL_SECRET` environment variable'
   })
 }

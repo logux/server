@@ -3,7 +3,7 @@ let ip = require('ip')
 const MAX_VERSION = 2
 const NO_SECRET = 'Set LOGUX_CONTROL_SECRET environment variable for Logux ' +
                   'to have access to this page.\n' +
-                  'Run `npx nanoid-cli` to generate secure secret.'
+                  'Run `npx nanoid` to generate secure secret.'
 
 function isValidBody (body) {
   if (typeof body !== 'object') return false

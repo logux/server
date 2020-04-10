@@ -55,8 +55,8 @@ exports[`shows help about missed option 1`] = `
 
 exports[`shows help about missed secret 1`] = `
 " FATAL  backend requires controlSecret option at 1970-01-01 00:00:00
-        Call npx nanoid-cli and set result as controlSecret or
-        LOGUX_CONTROL_SECRET environment variable
+        Call npx nanoid and set result as controlSecret or LOGUX_CONTROL_SECRET
+        environment variable
 
 "
 `;

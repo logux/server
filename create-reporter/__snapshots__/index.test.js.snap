@@ -37,13 +37,13 @@ exports[`reports EADDRINUSE error 2`] = `
 `;
 
 exports[`reports LOGUX_NO_CONTROL_SECRET error 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{\\"message\\":\\"\`backend\` requires also \`controlSecret\` option\\"},\\"note\\":\\"Call \`npx nanoid-cli\` and set result as \`controlSecret\` or \`LOGUX_CONTROL_SECRET\` environment variable\\",\\"msg\\":\\"\`backend\` requires also \`controlSecret\` option\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{\\"message\\":\\"\`backend\` requires also \`controlSecret\` option\\"},\\"note\\":\\"Call \`npx nanoid\` and set result as \`controlSecret\` or \`LOGUX_CONTROL_SECRET\` environment variable\\",\\"msg\\":\\"\`backend\` requires also \`controlSecret\` option\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "
 `;
 
 exports[`reports LOGUX_NO_CONTROL_SECRET error 2`] = `
 "[41m[37m FATAL [39m[49m [1m[31m[33mbackend[39m[31m requires also [33mcontrolSecret[39m[31m option[39m[22m [2mat 1970-01-01 00:00:00[22m
-        [90mCall [1mnpx nanoid-cli[22m and set result as [1mcontrolSecret[22m or[39m
+        [90mCall [1mnpx nanoid[22m and set result as [1mcontrolSecret[22m or[39m
         [90m[1mLOGUX_CONTROL_SECRET[22m environment variable[39m
 
 "
