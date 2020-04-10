@@ -1,6 +1,11 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.7.1
+* Print to the log about denied control requests attempts.
+* Fix server options types.
+* Return status code 500 on control requests if server has no secret.
+
 ## 0.7 “Eliza Cassan”
 * Use Logux Core 0.5 and WebSocket Protocol 3.
 * Use Back-end Protocol 3.
