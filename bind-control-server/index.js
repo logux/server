@@ -83,7 +83,7 @@ function bindControlServer (app) {
     } else {
       if (!rule.safe) {
         if (!app.options.controlSecret) {
-          res.statusCode = 403
+          res.statusCode = 500
           res.end(NO_SECRET)
           return
         } else if (app.isBruteforce(req.connection.remoteAddress)) {

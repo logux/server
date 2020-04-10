@@ -109,7 +109,7 @@ it('shows error on missed secret', async () => {
   }
   await app.listen()
   let err = await requestError('GET', '/test?secret')
-  expect(err.statusCode).toEqual(403)
+  expect(err.statusCode).toEqual(500)
   expect(err.message).toContain('LOGUX_CONTROL_SECRET')
 })
 
