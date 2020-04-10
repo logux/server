@@ -444,6 +444,32 @@ exports[`reports wrongChannel without name 2`] = `
 "
 `;
 
+exports[`reports wrongControlIp 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"ipAddress\\":\\"6.0.0.1\\",\\"mask\\":\\"127.0.0.1/8\\",\\"msg\\":\\"IP address of control request do not pass the mask\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports wrongControlIp 2`] = `
+"[43m[30m WARN [39m[49m  [1m[33mIP address of control request do not pass the mask[39m[22m [2mat 1970-01-01 00:00:00[22m
+        IP address: [1m6.0.0.1[22m
+        Mask:       [1m127.0.0.1/8[22m
+
+"
+`;
+
+exports[`reports wrongControlSecret 1`] = `
+"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"ipAddress\\":\\"6.0.0.1\\",\\"wrongSecret\\":\\"ArgDCPc1IxfU97V1ukeN6\\",\\"msg\\":\\"Wrong secret in control request\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"
+`;
+
+exports[`reports wrongControlSecret 2`] = `
+"[43m[30m WARN [39m[49m  [1m[33mWrong secret in control request[39m[22m [2mat 1970-01-01 00:00:00[22m
+        IP address:   [1m6.0.0.1[22m
+        Wrong secret: [1mArgDCPc1IxfU97V1ukeN6[22m
+
+"
+`;
+
 exports[`reports zombie 1`] = `
 "{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"nodeId\\":\\"100:uImkcF4z\\",\\"msg\\":\\"Zombie client was disconnected\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 "

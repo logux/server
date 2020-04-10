@@ -116,6 +116,16 @@ const REPORTERS = {
 
   zombie: () => ({ level: 'warn', msg: 'Zombie client was disconnected' }),
 
+  wrongControlSecret: () => ({
+    level: 'warn',
+    msg: 'Wrong secret in control request'
+  }),
+
+  wrongControlIp: () => ({
+    level: 'warn',
+    msg: 'IP address of control request do not pass the mask'
+  }),
+
   unknownType: record => ({
     level: /^ server(:| )/.test(record.actionId) ? 'error' : 'warn',
     msg: 'Action with unknown type'

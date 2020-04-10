@@ -72,6 +72,22 @@ function createServer (options) {
   return server
 }
 
+function createReporter (opts) {
+  let result = { }
+  result.names = []
+  result.reports = []
+
+  opts = opts || { }
+  opts.reporter = (name, details) => {
+    result.names.push(name)
+    result.reports.push([name, details])
+  }
+
+  let server = createServer(opts)
+  result.app = server
+  return result
+}
+
 function request ({ method, path, string, data }) {
   if (!string && data) string = JSON.stringify(data)
   return new Promise((resolve, reject) => {
@@ -206,8 +222,8 @@ it('checks secret option', () => {
 
 it('validates HTTP requests', async () => {
   let prefix = { version: 2, secret: '1234' }
-  let app = createServer(OPTIONS)
-  await app.listen()
+  let test = createReporter(OPTIONS)
+  await test.app.listen()
   expect(await request({ method: 'PUT', string: '' }))
     .toEqual(405)
   expect(await request({ path: '/logux', string: '' }))
@@ -236,7 +252,10 @@ it('validates HTTP requests', async () => {
     .toEqual(400)
   expect(await send({ version: 2, secret: 'wrong', commands: [] }))
     .toEqual(403)
-  expect(app.log.actions()).toEqual([])
+  expect(test.app.log.actions()).toEqual([])
+  expect(test.reports[1]).toEqual([
+    'wrongControlSecret', { ipAddress: '127.0.0.1', wrongSecret: 'wrong' }
+  ])
 })
 
 it('creates actions', async () => {

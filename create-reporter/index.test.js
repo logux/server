@@ -277,6 +277,20 @@ it('reports zombie', () => {
   check('zombie', { nodeId: '100:uImkcF4z' })
 })
 
+it('reports wrongControlIp', () => {
+  check('wrongControlIp', {
+    ipAddress: '6.0.0.1',
+    mask: '127.0.0.1/8'
+  })
+})
+
+it('reports wrongControlSecret', () => {
+  check('wrongControlSecret', {
+    ipAddress: '6.0.0.1',
+    wrongSecret: 'ArgDCPc1IxfU97V1ukeN6'
+  })
+})
+
 it('reports destroy', () => {
   check('destroy')
 })

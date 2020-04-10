@@ -22,6 +22,10 @@ function bindControlServer (app) {
   app.http.on('request', (req, res) => {
     let ipAddress = req.connection.remoteAddress
     if (masks.every(i => !i.contains(ipAddress))) {
+      app.reporter('wrongControlIp', {
+        ipAddress,
+        mask: app.options.controlMask
+      })
       res.statusCode = 403
       res.end('IP address is not in LOGUX_CONTROL_MASK/controlMask')
       return
@@ -65,9 +69,13 @@ function bindControlServer (app) {
           res.statusCode = 429
           res.end('Too many wrong secret attempts')
         } else if (body.secret !== app.options.controlSecret) {
+          app.rememberBadAuth(req.connection.remoteAddress)
+          app.reporter('wrongControlSecret', {
+            ipAddress,
+            wrongSecret: body.secret
+          })
           res.statusCode = 403
           res.end('Wrong secret')
-          app.rememberBadAuth(req.connection.remoteAddress)
         } else {
           for (let i of body.commands) {
             if (!rule.isValid(i)) {
@@ -91,9 +99,13 @@ function bindControlServer (app) {
           res.end('Too many wrong secret attempts')
           return
         } else if (reqUrl.search !== '?' + app.options.controlSecret) {
+          app.rememberBadAuth(req.connection.remoteAddress)
+          app.reporter('wrongControlSecret', {
+            ipAddress,
+            wrongSecret: reqUrl.search.slice(1)
+          })
           res.statusCode = 403
           res.end('Wrong secret')
-          app.rememberBadAuth(req.connection.remoteAddress)
           return
         }
       }

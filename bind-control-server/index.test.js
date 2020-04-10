@@ -18,6 +18,22 @@ function createServer (opts = { }) {
   return server
 }
 
+function createReporter (opts) {
+  let result = { }
+  result.names = []
+  result.reports = []
+
+  opts = opts || { }
+  opts.reporter = (name, details) => {
+    result.names.push(name)
+    result.reports.push([name, details])
+  }
+
+  app = createServer(opts)
+  result.app = app
+  return result
+}
+
 function request (method, path) {
   return new Promise((resolve, reject) => {
     let req = http.request({
@@ -77,11 +93,11 @@ it('responses 404', async () => {
 })
 
 it('checks secret', async () => {
-  app = createServer({ controlSecret: 'secret' })
-  app.controls['GET /test'] = {
+  let test = createReporter({ controlSecret: 'secret' })
+  test.app.controls['GET /test'] = {
     request: () => ({ body: 'done' })
   }
-  await app.listen()
+  await test.app.listen()
 
   let response = await request('GET', '/test%3Fsecret')
   expect(response.body).toContain('done')
@@ -89,6 +105,10 @@ it('checks secret', async () => {
   let err = await requestError('GET', '/test?wrong')
   expect(err.statusCode).toEqual(403)
   expect(err.message).toEqual('Wrong secret')
+
+  expect(test.reports[1]).toEqual([
+    'wrongControlSecret', { ipAddress: '127.0.0.1', wrongSecret: 'wrong' }
+  ])
 })
 
 it('supports wrong URL encoding', async () => {
@@ -171,9 +191,14 @@ it('does not break WebSocket', async () => {
 })
 
 it('checks incoming IP address', async () => {
-  app = createServer({ controlMask: '128.0.0.1/8, 127.1.0.0/16' })
-  await app.listen()
+  let controlMask = '128.0.0.1/8, 127.1.0.0/16'
+  let test = createReporter({ controlMask })
+  await test.app.listen()
   let err = await requestError('GET', '/')
+
   expect(err.statusCode).toEqual(403)
   expect(err.message).toContain('LOGUX_CONTROL_MASK')
+  expect(test.reports[1]).toEqual([
+    'wrongControlIp', { ipAddress: '127.0.0.1', mask: controlMask }
+  ])
 })
