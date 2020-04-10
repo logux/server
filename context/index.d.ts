@@ -1,6 +1,6 @@
 import { Action } from '@logux/core'
 
-import BaseServer, { BaseServerOptions, ServerMeta } from '../base-server'
+import Server, { ServerMeta } from '../server'
 
 /**
  * Action context.
@@ -28,7 +28,7 @@ export default class Context<D extends object> {
     clientId: string,
     userId: string | undefined,
     subprotocol: string,
-    server: BaseServer
+    server: Server
   )
 
   /**
@@ -96,7 +96,7 @@ export default class Context<D extends object> {
   /**
    * Logux server
    */
-  server: BaseServer
+  server: Server
 
   /**
    * Check creator subprotocol version. It uses `semver` npm package
