@@ -2,7 +2,7 @@ import BunyanLogger = require('bunyan')
 
 import BaseServer, { Reporter, BaseServerOptions } from '../base-server'
 
-export type ServerOptions = BaseServerOptions & {
+export type ServerOptions = BaseServerOptions | {
   /**
    * Report process/errors to CLI in bunyan JSON or in human readable
    * format. It can be also a function to show current server status.
