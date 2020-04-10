@@ -350,7 +350,7 @@ interface Processor<A extends Action, D extends object> {
 }
 
 /**
- * Callback which will be run on the end of subscription
+ * Callback which will be run on the end of action/subscription
  * processing or on an error.
  *
  * @param ctx Information about node, who create this action.
