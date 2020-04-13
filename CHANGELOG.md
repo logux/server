@@ -1,6 +1,12 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.8 “Morpheus”
+* Rename `init` callback to `load` in `Server#channel()`.
+* Add `TestServer` and `TestClient` to test servers.
+* Add `filterMeta` helper.
+* Fix types.
+
 ## 0.7.2
 * More flexible types for logger.
 
