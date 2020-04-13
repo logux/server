@@ -1,4 +1,4 @@
-let filterMeta = require('..')
+let { filterMeta } = require('..')
 
 it('filters meta', () => {
   let meta1 = {

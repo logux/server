@@ -1,6 +1,9 @@
 import ServerClient from './server-client'
 import ALLOWED_META from './allowed-meta'
+import filterMeta from './filter-meta'
 import TestServer from './test-server'
+import TestClient from './test-client'
+import BaseServer from './base-server'
 import Server from './server'
 
 export { Action } from '@logux/core'
@@ -19,8 +22,11 @@ export {
 } from './base-server'
 
 export {
-  ServerClient,
   ALLOWED_META,
+  ServerClient,
+  filterMeta,
   TestServer,
+  TestClient,
+  BaseServer,
   Server
 }
