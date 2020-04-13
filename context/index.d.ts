@@ -1,6 +1,7 @@
 import { Action } from '@logux/core'
 
-import Server, { ServerMeta } from '../server'
+import { ServerMeta } from '../base-server'
+import Server from '../server'
 
 /**
  * Action context.
