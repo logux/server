@@ -38,7 +38,11 @@ class ServerClient {
     this.processing = false
     this.connection = connection
     this.key = key.toString()
-    this.remoteAddress = connection.ws._socket.remoteAddress
+    if (connection.ws) {
+      this.remoteAddress = connection.ws._socket.remoteAddress
+    } else {
+      this.remoteAddress = '127.0.0.1'
+    }
 
     let token
     if (this.app.env === 'development') token = 'development'
