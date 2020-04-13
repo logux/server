@@ -4,7 +4,6 @@ import {
 } from '@logux/core'
 import { Server as HTTPServer } from 'http'
 import { Unsubscribe } from 'nanoevents'
-import BunyanLogger = require('bunyan')
 
 import Context, { ChannelContext } from '../context'
 import ServerClient from '../server-client'
@@ -187,6 +186,16 @@ export type Resend = {
   nodes?: string[]
 }
 
+export class Logger {
+  info (details: object, message: string): void
+
+  warn (details: object, message: string): void
+
+  error (details: object, message: string): void
+
+  fatal (details: object, message: string): void
+}
+
 export type ServerOptions = {
   /**
    * Server current application subprotocol version in SemVer format.
@@ -303,7 +312,7 @@ export type ServerOptions = {
   /**
    * Bunyan logger with custom settings.
    */
-  bunyan?: BunyanLogger
+  bunyan?: Logger
 }
 
 /**

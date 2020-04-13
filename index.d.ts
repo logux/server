@@ -12,7 +12,8 @@ export {
   LoguxUndoAction,
   LoguxUnsubscribeAction,
   ServerMeta,
-  ServerOptions
+  ServerOptions,
+  Logger
 } from './server'
 
 export {
