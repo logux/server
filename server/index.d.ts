@@ -186,7 +186,7 @@ export type Resend = {
   nodes?: string[]
 }
 
-export class Logger {
+export type Logger = {
   info (details: object, message: string): void
 
   warn (details: object, message: string): void
