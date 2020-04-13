@@ -48,6 +48,7 @@ it('sends and collect actions', async () => {
   ])
   let received = await client1.collect(async () => {
     await client1.log.add({ type: 'FOO' })
+    await delay(1)
     await client2.log.add({ type: 'RESEND' })
     await delay(10)
   })
@@ -58,9 +59,9 @@ it('sends and collect actions', async () => {
   ])
   expect(client1.log.actions()).toEqual([
     { type: 'FOO' },
-    { type: 'RESEND' },
     { type: 'BAR' },
-    { type: 'logux/processed', id: '1 10:1:test 0' }
+    { type: 'logux/processed', id: '1 10:1:test 0' },
+    { type: 'RESEND' }
   ])
 })
 
