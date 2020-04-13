@@ -91,7 +91,7 @@ server.channel<UserParams, UserData, UserSubscribeAction>('user/:id', {
       return undefined
     }
   },
-  async init (ctx) {
+  async load (ctx) {
     // THROWS is not assignable to parameter of type 'Action'
     await ctx.sendBack({
       userId: ctx.data.user.id,

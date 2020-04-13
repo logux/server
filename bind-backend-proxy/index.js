@@ -218,7 +218,7 @@ function bindBackendProxy (app) {
       sendAction(action, meta)
       return accessing[meta.id]
     },
-    init (ctx, action, meta) {
+    load (ctx, action, meta) {
       return processing[meta.id]
     },
     finally (ctx, action, meta) {

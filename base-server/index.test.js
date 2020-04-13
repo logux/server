@@ -678,7 +678,7 @@ it('checks channel definition', () => {
   }).toThrow('Channel foo/:id must have access callback')
 
   expect(() => {
-    app.channel(/^foo:/, { init: true })
+    app.channel(/^foo:/, { load: true })
   }).toThrow('Channel /^foo:/ must have access callback')
 })
 
@@ -940,7 +940,7 @@ it('cancels subscriptions on disconnect', async () => {
     filter () {
       throw new Error('no calls')
     },
-    init () {
+    load () {
       throw new Error('no calls')
     }
   })
@@ -964,7 +964,7 @@ it('reports about errors during channel initialization', async () => {
   let err = new Error()
   test.app.channel(/^user\/(\d+)$/, {
     access: () => true,
-    init () {
+    load () {
       throw err
     }
   })
@@ -1001,7 +1001,7 @@ it('loads initial actions during subscription', async () => {
   let initializating
   test.app.channel('user/:id', {
     access: () => true,
-    init (ctx, action, meta) {
+    load (ctx, action, meta) {
       expect(ctx.params.id).toEqual('10')
       expect(action.channel).toEqual('user/10')
       expect(meta.id).toEqual('1 10:uuid 0')

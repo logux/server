@@ -74,7 +74,7 @@ server.channel<UserParams, UserData, UserSubscribeAction>('user/:id', {
       return undefined
     }
   },
-  async init (ctx) {
+  async load (ctx) {
     await ctx.sendBack({
       type: 'user/rename',
       userId: ctx.data.user.id,

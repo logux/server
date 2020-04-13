@@ -76,7 +76,7 @@ server.channel('user/:id', {
   access (ctx, action, meta) {
     return ctx.params.id === ctx.userId
   }
-  async init (ctx, action, meta) {
+  async load (ctx, action, meta) {
     const user = await db.loadUser(ctx.params.id)
     server.log.add(
       { type: 'USER_NAME', name: user.name },

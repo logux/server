@@ -424,14 +424,14 @@ interface FilterCreator<
 }
 
 /**
- * Send actions with initial state.
+ * Send actions with current state.
  *
  * @param ctx Information about node, who create this action.
  * @param action The action data.
  * @param meta The action metadata.
- * @returns Promise during initial actions loading.
+ * @returns Promise during current actions loading.
  */
-interface ChannelInitialized<
+interface ChannelLoader<
   A extends Action, D extends object, P extends object | string[]
 > {
   (ctx: ChannelContext<D, P>, action: A, meta: ServerMeta): void | Promise<void>
@@ -463,7 +463,7 @@ type ChannelCallbacks<
 > = {
   access: ChannelAuthorizer<A, D, P>
   filter?: FilterCreator<A, D, P>
-  init?: ChannelInitialized<A, D, P>
+  load?: ChannelLoader<A, D, P>
   finally?: ChannelFinally<A, D, P>
 }
 
@@ -742,7 +742,7 @@ export default class Server {
    *       return !action.hidden
    *     }
    *   }
-   *   async init (ctx, action, meta) {
+   *   async load (ctx, action, meta) {
    *     const user = await db.loadUser(ctx.params.id)
    *     ctx.sendBack({ type: 'USER_NAME', name: user.name })
    *   }

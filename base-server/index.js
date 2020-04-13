@@ -562,7 +562,7 @@ class BaseServer {
           this.subscribers[action.channel][ctx.nodeId] = filter || true
           subscribed = true
 
-          if (i.init) await i.init(ctx, action, meta)
+          if (i.load) await i.load(ctx, action, meta)
           this.emitter.emit('subscribed', action, meta, Date.now() - start)
           this.markAsProcessed(meta)
         } catch (e) {
