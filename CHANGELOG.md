@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.7.2
+* More flexible types for logger.
+
 ## 0.7.1
 * Print to the log about denied control requests attempts.
 * Fix server options types.
