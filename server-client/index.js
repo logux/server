@@ -4,6 +4,7 @@ let semver = require('semver')
 let FilteredNode = require('../filtered-node')
 let ALLOWED_META = require('../allowed-meta')
 let parseNodeId = require('../parse-node-id')
+let filterMeta = require('../filter-meta')
 
 const RESEND_META = [
   'channel', 'channels',
@@ -158,7 +159,7 @@ class ServerClient {
   }
 
   async outMap (action, meta) {
-    return [action, { id: meta.id, time: meta.time }]
+    return [action, filterMeta(meta)]
   }
 
   async inMap (action, meta) {
