@@ -26,7 +26,7 @@ export default class Context<D extends object> {
   constructor(
     nodeId: string,
     clientId: string,
-    userId: string | undefined,
+    userId: string,
     subprotocol: string,
     server: Server
   )
@@ -67,7 +67,7 @@ export default class Context<D extends object> {
    * }
    * ```
    */
-  userId: 'server' | string | undefined
+  userId: 'server' | string
 
   /**
    * Unique persistence client ID.
