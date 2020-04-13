@@ -125,6 +125,12 @@ it('has remote address shortcut', () => {
   expect(client.remoteAddress).toEqual('127.0.0.1')
 })
 
+it('has default remote address if ws param does not set', () => {
+  let pair = new TestPair()
+  let client = new ServerClient(createServer(), pair.left, 1)
+  expect(client.remoteAddress).toEqual('127.0.0.1')
+})
+
 it('reports about connection', () => {
   let test = createReporter()
   let fired = []
