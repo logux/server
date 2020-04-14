@@ -33,7 +33,7 @@ export default class TestServer extends BaseServer {
   /**
    * @param opts The limit subset of server options.
    */
-  constructor (opts: TestServerOptions)
+  constructor (opts?: TestServerOptions)
 
   /**
    * Time replacement without variable parts like current timestamp.
