@@ -723,7 +723,7 @@ it('sends new actions by node ID', async () => {
   await app.log.add({ type: 'A' }, { id: '1 server:x 0' })
   await app.log.add({ type: 'A' }, { id: '2 server:x 0', nodes: ['10:uuid'] })
   client.connection.other().send(['synced', 2])
-  await delay(1)
+  await delay(10)
 
   expect(sentNames(client)).toEqual(['connected', 'sync'])
   expect(sent(client)[1]).toEqual([
