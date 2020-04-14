@@ -42,7 +42,7 @@ export default class TestClient {
    * @param userId User ID.
    * @param opts Other options.
    */
-  constructor (server: TestServer, userId: string, opts: TestClientOptions)
+  constructor (server: TestServer, userId: string, opts?: TestClientOptions)
 
   /**
    * Client’s log with extra methods to check actions inside.
