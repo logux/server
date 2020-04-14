@@ -99,6 +99,11 @@ it('tracks action processing', async () => {
   let accessError = await catchError(() => client.process({ type: 'DENIED' }))
   expect(accessError.message).toEqual('Action was denied')
 
+  let unknownError = await catchError(() => client.process({ type: 'UNKNOWN' }))
+  expect(unknownError.message).toEqual(
+    'Server does not have callbacks for UNKNOWN actions'
+  )
+
   let customError = await catchError(() => client.process({ type: 'UNDO' }))
   expect(customError.message).toEqual('Server undid action')
 })
@@ -113,12 +118,9 @@ it('detects action ID dublicate', async () => {
   let processed = await client.process({ type: 'FOO' }, { id: '1 10:1:test 0' })
   expect(processed).toEqual([{ type: 'logux/processed', id: '1 10:1:test 0' }])
 
-  let err
-  try {
+  let err = await catchError(async () => {
     await client.process({ type: 'FOO' }, { id: '1 10:1:test 0' })
-  } catch (e) {
-    err = e
-  }
+  })
   expect(err.message).toEqual('Action 1 10:1:test 0 was already in log')
 })
 
@@ -141,4 +143,9 @@ it('tracks subscriptions', async () => {
     type: 'logux/subscribe', channel: 'foo', a: 1
   })
   expect(actions2).toEqual([{ type: 'FOO', a: 1 }])
+
+  let unknownError = await catchError(() => client.subscribe('unknown'))
+  expect(unknownError.message).toEqual(
+    'Server does not have callbacks for unknown channel'
+  )
 })

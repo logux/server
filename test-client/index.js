@@ -68,6 +68,14 @@ class TestClient {
             let error
             if (other.reason === 'denied') {
               error = new Error('Action was denied')
+            } else if (other.reason === 'unknownType') {
+              error = new Error(
+                `Server does not have callbacks for ${ action.type } actions`
+              )
+            } else if (other.reason === 'wrongChannel') {
+              error = new Error(
+                `Server does not have callbacks for ${ action.channel } channel`
+              )
             } else if (lastError) {
               error = lastError
             } else {

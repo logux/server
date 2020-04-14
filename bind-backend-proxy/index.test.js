@@ -497,7 +497,7 @@ it('reacts on unknown action', async () => {
   ])
   await delay(100)
   expect(app.log.actions()).toEqual([
-    { type: 'logux/undo', reason: 'error', id: '1 10:uuid 0' }
+    { type: 'logux/undo', reason: 'unknownType', id: '1 10:uuid 0' }
   ])
   let debug = client.connection.pair.leftSent.find(i => i[0] === 'debug')
   expect(debug).toEqual(['debug', 'error', 'Action with unknown type UNKNOWN'])
@@ -517,7 +517,7 @@ it('reacts on unknown channel', async () => {
   await delay(100)
   expect(app.log.actions()).toEqual([
     { type: 'logux/subscribe', channel: 'unknown' },
-    { type: 'logux/undo', reason: 'error', id: '1 10:uuid 0' }
+    { type: 'logux/undo', reason: 'wrongChannel', id: '1 10:uuid 0' }
   ])
   let debug = client.connection.pair.leftSent.find(i => i[0] === 'debug')
   expect(debug).toEqual(['debug', 'error', 'Wrong channel name unknown'])

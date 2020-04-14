@@ -700,7 +700,7 @@ it('reports about wrong channel name', async () => {
     actionId: '1 10:uuid 0', channel: undefined
   })
   expect(test.reports[2][1].action).toEqual({
-    id: '1 10:uuid 0', reason: 'error', type: 'logux/undo'
+    id: '1 10:uuid 0', reason: 'wrongChannel', type: 'logux/undo'
   })
   expect(test.app.nodeIds['10:uuid'].connection.send).toHaveBeenCalledWith([
     'debug', 'error', 'Wrong channel name undefined'

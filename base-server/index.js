@@ -442,7 +442,7 @@ class BaseServer {
     this.log.changeMeta(meta.id, { status: 'error' })
     this.reporter('unknownType', { type: action.type, actionId: meta.id })
     if (parseNodeId(meta.id).userId !== 'server') {
-      this.undo(meta, 'error')
+      this.undo(meta, 'unknownType')
     }
     this.debugActionError(meta, `Action with unknown type ${ action.type }`)
   }
@@ -453,7 +453,7 @@ class BaseServer {
       actionId: meta.id,
       channel: action.channel
     })
-    this.undo(meta, 'error')
+    this.undo(meta, 'wrongChannel')
     this.debugActionError(meta, `Wrong channel name ${ action.channel }`)
   }
 
