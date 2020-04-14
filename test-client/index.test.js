@@ -48,7 +48,7 @@ it('sends and collect actions', async () => {
   ])
   let received = await client1.collect(async () => {
     await client1.log.add({ type: 'FOO' })
-    await delay(1)
+    await delay(10)
     await client2.log.add({ type: 'RESEND' })
     await delay(10)
   })
