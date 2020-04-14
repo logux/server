@@ -3,6 +3,13 @@ import { TestTime } from '@logux/core'
 import TestClient, { TestClientOptions } from '../test-client'
 import BaseServer from '../base-server'
 
+type TestServerOptions = {
+  /**
+   * Print server log to the console for debug.
+   */
+  reporter?: 'human'
+}
+
 /**
  * Server to be used in test.
  *
@@ -23,6 +30,11 @@ import BaseServer from '../base-server'
  * ```
  */
 export default class TestServer extends BaseServer {
+  /**
+   * @param opts The limit subset of server options.
+   */
+  constructor (opts: TestServerOptions)
+
   /**
    * Time replacement without variable parts like current timestamp.
    */

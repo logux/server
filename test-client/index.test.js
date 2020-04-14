@@ -149,3 +149,10 @@ it('tracks subscriptions', async () => {
     'Server does not have callbacks for unknown channel'
   )
 })
+
+it('prints server log', async () => {
+  jest.spyOn(process.stdout, 'write').mockImplementation(() => true)
+  server = new TestServer({ reporter: 'human' })
+  await server.connect()
+  expect(process.stdout.write).toHaveBeenCalledTimes(2)
+})
