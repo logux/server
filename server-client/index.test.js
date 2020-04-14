@@ -1120,7 +1120,7 @@ it('does not resend actions back', async () => {
     { type: 'C' }, { id: [4, '10:1:uuid', 0], time: 4 }
   ])
   await client1.node.connection.pair.wait('right')
-  await delay(1)
+  await delay(10)
 
   expect(actions(client1)).toEqual([])
   expect(actions(client2)).toEqual([{ type: 'A' }, { type: 'C' }])
