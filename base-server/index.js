@@ -16,6 +16,8 @@ let Context = require('../context')
 
 let readFile = promisify(fs.readFile)
 
+const RESEND_META = ['channels', 'users', 'clients', 'nodes']
+
 function optionError (msg) {
   let error = new Error(msg)
   error.logux = true
@@ -87,24 +89,9 @@ class BaseServer {
           meta.status = 'processed'
         }
       }
-      if (meta.channel) {
-        meta.channels = [meta.channel]
-        delete meta.channel
-      }
-      if (meta.user) {
-        meta.users = [meta.user]
-        delete meta.user
-      }
-      if (meta.client) {
-        meta.clients = [meta.client]
-        delete meta.client
-      }
-      if (meta.node) {
-        meta.nodes = [meta.node]
-        delete meta.node
-      }
+      this.replaceResendShortcuts(meta)
     })
-    this.on('add', (action, meta) => {
+    this.on('add', async (action, meta) => {
       let start = Date.now()
       this.reporter('add', { action, meta })
 
@@ -124,6 +111,29 @@ class BaseServer {
         return
       }
 
+      let processor = this.getProcessor(action.type)
+      if (processor && processor.resend && meta.status === 'waiting') {
+        let ctx = this.createContext(meta)
+        let resend
+        try {
+          resend = await processor.resend(ctx, action, meta)
+        } catch (e) {
+          this.undo(meta, 'error')
+          this.emitter.emit('error', e, action, meta)
+          this.finally(processor, ctx, action, meta)
+          return
+        }
+        if (resend) {
+          this.replaceResendShortcuts(resend)
+          let diff = { }
+          for (let i of RESEND_META) {
+            if (resend[i]) diff[i] = resend[i]
+          }
+          await this.log.changeMeta(meta.id, diff)
+          meta = { ...meta, ...diff }
+        }
+      }
+
       if (this.isUseless(action, meta)) {
         this.reporter('useless', { action, meta })
       }
@@ -131,7 +141,6 @@ class BaseServer {
       this.sendAction(action, meta)
 
       if (meta.status === 'waiting') {
-        let processor = this.getProcessor(action.type)
         if (!processor) {
           this.internalUnkownType(action, meta)
           return
@@ -685,6 +694,25 @@ class BaseServer {
 
     let action = { ...extra, type: 'logux/undo', id: meta.id, reason }
     return [action, undoMeta]
+  }
+
+  replaceResendShortcuts (meta) {
+    if (meta.channel) {
+      meta.channels = [meta.channel]
+      delete meta.channel
+    }
+    if (meta.user) {
+      meta.users = [meta.user]
+      delete meta.user
+    }
+    if (meta.client) {
+      meta.clients = [meta.client]
+      delete meta.client
+    }
+    if (meta.node) {
+      meta.nodes = [meta.node]
+      delete meta.node
+    }
   }
 }
 

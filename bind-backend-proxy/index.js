@@ -197,12 +197,12 @@ function bindBackendProxy (app) {
     })
   }))
   app.otherType({
-    resend (ctx, action, meta) {
-      sendAction(action, meta)
-      return resending[meta.id]
-    },
     access (ctx, action, meta) {
+      sendAction(action, meta)
       return accessing[meta.id]
+    },
+    resend (ctx, action, meta) {
+      return resending[meta.id]
     },
     process (ctx, action, meta) {
       return processing[meta.id]

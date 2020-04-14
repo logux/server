@@ -676,16 +676,16 @@ it('adds resend keys', async () => {
 
   let client = await connectClient(test.app)
   client.connection.other().send(['sync', 2,
-    { type: 'FOO' }, { id: [1, '10:uuid', 0], time: 1, users: ['2'] },
-    { type: 'EMPTY' }, { id: [2, '10:uuid', 0], time: 2, users: ['2'] }
+    { type: 'FOO' }, { id: [1, '10:uuid', 0], time: 1 },
+    { type: 'EMPTY' }, { id: [2, '10:uuid', 0], time: 2 }
   ])
   await client.connection.pair.wait('right')
 
   expect(test.app.log.actions()).toEqual([
     { type: 'FOO' },
     { type: 'EMPTY' },
-    { type: 'logux/processed', id: '1 10:uuid 0' },
-    { type: 'logux/processed', id: '2 10:uuid 0' }
+    { type: 'logux/processed', id: '2 10:uuid 0' },
+    { type: 'logux/processed', id: '1 10:uuid 0' }
   ])
   expect(test.names).toEqual([
     'connect', 'authenticated', 'add', 'add', 'add', 'add'
@@ -1061,8 +1061,8 @@ it('has finally callback', async () => {
   ])
   await client.node.connection.pair.wait('right')
 
-  expect(calls).toEqual(['C', 'D', 'A', 'E', 'B'])
-  expect(errors).toEqual(['C', 'D', 'E', 'EE'])
+  expect(calls).toEqual(['D', 'A', 'C', 'E', 'B'])
+  expect(errors).toEqual(['D', 'C', 'E', 'EE'])
 })
 
 it('sends error to author', async () => {
@@ -1149,4 +1149,31 @@ it('keeps context', async () => {
   await delay(1)
 
   expect(sent(client)[2][2].type).toEqual('logux/processed')
+})
+
+it('uses resend for own actions', async () => {
+  let app = createServer()
+  app.type('FOO', {
+    resend: () => ({ channel: 'foo' }),
+    access: () => false
+  })
+  app.channel('foo', {
+    access: () => true
+  })
+  let client = await connectClient(app, '10:1:uuid')
+  client.node.connection.other().send([
+    'sync', 1,
+    { type: 'logux/subscribe', channel: 'foo' },
+    { id: [1, '10:1:uuid', 0], time: 1 }
+  ])
+  await delay(10)
+
+  app.log.add({ type: 'FOO' })
+  await delay(10)
+  expect(app.log.entries()[2][1].channels).toEqual(['foo'])
+  expect(sent(client)[3][2]).toEqual({ type: 'FOO' })
+
+  app.log.add({ type: 'FOO' }, { status: 'processed' })
+  await delay(10)
+  expect(app.log.entries()[3][1].channels).not.toBeDefined()
 })

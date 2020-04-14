@@ -6,13 +6,6 @@ let ALLOWED_META = require('../allowed-meta')
 let parseNodeId = require('../parse-node-id')
 let filterMeta = require('../filter-meta')
 
-const RESEND_META = [
-  'channel', 'channels',
-  'user', 'users',
-  'client', 'clients',
-  'node', 'nodes'
-]
-
 function reportDetails (client) {
   return {
     connectionId: client.key,
@@ -166,41 +159,14 @@ class ServerClient {
     if (!meta.subprotocol) {
       meta.subprotocol = this.node.remoteSubprotocol
     }
-
-    for (let i of RESEND_META) delete meta[i]
-
-    let type = action.type
-    if (type !== 'logux/subscribe' && type !== 'logux/unsubscribe') {
-      let processor = this.app.getProcessor(type)
-      if (processor && processor.resend) {
-        let ctx = this.app.createContext(meta)
-        try {
-          let keys = await processor.resend(ctx, action, meta)
-          if (keys) {
-            for (let i of RESEND_META) {
-              if (keys[i]) meta[i] = keys[i]
-            }
-          }
-        } catch (e) {
-          this.app.undo(meta, 'error')
-          this.app.emitter.emit('error', e, action, meta)
-          this.app.finally(processor, ctx, action, meta)
-          return [false, false]
-        }
-      }
-    }
-
     return [action, meta]
   }
 
   async filter (action, meta) {
-    if (!action) return false
     let ctx = this.app.createContext(meta)
 
     let wrongUser = !this.clientId || this.clientId !== ctx.clientId
-    let wrongMeta = Object.keys(meta).some(i => {
-      return !ALLOWED_META.includes(i) && !RESEND_META.includes(i)
-    })
+    let wrongMeta = Object.keys(meta).some(i => !ALLOWED_META.includes(i))
     if (wrongUser || wrongMeta) {
       delete this.app.contexts[meta.id]
       this.denyBack(meta)
