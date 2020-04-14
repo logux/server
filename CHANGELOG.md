@@ -1,6 +1,14 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.8.1
+* Call `resend` after `access` step in action processing.
+* Add special reason for unknown action or channel errors.
+* Fix `TestClient` error on unknown action or channel.
+* Allow to show log by passing `reporter: "human"` option to `TestServer`.
+* Fix calling `resend` on server’s own actions.
+* Fix types (by Andrey Berezhnoy).
+
 ## 0.8 “Morpheus”
 * Rename `init` callback to `load` in `Server#channel()`.
 * Add `TestServer` and `TestClient` to test servers.
