@@ -89,6 +89,9 @@ server.type('CHANGE_NAME', {
   access (ctx, action, meta) {
     return action.user === ctx.userId
   },
+  resend (ctx, action, meta) {
+    return { channel: `user/${ ctx.userId }` }
+  },
   process (ctx, action, meta) {
     if (isFirstOlder(lastNameChange(action.user), meta)) {
       return db.changeUserName({ id: action.user, name: action.name })
