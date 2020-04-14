@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.8.2
+* Fix types.
+
 ## 0.8.1
 * Call `resend` after `access` step in action processing.
 * Add special reason for unknown action or channel errors.
