@@ -54,13 +54,13 @@ it('sends and collect actions', async () => {
   })
   expect(received).toEqual([
     { type: 'BAR' },
-    { type: 'logux/processed', id: '1 10:1:test 0' },
+    { type: 'logux/processed', id: '1 10:1:1 0' },
     { type: 'RESEND' }
   ])
   expect(client1.log.actions()).toEqual([
     { type: 'FOO' },
     { type: 'BAR' },
-    { type: 'logux/processed', id: '1 10:1:test 0' },
+    { type: 'logux/processed', id: '1 10:1:1 0' },
     { type: 'RESEND' }
   ])
 })
@@ -88,12 +88,12 @@ it('tracks action processing', async () => {
   let client = await server.connect('10')
 
   let processed = await client.process({ type: 'FOO' })
-  expect(processed).toEqual([{ type: 'logux/processed', id: '1 10:1:test 0' }])
+  expect(processed).toEqual([{ type: 'logux/processed', id: '1 10:1:1 0' }])
 
   let serverError = await catchError(() => client.process({ type: 'ERR' }))
   expect(serverError.message).toEqual('test')
   expect(serverError.action).toEqual({
-    type: 'logux/undo', id: '3 10:1:test 0', reason: 'error'
+    type: 'logux/undo', id: '3 10:1:1 0', reason: 'error'
   })
 
   let accessError = await catchError(() => client.process({ type: 'DENIED' }))
@@ -115,13 +115,13 @@ it('detects action ID dublicate', async () => {
   })
   let client = await server.connect('10')
 
-  let processed = await client.process({ type: 'FOO' }, { id: '1 10:1:test 0' })
-  expect(processed).toEqual([{ type: 'logux/processed', id: '1 10:1:test 0' }])
+  let processed = await client.process({ type: 'FOO' }, { id: '1 10:1:1 0' })
+  expect(processed).toEqual([{ type: 'logux/processed', id: '1 10:1:1 0' }])
 
   let err = await catchError(async () => {
-    await client.process({ type: 'FOO' }, { id: '1 10:1:test 0' })
+    await client.process({ type: 'FOO' }, { id: '1 10:1:1 0' })
   })
-  expect(err.message).toEqual('Action 1 10:1:test 0 was already in log')
+  expect(err.message).toEqual('Action 1 10:1:1 0 was already in log')
 })
 
 it('tracks subscriptions', async () => {

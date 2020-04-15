@@ -9,7 +9,7 @@ class TestClient {
     let clientId = server.testUsers[userId] || 0
     clientId += 1
     server.testUsers[userId] = clientId
-    this.nodeId = `${ userId }:${ clientId }:test`
+    this.nodeId = `${ userId }:${ clientId }:1`
     this.log = server.time.nextLog({ nodeId: this.nodeId })
     this.log.on('preadd', (action, meta) => {
       meta.reasons.push('test')
