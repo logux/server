@@ -1,9 +1,10 @@
-let mockOS = jest.requireActual('os')
-jest
-  .spyOn(mockOS, 'platform')
-  .mockImplementation()
-  .mockReturnValue('linux')
-jest.mock('os', () => mockOS)
+jest.mock('os', () => {
+  return {
+    hostname: () => 'localhost',
+    platform: () => 'linux',
+    EOL: '\n'
+  }
+})
 
 let { LoguxError } = require('@logux/core')
 let bunyan = require('bunyan')
@@ -73,7 +74,6 @@ function createError (name, message) {
 let originEnv = process.env.NODE_ENV
 afterEach(() => {
   process.env.NODE_ENV = originEnv
-  jest.resetModules()
 })
 
 it('uses passed bunyan instance', () => {
