@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.8.3
+* Make node IDs in `TestClient` shorter.
+
 ## 0.8.2
 * Fix types.
 
