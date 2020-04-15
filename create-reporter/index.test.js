@@ -1,3 +1,11 @@
+jest.mock('os', () => {
+  return {
+    hostname: () => 'localhost',
+    platform: () => 'linux',
+    EOL: '\n'
+  }
+})
+
 let { LoguxError } = require('@logux/core')
 let bunyan = require('bunyan')
 
