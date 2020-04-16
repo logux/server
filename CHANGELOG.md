@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.8.4
+* Fix back-end protocol check in HTTP request receiving.
+
 ## 0.8.3
 * Make node IDs in `TestClient` shorter.
 
