@@ -14,15 +14,15 @@ export type TestClientOptions = {
  * import { TestServer } from '@logux/server'
  * import postsModule from '.'
  *
- * let server
+ * let destroyable
  * afterEach(() => {
- *   if (server) server.destroy()
+ *   if (destroyable) destroyable.destroy()
  * })
  *
  * function createServer () {
- *   server = new TestServer()
- *   postsModule(server)
- *   return server
+ *   destroyable = new TestServer()
+ *   postsModule(destroyable)
+ *   return destroyable
  * }
  *
  * it('creates and loads posts', () => {
@@ -30,7 +30,7 @@ export type TestClientOptions = {
  *   let client1 = await server.connect('1')
  *   await client1.process({ type: 'posts/add', post })
  *   let client1 = await server.connect('2')
- *   expect(await client.subscribe('posts')).toEqual([
+ *   expect(await client2.subscribe('posts')).toEqual([
  *     { type: 'posts/add', post }
  *   ])
  * })
