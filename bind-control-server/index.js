@@ -1,6 +1,7 @@
 let ip = require('ip')
 
-const MAX_VERSION = 2
+const MAX_VERSION = 3
+const MIN_VERSION = 3
 const NO_SECRET = 'Set LOGUX_CONTROL_SECRET environment variable for Logux ' +
                   'to have access to this page.\n' +
                   'Run `npx nanoid` to generate secure secret.'
@@ -62,9 +63,9 @@ function bindControlServer (app) {
         if (!isValidBody(body)) {
           res.statusCode = 400
           res.end('Wrong body')
-        } else if (body.version > MAX_VERSION) {
+        } else if (body.version < MIN_VERSION || body.version > MAX_VERSION) {
           res.statusCode = 400
-          res.end('Unknown version')
+          res.end('Back-end protocol version is not supported')
         } else if (app.isBruteforce(req.connection.remoteAddress)) {
           res.statusCode = 429
           res.end('Too many wrong secret attempts')

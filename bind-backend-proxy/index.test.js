@@ -221,7 +221,7 @@ it('checks secret option', () => {
 })
 
 it('validates HTTP requests', async () => {
-  let prefix = { version: 2, secret: '1234' }
+  let prefix = { version: 3, secret: '1234' }
   let test = createReporter(OPTIONS)
   await test.app.listen()
   expect(await request({ method: 'PUT', string: '' }))
@@ -236,7 +236,7 @@ it('validates HTTP requests', async () => {
     .toEqual(400)
   expect(await send({ version: 100, secret: '1234', commands: [] }))
     .toEqual(400)
-  expect(await send({ version: 2, commands: [] }))
+  expect(await send({ version: 3, commands: [] }))
     .toEqual(400)
   expect(await send({ ...prefix, commands: {} }))
     .toEqual(400)
@@ -250,7 +250,7 @@ it('validates HTTP requests', async () => {
     .toEqual(400)
   expect(await send({ ...prefix, commands: [['action', { }, 'f']] }))
     .toEqual(400)
-  expect(await send({ version: 2, secret: 'wrong', commands: [] }))
+  expect(await send({ version: 3, secret: 'wrong', commands: [] }))
     .toEqual(403)
   expect(test.app.log.actions()).toEqual([])
   expect(test.reports[1]).toEqual([
@@ -261,7 +261,7 @@ it('validates HTTP requests', async () => {
 it('creates actions', async () => {
   let app = createServer(OPTIONS)
   await app.listen()
-  let code = await send({ version: 2, secret: '1234', commands: [ACTION] })
+  let code = await send({ version: 3, secret: '1234', commands: [ACTION] })
   expect(code).toEqual(200)
   expect(app.log.actions()).toEqual([{ type: 'A' }])
   expect(sent).toEqual([])
@@ -277,7 +277,7 @@ it('creates and processes actions', async () => {
     }
   })
   await app.listen()
-  let code = await send({ version: 2, secret: '1234', commands: [ACTION] })
+  let code = await send({ version: 3, secret: '1234', commands: [ACTION] })
 
   expect(code).toEqual(200)
   expect(app.log.actions()).toEqual([{ type: 'A' }])
@@ -616,21 +616,21 @@ it('reacts on backend error', async () => {
 it('has bruteforce protection', async () => {
   let app = createServer(OPTIONS)
   await app.listen()
-  let code = await send({ version: 2, secret: 'wrong', commands: [] })
+  let code = await send({ version: 3, secret: 'wrong', commands: [] })
 
   expect(code).toEqual(403)
-  code = await send({ version: 2, secret: 'wrong', commands: [] })
+  code = await send({ version: 3, secret: 'wrong', commands: [] })
 
   expect(code).toEqual(403)
-  code = await send({ version: 2, secret: 'wrong', commands: [] })
+  code = await send({ version: 3, secret: 'wrong', commands: [] })
 
   expect(code).toEqual(403)
-  code = await send({ version: 2, secret: 'wrong', commands: [] })
+  code = await send({ version: 3, secret: 'wrong', commands: [] })
 
   expect(code).toEqual(429)
   await delay(3050)
 
-  code = await send({ version: 2, secret: 'wrong', commands: [] })
+  code = await send({ version: 3, secret: 'wrong', commands: [] })
 
   expect(code).toEqual(403)
 })
