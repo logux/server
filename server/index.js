@@ -1,6 +1,7 @@
-let { join } = require('path')
+let { join, relative } = require('path')
 let dotenv = require('dotenv')
 let yargs = require('yargs')
+let globby = require('globby')
 
 let createReporter = require('../create-reporter')
 let BaseServer = require('../base-server')
@@ -170,6 +171,34 @@ class Server extends BaseServer {
     } catch (err) {
       this.reporter('error', { err })
       return process.exit(1)
+    }
+  }
+
+  async autoloadModules (pattern = ['modules/*/index.js', 'modules/*.js']) {
+    let matches = await globby(pattern, {
+      cwd: this.options.root,
+      absolute: true,
+      onlyFiles: true
+    })
+
+    for (let modulePath of matches) {
+      // eslint-disable-next-line max-len
+      // eslint-disable-next-line global-require, security/detect-non-literal-require
+      let serverModule = require(modulePath)
+
+      if (typeof serverModule === 'function') {
+        serverModule(this)
+      } else {
+        let moduleName = relative(this.options.root, modulePath)
+
+        let error = new Error('Server module should export ' +
+                              'a function that accepts a server.')
+        error.logux = true
+        error.note = `Your module ${ moduleName } ` +
+                     `exports ${ typeof serverModule }.`
+
+        throw error
+      }
     }
   }
 }
