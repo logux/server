@@ -125,7 +125,7 @@ export default class Context<D extends object> {
    * @param meta Action’s meta.
    * @returns Promise until action was added to the server log.
    */
-  sendBack (action: Action, meta?: ServerMeta): Promise<void>
+  sendBack (action: Action, meta?: Partial<ServerMeta>): Promise<void>
 }
 
 /**

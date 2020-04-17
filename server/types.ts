@@ -81,6 +81,8 @@ server.channel<UserParams, UserData, UserSubscribeAction>('user/:id', {
       type: 'user/rename',
       userId: ctx.data.user.id,
       name: ctx.data.user.name
+    }, {
+      status: 'processed'
     })
   }
 })
