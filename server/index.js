@@ -174,7 +174,7 @@ class Server extends BaseServer {
     }
   }
 
-  async autoloadModules (pattern = 'modules/**/*.js') {
+  async autoloadModules (pattern = ['modules/*/index.js', 'modules/*.js']) {
     let matches = await globby(pattern, {
       cwd: this.options.root,
       absolute: true,
