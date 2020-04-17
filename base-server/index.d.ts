@@ -761,6 +761,14 @@ export default class BaseServer {
     D extends object = { },
   > (callbacks: ChannelCallbacks<LoguxSubscribeAction, D, { }>): void
 
+  /**
+   * Add new action to the server and return the Promise until it will be
+   * resend to clients and processed.
+   *
+   * @param action New action to resend and process.
+   * @param meta Action’s meta.
+   * @returns Promise until new action will be resend to clients and processed.
+   */
   process (action: Action, meta?: Partial<ServerMeta>): Promise<ServerMeta>
 
   /**
