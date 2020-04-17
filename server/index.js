@@ -1,4 +1,4 @@
-let { join } = require('path')
+let { join, relative } = require('path')
 let dotenv = require('dotenv')
 let yargs = require('yargs')
 let globby = require('globby')
@@ -188,6 +188,16 @@ class Server extends BaseServer {
 
       if (typeof serverModule === 'function') {
         serverModule(this)
+      } else {
+        let moduleName = relative(this.options.root, modulePath)
+
+        let error = new Error('Server module should export ' +
+                              'a function that accepts a server.')
+        error.logux = true
+        error.note = `Your module ${ moduleName } ` +
+                     `exports ${ typeof serverModule }.`
+
+        throw error
       }
     }
   }
