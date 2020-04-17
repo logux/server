@@ -35,11 +35,9 @@ it('checks subprotocol', () => {
 it('sends action back', () => {
   let entries = []
   let ctx = createContext('10:uuid', '2.4.0', {
-    log: {
-      add (...args) {
-        entries.push(args)
-        return 1
-      }
+    process (...args) {
+      entries.push(args)
+      return 1
     }
   })
   expect(ctx.sendBack({ type: 'A' })).toEqual(1)

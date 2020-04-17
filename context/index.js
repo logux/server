@@ -16,7 +16,7 @@ class Context {
   }
 
   sendBack (action, meta = { }) {
-    return this.server.log.add(action, { clients: [this.clientId], ...meta })
+    return this.server.process(action, { clients: [this.clientId], ...meta })
   }
 }
 

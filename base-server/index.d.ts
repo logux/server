@@ -614,6 +614,8 @@ export default class BaseServer {
     D extends object = { },
   > (callbacks: ChannelCallbacks<LoguxSubscribeAction, D, { }>): void
 
+  process (action: Action, meta?: Partial<ServerMeta>): Promise<ServerMeta>
+
   /**
    * Undo action from client.
    *

@@ -148,9 +148,13 @@ class BaseServer {
         if (processor.process) {
           this.processAction(processor, action, meta, start)
         } else {
+          this.emitter.emit('processed', action, meta, 0)
           this.finally(processor, this.createContext(meta), action, meta)
           this.markAsProcessed(meta)
         }
+      } else {
+        this.emitter.emit('processed', action, meta, 0)
+        this.finally(processor, this.createContext(meta), action, meta)
       }
     })
     this.on('clean', (action, meta) => {
@@ -357,6 +361,26 @@ class BaseServer {
       }
     }
     this.otherSubscriber = channel
+  }
+
+  process (action, meta = { }) {
+    return new Promise((resolve, reject) => {
+      let unbindError = this.on('error', (e, errorAction) => {
+        if (errorAction === action) {
+          unbindError()
+          unbindProcessed()
+          reject(e)
+        }
+      })
+      let unbindProcessed = this.on('processed', (processed, processedMeta) => {
+        if (processed === action) {
+          unbindError()
+          unbindProcessed()
+          resolve(processedMeta)
+        }
+      })
+      this.log.add(action, meta)
+    })
   }
 
   undo (meta, reason = 'error', extra = { }) {

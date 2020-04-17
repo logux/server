@@ -1111,3 +1111,30 @@ it('has shortcuts for resend arrays', async () => {
     ]
   ])
 })
+
+it('tracks action processing on add', async () => {
+  let error = new Error('test')
+  app = createServer()
+  app.type('FOO', {
+    access: () => false,
+    resend: () => ({ channels: ['foo'] })
+  })
+  app.type('ERROR', {
+    access: () => false,
+    process () {
+      throw error
+    }
+  })
+
+  let meta = await app.process({ type: 'FOO' }, { a: 1 })
+  expect(meta.a).toEqual(1)
+  expect(meta.channels).toEqual(['foo'])
+
+  let err
+  try {
+    await app.process({ type: 'ERROR' })
+  } catch (e) {
+    err = e
+  }
+  expect(err).toBe(error)
+})
