@@ -182,6 +182,10 @@ it('uses environment variables for config', () => {
 
 it('uses reporter param', () => checkOut('options.js', ['', '--r', 'json']))
 
+it('uses autoload modules', () => checkOut('autoload-modules.js'))
+
+it('uses autoload wrond export', () => checkError('autoload-error-modules.js'))
+
 it('uses .env cwd', async () => {
   let result = await check(
     'options.js',

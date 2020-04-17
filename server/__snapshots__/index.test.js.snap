@@ -148,6 +148,32 @@ exports[`uses .env from root 1`] = `
 "
 `;
 
+exports[`uses autoload modules 1`] = `
+"Child path module: 1.0.0
+Root path module: 1.0.0
+ INFO   Logux server is listening at 1970-01-01 00:00:00
+        PID:          21384
+        Logux server: 0.0.0
+        Environment:  test
+        Node ID:      server:FnXaqDxY
+        Subprotocol:  1.0.0
+        Supports:     1.x
+        Listen:       ws://127.0.0.1:31337/
+
+ INFO   Shutting down Logux server at 1970-01-01 00:00:00
+
+"
+`;
+
+exports[`uses autoload wrond export 1`] = `
+" FATAL  Server module should export a function that accepts a server. at 1970-01-01 00:00:00
+        Your module error-modules/wrond-export/index.js exports string.
+
+ INFO   Shutting down Logux server at 1970-01-01 00:00:00
+
+"
+`;
+
 exports[`uses environment variables for config 1`] = `
 "{\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"test\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"listen\\":\\"ws://127.0.0.1:31337/\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
 {\\"name\\":\\"logux-server\\",\\"hostname\\":\\"localhost\\",\\"pid\\":21384,\\"level\\":30,\\"msg\\":\\"Shutting down Logux server\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
