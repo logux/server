@@ -1,6 +1,10 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.8.5
+* `Context#sendBack` returns Promise until action will be re-send and processed.
+* Fix `Context#sendBack` typings.
+
 ## 0.8.4
 * Fix back-end protocol check in HTTP request receiving.
 
