@@ -1,5 +1,7 @@
-import { Server, Action, LoguxSubscribeAction } from '..'
+import { actionCreatorFactory } from 'typescript-fsa'
 import bunyan from 'bunyan'
+
+import { Server, Action, LoguxSubscribeAction } from '..'
 
 let server = new Server(
   Server.loadOptions(process, {
@@ -96,4 +98,13 @@ server.channel(/admin:\d/, {
 
 server.on('connected', client => {
   console.log(client.remoteAddress)
+})
+
+let createAction = actionCreatorFactory()
+let addUser = createAction<{ userId: string }>('user/remove')
+
+server.type(addUser, {
+  access (ctx, action) {
+    return action.payload.userId === ctx.userId
+  }
 })

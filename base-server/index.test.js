@@ -1,4 +1,5 @@
 let { MemoryStore, TestTime, Log } = require('@logux/core')
+let { actionCreatorFactory } = require('typescript-fsa')
 let { readFileSync } = require('fs')
 let { delay } = require('nanodelay')
 let WebSocket = require('ws')
@@ -1137,4 +1138,21 @@ it('tracks action processing on add', async () => {
     err = e
   }
   expect(err).toBe(error)
+})
+
+it('has shortcut API for action creators', async () => {
+  let createAction = actionCreatorFactory()
+  let createA = createAction('A')
+
+  let processed = []
+  app = createServer()
+  app.type(createA, {
+    access: () => true,
+    process (ctx, action) {
+      processed.push(action)
+    }
+  })
+
+  await app.process({ type: 'A' })
+  expect(processed).toEqual([{ type: 'A' }])
 })

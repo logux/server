@@ -1,3 +1,5 @@
+import { actionCreatorFactory } from 'typescript-fsa'
+
 import { Server, Action, LoguxSubscribeAction } from '..'
 
 let server = new Server(
@@ -60,7 +62,7 @@ server.type<UserRenameAction, UserData>('user/rename', {
   }
 })
 
-// THROWS is not assignable to parameter of type 'ActionCallbacks
+// THROWS No overload matches this call.
 server.type('user/changeId', {
   async process (_, action) {
     let user = new User(action.userId)
@@ -69,7 +71,7 @@ server.type('user/changeId', {
   }
 })
 
-// THROWS '"bad"' is not assignable to parameter of type '"user/rename"'.
+// THROWS '"bad"' is not assignable to parameter of type '"user/rename"'
 server.type<UserRenameAction>('bad', {
   access () {
     return true
@@ -112,5 +114,15 @@ server.channel(/admin:\d/, {
 server.channel<BadParams>('posts', {
   access () {
     return true
+  }
+})
+
+let createAction = actionCreatorFactory()
+let addUser = createAction<{ userId: string }>('user/remove')
+
+server.type(addUser, {
+  access (ctx, action) {
+    // THROWS Property 'id' does not exist on type '{ userId: string; }'
+    return action.payload.id === ctx.userId
   }
 })

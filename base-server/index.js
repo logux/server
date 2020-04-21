@@ -315,6 +315,7 @@ class BaseServer {
   }
 
   type (name, callbacks) {
+    if (typeof name === 'function') name = name.toString()
     if (this.types[name]) {
       throw new Error(`Action type ${ name } was already defined`)
     }
