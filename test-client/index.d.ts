@@ -14,6 +14,7 @@ export type TestClientOptions = {
  * ```js
  * import { TestServer } from '@logux/server'
  * import postsModule from '.'
+ * import authModule from '.'
  *
  * let destroyable
  * afterEach(() => {
@@ -22,12 +23,23 @@ export type TestClientOptions = {
  *
  * function createServer () {
  *   destroyable = new TestServer()
- *   postsModule(destroyable)
  *   return destroyable
  * }
  *
+ * it('check auth', () => {
+ *   let server = createServer()
+ *   authModule(server)
+ *   await server.connect('1', { token: 'good' })
+ *    expect(() => {
+ *      await server.connect('2', { token: 'bad' })
+ *    }).rejects.toEqual({
+ *      error: 'Wrong credentials'
+ *    })
+ * })
+ *
  * it('creates and loads posts', () => {
  *   let server = createServer()
+ *   postsModule(server)
  *   let client1 = await server.connect('1')
  *   await client1.process({ type: 'posts/add', post })
  *   let client1 = await server.connect('2')
