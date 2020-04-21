@@ -156,3 +156,12 @@ it('prints server log', async () => {
   await server.connect()
   expect(process.stdout.write).toHaveBeenCalledTimes(2)
 })
+
+it('tests authentication', async () => {
+  server = new TestServer()
+  server.auth((userId, token) => userId === '10' && token === 'good')
+  let client = new TestClient(server, '10')
+  // let error = await catchError(() => client.connect({ token: 'bad' }))
+  // expect(error.message).toEqual('Wrong credentials')
+  await client.connect({ token: 'good' })
+})
