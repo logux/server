@@ -76,6 +76,7 @@
     "nanodelay": "^1.0.1",
     "print-snapshots": "^0.3.0",
     "rimraf": "^3.0.2",
+    "typescript-fsa": "^3.0.0",
     "yaspeller-ci": "^1.0.2"
   },
   "husky": {
