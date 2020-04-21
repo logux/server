@@ -30,17 +30,7 @@ class TestClient {
     this.node.options.token = opts.token
     this.server.addClient(this.pair.right)
     this.node.connection.connect()
-    this.node.throwsError = false
-    let unbind = this.node.on('error', e => {
-      if (e.name === 'LoguxError' && e.type === 'wrong-credentials') {
-        throw new Error(e.description)
-      } else {
-        throw e
-      }
-    })
     await this.node.waitFor('synchronized')
-    this.node.throwsError = true
-    unbind()
   }
 
   disconnect () {
