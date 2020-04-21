@@ -4,7 +4,8 @@ import { LoguxSubscribeAction, LoguxUnsubscribeAction } from '../base-server'
 import TestServer from '../test-server'
 
 export type TestClientOptions = {
-  subprotocol?: string
+  subprotocol?: string,
+  token?: string
 }
 
 /**
