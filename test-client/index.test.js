@@ -159,9 +159,18 @@ it('prints server log', async () => {
 
 it('tests authentication', async () => {
   server = new TestServer()
+  server.options.supports = '0.0.0'
   server.auth((userId, token) => userId === '10' && token === 'good')
-  let client = new TestClient(server, '10')
-  // let error = await catchError(() => client.connect({ token: 'bad' }))
-  // expect(error.message).toEqual('Wrong credentials')
-  await client.connect({ token: 'good' })
+
+  let wrong = await catchError(async () => {
+    await server.connect('10', { token: 'bad' })
+  })
+  expect(wrong.message).toEqual('Wrong credentials')
+
+  let error = await catchError(async () => {
+    await server.connect('10', { subprotocol: '1.0.0' })
+  })
+  expect(error.message).toContain('wrong-subprotocol')
+
+  await server.connect('10', { token: 'good' })
 })
