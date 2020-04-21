@@ -3,10 +3,6 @@ import { Action, Meta, TestLog, TestPair } from '@logux/core'
 import { LoguxSubscribeAction, LoguxUnsubscribeAction } from '../base-server'
 import TestServer from '../test-server'
 
-export type TestClientOptions = {
-  subprotocol?: string
-}
-
 /**
  * Client to test server.
  *
@@ -42,7 +38,9 @@ export default class TestClient {
    * @param userId User ID.
    * @param opts Other options.
    */
-  constructor (server: TestServer, userId: string, opts?: TestClientOptions)
+  constructor (
+    server: TestServer, userId: string, opts?: { subprotocol?: string }
+  )
 
   /**
    * Client’s log with extra methods to check actions inside.
@@ -80,9 +78,10 @@ export default class TestClient {
    * await client.connect()
    * ```
    *
+   * @params Connection credentials.
    * @returns Promise until the authorization.
    */
-  connect (): Promise<void>
+  connect (opts?: { token: string }): Promise<void>
 
   /**
    * Disconnect from test server.
