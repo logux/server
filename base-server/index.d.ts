@@ -1,7 +1,8 @@
 import {
-  Action, AnyAction, ID, Log, Meta, ServerConnection
+  Action, AnyAction, ID, Log, Meta, ServerConnection, Store, TestTime
 } from '@logux/core'
 import { Unsubscribe } from 'nanoevents'
+import { Server as HTTPServer } from 'http'
 
 import Context, { ChannelContext } from '../context'
 import ServerClient from '../server-client'
@@ -56,6 +57,113 @@ export type ServerMeta = Meta & {
    * Client with listed node ID will receive the action.
    */
   node?: string
+}
+
+export type BaseServerOptions = {
+  /**
+   * Server current application subprotocol version in SemVer format.
+   */
+  subprotocol: string
+
+  /**
+   * npm’s version requirements for client subprotocol version.
+   */
+  supports: string
+
+  /**
+   * Application root to load files and show errors.
+   * Default is `process.cwd()`.
+   */
+  root?: string
+
+  /**
+   * Timeout in milliseconds to disconnect connection.
+   * Default is `20000`.
+   */
+  timeout?: number
+
+  /**
+   * Milliseconds since last message to test connection by sending ping.
+   * Default is `10000`.
+   */
+  ping?: number
+
+  /**
+   * URL to PHP, Ruby on Rails, or other backend to process actions and
+   * authentication.
+   */
+  backend?: string
+
+  /**
+   * URL to Redis for Logux Server Pro scaling.
+   */
+  redis?: string
+
+  /**
+   * Secret to control the server.
+   */
+  controlSecret?: string
+
+  /**
+   * CIDR masks for IP address, where control requests could came from.
+   */
+  controlMask?: string
+
+  /**
+   * Store to save log. Will be {@link @logux/core:MemoryStore}, by default.
+   */
+  store?: Store
+
+  /**
+   * Test time to test server.
+   */
+  time?: TestTime
+
+  /**
+   * Custom random ID to be used in node ID.
+   */
+  id?: string
+
+  /**
+   * Development or production server mode. By default,
+   * it will be taken from `NODE_ENV` environment variable.
+   * On empty `NODE_ENV` it will be `'development'`.
+   */
+  env?: 'production' | 'development'
+
+  /**
+   * Process ID, to display in reporter.
+   */
+  pid?: number
+
+  /**
+   * HTTP server to connect WebSocket server to it. Same as in `ws.Server`.
+   */
+  server?: HTTPServer
+
+  /**
+   * Port to bind server. It will create HTTP server manually to connect
+   * WebSocket server to it. Default is `31337`.
+   */
+  port?: number
+
+  /**
+   * IP-address to bind server. Default is `127.0.0.1`.
+   */
+  host?: string
+
+  /**
+   * SSL key or path to it. Path could be relative from server root.
+   * It is required in production mode, because WSS is highly recommended.
+   */
+  key?: string
+
+  /**
+   * SSL certificate or path to it. Path could be relative from server
+   * root. It is required in production mode, because WSS is highly
+   * recommended.
+   */
+  cert?: string
 }
 
 export type LoguxSubscribeAction = {
@@ -347,6 +455,15 @@ export type Logger = {
  * Base server class to extend.
  */
 export default class BaseServer {
+  /**
+   * Server options.
+   *
+   * ```js
+   * console.log('Server options', server.options.subprotocol)
+   * ```
+   */
+  options: BaseServerOptions
+
   /**
    * Function to show current server status.
    */
