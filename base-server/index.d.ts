@@ -563,18 +563,38 @@ export default class BaseServer {
     event: 'fatal' | 'clientError',
     listener: (err: Error) => void
   ): Unsubscribe
+
+  /**
+   * @param event The event name.
+   * @param listener Error listener.
+   */
   on (
     event: 'error',
     listener: (err: Error, action: Action, meta: ServerMeta) => void
   ): Unsubscribe
+
+  /**
+   * @param event The event name.
+   * @param listener Client listener.
+   */
   on (
     event: 'connected' | 'disconnected',
     listener: (client: ServerClient) => void
   ): Unsubscribe
+
+  /**
+   * @param event The event name.
+   * @param listener Action listener.
+   */
   on (
     event: 'preadd' | 'add' | 'clean',
     listener: (action: Action, meta: ServerMeta) => void
   ): Unsubscribe
+
+  /**
+   * @param event The event name.
+   * @param listener Processing listener.
+   */
   on (
     event: 'processed',
     listener: (
@@ -583,6 +603,11 @@ export default class BaseServer {
       latencyMilliseconds: number
     ) => void
   ): Unsubscribe
+
+  /**
+   * @param event The event name.
+   * @param listener Subscription listener.
+   */
   on (
     event: 'subscribed',
     listener: (
@@ -687,7 +712,7 @@ export default class BaseServer {
    * })
    * ```
    *
-   * @param pattern Pattern or regular expression for channel name.
+   * @param pattern Pattern for channel name.
    * @param callbacks Callback during subscription process.
    *
    * @template P Type for `ctx.params`.
@@ -699,6 +724,11 @@ export default class BaseServer {
     D extends object = { },
     A extends LoguxSubscribeAction = LoguxSubscribeAction
   > (pattern: string, callbacks: ChannelCallbacks<A, D, P>): void
+
+  /**
+   * @param pattern Regular expression for channel name.
+   * @param callbacks Callback during subscription process.
+   */
   channel<
     P extends string[] = string[],
     D extends object = { },
