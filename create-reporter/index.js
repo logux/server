@@ -1,4 +1,4 @@
-let bunyan = require('bunyan')
+let pino = require('pino')
 let os = require('os')
 
 let HumanFormatter = require('../human-formatter')
@@ -193,21 +193,22 @@ const REPORTERS = {
 
 function createReporter (options) {
   let logger
-  if (options.bunyan) {
-    logger = options.bunyan
+  if (options.logger) {
+    logger = options.logger
   } else {
-    let streams
+    let stream
     if (options.reporter === 'human') {
       let env = options.env || process.env.NODE_ENV || 'development'
       let color = env !== 'development' ? false : undefined
-      streams = [
-        {
-          type: 'raw',
-          stream: new HumanFormatter({ basepath: options.root, color })
-        }
-      ]
+      stream = new HumanFormatter({
+        basepath: options.root,
+        color
+      })
     }
-    logger = bunyan.createLogger({ name: 'logux-server', streams })
+    logger = pino(
+      { name: 'logux-server', timestamp: pino.stdTimeFunctions.isoTime },
+      stream
+    )
   }
 
   function reporter (type, details) {

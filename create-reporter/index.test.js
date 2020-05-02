@@ -7,7 +7,7 @@ jest.mock('os', () => {
 })
 
 let { LoguxError } = require('@logux/core')
-let bunyan = require('bunyan')
+let pino = require('pino')
 
 let createReporter = require('../create-reporter')
 let HumanFormatter = require('../human-formatter')
@@ -32,8 +32,15 @@ function clean (str) {
 
 function check (type, details) {
   let json = new MemoryStream()
+  // TODO: why we need v property, it present in several examples in
+  //  pino docs, but there is no description what it is
   let jsonReporter = createReporter({
-    bunyan: bunyan.createLogger({ name: 'test', pid: 21384, stream: json })
+    logger: pino({
+      name: 'test',
+      base: { pid: 21384, hostname: 'localhost' },
+      timestamp: pino.stdTimeFunctions.isoTime
+    },
+    json)
   })
 
   jsonReporter(type, details)
@@ -41,18 +48,13 @@ function check (type, details) {
 
   let human = new MemoryStream()
   let humanReporter = createReporter({
-    bunyan: bunyan.createLogger({
-      pid: 21384,
-      name: 'test',
-      streams: [
-        {
-          type: 'raw',
-          stream: new HumanFormatter({
-            basepath: '/dev/app', color: true, out: human
-          })
-        }
-      ]
-    })
+    logger: pino(
+      { name: 'test', base: { pid: 21384, hostname: 'localhost' } },
+      new HumanFormatter({
+        basepath: '/dev/app',
+        color: true,
+        out: human
+      }))
   })
 
   humanReporter(type, details)
@@ -71,27 +73,34 @@ function createError (name, message) {
   return err
 }
 
+function getStream (logger) {
+  let streamSym = Object.getOwnPropertySymbols(logger).find(it => {
+    // keyFor doesn't work
+    return it.toString() === 'Symbol(pino.stream)'
+  })
+  return logger[streamSym]
+}
+
 let originEnv = process.env.NODE_ENV
 afterEach(() => {
   process.env.NODE_ENV = originEnv
 })
 
-it('uses passed bunyan instance', () => {
-  let logger = bunyan.createLogger({ name: 'test' })
-  let reporter = createReporter({ bunyan: logger })
+it('uses passed logger instance', () => {
+  let logger = pino({ name: 'test' })
+  let reporter = createReporter({ logger })
   expect(reporter.logger).toEqual(logger)
 })
 
 it('creates JSON reporter', () => {
-  let logger = bunyan.createLogger({ name: 'test' })
+  let logger = pino({ name: 'test' })
   let reporter = createReporter({ reporter: 'json' })
   expect(reporter.logger.streams).toEqual(logger.streams)
 })
 
 it('creates human reporter', () => {
   let reporter = createReporter({ reporter: 'human', root: '/dir/' })
-  expect(reporter.logger.streams).toHaveLength(1)
-  let stream = reporter.logger.streams[0].stream
+  let stream = getStream(reporter.logger)
   expect(stream instanceof HumanFormatter).toBe(true)
   expect(stream.basepath).toEqual('/dir/')
   expect(stream.chalk.level).toEqual(0)
@@ -99,24 +108,24 @@ it('creates human reporter', () => {
 
 it('adds trailing slash to path', () => {
   let reporter = createReporter({ reporter: 'human', root: '/dir' })
-  expect(reporter.logger.streams[0].stream.basepath).toEqual('/dir/')
+  expect(getStream(reporter.logger).basepath).toEqual('/dir/')
 })
 
 it('uses color in development', () => {
   let reporter = createReporter({ env: 'development', reporter: 'human' })
-  expect(reporter.logger.streams[0].stream.chalk.level).toBeGreaterThan(0)
+  expect(getStream(reporter.logger).chalk.level).toBeGreaterThan(0)
 })
 
 it('uses colors by default', () => {
   delete process.env.NODE_ENV
   let reporter = createReporter({ reporter: 'human' })
-  expect(reporter.logger.streams[0].stream.chalk.level).toBeGreaterThan(0)
+  expect(getStream(reporter.logger).chalk.level).toBeGreaterThan(0)
 })
 
 it('uses environment variable to detect environment', () => {
   process.env.NODE_ENV = 'production'
   let reporter = createReporter({ reporter: 'human' })
-  expect(reporter.logger.streams[0].stream.chalk.level).toEqual(0)
+  expect(getStream(reporter.logger).chalk.level).toEqual(0)
 })
 
 it('reports listen', () => {

@@ -1,12 +1,12 @@
 import { Server, Action, LoguxSubscribeAction } from '..'
-import bunyan from 'bunyan'
+import * as pino from "pino";
 
 let server = new Server(
   Server.loadOptions(process, {
     subprotocol: '1.0.0',
     reporter: 'human',
     supports: '1.x',
-    bunyan: bunyan.createLogger({ name: 'logux' }),
+    logger: pino({ name: 'logux' }),
     root: __dirname,
   })
 )

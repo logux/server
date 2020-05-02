@@ -2,16 +2,16 @@ import BaseServer, { Logger, Reporter, BaseServerOptions } from '../base-server'
 
 export type ServerOptions = BaseServerOptions & {
   /**
-   * Report process/errors to CLI in bunyan JSON or in human readable
+   * Report process/errors to CLI in pino, JSON or in human readable
    * format. It can be also a function to show current server status.
    * Default is `'human'`.
    */
   reporter?: 'human' | 'json' | Reporter
 
   /**
-   * Bunyan logger with custom settings.
+   * Logger with custom settings.
    */
-  bunyan?: Logger
+  logger?: Logger
 }
 
 /**

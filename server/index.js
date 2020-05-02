@@ -7,7 +7,7 @@ let BaseServer = require('../base-server')
 
 const AVAILABLE_OPTIONS = [
   'subprotocol', 'supports', 'timeout', 'ping', 'root', 'store', 'server',
-  'port', 'host', 'key', 'cert', 'env', 'bunyan', 'reporter', 'backend',
+  'port', 'host', 'key', 'cert', 'env', 'logger', 'reporter', 'backend',
   'controlMask', 'controlSecret', 'redis'
 ]
 

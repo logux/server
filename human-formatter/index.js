@@ -178,6 +178,7 @@ class HumanFormatter extends stream.Writable {
 
   write (record) {
     let c = this.chalk
+    record = JSON.parse(record)
     let message = [LABELS[record.level](c, record.msg)]
 
     let params = Object.keys(record)
