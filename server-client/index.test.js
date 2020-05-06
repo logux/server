@@ -1177,3 +1177,33 @@ it('uses resend for own actions', async () => {
   await delay(10)
   expect(app.log.entries()[3][1].channels).not.toBeDefined()
 })
+
+it('does not dublicate channel load actions', async () => {
+  let app = createServer()
+  app.on('FOO', {
+    access: () => true,
+    resend: () => ({ channel: 'foo' })
+  })
+  app.channel('foo', {
+    access: () => true,
+    async load (ctx) {
+      await ctx.sendBack({ type: 'FOO' })
+    }
+  })
+  let client = await connectClient(app, '10:1:uuid')
+  client.node.connection.other().send([
+    'sync', 1,
+    { type: 'logux/subscribe', channel: 'foo' },
+    { id: [1, '10:1:uuid', 0], time: 1 }
+  ])
+  await delay(10)
+
+  function meta (time) {
+    return { id: time, time, subprotocol: '0.0.1' }
+  }
+  expect(client.node.connection.pair.leftSent.slice(1)).toEqual([
+    ['synced', 1],
+    ['sync', 2, { type: 'FOO' }, meta(1)],
+    ['sync', 3, { type: 'logux/processed', id: '1 10:1:uuid 0' }, meta(2)]
+  ])
+})
