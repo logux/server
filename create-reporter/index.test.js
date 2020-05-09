@@ -28,6 +28,8 @@ function clean (str) {
     .replace(/\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/g, '1970-01-01 00:00:00')
     .replace(/"time":"[^"]+"/g, '"time":"1970-01-01T00:00:00.000Z"')
     .replace(/"hostname":"[^"]+"/g, '"hostname":"localhost"')
+    .replace(/"pid":\d+/g, '"pid":21384')
+    .replace(/PID:(\s+.*m)\d+(.*m)/, 'PID:$121384$2')
 }
 
 function check (type, details) {
@@ -37,7 +39,6 @@ function check (type, details) {
   let jsonReporter = createReporter({
     logger: pino({
       name: 'test',
-      base: { pid: 21384, hostname: 'localhost' },
       timestamp: pino.stdTimeFunctions.isoTime
     },
     json)
@@ -49,7 +50,7 @@ function check (type, details) {
   let human = new MemoryStream()
   let humanReporter = createReporter({
     logger: pino(
-      { name: 'test', base: { pid: 21384, hostname: 'localhost' } },
+      { name: 'test' },
       new HumanFormatter({
         basepath: '/dev/app',
         color: true,
