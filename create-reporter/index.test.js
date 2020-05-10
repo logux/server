@@ -299,37 +299,34 @@ it('reports destroy', () => {
   check('destroy')
 })
 
-// eslint-disable-next-line max-len
-describe.skip('errors reporting fails with pino.final with prettyPrint does not support flushing', () => {
-  it('reports EACCES error', () => {
-    check('error', { fatal: true, err: { code: 'EACCES', port: 80 } })
-  })
+it('reports EACCES error', () => {
+  check('error', { fatal: true, err: { code: 'EACCES', port: 80 } })
+})
 
-  it('reports EADDRINUSE error', () => {
-    check('error', { fatal: true, err: { code: 'EADDRINUSE', port: 31337 } })
-  })
+it('reports EADDRINUSE error', () => {
+  check('error', { fatal: true, err: { code: 'EADDRINUSE', port: 31337 } })
+})
 
-  it('reports LOGUX_NO_CONTROL_SECRET error', () => {
-    let err = {
-      code: 'LOGUX_NO_CONTROL_SECRET',
-      message: '`backend` requires also `controlSecret` option'
-    }
-    check('error', { fatal: true, err })
-  })
+it('reports LOGUX_NO_CONTROL_SECRET error', () => {
+  let err = {
+    code: 'LOGUX_NO_CONTROL_SECRET',
+    message: '`backend` requires also `controlSecret` option'
+  }
+  check('error', { fatal: true, err })
+})
 
-  it('reports Logux error', () => {
-    let err = {
-      message: 'Unknown option `suprotocol` in server constructor',
-      logux: true,
-      note: 'Maybe there is a mistake in option name or this version ' +
-        'of Logux Server doesn’t support this option'
-    }
-    check('error', { fatal: true, err })
-  })
+it('reports Logux error', () => {
+  let err = {
+    message: 'Unknown option `suprotocol` in server constructor',
+    logux: true,
+    note: 'Maybe there is a mistake in option name or this version ' +
+      'of Logux Server doesn’t support this option'
+  }
+  check('error', { fatal: true, err })
+})
 
-  it('reports error', () => {
-    check('error', { fatal: true, err: createError('Error', 'Some mistake') })
-  })
+it('reports error', () => {
+  check('error', { fatal: true, err: createError('Error', 'Some mistake') })
 })
 
 it('reports error from action', () => {

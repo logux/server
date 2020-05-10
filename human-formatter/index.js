@@ -180,6 +180,16 @@ function humanFormatter (options) {
   return function (record) {
     if (!record) return undefined
 
+    // Hack to disable unwanted warning.
+    // Issue is raised to disable it more natural way
+    // https://github.com/pinojs/pino-pretty/issues/108
+    if (record.msg === PINO_FLUSH_SYNC_WARNIN_MSG) {
+      // If the prettifier returns undefined, instead of a
+      // formatted line, nothing will be written to the destination stream.
+      // It's a lie, undefined is written.
+      return ''
+    }
+
     let message = [LABELS[record.level](c, record.msg)]
     let params = Object.keys(record)
       // Can be done through redact
@@ -205,6 +215,7 @@ function humanFormatter (options) {
       let note = record.note
       if (typeof note === 'string') {
         note = note.replace(/`([^`]+)`/g, c.bold('$1'))
+        // TODO: Why concat with spreading?
         note = [].concat(
           ...note.split('\n')
             .map(row => splitByLength(row, 80 - PADDING.length))
