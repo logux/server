@@ -1,7 +1,7 @@
 let pino = require('pino')
 let os = require('os')
 
-let HumanFormatter = require('../human-formatter')
+let humanPrettifier = require('../human-formatter')
 
 const ERROR_CODES = {
   EADDRINUSE: e => {
@@ -200,15 +200,28 @@ function createReporter (options) {
     if (options.reporter === 'human') {
       let env = options.env || process.env.NODE_ENV || 'development'
       let color = env !== 'development' ? false : undefined
-      stream = new HumanFormatter({
-        basepath: options.root,
-        color
-      })
+      stream = options.out || pino.destination()
+      logger = pino(
+        {
+          name: 'logux-server',
+          timestamp: pino.stdTimeFunctions.isoTime,
+          prettyPrint: {
+            basepath: options.root,
+            color
+          },
+          prettifier: humanPrettifier
+        },
+        stream
+      )
+    } else {
+      logger = pino(
+        {
+          name: 'logux-server',
+          timestamp: pino.stdTimeFunctions.isoTime
+        },
+        stream
+      )
     }
-    logger = pino(
-      { name: 'logux-server', timestamp: pino.stdTimeFunctions.isoTime },
-      stream
-    )
   }
 
   function reporter (type, details) {

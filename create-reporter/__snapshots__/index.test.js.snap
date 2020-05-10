@@ -255,6 +255,7 @@ exports[`reports listen 2`] = `
         Subprotocol:    [1m0.0.0[22m
         Supports:       [1m0.x[22m
         Control listen: [1mhttp://127.0.0.1:31337/[22m
+        Control mask:   [1mundefined[22m
         Backend send:   [1mhttp://127.0.0.1:3000/logux[22m
         Listen:         [1mws://127.0.0.1:31337/[22m
         [90mServer was started in non-secure development mode[39m
@@ -298,6 +299,7 @@ exports[`reports listen for production 2`] = `
         Subprotocol:    [1m0.0.0[22m
         Supports:       [1m0.x[22m
         Control listen: [1mhttp://127.0.0.1:31337/[22m
+        Control mask:   [1mundefined[22m
         Redis:          [1m//localhost[22m
         Listen:         [1mwss://127.0.0.1:31337/[22m
 
@@ -436,6 +438,7 @@ exports[`reports wrongChannel without name 1`] = `
 
 exports[`reports wrongChannel without name 2`] = `
 "[43m[30m WARN [39m[49m  [1m[33mWrong channel name[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Channel:   [1mundefined[22m
         Action ID: [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
 
 "

@@ -1,6 +1,5 @@
 let stripAnsi = require('strip-ansi')
 let yyyymmdd = require('yyyy-mm-dd')
-let stream = require('stream')
 let chalk = require('chalk')
 let path = require('path')
 let os = require('os')
@@ -34,6 +33,9 @@ const LABELS = {
   50: (c, str) => label(c, ' ERROR ', 'red', 'bgRed', 'white', str),
   60: (c, str) => label(c, ' FATAL ', 'red', 'bgRed', 'white', str)
 }
+
+const PINO_FLUSH_SYNC_WARNIN_MSG =
+  'pino.final with prettyPrint does not support flushing'
 
 function rightPag (str, length) {
   let add = length - stripAnsi(str).length
@@ -154,35 +156,34 @@ function prettyStackTrace (c, stack, basepath) {
       let func = match[1]
       let relative = match[2].slice(basepath.length)
       let converted = `${ PADDING }at ${ func } (./${ relative })`
+      // TODO: fix typo
       let isDependecy = match[2].includes('node_modules')
       return isDependecy ? c.gray(converted) : c.red(converted)
     }
   }).join(NEXT_LINE)
 }
 
-class HumanFormatter extends stream.Writable {
-  constructor (options) {
-    super()
-
-    if (typeof options.color === 'undefined') {
-      this.chalk = chalk
-    } else {
-      this.chalk = new chalk.Instance({ level: options.color ? 3 : 0 })
-    }
-
-    this.basepath = options.basepath || process.cwd()
-    this.out = options.out || process.stdout
-
-    if (this.basepath.slice(-1) !== path.sep) this.basepath += path.sep
+function humanFormatter (options) {
+  let c
+  if (options.color === undefined) {
+    c = chalk
+  } else {
+    c = new chalk.Instance({ level: options.color ? 3 : 0 })
   }
+  let basepath = options.basepath || process.cwd()
+  if (basepath.slice(-1) !== path.sep) basepath += path.sep
+  // eslint-disable-next-line no-invalid-this
+  this.chalk = c
+  // eslint-disable-next-line no-invalid-this
+  this.basepath = basepath
 
-  write (record) {
-    let c = this.chalk
-    record = JSON.parse(record)
+  return function (record) {
+    if (!record) return undefined
+
     let message = [LABELS[record.level](c, record.msg)]
-
     let params = Object.keys(record)
-      .filter(i => !PARAMS_BLACKLIST[i])
+      // Can be done through redact
+      .filter(key => !PARAMS_BLACKLIST[key])
       .map(key => [formatName(key), record[key]])
 
     if (record.loguxServer) {
@@ -195,7 +196,7 @@ class HumanFormatter extends stream.Writable {
     }
 
     if (record.err && record.err.stack) {
-      message.push(prettyStackTrace(c, record.err.stack, this.basepath))
+      message.push(prettyStackTrace(c, record.err.stack, basepath))
     }
 
     message.push(formatParams(c, params))
@@ -212,8 +213,8 @@ class HumanFormatter extends stream.Writable {
       message.push(note.map(i => PADDING + c.grey(i)).join(NEXT_LINE))
     }
 
-    this.out.write(message.filter(i => i !== '').join(NEXT_LINE) + SEPARATOR)
+    return message.filter(i => i !== '').join(NEXT_LINE) + SEPARATOR
   }
 }
 
-module.exports = HumanFormatter
+module.exports = humanFormatter
