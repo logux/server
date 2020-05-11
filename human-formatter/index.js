@@ -183,16 +183,11 @@ function humanFormatter (options) {
     // Issue is raised to disable it more natural way
     // https://github.com/pinojs/pino-pretty/issues/108
     if (record.msg === PINO_FLUSH_SYNC_WARNIN_MSG) {
-      // Usually you should use undefined for logger to skip this record.
-      // But this message is written in separate flushSync method of pretty
-      // stream wrapper and it's written as is.
-      // Thus, I have to return empty string
       return ''
     }
 
     let message = [LABELS[record.level](c, record.msg)]
     let params = Object.keys(record)
-      // Can be done through redact
       .filter(key => !PARAMS_BLACKLIST[key])
       .map(key => [formatName(key), record[key]])
 
