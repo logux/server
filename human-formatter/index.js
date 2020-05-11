@@ -173,9 +173,7 @@ function humanFormatter (options) {
   let basepath = options.basepath || process.cwd()
   if (basepath.slice(-1) !== path.sep) basepath += path.sep
   // Pino passes logger instance as this to prettifier constructor
-  // eslint-disable-next-line no-invalid-this
   this.chalk = c
-  // eslint-disable-next-line no-invalid-this
   this.basepath = basepath
 
   return function (record) {

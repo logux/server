@@ -101,7 +101,15 @@
     ]
   },
   "eslintConfig": {
-    "extends": "@logux/eslint-config"
+    "extends": "@logux/eslint-config",
+    "overrides": [
+      {
+        "files": ["human-formatter/index.js"],
+        "rules": {
+          "no-invalid-this": "off"
+        }
+      }
+    ]
   },
   "yaspeller": {
     "lang": "en",
