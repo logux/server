@@ -451,6 +451,11 @@ export type Logger = {
   fatal (details: object, message: string): void
 }
 
+interface ActionCreator {
+  toString (): string,
+  (...args: any[]): Action
+}
+
 /**
  * Base server class to extend.
  */
@@ -660,6 +665,11 @@ export default class BaseServer {
     callbacks: ActionCallbacks<A, D>
   ): void
 
+  type<AC extends ActionCreator, D extends object = { }> (
+    actionCreator: AC,
+    callbacks: ActionCallbacks<ReturnType<AC>, D>
+  ): void
+
   /**
    * Define callbacks for actions, which type was not defined
    * by any {@link Server#type}. Useful for proxy or some hacks.
@@ -761,6 +771,14 @@ export default class BaseServer {
     D extends object = { },
   > (callbacks: ChannelCallbacks<LoguxSubscribeAction, D, { }>): void
 
+  /**
+   * Add new action to the server and return the Promise until it will be
+   * resend to clients and processed.
+   *
+   * @param action New action to resend and process.
+   * @param meta Action’s meta.
+   * @returns Promise until new action will be resend to clients and processed.
+   */
   process (action: Action, meta?: Partial<ServerMeta>): Promise<ServerMeta>
 
   /**

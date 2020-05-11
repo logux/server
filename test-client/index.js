@@ -27,9 +27,24 @@ class TestClient {
   }
 
   connect () {
-    this.server.addClient(this.pair.right)
-    this.node.connection.connect()
-    return this.node.waitFor('synchronized')
+    return new Promise((resolve, reject) => {
+      this.node.throwsError = false
+      let unbind = this.node.on('error', e => {
+        if (e.name === 'LoguxError' && e.type === 'wrong-credentials') {
+          reject(new Error('Wrong credentials'))
+        } else {
+          reject(e)
+        }
+      })
+
+      this.server.addClient(this.pair.right)
+      this.node.connection.connect()
+      this.node.waitFor('synchronized').then(() => {
+        this.node.throwsError = true
+        unbind()
+        resolve()
+      })
+    })
   }
 
   disconnect () {
