@@ -156,9 +156,8 @@ function prettyStackTrace (c, stack, basepath) {
       let func = match[1]
       let relative = match[2].slice(basepath.length)
       let converted = `${ PADDING }at ${ func } (./${ relative })`
-      // TODO: fix typo
-      let isDependecy = match[2].includes('node_modules')
-      return isDependecy ? c.gray(converted) : c.red(converted)
+      let isDependency = match[2].includes('node_modules')
+      return isDependency ? c.gray(converted) : c.red(converted)
     }
   }).join(NEXT_LINE)
 }
