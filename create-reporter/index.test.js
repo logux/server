@@ -332,7 +332,7 @@ it('reports Logux error', () => {
     message: 'Unknown option `suprotocol` in server constructor',
     logux: true,
     note: 'Maybe there is a mistake in option name or this version ' +
-      'of Logux Server doesn’t support this option'
+          'of Logux Server doesn’t support this option'
   }
   check('error', { fatal: true, err })
 })

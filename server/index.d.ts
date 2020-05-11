@@ -2,7 +2,7 @@ import BaseServer, { Logger, Reporter, BaseServerOptions } from '../base-server'
 
 export type ServerOptions = BaseServerOptions & {
   /**
-   * Report process/errors to CLI in pino, JSON or in human readable
+   * Report process/errors to CLI in pino JSON or in human readable
    * format. It can be also a function to show current server status.
    * Default is `'human'`.
    */

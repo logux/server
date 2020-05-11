@@ -213,7 +213,7 @@ it('shows help about missed secret', () => checkError('no-secret.js'))
 
 it('disables colors for constructor errors', () => {
   return checkError('missed.js', {
-    env: Object.assign({}, process.env, {
+    env: Object.assign({ }, process.env, {
       NODE_ENV: 'production'
     })
   })
