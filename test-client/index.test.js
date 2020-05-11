@@ -150,8 +150,6 @@ it('tracks subscriptions', async () => {
   )
 })
 
-// TODO: it's strange to think that stdout will be used,
-//  as we can pass our own output stream.
 it('prints server log', async () => {
   let out = {
     write () {
