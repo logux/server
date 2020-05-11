@@ -196,11 +196,10 @@ function createReporter (options) {
   if (options.logger) {
     logger = options.logger
   } else {
-    let stream
+    let stream = options.out || pino.destination()
     if (options.reporter === 'human') {
       let env = options.env || process.env.NODE_ENV || 'development'
       let color = env !== 'development' ? false : undefined
-      stream = options.out || pino.destination()
       logger = pino(
         {
           name: 'logux-server',

@@ -88,9 +88,21 @@ it('uses passed logger instance', () => {
 })
 
 it('creates JSON reporter', () => {
-  let logger = pino({ name: 'test' })
-  let reporter = createReporter({ reporter: 'json' })
-  expect(reporter.logger.streams).toEqual(logger.streams)
+  let mockedStream = new MemoryStream()
+  let reporter = createReporter({ out: mockedStream })
+  reporter('unknownType', {})
+  expect(clean(mockedStream.string)).toMatchSnapshot()
+})
+
+it('creates human reporter', () => {
+  let mockedStream = new MemoryStream()
+  let reporter = createReporter({
+    reporter: 'human',
+    root: '/dir/',
+    out: mockedStream
+  })
+  reporter('unknownType', {})
+  expect(clean(mockedStream.string)).toMatchSnapshot()
 })
 
 it('adds trailing slash to path', () => {

@@ -1,5 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`creates JSON reporter 1`] = `
+"{\\"level\\":40,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"logux-server\\",\\"msg\\":\\"Action with unknown type\\"}
+"
+`;
+
+exports[`creates human reporter 1`] = `
+" WARN   Action with unknown type at 1970-01-01 00:00:00
+
+"
+`;
+
 exports[`reports EACCES error 1`] = `
 "{\\"level\\":60,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"err\\":{},\\"note\\":\\"Non-privileged users can't start a listening socket on ports below 1024. Try to change user or take another port.\\\\n\\\\n$ su - \`<username>\`\\\\n$ npm start -p 80\\",\\"msg\\":\\"You are not allowed to run server on port \`80\`\\"}
 "
