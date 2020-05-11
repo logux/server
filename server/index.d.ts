@@ -19,12 +19,8 @@ export type ServerOptions = BaseServerOptions & {
    * const pinoElastic = require('pino-elasticsearch')
    *
    * const streamToElastic = pinoElastic({
-   *   index: 'an-index',
-   *   type: 'log',
    *   consistency: 'one',
    *   node: 'http://localhost:9200',
-   *   'es-version': 6,
-   *   'bulk-size': 200,
    *   ecs: true
    * })
    *
