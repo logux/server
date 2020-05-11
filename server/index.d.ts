@@ -11,12 +11,13 @@ export type ServerOptions = BaseServerOptions & {
   /**
    * Logger with custom settings.
    *
-   * For example you can provide pino logger that streams logs to
+   * For example, you can provide pino logger that streams logs to
    * elasticsearch
    *
    * ```js
    * const pino = require('pino')
    * const pinoElastic = require('pino-elasticsearch')
+   *
    * const streamToElastic = pinoElastic({
    *   index: 'an-index',
    *   type: 'log',
@@ -24,9 +25,15 @@ export type ServerOptions = BaseServerOptions & {
    *   node: 'http://localhost:9200',
    *   'es-version': 6,
    *   'bulk-size': 200,
-   *    ecs: true
+   *   ecs: true
    * })
-   * const logger = pino({ level: 'info' }, streamToElastic)
+   *
+   * const server = new Server(
+   *   Server.loadOptions(process, {
+   *     …,
+   *     logger: pino({ level: 'info' }, streamToElastic)
+   *   })
+   * )
    * ```
    *
    * Other logger examples can be found here http://getpino.io/#/docs/ecosystem
