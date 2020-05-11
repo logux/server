@@ -2,8 +2,6 @@ import { actionCreatorFactory } from 'typescript-fsa'
 import { Server, Action, LoguxSubscribeAction } from '..'
 import * as pino from "pino";
 
-import { Server, Action, LoguxSubscribeAction } from '..'
-
 let server = new Server(
   Server.loadOptions(process, {
     subprotocol: '1.0.0',
