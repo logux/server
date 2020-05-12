@@ -7,10 +7,10 @@ jest.mock('os', () => {
 })
 
 let { LoguxError } = require('@logux/core')
-let bunyan = require('bunyan')
+let pino = require('pino')
 
 let createReporter = require('../create-reporter')
-let HumanFormatter = require('../human-formatter')
+let humanFormatter = require('../human-formatter')
 
 class MemoryStream {
   constructor () {
@@ -28,12 +28,18 @@ function clean (str) {
     .replace(/\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/g, '1970-01-01 00:00:00')
     .replace(/"time":"[^"]+"/g, '"time":"1970-01-01T00:00:00.000Z"')
     .replace(/"hostname":"[^"]+"/g, '"hostname":"localhost"')
+    .replace(/"pid":\d+/g, '"pid":21384')
+    .replace(/PID:(\s+.*m)\d+(.*m)/, 'PID:$121384$2')
 }
 
 function check (type, details) {
   let json = new MemoryStream()
   let jsonReporter = createReporter({
-    bunyan: bunyan.createLogger({ name: 'test', pid: 21384, stream: json })
+    logger: pino({
+      name: 'test',
+      timestamp: pino.stdTimeFunctions.isoTime
+    },
+    json)
   })
 
   jsonReporter(type, details)
@@ -41,18 +47,17 @@ function check (type, details) {
 
   let human = new MemoryStream()
   let humanReporter = createReporter({
-    bunyan: bunyan.createLogger({
-      pid: 21384,
-      name: 'test',
-      streams: [
-        {
-          type: 'raw',
-          stream: new HumanFormatter({
-            basepath: '/dev/app', color: true, out: human
-          })
-        }
-      ]
-    })
+    logger: pino(
+      {
+        name: 'test',
+        prettyPrint: {
+          basepath: '/dev/app',
+          color: true
+        },
+        prettifier: humanFormatter
+      },
+      human
+    )
   })
 
   humanReporter(type, details)
@@ -76,47 +81,50 @@ afterEach(() => {
   process.env.NODE_ENV = originEnv
 })
 
-it('uses passed bunyan instance', () => {
-  let logger = bunyan.createLogger({ name: 'test' })
-  let reporter = createReporter({ bunyan: logger })
+it('uses passed logger instance', () => {
+  let logger = pino({ name: 'test' })
+  let reporter = createReporter({ logger })
   expect(reporter.logger).toEqual(logger)
 })
 
 it('creates JSON reporter', () => {
-  let logger = bunyan.createLogger({ name: 'test' })
-  let reporter = createReporter({ reporter: 'json' })
-  expect(reporter.logger.streams).toEqual(logger.streams)
+  let mockedStream = new MemoryStream()
+  let reporter = createReporter({ out: mockedStream })
+  reporter('unknownType', {})
+  expect(clean(mockedStream.string)).toMatchSnapshot()
 })
 
 it('creates human reporter', () => {
-  let reporter = createReporter({ reporter: 'human', root: '/dir/' })
-  expect(reporter.logger.streams).toHaveLength(1)
-  let stream = reporter.logger.streams[0].stream
-  expect(stream instanceof HumanFormatter).toBe(true)
-  expect(stream.basepath).toEqual('/dir/')
-  expect(stream.chalk.level).toEqual(0)
+  let mockedStream = new MemoryStream()
+  let reporter = createReporter({
+    reporter: 'human',
+    root: '/dir/',
+    out: mockedStream
+  })
+  reporter('unknownType', {})
+  expect(clean(mockedStream.string)).toMatchSnapshot()
 })
 
 it('adds trailing slash to path', () => {
   let reporter = createReporter({ reporter: 'human', root: '/dir' })
-  expect(reporter.logger.streams[0].stream.basepath).toEqual('/dir/')
-})
-
-it('uses color in development', () => {
-  let reporter = createReporter({ env: 'development', reporter: 'human' })
-  expect(reporter.logger.streams[0].stream.chalk.level).toBeGreaterThan(0)
+  expect(reporter.logger.basepath).toEqual('/dir/')
 })
 
 it('uses colors by default', () => {
   delete process.env.NODE_ENV
   let reporter = createReporter({ reporter: 'human' })
-  expect(reporter.logger.streams[0].stream.chalk.level).toBeGreaterThan(0)
+  expect(reporter.logger.chalk.level).toBeGreaterThan(0)
+})
+
+it('uses color in development', () => {
+  let reporter = createReporter({ env: 'development', reporter: 'human' })
+  expect(reporter.logger.chalk.level).toBeGreaterThan(0)
 })
 
 it('uses environment variable to detect environment', () => {
   process.env.NODE_ENV = 'production'
   let reporter = createReporter({ reporter: 'human' })
-  expect(reporter.logger.streams[0].stream.chalk.level).toEqual(0)
+  expect(reporter.logger.chalk.level).toEqual(0)
 })
 
 it('reports listen', () => {

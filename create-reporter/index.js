@@ -1,7 +1,7 @@
-let bunyan = require('bunyan')
+let pino = require('pino')
 let os = require('os')
 
-let HumanFormatter = require('../human-formatter')
+let humanFormatter = require('../human-formatter')
 
 const ERROR_CODES = {
   EADDRINUSE: e => {
@@ -193,21 +193,30 @@ const REPORTERS = {
 
 function createReporter (options) {
   let logger
-  if (options.bunyan) {
-    logger = options.bunyan
+  if (options.logger) {
+    logger = options.logger
   } else {
-    let streams
+    let stream = options.out || pino.destination()
+    let prettifier = {}
     if (options.reporter === 'human') {
       let env = options.env || process.env.NODE_ENV || 'development'
       let color = env !== 'development' ? false : undefined
-      streams = [
-        {
-          type: 'raw',
-          stream: new HumanFormatter({ basepath: options.root, color })
-        }
-      ]
+      prettifier = {
+        prettyPrint: {
+          basepath: options.root,
+          color
+        },
+        prettifier: humanFormatter
+      }
     }
-    logger = bunyan.createLogger({ name: 'logux-server', streams })
+    logger = pino(
+      {
+        name: 'logux-server',
+        timestamp: pino.stdTimeFunctions.isoTime,
+        ...prettifier
+      },
+      stream
+    )
   }
 
   function reporter (type, details) {

@@ -151,10 +151,14 @@ it('tracks subscriptions', async () => {
 })
 
 it('prints server log', async () => {
-  jest.spyOn(process.stdout, 'write').mockImplementation(() => true)
-  server = new TestServer({ reporter: 'human' })
+  let out = {
+    write () {
+    }
+  }
+  jest.spyOn(out, 'write').mockImplementation(() => true)
+  server = new TestServer({ reporter: 'human', out })
   await server.connect()
-  expect(process.stdout.write).toHaveBeenCalledTimes(2)
+  expect(out.write).toHaveBeenCalledTimes(2)
 })
 
 it('tests authentication', async () => {

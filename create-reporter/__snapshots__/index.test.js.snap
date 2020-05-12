@@ -1,7 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`creates JSON reporter 1`] = `
+"{\\"level\\":40,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"logux-server\\",\\"msg\\":\\"Action with unknown type\\"}
+"
+`;
+
+exports[`creates human reporter 1`] = `
+" WARN   Action with unknown type at 1970-01-01 00:00:00
+
+"
+`;
+
 exports[`reports EACCES error 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{},\\"note\\":\\"Non-privileged users can't start a listening socket on ports below 1024. Try to change user or take another port.\\\\n\\\\n$ su - \`<username>\`\\\\n$ npm start -p 80\\",\\"msg\\":\\"You are not allowed to run server on port \`80\`\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":60,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"err\\":{},\\"note\\":\\"Non-privileged users can't start a listening socket on ports below 1024. Try to change user or take another port.\\\\n\\\\n$ su - \`<username>\`\\\\n$ npm start -p 80\\",\\"msg\\":\\"You are not allowed to run server on port \`80\`\\"}
 "
 `;
 
@@ -17,7 +28,7 @@ exports[`reports EACCES error 2`] = `
 `;
 
 exports[`reports EADDRINUSE error 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{},\\"note\\":\\"Another Logux server or other app already running on this port. Probably you haven’t stopped server from other project or previous version of this server was not killed.\\\\n\\\\n$ su - root\\\\n# netstat -nlp | grep 31337\\\\nProto   Local Address   State    PID/Program name\\\\ntcp     0.0.0.0:31337    LISTEN   \`777\`/node\\\\n# sudo kill -9 \`777\`\\",\\"msg\\":\\"Port \`31337\` already in use\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":60,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"err\\":{},\\"note\\":\\"Another Logux server or other app already running on this port. Probably you haven’t stopped server from other project or previous version of this server was not killed.\\\\n\\\\n$ su - root\\\\n# netstat -nlp | grep 31337\\\\nProto   Local Address   State    PID/Program name\\\\ntcp     0.0.0.0:31337    LISTEN   \`777\`/node\\\\n# sudo kill -9 \`777\`\\",\\"msg\\":\\"Port \`31337\` already in use\\"}
 "
 `;
 
@@ -37,7 +48,7 @@ exports[`reports EADDRINUSE error 2`] = `
 `;
 
 exports[`reports LOGUX_NO_CONTROL_SECRET error 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{\\"message\\":\\"\`backend\` requires also \`controlSecret\` option\\"},\\"note\\":\\"Call \`npx nanoid\` and set result as \`controlSecret\` or \`LOGUX_CONTROL_SECRET\` environment variable\\",\\"msg\\":\\"\`backend\` requires also \`controlSecret\` option\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":60,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"err\\":{\\"message\\":\\"\`backend\` requires also \`controlSecret\` option\\"},\\"note\\":\\"Call \`npx nanoid\` and set result as \`controlSecret\` or \`LOGUX_CONTROL_SECRET\` environment variable\\",\\"msg\\":\\"\`backend\` requires also \`controlSecret\` option\\"}
 "
 `;
 
@@ -50,7 +61,7 @@ exports[`reports LOGUX_NO_CONTROL_SECRET error 2`] = `
 `;
 
 exports[`reports Logux error 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"note\\":\\"Maybe there is a mistake in option name or this version of Logux Server doesn’t support this option\\",\\"msg\\":\\"Unknown option \`suprotocol\` in server constructor\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":60,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"note\\":\\"Maybe there is a mistake in option name or this version of Logux Server doesn’t support this option\\",\\"msg\\":\\"Unknown option \`suprotocol\` in server constructor\\"}
 "
 `;
 
@@ -63,7 +74,7 @@ exports[`reports Logux error 2`] = `
 `;
 
 exports[`reports add 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"action\\":{\\"type\\":\\"CHANGE_USER\\",\\"id\\":100,\\"data\\":{\\"name\\":\\"John\\",\\"role\\":null,\\"array\\":[1,[2],{\\"a\\":\\"1\\",\\"b\\":{\\"c\\":2},\\"d\\":[],\\"e\\":null},null]}},\\"meta\\":{\\"id\\":\\"1487805099387 100:uImkcF4z 0\\",\\"time\\":1487805099387,\\"reasons\\":[\\"lastValue\\",\\"debug\\"],\\"server\\":\\"server:H1f8LAyzl\\",\\"subprotocol\\":\\"1.0.0\\"},\\"msg\\":\\"Action was added\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"action\\":{\\"type\\":\\"CHANGE_USER\\",\\"id\\":100,\\"data\\":{\\"name\\":\\"John\\",\\"role\\":null,\\"array\\":[1,[2],{\\"a\\":\\"1\\",\\"b\\":{\\"c\\":2},\\"d\\":[],\\"e\\":null},null]}},\\"meta\\":{\\"id\\":\\"1487805099387 100:uImkcF4z 0\\",\\"time\\":1487805099387,\\"reasons\\":[\\"lastValue\\",\\"debug\\"],\\"server\\":\\"server:H1f8LAyzl\\",\\"subprotocol\\":\\"1.0.0\\"},\\"msg\\":\\"Action was added\\"}
 "
 `;
 
@@ -87,7 +98,7 @@ exports[`reports add 2`] = `
 `;
 
 exports[`reports authenticated 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"connectionId\\":\\"670\\",\\"subprotocol\\":\\"1.0.0\\",\\"nodeId\\":\\"admin:100:uImkcF4z\\",\\"msg\\":\\"User was authenticated\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"connectionId\\":\\"670\\",\\"subprotocol\\":\\"1.0.0\\",\\"nodeId\\":\\"admin:100:uImkcF4z\\",\\"msg\\":\\"User was authenticated\\"}
 "
 `;
 
@@ -101,7 +112,7 @@ exports[`reports authenticated 2`] = `
 `;
 
 exports[`reports authenticated without user ID 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"connectionId\\":\\"670\\",\\"subprotocol\\":\\"1.0.0\\",\\"nodeId\\":\\"uImkcF4z\\",\\"msg\\":\\"User was authenticated\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"connectionId\\":\\"670\\",\\"subprotocol\\":\\"1.0.0\\",\\"nodeId\\":\\"uImkcF4z\\",\\"msg\\":\\"User was authenticated\\"}
 "
 `;
 
@@ -115,7 +126,7 @@ exports[`reports authenticated without user ID 2`] = `
 `;
 
 exports[`reports clean 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"msg\\":\\"Action was cleaned\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"msg\\":\\"Action was cleaned\\"}
 "
 `;
 
@@ -127,7 +138,7 @@ exports[`reports clean 2`] = `
 `;
 
 exports[`reports connect 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"connectionId\\":\\"670\\",\\"ipAddress\\":\\"10.110.6.56\\",\\"msg\\":\\"Client was connected\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"connectionId\\":\\"670\\",\\"ipAddress\\":\\"10.110.6.56\\",\\"msg\\":\\"Client was connected\\"}
 "
 `;
 
@@ -140,7 +151,7 @@ exports[`reports connect 2`] = `
 `;
 
 exports[`reports denied 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"msg\\":\\"Action was denied\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":40,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"msg\\":\\"Action was denied\\"}
 "
 `;
 
@@ -152,7 +163,7 @@ exports[`reports denied 2`] = `
 `;
 
 exports[`reports destroy 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"msg\\":\\"Shutting down Logux server\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"msg\\":\\"Shutting down Logux server\\"}
 "
 `;
 
@@ -163,7 +174,7 @@ exports[`reports destroy 2`] = `
 `;
 
 exports[`reports disconnect 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"nodeId\\":\\"100:uImkcF4z\\",\\"msg\\":\\"Client was disconnected\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"nodeId\\":\\"100:uImkcF4z\\",\\"msg\\":\\"Client was disconnected\\"}
 "
 `;
 
@@ -175,7 +186,7 @@ exports[`reports disconnect 2`] = `
 `;
 
 exports[`reports disconnect from unauthenticated user 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"connectionId\\":\\"670\\",\\"msg\\":\\"Client was disconnected\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"connectionId\\":\\"670\\",\\"msg\\":\\"Client was disconnected\\"}
 "
 `;
 
@@ -187,7 +198,7 @@ exports[`reports disconnect from unauthenticated user 2`] = `
 `;
 
 exports[`reports error 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":60,\\"err\\":{\\"message\\":\\"Some mistake\\",\\"name\\":\\"Error\\",\\"stack\\":\\"Error: Some mistake\\\\n    at Object.<anonymous> (/dev/app/index.js:28:13)\\\\n    at Module._compile (module.js:573:32)\\\\n    at at runTest (/dev/app/node_modules/jest/index.js:50:10)\\\\n    at process._tickCallback (internal/process/next_tick.js:103:7)\\"},\\"msg\\":\\"Some mistake\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":60,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"err\\":{\\"message\\":\\"Some mistake\\",\\"name\\":\\"Error\\",\\"stack\\":\\"Error: Some mistake\\\\n    at Object.<anonymous> (/dev/app/index.js:28:13)\\\\n    at Module._compile (module.js:573:32)\\\\n    at at runTest (/dev/app/node_modules/jest/index.js:50:10)\\\\n    at process._tickCallback (internal/process/next_tick.js:103:7)\\"},\\"msg\\":\\"Some mistake\\"}
 "
 `;
 
@@ -202,7 +213,7 @@ exports[`reports error 2`] = `
 `;
 
 exports[`reports error from action 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":50,\\"err\\":{\\"message\\":\\"Some mistake\\",\\"name\\":\\"Error\\",\\"stack\\":\\"Error: Some mistake\\\\n    at Object.<anonymous> (/dev/app/index.js:28:13)\\\\n    at Module._compile (module.js:573:32)\\\\n    at at runTest (/dev/app/node_modules/jest/index.js:50:10)\\\\n    at process._tickCallback (internal/process/next_tick.js:103:7)\\"},\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"msg\\":\\"Some mistake\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":50,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"err\\":{\\"message\\":\\"Some mistake\\",\\"name\\":\\"Error\\",\\"stack\\":\\"Error: Some mistake\\\\n    at Object.<anonymous> (/dev/app/index.js:28:13)\\\\n    at Module._compile (module.js:573:32)\\\\n    at at runTest (/dev/app/node_modules/jest/index.js:50:10)\\\\n    at process._tickCallback (internal/process/next_tick.js:103:7)\\"},\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"msg\\":\\"Some mistake\\"}
 "
 `;
 
@@ -218,7 +229,7 @@ exports[`reports error from action 2`] = `
 `;
 
 exports[`reports error from client 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"connectionId\\":\\"670\\",\\"msg\\":\\"Client error: A timeout was reached (5000ms)\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":40,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"connectionId\\":\\"670\\",\\"msg\\":\\"Client error: A timeout was reached (5000ms)\\"}
 "
 `;
 
@@ -230,7 +241,7 @@ exports[`reports error from client 2`] = `
 `;
 
 exports[`reports error from node 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"nodeId\\":\\"100:uImkcF4z\\",\\"msg\\":\\"Sync error: A timeout was reached (5000ms)\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":40,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"nodeId\\":\\"100:uImkcF4z\\",\\"msg\\":\\"Sync error: A timeout was reached (5000ms)\\"}
 "
 `;
 
@@ -242,7 +253,7 @@ exports[`reports error from node 2`] = `
 `;
 
 exports[`reports listen 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"development\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"0.0.0\\",\\"supports\\":\\"0.x\\",\\"note\\":[\\"Server was started in non-secure development mode\\",\\"Press Ctrl-C to shutdown server\\"],\\"listen\\":\\"ws://127.0.0.1:31337/\\",\\"controlListen\\":\\"http://127.0.0.1:31337/\\",\\"backendSend\\":\\"http://127.0.0.1:3000/logux\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"development\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"0.0.0\\",\\"supports\\":\\"0.x\\",\\"note\\":[\\"Server was started in non-secure development mode\\",\\"Press Ctrl-C to shutdown server\\"],\\"listen\\":\\"ws://127.0.0.1:31337/\\",\\"controlListen\\":\\"http://127.0.0.1:31337/\\",\\"backendSend\\":\\"http://127.0.0.1:3000/logux\\",\\"msg\\":\\"Logux server is listening\\"}
 "
 `;
 
@@ -265,7 +276,7 @@ exports[`reports listen 2`] = `
 `;
 
 exports[`reports listen for custom domain 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"development\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"0.0.0\\",\\"supports\\":\\"0.x\\",\\"note\\":[\\"Server was started in non-secure development mode\\",\\"Press Ctrl-C to shutdown server\\"],\\"server\\":true,\\"prometheus\\":\\"http://127.0.0.1:31338/prometheus\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"development\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"0.0.0\\",\\"supports\\":\\"0.x\\",\\"note\\":[\\"Server was started in non-secure development mode\\",\\"Press Ctrl-C to shutdown server\\"],\\"server\\":true,\\"prometheus\\":\\"http://127.0.0.1:31338/prometheus\\",\\"msg\\":\\"Logux server is listening\\"}
 "
 `;
 
@@ -286,7 +297,7 @@ exports[`reports listen for custom domain 2`] = `
 `;
 
 exports[`reports listen for production 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"production\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"0.0.0\\",\\"supports\\":\\"0.x\\",\\"listen\\":\\"wss://127.0.0.1:31337/\\",\\"controlListen\\":\\"http://127.0.0.1:31337/\\",\\"redis\\":\\"//localhost\\",\\"msg\\":\\"Logux server is listening\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"production\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"0.0.0\\",\\"supports\\":\\"0.x\\",\\"listen\\":\\"wss://127.0.0.1:31337/\\",\\"controlListen\\":\\"http://127.0.0.1:31337/\\",\\"redis\\":\\"//localhost\\",\\"msg\\":\\"Logux server is listening\\"}
 "
 `;
 
@@ -307,7 +318,7 @@ exports[`reports listen for production 2`] = `
 `;
 
 exports[`reports processed 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"latency\\":500,\\"msg\\":\\"Action was processed\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"latency\\":500,\\"msg\\":\\"Action was processed\\"}
 "
 `;
 
@@ -320,7 +331,7 @@ exports[`reports processed 2`] = `
 `;
 
 exports[`reports subscribed 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"channel\\":\\"user/100\\",\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"msg\\":\\"Client was subscribed\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"channel\\":\\"user/100\\",\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"msg\\":\\"Client was subscribed\\"}
 "
 `;
 
@@ -333,7 +344,7 @@ exports[`reports subscribed 2`] = `
 `;
 
 exports[`reports sync error 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":50,\\"err\\":{\\"message\\":\\"Logux received unknown-message error (Unknown message \`bad\` type)\\",\\"name\\":\\"LoguxError\\"},\\"connectionId\\":\\"670\\",\\"msg\\":\\"Logux received unknown-message error (Unknown message \`bad\` type)\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":50,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"err\\":{\\"message\\":\\"Logux received unknown-message error (Unknown message \`bad\` type)\\",\\"name\\":\\"LoguxError\\"},\\"connectionId\\":\\"670\\",\\"msg\\":\\"Logux received unknown-message error (Unknown message \`bad\` type)\\"}
 "
 `;
 
@@ -345,7 +356,7 @@ exports[`reports sync error 2`] = `
 `;
 
 exports[`reports unauthenticated 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"connectionId\\":\\"670\\",\\"subprotocol\\":\\"1.0.0\\",\\"nodeId\\":\\"100:uImkcF4z\\",\\"msg\\":\\"Bad authentication\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":40,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"connectionId\\":\\"670\\",\\"subprotocol\\":\\"1.0.0\\",\\"nodeId\\":\\"100:uImkcF4z\\",\\"msg\\":\\"Bad authentication\\"}
 "
 `;
 
@@ -359,7 +370,7 @@ exports[`reports unauthenticated 2`] = `
 `;
 
 exports[`reports unknownType 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"type\\":\\"CHANGE_SER\\",\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"msg\\":\\"Action with unknown type\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":40,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"type\\":\\"CHANGE_SER\\",\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"msg\\":\\"Action with unknown type\\"}
 "
 `;
 
@@ -372,7 +383,7 @@ exports[`reports unknownType 2`] = `
 `;
 
 exports[`reports unknownType from server 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"type\\":\\"CHANGE_SER\\",\\"actionId\\":\\"1487805099387 server:FnXaqDxY 0\\",\\"msg\\":\\"Action with unknown type\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":40,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"type\\":\\"CHANGE_SER\\",\\"actionId\\":\\"1487805099387 server:FnXaqDxY 0\\",\\"msg\\":\\"Action with unknown type\\"}
 "
 `;
 
@@ -385,7 +396,7 @@ exports[`reports unknownType from server 2`] = `
 `;
 
 exports[`reports unsubscribed 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":30,\\"channel\\":\\"user/100\\",\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"msg\\":\\"Client was unsubscribed\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"channel\\":\\"user/100\\",\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"msg\\":\\"Client was unsubscribed\\"}
 "
 `;
 
@@ -398,7 +409,7 @@ exports[`reports unsubscribed 2`] = `
 `;
 
 exports[`reports useless actions 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"action\\":{\\"type\\":\\"ADD_USER\\",\\"id\\":100,\\"name\\":\\"John\\"},\\"meta\\":{\\"id\\":\\"1487805099387 100:uImkcF4z 0\\",\\"time\\":1487805099387,\\"reasons\\":[],\\"server\\":\\"server:H1f8LAyzl\\",\\"subprotocol\\":\\"1.0.0\\"},\\"msg\\":\\"Useless action\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":40,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"action\\":{\\"type\\":\\"ADD_USER\\",\\"id\\":100,\\"name\\":\\"John\\"},\\"meta\\":{\\"id\\":\\"1487805099387 100:uImkcF4z 0\\",\\"time\\":1487805099387,\\"reasons\\":[],\\"server\\":\\"server:H1f8LAyzl\\",\\"subprotocol\\":\\"1.0.0\\"},\\"msg\\":\\"Useless action\\"}
 "
 `;
 
@@ -419,7 +430,7 @@ exports[`reports useless actions 2`] = `
 `;
 
 exports[`reports wrongChannel 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"channel\\":\\"ser/100\\",\\"msg\\":\\"Wrong channel name\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":40,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"channel\\":\\"ser/100\\",\\"msg\\":\\"Wrong channel name\\"}
 "
 `;
 
@@ -432,7 +443,7 @@ exports[`reports wrongChannel 2`] = `
 `;
 
 exports[`reports wrongChannel without name 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"msg\\":\\"Wrong channel name\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":40,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"msg\\":\\"Wrong channel name\\"}
 "
 `;
 
@@ -445,7 +456,7 @@ exports[`reports wrongChannel without name 2`] = `
 `;
 
 exports[`reports wrongControlIp 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"ipAddress\\":\\"6.0.0.1\\",\\"mask\\":\\"127.0.0.1/8\\",\\"msg\\":\\"IP address of control request do not pass the mask\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":40,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"ipAddress\\":\\"6.0.0.1\\",\\"mask\\":\\"127.0.0.1/8\\",\\"msg\\":\\"IP address of control request do not pass the mask\\"}
 "
 `;
 
@@ -458,7 +469,7 @@ exports[`reports wrongControlIp 2`] = `
 `;
 
 exports[`reports wrongControlSecret 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"ipAddress\\":\\"6.0.0.1\\",\\"wrongSecret\\":\\"ArgDCPc1IxfU97V1ukeN6\\",\\"msg\\":\\"Wrong secret in control request\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":40,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"ipAddress\\":\\"6.0.0.1\\",\\"wrongSecret\\":\\"ArgDCPc1IxfU97V1ukeN6\\",\\"msg\\":\\"Wrong secret in control request\\"}
 "
 `;
 
@@ -471,7 +482,7 @@ exports[`reports wrongControlSecret 2`] = `
 `;
 
 exports[`reports zombie 1`] = `
-"{\\"name\\":\\"test\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"level\\":40,\\"nodeId\\":\\"100:uImkcF4z\\",\\"msg\\":\\"Zombie client was disconnected\\",\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"v\\":0}
+"{\\"level\\":40,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"nodeId\\":\\"100:uImkcF4z\\",\\"msg\\":\\"Zombie client was disconnected\\"}
 "
 `;
 
