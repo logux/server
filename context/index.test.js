@@ -8,7 +8,7 @@ function createContext (nodeId, subprotocol, server, meta) {
 
 it('has open data', () => {
   let ctx = createContext('10:client:uuid', '2.4.0')
-  expect(ctx.data).toEqual({ })
+  expect(ctx.data).toEqual({})
 })
 
 it('saves data', () => {

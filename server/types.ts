@@ -1,6 +1,7 @@
 import { actionCreatorFactory } from 'typescript-fsa'
+import * as pino from 'pino'
+
 import { Server, Action, LoguxSubscribeAction } from '..'
-import * as pino from "pino";
 
 let server = new Server(
   Server.loadOptions(process, {
@@ -8,7 +9,7 @@ let server = new Server(
     reporter: 'human',
     supports: '1.x',
     logger: pino({ name: 'logux' }),
-    root: __dirname,
+    root: __dirname
   })
 )
 
@@ -21,17 +22,17 @@ class User {
     this.name = 'name'
   }
 
-  async save (): Promise<void> { }
+  async save (): Promise<void> {}
 }
 
 type UserRenameAction = Action & {
-  type: 'user/rename',
-  userId: string,
+  type: 'user/rename'
+  userId: string
   name: string
 }
 
 type UserSubscribeAction = LoguxSubscribeAction & {
-  fields: ('name' | 'email')[]
+  fields?: ('name' | 'email')[]
 }
 
 type UserData = {
@@ -51,7 +52,7 @@ server.type<UserRenameAction, UserData>('user/rename', {
 
   resend (_, action) {
     return {
-      channel: `user/${ action.userId }`
+      channel: `user/${action.userId}`
     }
   },
 
@@ -67,24 +68,28 @@ server.channel<UserParams, UserData, UserSubscribeAction>('user/:id', {
     ctx.data.user = new User(ctx.params.id)
     return ctx.data.user.id === ctx.userId
   },
-  filter (_, action) {
-    if (action.fields) {
-      return (_, otherAction) => {
-        return action.fields.includes('name') &&
-               otherAction.type === 'user/rename'
+  filter (ctx, action) {
+    return (cxt2, otherAction) => {
+      if (typeof action.fields !== 'undefined') {
+        return (
+          action.fields.includes('name') && otherAction.type === 'user/rename'
+        )
+      } else {
+        return true
       }
-    } else {
-      return undefined
     }
   },
   async load (ctx) {
-    await ctx.sendBack({
-      type: 'user/rename',
-      userId: ctx.data.user.id,
-      name: ctx.data.user.name
-    }, {
-      status: 'processed'
-    })
+    await ctx.sendBack(
+      {
+        type: 'user/rename',
+        userId: ctx.data.user.id,
+        name: ctx.data.user.name
+      },
+      {
+        status: 'processed'
+      }
+    )
   }
 })
 

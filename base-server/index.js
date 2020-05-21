@@ -26,14 +26,17 @@ function optionError (msg) {
 }
 
 function nodeToClient (nodeId) {
-  return nodeId.split(':').slice(0, 2).join(':')
+  return nodeId
+    .split(':')
+    .slice(0, 2)
+    .join(':')
 }
 
 class BaseServer {
   constructor (opts) {
-    this.options = opts || { }
+    this.options = opts || {}
 
-    this.reporter = this.options.reporter || function () { }
+    this.reporter = this.options.reporter || function () {}
 
     this.env = this.options.env || process.env.NODE_ENV || 'development'
 
@@ -56,7 +59,7 @@ class BaseServer {
       if (!this.options.host) this.options.host = '127.0.0.1'
     }
 
-    this.nodeId = `server:${ this.options.id || nanoid(8) }`
+    this.nodeId = `server:${this.options.id || nanoid(8)}`
 
     this.options.root = this.options.root || process.cwd()
     this.options.controlMask = this.options.controlMask || '127.0.0.1/8'
@@ -70,7 +73,7 @@ class BaseServer {
       log = new Log({ store, nodeId: this.nodeId })
     }
 
-    this.contexts = { }
+    this.contexts = {}
     this.log = log
 
     this.on('preadd', (action, meta) => {
@@ -125,7 +128,7 @@ class BaseServer {
         }
         if (resend) {
           this.replaceResendShortcuts(resend)
-          let diff = { }
+          let diff = {}
           for (let i of RESEND_META) {
             if (resend[i]) diff[i] = resend[i]
           }
@@ -200,23 +203,23 @@ class BaseServer {
 
     this.unbind = []
 
-    this.connected = { }
-    this.nodeIds = { }
-    this.clientIds = { }
-    this.userIds = { }
-    this.types = { }
+    this.connected = {}
+    this.nodeIds = {}
+    this.clientIds = {}
+    this.userIds = {}
+    this.types = {}
     this.processing = 0
 
     this.lastClient = 0
 
     this.channels = []
-    this.subscribers = { }
+    this.subscribers = {}
 
-    this.authAttempts = { }
-    this.unknownTypes = { }
-    this.wrongChannels = { }
+    this.authAttempts = {}
+    this.unknownTypes = {}
+    this.wrongChannels = {}
 
-    this.timeouts = { }
+    this.timeouts = {}
     this.lastTimeout = 0
 
     this.controls = {
@@ -226,7 +229,7 @@ class BaseServer {
       }
     }
 
-    this.listenNotes = { }
+    this.listenNotes = {}
     if (this.options.backend) {
       bindBackendProxy(this)
     }
@@ -237,15 +240,18 @@ class BaseServer {
         clearTimeout(this.timeouts[i])
       }
     })
-    this.unbind.push(() => new Promise(resolve => {
-      if (this.processing === 0) {
-        resolve()
-      } else {
-        this.on('processed', () => {
-          if (this.processing === 0) resolve()
+    this.unbind.push(
+      () =>
+        new Promise(resolve => {
+          if (this.processing === 0) {
+            resolve()
+          } else {
+            this.on('processed', () => {
+              if (this.processing === 0) resolve()
+            })
+          }
         })
-      }
-    }))
+    )
   }
 
   auth (authenticator) {
@@ -266,15 +272,21 @@ class BaseServer {
     }
     await bindControlServer(this)
 
-    this.unbind.push(() => new Promise(resolve => {
-      this.ws.on('close', resolve)
-      this.ws.close()
-    }))
+    this.unbind.push(
+      () =>
+        new Promise(resolve => {
+          this.ws.on('close', resolve)
+          this.ws.close()
+        })
+    )
     if (this.http) {
-      this.unbind.push(() => new Promise(resolve => {
-        this.http.on('close', resolve)
-        this.http.close()
-      }))
+      this.unbind.push(
+        () =>
+          new Promise(resolve => {
+            this.http.on('close', resolve)
+            this.http.close()
+          })
+      )
     }
 
     let pkg = JSON.parse(await readFile(join(__dirname, '../package.json')))
@@ -317,10 +329,10 @@ class BaseServer {
   type (name, callbacks) {
     if (typeof name === 'function') name = name.toString()
     if (this.types[name]) {
-      throw new Error(`Action type ${ name } was already defined`)
+      throw new Error(`Action type ${name} was already defined`)
     }
     if (!callbacks || !callbacks.access) {
-      throw new Error(`Action type ${ name } must have access callback`)
+      throw new Error(`Action type ${name} must have access callback`)
     }
     this.types[name] = callbacks
   }
@@ -337,9 +349,9 @@ class BaseServer {
 
   channel (pattern, callbacks) {
     if (!callbacks || !callbacks.access) {
-      throw new Error(`Channel ${ pattern } must have access callback`)
+      throw new Error(`Channel ${pattern} must have access callback`)
     }
-    let channel = Object.assign({ }, callbacks)
+    let channel = Object.assign({}, callbacks)
     if (typeof pattern === 'string') {
       channel.pattern = new UrlPattern(pattern)
     } else {
@@ -355,7 +367,7 @@ class BaseServer {
     if (this.otherSubscriber) {
       throw new Error('Callbacks for unknown channel are already defined')
     }
-    let channel = Object.assign({ }, callbacks)
+    let channel = Object.assign({}, callbacks)
     channel.pattern = {
       match (name) {
         return [name]
@@ -364,7 +376,7 @@ class BaseServer {
     this.otherSubscriber = channel
   }
 
-  process (action, meta = { }) {
+  process (action, meta = {}) {
     return new Promise((resolve, reject) => {
       let unbindError = this.on('error', (e, errorAction) => {
         if (errorAction === action) {
@@ -384,7 +396,7 @@ class BaseServer {
     })
   }
 
-  undo (meta, reason = 'error', extra = { }) {
+  undo (meta, reason = 'error', extra = {}) {
     let clientId = parseNodeId(meta.id).clientId
     let [action, undoMeta] = this.buildUndo(meta, reason, extra)
     undoMeta.clients = (undoMeta.clients || []).concat([clientId])
@@ -396,7 +408,7 @@ class BaseServer {
       if (this.connected[i].connection.connected) {
         try {
           this.connected[i].connection.send(['debug', 'error', error.stack])
-        } catch (e) { }
+        } catch {}
       }
     }
   }
@@ -478,7 +490,7 @@ class BaseServer {
     if (parseNodeId(meta.id).userId !== 'server') {
       this.undo(meta, 'unknownType')
     }
-    this.debugActionError(meta, `Action with unknown type ${ action.type }`)
+    this.debugActionError(meta, `Action with unknown type ${action.type}`)
   }
 
   internalWrongChannel (action, meta) {
@@ -488,7 +500,7 @@ class BaseServer {
       channel: action.channel
     })
     this.undo(meta, 'wrongChannel')
-    this.debugActionError(meta, `Wrong channel name ${ action.channel }`)
+    this.debugActionError(meta, `Wrong channel name ${action.channel}`)
   }
 
   async processAction (processor, action, meta, start) {
@@ -536,7 +548,11 @@ class BaseServer {
       }
 
       this.contexts[meta.id] = new Context(
-        data.nodeId, data.clientId, data.userId, subprotocol, this
+        data.nodeId,
+        data.clientId,
+        data.userId,
+        subprotocol,
+        this
       )
     }
     return this.contexts[meta.id]
@@ -582,7 +598,7 @@ class BaseServer {
             return
           }
 
-          let filter = i.filter && await i.filter(ctx, action, meta)
+          let filter = i.filter && (await i.filter(ctx, action, meta))
 
           this.reporter('subscribed', {
             actionId: meta.id,
@@ -590,7 +606,7 @@ class BaseServer {
           })
 
           if (!this.subscribers[action.channel]) {
-            this.subscribers[action.channel] = { }
+            this.subscribers[action.channel] = {}
             this.emitter.emit('subscribing', action, meta)
           }
           this.subscribers[action.channel][ctx.nodeId] = filter || true
@@ -641,7 +657,7 @@ class BaseServer {
   denyAction (meta) {
     this.reporter('denied', { actionId: meta.id })
     this.undo(meta, 'denied')
-    this.debugActionError(meta, `Action "${ meta.id }" was denied`)
+    this.debugActionError(meta, `Action "${meta.id}" was denied`)
   }
 
   debugActionError (meta, msg) {

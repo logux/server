@@ -1,5 +1,12 @@
 import {
-  Action, AnyAction, ID, Log, Meta, ServerConnection, Store, TestTime
+  Action,
+  AnyAction,
+  ID,
+  Log,
+  Meta,
+  ServerConnection,
+  Store,
+  TestTime
 } from '@logux/core'
 import { Unsubscribe } from 'nanoevents'
 import { Server as HTTPServer } from 'http'
@@ -206,11 +213,9 @@ export type LoguxAction =
  * @returns `true` if credentials was correct
  */
 interface Authenticator {
-  (
-    userId: string,
-    token: string,
-    server: ServerClient
-  ): boolean | Promise<boolean>
+  (userId: string, token: string, server: ServerClient):
+    | boolean
+    | Promise<boolean>
 }
 
 /**
@@ -270,7 +275,7 @@ interface ActionFinally<A extends Action, D extends object> {
  * @returns Should action be sent to client.
  */
 interface ChannelFilter {
-  (ctx: Context<{ }>, action: Action, meta: ServerMeta): boolean
+  (ctx: Context<{}>, action: Action, meta: ServerMeta): boolean
 }
 
 /**
@@ -282,11 +287,13 @@ interface ChannelFilter {
  * @returns `true` if client are allowed to subscribe to this channel.
  */
 interface ChannelAuthorizer<
-  A extends Action, D extends object, P extends object | string[]
+  A extends Action,
+  D extends object,
+  P extends object | string[]
 > {
-  (
-    ctx: ChannelContext<D, P>, action: A, meta: ServerMeta
-  ): boolean | Promise<boolean>
+  (ctx: ChannelContext<D, P>, action: A, meta: ServerMeta):
+    | boolean
+    | Promise<boolean>
 }
 
 /**
@@ -298,11 +305,14 @@ interface ChannelAuthorizer<
  * @returns Actions filter.
  */
 interface FilterCreator<
-  A extends Action, D extends object, P extends object | string[]
+  A extends Action,
+  D extends object,
+  P extends object | string[]
 > {
-  (
-    ctx: ChannelContext<D, P>, action: A, meta: ServerMeta
-  ): Promise<ChannelFilter> | ChannelFilter | void
+  (ctx: ChannelContext<D, P>, action: A, meta: ServerMeta):
+    | Promise<ChannelFilter>
+    | ChannelFilter
+    | void
 }
 
 /**
@@ -314,7 +324,9 @@ interface FilterCreator<
  * @returns Promise during current actions loading.
  */
 interface ChannelLoader<
-  A extends Action, D extends object, P extends object | string[]
+  A extends Action,
+  D extends object,
+  P extends object | string[]
 > {
   (ctx: ChannelContext<D, P>, action: A, meta: ServerMeta): void | Promise<void>
 }
@@ -328,7 +340,9 @@ interface ChannelLoader<
  * @param meta The action metadata.
  */
 interface ChannelFinally<
-  A extends Action, D extends object, P extends object | string[]
+  A extends Action,
+  D extends object,
+  P extends object | string[]
 > {
   (ctx: ChannelContext<D, P>, action: A, meta: ServerMeta): void
 }
@@ -341,7 +355,9 @@ type ActionCallbacks<A extends Action, D extends object> = {
 }
 
 type ChannelCallbacks<
-  A extends Action, D extends object, P extends object | string[]
+  A extends Action,
+  D extends object,
+  P extends object | string[]
 > = {
   access: ChannelAuthorizer<A, D, P>
   filter?: FilterCreator<A, D, P>
@@ -413,7 +429,7 @@ type ReportersArguments = {
   }
   listen: {
     controlSecret: string
-    controlMask: string,
+    controlMask: string
     loguxServer: string
     environment: 'production' | 'development'
     subprotocol: string
@@ -429,8 +445,9 @@ type ReportersArguments = {
   }
 }
 
-export type Reporter = <E extends keyof ReportersArguments> (
-  event: E, payload: ReportersArguments[E]
+export type Reporter = <E extends keyof ReportersArguments>(
+  event: E,
+  payload: ReportersArguments[E]
 ) => void
 
 export type Resend = {
@@ -445,15 +462,15 @@ export type Resend = {
 }
 
 export type Logger = {
-  info (details: object, message: string): void
-  warn (details: object, message: string): void
-  error (details: object, message: string): void
-  fatal (details: object, message: string): void
+  info(details: object, message: string): void
+  warn(details: object, message: string): void
+  error(details: object, message: string): void
+  fatal(details: object, message: string): void
 }
 
 interface ActionCreator {
-  toString (): string,
-  (...args: any[]): Action
+  (...args: any): Action
+  toString(): string
 }
 
 /**
@@ -665,12 +682,12 @@ export default class BaseServer {
    * @template A Action’s type.
    * @template D Type for `ctx.data`.
    */
-  type<A extends Action = AnyAction, D extends object = { }> (
+  type<A extends Action = AnyAction, D extends object = {}> (
     name: A['type'],
     callbacks: ActionCallbacks<A, D>
   ): void
 
-  type<AC extends ActionCreator, D extends object = { }> (
+  type<AC extends ActionCreator, D extends object = {}> (
     actionCreator: AC,
     callbacks: ActionCallbacks<ReturnType<AC>, D>
   ): void
@@ -703,9 +720,7 @@ export default class BaseServer {
    *
    * @template D Type for `ctx.data`.
    */
-  otherType<
-    D extends object = { }
-  > (callbacks: ActionCallbacks<Action, D>): void
+  otherType<D extends object = {}> (callbacks: ActionCallbacks<Action, D>): void
 
   /**
    * Define the channel.
@@ -735,8 +750,8 @@ export default class BaseServer {
    * @template A `logux/subscribe` Action’s type.
    */
   channel<
-    P extends object = { },
-    D extends object = { },
+    P extends object = {},
+    D extends object = {},
     A extends LoguxSubscribeAction = LoguxSubscribeAction
   > (pattern: string, callbacks: ChannelCallbacks<A, D, P>): void
 
@@ -746,7 +761,7 @@ export default class BaseServer {
    */
   channel<
     P extends string[] = string[],
-    D extends object = { },
+    D extends object = {},
     A extends LoguxSubscribeAction = LoguxSubscribeAction
   > (pattern: RegExp, callbacks: ChannelCallbacks<A, D, P>): void
 
@@ -772,9 +787,9 @@ export default class BaseServer {
    * @template D Type for `ctx.data`.
    * @template A `logux/subscribe` Action’s type.
    */
-  otherChannel<
-    D extends object = { },
-  > (callbacks: ChannelCallbacks<LoguxSubscribeAction, D, { }>): void
+  otherChannel<D extends object = {}> (
+    callbacks: ChannelCallbacks<LoguxSubscribeAction, D, {}>
+  ): void
 
   /**
    * Add new action to the server and return the Promise until it will be

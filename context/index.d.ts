@@ -24,7 +24,7 @@ export default class Context<D extends object> {
    * @param subprotocol Action creator application subprotocol version in SemVer format.
    * @param server Logux server
    */
-  constructor(
+  constructor (
     nodeId: string,
     clientId: string,
     userId: string,
@@ -140,7 +140,8 @@ export default class Context<D extends object> {
  * ```
  */
 export class ChannelContext<
-  D extends object, P extends object | string[]
+  D extends object,
+  P extends object | string[]
 > extends Context<D> {
   /**
    * Parsed variable parts of channel pattern.

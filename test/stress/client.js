@@ -10,7 +10,7 @@ let index = 0
 let stop = false
 
 function map (action, meta) {
-  let filtered = { }
+  let filtered = {}
   for (let i in meta) {
     if (ALLOWED_META.includes(i)) filtered[i] = meta[i]
   }
@@ -19,13 +19,13 @@ function map (action, meta) {
 
 function randomDelay (ms) {
   let random = ms / 3
-  return delay(ms + (Math.random() * random))
+  return delay(ms + Math.random() * random)
 }
 
 async function tick () {
   if (stop) return
 
-  let nodeId = `1:${ ++index }`
+  let nodeId = `1:${++index}`
   let connection = new WsConnection('ws://localhost:31337', WebSocket)
   let log = new Log({ nodeId, store: new MemoryStore() })
   let node = new ClientNode(nodeId, log, connection, {

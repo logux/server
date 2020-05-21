@@ -6,45 +6,48 @@ let humanFormatter = require('../human-formatter')
 const ERROR_CODES = {
   EADDRINUSE: e => {
     let wayToFix = {
-      win32: 'Run `cmd.exe` as an administrator\n' +
-             'C:\\> netstat -a -b -n -o\n' +
-             'C:\\> taskkill /F /PID `<processid>`',
-      darwin: `$ sudo lsof -i ${ e.port }\n` +
-              '$ sudo kill -9 `<processid>`',
-      linux: '$ su - root\n' +
-             `# netstat -nlp | grep ${ e.port }\n` +
-             'Proto   Local Address   State    PID/Program name\n' +
-             `tcp     0.0.0.0:${ e.port }    LISTEN   \`777\`/node\n` +
-             '# sudo kill -9 `777`'
+      win32:
+        'Run `cmd.exe` as an administrator\n' +
+        'C:\\> netstat -a -b -n -o\n' +
+        'C:\\> taskkill /F /PID `<processid>`',
+      darwin: `$ sudo lsof -i ${e.port}\n` + '$ sudo kill -9 `<processid>`',
+      linux:
+        '$ su - root\n' +
+        `# netstat -nlp | grep ${e.port}\n` +
+        'Proto   Local Address   State    PID/Program name\n' +
+        `tcp     0.0.0.0:${e.port}    LISTEN   \`777\`/node\n` +
+        '# sudo kill -9 `777`'
     }
 
     return {
-      msg: `Port \`${ e.port }\` already in use`,
-      note: 'Another Logux server or other app already running on this port. ' +
-            'Probably you haven’t stopped server from other project ' +
-            'or previous version of this server was not killed.\n\n' +
-            (wayToFix[os.platform()] || '')
+      msg: `Port \`${e.port}\` already in use`,
+      note:
+        'Another Logux server or other app already running on this port. ' +
+        'Probably you haven’t stopped server from other project ' +
+        'or previous version of this server was not killed.\n\n' +
+        (wayToFix[os.platform()] || '')
     }
   },
   EACCES: (e, environment) => {
     let wayToFix = {
-      development: 'In dev mode it can be done with sudo:\n' +
-                   '$ sudo npm start',
-      production: '$ su - `<username>`\n' +
-                  `$ npm start -p ${ e.port }`
+      development:
+        'In dev mode it can be done with sudo:\n' + '$ sudo npm start',
+      production: '$ su - `<username>`\n' + `$ npm start -p ${e.port}`
     }
 
     return {
-      msg: `You are not allowed to run server on port \`${ e.port }\``,
-      note: 'Non-privileged users can\'t start a listening socket on ports ' +
-            'below 1024. Try to change user or take another port.\n\n' +
-            (wayToFix[environment] || wayToFix.production)
+      msg: `You are not allowed to run server on port \`${e.port}\``,
+      note:
+        "Non-privileged users can't start a listening socket on ports " +
+        'below 1024. Try to change user or take another port.\n\n' +
+        (wayToFix[environment] || wayToFix.production)
     }
   },
   LOGUX_NO_CONTROL_SECRET: e => ({
     msg: e.message,
-    note: 'Call `npx nanoid` and set result as `controlSecret` ' +
-          'or `LOGUX_CONTROL_SECRET` environment variable'
+    note:
+      'Call `npx nanoid` and set result as `controlSecret` ' +
+      'or `LOGUX_CONTROL_SECRET` environment variable'
   })
 }
 
@@ -69,11 +72,11 @@ const REPORTERS = {
       details.server = r.server
     } else {
       let wsProtocol = r.cert ? 'wss://' : 'ws://'
-      details.listen = `${ wsProtocol }${ r.host }:${ r.port }/`
+      details.listen = `${wsProtocol}${r.host}:${r.port}/`
     }
 
     if (r.controlSecret) {
-      details.controlListen = `http://${ r.host }:${ r.port }/`
+      details.controlListen = `http://${r.host}:${r.port}/`
       details.controlMask = r.controlMask
     }
 
@@ -138,12 +141,13 @@ const REPORTERS = {
 
   clientError: record => {
     let result = {
-      level: 'warn', details: { }
+      level: 'warn',
+      details: {}
     }
     if (record.err.received) {
-      result.msg = `Client error: ${ record.err.description }`
+      result.msg = `Client error: ${record.err.description}`
     } else {
-      result.msg = `Sync error: ${ record.err.description }`
+      result.msg = `Sync error: ${record.err.description}`
     }
     for (let i in record) {
       if (i !== 'err') {
@@ -222,7 +226,7 @@ function createReporter (options) {
   function reporter (type, details) {
     let report = REPORTERS[type](details)
     let level = report.level || 'info'
-    reporter.logger[level](report.details || details || { }, report.msg)
+    reporter.logger[level](report.details || details || {}, report.msg)
   }
   reporter.logger = logger
   return reporter

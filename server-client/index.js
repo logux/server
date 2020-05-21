@@ -207,10 +207,10 @@ class ServerClient {
 
   denyBack (meta) {
     this.app.reporter('denied', { actionId: meta.id })
-    let [action, undoMeta] = this.app.buildUndo(meta, 'denied', { })
+    let [action, undoMeta] = this.app.buildUndo(meta, 'denied', {})
     undoMeta.clients = (undoMeta.clients || []).concat([this.clientId])
     this.app.log.add(action, undoMeta)
-    this.app.debugActionError(meta, `Action "${ meta.id }" was denied`)
+    this.app.debugActionError(meta, `Action "${meta.id}" was denied`)
   }
 }
 

@@ -7,9 +7,24 @@ let createReporter = require('../create-reporter')
 let BaseServer = require('../base-server')
 
 const AVAILABLE_OPTIONS = [
-  'subprotocol', 'supports', 'timeout', 'ping', 'root', 'store', 'server',
-  'port', 'host', 'key', 'cert', 'env', 'logger', 'reporter', 'backend',
-  'controlMask', 'controlSecret', 'redis'
+  'subprotocol',
+  'supports',
+  'timeout',
+  'ping',
+  'root',
+  'store',
+  'server',
+  'port',
+  'host',
+  'key',
+  'cert',
+  'env',
+  'logger',
+  'reporter',
+  'backend',
+  'controlMask',
+  'controlSecret',
+  'redis'
 ]
 
 const ENVS = {
@@ -79,7 +94,7 @@ yargs
     describe: 'URL to Redis for Logux Server Pro scaling',
     type: 'string'
   })
-  .epilog(`Environment variables: \n${ envHelp() }`)
+  .epilog(`Environment variables: \n${envHelp()}`)
   .example('$0 --port 31337 --host 127.0.0.1')
   .example('LOGUX_PORT=1337 $0')
   .locale('en')
@@ -87,20 +102,18 @@ yargs
   .version(false)
 
 class Server extends BaseServer {
-  static loadOptions (process, defaults = { }) {
+  static loadOptions (process, defaults = {}) {
     if (defaults.root) {
       dotenv.config({ path: join(defaults.root, '.env') })
     } else {
       dotenv.config()
     }
     let argv = yargs.parse(process.argv)
-    let opts = { }
+    let opts = {}
 
     for (let name of AVAILABLE_OPTIONS) {
       let arg = name.replace(/[A-Z]/g, char => '-' + char.toLowerCase())
-      opts[name] = argv[arg] ||
-                   process.env[ENVS[name]] ||
-                   defaults[name]
+      opts[name] = argv[arg] || process.env[ENVS[name]] || defaults[name]
     }
 
     opts.port = parseInt(opts.port, 10)
@@ -108,7 +121,7 @@ class Server extends BaseServer {
   }
 
   constructor (opts) {
-    if (!opts) opts = { }
+    if (!opts) opts = {}
 
     if (typeof opts.reporter !== 'function') {
       opts.reporter = opts.reporter || 'human'
@@ -143,10 +156,12 @@ class Server extends BaseServer {
     for (let name in opts) {
       if (!AVAILABLE_OPTIONS.includes(name)) {
         let error = new Error(
-          `Unknown option \`${ name }\` in server constructor`)
+          `Unknown option \`${name}\` in server constructor`
+        )
         error.logux = true
-        error.note = 'Maybe there is a mistake in option name or this ' +
-                     'version of Logux Server doesn’t support this option'
+        error.note =
+          'Maybe there is a mistake in option name or this ' +
+          'version of Logux Server doesn’t support this option'
         error.option = name
         throw error
       }
@@ -182,8 +197,7 @@ class Server extends BaseServer {
     })
 
     for (let modulePath of matches) {
-      // eslint-disable-next-line max-len
-      // eslint-disable-next-line global-require, security/detect-non-literal-require
+      // eslint-disable-next-line security/detect-non-literal-require
       let serverModule = require(modulePath)
 
       if (typeof serverModule === 'function') {
@@ -191,11 +205,12 @@ class Server extends BaseServer {
       } else {
         let moduleName = relative(this.options.root, modulePath)
 
-        let error = new Error('Server module should export ' +
-                              'a function that accepts a server.')
+        let error = new Error(
+          'Server module should export ' + 'a function that accepts a server.'
+        )
         error.logux = true
-        error.note = `Your module ${ moduleName } ` +
-                     `exports ${ typeof serverModule }.`
+        error.note =
+          `Your module ${moduleName} ` + `exports ${typeof serverModule}.`
 
         throw error
       }

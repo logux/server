@@ -17,7 +17,7 @@ function createConnection () {
 }
 
 function createServer (opts) {
-  if (!opts) opts = { }
+  if (!opts) opts = {}
   opts.subprotocol = '0.0.1'
   opts.supports = '0.x'
   opts.time = new TestTime()
@@ -37,7 +37,7 @@ function createReporter (opts) {
   let names = []
   let reports = []
 
-  opts = opts || { }
+  opts = opts || {}
   opts.reporter = (name, details) => {
     names.push(name)
     reports.push([name, details])
@@ -138,9 +138,15 @@ it('reports about connection', () => {
     fired.push(client.key)
   })
   new ServerClient(test.app, createConnection(), 1)
-  expect(test.reports).toEqual([['connect', {
-    connectionId: '1', ipAddress: '127.0.0.1'
-  }]])
+  expect(test.reports).toEqual([
+    [
+      'connect',
+      {
+        connectionId: '1',
+        ipAddress: '127.0.0.1'
+      }
+    ]
+  ])
   expect(fired).toEqual(['1'])
 })
 
@@ -156,8 +162,8 @@ it('removes itself on destroy', async () => {
 
   await client1.connection.connect()
   await client2.connection.connect()
-  client1.auth('10:uuid', { })
-  client2.auth('10:other', { })
+  client1.auth('10:uuid', {})
+  client2.auth('10:other', {})
   test.app.subscribers = {
     'user/10': {
       '10:uuid': client1,
@@ -173,16 +179,20 @@ it('removes itself on destroy', async () => {
   })
   expect(client1.connection.connected).toBe(false)
   expect(test.names).toEqual([
-    'connect', 'connect', 'authenticated', 'authenticated', 'disconnect'
+    'connect',
+    'connect',
+    'authenticated',
+    'authenticated',
+    'disconnect'
   ])
   expect(test.reports[4]).toEqual(['disconnect', { nodeId: '10:uuid' }])
 
   client2.destroy()
-  expect(test.app.connected).toEqual({ })
-  expect(test.app.clientIds).toEqual({ })
-  expect(test.app.nodeIds).toEqual({ })
-  expect(test.app.userIds).toEqual({ })
-  expect(test.app.subscribers).toEqual({ })
+  expect(test.app.connected).toEqual({})
+  expect(test.app.clientIds).toEqual({})
+  expect(test.app.nodeIds).toEqual({})
+  expect(test.app.userIds).toEqual({})
+  expect(test.app.subscribers).toEqual({})
   expect(fired).toEqual(['1', '2'])
 })
 
@@ -202,7 +212,7 @@ it('does not report users disconnects on server destroy', async () => {
 
   await client.connection.connect()
   test.app.destroy()
-  expect(test.app.connected).toEqual({ })
+  expect(test.app.connected).toEqual({})
   expect(client.connection.connected).toBe(false)
   expect(test.names).toEqual(['connect', 'destroy'])
   expect(test.reports[1]).toEqual(['destroy', undefined])
@@ -228,9 +238,14 @@ it('reports on wrong authentication', async () => {
   await client.connection.pair.wait('right')
 
   expect(test.names).toEqual(['connect', 'unauthenticated', 'disconnect'])
-  expect(test.reports[1]).toEqual(['unauthenticated', {
-    connectionId: '1', nodeId: '10:uuid', subprotocol: '0.0.0'
-  }])
+  expect(test.reports[1]).toEqual([
+    'unauthenticated',
+    {
+      connectionId: '1',
+      nodeId: '10:uuid',
+      subprotocol: '0.0.0'
+    }
+  ])
 })
 
 it('reports about authentication error', async () => {
@@ -240,7 +255,9 @@ it('reports about authentication error', async () => {
   test.app.on('error', e => {
     errors.push(e)
   })
-  test.app.auth(() => { throw error })
+  test.app.auth(() => {
+    throw error
+  })
   let client = new ServerClient(test.app, createConnection(), 1)
   await client.connection.connect()
   let protocol = client.node.localProtocol
@@ -248,9 +265,13 @@ it('reports about authentication error', async () => {
   await client.connection.pair.wait('right')
 
   expect(test.names).toEqual(['connect', 'error', 'disconnect'])
-  expect(test.reports[1]).toEqual(['error', {
-    err: error, nodeId: '10:uuid'
-  }])
+  expect(test.reports[1]).toEqual([
+    'error',
+    {
+      err: error,
+      nodeId: '10:uuid'
+    }
+  ])
   expect(errors).toEqual([error])
 })
 
@@ -268,10 +289,12 @@ it('blocks authentication bruteforce', async () => {
   expect(test.names.filter(i => i === 'disconnect')).toHaveLength(5)
   expect(test.names.filter(i => i === 'unauthenticated')).toHaveLength(3)
   expect(test.names.filter(i => i === 'clientError')).toHaveLength(2)
-  test.reports.filter(i => i[0] === 'clientError').forEach(report => {
-    expect(report[1].err.type).toEqual('bruteforce')
-    expect(report[1].nodeId).toMatch(/(4|5):uuid/)
-  })
+  test.reports
+    .filter(i => i[0] === 'clientError')
+    .forEach(report => {
+      expect(report[1].err.type).toEqual('bruteforce')
+      expect(report[1].nodeId).toMatch(/(4|5):uuid/)
+    })
   await delay(3050)
 
   await connect(6)
@@ -291,15 +314,20 @@ it('reports on server in user name', async () => {
   await client.connection.pair.wait('right')
 
   expect(test.names).toEqual(['connect', 'unauthenticated', 'disconnect'])
-  expect(test.reports[1]).toEqual(['unauthenticated', {
-    connectionId: '1', nodeId: 'server:x', subprotocol: '0.0.0'
-  }])
+  expect(test.reports[1]).toEqual([
+    'unauthenticated',
+    {
+      connectionId: '1',
+      nodeId: 'server:x',
+      subprotocol: '0.0.0'
+    }
+  ])
 })
 
 it('authenticates user', async () => {
   let test = createReporter()
-  test.app.auth(async (id, token, who) =>
-    token === 'token' && id === 'a' && who === client
+  test.app.auth(
+    async (id, token, who) => token === 'token' && id === 'a' && who === client
   )
   let client = createClient(test.app)
 
@@ -310,9 +338,9 @@ it('authenticates user', async () => {
 
   await client.connection.connect()
   let protocol = client.node.localProtocol
-  client.connection.other().send([
-    'connect', protocol, 'a:b:uuid', 0, { token: 'token' }
-  ])
+  client.connection
+    .other()
+    .send(['connect', protocol, 'a:b:uuid', 0, { token: 'token' }])
   await client.connection.pair.wait('right')
 
   expect(client.userId).toEqual('a')
@@ -323,9 +351,14 @@ it('authenticates user', async () => {
   expect(test.app.clientIds).toEqual({ 'a:b': client })
   expect(test.app.userIds).toEqual({ a: [client] })
   expect(test.names).toEqual(['connect', 'authenticated'])
-  expect(test.reports[1]).toEqual(['authenticated', {
-    connectionId: '1', nodeId: 'a:b:uuid', subprotocol: '0.0.0'
-  }])
+  expect(test.reports[1]).toEqual([
+    'authenticated',
+    {
+      connectionId: '1',
+      nodeId: 'a:b:uuid',
+      subprotocol: '0.0.0'
+    }
+  ])
   expect(authenticated).toHaveLength(1)
   expect(authenticated[0][0]).toBe(client)
   expect(typeof authenticated[0][1]).toEqual('number')
@@ -338,9 +371,9 @@ it('supports non-promise authenticator', async () => {
 
   await client.connection.connect()
   let protocol = client.node.localProtocol
-  client.connection.other().send([
-    'connect', protocol, '10:uuid', 0, { token: 'token' }
-  ])
+  client.connection
+    .other()
+    .send(['connect', protocol, '10:uuid', 0, { token: 'token' }])
   await client.connection.pair.wait('right')
 
   expect(client.node.authenticated).toBe(true)
@@ -356,7 +389,7 @@ it('authenticates user without user name', async () => {
   await client.connection.pair.wait('right')
 
   expect(client.userId).toBeUndefined()
-  expect(app.userIds).toEqual({ })
+  expect(app.userIds).toEqual({})
 })
 
 it('reports about synchronization errors', async () => {
@@ -367,10 +400,13 @@ it('reports about synchronization errors', async () => {
   await client.connection.pair.wait()
 
   expect(test.names).toEqual(['connect', 'error'])
-  expect(test.reports[1]).toEqual(['error', {
-    connectionId: '1',
-    err: new LoguxError('wrong-format', undefined, true)
-  }])
+  expect(test.reports[1]).toEqual([
+    'error',
+    {
+      connectionId: '1',
+      err: new LoguxError('wrong-format', undefined, true)
+    }
+  ])
 })
 
 it('checks subprotocol', async () => {
@@ -378,18 +414,22 @@ it('checks subprotocol', async () => {
   let client = createClient(test.app)
   await client.connection.connect()
   let protocol = client.node.localProtocol
-  client.connection.other().send([
-    'connect', protocol, '10:uuid', 0, { subprotocol: '1.0.0' }
-  ])
+  client.connection
+    .other()
+    .send(['connect', protocol, '10:uuid', 0, { subprotocol: '1.0.0' }])
   await client.connection.pair.wait('right')
 
   expect(test.names).toEqual(['connect', 'clientError', 'disconnect'])
-  expect(test.reports[1]).toEqual(['clientError', {
-    connectionId: '1',
-    err: new LoguxError('wrong-subprotocol', {
-      supported: '0.x', used: '1.0.0'
-    })
-  }])
+  expect(test.reports[1]).toEqual([
+    'clientError',
+    {
+      connectionId: '1',
+      err: new LoguxError('wrong-subprotocol', {
+        supported: '0.x',
+        used: '1.0.0'
+      })
+    }
+  ])
 })
 
 it('has method to check client subprotocol', () => {
@@ -424,10 +464,10 @@ it('disconnects zombie', async () => {
   let client2 = createClient(test.app)
 
   await client1.connection.connect()
-  client1.auth('10:client:a', { })
+  client1.auth('10:client:a', {})
   await client2.connection.connect()
 
-  client2.auth('10:client:b', { })
+  client2.auth('10:client:b', {})
   await delay(0)
 
   expect(Object.keys(test.app.connected)).toEqual([client2.key])
@@ -452,9 +492,9 @@ it('checks action access', async () => {
   })
 
   let client = await connectClient(test.app)
-  client.connection.other().send(['sync', 2,
-    { type: 'FOO' }, { id: [1, '10:uuid', 0], time: 1 }
-  ])
+  client.connection
+    .other()
+    .send(['sync', 2, { type: 'FOO' }, { id: [1, '10:uuid', 0], time: 1 }])
   await client.connection.pair.wait('right')
 
   expect(test.names).toEqual(['connect', 'authenticated', 'denied', 'add'])
@@ -470,14 +510,25 @@ it('checks action creator', async () => {
   test.app.type('BAD', { access: () => true })
 
   let client = await connectClient(test.app)
-  client.connection.other().send(['sync', 2,
-    { type: 'GOOD' }, { id: [1, '10:uuid', 0], time: 1 },
-    { type: 'BAD' }, { id: [2, '1:uuid', 0], time: 2 }
-  ])
+  client.connection
+    .other()
+    .send([
+      'sync',
+      2,
+      { type: 'GOOD' },
+      { id: [1, '10:uuid', 0], time: 1 },
+      { type: 'BAD' },
+      { id: [2, '1:uuid', 0], time: 2 }
+    ])
   await client.connection.pair.wait('right')
 
   expect(test.names).toEqual([
-    'connect', 'authenticated', 'denied', 'add', 'add', 'add'
+    'connect',
+    'authenticated',
+    'denied',
+    'add',
+    'add',
+    'add'
   ])
   expect(test.reports[2]).toEqual(['denied', { actionId: '2 1:uuid 0' }])
   expect(test.reports[4][1].meta.id).toEqual('1 10:uuid 0')
@@ -493,14 +544,18 @@ it('allows subscribe and unsubscribe actions', async () => {
   test.app.channel('a', { access: () => true })
 
   let client = await connectClient(test.app)
-  client.connection.other().send(['sync', 3,
-    { type: 'logux/subscribe', channel: 'a' },
-    { id: [1, '10:uuid', 0], time: 1 },
-    { type: 'logux/unsubscribe', channel: 'b' },
-    { id: [2, '10:uuid', 0], time: 2 },
-    { type: 'logux/undo' },
-    { id: [3, '10:uuid', 0], time: 3 }
-  ])
+  client.connection
+    .other()
+    .send([
+      'sync',
+      3,
+      { type: 'logux/subscribe', channel: 'a' },
+      { id: [1, '10:uuid', 0], time: 1 },
+      { type: 'logux/unsubscribe', channel: 'b' },
+      { id: [2, '10:uuid', 0], time: 2 },
+      { type: 'logux/undo' },
+      { id: [3, '10:uuid', 0], time: 3 }
+    ])
   await client.connection.pair.wait('right')
 
   expect(test.names[2]).toEqual('unknownType')
@@ -518,7 +573,9 @@ it('checks action meta', async () => {
   test.app.log.generateId()
 
   let client = await connectClient(test.app)
-  client.connection.other().send(['sync', 2,
+  client.connection.other().send([
+    'sync',
+    2,
     { type: 'BAD' },
     { id: [1, '10:uuid', 0], time: 1, status: 'processed' },
     { type: 'GOOD' },
@@ -536,7 +593,12 @@ it('checks action meta', async () => {
     { type: 'logux/processed', id: '2 10:uuid 0' }
   ])
   expect(test.names).toEqual([
-    'connect', 'authenticated', 'denied', 'add', 'add', 'add'
+    'connect',
+    'authenticated',
+    'denied',
+    'add',
+    'add',
+    'add'
   ])
   expect(test.reports[2][1].actionId).toEqual('1 10:uuid 0')
   expect(test.reports[4][1].meta.id).toEqual('2 10:uuid 0')
@@ -546,19 +608,22 @@ it('ignores unknown action types', async () => {
   let test = createReporter()
 
   let client = await connectClient(test.app)
-  client.connection.other().send(['sync', 2,
-    { type: 'UNKNOWN' }, { id: [1, '10:uuid', 0], time: 1 }
-  ])
+  client.connection
+    .other()
+    .send(['sync', 2, { type: 'UNKNOWN' }, { id: [1, '10:uuid', 0], time: 1 }])
   await client.connection.pair.wait('right')
 
   expect(test.app.log.actions()).toEqual([
     { type: 'logux/undo', reason: 'unknownType', id: '1 10:uuid 0' }
   ])
-  expect(test.names).toEqual([
-    'connect', 'authenticated', 'unknownType', 'add'])
-  expect(test.reports[2]).toEqual(['unknownType', {
-    actionId: '1 10:uuid 0', type: 'UNKNOWN'
-  }])
+  expect(test.names).toEqual(['connect', 'authenticated', 'unknownType', 'add'])
+  expect(test.reports[2]).toEqual([
+    'unknownType',
+    {
+      actionId: '1 10:uuid 0',
+      type: 'UNKNOWN'
+    }
+  ])
 })
 
 it('checks user access for action', async () => {
@@ -574,10 +639,16 @@ it('checks user access for action', async () => {
 
   let client = await connectClient(test.app)
   jest.spyOn(client.connection, 'send')
-  client.connection.other().send(['sync', 2,
-    { type: 'FOO' }, { id: [1, '10:uuid', 0], time: 1 },
-    { type: 'FOO', bar: true }, { id: [1, '10:uuid', 1], time: 1 }
-  ])
+  client.connection
+    .other()
+    .send([
+      'sync',
+      2,
+      { type: 'FOO' },
+      { id: [1, '10:uuid', 0], time: 1 },
+      { type: 'FOO', bar: true },
+      { id: [1, '10:uuid', 1], time: 1 }
+    ])
   await delay(50)
   expect(test.app.log.actions()).toEqual([
     { type: 'FOO', bar: true },
@@ -585,10 +656,18 @@ it('checks user access for action', async () => {
     { type: 'logux/processed', id: '1 10:uuid 1' }
   ])
   expect(test.names).toEqual([
-    'connect', 'authenticated', 'denied', 'add', 'add', 'add'])
+    'connect',
+    'authenticated',
+    'denied',
+    'add',
+    'add',
+    'add'
+  ])
   expect(test.reports[2][1].actionId).toEqual('1 10:uuid 0')
   expect(sent(client).find(i => i[0] === 'debug')).toEqual([
-    'debug', 'error', 'Action "1 10:uuid 0" was denied'
+    'debug',
+    'error',
+    'Action "1 10:uuid 0" was denied'
   ])
 })
 
@@ -606,7 +685,7 @@ it('takes subprotocol from action meta', async () => {
   let client = await connectClient(app)
   app.log.add(
     { type: 'FOO' },
-    { id: `1 ${ client.nodeId } 0`, subprotocol: '1.0.0' }
+    { id: `1 ${client.nodeId} 0`, subprotocol: '1.0.0' }
   )
   await delay(1)
 
@@ -633,18 +712,27 @@ it('reports about errors in access callback', async () => {
   })
 
   let client = await connectClient(test.app)
-  client.connection.other().send(['sync', 2,
-    { type: 'FOO', bar: true }, { id: [1, '10:uuid', 0], time: 1 }
-  ])
+  client.connection
+    .other()
+    .send([
+      'sync',
+      2,
+      { type: 'FOO', bar: true },
+      { id: [1, '10:uuid', 0], time: 1 }
+    ])
   await client.connection.pair.wait('right')
 
   expect(test.app.log.actions()).toEqual([
     { type: 'logux/undo', reason: 'error', id: '1 10:uuid 0' }
   ])
   expect(test.names).toEqual(['connect', 'authenticated', 'error', 'add'])
-  expect(test.reports[2]).toEqual(['error', {
-    actionId: '1 10:uuid 0', err
-  }])
+  expect(test.reports[2]).toEqual([
+    'error',
+    {
+      actionId: '1 10:uuid 0',
+      err
+    }
+  ])
   expect(throwed).toEqual(err)
   expect(finalled).toEqual(1)
 })
@@ -667,18 +755,23 @@ it('adds resend keys', async () => {
   })
   test.app.type('EMPTY', {
     access: () => true,
-    resend () {
-    }
+    resend () {}
   })
 
   test.app.log.generateId()
   test.app.log.generateId()
 
   let client = await connectClient(test.app)
-  client.connection.other().send(['sync', 2,
-    { type: 'FOO' }, { id: [1, '10:uuid', 0], time: 1 },
-    { type: 'EMPTY' }, { id: [2, '10:uuid', 0], time: 2 }
-  ])
+  client.connection
+    .other()
+    .send([
+      'sync',
+      2,
+      { type: 'FOO' },
+      { id: [1, '10:uuid', 0], time: 1 },
+      { type: 'EMPTY' },
+      { id: [2, '10:uuid', 0], time: 2 }
+    ])
   await client.connection.pair.wait('right')
 
   expect(test.app.log.actions()).toEqual([
@@ -688,7 +781,12 @@ it('adds resend keys', async () => {
     { type: 'logux/processed', id: '1 10:uuid 0' }
   ])
   expect(test.names).toEqual([
-    'connect', 'authenticated', 'add', 'add', 'add', 'add'
+    'connect',
+    'authenticated',
+    'add',
+    'add',
+    'add',
+    'add'
   ])
   expect(test.reports[2][1].action.type).toEqual('FOO')
   expect(test.reports[2][1].meta.nodes).toEqual(['1:client:other'])
@@ -711,7 +809,10 @@ it('sends old actions by node ID', async () => {
   await client.node.waitFor('synchronized')
   expect(sentNames(client)).toEqual(['connected', 'sync'])
   expect(sent(client)[1]).toEqual([
-    'sync', 2, { type: 'A' }, { id: [2, 'server:x', 0], time: 2 }
+    'sync',
+    2,
+    { type: 'A' },
+    { id: [2, 'server:x', 0], time: 2 }
   ])
 })
 
@@ -727,7 +828,10 @@ it('sends new actions by node ID', async () => {
 
   expect(sentNames(client)).toEqual(['connected', 'sync'])
   expect(sent(client)[1]).toEqual([
-    'sync', 2, { type: 'A' }, { id: [2, 'server:x', 0], time: 2 }
+    'sync',
+    2,
+    { type: 'A' },
+    { id: [2, 'server:x', 0], time: 2 }
   ])
 })
 
@@ -737,7 +841,8 @@ it('sends old actions by client ID', async () => {
 
   await app.log.add({ type: 'A' }, { id: '1 server:x 0' })
   await app.log.add(
-    { type: 'A' }, { id: '2 server:x 0', clients: ['10:client'] }
+    { type: 'A' },
+    { id: '2 server:x 0', clients: ['10:client'] }
   )
   let client = await connectClient(app, '10:client:uuid')
 
@@ -745,7 +850,10 @@ it('sends old actions by client ID', async () => {
   await client.node.waitFor('synchronized')
   expect(sentNames(client)).toEqual(['connected', 'sync'])
   expect(sent(client)[1]).toEqual([
-    'sync', 2, { type: 'A' }, { id: [2, 'server:x', 0], time: 2 }
+    'sync',
+    2,
+    { type: 'A' },
+    { id: [2, 'server:x', 0], time: 2 }
   ])
 })
 
@@ -756,14 +864,18 @@ it('sends new actions by client ID', async () => {
   let client = await connectClient(app, '10:client:uuid')
   await app.log.add({ type: 'A' }, { id: '1 server:x 0' })
   await app.log.add(
-    { type: 'A' }, { id: '2 server:x 0', clients: ['10:client'] }
+    { type: 'A' },
+    { id: '2 server:x 0', clients: ['10:client'] }
   )
   client.connection.other().send(['synced', 2])
   await delay(1)
 
   expect(sentNames(client)).toEqual(['connected', 'sync'])
   expect(sent(client)[1]).toEqual([
-    'sync', 2, { type: 'A' }, { id: [2, 'server:x', 0], time: 2 }
+    'sync',
+    2,
+    { type: 'A' },
+    { id: [2, 'server:x', 0], time: 2 }
   ])
 })
 
@@ -779,7 +891,10 @@ it('sends old actions by user', async () => {
   await client.node.waitFor('synchronized')
   expect(sentNames(client)).toEqual(['connected', 'sync'])
   expect(sent(client)[1]).toEqual([
-    'sync', 2, { type: 'A' }, { id: [2, 'server:x', 0], time: 2 }
+    'sync',
+    2,
+    { type: 'A' },
+    { id: [2, 'server:x', 0], time: 2 }
   ])
 })
 
@@ -795,7 +910,10 @@ it('sends new actions by user', async () => {
 
   expect(sentNames(client)).toEqual(['connected', 'sync'])
   expect(sent(client)[1]).toEqual([
-    'sync', 2, { type: 'A' }, { id: [2, 'server:x', 0], time: 2 }
+    'sync',
+    2,
+    { type: 'A' },
+    { id: [2, 'server:x', 0], time: 2 }
   ])
 })
 
@@ -817,9 +935,13 @@ it('sends new actions by channel', async () => {
   }
   await app.log.add({ type: 'FOO' }, { id: '1 server:x 0' })
   await app.log.add({ type: 'FOO' }, { id: '2 server:x 0', channels: ['foo'] })
-  await app.log.add({ type: 'BAR', secret: true }, {
-    id: '3 server:x 0', channels: ['bar']
-  })
+  await app.log.add(
+    { type: 'BAR', secret: true },
+    {
+      id: '3 server:x 0',
+      channels: ['bar']
+    }
+  )
   await app.log.add({ type: 'BAR' }, { id: '4 server:x 0', channels: ['bar'] })
   client.connection.other().send(['synced', 2])
   client.connection.other().send(['synced', 4])
@@ -828,10 +950,16 @@ it('sends new actions by channel', async () => {
 
   expect(sentNames(client)).toEqual(['connected', 'sync', 'sync'])
   expect(sent(client)[1]).toEqual([
-    'sync', 2, { type: 'FOO' }, { id: [2, 'server:x', 0], time: 2 }
+    'sync',
+    2,
+    { type: 'FOO' },
+    { id: [2, 'server:x', 0], time: 2 }
   ])
   expect(sent(client)[2]).toEqual([
-    'sync', 4, { type: 'BAR' }, { id: [4, 'server:x', 0], time: 4 }
+    'sync',
+    4,
+    { type: 'BAR' },
+    { id: [4, 'server:x', 0], time: 4 }
   ])
 })
 
@@ -851,7 +979,10 @@ it('works with channel according client ID', async () => {
 
   expect(sentNames(client)).toEqual(['connected', 'sync'])
   expect(sent(client)[1]).toEqual([
-    'sync', 1, { type: 'FOO' }, { id: [2, 'server:x', 0], time: 2 }
+    'sync',
+    1,
+    { type: 'FOO' },
+    { id: [2, 'server:x', 0], time: 2 }
   ])
 })
 
@@ -859,19 +990,25 @@ it('sends old action only once', async () => {
   let app = createServer()
   app.type('FOO', { access: () => true })
 
-  await app.log.add({ type: 'FOO' }, {
-    id: '1 server:x 0',
-    users: ['10', '10'],
-    nodes: ['10:uuid', '10:uuid'],
-    clients: ['10:uuid', '10:uuid']
-  })
+  await app.log.add(
+    { type: 'FOO' },
+    {
+      id: '1 server:x 0',
+      users: ['10', '10'],
+      nodes: ['10:uuid', '10:uuid'],
+      clients: ['10:uuid', '10:uuid']
+    }
+  )
   let client = await connectClient(app)
 
   client.connection.other().send(['synced', 2])
   await client.node.waitFor('synchronized')
   expect(sentNames(client)).toEqual(['connected', 'sync'])
   expect(sent(client)[1]).toEqual([
-    'sync', 1, { type: 'FOO' }, { id: [1, 'server:x', 0], time: 1 }
+    'sync',
+    1,
+    { type: 'FOO' },
+    { id: [1, 'server:x', 0], time: 1 }
   ])
 })
 
@@ -884,7 +1021,9 @@ it('sends debug back on unknown type', async () => {
   await client1.node.connection.pair.wait('right')
 
   expect(sent(client1)[1]).toEqual([
-    'debug', 'error', 'Action with unknown type UNKNOWN'
+    'debug',
+    'error',
+    'Action with unknown type UNKNOWN'
   ])
   expect(sentNames(client2)).toEqual(['connected'])
 })
@@ -906,11 +1045,16 @@ it('decompress subprotocol', async () => {
   app.log.generateId()
 
   let client = await connectClient(app)
-  client.node.connection.other().send([
-    'sync', 2,
-    { type: 'A' }, { id: [1, '10:uuid', 0], time: 1 },
-    { type: 'A' }, { id: [2, '10:uuid', 0], time: 2, subprotocol: '2.0.0' }
-  ])
+  client.node.connection
+    .other()
+    .send([
+      'sync',
+      2,
+      { type: 'A' },
+      { id: [1, '10:uuid', 0], time: 1 },
+      { type: 'A' },
+      { id: [2, '10:uuid', 0], time: 2, subprotocol: '2.0.0' }
+    ])
   await client.node.connection.pair.wait('right')
 
   expect(app.log.entries()[0][1].subprotocol).toEqual('0.0.0')
@@ -930,14 +1074,17 @@ it('has custom processor for unknown type', async () => {
     }
   })
   let client = await connectClient(test.app)
-  client.node.connection.other().send([
-    'sync', 1,
-    { type: 'UNKOWN' }, { id: [1, '10:uuid', 0], time: 1 }
-  ])
+  client.node.connection
+    .other()
+    .send(['sync', 1, { type: 'UNKOWN' }, { id: [1, '10:uuid', 0], time: 1 }])
   await client.node.connection.pair.wait('right')
 
   expect(test.names).toEqual([
-    'connect', 'authenticated', 'add', 'processed', 'add'
+    'connect',
+    'authenticated',
+    'add',
+    'processed',
+    'add'
   ])
   expect(calls).toEqual(['access', 'process'])
 })
@@ -956,15 +1103,12 @@ it('allows to reports about unknown type in custom processor', async () => {
     }
   })
   let client = await connectClient(test.app)
-  client.node.connection.other().send([
-    'sync', 1,
-    { type: 'UNKOWN' }, { id: [1, '10:uuid', 0], time: 1 }
-  ])
+  client.node.connection
+    .other()
+    .send(['sync', 1, { type: 'UNKOWN' }, { id: [1, '10:uuid', 0], time: 1 }])
   await client.node.connection.pair.wait('right')
 
-  expect(test.names).toEqual([
-    'connect', 'authenticated', 'unknownType', 'add'
-  ])
+  expect(test.names).toEqual(['connect', 'authenticated', 'unknownType', 'add'])
   expect(calls).toEqual(['access'])
 })
 
@@ -980,10 +1124,14 @@ it('allows to use different node ID', async () => {
     }
   })
   let client = await connectClient(app, '10:client:uuid')
-  client.node.connection.other().send([
-    'sync', 1,
-    { type: 'A' }, { id: [1, '10:client:other', 0], time: 1 }
-  ])
+  client.node.connection
+    .other()
+    .send([
+      'sync',
+      1,
+      { type: 'A' },
+      { id: [1, '10:client:other', 0], time: 1 }
+    ])
   await client.node.connection.pair.wait('right')
 
   expect(calls).toEqual(1)
@@ -994,10 +1142,9 @@ it('allows to use different node ID', async () => {
 it('allows to use different node ID only with same client ID', async () => {
   let test = createReporter()
   let client = await connectClient(test.app, '10:client:uuid')
-  client.node.connection.other().send([
-    'sync', 1,
-    { type: 'A' }, { id: [1, '10:clnt:uuid', 0], time: 1 }
-  ])
+  client.node.connection
+    .other()
+    .send(['sync', 1, { type: 'A' }, { id: [1, '10:clnt:uuid', 0], time: 1 }])
   await client.node.connection.pair.wait('right')
 
   expect(test.names).toEqual(['connect', 'authenticated', 'denied', 'add'])
@@ -1051,14 +1198,22 @@ it('has finally callback', async () => {
     }
   })
   let client = await connectClient(app, '10:client:uuid')
-  client.node.connection.other().send([
-    'sync', 5,
-    { type: 'A' }, { id: [1, '10:client:other', 0], time: 1 },
-    { type: 'B' }, { id: [2, '10:client:other', 0], time: 1 },
-    { type: 'C' }, { id: [3, '10:client:other', 0], time: 1 },
-    { type: 'D' }, { id: [4, '10:client:other', 0], time: 1 },
-    { type: 'E' }, { id: [5, '10:client:other', 0], time: 1 }
-  ])
+  client.node.connection
+    .other()
+    .send([
+      'sync',
+      5,
+      { type: 'A' },
+      { id: [1, '10:client:other', 0], time: 1 },
+      { type: 'B' },
+      { id: [2, '10:client:other', 0], time: 1 },
+      { type: 'C' },
+      { id: [3, '10:client:other', 0], time: 1 },
+      { type: 'D' },
+      { id: [4, '10:client:other', 0], time: 1 },
+      { type: 'E' },
+      { id: [5, '10:client:other', 0], time: 1 }
+    ])
   await client.node.connection.pair.wait('right')
 
   expect(calls).toEqual(['D', 'A', 'C', 'E', 'B'])
@@ -1071,9 +1226,9 @@ it('sends error to author', async () => {
   let client1 = await connectClient(app, '10:1:uuid')
   let client2 = await connectClient(app, '10:2:uuid')
 
-  client2.node.connection.other().send([
-    'sync', 1, { type: 'A' }, { id: [1, '10:1:uuid', 0], time: 1 }
-  ])
+  client2.node.connection
+    .other()
+    .send(['sync', 1, { type: 'A' }, { id: [1, '10:1:uuid', 0], time: 1 }])
   await client2.node.connection.pair.wait('right')
   await delay(1)
 
@@ -1101,24 +1256,36 @@ it('does not resend actions back', async () => {
   let client1 = await connectClient(app, '10:1:uuid')
   let client2 = await connectClient(app, '10:2:uuid')
 
-  client1.node.connection.other().send([
-    'sync', 1,
-    { type: 'logux/subscribe', channel: 'all' },
-    { id: [1, '10:1:uuid', 0], time: 1 }
-  ])
-  client2.node.connection.other().send([
-    'sync', 1,
-    { type: 'logux/subscribe', channel: 'all' },
-    { id: [1, '10:2:uuid', 0], time: 1 }
-  ])
+  client1.node.connection
+    .other()
+    .send([
+      'sync',
+      1,
+      { type: 'logux/subscribe', channel: 'all' },
+      { id: [1, '10:1:uuid', 0], time: 1 }
+    ])
+  client2.node.connection
+    .other()
+    .send([
+      'sync',
+      1,
+      { type: 'logux/subscribe', channel: 'all' },
+      { id: [1, '10:2:uuid', 0], time: 1 }
+    ])
   await client2.node.connection.pair.wait('right')
 
-  client1.node.connection.other().send([
-    'sync', 4,
-    { type: 'A' }, { id: [2, '10:1:uuid', 0], time: 2 },
-    { type: 'B' }, { id: [3, '10:1:uuid', 0], time: 3 },
-    { type: 'C' }, { id: [4, '10:1:uuid', 0], time: 4 }
-  ])
+  client1.node.connection
+    .other()
+    .send([
+      'sync',
+      4,
+      { type: 'A' },
+      { id: [2, '10:1:uuid', 0], time: 2 },
+      { type: 'B' },
+      { id: [3, '10:1:uuid', 0], time: 3 },
+      { type: 'C' },
+      { id: [4, '10:1:uuid', 0], time: 4 }
+    ])
   await client1.node.connection.pair.wait('right')
   await delay(10)
 
@@ -1142,9 +1309,9 @@ it('keeps context', async () => {
   })
 
   let client = await connectClient(app, '10:1:uuid')
-  client.node.connection.other().send([
-    'sync', 1, { type: 'A' }, { id: [1, '10:1:uuid', 0], time: 1 }
-  ])
+  client.node.connection
+    .other()
+    .send(['sync', 1, { type: 'A' }, { id: [1, '10:1:uuid', 0], time: 1 }])
   await client.node.connection.pair.wait('right')
   await delay(1)
 
@@ -1161,11 +1328,14 @@ it('uses resend for own actions', async () => {
     access: () => true
   })
   let client = await connectClient(app, '10:1:uuid')
-  client.node.connection.other().send([
-    'sync', 1,
-    { type: 'logux/subscribe', channel: 'foo' },
-    { id: [1, '10:1:uuid', 0], time: 1 }
-  ])
+  client.node.connection
+    .other()
+    .send([
+      'sync',
+      1,
+      { type: 'logux/subscribe', channel: 'foo' },
+      { id: [1, '10:1:uuid', 0], time: 1 }
+    ])
   await delay(10)
 
   app.log.add({ type: 'FOO' })
@@ -1191,11 +1361,14 @@ it('does not dublicate channel load actions', async () => {
     }
   })
   let client = await connectClient(app, '10:1:uuid')
-  client.node.connection.other().send([
-    'sync', 1,
-    { type: 'logux/subscribe', channel: 'foo' },
-    { id: [1, '10:1:uuid', 0], time: 1 }
-  ])
+  client.node.connection
+    .other()
+    .send([
+      'sync',
+      1,
+      { type: 'logux/subscribe', channel: 'foo' },
+      { id: [1, '10:1:uuid', 0], time: 1 }
+    ])
   await delay(10)
 
   function meta (time) {

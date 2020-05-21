@@ -14,7 +14,9 @@ const OPTIONS = {
 }
 
 const ACTION = [
-  'action', { type: 'A' }, { id: '1 server:rails 0', reasons: ['test'] }
+  'action',
+  { type: 'A' },
+  { id: '1 server:rails 0', reasons: ['test'] }
 ]
 
 function createConnection () {
@@ -40,9 +42,7 @@ async function connectClient (server, token) {
   client.node.now = () => 0
   await client.connection.connect()
   let protocol = client.node.localProtocol
-  client.connection.other().send(
-    ['connect', protocol, '10:uuid', 0, { token }]
-  )
+  client.connection.other().send(['connect', protocol, '10:uuid', 0, { token }])
   await client.connection.pair.wait('right')
 
   return client
@@ -73,11 +73,11 @@ function createServer (options) {
 }
 
 function createReporter (opts) {
-  let result = { }
+  let result = {}
   result.names = []
   result.reports = []
 
-  opts = opts || { }
+  opts = opts || {}
   opts.reporter = (name, details) => {
     result.names.push(name)
     result.reports.push([name, details])
@@ -91,18 +91,21 @@ function createReporter (opts) {
 function request ({ method, path, string, data }) {
   if (!string && data) string = JSON.stringify(data)
   return new Promise((resolve, reject) => {
-    let req = http.request({
-      method: method || 'POST',
-      host: '127.0.0.1',
-      port: lastPort,
-      path: path || '/',
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(string)
+    let req = http.request(
+      {
+        method: method || 'POST',
+        host: '127.0.0.1',
+        port: lastPort,
+        path: path || '/',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(string)
+        }
+      },
+      res => {
+        resolve(res.statusCode)
       }
-    }, res => {
-      resolve(res.statusCode)
-    })
+    )
     req.on('error', reject)
     req.end(string)
   })
@@ -127,67 +130,67 @@ let httpServer = http.createServer((req, res) => {
       if (data.commands[0][1] === '10' && data.commands[0][2] === 'good') {
         res.write('[["authent')
         await delay(100)
-        res.end(`icated","${ data.commands[0][3] }"]]`)
+        res.end(`icated","${data.commands[0][3]}"]]`)
       } else if (data.commands[0][2] === 'error') {
         res.end('[["error","stack"]]')
       } else if (data.commands[0][2] === 'empty') {
         res.end('')
       } else {
-        res.end(`[["denied","${ data.commands[0][3] }"]]`)
+        res.end(`[["denied","${data.commands[0][3]}"]]`)
       }
     } else if (data.commands[0][1].type === 'NO') {
       res.statusCode = 404
       res.end()
     } else if (data.commands[0][1].type === 'BAD') {
-      res.end(`[["forbidden","${ actionId }"]]`)
+      res.end(`[["forbidden","${actionId}"]]`)
     } else if (data.commands[0][1].type === 'UNKNOWN') {
-      res.end(`[["unknownAction","${ actionId }"]]`)
+      res.end(`[["unknownAction","${actionId}"]]`)
     } else if (data.commands[0][1].channel === 'unknown') {
-      res.end(`[["unknownChannel","${ actionId }"]]`)
+      res.end(`[["unknownChannel","${actionId}"]]`)
     } else if (data.commands[0][1].type === 'AERROR') {
-      res.end(`[["error","${ actionId }","stack"]]`)
+      res.end(`[["error","${actionId}","stack"]]`)
     } else if (data.commands[0][1].type === 'PERROR') {
-      res.write(`[["approved","${ actionId }"]`)
+      res.write(`[["approved","${actionId}"]`)
       await delay(100)
-      res.end(`,["error","${ actionId }","stack"]]`)
+      res.end(`,["error","${actionId}","stack"]]`)
     } else if (data.commands[0][1].type === 'BROKEN1') {
-      res.end(`[["approved","${ actionId }"]`)
+      res.end(`[["approved","${actionId}"]`)
     } else if (data.commands[0][1].type === 'BROKEN2') {
-      res.end(`[["approved","${ actionId }"],"processed"]`)
+      res.end(`[["approved","${actionId}"],"processed"]`)
     } else if (data.commands[0][1].type === 'BROKEN3') {
-      res.end(`[["approved","${ actionId }"],[1]]`)
+      res.end(`[["approved","${actionId}"],[1]]`)
     } else if (data.commands[0][1].type === 'BROKEN4') {
-      res.end(`[["approved","${ actionId }"],["procesed","${ actionId }"]]`)
+      res.end(`[["approved","${actionId}"],["procesed","${actionId}"]]`)
     } else if (data.commands[0][1].type === 'BROKEN5') {
       res.end(':')
     } else if (data.commands[0][1].type === 'BROKEN6') {
-      res.end(`[["resend","${ actionId }",{}],[["approved","${ actionId }"]]`)
+      res.end(`[["resend","${actionId}",{}],[["approved","${actionId}"]]`)
     } else if (data.commands[0][1].type === 'BROKEN7') {
-      res.end(`[["processed","${ actionId }"]]`)
+      res.end(`[["processed","${actionId}"]]`)
     } else if (data.commands[0][1].type === 'BROKEN8') {
-      res.end(`[["approved","${ actionId }"],["resend","${ actionId }",{}]]`)
+      res.end(`[["approved","${actionId}"],["resend","${actionId}",{}]]`)
     } else if (data.commands[0][1].type === 'BROKEN9') {
-      res.end(`[["resend","${ actionId }",1]]`)
+      res.end(`[["resend","${actionId}",1]]`)
     } else if (data.commands[0][1].type === 'BROKENA') {
-      res.end(`[["resend","${ actionId }",{"channels":1}]]`)
+      res.end(`[["resend","${actionId}",{"channels":1}]]`)
     } else if (data.commands[0][1].type === 'BROKENB') {
-      res.end(`[["resend","${ actionId }",{"channels":[1]}]]`)
+      res.end(`[["resend","${actionId}",{"channels":[1]}]]`)
     } else if (data.commands[0][1].channel === 'resend') {
-      res.end(`[["resend","${ actionId }",{}],[["approved","${ actionId }"]]`)
+      res.end(`[["resend","${actionId}",{}],[["approved","${actionId}"]]`)
     } else if (data.commands[0][1].type === 'EMPTY') {
       res.end()
     } else if (data.commands[0][1].type === 'RESEND') {
       res.end(`[
-        ["resend","${ actionId }",{"channels":["A"]}],
-        ["approved","${ actionId }"],
-        ["processed","${ actionId }"]
+        ["resend","${actionId}",{"channels":["A"]}],
+        ["approved","${actionId}"],
+        ["processed","${actionId}"]
       ]`)
     } else {
       res.write('[["appro')
       await delay(1)
-      res.write(`ved","${ actionId }"]`)
+      res.write(`ved","${actionId}"]`)
       await delay(100)
-      res.end(`,["processed","${ actionId }"]]`)
+      res.end(`,["processed","${actionId}"]]`)
     }
   })
 })
@@ -224,37 +227,28 @@ it('validates HTTP requests', async () => {
   let prefix = { version: 3, secret: '1234' }
   let test = createReporter(OPTIONS)
   await test.app.listen()
-  expect(await request({ method: 'PUT', string: '' }))
-    .toEqual(405)
-  expect(await request({ path: '/logux', string: '' }))
-    .toEqual(404)
-  expect(await request({ string: '{' }))
-    .toEqual(400)
-  expect(await request({ string: '""' }))
-    .toEqual(400)
-  expect(await send({ }))
-    .toEqual(400)
-  expect(await send({ version: 100, secret: '1234', commands: [] }))
-    .toEqual(400)
-  expect(await send({ version: 3, commands: [] }))
-    .toEqual(400)
-  expect(await send({ ...prefix, commands: {} }))
-    .toEqual(400)
-  expect(await send({ ...prefix, commands: [1] }))
-    .toEqual(400)
-  expect(await send({ ...prefix, commands: [[1]] }))
-    .toEqual(400)
-  expect(await send({ ...prefix, commands: [['f']] }))
-    .toEqual(400)
-  expect(await send({ ...prefix, commands: [['action'], 'f'] }))
-    .toEqual(400)
-  expect(await send({ ...prefix, commands: [['action', { }, 'f']] }))
-    .toEqual(400)
-  expect(await send({ version: 3, secret: 'wrong', commands: [] }))
-    .toEqual(403)
+  expect(await request({ method: 'PUT', string: '' })).toEqual(405)
+  expect(await request({ path: '/logux', string: '' })).toEqual(404)
+  expect(await request({ string: '{' })).toEqual(400)
+  expect(await request({ string: '""' })).toEqual(400)
+  expect(await send({})).toEqual(400)
+  expect(await send({ version: 100, secret: '1234', commands: [] })).toEqual(
+    400
+  )
+  expect(await send({ version: 3, commands: [] })).toEqual(400)
+  expect(await send({ ...prefix, commands: {} })).toEqual(400)
+  expect(await send({ ...prefix, commands: [1] })).toEqual(400)
+  expect(await send({ ...prefix, commands: [[1]] })).toEqual(400)
+  expect(await send({ ...prefix, commands: [['f']] })).toEqual(400)
+  expect(await send({ ...prefix, commands: [['action'], 'f'] })).toEqual(400)
+  expect(await send({ ...prefix, commands: [['action', {}, 'f']] })).toEqual(
+    400
+  )
+  expect(await send({ version: 3, secret: 'wrong', commands: [] })).toEqual(403)
   expect(test.app.log.actions()).toEqual([])
   expect(test.reports[1]).toEqual([
-    'wrongControlSecret', { ipAddress: '127.0.0.1', wrongSecret: 'wrong' }
+    'wrongControlSecret',
+    { ipAddress: '127.0.0.1', wrongSecret: 'wrong' }
   ])
 })
 
@@ -296,9 +290,9 @@ it('reports about network errors', async () => {
     errors.push(e.code)
   })
   let client = await connectClient(app)
-  client.connection.other().send(['sync', 1,
-    { type: 'A' }, { id: [1, '10:uuid', 0], time: 1 }
-  ])
+  client.connection
+    .other()
+    .send(['sync', 1, { type: 'A' }, { id: [1, '10:uuid', 0], time: 1 }])
   await delay(100)
 
   expect(errors).toEqual(['ECONNREFUSED'])
@@ -314,9 +308,9 @@ it('reports bad HTTP answers', async () => {
     errors.push(e.message)
   })
   let client = await connectClient(app)
-  client.connection.other().send(['sync', 1,
-    { type: 'NO' }, { id: [1, '10:uuid', 0], time: 1 }
-  ])
+  client.connection
+    .other()
+    .send(['sync', 1, { type: 'NO' }, { id: [1, '10:uuid', 0], time: 1 }])
   await delay(100)
 
   expect(errors).toEqual(['Backend responsed with 404 code'])
@@ -338,9 +332,7 @@ it('authenticates user on backend', async () => {
       {
         version: 3,
         secret: '1234',
-        commands: [
-          ['auth', '10', 'good', authId]
-        ]
+        commands: [['auth', '10', 'good', authId]]
       }
     ]
   ])
@@ -401,12 +393,16 @@ it('notifies about actions and subscriptions', async () => {
     events.push('backendProcessed')
   })
   let client = await connectClient(app)
-  client.connection.other().send(['sync', 2,
-    { type: 'A' },
-    { id: [1, '10:uuid', 0], time: 1 },
-    { type: 'logux/subscribe', channel: 'a' },
-    { id: [2, '10:uuid', 0], time: 2 }
-  ])
+  client.connection
+    .other()
+    .send([
+      'sync',
+      2,
+      { type: 'A' },
+      { id: [1, '10:uuid', 0], time: 1 },
+      { type: 'logux/subscribe', channel: 'a' },
+      { id: [2, '10:uuid', 0], time: 2 }
+    ])
   await delay(50)
 
   expect(app.log.actions()).toEqual([
@@ -463,9 +459,12 @@ it('notifies about actions and subscriptions', async () => {
   ])
   expect(app.log.entries()[0][1].status).toEqual('processed')
   expect(events).toEqual([
-    'backendSent', 'backendSent',
-    'backendGranted', 'backendGranted',
-    'backendProcessed', 'backendProcessed'
+    'backendSent',
+    'backendSent',
+    'backendGranted',
+    'backendGranted',
+    'backendProcessed',
+    'backendProcessed'
   ])
 })
 
@@ -475,9 +474,9 @@ it('asks about action access', async () => {
     throw e
   })
   let client = await connectClient(app)
-  client.connection.other().send(['sync', 2,
-    { type: 'BAD' }, { id: [1, '10:uuid', 0], time: 1 }
-  ])
+  client.connection
+    .other()
+    .send(['sync', 2, { type: 'BAD' }, { id: [1, '10:uuid', 0], time: 1 }])
   await delay(50)
 
   expect(app.log.actions()).toEqual([
@@ -492,9 +491,9 @@ it('reacts on unknown action', async () => {
     errors.push(e.message)
   })
   let client = await connectClient(app)
-  client.connection.other().send(['sync', 2,
-    { type: 'UNKNOWN' }, { id: [1, '10:uuid', 0], time: 1 }
-  ])
+  client.connection
+    .other()
+    .send(['sync', 2, { type: 'UNKNOWN' }, { id: [1, '10:uuid', 0], time: 1 }])
   await delay(100)
   expect(app.log.actions()).toEqual([
     { type: 'logux/undo', reason: 'unknownType', id: '1 10:uuid 0' }
@@ -510,10 +509,14 @@ it('reacts on unknown channel', async () => {
     errors.push(e.message)
   })
   let client = await connectClient(app)
-  client.connection.other().send(['sync', 2,
-    { type: 'logux/subscribe', channel: 'unknown' },
-    { id: [1, '10:uuid', 0], time: 1 }
-  ])
+  client.connection
+    .other()
+    .send([
+      'sync',
+      2,
+      { type: 'logux/subscribe', channel: 'unknown' },
+      { id: [1, '10:uuid', 0], time: 1 }
+    ])
   await delay(100)
   expect(app.log.actions()).toEqual([
     { type: 'logux/subscribe', channel: 'unknown' },
@@ -534,21 +537,38 @@ it('reacts on wrong backend answer', async () => {
   function nextMeta () {
     return { id: [++lastId, '10:uuid', 0], time: 1 }
   }
-  client.connection.other().send(['sync', 8,
-    { type: 'EMPTY' }, nextMeta(),
-    { type: 'BROKEN1' }, nextMeta(),
-    { type: 'BROKEN2' }, nextMeta(),
-    { type: 'BROKEN3' }, nextMeta(),
-    { type: 'BROKEN4' }, nextMeta(),
-    { type: 'BROKEN5' }, nextMeta(),
-    { type: 'BROKEN6' }, nextMeta(),
-    { type: 'BROKEN7' }, nextMeta(),
-    { type: 'BROKEN8' }, nextMeta(),
-    { type: 'BROKEN9' }, nextMeta(),
-    { type: 'BROKENA' }, nextMeta(),
-    { type: 'BROKENB' }, nextMeta(),
-    { type: 'logux/subscribe', channel: 'resend' }, nextMeta()
-  ])
+  client.connection
+    .other()
+    .send([
+      'sync',
+      8,
+      { type: 'EMPTY' },
+      nextMeta(),
+      { type: 'BROKEN1' },
+      nextMeta(),
+      { type: 'BROKEN2' },
+      nextMeta(),
+      { type: 'BROKEN3' },
+      nextMeta(),
+      { type: 'BROKEN4' },
+      nextMeta(),
+      { type: 'BROKEN5' },
+      nextMeta(),
+      { type: 'BROKEN6' },
+      nextMeta(),
+      { type: 'BROKEN7' },
+      nextMeta(),
+      { type: 'BROKEN8' },
+      nextMeta(),
+      { type: 'BROKEN9' },
+      nextMeta(),
+      { type: 'BROKENA' },
+      nextMeta(),
+      { type: 'BROKENB' },
+      nextMeta(),
+      { type: 'logux/subscribe', channel: 'resend' },
+      nextMeta()
+    ])
   await delay(100)
 
   expect(app.log.actions()).toEqual([
@@ -597,10 +617,16 @@ it('reacts on backend error', async () => {
     expect(e.stack).toEqual('stack')
   })
   let client = await connectClient(app)
-  client.connection.other().send(['sync', 3,
-    { type: 'AERROR' }, { id: [1, '10:uuid', 0], time: 1 },
-    { type: 'PERROR' }, { id: [2, '10:uuid', 0], time: 1 }
-  ])
+  client.connection
+    .other()
+    .send([
+      'sync',
+      3,
+      { type: 'AERROR' },
+      { id: [1, '10:uuid', 0], time: 1 },
+      { type: 'PERROR' },
+      { id: [2, '10:uuid', 0], time: 1 }
+    ])
   await delay(220)
 
   expect(app.log.actions()).toEqual([
@@ -609,7 +635,8 @@ it('reacts on backend error', async () => {
     { type: 'logux/undo', reason: 'error', id: '2 10:uuid 0' }
   ])
   expect(errors).toEqual([
-    'Error on back-end server', 'Error on back-end server'
+    'Error on back-end server',
+    'Error on back-end server'
   ])
 })
 
@@ -641,9 +668,9 @@ it('sets meta to resend', async () => {
     throw e
   })
   let client = await connectClient(app)
-  client.connection.other().send(['sync', 2,
-    { type: 'RESEND' }, { id: [1, '10:uuid', 0], time: 1 }
-  ])
+  client.connection
+    .other()
+    .send(['sync', 2, { type: 'RESEND' }, { id: [1, '10:uuid', 0], time: 1 }])
   await delay(50)
   expect(app.log.actions()).toEqual([
     { type: 'RESEND' },

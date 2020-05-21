@@ -5,7 +5,7 @@ let BaseServer = require('../base-server')
 let TestClient = require('../test-client')
 
 class TestServer extends BaseServer {
-  constructor (opts = { }) {
+  constructor (opts = {}) {
     let time = new TestTime()
     let reporter
     if (opts.reporter === 'human') {
@@ -20,10 +20,10 @@ class TestServer extends BaseServer {
     })
     this.time = time
     this.auth(() => true)
-    this.testUsers = { }
+    this.testUsers = {}
   }
 
-  async connect (userId, opts = { }) {
+  async connect (userId, opts = {}) {
     let client = new TestClient(this, userId, opts)
     await client.connect()
     return client

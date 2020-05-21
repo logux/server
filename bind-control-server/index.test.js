@@ -6,7 +6,7 @@ let http = require('http')
 let BaseServer = require('../base-server')
 
 let lastPort = 10111
-function createServer (opts = { }) {
+function createServer (opts = {}) {
   lastPort += 1
   let server = new BaseServer({
     subprotocol: '0.0.0',
@@ -19,11 +19,11 @@ function createServer (opts = { }) {
 }
 
 function createReporter (opts) {
-  let result = { }
+  let result = {}
   result.names = []
   result.reports = []
 
-  opts = opts || { }
+  opts = opts || {}
   opts.reporter = (name, details) => {
     result.names.push(name)
     result.reports.push([name, details])
@@ -36,26 +36,29 @@ function createReporter (opts) {
 
 function request (method, path) {
   return new Promise((resolve, reject) => {
-    let req = http.request({
-      method,
-      host: 'localhost',
-      port: app.options.port,
-      path
-    }, res => {
-      let body = ''
-      res.on('data', chunk => {
-        body += chunk
-      })
-      res.on('end', () => {
-        if (res.statusCode === 200) {
-          resolve({ body, headers: res.headers })
-        } else {
-          let error = new Error(body)
-          error.statusCode = res.statusCode
-          reject(error)
-        }
-      })
-    })
+    let req = http.request(
+      {
+        method,
+        host: 'localhost',
+        port: app.options.port,
+        path
+      },
+      res => {
+        let body = ''
+        res.on('data', chunk => {
+          body += chunk
+        })
+        res.on('end', () => {
+          if (res.statusCode === 200) {
+            resolve({ body, headers: res.headers })
+          } else {
+            let error = new Error(body)
+            error.statusCode = res.statusCode
+            reject(error)
+          }
+        })
+      }
+    )
     req.on('error', reject)
     req.end()
   })
@@ -107,7 +110,8 @@ it('checks secret', async () => {
   expect(err.message).toEqual('Wrong secret')
 
   expect(test.reports[1]).toEqual([
-    'wrongControlSecret', { ipAddress: '127.0.0.1', wrongSecret: 'wrong' }
+    'wrongControlSecret',
+    { ipAddress: '127.0.0.1', wrongSecret: 'wrong' }
   ])
 })
 
@@ -199,6 +203,7 @@ it('checks incoming IP address', async () => {
   expect(err.statusCode).toEqual(403)
   expect(err.message).toContain('LOGUX_CONTROL_MASK')
   expect(test.reports[1]).toEqual([
-    'wrongControlIp', { ipAddress: '127.0.0.1', mask: controlMask }
+    'wrongControlIp',
+    { ipAddress: '127.0.0.1', mask: controlMask }
   ])
 })

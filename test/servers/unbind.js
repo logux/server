@@ -10,4 +10,4 @@ app.nodeId = 'server:FnXaqDxY'
 
 app.destroy()
 
-setTimeout(() => { }, 10000)
+setTimeout(() => {}, 10000)

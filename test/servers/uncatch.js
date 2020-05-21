@@ -8,12 +8,12 @@ let app = new Server({
 })
 app.nodeId = 'server:FnXaqDxY'
 
-app.on('fatal', e => console.log(`Fatal event: ${ e.message }`))
+app.on('fatal', e => console.log(`Fatal event: ${e.message}`))
 
 new Promise((resolve, reject) => {
   setTimeout(() => {
     let error = new Error('Test Error')
-    error.stack = `${ error.stack.split('\n')[0] }\nfake stacktrace`
+    error.stack = `${error.stack.split('\n')[0]}\nfake stacktrace`
     reject(error)
   }, 50)
 })

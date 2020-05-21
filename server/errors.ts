@@ -19,12 +19,12 @@ class User {
     this.name = 'name'
   }
 
-  async save (): Promise<void> { }
+  async save (): Promise<void> {}
 }
 
 type UserRenameAction = Action & {
-  type: 'user/rename',
-  userId: string,
+  type: 'user/rename'
+  userId: string
   name: string
 }
 
@@ -51,7 +51,7 @@ server.type<UserRenameAction, UserData>('user/rename', {
   // THROWS is not assignable to type 'Resender
   resend (_, action) {
     return {
-      subscriptions: `user/${ action.userId }`
+      subscriptions: `user/${action.userId}`
     }
   },
 
@@ -86,8 +86,9 @@ server.channel<UserParams, UserData, UserSubscribeAction>('user/:id', {
   async filter (_, action) {
     if (action.fields) {
       return (_: any, otherAction: Action) => {
-        return action.fields.includes('name') &&
-               otherAction.type === 'user/rename'
+        return (
+          action.fields.includes('name') && otherAction.type === 'user/rename'
+        )
       }
     } else {
       return undefined

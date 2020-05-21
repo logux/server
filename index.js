@@ -6,5 +6,10 @@ let TestClient = require('./test-client')
 let Server = require('./server')
 
 module.exports = {
-  BaseServer, TestServer, TestClient, Server, ALLOWED_META, filterMeta
+  BaseServer,
+  TestServer,
+  TestClient,
+  Server,
+  ALLOWED_META,
+  filterMeta
 }

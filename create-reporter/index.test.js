@@ -35,11 +35,13 @@ function clean (str) {
 function check (type, details) {
   let json = new MemoryStream()
   let jsonReporter = createReporter({
-    logger: pino({
-      name: 'test',
-      timestamp: pino.stdTimeFunctions.isoTime
-    },
-    json)
+    logger: pino(
+      {
+        name: 'test',
+        timestamp: pino.stdTimeFunctions.isoTime
+      },
+      json
+    )
   })
 
   jsonReporter(type, details)
@@ -68,7 +70,7 @@ function createError (name, message) {
   let err = new Error(message)
   err.name = name
   err.stack =
-    `${ name }: ${ message }\n` +
+    `${name}: ${message}\n` +
     '    at Object.<anonymous> (/dev/app/index.js:28:13)\n' +
     '    at Module._compile (module.js:573:32)\n' +
     '    at at runTest (/dev/app/node_modules/jest/index.js:50:10)\n' +
@@ -137,7 +139,7 @@ it('reports listen', () => {
     backend: 'http://127.0.0.1:3000/logux',
     nodeId: 'server:FnXaqDxY',
     server: false,
-    notes: { },
+    notes: {},
     redis: undefined,
     cert: false,
     host: '127.0.0.1',
@@ -154,7 +156,7 @@ it('reports listen for production', () => {
     supports: '0.x',
     nodeId: 'server:FnXaqDxY',
     server: false,
-    notes: { },
+    notes: {},
     redis: '//localhost',
     cert: true,
     host: '127.0.0.1',
@@ -239,7 +241,8 @@ it('reports denied', () => {
 
 it('reports unknownType', () => {
   check('unknownType', {
-    type: 'CHANGE_SER', actionId: '1487805099387 100:uImkcF4z 0'
+    type: 'CHANGE_SER',
+    actionId: '1487805099387 100:uImkcF4z 0'
   })
 })
 
@@ -259,25 +262,29 @@ it('reports wrongChannel', () => {
 
 it('reports wrongChannel without name', () => {
   check('wrongChannel', {
-    channel: undefined, actionId: '1487805099387 100:uImkcF4z 0'
+    channel: undefined,
+    actionId: '1487805099387 100:uImkcF4z 0'
   })
 })
 
 it('reports processed', () => {
   check('processed', {
-    actionId: '1487805099387 100:uImkcF4z 0', latency: 500
+    actionId: '1487805099387 100:uImkcF4z 0',
+    latency: 500
   })
 })
 
 it('reports subscribed', () => {
   check('subscribed', {
-    channel: 'user/100', actionId: '1487805099387 100:uImkcF4z 0'
+    channel: 'user/100',
+    actionId: '1487805099387 100:uImkcF4z 0'
   })
 })
 
 it('reports unsubscribed', () => {
   check('unsubscribed', {
-    channel: 'user/100', actionId: '1487805099387 100:uImkcF4z 0'
+    channel: 'user/100',
+    actionId: '1487805099387 100:uImkcF4z 0'
   })
 })
 
@@ -331,8 +338,9 @@ it('reports Logux error', () => {
   let err = {
     message: 'Unknown option `suprotocol` in server constructor',
     logux: true,
-    note: 'Maybe there is a mistake in option name or this version ' +
-          'of Logux Server doesn’t support this option'
+    note:
+      'Maybe there is a mistake in option name or this version ' +
+      'of Logux Server doesn’t support this option'
   }
   check('error', { fatal: true, err })
 })

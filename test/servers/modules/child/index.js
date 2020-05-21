@@ -1,3 +1,3 @@
 module.exports = server => {
-  console.log(`Child path module: ${ server.options.subprotocol }`)
+  console.log(`Child path module: ${server.options.subprotocol}`)
 }

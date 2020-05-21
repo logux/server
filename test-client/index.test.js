@@ -21,10 +21,7 @@ it('connects and disconnect', async () => {
   server = new TestServer()
   let client1 = new TestClient(server, '10')
   let client2 = new TestClient(server, '10')
-  await Promise.all([
-    client1.connect(),
-    client2.connect()
-  ])
+  await Promise.all([client1.connect(), client2.connect()])
   expect(Object.keys(server.clientIds)).toEqual(['10:1', '10:2'])
   await client1.disconnect()
   expect(Object.keys(server.clientIds)).toEqual(['10:2'])
@@ -93,7 +90,9 @@ it('tracks action processing', async () => {
   let serverError = await catchError(() => client.process({ type: 'ERR' }))
   expect(serverError.message).toEqual('test')
   expect(serverError.action).toEqual({
-    type: 'logux/undo', id: '3 10:1:1 0', reason: 'error'
+    type: 'logux/undo',
+    id: '3 10:1:1 0',
+    reason: 'error'
   })
 
   let accessError = await catchError(() => client.process({ type: 'DENIED' }))
@@ -137,10 +136,12 @@ it('tracks subscriptions', async () => {
   expect(actions1).toEqual([{ type: 'FOO', a: undefined }])
 
   await client.unsubscribe('foo')
-  expect(server.subscribers).toEqual({ })
+  expect(server.subscribers).toEqual({})
 
   let actions2 = await client.subscribe({
-    type: 'logux/subscribe', channel: 'foo', a: 1
+    type: 'logux/subscribe',
+    channel: 'foo',
+    a: 1
   })
   expect(actions2).toEqual([{ type: 'FOO', a: 1 }])
 
@@ -152,8 +153,7 @@ it('tracks subscriptions', async () => {
 
 it('prints server log', async () => {
   let out = {
-    write () {
-    }
+    write () {}
   }
   jest.spyOn(out, 'write').mockImplementation(() => true)
   server = new TestServer({ reporter: 'human', out })

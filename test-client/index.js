@@ -3,13 +3,13 @@ let { ClientNode, TestPair } = require('@logux/core')
 let filterMeta = require('../filter-meta')
 
 class TestClient {
-  constructor (server, userId, opts = { }) {
+  constructor (server, userId, opts = {}) {
     this.server = server
     this.pair = new TestPair()
     let clientId = server.testUsers[userId] || 0
     clientId += 1
     server.testUsers[userId] = clientId
-    this.nodeId = `${ userId }:${ clientId }:1`
+    this.nodeId = `${userId}:${clientId}:1`
     this.log = server.time.nextLog({ nodeId: this.nodeId })
     this.log.on('preadd', (action, meta) => {
       meta.reasons.push('test')
@@ -55,7 +55,7 @@ class TestClient {
   async collect (test) {
     let added = []
     let unbind = this.node.log.on('add', (action, meta) => {
-      if (!meta.id.includes(` ${ this.nodeId } `)) {
+      if (!meta.id.includes(` ${this.nodeId} `)) {
         added.push(action)
       }
     })
@@ -85,11 +85,11 @@ class TestClient {
               error = new Error('Action was denied')
             } else if (other.reason === 'unknownType') {
               error = new Error(
-                `Server does not have callbacks for ${ action.type } actions`
+                `Server does not have callbacks for ${action.type} actions`
               )
             } else if (other.reason === 'wrongChannel') {
               error = new Error(
-                `Server does not have callbacks for ${ action.channel } channel`
+                `Server does not have callbacks for ${action.channel} channel`
               )
             } else if (lastError) {
               error = lastError
@@ -104,7 +104,7 @@ class TestClient {
           if (newMeta) {
             id = newMeta.id
           } else {
-            reject(new Error(`Action ${ meta.id } was already in log`))
+            reject(new Error(`Action ${meta.id} was already in log`))
           }
         })
       })

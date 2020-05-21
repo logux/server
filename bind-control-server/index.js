@@ -2,9 +2,10 @@ let ip = require('ip')
 
 const MAX_VERSION = 3
 const MIN_VERSION = 3
-const NO_SECRET = 'Set LOGUX_CONTROL_SECRET environment variable for Logux ' +
-                  'to have access to this page.\n' +
-                  'Run `npx nanoid` to generate secure secret.'
+const NO_SECRET =
+  'Set LOGUX_CONTROL_SECRET environment variable for Logux ' +
+  'to have access to this page.\n' +
+  'Run `npx nanoid` to generate secure secret.'
 
 function isValidBody (body) {
   if (typeof body !== 'object') return false
@@ -55,7 +56,7 @@ function bindControlServer (app) {
         let body
         try {
           body = JSON.parse(json)
-        } catch (e) {
+        } catch {
           res.statusCode = 400
           res.end('Wrong format')
           return

@@ -8,27 +8,28 @@ function send (action, meta) {
   let body = JSON.stringify({
     version: 0,
     secret: 'secret',
-    commands: [
-      ['action', action, meta]
-    ]
+    commands: [['action', action, meta]]
   })
   return new Promise((resolve, reject) => {
-    let req = http.request({
-      method: 'POST',
-      host: 'localhost',
-      port: 31338,
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(body)
+    let req = http.request(
+      {
+        method: 'POST',
+        host: 'localhost',
+        port: 31338,
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(body)
+        }
+      },
+      res => {
+        if (res.statusCode < 200 || res.statusCode > 299) {
+          reject(new Error('Logux error'))
+        } else {
+          process.stdout.write(chalk.blue('R'))
+          resolve()
+        }
       }
-    }, res => {
-      if (res.statusCode < 200 || res.statusCode > 299) {
-        reject(new Error('Logux error'))
-      } else {
-        process.stdout.write(chalk.blue('R'))
-        resolve()
-      }
-    })
+    )
     req.on('error', reject)
     req.end(body)
   })
@@ -45,7 +46,7 @@ let server = http.createServer((req, res) => {
       let [type, action, meta] = data.commands[0]
       let nodes = [meta.id.split(' ')[1]]
       await delay(500)
-      res.write(`[["approved","${ meta.id }"]`)
+      res.write(`[["approved","${meta.id}"]`)
       if (type === 'action' && action.type === 'logux/subscribe') {
         await delay(300)
         await send({ type: 'project/name', value: 'A' }, { nodes })
@@ -56,7 +57,7 @@ let server = http.createServer((req, res) => {
         await delay(500)
         process.stdout.write(chalk.yellow('A'))
       }
-      res.write(`,["processed","${ meta.id }"]]`)
+      res.write(`,["processed","${meta.id}"]]`)
       res.end()
     } catch (e) {
       process.stderr.write(chalk.red(e.stack))

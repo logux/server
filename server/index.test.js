@@ -58,12 +58,12 @@ function check (name, args, opts, kill) {
 }
 
 async function checkOut (name, args) {
-  let result = await check(name, args, { }, 'kill')
+  let result = await check(name, args, {}, 'kill')
   let out = result[0]
   let exit = result[1]
   expect(out).toMatchSnapshot()
   if (exit !== 0) {
-    throw new Error(`Fall with:\n${ out }`)
+    throw new Error(`Fall with:\n${out}`)
   }
 }
 
@@ -86,14 +86,20 @@ it('uses CLI args for options', () => {
   let options = Server.loadOptions({
     argv: [
       '',
-      '--port', '1337',
-      '--host', '192.168.1.1',
-      '--reporter', 'json',
-      '--redis', '//localhost',
-      '--backend', 'http://localhost:8080/logux',
-      '--control-secret', 'secret'
+      '--port',
+      '1337',
+      '--host',
+      '192.168.1.1',
+      '--reporter',
+      'json',
+      '--redis',
+      '//localhost',
+      '--backend',
+      'http://localhost:8080/logux',
+      '--control-secret',
+      'secret'
     ],
-    env: { }
+    env: {}
   })
 
   expect(options.host).toEqual('192.168.1.1')
@@ -128,10 +134,13 @@ it('uses env for options', () => {
 })
 
 it('uses combined options', () => {
-  let options = Server.loadOptions({
-    env: { LOGUX_CERT: './cert.pem' },
-    argv: ['', '--key', './key.pem']
-  }, { port: 31337 })
+  let options = Server.loadOptions(
+    {
+      env: { LOGUX_CERT: './cert.pem' },
+      argv: ['', '--key', './key.pem']
+    },
+    { port: 31337 }
+  )
 
   expect(options.port).toEqual(31337)
   expect(options.cert).toEqual('./cert.pem')
@@ -143,16 +152,24 @@ it('uses arg, env, options in given priority', () => {
     { argv: ['', '--port', '31337'], env: { LOGUX_PORT: 21337 } },
     { port: 11337 }
   )
-  let options2 = Server.loadOptions({
-    argv: [], env: { LOGUX_PORT: 21337 }
-  }, {
-    port: 11337
-  })
-  let options3 = Server.loadOptions({
-    argv: [], env: { }
-  }, {
-    port: 11337
-  })
+  let options2 = Server.loadOptions(
+    {
+      argv: [],
+      env: { LOGUX_PORT: 21337 }
+    },
+    {
+      port: 11337
+    }
+  )
+  let options3 = Server.loadOptions(
+    {
+      argv: [],
+      env: {}
+    },
+    {
+      port: 11337
+    }
+  )
 
   expect(options1.port).toEqual(31337)
   expect(options2.port).toEqual(21337)
@@ -162,7 +179,7 @@ it('uses arg, env, options in given priority', () => {
 it('destroys everything on exit', () => checkOut('destroy.js'))
 
 it('writes about unbind', async () => {
-  let result = await check('unbind.js', [], { }, 'kill')
+  let result = await check('unbind.js', [], {}, 'kill')
   expect(result[0]).toMatchSnapshot()
 })
 
@@ -172,7 +189,7 @@ it('shows uncatch rejects', () => checkError('uncatch.js'))
 
 it('uses environment variables for config', () => {
   return checkOut('options.js', {
-    env: Object.assign({ }, process.env, {
+    env: Object.assign({}, process.env, {
       LOGUX_REPORTER: 'json',
       LOGUX_PORT: 31337,
       NODE_ENV: 'test'
@@ -217,7 +234,7 @@ it('shows help about missed secret', () => checkError('no-secret.js'))
 
 it('disables colors for constructor errors', () => {
   return checkError('missed.js', {
-    env: Object.assign({ }, process.env, {
+    env: Object.assign({}, process.env, {
       NODE_ENV: 'production'
     })
   })

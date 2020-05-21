@@ -47,16 +47,16 @@ function label (c, type, color, labelBg, labelText, message) {
   let labelFormat = c[labelBg][labelText]
   let messageFormat = c.bold[color]
   let pagged = rightPag(labelFormat(type), 8)
-  let time = c.dim(`at ${ yyyymmdd.withTime(new Date()) }`)
+  let time = c.dim(`at ${yyyymmdd.withTime(new Date())}`)
   let highlighted = message.replace(/`([^`]+)`/g, c.yellow('$1'))
-  return `${ pagged }${ messageFormat(highlighted) } ${ time }`
+  return `${pagged}${messageFormat(highlighted)} ${time}`
 }
 
 function formatName (key) {
   return key
-    .replace(/[A-Z]/g, char => ` ${ char.toLowerCase() }`)
+    .replace(/[A-Z]/g, char => ` ${char.toLowerCase()}`)
     .split(' ')
-    .map(word => word === 'ip' || word === 'id' ? word.toUpperCase() : word)
+    .map(word => (word === 'ip' || word === 'id' ? word.toUpperCase() : word))
     .join(' ')
     .replace(/^\w/, char => char.toUpperCase())
 }
@@ -86,7 +86,7 @@ function formatValue (c, value) {
 }
 
 function formatObject (c, obj) {
-  let items = Object.keys(obj).map(k => `${ k }: ${ formatValue(c, obj[k]) }`)
+  let items = Object.keys(obj).map(k => `${k}: ${formatValue(c, obj[k])}`)
   return '{ ' + items.join(', ') + ' }'
 }
 
@@ -97,7 +97,7 @@ function formatArray (c, array) {
 
 function formatActionId (c, id) {
   let p = id.split(' ')
-  return `${ c.bold(p[0]) } ${ formatNodeId(c, p[1]) } ${ c.bold(p[2]) }`
+  return `${c.bold(p[0])} ${formatNodeId(c, p[1])} ${c.bold(p[2])}`
 }
 
 function formatParams (c, params, parent) {
@@ -106,30 +106,38 @@ function formatParams (c, params, parent) {
     return name.length > max ? name.length : max
   }, 0)
 
-  return params.map(param => {
-    let name = param[0]
-    let value = param[1]
+  return params
+    .map(param => {
+      let name = param[0]
+      let value = param[1]
 
-    let start = PADDING + rightPag(`${ name }: `, maxName + 2)
+      let start = PADDING + rightPag(`${name}: `, maxName + 2)
 
-    if (name === 'Node ID') {
-      return start + formatNodeId(c, value)
-    } else if (name === 'Action ID' || (parent === 'Meta' && name === 'id')) {
-      return start + formatActionId(c, value)
-    } else if (Array.isArray(value)) {
-      return start + formatArray(c, value)
-    } else if (typeof value === 'object' && value) {
-      let nested = Object.keys(value).map(key => [key, value[key]])
-      return start + NEXT_LINE + INDENT +
-        formatParams(c, nested, name).split(NEXT_LINE).join(NEXT_LINE + INDENT)
-    } else if (name === 'Latency' && !parent) {
-      return start + c.bold(value) + LATENCY_UNIT
-    } else if (typeof value === 'string' && parent) {
-      return start + '"' + c.bold(value) + '"'
-    } else {
-      return start + c.bold(value)
-    }
-  }).join(NEXT_LINE)
+      if (name === 'Node ID') {
+        return start + formatNodeId(c, value)
+      } else if (name === 'Action ID' || (parent === 'Meta' && name === 'id')) {
+        return start + formatActionId(c, value)
+      } else if (Array.isArray(value)) {
+        return start + formatArray(c, value)
+      } else if (typeof value === 'object' && value) {
+        let nested = Object.keys(value).map(key => [key, value[key]])
+        return (
+          start +
+          NEXT_LINE +
+          INDENT +
+          formatParams(c, nested, name)
+            .split(NEXT_LINE)
+            .join(NEXT_LINE + INDENT)
+        )
+      } else if (name === 'Latency' && !parent) {
+        return start + c.bold(value) + LATENCY_UNIT
+      } else if (typeof value === 'string' && parent) {
+        return start + '"' + c.bold(value) + '"'
+      } else {
+        return start + c.bold(value)
+      }
+    })
+    .join(NEXT_LINE)
 }
 
 function splitByLength (string, max) {
@@ -138,28 +146,32 @@ function splitByLength (string, max) {
   for (let word of words) {
     let last = lines[lines.length - 1]
     if (last.length + word.length > max) {
-      lines.push(`${ word } `)
+      lines.push(`${word} `)
     } else {
-      lines[lines.length - 1] = `${ last }${ word } `
+      lines[lines.length - 1] = `${last}${word} `
     }
   }
   return lines.map(i => i.trim())
 }
 
 function prettyStackTrace (c, stack, basepath) {
-  return stack.split('\n').slice(1).map(line => {
-    let match = line.match(/\s+at ([^(]+) \(([^)]+)\)/)
-    let isSystem = !match || !match[2].startsWith(basepath)
-    if (isSystem) {
-      return c.gray(line.replace(/^\s*/, PADDING))
-    } else {
-      let func = match[1]
-      let relative = match[2].slice(basepath.length)
-      let converted = `${ PADDING }at ${ func } (./${ relative })`
-      let isDependency = match[2].includes('node_modules')
-      return isDependency ? c.gray(converted) : c.red(converted)
-    }
-  }).join(NEXT_LINE)
+  return stack
+    .split('\n')
+    .slice(1)
+    .map(line => {
+      let match = line.match(/\s+at ([^(]+) \(([^)]+)\)/)
+      let isSystem = !match || !match[2].startsWith(basepath)
+      if (isSystem) {
+        return c.gray(line.replace(/^\s*/, PADDING))
+      } else {
+        let func = match[1]
+        let relative = match[2].slice(basepath.length)
+        let converted = `${PADDING}at ${func} (./${relative})`
+        let isDependency = match[2].includes('node_modules')
+        return isDependency ? c.gray(converted) : c.red(converted)
+      }
+    })
+    .join(NEXT_LINE)
 }
 
 function humanFormatter (options) {
@@ -208,7 +220,8 @@ function humanFormatter (options) {
       if (typeof note === 'string') {
         note = note.replace(/`([^`]+)`/g, c.bold('$1'))
         note = [].concat(
-          ...note.split('\n')
+          ...note
+            .split('\n')
             .map(row => splitByLength(row, 80 - PADDING.length))
         )
       }

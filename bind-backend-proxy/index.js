@@ -21,53 +21,56 @@ function send (backend, command, events) {
     secret: backend.secret
   })
   let protocol = backend.protocol === 'https:' ? https : http
-  let req = protocol.request({
-    method: 'POST',
-    host: backend.hostname,
-    port: backend.port,
-    path: backend.pathname + backend.search,
-    headers: {
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(body)
-    }
-  }, res => {
-    if (res.statusCode < 200 || res.statusCode > 299) {
-      events.error(new Error(`Backend responsed with ${ res.statusCode } code`))
-    } else {
-      let data = false
-      res
-        .pipe(JSONStream.parse('*'))
-        .on('data', answer => {
-          if (!Array.isArray(answer)) {
-            events.error(new Error('Wrong back-end answer'))
-          } else {
-            let [name, ...args] = answer
-            if (name === 'error') {
-              let err = new Error('Error on back-end server')
-              err.stack = args[1]
-              events.error(err)
-            } else if (events.filter(...args)) {
-              if (!events[name]) {
-                events.error(new Error('Unknown back-end answer'))
-              } else {
-                data = true
-                events[name](...args)
+  let req = protocol.request(
+    {
+      method: 'POST',
+      host: backend.hostname,
+      port: backend.port,
+      path: backend.pathname + backend.search,
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(body)
+      }
+    },
+    res => {
+      if (res.statusCode < 200 || res.statusCode > 299) {
+        events.error(new Error(`Backend responsed with ${res.statusCode} code`))
+      } else {
+        let data = false
+        res
+          .pipe(JSONStream.parse('*'))
+          .on('data', answer => {
+            if (!Array.isArray(answer)) {
+              events.error(new Error('Wrong back-end answer'))
+            } else {
+              let [name, ...args] = answer
+              if (name === 'error') {
+                let err = new Error('Error on back-end server')
+                err.stack = args[1]
+                events.error(err)
+              } else if (events.filter(...args)) {
+                if (!events[name]) {
+                  events.error(new Error('Unknown back-end answer'))
+                } else {
+                  data = true
+                  events[name](...args)
+                }
               }
             }
-          }
-        })
-        .on('error', err => {
-          events.error(err)
-        })
-        .on('end', () => {
-          if (!data) {
-            events.error(new Error('Empty back-end answer'))
-          } else if (events.end) {
-            events.end()
-          }
-        })
+          })
+          .on('error', err => {
+            events.error(err)
+          })
+          .on('end', () => {
+            if (!data) {
+              events.error(new Error('Empty back-end answer'))
+            } else if (events.end) {
+              events.end()
+            }
+          })
+      }
     }
-  })
+  )
   req.on('error', err => {
     events.error(err)
   })
@@ -84,9 +87,9 @@ function bindBackendProxy (app) {
   let backend = new URL(app.options.backend)
   backend.secret = app.options.controlSecret
 
-  let resending = { }
-  let accessing = { }
-  let processing = { }
+  let resending = {}
+  let accessing = {}
+  let processing = {}
 
   function sendAction (action, meta) {
     let resendResolve
@@ -179,23 +182,26 @@ function bindBackendProxy (app) {
     })
   }
 
-  app.auth((userId, token) => new Promise((resolve, reject) => {
-    let authId = nanoid()
-    send(backend, ['auth', userId, token, authId], {
-      filter (id) {
-        return id === authId
-      },
-      authenticated () {
-        resolve(true)
-      },
-      denied () {
-        resolve(false)
-      },
-      error (e) {
-        reject(e)
-      }
-    })
-  }))
+  app.auth(
+    (userId, token) =>
+      new Promise((resolve, reject) => {
+        let authId = nanoid()
+        send(backend, ['auth', userId, token, authId], {
+          filter (id) {
+            return id === authId
+          },
+          authenticated () {
+            resolve(true)
+          },
+          denied () {
+            resolve(false)
+          },
+          error (e) {
+            reject(e)
+          }
+        })
+      })
+  )
   app.otherType({
     access (ctx, action, meta) {
       sendAction(action, meta)
@@ -229,11 +235,13 @@ function bindBackendProxy (app) {
 
   app.controls['POST /'] = {
     isValid (command) {
-      return command.length === 3 &&
+      return (
+        command.length === 3 &&
         command[0] === 'action' &&
         typeof command[1] === 'object' &&
         typeof command[2] === 'object' &&
         typeof command[1].type === 'string'
+      )
     },
     command (command, req) {
       if (!app.types[command[1].type]) {

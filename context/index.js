@@ -2,7 +2,7 @@ let semver = require('semver')
 
 class Context {
   constructor (nodeId, clientId, userId, subprotocol, server) {
-    this.data = { }
+    this.data = {}
     this.nodeId = nodeId
     this.userId = userId
     this.clientId = clientId
@@ -15,7 +15,7 @@ class Context {
     return semver.satisfies(this.subprotocol, range)
   }
 
-  sendBack (action, meta = { }) {
+  sendBack (action, meta = {}) {
     return this.server.process(action, { clients: [this.clientId], ...meta })
   }
 }
