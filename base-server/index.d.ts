@@ -461,6 +461,11 @@ interface ActionCreator {
  */
 export default class BaseServer {
   /**
+   * @param opts Server options.
+   */
+  constructor (opts: BaseServerOptions)
+
+  /**
    * Server options.
    *
    * ```js
