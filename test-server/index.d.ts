@@ -1,13 +1,35 @@
-import { TestTime } from '@logux/core'
+import { TestTime, TestLog } from '@logux/core'
 
 import TestClient, { TestClientOptions } from '../test-client'
-import BaseServer from '../base-server'
+import BaseServer, {
+  ServerMeta,
+  BaseServerOptions,
+  Reporter
+} from '../base-server'
 
-type TestServerOptions = {
+export type TestServerOptions = Omit<
+  BaseServerOptions,
+  'subprotocol' | 'supports'
+> & {
+  subprotocol?: string
+  supports?: string
+
+  /**
+   * Disable built-in auth.
+   */
+  auth?: false
+
   /**
    * Print server log to the console for debug.
    */
-  reporter?: 'human'
+  reporter?: 'human' | Reporter
+
+  /**
+   * Stream to be used by reporter to write log.
+   */
+  reporterStream?: {
+    write(str: string): void
+  }
 }
 
 /**
@@ -39,6 +61,15 @@ export default class TestServer extends BaseServer {
    * Time replacement without variable parts like current timestamp.
    */
   time: TestTime
+
+  /**
+   * Server actions log, with methods to check actions inside.
+   *
+   * ```js
+   * server.log.actions() //=> […]
+   * ```
+   */
+  log: TestLog<ServerMeta>
 
   /**
    * Create and connect client.

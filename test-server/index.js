@@ -7,19 +7,18 @@ let TestClient = require('../test-client')
 class TestServer extends BaseServer {
   constructor (opts = {}) {
     let time = new TestTime()
-    let reporter
     if (opts.reporter === 'human') {
-      reporter = createReporter(opts)
+      opts.reporter = createReporter(opts)
     }
     super({
       subprotocol: '0.0.0',
       supports: '0.0.0',
-      reporter,
       time,
-      id: 'test'
+      id: 'test',
+      ...opts
     })
     this.time = time
-    this.auth(() => true)
+    if (opts.auth !== false) this.auth(() => true)
     this.testUsers = {}
   }
 
