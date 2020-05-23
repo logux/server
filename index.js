@@ -1,8 +1,10 @@
 let ALLOWED_META = require('./allowed-meta')
+let parseNodeId = require('./parse-node-id')
 let filterMeta = require('./filter-meta')
 let BaseServer = require('./base-server')
 let TestServer = require('./test-server')
 let TestClient = require('./test-client')
+let Context = require('./context')
 let Server = require('./server')
 
 module.exports = {
@@ -11,5 +13,7 @@ module.exports = {
   TestClient,
   Server,
   ALLOWED_META,
-  filterMeta
+  parseNodeId,
+  filterMeta,
+  Context
 }

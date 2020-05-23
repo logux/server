@@ -16,7 +16,7 @@ import Server from '../server'
  *
  * @template D Type for `ctx.data`.
  */
-export default class Context<D extends object> {
+export default class Context<D extends object = {}> {
   /**
    * @param nodeId Unique node ID.
    * @param clientId Unique persistence client ID.
