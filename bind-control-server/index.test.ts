@@ -1,12 +1,13 @@
-let { ClientNode, Log, MemoryStore, WsConnection } = require('@logux/core')
-let { delay } = require('nanodelay')
-let WebSocket = require('ws')
-let http = require('http')
+import { ClientNode, Log, MemoryStore, WsConnection } from '@logux/core'
+import { delay } from 'nanodelay'
+import WebSocket from 'ws'
+import http from 'http'
 
-let BaseServer = require('../base-server')
+import { BaseServer, BaseServerOptions } from '..'
+import { GetProcessor } from '../base-server'
 
 let lastPort = 10111
-function createServer (opts = {}) {
+function createServer (opts: Partial<BaseServerOptions> = {}) {
   lastPort += 1
   let server = new BaseServer({
     subprotocol: '0.0.0',
@@ -18,24 +19,43 @@ function createServer (opts = {}) {
   return server
 }
 
-function createReporter (opts) {
-  let result = {}
-  result.names = []
-  result.reports = []
+class RequestError extends Error {
+  statusCode: number | undefined
 
-  opts = opts || {}
-  opts.reporter = (name, details) => {
-    result.names.push(name)
-    result.reports.push([name, details])
+  constructor (statusCode: number | undefined, body: string) {
+    super(body)
+    this.name = 'RequestError'
+    this.statusCode = statusCode
   }
-
-  app = createServer(opts)
-  result.app = app
-  return result
 }
 
-function request (method, path) {
-  return new Promise((resolve, reject) => {
+type Response = {
+  body: string
+  headers: http.IncomingHttpHeaders
+}
+
+let app: BaseServer
+
+afterEach(async () => {
+  await app.destroy()
+})
+
+function createReporter (opts = {}) {
+  let names: string[] = []
+  let reports: [string, object][] = []
+
+  app = createServer({
+    ...opts,
+    reporter (name: string, details: object) {
+      names.push(name)
+      reports.push([name, details])
+    }
+  } as any)
+  return { names, reports, app }
+}
+
+function request (method: 'GET', path: string): Promise<Response> {
+  return new Promise<Response>((resolve, reject) => {
     let req = http.request(
       {
         method,
@@ -52,8 +72,7 @@ function request (method, path) {
           if (res.statusCode === 200) {
             resolve({ body, headers: res.headers })
           } else {
-            let error = new Error(body)
-            error.statusCode = res.statusCode
+            let error = new RequestError(res.statusCode, body)
             reject(error)
           }
         })
@@ -64,21 +83,17 @@ function request (method, path) {
   })
 }
 
-async function requestError (method, path) {
+async function requestError (
+  method: 'GET',
+  path: string
+): Promise<RequestError> {
   try {
     await request(method, path)
-    return false
   } catch (e) {
     return e
   }
+  throw new Error('Error was not found')
 }
-
-let app
-
-afterEach(async () => {
-  await app.destroy()
-  app = undefined
-})
 
 it('has health check', async () => {
   app = createServer({ controlSecret: 'secret', backend: 'http://localhost/' })
@@ -98,7 +113,9 @@ it('responses 404', async () => {
 it('checks secret', async () => {
   let test = createReporter({ controlSecret: 'secret' })
   test.app.controls['GET /test'] = {
-    request: () => ({ body: 'done' })
+    request () {
+      return { body: 'done' }
+    }
   }
   await test.app.listen()
 
@@ -187,7 +204,7 @@ it('does not break WebSocket', async () => {
 
   let nodeId = '10:client:node'
   let log = new Log({ store: new MemoryStore(), nodeId })
-  let con = new WsConnection('ws://localhost:' + app.options.port, WebSocket)
+  let con = new WsConnection(`ws://localhost:${app.options.port}`, WebSocket)
   let node = new ClientNode(nodeId, log, con)
 
   node.connection.connect()

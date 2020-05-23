@@ -1,9 +1,15 @@
-let parseNodeId = require('../parse-node-id')
-let Context = require('../context')
+import { Action } from '@logux/core'
 
-function createContext (nodeId, subprotocol, server, meta) {
+import { Server, Context, parseNodeId, ServerMeta } from '..'
+
+function createContext (
+  nodeId: string,
+  subprotocol: string,
+  server: object = {}
+): Context {
   let { clientId, userId } = parseNodeId(nodeId)
-  return new Context(nodeId, clientId, userId, subprotocol, server, meta)
+  if (typeof userId === 'undefined') throw new Error('User ID is missed')
+  return new Context(nodeId, clientId, userId, subprotocol, server as Server)
 }
 
 it('has open data', () => {
@@ -33,14 +39,16 @@ it('checks subprotocol', () => {
 })
 
 it('sends action back', () => {
-  let entries = []
-  let ctx = createContext('10:uuid', '2.4.0', {
-    process (...args) {
-      entries.push(args)
-      return 1
+  let entries: [Action, ServerMeta][] = []
+  let promise = Promise.resolve({})
+  let fakeServer = {
+    process (action: Action, meta: ServerMeta) {
+      entries.push([action, meta])
+      return promise
     }
-  })
-  expect(ctx.sendBack({ type: 'A' })).toEqual(1)
+  }
+  let ctx = createContext('10:uuid', '2.4.0', fakeServer)
+  expect(ctx.sendBack({ type: 'A' })).toBe(promise)
   ctx.sendBack({ type: 'B' }, { reasons: ['1'], clients: [] })
   expect(entries).toEqual([
     [{ type: 'A' }, { clients: ['10:uuid'] }],

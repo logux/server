@@ -1,4 +1,4 @@
-let parseNodeId = require('../parse-node-id')
+import { parseNodeId } from '..'
 
 it('parses node ID', () => {
   expect(parseNodeId('10:client:uuid')).toEqual({

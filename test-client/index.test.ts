@@ -1,13 +1,14 @@
-let { delay } = require('nanodelay')
+import { delay } from 'nanodelay'
 
-let { TestClient, TestServer } = require('..')
+import { TestClient, TestServer } from '..'
+import { LoguxAnySubscribeAction } from '../base-server'
 
-let server
+let server: TestServer
 afterEach(() => {
-  if (server) server.destroy()
+  server.destroy()
 })
 
-async function catchError (cb) {
+async function catchError (cb: () => Promise<any>) {
   let err
   try {
     await cb()
@@ -15,6 +16,10 @@ async function catchError (cb) {
     err = e
   }
   return err
+}
+
+function privateMethods (obj: object): any {
+  return obj
 }
 
 it('connects and disconnect', async () => {
@@ -125,7 +130,7 @@ it('detects action ID dublicate', async () => {
 
 it('tracks subscriptions', async () => {
   server = new TestServer()
-  server.channel('foo', {
+  server.channel<{}, {}, LoguxAnySubscribeAction>('foo', {
     access: () => true,
     load (ctx, action) {
       ctx.sendBack({ type: 'FOO', a: action.a })
@@ -136,7 +141,7 @@ it('tracks subscriptions', async () => {
   expect(actions1).toEqual([{ type: 'FOO', a: undefined }])
 
   await client.unsubscribe('foo')
-  expect(server.subscribers).toEqual({})
+  expect(privateMethods(server).subscribers).toEqual({})
 
   let actions2 = await client.subscribe({
     type: 'logux/subscribe',
@@ -152,13 +157,13 @@ it('tracks subscriptions', async () => {
 })
 
 it('prints server log', async () => {
-  let out = {
+  let reporterStream = {
     write () {}
   }
-  jest.spyOn(out, 'write').mockImplementation(() => true)
-  server = new TestServer({ reporter: 'human', out })
-  await server.connect()
-  expect(out.write).toHaveBeenCalledTimes(2)
+  jest.spyOn(reporterStream, 'write').mockImplementation(() => {})
+  server = new TestServer({ reporter: 'human', reporterStream })
+  await server.connect('10:uuid')
+  expect(reporterStream.write).toHaveBeenCalledTimes(2)
 })
 
 it('tests authentication', async () => {
@@ -177,4 +182,9 @@ it('tests authentication', async () => {
   expect(error.message).toContain('wrong-subprotocol')
 
   await server.connect('10', { token: 'good' })
+})
+
+it('disables build-in auth', async () => {
+  server = new TestServer({ auth: false })
+  expect(privateMethods(server).authenticator).not.toBeDefined()
 })

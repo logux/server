@@ -1,3 +1,10 @@
+import { LoguxError } from '@logux/core'
+
+import createReporter from '../create-reporter'
+import humanFormatter from '../human-formatter'
+
+import pino = require('pino')
+
 jest.mock('os', () => {
   return {
     hostname: () => 'localhost',
@@ -6,23 +13,19 @@ jest.mock('os', () => {
   }
 })
 
-let { LoguxError } = require('@logux/core')
-let pino = require('pino')
-
-let createReporter = require('../create-reporter')
-let humanFormatter = require('../human-formatter')
-
 class MemoryStream {
+  string: string
+
   constructor () {
     this.string = ''
   }
 
-  write (chunk) {
+  write (chunk: string) {
     this.string += chunk
   }
 }
 
-function clean (str) {
+function clean (str: string) {
   return str
     .replace(/\r\v/g, '\n')
     .replace(/\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/g, '1970-01-01 00:00:00')
@@ -32,7 +35,7 @@ function clean (str) {
     .replace(/PID:(\s+.*m)\d+(.*m)/, 'PID:$121384$2')
 }
 
-function check (type, details) {
+function check (type: string, details?: object) {
   let json = new MemoryStream()
   let jsonReporter = createReporter({
     logger: pino(
@@ -48,14 +51,15 @@ function check (type, details) {
   expect(clean(json.string)).toMatchSnapshot()
 
   let human = new MemoryStream()
+  let humanReporterOpts = {
+    basepath: '/dev/app',
+    color: true
+  }
   let humanReporter = createReporter({
     logger: pino(
       {
         name: 'test',
-        prettyPrint: {
-          basepath: '/dev/app',
-          color: true
-        },
+        prettyPrint: humanReporterOpts as any,
         prettifier: humanFormatter
       },
       human
@@ -66,7 +70,7 @@ function check (type, details) {
   expect(clean(human.string)).toMatchSnapshot()
 }
 
-function createError (name, message) {
+function createError (name: string, message: string) {
   let err = new Error(message)
   err.name = name
   err.stack =
@@ -90,21 +94,21 @@ it('uses passed logger instance', () => {
 })
 
 it('creates JSON reporter', () => {
-  let mockedStream = new MemoryStream()
-  let reporter = createReporter({ out: mockedStream })
+  let reporterStream = new MemoryStream()
+  let reporter = createReporter({ reporterStream })
   reporter('unknownType', {})
-  expect(clean(mockedStream.string)).toMatchSnapshot()
+  expect(clean(reporterStream.string)).toMatchSnapshot()
 })
 
 it('creates human reporter', () => {
-  let mockedStream = new MemoryStream()
+  let reporterStream = new MemoryStream()
   let reporter = createReporter({
+    reporterStream,
     reporter: 'human',
-    root: '/dir/',
-    out: mockedStream
+    root: '/dir/'
   })
   reporter('unknownType', {})
-  expect(clean(mockedStream.string)).toMatchSnapshot()
+  expect(clean(reporterStream.string)).toMatchSnapshot()
 })
 
 it('adds trailing slash to path', () => {

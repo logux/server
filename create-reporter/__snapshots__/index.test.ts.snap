@@ -229,24 +229,24 @@ exports[`reports error from action 2`] = `
 `;
 
 exports[`reports error from client 1`] = `
-"{\\"level\\":40,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"connectionId\\":\\"670\\",\\"msg\\":\\"Client error: A timeout was reached (5000ms)\\"}
+"{\\"level\\":40,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"connectionId\\":\\"670\\",\\"msg\\":\\"Client error: A timeout was reached (5000 ms)\\"}
 "
 `;
 
 exports[`reports error from client 2`] = `
-"[43m[30m WARN [39m[49m  [1m[33mClient error: A timeout was reached (5000ms)[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[43m[30m WARN [39m[49m  [1m[33mClient error: A timeout was reached (5000 ms)[39m[22m [2mat 1970-01-01 00:00:00[22m
         Connection ID: [1m670[22m
 
 "
 `;
 
 exports[`reports error from node 1`] = `
-"{\\"level\\":40,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"nodeId\\":\\"100:uImkcF4z\\",\\"msg\\":\\"Sync error: A timeout was reached (5000ms)\\"}
+"{\\"level\\":40,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"nodeId\\":\\"100:uImkcF4z\\",\\"msg\\":\\"Sync error: A timeout was reached (5000 ms)\\"}
 "
 `;
 
 exports[`reports error from node 2`] = `
-"[43m[30m WARN [39m[49m  [1m[33mSync error: A timeout was reached (5000ms)[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[43m[30m WARN [39m[49m  [1m[33mSync error: A timeout was reached (5000 ms)[39m[22m [2mat 1970-01-01 00:00:00[22m
         Node ID: [1m100[22m:uImkcF4z
 
 "

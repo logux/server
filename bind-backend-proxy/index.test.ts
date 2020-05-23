@@ -1,15 +1,35 @@
-let { TestTime, TestPair } = require('@logux/core')
-let { delay } = require('nanodelay')
-let http = require('http')
+import { delay } from 'nanodelay'
+import http from 'http'
 
-let ServerClient = require('../server-client')
-let BaseServer = require('../base-server')
+import { TestServerOptions, TestServer } from '..'
 
-let destroyable = []
+let destroyable: { destroy(): Promise<void> }[] = []
 let lastPort = 8111
 
+beforeAll(() => {
+  return new Promise((resolve, reject) => {
+    httpServer.on('error', reject)
+    httpServer.listen(8110, resolve)
+  })
+})
+
+beforeEach(() => {
+  sent = []
+})
+
+afterEach(async () => {
+  await Promise.all(destroyable.map(i => i.destroy()))
+  destroyable = []
+})
+
+afterAll(() => {
+  return new Promise(resolve => {
+    httpServer.close(resolve)
+  })
+})
+
 const OPTIONS = {
-  controlSecret: '1234',
+  controlSecret: 'S',
   backend: 'http://127.0.0.1:8110/path'
 }
 
@@ -19,87 +39,62 @@ const ACTION = [
   { id: '1 server:rails 0', reasons: ['test'] }
 ]
 
-function createConnection () {
-  let pair = new TestPair()
-  pair.left.ws = {
-    _socket: {
-      remoteAddress: '127.0.0.1'
-    }
-  }
-  return pair.left
-}
-
-function createClient (server) {
-  server.lastClient += 1
-  let client = new ServerClient(server, createConnection(), server.lastClient)
-  server.connected[server.lastClient] = client
-  destroyable.push(client)
-  return client
-}
-
-async function connectClient (server, token) {
-  let client = createClient(server)
-  client.node.now = () => 0
-  await client.connection.connect()
-  let protocol = client.node.localProtocol
-  client.connection.other().send(['connect', protocol, '10:uuid', 0, { token }])
-  await client.connection.pair.wait('right')
-
-  return client
-}
-
-function createServerWithoutAuth (options) {
+function createServer (opts?: TestServerOptions) {
   lastPort += 1
-  options.time = new TestTime()
-  options.port = lastPort
-  options.subprotocol = '0.0.0'
-  options.supports = '0.x'
+  let server = new TestServer({
+    port: lastPort,
+    ...opts
+  })
 
-  let server = new BaseServer(options)
   server.nodeId = 'server:uuid'
   server.on('preadd', (action, meta) => {
     meta.reasons.push('test')
   })
 
   destroyable.push(server)
-
   return server
 }
 
-function createServer (options) {
-  let server = createServerWithoutAuth(options)
-  server.auth(() => true)
-  return server
+function createReporter (opts: TestServerOptions = {}) {
+  let names: string[] = []
+  let reports: [string, object][] = []
+  let app = createServer({
+    ...opts,
+    reporter (name: string, details: any) {
+      names.push(name)
+      reports.push([name, details])
+    }
+  })
+  return { names, reports, app }
 }
 
-function createReporter (opts) {
-  let result = {}
-  result.names = []
-  result.reports = []
-
-  opts = opts || {}
-  opts.reporter = (name, details) => {
-    result.names.push(name)
-    result.reports.push([name, details])
-  }
-
-  let server = createServer(opts)
-  result.app = server
-  return result
+type RequestOptions = {
+  method?: 'GET' | 'POST' | 'PUT'
+  path?: string
 }
 
-function request ({ method, path, string, data }) {
-  if (!string && data) string = JSON.stringify(data)
-  return new Promise((resolve, reject) => {
+type DataRequest = RequestOptions & {
+  string?: undefined
+  data: object
+}
+
+type StringRequest = RequestOptions & {
+  string: string
+  data?: undefined
+}
+
+function request ({ method, path, string, data }: DataRequest | StringRequest) {
+  let body = string ?? JSON.stringify(data)
+  return new Promise<number>((resolve, reject) => {
     let req = http.request(
       {
-        method: method || 'POST',
+        method: method ?? 'POST',
         host: '127.0.0.1',
         port: lastPort,
-        path: path || '/',
+        path: path ?? '/',
         headers: {
           'Content-Type': 'application/json',
-          'Content-Length': Buffer.byteLength(string)
+          'Content-Length': Buffer.byteLength(body)
         }
       },
       res => {
@@ -107,15 +102,25 @@ function request ({ method, path, string, data }) {
       }
     )
     req.on('error', reject)
-    req.end(string)
+    req.end(body)
   })
 }
 
-function send (data) {
+function send (data: object) {
   return request({ data })
 }
 
-let sent = []
+async function catchError (cb: () => Promise<any>) {
+  let err
+  try {
+    await cb()
+  } catch (e) {
+    err = e
+  }
+  return err
+}
+
+let sent: [string, string, any][] = []
 
 let httpServer = http.createServer((req, res) => {
   let body = ''
@@ -125,7 +130,7 @@ let httpServer = http.createServer((req, res) => {
   req.on('end', async () => {
     let data = JSON.parse(body)
     let actionId = data.commands[0][2].id
-    sent.push([req.method, req.url, data])
+    sent.push([req.method ?? 'NO_METHOD', req.url ?? 'NO_URL', data])
     if (data.commands[0][0] === 'auth') {
       if (data.commands[0][1] === '10' && data.commands[0][2] === 'good') {
         res.write('[["authent')
@@ -195,28 +200,6 @@ let httpServer = http.createServer((req, res) => {
   })
 })
 
-beforeAll(() => {
-  return new Promise((resolve, reject) => {
-    httpServer.on('error', reject)
-    httpServer.listen(8110, resolve)
-  })
-})
-
-beforeEach(() => {
-  sent = []
-})
-
-afterEach(async () => {
-  await Promise.all(destroyable.map(i => i.destroy()))
-  destroyable = []
-})
-
-afterAll(() => {
-  return new Promise(resolve => {
-    httpServer.close(resolve)
-  })
-})
-
 it('checks secret option', () => {
   expect(() => {
     createServer({ backend: 'http://example.com' })
@@ -224,26 +207,23 @@ it('checks secret option', () => {
 })
 
 it('validates HTTP requests', async () => {
-  let prefix = { version: 3, secret: '1234' }
+  let prefix = { version: 3, secret: 'S' }
   let test = createReporter(OPTIONS)
   await test.app.listen()
+
   expect(await request({ method: 'PUT', string: '' })).toEqual(405)
   expect(await request({ path: '/logux', string: '' })).toEqual(404)
   expect(await request({ string: '{' })).toEqual(400)
   expect(await request({ string: '""' })).toEqual(400)
   expect(await send({})).toEqual(400)
-  expect(await send({ version: 100, secret: '1234', commands: [] })).toEqual(
-    400
-  )
+  expect(await send({ version: 100, secret: 'S', commands: [] })).toEqual(400)
   expect(await send({ version: 3, commands: [] })).toEqual(400)
   expect(await send({ ...prefix, commands: {} })).toEqual(400)
   expect(await send({ ...prefix, commands: [1] })).toEqual(400)
   expect(await send({ ...prefix, commands: [[1]] })).toEqual(400)
   expect(await send({ ...prefix, commands: [['f']] })).toEqual(400)
   expect(await send({ ...prefix, commands: [['action'], 'f'] })).toEqual(400)
-  expect(await send({ ...prefix, commands: [['action', {}, 'f']] })).toEqual(
-    400
-  )
+  expect(await send({ ...prefix, commands: [['action', {}, '']] })).toEqual(400)
   expect(await send({ version: 3, secret: 'wrong', commands: [] })).toEqual(403)
   expect(test.app.log.actions()).toEqual([])
   expect(test.reports[1]).toEqual([
@@ -255,7 +235,7 @@ it('validates HTTP requests', async () => {
 it('creates actions', async () => {
   let app = createServer(OPTIONS)
   await app.listen()
-  let code = await send({ version: 3, secret: '1234', commands: [ACTION] })
+  let code = await send({ version: 3, secret: 'S', commands: [ACTION] })
   expect(code).toEqual(200)
   expect(app.log.actions()).toEqual([{ type: 'A' }])
   expect(sent).toEqual([])
@@ -271,7 +251,7 @@ it('creates and processes actions', async () => {
     }
   })
   await app.listen()
-  let code = await send({ version: 3, secret: '1234', commands: [ACTION] })
+  let code = await send({ version: 3, secret: 'S', commands: [ACTION] })
 
   expect(code).toEqual(200)
   expect(app.log.actions()).toEqual([{ type: 'A' }])
@@ -282,47 +262,43 @@ it('creates and processes actions', async () => {
 
 it('reports about network errors', async () => {
   let app = createServer({
-    controlSecret: '1234',
+    controlSecret: 'S',
     backend: 'https://localhost:7110/'
   })
-  let errors = []
+  let errors: string[] = []
   app.on('error', e => {
-    errors.push(e.code)
+    errors.push(e.message)
   })
-  let client = await connectClient(app)
-  client.connection
-    .other()
-    .send(['sync', 1, { type: 'A' }, { id: [1, '10:uuid', 0], time: 1 }])
+  let client = await app.connect('10')
+  client.log.add({ type: 'A' })
   await delay(100)
 
-  expect(errors).toEqual(['ECONNREFUSED'])
+  expect(errors).toEqual(['connect ECONNREFUSED 127.0.0.1:7110'])
   expect(app.log.actions()).toEqual([
-    { type: 'logux/undo', reason: 'error', id: '1 10:uuid 0' }
+    { type: 'logux/undo', reason: 'error', id: '1 10:1:1 0' }
   ])
 })
 
 it('reports bad HTTP answers', async () => {
   let app = createServer(OPTIONS)
-  let errors = []
+  let errors: string[] = []
   app.on('error', e => {
     errors.push(e.message)
   })
-  let client = await connectClient(app)
-  client.connection
-    .other()
-    .send(['sync', 1, { type: 'NO' }, { id: [1, '10:uuid', 0], time: 1 }])
+  let client = await app.connect('10')
+  client.log.add({ type: 'NO' })
   await delay(100)
 
   expect(errors).toEqual(['Backend responsed with 404 code'])
   expect(app.log.actions()).toEqual([
-    { type: 'logux/undo', reason: 'error', id: '1 10:uuid 0' }
+    { type: 'logux/undo', reason: 'error', id: '1 10:1:1 0' }
   ])
 })
 
 it('authenticates user on backend', async () => {
-  let app = createServerWithoutAuth(OPTIONS)
-  let client = await connectClient(app, 'good')
-  expect(client.connection.connected).toBe(true)
+  let app = createServer({ ...OPTIONS, auth: false })
+  let client = await app.connect('10', { token: 'good' })
+  expect(client.pair.left.connected).toBe(true)
   let authId = sent[0][2].commands[0][3]
   expect(typeof authId).toEqual('string')
   expect(sent).toEqual([
@@ -331,7 +307,7 @@ it('authenticates user on backend', async () => {
       '/path',
       {
         version: 3,
-        secret: '1234',
+        secret: 'S',
         commands: [['auth', '10', 'good', authId]]
       }
     ]
@@ -339,33 +315,32 @@ it('authenticates user on backend', async () => {
 })
 
 it('checks user credentials', async () => {
-  let app = createServerWithoutAuth(OPTIONS)
-  let client = await connectClient(app, 'bad')
-  expect(client.connection.connected).toBe(false)
-  expect(client.connection.pair.leftSent).toEqual([
-    ['error', 'wrong-credentials']
-  ])
+  let app = createServer({ ...OPTIONS, auth: false })
+  let error = await catchError(() => app.connect('10', { token: 'bad' }))
+  expect(error.message).toEqual('Wrong credentials')
 })
 
 it('process errors during authentication', async () => {
-  let app = createServerWithoutAuth(OPTIONS)
-  let errors = []
+  let app = createServer({ ...OPTIONS, auth: false })
+  let errors: string[] = []
   app.on('error', e => {
     errors.push(e.message)
   })
-  let client = await connectClient(app, 'error')
-  expect(client.connection.connected).toBe(false)
+  app.connect('10', { token: 'error' })
+  await delay(100)
+  expect(Object.keys(app.connected)).toHaveLength(0)
   expect(errors).toEqual(['Error on back-end server'])
 })
 
 it('process wrong answer during authentication', async () => {
-  let app = createServerWithoutAuth(OPTIONS)
-  let errors = []
+  let app = createServer({ ...OPTIONS, auth: false })
+  let errors: string[] = []
   app.on('error', e => {
     errors.push(e.message)
   })
-  let client = await connectClient(app, 'empty')
-  expect(client.connection.connected).toBe(false)
+  app.connect('10', { token: 'empty' })
+  await delay(100)
+  expect(Object.keys(app.connected)).toHaveLength(0)
   expect(errors).toEqual(['Empty back-end answer'])
 })
 
@@ -374,7 +349,7 @@ it('notifies about actions and subscriptions', async () => {
   app.on('error', e => {
     throw e
   })
-  let events = []
+  let events: string[] = []
   app.on('backendSent', (action, meta) => {
     expect(typeof action.type).toEqual('string')
     expect(typeof meta.id).toEqual('string')
@@ -392,18 +367,10 @@ it('notifies about actions and subscriptions', async () => {
     expect(latency > 1 && latency < 500).toBe(true)
     events.push('backendProcessed')
   })
-  let client = await connectClient(app)
-  client.connection
-    .other()
-    .send([
-      'sync',
-      2,
-      { type: 'A' },
-      { id: [1, '10:uuid', 0], time: 1 },
-      { type: 'logux/subscribe', channel: 'a' },
-      { id: [2, '10:uuid', 0], time: 2 }
-    ])
-  await delay(50)
+  let client = await app.connect('10')
+  client.log.add({ type: 'A' })
+  client.log.add({ type: 'logux/subscribe', channel: 'a' })
+  await delay(100)
 
   expect(app.log.actions()).toEqual([
     { type: 'A' },
@@ -416,12 +383,12 @@ it('notifies about actions and subscriptions', async () => {
       '/path',
       {
         version: 3,
-        secret: '1234',
+        secret: 'S',
         commands: [
           [
             'action',
             { type: 'A' },
-            { id: '1 10:uuid 0', time: 1, subprotocol: '0.0.0' }
+            { id: '1 10:1:1 0', time: 1, subprotocol: '0.0.0' }
           ]
         ]
       }
@@ -431,14 +398,14 @@ it('notifies about actions and subscriptions', async () => {
       '/path',
       {
         version: 3,
-        secret: '1234',
+        secret: 'S',
         commands: [
           [
             'action',
             { type: 'logux/subscribe', channel: 'a' },
             {
               added: 1,
-              id: '2 10:uuid 0',
+              id: '2 10:1:1 0',
               time: 2,
               reasons: ['test'],
               server: 'server:uuid',
@@ -453,9 +420,9 @@ it('notifies about actions and subscriptions', async () => {
 
   expect(app.log.actions()).toEqual([
     { type: 'A' },
-    { type: 'logux/processed', id: '1 10:uuid 0' },
     { type: 'logux/subscribe', channel: 'a' },
-    { type: 'logux/processed', id: '2 10:uuid 0' }
+    { type: 'logux/processed', id: '1 10:1:1 0' },
+    { type: 'logux/processed', id: '2 10:1:1 0' }
   ])
   expect(app.log.entries()[0][1].status).toEqual('processed')
   expect(events).toEqual([
@@ -473,14 +440,12 @@ it('asks about action access', async () => {
   app.on('error', e => {
     throw e
   })
-  let client = await connectClient(app)
-  client.connection
-    .other()
-    .send(['sync', 2, { type: 'BAD' }, { id: [1, '10:uuid', 0], time: 1 }])
+  let client = await app.connect('10')
+  client.log.add({ type: 'BAD' })
   await delay(50)
 
   expect(app.log.actions()).toEqual([
-    { type: 'logux/undo', reason: 'denied', id: '1 10:uuid 0' }
+    { type: 'logux/undo', reason: 'denied', id: '1 10:1:1 0' }
   ])
 })
 
@@ -490,15 +455,13 @@ it('reacts on unknown action', async () => {
   app.on('error', e => {
     errors.push(e.message)
   })
-  let client = await connectClient(app)
-  client.connection
-    .other()
-    .send(['sync', 2, { type: 'UNKNOWN' }, { id: [1, '10:uuid', 0], time: 1 }])
+  let client = await app.connect('10')
+  client.log.add({ type: 'UNKNOWN' })
   await delay(100)
   expect(app.log.actions()).toEqual([
-    { type: 'logux/undo', reason: 'unknownType', id: '1 10:uuid 0' }
+    { type: 'logux/undo', reason: 'unknownType', id: '1 10:1:1 0' }
   ])
-  let debug = client.connection.pair.leftSent.find(i => i[0] === 'debug')
+  let debug = client.pair.rightSent.find(i => i[0] === 'debug')
   expect(debug).toEqual(['debug', 'error', 'Action with unknown type UNKNOWN'])
 })
 
@@ -508,89 +471,59 @@ it('reacts on unknown channel', async () => {
   app.on('error', e => {
     errors.push(e.message)
   })
-  let client = await connectClient(app)
-  client.connection
-    .other()
-    .send([
-      'sync',
-      2,
-      { type: 'logux/subscribe', channel: 'unknown' },
-      { id: [1, '10:uuid', 0], time: 1 }
-    ])
+  let client = await app.connect('10')
+  client.log.add({ type: 'logux/subscribe', channel: 'unknown' })
   await delay(100)
   expect(app.log.actions()).toEqual([
     { type: 'logux/subscribe', channel: 'unknown' },
-    { type: 'logux/undo', reason: 'wrongChannel', id: '1 10:uuid 0' }
+    { type: 'logux/undo', reason: 'wrongChannel', id: '1 10:1:1 0' }
   ])
-  let debug = client.connection.pair.leftSent.find(i => i[0] === 'debug')
+  let debug = client.pair.rightSent.find(i => i[0] === 'debug')
   expect(debug).toEqual(['debug', 'error', 'Wrong channel name unknown'])
 })
 
 it('reacts on wrong backend answer', async () => {
   let app = createServer(OPTIONS)
-  let errors = []
+  let errors: string[] = []
   app.on('error', e => {
     errors.push(e.message)
   })
-  let client = await connectClient(app)
-  let lastId = 0
-  function nextMeta () {
-    return { id: [++lastId, '10:uuid', 0], time: 1 }
-  }
-  client.connection
-    .other()
-    .send([
-      'sync',
-      8,
-      { type: 'EMPTY' },
-      nextMeta(),
-      { type: 'BROKEN1' },
-      nextMeta(),
-      { type: 'BROKEN2' },
-      nextMeta(),
-      { type: 'BROKEN3' },
-      nextMeta(),
-      { type: 'BROKEN4' },
-      nextMeta(),
-      { type: 'BROKEN5' },
-      nextMeta(),
-      { type: 'BROKEN6' },
-      nextMeta(),
-      { type: 'BROKEN7' },
-      nextMeta(),
-      { type: 'BROKEN8' },
-      nextMeta(),
-      { type: 'BROKEN9' },
-      nextMeta(),
-      { type: 'BROKENA' },
-      nextMeta(),
-      { type: 'BROKENB' },
-      nextMeta(),
-      { type: 'logux/subscribe', channel: 'resend' },
-      nextMeta()
-    ])
+  let client = await app.connect('10')
+  client.log.add({ type: 'EMPTY' })
+  client.log.add({ type: 'BROKEN1' })
+  client.log.add({ type: 'BROKEN2' })
+  client.log.add({ type: 'BROKEN3' })
+  client.log.add({ type: 'BROKEN4' })
+  client.log.add({ type: 'BROKEN5' })
+  client.log.add({ type: 'BROKEN6' })
+  client.log.add({ type: 'BROKEN7' })
+  client.log.add({ type: 'BROKEN8' })
+  client.log.add({ type: 'BROKEN9' })
+  client.log.add({ type: 'BROKENA' })
+  client.log.add({ type: 'BROKENB' })
+  client.log.add({ type: 'logux/subscribe', channel: 'resend' })
   await delay(100)
 
   expect(app.log.actions()).toEqual([
-    { type: 'logux/subscribe', channel: 'resend' },
     { type: 'BROKEN1' },
     { type: 'BROKEN2' },
     { type: 'BROKEN3' },
     { type: 'BROKEN4' },
     { type: 'BROKEN8' },
-    { type: 'logux/undo', reason: 'error', id: '1 10:uuid 0' },
-    { type: 'logux/undo', reason: 'error', id: '2 10:uuid 0' },
-    { type: 'logux/undo', reason: 'error', id: '3 10:uuid 0' },
-    { type: 'logux/undo', reason: 'error', id: '4 10:uuid 0' },
-    { type: 'logux/undo', reason: 'error', id: '5 10:uuid 0' },
-    { type: 'logux/undo', reason: 'error', id: '6 10:uuid 0' },
-    { type: 'logux/undo', reason: 'error', id: '7 10:uuid 0' },
-    { type: 'logux/undo', reason: 'error', id: '8 10:uuid 0' },
-    { type: 'logux/undo', reason: 'error', id: '9 10:uuid 0' },
-    { type: 'logux/undo', reason: 'error', id: '10 10:uuid 0' },
-    { type: 'logux/undo', reason: 'error', id: '11 10:uuid 0' },
-    { type: 'logux/undo', reason: 'error', id: '12 10:uuid 0' },
-    { type: 'logux/undo', reason: 'error', id: '13 10:uuid 0' }
+    { type: 'logux/subscribe', channel: 'resend' },
+    { type: 'logux/undo', reason: 'error', id: '1 10:1:1 0' },
+    { type: 'logux/undo', reason: 'error', id: '2 10:1:1 0' },
+    { type: 'logux/undo', reason: 'error', id: '3 10:1:1 0' },
+    { type: 'logux/undo', reason: 'error', id: '4 10:1:1 0' },
+    { type: 'logux/undo', reason: 'error', id: '5 10:1:1 0' },
+    { type: 'logux/undo', reason: 'error', id: '6 10:1:1 0' },
+    { type: 'logux/undo', reason: 'error', id: '7 10:1:1 0' },
+    { type: 'logux/undo', reason: 'error', id: '8 10:1:1 0' },
+    { type: 'logux/undo', reason: 'error', id: '9 10:1:1 0' },
+    { type: 'logux/undo', reason: 'error', id: '10 10:1:1 0' },
+    { type: 'logux/undo', reason: 'error', id: '11 10:1:1 0' },
+    { type: 'logux/undo', reason: 'error', id: '12 10:1:1 0' },
+    { type: 'logux/undo', reason: 'error', id: '13 10:1:1 0' }
   ])
   expect(errors).toEqual([
     'Empty back-end answer',
@@ -611,28 +544,20 @@ it('reacts on wrong backend answer', async () => {
 
 it('reacts on backend error', async () => {
   let app = createServer(OPTIONS)
-  let errors = []
+  let errors: string[] = []
   app.on('error', e => {
     errors.push(e.message)
     expect(e.stack).toEqual('stack')
   })
-  let client = await connectClient(app)
-  client.connection
-    .other()
-    .send([
-      'sync',
-      3,
-      { type: 'AERROR' },
-      { id: [1, '10:uuid', 0], time: 1 },
-      { type: 'PERROR' },
-      { id: [2, '10:uuid', 0], time: 1 }
-    ])
+  let client = await app.connect('10')
+  client.log.add({ type: 'AERROR' })
+  client.log.add({ type: 'PERROR' })
   await delay(220)
 
   expect(app.log.actions()).toEqual([
     { type: 'PERROR' },
-    { type: 'logux/undo', reason: 'error', id: '1 10:uuid 0' },
-    { type: 'logux/undo', reason: 'error', id: '2 10:uuid 0' }
+    { type: 'logux/undo', reason: 'error', id: '1 10:1:1 0' },
+    { type: 'logux/undo', reason: 'error', id: '2 10:1:1 0' }
   ])
   expect(errors).toEqual([
     'Error on back-end server',
@@ -667,14 +592,12 @@ it('sets meta to resend', async () => {
   app.on('error', e => {
     throw e
   })
-  let client = await connectClient(app)
-  client.connection
-    .other()
-    .send(['sync', 2, { type: 'RESEND' }, { id: [1, '10:uuid', 0], time: 1 }])
+  let client = await app.connect('10')
+  client.log.add({ type: 'RESEND' })
   await delay(50)
   expect(app.log.actions()).toEqual([
     { type: 'RESEND' },
-    { type: 'logux/processed', id: '1 10:uuid 0' }
+    { type: 'logux/processed', id: '1 10:1:1 0' }
   ])
   expect(app.log.entries()[0][1].channels).toEqual(['A'])
 })

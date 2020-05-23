@@ -1,8 +1,13 @@
-let { ClientNode, TestPair, TestTime } = require('@logux/core')
+import { ClientNode, TestPair, TestTime, TestLog } from '@logux/core'
 
-let FilteredNode = require('../filtered-node')
+import FilteredNode from '../filtered-node'
 
-function createTest () {
+type Test = {
+  client: ClientNode<{}, TestLog>
+  server: FilteredNode
+}
+
+function createTest (): Test {
   let time = new TestTime()
   let log1 = time.nextLog()
   let log2 = time.nextLog()
@@ -21,10 +26,10 @@ function createTest () {
   return { client, server }
 }
 
-let test
+let test: Test
 afterEach(async () => {
-  await test.client.destroy()
-  await test.server.destroy()
+  test.client.destroy()
+  test.server.destroy()
 })
 
 it('does not sync actions on add', async () => {

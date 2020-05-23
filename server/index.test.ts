@@ -1,14 +1,15 @@
-let { join } = require('path')
-let spawn = require('cross-spawn')
+import { ChildProcess, SpawnOptions } from 'child_process'
+import { join } from 'path'
+import spawn from 'cross-spawn'
 
-let { Server } = require('..')
+import { Server } from '..'
 
 const DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
 
-let started
+let started: ChildProcess | undefined
 
-function start (name, args) {
-  return new Promise(resolve => {
+function start (name: string, args?: string[]) {
+  return new Promise<ChildProcess>(resolve => {
     started = spawn(join(__dirname, '../test/servers/', name), args)
     let running = false
     function callback () {
@@ -17,19 +18,24 @@ function start (name, args) {
         resolve()
       }
     }
-    started.stdout.on('data', callback)
-    started.stderr.on('data', callback)
+    started.stdout?.on('data', callback)
+    started.stderr?.on('data', callback)
   })
 }
 
-function check (name, args, opts, kill) {
-  return new Promise(resolve => {
+function check (
+  name: string,
+  args?: string[],
+  opts?: SpawnOptions,
+  kill = false
+) {
+  return new Promise<[string, number]>(resolve => {
     let out = ''
     let server = spawn(join(__dirname, '../test/servers/', name), args, opts)
-    server.stdout.on('data', chank => {
+    server.stdout?.on('data', chank => {
       out += chank
     })
-    server.stderr.on('data', chank => {
+    server.stderr?.on('data', chank => {
       out += chank
     })
     server.on('close', exit => {
@@ -57,8 +63,12 @@ function check (name, args, opts, kill) {
   })
 }
 
-async function checkOut (name, args) {
-  let result = await check(name, args, {}, 'kill')
+function fakeProcess (argv: string[] = [], env: object = {}): any {
+  return { argv, env }
+}
+
+async function checkOut (name: string, args?: string[], opts?: SpawnOptions) {
+  let result = await check(name, args, opts, true)
   let out = result[0]
   let exit = result[1]
   expect(out).toMatchSnapshot()
@@ -67,8 +77,8 @@ async function checkOut (name, args) {
   }
 }
 
-async function checkError (name, args) {
-  let result = await check(name, args)
+async function checkError (name: string, args?: string[], opts?: SpawnOptions) {
+  let result = await check(name, args, opts)
   let out = result[0]
   let exit = result[1]
   expect(out).toMatchSnapshot()
@@ -83,8 +93,8 @@ afterEach(() => {
 })
 
 it('uses CLI args for options', () => {
-  let options = Server.loadOptions({
-    argv: [
+  let options = Server.loadOptions(
+    fakeProcess([
       '',
       '--port',
       '1337',
@@ -98,9 +108,12 @@ it('uses CLI args for options', () => {
       'http://localhost:8080/logux',
       '--control-secret',
       'secret'
-    ],
-    env: {}
-  })
+    ]),
+    {
+      subprotocol: '1.0.0',
+      supports: '1.0.0'
+    }
+  )
 
   expect(options.host).toEqual('192.168.1.1')
   expect(options.port).toEqual(1337)
@@ -113,17 +126,20 @@ it('uses CLI args for options', () => {
 })
 
 it('uses env for options', () => {
-  let options = Server.loadOptions({
-    argv: [],
-    env: {
+  let options = Server.loadOptions(
+    fakeProcess([], {
       LOGUX_HOST: '127.0.1.1',
-      LOGUX_PORT: 31337,
+      LOGUX_PORT: '31337',
       LOGUX_REPORTER: 'json',
       LOGUX_REDIS: '//localhost',
       LOGUX_BACKEND: 'http://localhost:8080/logux',
       LOGUX_CONTROL_SECRET: 'secret'
+    }),
+    {
+      subprotocol: '1.0.0',
+      supports: '1.0.0'
     }
-  })
+  )
 
   expect(options.host).toEqual('127.0.1.1')
   expect(options.port).toEqual(31337)
@@ -135,11 +151,8 @@ it('uses env for options', () => {
 
 it('uses combined options', () => {
   let options = Server.loadOptions(
-    {
-      env: { LOGUX_CERT: './cert.pem' },
-      argv: ['', '--key', './key.pem']
-    },
-    { port: 31337 }
+    fakeProcess(['', '--key', './key.pem'], { LOGUX_CERT: './cert.pem' }),
+    { subprotocol: '1.0.0', supports: '1.0.0', port: 31337 }
   )
 
   expect(options.port).toEqual(31337)
@@ -149,27 +162,23 @@ it('uses combined options', () => {
 
 it('uses arg, env, options in given priority', () => {
   let options1 = Server.loadOptions(
-    { argv: ['', '--port', '31337'], env: { LOGUX_PORT: 21337 } },
-    { port: 11337 }
-  )
-  let options2 = Server.loadOptions(
+    fakeProcess(['', '--port', '31337'], { LOGUX_PORT: 21337 }),
     {
-      argv: [],
-      env: { LOGUX_PORT: 21337 }
-    },
-    {
+      subprotocol: '1.0.0',
+      supports: '1.0.0',
       port: 11337
     }
   )
-  let options3 = Server.loadOptions(
-    {
-      argv: [],
-      env: {}
-    },
-    {
-      port: 11337
-    }
-  )
+  let options2 = Server.loadOptions(fakeProcess([], { LOGUX_PORT: 21337 }), {
+    subprotocol: '1.0.0',
+    supports: '1.0.0',
+    port: 11337
+  })
+  let options3 = Server.loadOptions(fakeProcess(), {
+    subprotocol: '1.0.0',
+    supports: '1.0.0',
+    port: 11337
+  })
 
   expect(options1.port).toEqual(31337)
   expect(options2.port).toEqual(21337)
@@ -179,7 +188,7 @@ it('uses arg, env, options in given priority', () => {
 it('destroys everything on exit', () => checkOut('destroy.js'))
 
 it('writes about unbind', async () => {
-  let result = await check('unbind.js', [], {}, 'kill')
+  let result = await check('unbind.js', [], {}, true)
   expect(result[0]).toMatchSnapshot()
 })
 
@@ -188,12 +197,13 @@ it('shows uncatch errors', () => checkError('throw.js'))
 it('shows uncatch rejects', () => checkError('uncatch.js'))
 
 it('uses environment variables for config', () => {
-  return checkOut('options.js', {
-    env: Object.assign({}, process.env, {
+  return checkOut('options.js', [], {
+    env: {
+      ...process.env,
       LOGUX_REPORTER: 'json',
-      LOGUX_PORT: 31337,
+      LOGUX_PORT: '31337',
       NODE_ENV: 'test'
-    })
+    }
   })
 })
 
@@ -208,7 +218,7 @@ it('uses .env cwd', async () => {
     'options.js',
     [],
     { cwd: join(__dirname, '../test/fixtures') },
-    'kill'
+    true
   )
   expect(result[0]).toMatchSnapshot()
 })
@@ -233,10 +243,11 @@ it('shows help about missed option', () => checkError('missed.js'))
 it('shows help about missed secret', () => checkError('no-secret.js'))
 
 it('disables colors for constructor errors', () => {
-  return checkError('missed.js', {
-    env: Object.assign({}, process.env, {
+  return checkError('missed.js', [], {
+    env: {
+      ...process.env,
       NODE_ENV: 'production'
-    })
+    }
   })
 })
 

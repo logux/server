@@ -1,6 +1,10 @@
-import { Action, Meta, TestLog, TestPair } from '@logux/core'
+import { Action, TestLog, TestPair } from '@logux/core'
 
-import { LoguxSubscribeAction, LoguxUnsubscribeAction } from '../base-server'
+import {
+  LoguxAnySubscribeAction,
+  LoguxUnsubscribeAction,
+  ServerMeta
+} from '../base-server'
 import TestServer from '../test-server'
 
 export type TestClientOptions = {
@@ -138,7 +142,7 @@ export default class TestClient {
    * @param meta Optional action’s meta.
    * @returns Promise until `logux/processed` answer.
    */
-  process (action: Action, meta?: Meta): Promise<Action[]>
+  process (action: Action, meta?: Partial<ServerMeta>): Promise<Action[]>
 
   /**
    * Subscribe to the channel and collect all actions dunring the subscription.
@@ -153,7 +157,7 @@ export default class TestClient {
    * @param channel Channel name or `logux/subscribe` action.
    * @returns Promise with all actions from the server.
    */
-  subscribe (channel: string | LoguxSubscribeAction): Promise<Action[]>
+  subscribe (channel: string | LoguxAnySubscribeAction): Promise<Action[]>
 
   /**
    * Unsubscribe client from the channel.
