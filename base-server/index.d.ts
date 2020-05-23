@@ -5,7 +5,7 @@ import {
   Log,
   Meta,
   ServerConnection,
-  Store,
+  LogStore,
   TestTime
 } from '@logux/core'
 import { Unsubscribe } from 'nanoevents'
@@ -119,7 +119,7 @@ export type BaseServerOptions = {
   /**
    * Store to save log. Will be {@link @logux/core:MemoryStore}, by default.
    */
-  store?: Store
+  store?: LogStore
 
   /**
    * Test time to test server.
@@ -163,7 +163,7 @@ export type BaseServerOptions = {
    * SSL key or path to it. Path could be relative from server root.
    * It is required in production mode, because WSS is highly recommended.
    */
-  key?: string
+  key?: string | { pem: string }
 
   /**
    * SSL certificate or path to it. Path could be relative from server
@@ -180,6 +180,10 @@ export type LoguxSubscribeAction = {
     id: string
     time: number
   }
+}
+
+export type LoguxAnySubscribeAction = LoguxSubscribeAction & {
+  [key: string]: any
 }
 
 export type LoguxUnsubscribeAction = {
@@ -473,10 +477,27 @@ interface ActionCreator {
   toString(): string
 }
 
+type Response = {
+  header?: {
+    [name: string]: string
+  }
+  body: string
+}
+
+type GetProcessor = {
+  safe?: boolean
+  request(request: object): Response
+}
+
+type PostProcessor = {
+  isValid(command: object): false
+  command(command: object, request: object): Promise<void>
+}
+
 /**
  * Base server class to extend.
  */
-export default class BaseServer {
+export default class BaseServer<L extends Log = Log<ServerMeta>> {
   /**
    * @param opts Server options.
    */
@@ -523,7 +544,7 @@ export default class BaseServer {
    * server.log.each(finder)
    * ```
    */
-  log: Log<ServerMeta>
+  log: L
 
   /**
    * Connected clients.
@@ -536,6 +557,55 @@ export default class BaseServer {
    */
   connected: {
     [key: string]: ServerClient
+  }
+
+  /**
+   * Connected client by client ID.
+   *
+   * Do not rely on this data, when you have multiple Logux servers.
+   * Each server will have a different list.
+   */
+  clientIds: {
+    [clientId: string]: ServerClient
+  }
+
+  /**
+   * Connected client by node ID.
+   *
+   * Do not rely on this data, when you have multiple Logux servers.
+   * Each server will have a different list.
+   */
+  nodeIds: {
+    [nodeId: string]: ServerClient
+  }
+
+  /**
+   * Connected client by user ID.
+   *
+   * Do not rely on this data, when you have multiple Logux servers.
+   * Each server will have a different list.
+   */
+  userIds: {
+    [nodeId: string]: ServerClient[]
+  }
+
+  /**
+   * Clients subscribed to some channel.
+   *
+   * Do not rely on this data, when you have multiple Logux servers.
+   * Each server will have a different list.
+   */
+  subscribers: {
+    [channel: string]: {
+      [nodeId: string]: ChannelFilter | true
+    }
+  }
+
+  /**
+   * Add callback to internal HTTP server.
+   */
+  controls: {
+    [path: string]: GetProcessor | PostProcessor
   }
 
   /**
@@ -611,10 +681,19 @@ export default class BaseServer {
 
   /**
    * @param event The event name.
+   * @param listener Client listener.
+   */
+  on (
+    event: 'authenticated',
+    listener: (client: ServerClient, latencyMilliseconds: number) => void
+  ): Unsubscribe
+
+  /**
+   * @param event The event name.
    * @param listener Action listener.
    */
   on (
-    event: 'preadd' | 'add' | 'clean',
+    event: 'preadd' | 'add' | 'clean' | 'backendSent',
     listener: (action: Action, meta: ServerMeta) => void
   ): Unsubscribe
 
@@ -623,7 +702,7 @@ export default class BaseServer {
    * @param listener Processing listener.
    */
   on (
-    event: 'processed',
+    event: 'processed' | 'backendGranted' | 'backendProcessed',
     listener: (
       action: Action,
       meta: ServerMeta,
@@ -643,6 +722,12 @@ export default class BaseServer {
       latencyMilliseconds: number
     ) => void
   ): Unsubscribe
+
+  /**
+   * @param event The event name.
+   * @param listener Event listener.
+   */
+  on (event: 'subscriptionCancelled', listener: () => void): Unsubscribe
 
   /**
    * Stop server and unbind all listeners.
@@ -788,7 +873,7 @@ export default class BaseServer {
    * @template A `logux/subscribe` Action’s type.
    */
   otherChannel<D extends object = {}> (
-    callbacks: ChannelCallbacks<LoguxSubscribeAction, D, {}>
+    callbacks: ChannelCallbacks<LoguxSubscribeAction, D, [string]>
   ): void
 
   /**
