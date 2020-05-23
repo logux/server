@@ -102,7 +102,7 @@ yargs
   .version(false)
 
 class Server extends BaseServer {
-  static loadOptions (process, defaults = {}) {
+  static loadOptions (process, defaults) {
     if (defaults.root) {
       dotenv.config({ path: join(defaults.root, '.env') })
     } else {

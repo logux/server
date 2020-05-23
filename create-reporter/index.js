@@ -200,7 +200,7 @@ function createReporter (options) {
   if (options.logger) {
     logger = options.logger
   } else {
-    let stream = options.out || pino.destination()
+    let stream = options.reporterStream || pino.destination()
     let prettifier = {}
     if (options.reporter === 'human') {
       let env = options.env || process.env.NODE_ENV || 'development'

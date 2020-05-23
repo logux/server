@@ -1,7 +1,7 @@
 import { actionCreatorFactory } from 'typescript-fsa'
-import * as pino from 'pino'
 
 import { Server, Action, LoguxSubscribeAction } from '..'
+import pino = require('pino')
 
 let server = new Server(
   Server.loadOptions(process, {

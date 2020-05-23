@@ -9,6 +9,13 @@ export type ServerOptions = BaseServerOptions & {
   reporter?: 'human' | 'json' | Reporter
 
   /**
+   * Stream to be used by reporter to write log.
+   */
+  reporterStream?: {
+    write(str: string): void
+  }
+
+  /**
    * Logger with custom settings.
    *
    * For example, you can provide pino logger that streams logs to
