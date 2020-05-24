@@ -9,7 +9,8 @@ let app = new Server({
 })
 app.nodeId = 'server:FnXaqDxY'
 
-app.autoloadModules('error-modules/*/index.js')
 app.auth(async () => true)
 
-app.listen()
+app.listen().then(() => {
+  app.autoloadModules('error-modules/*/index.js')
+})
