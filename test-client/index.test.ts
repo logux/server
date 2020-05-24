@@ -1,7 +1,7 @@
+import { TestTime } from '@logux/core'
 import { delay } from 'nanodelay'
 
-import { TestClient, TestServer } from '..'
-import { LoguxAnySubscribeAction } from '../base-server'
+import { LoguxAnySubscribeAction, TestClient, TestServer } from '..'
 
 let server: TestServer
 afterEach(() => {
@@ -65,6 +65,15 @@ it('sends and collect actions', async () => {
     { type: 'logux/processed', id: '1 10:1:1 0' },
     { type: 'RESEND' }
   ])
+})
+
+it('allows to change time', () => {
+  let time = new TestTime()
+  let server1 = new TestServer({ time })
+  let server2 = new TestServer({ time })
+  expect(server1.options.time).toBe(time)
+  expect(server2.options.time).toBe(time)
+  expect(server1.nodeId).not.toEqual(server2.nodeId)
 })
 
 it('tracks action processing', async () => {

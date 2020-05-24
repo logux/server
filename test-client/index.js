@@ -10,7 +10,7 @@ class TestClient {
     clientId += 1
     server.testUsers[userId] = clientId
     this.nodeId = `${userId}:${clientId}:1`
-    this.log = server.time.nextLog({ nodeId: this.nodeId })
+    this.log = server.options.time.nextLog({ nodeId: this.nodeId })
     this.log.on('preadd', (action, meta) => {
       meta.reasons.push('test')
     })
