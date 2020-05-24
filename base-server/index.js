@@ -71,7 +71,7 @@ class BaseServer {
       log = new Log({ store, nodeId: this.nodeId })
     }
 
-    this.contexts = {}
+    this.contexts = new WeakMap()
     this.log = log
 
     this.on('preadd', (action, meta) => {
@@ -114,7 +114,7 @@ class BaseServer {
 
       let processor = this.getProcessor(action.type)
       if (processor && processor.resend && meta.status === 'waiting') {
-        let ctx = this.createContext(meta)
+        let ctx = this.createContext(action, meta)
         let resend
         try {
           resend = await processor.resend(ctx, action, meta)
@@ -150,12 +150,17 @@ class BaseServer {
           this.processAction(processor, action, meta, start)
         } else {
           this.emitter.emit('processed', action, meta, 0)
-          this.finally(processor, this.createContext(meta), action, meta)
+          this.finally(
+            processor,
+            this.createContext(action, meta),
+            action,
+            meta
+          )
           this.markAsProcessed(meta)
         }
       } else {
         this.emitter.emit('processed', action, meta, 0)
-        this.finally(processor, this.createContext(meta), action, meta)
+        this.finally(processor, this.createContext(action, meta), action, meta)
       }
     })
     this.on('clean', (action, meta) => {
@@ -460,7 +465,7 @@ class BaseServer {
             if (!clients.has(clientId)) {
               let filter = this.subscribers[channel][nodeId]
               if (typeof filter === 'function') {
-                if (!ctx) ctx = this.createContext(meta)
+                if (!ctx) ctx = this.createContext(action, meta)
                 filter = filter(ctx, action, meta)
               }
               let client = this.clientIds.get(clientId)
@@ -494,7 +499,7 @@ class BaseServer {
   }
 
   internalUnkownType (action, meta) {
-    delete this.contexts[meta.id]
+    this.contexts.delete(action)
     this.log.changeMeta(meta.id, { status: 'error' })
     this.reporter('unknownType', { type: action.type, actionId: meta.id })
     if (parseNodeId(meta.id).userId !== 'server') {
@@ -504,7 +509,7 @@ class BaseServer {
   }
 
   internalWrongChannel (action, meta) {
-    delete this.contexts[meta.id]
+    this.contexts.delete(action)
     this.reporter('wrongChannel', {
       actionId: meta.id,
       channel: action.channel
@@ -514,7 +519,7 @@ class BaseServer {
   }
 
   async processAction (processor, action, meta, start) {
-    let ctx = this.createContext(meta)
+    let ctx = this.createContext(action, meta)
 
     let latency
     this.processing += 1
@@ -546,8 +551,8 @@ class BaseServer {
     }
   }
 
-  createContext (meta) {
-    if (!this.contexts[meta.id]) {
+  createContext (action, meta) {
+    if (!this.contexts.has(action)) {
       let data = parseNodeId(meta.id)
 
       let subprotocol
@@ -557,15 +562,12 @@ class BaseServer {
         subprotocol = this.clientIds.get(data.clientId).node.remoteSubprotocol
       }
 
-      this.contexts[meta.id] = new Context(
-        data.nodeId,
-        data.clientId,
-        data.userId,
-        subprotocol,
-        this
+      this.contexts.set(
+        action,
+        new Context(data.nodeId, data.clientId, data.userId, subprotocol, this)
       )
     }
-    return this.contexts[meta.id]
+    return this.contexts.get(action)
   }
 
   async subscribeAction (action, meta, start) {
@@ -589,7 +591,7 @@ class BaseServer {
 
       let subscribed = false
       if (match) {
-        let ctx = this.createContext(meta)
+        let ctx = this.createContext(action, meta)
         ctx.params = match
         try {
           let access = await i.access(ctx, action, meta)
@@ -661,7 +663,7 @@ class BaseServer {
       channel: action.channel
     })
     this.markAsProcessed(meta)
-    delete this.contexts[meta.id]
+    this.contexts.delete(action)
   }
 
   denyAction (meta) {
@@ -724,7 +726,7 @@ class BaseServer {
   }
 
   finally (processor, ctx, action, meta) {
-    delete this.contexts[meta.id]
+    this.contexts.delete(action)
     if (processor && processor.finally) {
       try {
         processor.finally(ctx, action, meta)

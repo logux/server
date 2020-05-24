@@ -164,12 +164,12 @@ class ServerClient {
   }
 
   async filter (action, meta) {
-    let ctx = this.app.createContext(meta)
+    let ctx = this.app.createContext(action, meta)
 
     let wrongUser = !this.clientId || this.clientId !== ctx.clientId
     let wrongMeta = Object.keys(meta).some(i => !ALLOWED_META.includes(i))
     if (wrongUser || wrongMeta) {
-      delete this.app.contexts[meta.id]
+      this.app.contexts.delete(action)
       this.denyBack(meta)
       return false
     }
