@@ -27,9 +27,9 @@ it('connects and disconnect', async () => {
   let client1 = new TestClient(server, '10')
   let client2 = new TestClient(server, '10')
   await Promise.all([client1.connect(), client2.connect()])
-  expect(Object.keys(server.clientIds)).toEqual(['10:1', '10:2'])
+  expect(Array.from(server.clientIds.keys())).toEqual(['10:1', '10:2'])
   await client1.disconnect()
-  expect(Object.keys(server.clientIds)).toEqual(['10:2'])
+  expect(Array.from(server.clientIds.keys())).toEqual(['10:2'])
 })
 
 it('sends and collect actions', async () => {

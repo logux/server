@@ -329,8 +329,8 @@ it('creates a client on connection', async () => {
     ws.onopen = resolve
     ws.onerror = reject
   })
-  expect(Object.keys(app.connected)).toHaveLength(1)
-  expect(app.connected[1].remoteAddress).toEqual('127.0.0.1')
+  expect(app.connected.size).toEqual(1)
+  expect(app.connected.get('1')?.remoteAddress).toEqual('127.0.0.1')
 })
 
 it('creates a client manually', () => {
@@ -345,27 +345,27 @@ it('creates a client manually', () => {
       }
     }
   } as any)
-  expect(Object.keys(app.connected)).toHaveLength(1)
-  expect(app.connected[1].remoteAddress).toEqual('127.0.0.1')
+  expect(app.connected.size).toEqual(1)
+  expect(app.connected.get('1')?.remoteAddress).toEqual('127.0.0.1')
 })
 
 it('sends debug message to clients on runtimeError', () => {
   let app = createServer()
-  app.connected[1] = {
+  app.connected.set('1', {
     connection: {
       connected: true,
       send: jest.fn()
     },
     destroy: () => false
-  } as any
-  app.connected[2] = {
+  } as any)
+  app.connected.set('2', {
     connection: {
       connected: false,
       send: jest.fn()
     },
     destroy: () => false
-  } as any
-  app.connected[3] = {
+  } as any)
+  app.connected.set('3', {
     connection: {
       connected: true,
       send: () => {
@@ -373,25 +373,25 @@ it('sends debug message to clients on runtimeError', () => {
       }
     },
     destroy: () => false
-  } as any
+  } as any)
 
   let error = new Error('Test Error')
   error.stack = `${error.stack?.split('\n')[0]}\nfake stacktrace`
 
   app.debugError(error)
-  expect(app.connected[1].connection.send).toHaveBeenCalledWith([
+  expect(app.connected.get('1')?.connection.send).toHaveBeenCalledWith([
     'debug',
     'error',
     'Error: Test Error\n' + 'fake stacktrace'
   ])
-  expect(app.connected[2].connection.send).not.toHaveBeenCalled()
+  expect(app.connected.get('2')?.connection.send).not.toHaveBeenCalled()
 })
 
 it('disconnects client on destroy', () => {
   let app = createServer()
-  app.connected[1] = { destroy: jest.fn() } as any
+  app.connected.set('1', { destroy: jest.fn() } as any)
   app.destroy()
-  expect(app.connected[1].destroy).toHaveBeenCalledTimes(1)
+  expect(app.connected.get('1')?.destroy).toHaveBeenCalledTimes(1)
 })
 
 it('accepts custom HTTP server', async () => {
@@ -408,7 +408,7 @@ it('accepts custom HTTP server', async () => {
     ws.onopen = resolve
     ws.onerror = reject
   })
-  expect(Object.keys(app.connected)).toHaveLength(1)
+  expect(app.connected.size).toEqual(1)
 })
 
 it('marks actions with own node ID', async () => {
@@ -496,10 +496,10 @@ it('reports about fatal error', () => {
 
 it('sends errors to clients in development', () => {
   let test = createReporter({ env: 'development' })
-  test.app.connected[0] = {
+  test.app.connected.set('0', {
     connection: { connected: true, send: jest.fn() },
     destroy: () => false
-  } as any
+  } as any)
 
   let err = new Error('Test')
   err.stack = 'stack'
@@ -507,7 +507,7 @@ it('sends errors to clients in development', () => {
   emit(test.app, 'error', err)
 
   expect(test.reports).toEqual([['error', { err, nodeId: '10:uuid' }]])
-  expect(test.app.connected[0].connection.send).toHaveBeenCalledWith([
+  expect(test.app.connected.get('0')?.connection.send).toHaveBeenCalledWith([
     'debug',
     'error',
     'stack'
@@ -516,12 +516,12 @@ it('sends errors to clients in development', () => {
 
 it('does not send errors in non-development mode', () => {
   let app = createServer({ env: 'production' })
-  app.connected[0] = {
+  app.connected.set('0', {
     connection: { send: jest.fn() },
     destroy: () => false
-  } as any
+  } as any)
   emit(app, 'error', new Error('Test'))
-  expect(app.connected[0].connection.send).not.toHaveBeenCalled()
+  expect(app.connected.get('0')?.connection.send).not.toHaveBeenCalled()
 })
 
 it('processes actions', async () => {
@@ -720,11 +720,12 @@ it('checks channel definition', () => {
 it('reports about wrong channel name', async () => {
   let test = createReporter({ env: 'development' })
   test.app.channel('foo', { access: () => true })
-  test.app.nodeIds['10:uuid'] = {
+  let client: any = {
     connection: { send: jest.fn() },
     node: { onAdd () {} }
-  } as any
-  test.app.clientIds['10:uuid'] = test.app.nodeIds['10:uuid']
+  }
+  test.app.nodeIds.set('10:uuid', client)
+  test.app.clientIds.set('10:uuid', client)
   await test.app.log.add({ type: 'logux/subscribe' }, { id: '1 10:uuid 0' })
   expect(test.names).toEqual(['add', 'wrongChannel', 'add', 'clean', 'clean'])
   expect(test.reports[1][1]).toEqual({
@@ -736,7 +737,7 @@ it('reports about wrong channel name', async () => {
     reason: 'wrongChannel',
     type: 'logux/undo'
   })
-  expect(test.app.nodeIds['10:uuid'].connection.send).toHaveBeenCalledWith([
+  expect(client.connection.send).toHaveBeenCalledWith([
     'debug',
     'error',
     'Wrong channel name undefined'
@@ -785,11 +786,12 @@ it('allows to have custom channel name check', async () => {
       return false
     }
   })
-  test.app.nodeIds['10:uuid'] = {
+  let client: any = {
     connection: { send: jest.fn() },
     node: { onAdd () {} }
-  } as any
-  test.app.clientIds['10:uuid'] = test.app.nodeIds['10:uuid']
+  }
+  test.app.nodeIds.set('10:uuid', client)
+  test.app.clientIds.set('10:uuid', client)
   await test.app.log.add({ type: 'logux/subscribe', channel: 'foo' })
   expect(channels).toEqual(['foo'])
   expect(test.names).toEqual(['add', 'wrongChannel', 'add', 'clean', 'clean'])
@@ -807,8 +809,8 @@ it('checks channel access', async () => {
   let client: any = {
     node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
   }
-  test.app.nodeIds['10:uuid'] = client
-  test.app.clientIds['10:uuid'] = client
+  test.app.nodeIds.set('10:uuid', client)
+  test.app.clientIds.set('10:uuid', client)
 
   let finalled = 0
 
@@ -844,8 +846,8 @@ it('reports about errors during channel authorization', async () => {
   let client: any = {
     node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
   }
-  test.app.nodeIds['10:uuid'] = client
-  test.app.clientIds['10:uuid'] = client
+  test.app.nodeIds.set('10:uuid', client)
+  test.app.clientIds.set('10:uuid', client)
 
   let err = new Error()
   test.app.channel(/^user\/(\d+)$/, {
@@ -876,8 +878,8 @@ it('subscribes clients', async () => {
   let client: any = {
     node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
   }
-  test.app.nodeIds['10:a:uuid'] = client
-  test.app.clientIds['10:a'] = client
+  test.app.nodeIds.set('10:a:uuid', client)
+  test.app.clientIds.set('10:a', client)
 
   let userSubsriptions = 0
   test.app.channel<{ id: string }>('user/:id', {
@@ -989,8 +991,8 @@ it('cancels subscriptions on disconnect', async () => {
   let client: any = {
     node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
   }
-  app.nodeIds['10:uuid'] = client
-  app.clientIds['10:uuid'] = client
+  app.nodeIds.set('10:uuid', client)
+  app.clientIds.set('10:uuid', client)
 
   let cancels = 0
   app.on('subscriptionCancelled', () => {
@@ -999,8 +1001,8 @@ it('cancels subscriptions on disconnect', async () => {
 
   app.channel('test', {
     access () {
-      delete app.clientIds['10:uuid']
-      delete app.nodeIds['10:uuid']
+      app.clientIds.delete('10:uuid')
+      app.nodeIds.delete('10:uuid')
       return true
     },
     filter () {
@@ -1025,8 +1027,8 @@ it('reports about errors during channel initialization', async () => {
   let client: any = {
     node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
   }
-  test.app.nodeIds['10:uuid'] = client
-  test.app.clientIds['10:uuid'] = client
+  test.app.nodeIds.set('10:uuid', client)
+  test.app.clientIds.set('10:uuid', client)
 
   let err = new Error()
   test.app.channel(/^user\/(\d+)$/, {
@@ -1067,8 +1069,8 @@ it('loads initial actions during subscription', async () => {
   let client: any = {
     node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
   }
-  test.app.nodeIds['10:uuid'] = client
-  test.app.clientIds['10:uuid'] = client
+  test.app.nodeIds.set('10:uuid', client)
+  test.app.clientIds.set('10:uuid', client)
 
   test.app.on('preadd', (action, meta) => {
     meta.reasons.push('test')

@@ -53,7 +53,7 @@ export default class Context<D extends object = {}> {
    * Unique node ID.
    *
    * ```js
-   * server.nodeIds[node.nodeId]
+   * server.nodeIds.get(node.nodeId)
    * ```
    */
   nodeId: string
@@ -74,7 +74,7 @@ export default class Context<D extends object = {}> {
    * Unique persistence client ID.
    *
    * ```js
-   * server.clientIds[node.clientId]
+   * server.clientIds.get(node.clientId)
    * ```
    */
   clientId: string

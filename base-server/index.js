@@ -201,10 +201,10 @@ class BaseServer {
 
     this.unbind = []
 
-    this.connected = {}
-    this.nodeIds = {}
-    this.clientIds = {}
-    this.userIds = {}
+    this.connected = new Map()
+    this.nodeIds = new Map()
+    this.clientIds = new Map()
+    this.userIds = new Map()
     this.types = {}
     this.processing = 0
 
@@ -233,7 +233,7 @@ class BaseServer {
     }
 
     this.unbind.push(() => {
-      for (let i in this.connected) this.connected[i].destroy()
+      for (let i of this.connected.values()) i.destroy()
       for (let i in this.timeouts) {
         clearTimeout(this.timeouts[i])
       }
@@ -402,10 +402,10 @@ class BaseServer {
   }
 
   debugError (error) {
-    for (let i in this.connected) {
-      if (this.connected[i].connection.connected) {
+    for (let i of this.connected.values()) {
+      if (i.connection.connected) {
         try {
-          this.connected[i].connection.send(['debug', 'error', error.stack])
+          i.connection.send(['debug', 'error', error.stack])
         } catch {}
       }
     }
@@ -423,24 +423,26 @@ class BaseServer {
 
     if (meta.nodes) {
       for (let id of meta.nodes) {
-        if (this.nodeIds[id] && this.nodeIds[id].clientId !== from) {
-          send(this.nodeIds[id])
+        let client = this.nodeIds.get(id)
+        if (client && client.clientId !== from) {
+          send(client)
         }
       }
     }
 
     if (meta.clients) {
       for (let id of meta.clients) {
-        if (this.clientIds[id] && id !== from) {
-          send(this.clientIds[id])
+        if (this.clientIds.has(id) && id !== from) {
+          send(this.clientIds.get(id))
         }
       }
     }
 
     if (meta.users) {
       for (let userId of meta.users) {
-        if (this.userIds[userId]) {
-          for (let client of this.userIds[userId]) {
+        let users = this.userIds.get(userId)
+        if (users) {
+          for (let client of users) {
             if (client.clientId !== from) {
               send(client)
             }
@@ -461,9 +463,10 @@ class BaseServer {
                 if (!ctx) ctx = this.createContext(meta)
                 filter = filter(ctx, action, meta)
               }
-              if (filter && this.clientIds[clientId]) {
+              let client = this.clientIds.get(clientId)
+              if (filter && client) {
                 clients.add(clientId)
-                this.clientIds[clientId].node.onAdd(action, meta)
+                client.node.onAdd(action, meta)
               }
             }
           }
@@ -474,8 +477,9 @@ class BaseServer {
 
   addClient (connection) {
     this.lastClient += 1
-    let node = new ServerClient(this, connection, this.lastClient)
-    this.connected[this.lastClient] = node
+    let key = this.lastClient.toString()
+    let client = new ServerClient(this, connection, key)
+    this.connected.set(key, client)
     return this.lastClient
   }
 
@@ -549,8 +553,8 @@ class BaseServer {
       let subprotocol
       if (meta.subprotocol) {
         subprotocol = meta.subprotocol
-      } else if (this.clientIds[data.clientId]) {
-        subprotocol = this.clientIds[data.clientId].node.remoteSubprotocol
+      } else if (this.clientIds.has(data.clientId)) {
+        subprotocol = this.clientIds.get(data.clientId).node.remoteSubprotocol
       }
 
       this.contexts[meta.id] = new Context(
@@ -598,7 +602,7 @@ class BaseServer {
             return
           }
 
-          let client = this.clientIds[ctx.clientId]
+          let client = this.clientIds.get(ctx.clientId)
           if (!client) {
             this.emitter.emit('subscriptionCancelled')
             return
@@ -669,8 +673,8 @@ class BaseServer {
   debugActionError (meta, msg) {
     if (this.env === 'development') {
       let clientId = parseNodeId(meta.id).clientId
-      if (this.clientIds[clientId]) {
-        this.clientIds[clientId].connection.send(['debug', 'error', msg])
+      if (this.clientIds.has(clientId)) {
+        this.clientIds.get(clientId).connection.send(['debug', 'error', msg])
       }
     }
   }

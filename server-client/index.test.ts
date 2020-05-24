@@ -90,7 +90,7 @@ function createReporter (opts: Partial<BaseServerOptions> = {}) {
 function createClient (app: BaseServer) {
   let lastClient: number = ++privateMethods(app).lastClient
   let client = new ServerClient(app, createConnection(), lastClient)
-  app.connected[lastClient] = client
+  app.connected.set(`${lastClient}`, client)
   destroyable.push(client)
   return client
 }
@@ -211,7 +211,7 @@ it('removes itself on destroy', async () => {
   await delay(1)
 
   client1.destroy()
-  expect(test.app.userIds).toEqual({ 10: [client2] })
+  expect(Array.from(test.app.userIds.keys())).toEqual(['10'])
   expect(test.app.subscribers).toEqual({
     'user/10': { '10:other': true }
   })
@@ -226,10 +226,10 @@ it('removes itself on destroy', async () => {
   expect(test.reports[4]).toEqual(['disconnect', { nodeId: '10:uuid' }])
 
   client2.destroy()
-  expect(test.app.connected).toEqual({})
-  expect(test.app.clientIds).toEqual({})
-  expect(test.app.nodeIds).toEqual({})
-  expect(test.app.userIds).toEqual({})
+  expect(test.app.connected.size).toEqual(0)
+  expect(test.app.clientIds.size).toEqual(0)
+  expect(test.app.nodeIds.size).toEqual(0)
+  expect(test.app.userIds.size).toEqual(0)
   expect(test.app.subscribers).toEqual({})
   expect(fired).toEqual(['1', '2'])
 })
@@ -250,7 +250,7 @@ it('does not report users disconnects on server destroy', async () => {
 
   await client.connection.connect()
   test.app.destroy()
-  expect(test.app.connected).toEqual({})
+  expect(test.app.connected.size).toEqual(0)
   expect(client.connection.connected).toBe(false)
   expect(test.names).toEqual(['connect', 'destroy'])
   expect(test.reports[1]).toEqual(['destroy', undefined])
@@ -369,9 +369,9 @@ it('authenticates user', async () => {
   expect(client.clientId).toEqual('a:b')
   expect(client.nodeId).toEqual('a:b:uuid')
   expect(client.node.authenticated).toBe(true)
-  expect(test.app.nodeIds).toEqual({ 'a:b:uuid': client })
-  expect(test.app.clientIds).toEqual({ 'a:b': client })
-  expect(test.app.userIds).toEqual({ a: [client] })
+  expect(test.app.nodeIds).toEqual(new Map([['a:b:uuid', client]]))
+  expect(test.app.clientIds).toEqual(new Map([['a:b', client]]))
+  expect(test.app.userIds).toEqual(new Map([['a', [client]]]))
   expect(test.names).toEqual(['connect', 'authenticated'])
   expect(test.reports[1]).toEqual([
     'authenticated',
@@ -401,7 +401,7 @@ it('authenticates user without user name', async () => {
   await connect(client, 'uuid', { token: 'token' })
 
   expect(client.userId).toBeUndefined()
-  expect(app.userIds).toEqual({})
+  expect(app.userIds.size).toEqual(0)
 })
 
 it('reports about synchronization errors', async () => {
@@ -477,7 +477,7 @@ it('disconnects zombie', async () => {
   privateMethods(client2).auth('10:client:b', {})
   await delay(0)
 
-  expect(Object.keys(test.app.connected)).toEqual([client2.key])
+  expect(Array.from(test.app.connected.keys())).toEqual([client2.key])
   expect(test.names).toEqual([
     'connect',
     'connect',

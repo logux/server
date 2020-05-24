@@ -550,14 +550,12 @@ export default class BaseServer<L extends Log = Log<ServerMeta>> {
    * Connected clients.
    *
    * ```js
-   * for (let i in server.connected) {
-   *   console.log(server.connected[i].remoteAddress)
+   * for (let client of server.connected.values()) {
+   *   console.log(client.remoteAddress)
    * }
    * ```
    */
-  connected: {
-    [key: string]: ServerClient
-  }
+  connected: Map<string, ServerClient>
 
   /**
    * Connected client by client ID.
@@ -565,9 +563,7 @@ export default class BaseServer<L extends Log = Log<ServerMeta>> {
    * Do not rely on this data, when you have multiple Logux servers.
    * Each server will have a different list.
    */
-  clientIds: {
-    [clientId: string]: ServerClient
-  }
+  clientIds: Map<string, ServerClient>
 
   /**
    * Connected client by node ID.
@@ -575,9 +571,7 @@ export default class BaseServer<L extends Log = Log<ServerMeta>> {
    * Do not rely on this data, when you have multiple Logux servers.
    * Each server will have a different list.
    */
-  nodeIds: {
-    [nodeId: string]: ServerClient
-  }
+  nodeIds: Map<string, ServerClient>
 
   /**
    * Connected client by user ID.
@@ -585,9 +579,7 @@ export default class BaseServer<L extends Log = Log<ServerMeta>> {
    * Do not rely on this data, when you have multiple Logux servers.
    * Each server will have a different list.
    */
-  userIds: {
-    [nodeId: string]: ServerClient[]
-  }
+  userIds: Map<string, ServerClient[]>
 
   /**
    * Clients subscribed to some channel.

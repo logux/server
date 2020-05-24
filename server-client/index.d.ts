@@ -6,7 +6,7 @@ import Server from '../server'
  * Logux client connected to server.
  *
  * ```js
- * const client = server.connected[0]
+ * const client = server.connected.get(0)
  * ```
  */
 export default class ServerClient {
@@ -63,7 +63,7 @@ export default class ServerClient {
    *
    * ```js
    * function stillConnected (client) {
-   *   return !!app.connected[client.key]
+   *   return app.connected.has(client.key)
    * }
    * ```
    */

@@ -83,19 +83,19 @@ class ServerClient {
     this.destroyed = true
     this.node.destroy()
     if (this.userId) {
-      let users = this.app.userIds[this.userId]
+      let users = this.app.userIds.get(this.userId)
       if (users) {
         users = users.filter(i => i !== this)
         if (users.length === 0) {
-          delete this.app.userIds[this.userId]
+          this.app.userIds.delete(this.userId)
         } else {
-          this.app.userIds[this.userId] = users
+          this.app.userIds.set(this.userId, users)
         }
       }
     }
     if (this.clientId) {
-      delete this.app.clientIds[this.clientId]
-      delete this.app.nodeIds[this.nodeId]
+      this.app.clientIds.delete(this.clientId)
+      this.app.nodeIds.delete(this.nodeId)
       for (let i in this.app.subscribers) {
         delete this.app.subscribers[i][this.nodeId]
         if (Object.keys(this.app.subscribers[i]).length === 0) {
@@ -106,7 +106,7 @@ class ServerClient {
     if (!this.app.destroying) {
       this.app.emitter.emit('disconnected', this)
     }
-    delete this.app.connected[this.key]
+    this.app.connected.delete(this.key)
   }
 
   async auth (nodeId, token) {
@@ -128,19 +128,20 @@ class ServerClient {
     }
 
     if (result) {
-      let zombie = this.app.clientIds[this.clientId]
+      let zombie = this.app.clientIds.get(this.clientId)
       if (zombie) {
         zombie.zombie = true
         this.app.reporter('zombie', { nodeId: zombie.nodeId })
         zombie.destroy()
       }
-      this.app.clientIds[this.clientId] = this
-      this.app.nodeIds[this.nodeId] = this
+      this.app.clientIds.set(this.clientId, this)
+      this.app.nodeIds.set(this.nodeId, this)
       if (this.userId) {
-        if (!this.app.userIds[this.userId]) {
-          this.app.userIds[this.userId] = []
+        if (!this.app.userIds.has(this.userId)) {
+          this.app.userIds.set(this.userId, [this])
+        } else {
+          this.app.userIds.get(this.userId).push(this)
         }
-        this.app.userIds[this.userId].push(this)
       }
       this.app.emitter.emit('authenticated', this, Date.now() - start)
       this.app.reporter('authenticated', reportDetails(this))

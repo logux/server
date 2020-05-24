@@ -328,7 +328,7 @@ it('process errors during authentication', async () => {
   })
   app.connect('10', { token: 'error' })
   await delay(100)
-  expect(Object.keys(app.connected)).toHaveLength(0)
+  expect(app.connected.size).toEqual(0)
   expect(errors).toEqual(['Error on back-end server'])
 })
 
@@ -340,7 +340,7 @@ it('process wrong answer during authentication', async () => {
   })
   app.connect('10', { token: 'empty' })
   await delay(100)
-  expect(Object.keys(app.connected)).toHaveLength(0)
+  expect(app.connected.size).toEqual(0)
   expect(errors).toEqual(['Empty back-end answer'])
 })
 
