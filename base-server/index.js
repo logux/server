@@ -415,11 +415,18 @@ class BaseServer {
 
   sendAction (action, meta) {
     let from = parseNodeId(meta.id).clientId
+    let clients = new Set([from])
+    let send = client => {
+      if (!clients.has(client.clientId)) {
+        clients.add(client.clientId)
+        client.node.onAdd(action, meta)
+      }
+    }
 
     if (meta.nodes) {
       for (let id of meta.nodes) {
         if (this.nodeIds[id] && this.nodeIds[id].clientId !== from) {
-          this.nodeIds[id].node.onAdd(action, meta)
+          send(this.nodeIds[id])
         }
       }
     }
@@ -427,7 +434,7 @@ class BaseServer {
     if (meta.clients) {
       for (let id of meta.clients) {
         if (this.clientIds[id] && id !== from) {
-          this.clientIds[id].node.onAdd(action, meta)
+          send(this.clientIds[id])
         }
       }
     }
@@ -436,14 +443,15 @@ class BaseServer {
       for (let userId of meta.users) {
         if (this.userIds[userId]) {
           for (let client of this.userIds[userId]) {
-            if (client.clientId !== from) client.node.onAdd(action, meta)
+            if (client.clientId !== from) {
+              send(client)
+            }
           }
         }
       }
     }
 
     if (meta.channels) {
-      let clients = new Set([from])
       let ctx
       for (let channel of meta.channels) {
         if (this.subscribers[channel]) {
