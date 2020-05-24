@@ -33,11 +33,9 @@ function nodeToClient (nodeId) {
 }
 
 class BaseServer {
-  constructor (opts) {
-    this.options = opts || {}
-
+  constructor (opts = {}) {
+    this.options = opts
     this.reporter = this.options.reporter || function () {}
-
     this.env = this.options.env || process.env.NODE_ENV || 'development'
 
     if (typeof this.options.subprotocol === 'undefined') {
