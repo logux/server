@@ -121,6 +121,7 @@ class ServerClient {
 
     let start = Date.now()
     let result = await this.app.authenticator({
+      headers: this.node.remoteHeaders,
       userId: this.userId,
       client: this,
       token

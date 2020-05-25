@@ -10,6 +10,12 @@ let server = new Server<{ locale: string }>(
   })
 )
 
+server.auth(({ userId, token, headers }) => {
+  // THROWS Property 'lang' does not exist on type '{ locale: string; }'
+  console.log(headers.lang)
+  return token === userId
+})
+
 class User {
   id: string
   name: string

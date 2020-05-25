@@ -208,7 +208,8 @@ export type LoguxAction =
   | LoguxProcessedAction
   | LoguxUndoAction
 
-export type AuthenticatorOptions = {
+export type AuthenticatorOptions<H extends object> = {
+  headers: H
   client: ServerClient
   userId: string
   token: string
@@ -222,8 +223,8 @@ export type AuthenticatorOptions = {
  * @param client Client object.
  * @returns `true` if credentials was correct
  */
-interface Authenticator {
-  (user: AuthenticatorOptions): boolean | Promise<boolean>
+interface Authenticator<H extends object> {
+  (user: AuthenticatorOptions<H>): boolean | Promise<boolean>
 }
 
 /**
@@ -627,7 +628,7 @@ export default class BaseServer<
    *
    * @param authenticator The authentication callback.
    */
-  auth (authenticator: Authenticator): void
+  auth (authenticator: Authenticator<H>): void
 
   /**
    * Start WebSocket server and listen for clients.

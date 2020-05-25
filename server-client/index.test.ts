@@ -57,7 +57,7 @@ function createServer (opts: Partial<BaseServerOptions> = {}) {
   opts.supports = '0.x'
   opts.time = new TestTime()
 
-  let server = new BaseServer<{}, TestLog<ServerMeta>>({
+  let server = new BaseServer<{ locale: string }, TestLog<ServerMeta>>({
     ...opts,
     subprotocol: '0.0.1',
     supports: '0.x',
@@ -353,10 +353,16 @@ it('reports on server in user name', async () => {
 
 it('authenticates user', async () => {
   let test = createReporter()
-  test.app.auth(async ({ userId, token, client }) => {
-    return token === 'token' && userId === 'a' && client === testClient
+  test.app.auth(async ({ userId, token, client, headers }) => {
+    return (
+      token === 'token' &&
+      userId === 'a' &&
+      client === testClient &&
+      headers.locale === 'fr'
+    )
   })
   let testClient = createClient(test.app)
+  testClient.node.remoteHeaders = { locale: 'fr' }
 
   let authenticated: [ServerClient, number][] = []
   test.app.on('authenticated', (...args) => {
