@@ -72,7 +72,7 @@ const server = new Server(
   })
 )
 
-server.auth(async (userId, token) => {
+server.auth(async ({ userId, token }) => {
   const user = await findUserByToken(token)
   return !!user && userId === user.id
 })

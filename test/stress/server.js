@@ -11,7 +11,7 @@ let app = new Server({
   backend: 'http://localhost:31339'
 })
 
-app.auth(async (user, token) => {
+app.auth(async ({ user, token }) => {
   await delay(400)
   return user === '1' && token === 'secret'
 })

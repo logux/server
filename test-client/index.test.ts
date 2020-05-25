@@ -178,7 +178,7 @@ it('prints server log', async () => {
 it('tests authentication', async () => {
   server = new TestServer()
   server.options.supports = '0.0.0'
-  server.auth((userId, token) => userId === '10' && token === 'good')
+  server.auth(({ userId, token }) => userId === '10' && token === 'good')
 
   let wrong = await catchError(async () => {
     await server.connect('10', { token: 'bad' })

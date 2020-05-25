@@ -208,6 +208,12 @@ export type LoguxAction =
   | LoguxProcessedAction
   | LoguxUndoAction
 
+export type AuthenticatorOptions = {
+  client: ServerClient
+  userId: string
+  token: string
+}
+
 /**
  * The authentication callback.
  *
@@ -217,9 +223,7 @@ export type LoguxAction =
  * @returns `true` if credentials was correct
  */
 interface Authenticator {
-  (userId: string, token: string, server: ServerClient):
-    | boolean
-    | Promise<boolean>
+  (user: AuthenticatorOptions): boolean | Promise<boolean>
 }
 
 /**
@@ -615,7 +619,7 @@ export default class BaseServer<
    * and node ID. It should return a Promise with `true` or `false`.
    *
    * ```js
-   * server.auth(async (userId, token) => {
+   * server.auth(async ({ userId, token }) => {
    *   const user = await findUserByToken(token)
    *   return !!user && userId === user.id
    * })

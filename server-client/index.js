@@ -120,7 +120,11 @@ class ServerClient {
     }
 
     let start = Date.now()
-    let result = await this.app.authenticator(this.userId, token, this)
+    let result = await this.app.authenticator({
+      userId: this.userId,
+      client: this,
+      token
+    })
 
     if (this.app.isBruteforce(this.remoteAddress)) {
       throw new LoguxError('bruteforce')

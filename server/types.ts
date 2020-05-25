@@ -13,6 +13,10 @@ let server = new Server<{ locale: string }>(
   })
 )
 
+server.auth(({ userId, token }) => {
+  return token === userId
+})
+
 class User {
   id: string
   name: string

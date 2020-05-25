@@ -353,25 +353,25 @@ it('reports on server in user name', async () => {
 
 it('authenticates user', async () => {
   let test = createReporter()
-  test.app.auth(
-    async (id, token, who) => token === 'token' && id === 'a' && who === client
-  )
-  let client = createClient(test.app)
+  test.app.auth(async ({ userId, token, client }) => {
+    return token === 'token' && userId === 'a' && client === testClient
+  })
+  let testClient = createClient(test.app)
 
   let authenticated: [ServerClient, number][] = []
   test.app.on('authenticated', (...args) => {
     authenticated.push(args)
   })
 
-  await connect(client, 'a:b:uuid', { token: 'token' })
+  await connect(testClient, 'a:b:uuid', { token: 'token' })
 
-  expect(client.userId).toEqual('a')
-  expect(client.clientId).toEqual('a:b')
-  expect(client.nodeId).toEqual('a:b:uuid')
-  expect(client.node.authenticated).toBe(true)
-  expect(test.app.nodeIds).toEqual(new Map([['a:b:uuid', client]]))
-  expect(test.app.clientIds).toEqual(new Map([['a:b', client]]))
-  expect(test.app.userIds).toEqual(new Map([['a', [client]]]))
+  expect(testClient.userId).toEqual('a')
+  expect(testClient.clientId).toEqual('a:b')
+  expect(testClient.nodeId).toEqual('a:b:uuid')
+  expect(testClient.node.authenticated).toBe(true)
+  expect(test.app.nodeIds).toEqual(new Map([['a:b:uuid', testClient]]))
+  expect(test.app.clientIds).toEqual(new Map([['a:b', testClient]]))
+  expect(test.app.userIds).toEqual(new Map([['a', [testClient]]]))
   expect(test.names).toEqual(['connect', 'authenticated'])
   expect(test.reports[1]).toEqual([
     'authenticated',
@@ -382,13 +382,13 @@ it('authenticates user', async () => {
     }
   ])
   expect(authenticated).toHaveLength(1)
-  expect(authenticated[0][0]).toBe(client)
+  expect(authenticated[0][0]).toBe(testClient)
   expect(typeof authenticated[0][1]).toEqual('number')
 })
 
 it('supports non-promise authenticator', async () => {
   let app = createServer()
-  app.auth((id, token) => token === 'token')
+  app.auth(({ userId, token }) => token === 'token')
   let client = createClient(app)
   await connect(client, '10:uuid', { token: 'token' })
   expect(client.node.authenticated).toBe(true)

@@ -183,7 +183,7 @@ function bindBackendProxy (app) {
   }
 
   app.auth(
-    (userId, token) =>
+    ({ userId, token }) =>
       new Promise((resolve, reject) => {
         let authId = nanoid()
         send(backend, ['auth', userId, token, authId], {
