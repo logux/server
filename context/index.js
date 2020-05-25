@@ -1,13 +1,12 @@
+let { parseId } = require('@logux/core')
 let semver = require('semver')
-
-let parseNodeId = require('../parse-node-id')
 
 class Context {
   constructor (server, meta) {
     this.server = server
     this.data = {}
 
-    let parsed = parseNodeId(meta.id)
+    let parsed = parseId(meta.id)
     this.nodeId = parsed.nodeId
     this.userId = parsed.userId
     this.clientId = parsed.clientId

@@ -1,6 +1,5 @@
 import ServerClient from './server-client'
 import ALLOWED_META from './allowed-meta'
-import parseNodeId from './parse-node-id'
 import filterMeta from './filter-meta'
 import TestServer from './test-server'
 import TestClient from './test-client'
@@ -29,7 +28,6 @@ export {
 export {
   ALLOWED_META,
   ServerClient,
-  parseNodeId,
   filterMeta,
   TestServer,
   TestClient,

@@ -503,7 +503,7 @@
 
 "@logux/core@logux/core#next":
   version "0.5.3"
-  resolved "https://codeload.github.com/logux/core/tar.gz/35d70c8b7f515f162b4e5157a9e55b8e5cb37abf"
+  resolved "https://codeload.github.com/logux/core/tar.gz/24d2c9484abc726b2237b2e0f9e3de10812aaf4d"
   dependencies:
     nanoevents "^5.1.7"
 

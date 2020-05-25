@@ -1,4 +1,4 @@
-let { ServerConnection, MemoryStore, Log } = require('@logux/core')
+let { ServerConnection, MemoryStore, Log, parseId } = require('@logux/core')
 let { createNanoEvents } = require('nanoevents')
 let { promisify } = require('util')
 let UrlPattern = require('url-pattern')
@@ -11,7 +11,6 @@ let bindControlServer = require('../bind-control-server')
 let bindBackendProxy = require('../bind-backend-proxy')
 let createHttpServer = require('../create-http-server')
 let ServerClient = require('../server-client')
-let parseNodeId = require('../parse-node-id')
 let Context = require('../context')
 
 let readFile = promisify(fs.readFile)
@@ -393,7 +392,7 @@ class BaseServer {
   }
 
   undo (meta, reason = 'error', extra = {}) {
-    let clientId = parseNodeId(meta.id).clientId
+    let clientId = parseId(meta.id).clientId
     let [action, undoMeta] = this.buildUndo(meta, reason, extra)
     undoMeta.clients = (undoMeta.clients || []).concat([clientId])
     return this.log.add(action, undoMeta)
@@ -410,7 +409,7 @@ class BaseServer {
   }
 
   sendAction (action, meta) {
-    let from = parseNodeId(meta.id).clientId
+    let from = parseId(meta.id).clientId
     let clients = new Set([from])
     let send = client => {
       if (!clients.has(client.clientId)) {
@@ -454,7 +453,7 @@ class BaseServer {
       for (let channel of meta.channels) {
         if (this.subscribers[channel]) {
           for (let nodeId in this.subscribers[channel]) {
-            let clientId = parseNodeId(nodeId).clientId
+            let clientId = parseId(nodeId).clientId
             if (!clients.has(clientId)) {
               let filter = this.subscribers[channel][nodeId]
               if (typeof filter === 'function') {
@@ -495,7 +494,7 @@ class BaseServer {
     this.contexts.delete(action)
     this.log.changeMeta(meta.id, { status: 'error' })
     this.reporter('unknownType', { type: action.type, actionId: meta.id })
-    if (parseNodeId(meta.id).userId !== 'server') {
+    if (parseId(meta.id).userId !== 'server') {
       this.undo(meta, 'unknownType')
     }
     this.debugActionError(meta, `Action with unknown type ${action.type}`)
@@ -535,7 +534,7 @@ class BaseServer {
 
   markAsProcessed (meta) {
     this.log.changeMeta(meta.id, { status: 'processed' })
-    let data = parseNodeId(meta.id)
+    let data = parseId(meta.id)
     if (data.userId !== 'server') {
       this.log.add(
         { type: 'logux/processed', id: meta.id },
@@ -657,7 +656,7 @@ class BaseServer {
 
   debugActionError (meta, msg) {
     if (this.env === 'development') {
-      let clientId = parseNodeId(meta.id).clientId
+      let clientId = parseId(meta.id).clientId
       if (this.clientIds.has(clientId)) {
         this.clientIds.get(clientId).connection.send(['debug', 'error', msg])
       }

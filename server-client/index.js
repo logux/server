@@ -1,9 +1,8 @@
-let { LoguxError } = require('@logux/core')
+let { LoguxError, parseId } = require('@logux/core')
 let semver = require('semver')
 
 let FilteredNode = require('../filtered-node')
 let ALLOWED_META = require('../allowed-meta')
-let parseNodeId = require('../parse-node-id')
 let filterMeta = require('../filter-meta')
 
 function reportDetails (client) {
@@ -111,11 +110,11 @@ class ServerClient {
 
   async auth (nodeId, token) {
     this.nodeId = nodeId
-    let data = parseNodeId(nodeId)
-    this.clientId = data.clientId
-    this.userId = data.userId
+    let { clientId, userId } = parseId(nodeId)
+    this.clientId = clientId
+    this.userId = userId
 
-    if (nodeId === 'server' || data.userId === 'server') {
+    if (nodeId === 'server' || userId === 'server') {
       this.app.reporter('unauthenticated', reportDetails(this))
       return false
     }

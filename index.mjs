@@ -1,5 +1,4 @@
 import ALLOWED_META from './allowed-meta/index.js'
-import parseNodeId from './parse-node-id/index.js'
 import BaseServer from './base-server/index.js'
 import TestServer from './test-server/index.js'
 import TestClient from './test-client/index.js'
@@ -13,7 +12,6 @@ export {
   TestClient,
   Server,
   ALLOWED_META,
-  parseNodeId,
   filterMeta,
   Context
 }
