@@ -21,6 +21,9 @@ class TestClient {
         return [action, filterMeta(meta)]
       }
     })
+    if (opts.headers) {
+      this.node.setLocalHeaders(opts.headers)
+    }
     server.unbind.push(() => {
       this.node.destroy()
     })

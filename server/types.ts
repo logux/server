@@ -3,7 +3,7 @@ import { actionCreatorFactory } from 'typescript-fsa'
 import { Server, Action, LoguxSubscribeAction } from '..'
 import pino = require('pino')
 
-let server = new Server(
+let server = new Server<{ locale: string }>(
   Server.loadOptions(process, {
     subprotocol: '1.0.0',
     reporter: 'human',
@@ -50,9 +50,9 @@ server.type<UserRenameAction, UserData>('user/rename', {
     return ctx.data.user.id === ctx.userId
   },
 
-  resend (_, action) {
+  resend (ctx, action) {
     return {
-      channel: `user/${action.userId}`
+      channels: [`user/${action.userId}`, `spellcheck/${ctx.headers.locale}`]
     }
   },
 

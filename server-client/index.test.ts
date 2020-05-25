@@ -57,7 +57,7 @@ function createServer (opts: Partial<BaseServerOptions> = {}) {
   opts.supports = '0.x'
   opts.time = new TestTime()
 
-  let server = new BaseServer<TestLog<ServerMeta>>({
+  let server = new BaseServer<{}, TestLog<ServerMeta>>({
     ...opts,
     subprotocol: '0.0.1',
     supports: '0.x',

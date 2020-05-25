@@ -51,7 +51,7 @@ export type TestServerOptions = Omit<
  * })
  * ```
  */
-export default class TestServer extends BaseServer {
+export default class TestServer<H extends object = {}> extends BaseServer<H> {
   /**
    * @param opts The limit subset of server options.
    */

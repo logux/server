@@ -16,7 +16,7 @@ import Server from '../server'
  *
  * @template D Type for `ctx.data`.
  */
-export default class Context<D extends object = {}> {
+export default class Context<D extends object = {}, H extends object = {}> {
   /**
    * @param nodeId Unique node ID.
    * @param clientId Unique persistence client ID.
@@ -24,13 +24,7 @@ export default class Context<D extends object = {}> {
    * @param subprotocol Action creator application subprotocol version in SemVer format.
    * @param server Logux server
    */
-  constructor (
-    nodeId: string,
-    clientId: string,
-    userId: string,
-    subprotocol: string,
-    server: Server
-  )
+  constructor (server: Server, meta: ServerMeta)
 
   /**
    * Open structure to save some data between different steps of processing.
@@ -48,6 +42,18 @@ export default class Context<D extends object = {}> {
    * ```
    */
   data: D
+
+  /**
+   * Client’s headers.
+   *
+   * ```js
+   * ctx.sendBack({
+   *   type: 'error',
+   *   message: I18n[ctx.headers.locale || 'en'].error
+   * })
+   * ```
+   */
+  headers: H
 
   /**
    * Unique node ID.
@@ -141,8 +147,9 @@ export default class Context<D extends object = {}> {
  */
 export class ChannelContext<
   D extends object,
-  P extends object | string[]
-> extends Context<D> {
+  P extends object | string[],
+  H extends object
+> extends Context<D, H> {
   /**
    * Parsed variable parts of channel pattern.
    *

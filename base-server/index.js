@@ -25,13 +25,6 @@ function optionError (msg) {
   throw error
 }
 
-function nodeToClient (nodeId) {
-  return nodeId
-    .split(':')
-    .slice(0, 2)
-    .join(':')
-}
-
 class BaseServer {
   constructor (opts = {}) {
     this.options = opts
@@ -461,7 +454,7 @@ class BaseServer {
       for (let channel of meta.channels) {
         if (this.subscribers[channel]) {
           for (let nodeId in this.subscribers[channel]) {
-            let clientId = nodeToClient(nodeId)
+            let clientId = parseNodeId(nodeId).clientId
             if (!clients.has(clientId)) {
               let filter = this.subscribers[channel][nodeId]
               if (typeof filter === 'function') {
@@ -552,22 +545,12 @@ class BaseServer {
   }
 
   createContext (action, meta) {
-    if (!this.contexts.has(action)) {
-      let data = parseNodeId(meta.id)
-
-      let subprotocol
-      if (meta.subprotocol) {
-        subprotocol = meta.subprotocol
-      } else if (this.clientIds.has(data.clientId)) {
-        subprotocol = this.clientIds.get(data.clientId).node.remoteSubprotocol
-      }
-
-      this.contexts.set(
-        action,
-        new Context(data.nodeId, data.clientId, data.userId, subprotocol, this)
-      )
+    let context = this.contexts.get(action)
+    if (!context) {
+      context = new Context(this, meta)
+      this.contexts.set(action, context)
     }
-    return this.contexts.get(action)
+    return context
   }
 
   async subscribeAction (action, meta, start) {

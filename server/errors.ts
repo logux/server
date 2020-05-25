@@ -2,7 +2,7 @@ import { actionCreatorFactory } from 'typescript-fsa'
 
 import { Server, Action, LoguxSubscribeAction } from '..'
 
-let server = new Server(
+let server = new Server<{ locale: string }>(
   Server.loadOptions(process, {
     subprotocol: '1.0.0',
     supports: '1.x',
@@ -56,6 +56,8 @@ server.type<UserRenameAction, UserData>('user/rename', {
   },
 
   async process (ctx, action) {
+    // THROWS Property 'lang' does not exist on type '{ locale: string; }'
+    console.log(ctx.headers.lang)
     ctx.data.user.name = action.newName
     // THROWS Property 'admin' does not exist on type 'UserData'.
     await ctx.data.admin.save()

@@ -66,7 +66,7 @@ export type ServerOptions = BaseServerOptions & {
  * server.listen()
  * ```
  */
-export default class Server extends BaseServer {
+export default class Server<H extends object = {}> extends BaseServer<H> {
   /**
    * Load options from command-line arguments and/or environment
    *

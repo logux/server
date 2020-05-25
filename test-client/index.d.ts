@@ -9,6 +9,7 @@ import TestServer from '../test-server'
 
 export type TestClientOptions = {
   subprotocol?: string
+  headers?: object
   token?: string
 }
 

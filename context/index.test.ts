@@ -1,57 +1,85 @@
 import { Action } from '@logux/core'
 
-import { Server, Context, parseNodeId, ServerMeta } from '..'
+import { Context, ServerMeta } from '..'
+
+let processed: [Action, ServerMeta][] = []
+
+const FAKE_SERVER: any = {
+  clientIds: new Map([
+    [
+      '20:client',
+      { node: { remoteSubprotocol: '2.0.0', remoteHeaders: { locale: 'fr' } } }
+    ]
+  ]),
+
+  process (action: Action, meta: ServerMeta) {
+    processed.push([action, meta])
+    return Promise.resolve()
+  }
+}
+
+beforeEach(() => {
+  processed = []
+})
 
 function createContext (
-  nodeId: string,
-  subprotocol: string,
-  server: object = {}
+  meta: Partial<ServerMeta> = { id: '1 10:client:uuid 0', subprotocol: '1.0.0' }
 ): Context {
-  let { clientId, userId } = parseNodeId(nodeId)
-  if (typeof userId === 'undefined') throw new Error('User ID is missed')
-  return new Context(nodeId, clientId, userId, subprotocol, server as Server)
+  return new Context(FAKE_SERVER, meta as ServerMeta)
 }
 
 it('has open data', () => {
-  let ctx = createContext('10:client:uuid', '2.4.0')
+  let ctx = createContext()
   expect(ctx.data).toEqual({})
 })
 
-it('saves data', () => {
-  let ctx = createContext('10:client:uuid', '2.4.0')
+it('parses meta', () => {
+  let ctx = createContext()
   expect(ctx.nodeId).toEqual('10:client:uuid')
   expect(ctx.clientId).toEqual('10:client')
   expect(ctx.userId).toEqual('10')
-  expect(ctx.subprotocol).toEqual('2.4.0')
+  expect(ctx.subprotocol).toEqual('1.0.0')
 })
 
 it('detects servers', () => {
-  let user = createContext('10:uuid', '2.4.0')
+  let user = createContext({ id: '1 10:uuid 0' })
   expect(user.isServer).toBe(false)
-  let server = createContext('server:uuid', '2.4.0')
+  let server = createContext({ id: '1 server:uuid 0' })
   expect(server.isServer).toBe(true)
 })
 
 it('checks subprotocol', () => {
-  let ctx = createContext('10:uuid', '2.4.0')
-  expect(ctx.isSubprotocol('^2.0')).toBe(true)
-  expect(ctx.isSubprotocol('>2.5')).toBe(false)
+  let ctx = createContext()
+  expect(ctx.isSubprotocol('^1.0')).toBe(true)
+  expect(ctx.isSubprotocol('>1.5')).toBe(false)
+})
+
+it('takes subprotocol from client', () => {
+  let ctx = createContext({ id: '1 20:client:uuid 0' })
+  expect(ctx.subprotocol).toEqual('2.0.0')
+})
+
+it('works on missed subprotocol', () => {
+  let ctx = createContext({ id: '1 10:client:uuid 0' })
+  expect(ctx.subprotocol).toBeUndefined()
+})
+
+it('takes headers from client', () => {
+  let ctx = createContext({ id: '1 20:client:uuid 0' })
+  expect(ctx.headers).toEqual({ locale: 'fr' })
+})
+
+it('works on missed headers', () => {
+  let ctx = createContext({ id: '1 10:client:uuid 0' })
+  expect(ctx.headers).toEqual({})
 })
 
 it('sends action back', () => {
-  let entries: [Action, ServerMeta][] = []
-  let promise = Promise.resolve({})
-  let fakeServer = {
-    process (action: Action, meta: ServerMeta) {
-      entries.push([action, meta])
-      return promise
-    }
-  }
-  let ctx = createContext('10:uuid', '2.4.0', fakeServer)
-  expect(ctx.sendBack({ type: 'A' })).toBe(promise)
+  let ctx = createContext()
+  expect(ctx.sendBack({ type: 'A' }) instanceof Promise).toBe(true)
   ctx.sendBack({ type: 'B' }, { reasons: ['1'], clients: [] })
-  expect(entries).toEqual([
-    [{ type: 'A' }, { clients: ['10:uuid'] }],
+  expect(processed).toEqual([
+    [{ type: 'A' }, { clients: ['10:client'] }],
     [{ type: 'B' }, { reasons: ['1'], clients: [] }]
   ])
 })

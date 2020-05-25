@@ -197,3 +197,10 @@ it('disables build-in auth', async () => {
   server = new TestServer({ auth: false })
   expect(privateMethods(server).authenticator).not.toBeDefined()
 })
+
+it('sets client headers', async () => {
+  server = new TestServer()
+  await server.connect('10', { headers: { locale: 'fr' } })
+  let node = server.clientIds.get('10:1')?.node
+  expect(node?.remoteHeaders).toEqual({ locale: 'fr' })
+})
