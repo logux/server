@@ -121,7 +121,7 @@ class ServerClient {
     }
 
     let ws = this.connection.ws
-    let headers = ''
+    let headers = {}
     if (ws && ws.upgradeReq && ws.upgradeReq.headers) {
       headers = ws.upgradeReq.headers
     }

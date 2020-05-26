@@ -10,6 +10,7 @@ import TestServer from '../test-server'
 export type TestClientOptions = {
   subprotocol?: string
   headers?: object
+  cookie?: object
   token?: string
 }
 

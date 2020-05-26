@@ -204,3 +204,13 @@ it('sets client headers', async () => {
   let node = server.clientIds.get('10:1')?.node
   expect(node?.remoteHeaders).toEqual({ locale: 'fr' })
 })
+
+it('sets client cookie', async () => {
+  server = new TestServer()
+  server.auth(({ cookie }) => cookie.token === 'good')
+  await server.connect('10', { cookie: { token: 'good' } })
+  let wrong = await catchError(async () => {
+    await server.connect('10', { cookie: { token: 'bad' } })
+  })
+  expect(wrong.message).toEqual('Wrong credentials')
+})

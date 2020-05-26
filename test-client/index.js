@@ -1,4 +1,5 @@
 let { ClientNode, TestPair } = require('@logux/core')
+let cookie = require('cookie')
 
 let filterMeta = require('../filter-meta')
 
@@ -21,8 +22,21 @@ class TestClient {
         return [action, filterMeta(meta)]
       }
     })
+    this.pair.right.ws = {
+      _socket: {
+        remoteAddress: '127.0.0.1'
+      },
+      upgradeReq: {
+        headers: {}
+      }
+    }
     if (opts.headers) {
       this.node.setLocalHeaders(opts.headers)
+    }
+    if (opts.cookie) {
+      this.pair.right.ws.upgradeReq.headers.cookie = Object.keys(opts.cookie)
+        .map(i => cookie.serialize(i, opts.cookie[i]))
+        .join('; ')
     }
     server.unbind.push(() => {
       this.node.destroy()
