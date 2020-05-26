@@ -212,6 +212,7 @@ export type AuthenticatorOptions<H extends object> = {
   headers: H
   client: ServerClient
   userId: string
+  cookie: { [name: string]: string }
   token: string
 }
 

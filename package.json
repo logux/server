@@ -36,6 +36,7 @@
     "@logux/core": "logux/core#next",
     "JSONStream": "^1.3.5",
     "chalk": "^4.0.0",
+    "cookie": "^0.4.1",
     "dotenv": "^8.2.0",
     "globby": "^11.0.0",
     "ip": "^1.1.5",

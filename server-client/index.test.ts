@@ -394,9 +394,22 @@ it('authenticates user', async () => {
 
 it('supports non-promise authenticator', async () => {
   let app = createServer()
-  app.auth(({ userId, token }) => token === 'token')
+  app.auth(({ token }) => token === 'token')
   let client = createClient(app)
   await connect(client, '10:uuid', { token: 'token' })
+  expect(client.node.authenticated).toBe(true)
+})
+
+it('supports cookie based authenticator', async () => {
+  let app = createServer()
+  app.auth(({ cookie }) => cookie.token === 'good')
+  let client = createClient(app)
+  privateMethods(client.connection.ws).upgradeReq = {
+    headers: {
+      cookie: 'token=good; a=b'
+    }
+  }
+  await connect(client, '10:uuid')
   expect(client.node.authenticated).toBe(true)
 })
 

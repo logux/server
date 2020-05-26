@@ -1,4 +1,5 @@
 let { LoguxError, parseId } = require('@logux/core')
+let cookie = require('cookie')
 let semver = require('semver')
 
 let FilteredNode = require('../filtered-node')
@@ -119,9 +120,16 @@ class ServerClient {
       return false
     }
 
+    let ws = this.connection.ws
+    let headers = ''
+    if (ws && ws.upgradeReq && ws.upgradeReq.headers) {
+      headers = ws.upgradeReq.headers
+    }
+
     let start = Date.now()
     let result = await this.app.authenticator({
       headers: this.node.remoteHeaders,
+      cookie: cookie.parse(headers.cookie || ''),
       userId: this.userId,
       client: this,
       token
