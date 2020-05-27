@@ -120,7 +120,8 @@
       "WebSocket",
       "io",
       "ES",
-      "TypeDoc"
+      "TypeDoc",
+      "roadmap"
     ]
   },
   "sharec": {
