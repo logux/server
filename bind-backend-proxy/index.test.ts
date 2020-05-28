@@ -209,7 +209,7 @@ it('validates HTTP requests', async () => {
   await test.app.listen()
 
   function check (...commands: any[]) {
-    return send({ version: 3, secret: 'S', commands })
+    return send({ version: 4, secret: 'S', commands })
   }
 
   expect(await request({ method: 'PUT', string: '' })).toEqual(405)
@@ -218,13 +218,13 @@ it('validates HTTP requests', async () => {
   expect(await request({ string: '""' })).toEqual(400)
   expect(await send({})).toEqual(400)
   expect(await send({ version: 100, secret: 'S', commands: [] })).toEqual(400)
-  expect(await send({ version: 3, commands: [] })).toEqual(400)
-  expect(await send({ version: 3, secret: 'S', commands: {} })).toEqual(400)
+  expect(await send({ version: 4, commands: [] })).toEqual(400)
+  expect(await send({ version: 4, secret: 'S', commands: {} })).toEqual(400)
   expect(await check(1)).toEqual(400)
   expect(await check({ command: 'auth' })).toEqual(400)
   expect(await check({ command: 'action', action: { type: 'A' } })).toEqual(400)
   expect(await check({ command: 'action', action: {}, meta: {} })).toEqual(400)
-  expect(await send({ version: 3, secret: 'wrong', commands: [] })).toEqual(403)
+  expect(await send({ version: 4, secret: 'wrong', commands: [] })).toEqual(403)
   expect(test.app.log.actions()).toEqual([])
   expect(test.reports[1]).toEqual([
     'wrongControlSecret',
@@ -235,7 +235,7 @@ it('validates HTTP requests', async () => {
 it('creates actions', async () => {
   let app = createServer(OPTIONS)
   await app.listen()
-  let code = await send({ version: 3, secret: 'S', commands: [ACTION] })
+  let code = await send({ version: 4, secret: 'S', commands: [ACTION] })
   expect(code).toEqual(200)
   expect(app.log.actions()).toEqual([{ type: 'A' }])
   expect(sent).toEqual([])
@@ -251,7 +251,7 @@ it('creates and processes actions', async () => {
     }
   })
   await app.listen()
-  let code = await send({ version: 3, secret: 'S', commands: [ACTION] })
+  let code = await send({ version: 4, secret: 'S', commands: [ACTION] })
 
   expect(code).toEqual(200)
   expect(app.log.actions()).toEqual([{ type: 'A' }])
@@ -308,7 +308,7 @@ it('authenticates user on backend', async () => {
       'POST',
       '/path',
       {
-        version: 3,
+        version: 4,
         secret: 'S',
         commands: [
           {
@@ -337,7 +337,7 @@ it('authenticates user by cookie', async () => {
       'POST',
       '/path',
       {
-        version: 3,
+        version: 4,
         secret: 'S',
         commands: [
           {
@@ -421,7 +421,7 @@ it('notifies about actions and subscriptions', async () => {
       'POST',
       '/path',
       {
-        version: 3,
+        version: 4,
         secret: 'S',
         commands: [
           {
@@ -437,7 +437,7 @@ it('notifies about actions and subscriptions', async () => {
       'POST',
       '/path',
       {
-        version: 3,
+        version: 4,
         secret: 'S',
         commands: [
           {
@@ -595,21 +595,21 @@ it('reacts on backend error', async () => {
 it('has bruteforce protection', async () => {
   let app = createServer(OPTIONS)
   await app.listen()
-  let code = await send({ version: 3, secret: 'wrong', commands: [] })
+  let code = await send({ version: 4, secret: 'wrong', commands: [] })
 
   expect(code).toEqual(403)
-  code = await send({ version: 3, secret: 'wrong', commands: [] })
+  code = await send({ version: 4, secret: 'wrong', commands: [] })
 
   expect(code).toEqual(403)
-  code = await send({ version: 3, secret: 'wrong', commands: [] })
+  code = await send({ version: 4, secret: 'wrong', commands: [] })
 
   expect(code).toEqual(403)
-  code = await send({ version: 3, secret: 'wrong', commands: [] })
+  code = await send({ version: 4, secret: 'wrong', commands: [] })
 
   expect(code).toEqual(429)
   await delay(3050)
 
-  code = await send({ version: 3, secret: 'wrong', commands: [] })
+  code = await send({ version: 4, secret: 'wrong', commands: [] })
 
   expect(code).toEqual(403)
 })

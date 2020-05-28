@@ -3,7 +3,7 @@ let { nanoid } = require('nanoid')
 let https = require('https')
 let http = require('http')
 
-const VERSION = 3
+const VERSION = 4
 
 const RESEND_KEYS = [
   'channels',

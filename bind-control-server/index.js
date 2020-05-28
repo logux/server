@@ -1,7 +1,7 @@
 let ip = require('ip')
 
-const MAX_VERSION = 3
-const MIN_VERSION = 3
+const MAX_VERSION = 4
+const MIN_VERSION = 4
 const NO_SECRET =
   'Set LOGUX_CONTROL_SECRET environment variable for Logux ' +
   'to have access to this page.\n' +
