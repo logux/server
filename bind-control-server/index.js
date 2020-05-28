@@ -12,10 +12,7 @@ function isValidBody (body) {
   if (typeof body.version !== 'number') return false
   if (typeof body.secret !== 'string') return false
   if (!Array.isArray(body.commands)) return false
-  for (let command of body.commands) {
-    if (!Array.isArray(command)) return false
-    if (typeof command[0] !== 'string') return false
-  }
+  if (body.commands.some(i => typeof i !== 'object')) return false
   return true
 }
 

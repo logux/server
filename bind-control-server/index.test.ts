@@ -4,7 +4,6 @@ import WebSocket from 'ws'
 import http from 'http'
 
 import { BaseServer, BaseServerOptions } from '..'
-import { GetProcessor } from '../base-server'
 
 let lastPort = 10111
 function createServer (opts: Partial<BaseServerOptions> = {}) {
