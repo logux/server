@@ -38,19 +38,18 @@ class ServerClient {
       this.remoteAddress = '127.0.0.1'
     }
 
-    let token
-    if (this.app.env === 'development') token = 'development'
-
     this.node = new FilteredNode(this, app.nodeId, app.log, connection, {
       subprotocol: app.options.subprotocol,
       inFilter: this.filter.bind(this),
       timeout: app.options.timeout,
       outMap: this.outMap.bind(this),
       inMap: this.inMap.bind(this),
-      token,
       ping: app.options.ping,
       auth: this.auth.bind(this)
     })
+    if (this.app.env === 'development') {
+      this.node.setLocalHeaders({ env: 'development' })
+    }
 
     this.node.catch(err => {
       this.app.emitter.emit('error', reportClient(this, err))

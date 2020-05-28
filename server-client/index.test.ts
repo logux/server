@@ -469,10 +469,7 @@ it('has method to check client subprotocol', () => {
 it('sends server environment in development', async () => {
   let app = createServer({ env: 'development' })
   let client = await connectClient(app)
-  expect(sent(client)[0][4]).toEqual({
-    subprotocol: '0.0.1',
-    token: 'development'
-  })
+  expect(sent(client)).toEqual([['headers', { env: 'development' }]])
 })
 
 it('does not send server environment in production', async () => {
@@ -1039,12 +1036,12 @@ it('sends debug back on unknown type', async () => {
   app.log.add({ type: 'UNKNOWN' }, { id: '2 10:uuid 0' })
   await getPair(client1).wait('right')
 
-  expect(sent(client1)[1]).toEqual([
+  expect(sent(client1).find(i => i[0] === 'debug')).toEqual([
     'debug',
     'error',
     'Action with unknown type UNKNOWN'
   ])
-  expect(sentNames(client2)).toEqual(['connected'])
+  expect(sentNames(client2)).toEqual(['headers', 'connected'])
 })
 
 it('does not send debug back on unknown type in production', async () => {
