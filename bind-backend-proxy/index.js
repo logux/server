@@ -200,12 +200,12 @@ function bindBackendProxy (app) {
   }
 
   app.auth(
-    ({ userId, token }) =>
+    ({ userId, headers, cookie, token }) =>
       new Promise((resolve, reject) => {
         let random = nanoid()
         send(
           backend,
-          { command: 'auth', authId: random, userId, token },
+          { command: 'auth', authId: random, userId, token, headers, cookie },
           {
             filter ({ authId }) {
               return random === authId

@@ -137,6 +137,8 @@ let httpServer = http.createServer((req, res) => {
         res.write('[{"answer":"authent')
         await delay(100)
         res.end(`icated",${id}}]`)
+      } else if (command.userId === '30' && command.cookie.token === 'good') {
+        res.end(`[{"answer":"authenticated",${id}}]`)
       } else if (command.token === 'error') {
         res.end(`[{"answer":"error",${id},"stack":"stack"}]`)
       } else if (command.token === 'empty') {
@@ -295,7 +297,10 @@ it('reports bad HTTP answers', async () => {
 
 it('authenticates user on backend', async () => {
   let app = createServer({ ...OPTIONS, auth: false })
-  await app.connect('10', { token: 'good' })
+  await app.connect('10', {
+    token: 'good',
+    headers: { lang: 'en' }
+  })
   let authId = sent[0][2].commands[0].authId
   expect(typeof authId).toEqual('string')
   expect(sent).toEqual([
@@ -305,7 +310,44 @@ it('authenticates user on backend', async () => {
       {
         version: 3,
         secret: 'S',
-        commands: [{ command: 'auth', authId, userId: '10', token: 'good' }]
+        commands: [
+          {
+            command: 'auth',
+            authId,
+            userId: '10',
+            token: 'good',
+            headers: { lang: 'en' },
+            cookie: {}
+          }
+        ]
+      }
+    ]
+  ])
+})
+
+it('authenticates user by cookie', async () => {
+  let app = createServer({ ...OPTIONS, auth: false })
+  await app.connect('30', {
+    cookie: { token: 'good' }
+  })
+  let authId = sent[0][2].commands[0].authId
+  expect(typeof authId).toEqual('string')
+  expect(sent).toEqual([
+    [
+      'POST',
+      '/path',
+      {
+        version: 3,
+        secret: 'S',
+        commands: [
+          {
+            command: 'auth',
+            authId,
+            userId: '30',
+            headers: {},
+            cookie: { token: 'good' }
+          }
+        ]
       }
     ]
   ])
