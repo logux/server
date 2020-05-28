@@ -29,16 +29,6 @@ This repository contains Logux server with:
 [cult]: http://cultofmartians.com/done.html
 
 
-## Install
-
-```sh
-npm install @logux/server
-```
-
-## Usage
-
-See [documentation] for Logux API.
-
 ### Logux Server as Proxy
 
 ```js
