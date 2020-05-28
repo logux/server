@@ -93,7 +93,7 @@ function bindBackendProxy (app) {
   let accessing = {}
   let processing = {}
 
-  function sendAction (action, meta) {
+  function sendAction (action, meta, headers) {
     let resendResolve
     if (action.type !== 'logux/subscribe') {
       resending[meta.id] = new Promise(resolve => {
@@ -127,7 +127,7 @@ function bindBackendProxy (app) {
     app.emitter.emit('backendSent', action, meta)
     send(
       backend,
-      { command: 'action', action, meta },
+      { command: 'action', action, meta, headers },
       {
         filter ({ id }) {
           return id === meta.id
@@ -225,7 +225,7 @@ function bindBackendProxy (app) {
   )
   app.otherType({
     access (ctx, action, meta) {
-      sendAction(action, meta)
+      sendAction(action, meta, ctx.headers)
       return accessing[meta.id]
     },
     resend (ctx, action, meta) {
@@ -242,7 +242,7 @@ function bindBackendProxy (app) {
   })
   app.otherChannel({
     access (ctx, action, meta) {
-      sendAction(action, meta)
+      sendAction(action, meta, ctx.headers)
       return accessing[meta.id]
     },
     load (ctx, action, meta) {

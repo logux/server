@@ -299,7 +299,7 @@ it('authenticates user on backend', async () => {
   let app = createServer({ ...OPTIONS, auth: false })
   await app.connect('10', {
     token: 'good',
-    headers: { lang: 'en' }
+    headers: { lang: 'fr' }
   })
   let authId = sent[0][2].commands[0].authId
   expect(typeof authId).toEqual('string')
@@ -316,7 +316,7 @@ it('authenticates user on backend', async () => {
             authId,
             userId: '10',
             token: 'good',
-            headers: { lang: 'en' },
+            headers: { lang: 'fr' },
             cookie: {}
           }
         ]
@@ -406,7 +406,7 @@ it('notifies about actions and subscriptions', async () => {
     expect(latency > 1 && latency < 500).toBe(true)
     events.push('backendProcessed')
   })
-  let client = await app.connect('10')
+  let client = await app.connect('10', { headers: { lang: 'fr' } })
   client.log.add({ type: 'A' })
   client.log.add({ type: 'logux/subscribe', channel: 'a' })
   await delay(100)
@@ -427,7 +427,8 @@ it('notifies about actions and subscriptions', async () => {
           {
             command: 'action',
             action: { type: 'A' },
-            meta: { id: '1 10:1:1 0', time: 1, subprotocol: '0.0.0' }
+            meta: { id: '1 10:1:1 0', time: 1, subprotocol: '0.0.0' },
+            headers: { lang: 'fr' }
           }
         ]
       }
@@ -449,7 +450,8 @@ it('notifies about actions and subscriptions', async () => {
               reasons: ['test'],
               server: 'server:uuid',
               subprotocol: '0.0.0'
-            }
+            },
+            headers: { lang: 'fr' }
           }
         ]
       }
