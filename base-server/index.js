@@ -564,11 +564,11 @@ class BaseServer {
     }
 
     let match
-    for (let i of channels) {
-      if (i.pattern) {
-        match = i.pattern.match(action.channel)
+    for (let channel of channels) {
+      if (channel.pattern) {
+        match = channel.pattern.match(action.channel)
       } else {
-        match = action.channel.match(i.regexp)
+        match = action.channel.match(channel.regexp)
       }
 
       let subscribed = false
@@ -576,7 +576,7 @@ class BaseServer {
         let ctx = this.createContext(action, meta)
         ctx.params = match
         try {
-          let access = await i.access(ctx, action, meta)
+          let access = await channel.access(ctx, action, meta)
           if (this.wrongChannels[meta.id]) {
             delete this.wrongChannels[meta.id]
             return
@@ -592,7 +592,8 @@ class BaseServer {
             return
           }
 
-          let filter = i.filter && (await i.filter(ctx, action, meta))
+          let filter = true
+          if (channel.filter) filter = await channel.filter(ctx, action, meta)
 
           this.reporter('subscribed', {
             actionId: meta.id,
@@ -603,10 +604,21 @@ class BaseServer {
             this.subscribers[action.channel] = {}
             this.emitter.emit('subscribing', action, meta)
           }
-          this.subscribers[action.channel][ctx.nodeId] = filter || true
+          this.subscribers[action.channel][ctx.nodeId] = filter
           subscribed = true
 
-          if (i.load) await i.load(ctx, action, meta)
+          if (channel.load) {
+            let sendBack = await channel.load(ctx, action, meta)
+            if (Array.isArray(sendBack)) {
+              await Promise.all(
+                sendBack.map(i => {
+                  return Array.isArray(i) ? ctx.sendBack(...i) : ctx.sendBack(i)
+                })
+              )
+            } else if (sendBack) {
+              await ctx.sendBack(sendBack)
+            }
+          }
           this.emitter.emit('subscribed', action, meta, Date.now() - start)
           this.markAsProcessed(meta)
         } catch (e) {
@@ -616,7 +628,7 @@ class BaseServer {
             this.unsubscribeAction(action, meta)
           }
         } finally {
-          this.finally(i, ctx, action, meta)
+          this.finally(channel, ctx, action, meta)
         }
         break
       }

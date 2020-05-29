@@ -1385,3 +1385,60 @@ it('does not dublicate channel load actions', async () => {
     ['sync', 3, { type: 'logux/processed', id: '1 10:1:uuid 0' }, meta(2)]
   ])
 })
+
+it('allows to return actions', async () => {
+  let app = createServer()
+  app.channel('a', {
+    access: () => true,
+    load () {
+      return { type: 'A' }
+    }
+  })
+  app.channel('b', {
+    access: () => true,
+    load () {
+      return [{ type: 'B' }]
+    }
+  })
+  app.channel('c', {
+    access: () => true,
+    load () {
+      return [[{ type: 'C' }, { time: 100 }]]
+    }
+  })
+  let client = await connectClient(app, '10:1:uuid')
+  await sendTo(client, [
+    'sync',
+    1,
+    { type: 'logux/subscribe', channel: 'a' },
+    { id: [1, '10:1:uuid', 0], time: 1 }
+  ])
+  await sendTo(client, [
+    'sync',
+    2,
+    { type: 'logux/subscribe', channel: 'b' },
+    { id: [2, '10:1:uuid', 0], time: 2 }
+  ])
+  await sendTo(client, [
+    'sync',
+    3,
+    { type: 'logux/subscribe', channel: 'c' },
+    { id: [3, '10:1:uuid', 0], time: 3 }
+  ])
+  await delay(10)
+
+  function meta (time: number) {
+    return { id: time, time, subprotocol: '0.0.1' }
+  }
+  expect(sent(client).slice(1)).toEqual([
+    ['synced', 1],
+    ['sync', 2, { type: 'A' }, meta(1)],
+    ['sync', 3, { type: 'logux/processed', id: '1 10:1:uuid 0' }, meta(2)],
+    ['synced', 2],
+    ['sync', 5, { type: 'B' }, meta(3)],
+    ['sync', 6, { type: 'logux/processed', id: '2 10:1:uuid 0' }, meta(4)],
+    ['synced', 3],
+    ['sync', 8, { type: 'C' }, { ...meta(5), time: 100 }],
+    ['sync', 9, { type: 'logux/processed', id: '3 10:1:uuid 0' }, meta(6)]
+  ])
+})

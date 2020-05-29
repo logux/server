@@ -216,6 +216,8 @@ export type AuthenticatorOptions<H extends object> = {
   token: string
 }
 
+type SendBackActions = void | Action | Action[] | [Action, Partial<Meta>][]
+
 /**
  * The authentication callback.
  *
@@ -341,9 +343,9 @@ interface ChannelLoader<
   P extends object | string[],
   H extends object
 > {
-  (ctx: ChannelContext<D, P, H>, action: A, meta: ServerMeta): void | Promise<
-    void
-  >
+  (ctx: ChannelContext<D, P, H>, action: A, meta: ServerMeta):
+    | SendBackActions
+    | Promise<SendBackActions>
 }
 
 /**
