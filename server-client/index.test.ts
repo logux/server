@@ -469,7 +469,8 @@ it('has method to check client subprotocol', () => {
 it('sends server environment in development', async () => {
   let app = createServer({ env: 'development' })
   let client = await connectClient(app)
-  expect(sent(client)).toEqual([['headers', { env: 'development' }]])
+  let headers = sent(client).find(i => i[0] === 'headers')
+  expect(headers).toEqual(['headers', { env: 'development' }])
 })
 
 it('does not send server environment in production', async () => {
