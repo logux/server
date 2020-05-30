@@ -197,12 +197,12 @@ const REPORTERS = {
 
 function createReporter (options) {
   let logger
-  if (options.logger) {
+  if (typeof options.logger === 'object') {
     logger = options.logger
   } else {
     let stream = options.reporterStream || pino.destination()
     let prettifier = {}
-    if (options.reporter === 'human') {
+    if (options.logger === 'human') {
       let env = options.env || process.env.NODE_ENV || 'development'
       let color = env !== 'development' ? false : undefined
       prettifier = {
