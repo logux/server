@@ -203,6 +203,7 @@ function createLogger (options) {
     let color = env !== 'development' ? false : undefined
     prettifier = {
       prettyPrint: {
+        suppressFlushSyncWarning: true,
         basepath: options.root,
         color
       },

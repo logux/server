@@ -34,9 +34,6 @@ const LABELS = {
   60: (c, str) => label(c, ' FATAL ', 'red', 'bgRed', 'white', str)
 }
 
-const PINO_FLUSH_SYNC_WARNIN_MSG =
-  'pino.final with prettyPrint does not support flushing'
-
 function rightPag (str, length) {
   let add = length - stripAnsi(str).length
   for (let i = 0; i < add; i++) str += ' '
@@ -188,13 +185,6 @@ function humanFormatter (options) {
   this.basepath = basepath
 
   return function (record) {
-    // Hack to disable unwanted warning.
-    // Issue is raised to disable it more natural way
-    // https://github.com/pinojs/pino-pretty/issues/108
-    if (record.msg === PINO_FLUSH_SYNC_WARNIN_MSG) {
-      return ''
-    }
-
     let message = [LABELS[record.level](c, record.msg)]
     let params = Object.keys(record)
       .filter(key => !PARAMS_BLACKLIST[key])
