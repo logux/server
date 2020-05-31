@@ -9,7 +9,7 @@ class TestServer extends BaseServer {
     if (!opts.time) {
       opts.time = new TestTime()
     }
-    if (opts.reporter === 'human') {
+    if (opts.logger === 'human') {
       opts.reporter = createReporter(opts)
     }
     opts.time.lastId += 1
