@@ -52,6 +52,7 @@ function check (type: string, details?: object) {
 
   let human = new MemoryStream()
   let humanReporterOpts = {
+    suppressFlushSyncWarning: true,
     basepath: '/dev/app',
     color: true
   }
