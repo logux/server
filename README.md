@@ -75,7 +75,7 @@ server.channel('user/:id', {
     const user = await db.loadUser(ctx.params.id)
     server.log.add(
       { type: 'USER_NAME', name: user.name },
-      { clients: [ctx.clientId] })
+      { clients: [ctx.clientId] }
     )
   }
 })
