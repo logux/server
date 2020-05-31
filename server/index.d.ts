@@ -2,7 +2,8 @@ import BaseServer, { Logger, Reporter, BaseServerOptions } from '../base-server'
 
 export type ServerOptions = BaseServerOptions & {
   /**
-   * Custom reporter for process/errors
+   * Custom reporter for process/errors. You should use it only for test purposes
+   * or unavoidable hacks.
    *
    * ```js
    * new Server({
@@ -76,7 +77,7 @@ export type ServerOptions = BaseServerOptions & {
  */
 export default class Server<H extends object = {}> extends BaseServer<H> {
   /**
-   * Load options from command-line arguments and/or environment
+   * Load options from command-line arguments and/or environment.
    *
    * ```js
    * const server = new Server(Server.loadOptions(process, {
