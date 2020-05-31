@@ -195,40 +195,38 @@ const REPORTERS = {
   }
 }
 
-function createReporter (options) {
-  let logger
-  if (typeof options.logger === 'object') {
-    logger = options.logger
-  } else {
-    let stream = options.reporterStream || pino.destination()
-    let prettifier = {}
-    if (options.logger === 'human') {
-      let env = options.env || process.env.NODE_ENV || 'development'
-      let color = env !== 'development' ? false : undefined
-      prettifier = {
-        prettyPrint: {
-          basepath: options.root,
-          color
-        },
-        prettifier: humanFormatter
-      }
-    }
-    logger = pino(
-      {
-        name: 'logux-server',
-        timestamp: pino.stdTimeFunctions.isoTime,
-        ...prettifier
+function createLogger (options) {
+  let stream = options.reporterStream || pino.destination()
+  let prettifier = {}
+  if (options.logger === 'human') {
+    let env = options.env || process.env.NODE_ENV || 'development'
+    let color = env !== 'development' ? false : undefined
+    prettifier = {
+      prettyPrint: {
+        basepath: options.root,
+        color
       },
-      stream
-    )
+      prettifier: humanFormatter
+    }
   }
+  return pino(
+    {
+      name: 'logux-server',
+      timestamp: pino.stdTimeFunctions.isoTime,
+      ...prettifier
+    },
+    stream
+  )
+}
 
+function createReporter (options) {
   function reporter (type, details) {
     let report = REPORTERS[type](details)
     let level = report.level || 'info'
     reporter.logger[level](report.details || details || {}, report.msg)
   }
-  reporter.logger = logger
+  reporter.logger =
+    typeof options.logger === 'object' ? options.logger : createLogger(options)
   return reporter
 }
 
