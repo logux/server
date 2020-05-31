@@ -6,7 +6,6 @@ import pino = require('pino')
 let server = new Server<{ locale: string }>(
   Server.loadOptions(process, {
     subprotocol: '1.0.0',
-    reporter: 'human',
     supports: '1.x',
     logger: pino({ name: 'logux' }),
     root: __dirname

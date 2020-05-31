@@ -100,7 +100,7 @@ it('uses CLI args for options', () => {
       '1337',
       '--host',
       '192.168.1.1',
-      '--reporter',
+      '--logger',
       'json',
       '--redis',
       '//localhost',
@@ -117,7 +117,7 @@ it('uses CLI args for options', () => {
 
   expect(options.host).toEqual('192.168.1.1')
   expect(options.port).toEqual(1337)
-  expect(options.reporter).toEqual('json')
+  expect(options.logger).toEqual('json')
   expect(options.cert).toBeUndefined()
   expect(options.key).toBeUndefined()
   expect(options.redis).toEqual('//localhost')
@@ -130,7 +130,7 @@ it('uses env for options', () => {
     fakeProcess([], {
       LOGUX_HOST: '127.0.1.1',
       LOGUX_PORT: '31337',
-      LOGUX_REPORTER: 'json',
+      LOGUX_LOGGER: 'json',
       LOGUX_REDIS: '//localhost',
       LOGUX_BACKEND: 'http://localhost:8080/logux',
       LOGUX_CONTROL_SECRET: 'secret'
@@ -143,7 +143,7 @@ it('uses env for options', () => {
 
   expect(options.host).toEqual('127.0.1.1')
   expect(options.port).toEqual(31337)
-  expect(options.reporter).toEqual('json')
+  expect(options.logger).toEqual('json')
   expect(options.redis).toEqual('//localhost')
   expect(options.backend).toEqual('http://localhost:8080/logux')
   expect(options.controlSecret).toEqual('secret')
@@ -200,14 +200,14 @@ it('uses environment variables for config', () => {
   return checkOut('options.js', [], {
     env: {
       ...process.env,
-      LOGUX_REPORTER: 'json',
+      LOGUX_LOGGER: 'json',
       LOGUX_PORT: '31337',
       NODE_ENV: 'test'
     }
   })
 })
 
-it('uses reporter param', () => checkOut('options.js', ['', '--r', 'json']))
+it('uses logger param', () => checkOut('options.js', ['', '--l', 'json']))
 
 it('uses autoload modules', () => checkOut('autoload-modules.js'))
 
@@ -251,8 +251,8 @@ it('disables colors for constructor errors', () => {
   })
 })
 
-it('uses reporter param for constructor errors', () => {
-  return checkError('missed.js', ['', '--r', 'json'])
+it('uses logger param for constructor errors', () => {
+  return checkError('missed.js', ['', '--l', 'json'])
 })
 
 it('writes to pino log', () => checkOut('pino.js'))

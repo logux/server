@@ -2,11 +2,20 @@ import BaseServer, { Logger, Reporter, BaseServerOptions } from '../base-server'
 
 export type ServerOptions = BaseServerOptions & {
   /**
-   * Report process/errors to CLI in pino JSON or in human readable
-   * format. It can be also a function to show current server status.
-   * Default is `'human'`.
+   * Custom reporter for process/errors. You should use it only for test purposes
+   * or unavoidable hacks.
+   *
+   * ```js
+   * new Server({
+   *   …,
+   *   reporter: (name, details) => {
+   *     console.log('Event:', name)
+   *     console.log('Details:', JSON.stringify(details))
+   *   }
+   * })
+   * ```
    */
-  reporter?: 'human' | 'json' | Reporter
+  reporter?: Reporter
 
   /**
    * Stream to be used by reporter to write log.
@@ -18,7 +27,7 @@ export type ServerOptions = BaseServerOptions & {
   /**
    * Logger with custom settings.
    *
-   * For example, you can provide pino logger that streams logs to
+   * Custom logger example: pino logger that streams logs to
    * elasticsearch
    *
    * ```js
@@ -41,7 +50,7 @@ export type ServerOptions = BaseServerOptions & {
    *
    * Other logger examples can be found here http://getpino.io/#/docs/ecosystem
    */
-  logger?: Logger
+  logger?: 'human' | 'json' | Logger
 }
 
 /**
@@ -68,7 +77,7 @@ export type ServerOptions = BaseServerOptions & {
  */
 export default class Server<H extends object = {}> extends BaseServer<H> {
   /**
-   * Load options from command-line arguments and/or environment
+   * Load options from command-line arguments and/or environment.
    *
    * ```js
    * const server = new Server(Server.loadOptions(process, {

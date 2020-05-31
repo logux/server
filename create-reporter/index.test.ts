@@ -104,7 +104,7 @@ it('creates human reporter', () => {
   let reporterStream = new MemoryStream()
   let reporter = createReporter({
     reporterStream,
-    reporter: 'human',
+    logger: 'human',
     root: '/dir/'
   })
   reporter('unknownType', {})
@@ -112,24 +112,24 @@ it('creates human reporter', () => {
 })
 
 it('adds trailing slash to path', () => {
-  let reporter = createReporter({ reporter: 'human', root: '/dir' })
+  let reporter = createReporter({ logger: 'human', root: '/dir' })
   expect(reporter.logger.basepath).toEqual('/dir/')
 })
 
 it('uses colors by default', () => {
   delete process.env.NODE_ENV
-  let reporter = createReporter({ reporter: 'human' })
+  let reporter = createReporter({ logger: 'human' })
   expect(reporter.logger.chalk.level).toBeGreaterThan(0)
 })
 
 it('uses color in development', () => {
-  let reporter = createReporter({ env: 'development', reporter: 'human' })
+  let reporter = createReporter({ env: 'development', logger: 'human' })
   expect(reporter.logger.chalk.level).toBeGreaterThan(0)
 })
 
 it('uses environment variable to detect environment', () => {
   process.env.NODE_ENV = 'production'
-  let reporter = createReporter({ reporter: 'human' })
+  let reporter = createReporter({ logger: 'human' })
   expect(reporter.logger.chalk.level).toEqual(0)
 })
 
