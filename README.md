@@ -73,10 +73,7 @@ server.channel('user/:id', {
   },
   async load (ctx, action, meta) {
     const user = await db.loadUser(ctx.params.id)
-    server.log.add(
-      { type: 'USER_NAME', name: user.name },
-      { clients: [ctx.clientId] }
-    )
+    return { type: 'USER_NAME', name: user.name }
   }
 })
 
@@ -87,9 +84,9 @@ server.type('CHANGE_NAME', {
   resend (ctx, action, meta) {
     return { channel: `user/${ ctx.userId }` }
   },
-  process (ctx, action, meta) {
+  async process (ctx, action, meta) {
     if (isFirstOlder(lastNameChange(action.user), meta)) {
-      return db.changeUserName({ id: action.user, name: action.name })
+      await db.changeUserName({ id: action.user, name: action.name })
     }
   }
 })
