@@ -297,7 +297,12 @@ it('reports about authentication error', async () => {
   let client = new ServerClient(test.app, createConnection(), 1)
   await connect(client)
 
-  expect(test.names).toEqual(['connect', 'error', 'disconnect'])
+  expect(test.names).toEqual([
+    'connect',
+    'error',
+    'unauthenticated',
+    'disconnect'
+  ])
   expect(test.reports[1]).toEqual([
     'error',
     {
@@ -317,7 +322,7 @@ it('blocks authentication bruteforce', async () => {
   }
   await Promise.all([1, 2, 3, 4, 5].map(i => connectNext(i)))
   expect(test.names.filter(i => i === 'disconnect')).toHaveLength(5)
-  expect(test.names.filter(i => i === 'unauthenticated')).toHaveLength(3)
+  expect(test.names.filter(i => i === 'unauthenticated')).toHaveLength(5)
   expect(test.names.filter(i => i === 'clientError')).toHaveLength(2)
   test.reports
     .filter(i => i[0] === 'clientError')
@@ -330,7 +335,7 @@ it('blocks authentication bruteforce', async () => {
   await connectNext(6)
 
   expect(test.names.filter(i => i === 'disconnect')).toHaveLength(6)
-  expect(test.names.filter(i => i === 'unauthenticated')).toHaveLength(4)
+  expect(test.names.filter(i => i === 'unauthenticated')).toHaveLength(6)
   expect(test.names.filter(i => i === 'clientError')).toHaveLength(2)
 })
 

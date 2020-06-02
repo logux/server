@@ -365,8 +365,9 @@ it('process errors during authentication', async () => {
   app.on('error', e => {
     errors.push(e.message)
   })
-  app.connect('10', { token: 'error' })
-  await delay(100)
+
+  let err = await catchError(() => app.connect('10', { token: 'error' }))
+  expect(err.toString()).toContain('Wrong credentials')
   expect(app.connected.size).toEqual(0)
   expect(errors).toEqual(['Error on back-end server'])
 })
@@ -377,8 +378,9 @@ it('process wrong answer during authentication', async () => {
   app.on('error', e => {
     errors.push(e.message)
   })
-  app.connect('10', { token: 'empty' })
-  await delay(100)
+
+  let err = await catchError(() => app.connect('10', { token: 'empty' }))
+  expect(err.toString()).toContain('Wrong credentials')
   expect(app.connected.size).toEqual(0)
   expect(errors).toEqual(['Empty back-end answer'])
 })

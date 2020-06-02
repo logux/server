@@ -14,15 +14,6 @@ function reportDetails (client) {
   }
 }
 
-function reportClient (client, obj) {
-  if (client.nodeId) {
-    obj.nodeId = client.nodeId
-  } else {
-    obj.connectionId = client.key
-  }
-  return obj
-}
-
 class ServerClient {
   constructor (app, connection, key) {
     this.app = app
@@ -52,7 +43,8 @@ class ServerClient {
     }
 
     this.node.catch(err => {
-      this.app.emitter.emit('error', reportClient(this, err))
+      err.connectionId = this.key
+      this.app.emitter.emit('error', err)
     })
     this.node.on('connect', () => {
       if (!this.isSubprotocol(this.app.options.supports)) {
@@ -67,7 +59,8 @@ class ServerClient {
     })
     this.node.on('clientError', err => {
       if (err.type !== 'wrong-credentials') {
-        this.app.emitter.emit('clientError', reportClient(this, err))
+        err.connectionId = this.key
+        this.app.emitter.emit('clientError', err)
       }
     })
 
@@ -126,16 +119,26 @@ class ServerClient {
     }
 
     let start = Date.now()
-    let result = await this.app.authenticator({
-      headers: this.node.remoteHeaders,
-      cookie: cookie.parse(headers.cookie || ''),
-      userId: this.userId,
-      client: this,
-      token
-    })
+    let result
+    try {
+      result = await this.app.authenticator({
+        headers: this.node.remoteHeaders,
+        cookie: cookie.parse(headers.cookie || ''),
+        userId: this.userId,
+        client: this,
+        token
+      })
+    } catch (e) {
+      e.nodeId = nodeId
+      this.app.emitter.emit('error', e)
+      result = false
+    }
 
     if (this.app.isBruteforce(this.remoteAddress)) {
-      throw new LoguxError('bruteforce')
+      let e = new LoguxError('bruteforce')
+      e.nodeId = nodeId
+      this.app.emitter.emit('clientError', e)
+      result = false
     }
 
     if (result) {
