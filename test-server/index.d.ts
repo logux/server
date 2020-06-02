@@ -22,7 +22,7 @@ export type TestServerOptions = Omit<
   /**
    * Print server log to the console for debug.
    */
-  reporter?: 'human' | Reporter
+  reporter?: Reporter
 
   /**
    * Stream to be used by reporter to write log.
@@ -30,6 +30,11 @@ export type TestServerOptions = Omit<
   reporterStream?: {
     write(str: string): void
   }
+
+  /**
+   * Print logs in human readable format
+   */
+  logger?: 'human'
 }
 
 /**

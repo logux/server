@@ -170,7 +170,7 @@ it('prints server log', async () => {
     write () {}
   }
   jest.spyOn(reporterStream, 'write').mockImplementation(() => {})
-  server = new TestServer({ reporter: 'human', reporterStream })
+  server = new TestServer({ logger: 'human', reporterStream })
   await server.connect('10:uuid')
   expect(reporterStream.write).toHaveBeenCalledTimes(2)
 })
