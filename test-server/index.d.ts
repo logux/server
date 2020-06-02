@@ -20,7 +20,7 @@ export type TestServerOptions = Omit<
   auth?: false
 
   /**
-   * Print server log to the console for debug.
+   * Low-level API to server logs for tests.
    */
   reporter?: Reporter
 
