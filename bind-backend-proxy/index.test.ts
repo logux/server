@@ -140,7 +140,7 @@ let httpServer = http.createServer((req, res) => {
       } else if (command.userId === '30' && command.cookie.token === 'good') {
         res.end(`[{"answer":"authenticated",${id}}]`)
       } else if (command.token === 'error') {
-        res.end(`[{"answer":"error",${id},"stack":"stack"}]`)
+        res.end(`[{"answer":"error",${id},"details":"stack"}]`)
       } else if (command.token === 'empty') {
         res.end('')
       } else {
@@ -158,11 +158,11 @@ let httpServer = http.createServer((req, res) => {
       } else if (command.action.channel === 'unknown') {
         res.end(`[{"answer":"unknownChannel",${id}}]`)
       } else if (command.action.type === 'AERROR') {
-        res.end(`[{"answer":"error",${id},"stack":"stack"}]`)
+        res.end(`[{"answer":"error",${id},"details":"stack"}]`)
       } else if (command.action.type === 'PERROR') {
         res.write(`[{"answer":"approved",${id}}`)
         await delay(100)
-        res.end(`,{"answer":"error",${id},"stack":"stack"}]`)
+        res.end(`,{"answer":"error",${id},"details":"stack"}]`)
       } else if (command.action.type === 'BROKEN1') {
         res.end(`[{"answer":"approved",${id}}`)
       } else if (command.action.type === 'BROKEN2') {

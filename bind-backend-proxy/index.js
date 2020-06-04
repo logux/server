@@ -49,7 +49,7 @@ function send (backend, command, events) {
               events.error(new Error('Wrong back-end answer'))
             } else if (answer.answer === 'error') {
               let err = new Error('Error on back-end server')
-              err.stack = answer.stack
+              err.stack = answer.details
               events.error(err)
             } else if (events.filter(answer)) {
               if (!events[answer.answer]) {
