@@ -740,6 +740,12 @@ export default class BaseServer<
   on (event: 'subscriptionCancelled', listener: () => void): Unsubscribe
 
   /**
+   * @param event The event name.
+   * @param listener Report listener.
+   */
+  on (event: 'report', listener: Reporter): Unsubscribe
+
+  /**
    * Stop server and unbind all listeners.
    *
    * ```js

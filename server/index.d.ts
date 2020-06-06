@@ -1,32 +1,25 @@
-import BaseServer, { Logger, Reporter, BaseServerOptions } from '../base-server'
+import BaseServer, { Logger, BaseServerOptions } from '../base-server'
+
+export type LoggerOptions = {
+  /**
+   * Logger message format.
+   */
+  type?: 'human' | 'json'
+
+  /**
+   * Stream to be used by logger to write log.
+   * todo Note about flushSync
+   */
+  stream?: {
+    write(str: string): void
+  }
+}
 
 export type ServerOptions = BaseServerOptions & {
   /**
-   * Custom reporter for process/errors. You should use it only for test purposes
-   * or unavoidable hacks.
-   *
-   * ```js
-   * new Server({
-   *   …,
-   *   reporter: (name, details) => {
-   *     console.log('Event:', name)
-   *     console.log('Details:', JSON.stringify(details))
-   *   }
-   * })
-   * ```
-   */
-  reporter?: Reporter
-
-  /**
-   * Stream to be used by reporter to write log.
-   */
-  reporterStream?: {
-    write(str: string): void
-  }
-
-  /**
    * Logger with custom settings.
    *
+   * You can either configure built-in logger or provide your own.
    * Custom logger example: pino logger that streams logs to
    * elasticsearch
    *
@@ -50,7 +43,7 @@ export type ServerOptions = BaseServerOptions & {
    *
    * Other logger examples can be found here http://getpino.io/#/docs/ecosystem
    */
-  logger?: 'human' | 'json' | Logger
+  logger?: Logger | LoggerOptions
 }
 
 /**

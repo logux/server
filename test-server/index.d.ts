@@ -4,8 +4,9 @@ import TestClient, { TestClientOptions } from '../test-client'
 import BaseServer, {
   ServerMeta,
   BaseServerOptions,
-  Reporter
+  Logger
 } from '../base-server'
+import { LoggerOptions } from '../server'
 
 export type TestServerOptions = Omit<
   BaseServerOptions,
@@ -20,21 +21,9 @@ export type TestServerOptions = Omit<
   auth?: false
 
   /**
-   * Low-level API to server logs for tests.
+   * Logger with custom settings.
    */
-  reporter?: Reporter
-
-  /**
-   * Stream to be used by reporter to write log.
-   */
-  reporterStream?: {
-    write(str: string): void
-  }
-
-  /**
-   * Print logs in human readable format
-   */
-  logger?: 'human'
+  logger?: Logger | LoggerOptions
 }
 
 /**

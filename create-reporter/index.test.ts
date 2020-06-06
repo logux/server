@@ -95,7 +95,7 @@ it('uses passed logger instance', () => {
 
 it('creates JSON reporter', () => {
   let reporterStream = new MemoryStream()
-  let reporter = createReporter({ reporterStream })
+  let reporter = createReporter({ logger: { stream: reporterStream } })
   reporter('unknownType', {})
   expect(clean(reporterStream.string)).toMatchSnapshot()
 })
@@ -103,8 +103,10 @@ it('creates JSON reporter', () => {
 it('creates human reporter', () => {
   let reporterStream = new MemoryStream()
   let reporter = createReporter({
-    reporterStream,
-    logger: 'human',
+    logger: {
+      stream: reporterStream,
+      type: 'human'
+    },
     root: '/dir/'
   })
   reporter('unknownType', {})

@@ -15,7 +15,6 @@ export { ServerOptions } from './server'
 export {
   LoguxAction,
   LoguxProcessedAction,
-  Reporter,
   LoguxSubscribeAction,
   LoguxAnySubscribeAction,
   LoguxUndoAction,

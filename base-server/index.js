@@ -27,7 +27,12 @@ function optionError (msg) {
 class BaseServer {
   constructor (opts = {}) {
     this.options = opts
-    this.reporter = this.options.reporter || function () {}
+    this.reporter = function (type, details) {
+      this.emitter.emit('report', type, details)
+      if (this.options.reporter) {
+        this.options.reporter(type, details)
+      }
+    }
     this.env = this.options.env || process.env.NODE_ENV || 'development'
 
     if (
