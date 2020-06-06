@@ -133,10 +133,9 @@ class Server extends BaseServer {
   constructor (opts) {
     if (!opts) opts = {}
 
-    if (typeof opts.reporter !== 'function') {
-      opts.logger = opts.logger || 'human'
-      opts.reporter = createReporter(opts)
-    }
+    opts.logger = opts.logger || 'human'
+    opts.reporter = createReporter(opts)
+    delete opts.reportComposer
 
     let initialized = false
     let onError = err => {

@@ -220,11 +220,20 @@ function createLogger (options) {
   )
 }
 
+function defaultReportComposer (type, details) {
+  let report = REPORTERS[type](details)
+  return {
+    level: report.level || 'info',
+    msg: report.msg,
+    details: report.details || details || {}
+  }
+}
+
 function createReporter (options) {
+  let reportComposer = options.reportComposer || defaultReportComposer
   function reporter (type, details) {
-    let report = REPORTERS[type](details)
-    let level = report.level || 'info'
-    reporter.logger[level](report.details || details || {}, report.msg)
+    let report = reportComposer(type, details)
+    if (report) reporter.logger[report.level](report.details, report.msg)
   }
   reporter.logger =
     typeof options.logger === 'object' ? options.logger : createLogger(options)

@@ -4,7 +4,7 @@ import TestClient, { TestClientOptions } from '../test-client'
 import BaseServer, {
   ServerMeta,
   BaseServerOptions,
-  Reporter
+  ReportComposer
 } from '../base-server'
 
 export type TestServerOptions = Omit<
@@ -21,8 +21,9 @@ export type TestServerOptions = Omit<
 
   /**
    * Low-level API to server logs for tests.
+   * TODO [sl.aleksandr 06.05.2020] Update docs
    */
-  reporter?: Reporter
+  reportComposer?: ReportComposer
 
   /**
    * Stream to be used by reporter to write log.

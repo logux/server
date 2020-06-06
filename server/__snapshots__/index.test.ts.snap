@@ -221,7 +221,7 @@ exports[`writes to pino log 1`] = `
 "
 `;
 
-exports[`writes using custom reporter 1`] = `
+exports[`writes using custom report composer 1`] = `
 "Event: listen
 Details: {\\"controlMask\\":\\"127.0.0.1/8\\",\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"test\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"server\\":false,\\"nodeId\\":\\"server:FnXaqDxY\\",\\"notes\\":{},\\"cert\\":false,\\"host\\":\\"127.0.0.1\\",\\"port\\":2000}
 Event: destroy

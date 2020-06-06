@@ -1,7 +1,12 @@
-import BaseServer, { Logger, Reporter, BaseServerOptions } from '../base-server'
+import BaseServer, {
+  Logger,
+  BaseServerOptions,
+  ReportComposer
+} from '../base-server'
 
 export type ServerOptions = BaseServerOptions & {
   /**
+   * TODO [sl.aleksandr 06.05.2020] Update docs
    * Custom reporter for process/errors. You should use it only for test purposes
    * or unavoidable hacks.
    *
@@ -15,7 +20,7 @@ export type ServerOptions = BaseServerOptions & {
    * })
    * ```
    */
-  reporter?: Reporter
+  reportComposer?: ReportComposer
 
   /**
    * Stream to be used by reporter to write log.

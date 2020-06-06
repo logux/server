@@ -464,6 +464,17 @@ type ReportersArguments = {
   }
 }
 
+export type Report = {
+  details: object
+  level: string
+  msg?: string
+}
+
+export type ReportComposer = <E extends keyof ReportersArguments>(
+  event: E,
+  payload: ReportersArguments[E]
+) => Report | void
+
 export type Reporter = <E extends keyof ReportersArguments>(
   event: E,
   payload: ReportersArguments[E]

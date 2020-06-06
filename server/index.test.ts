@@ -259,4 +259,5 @@ it('writes to pino log', () => checkOut('pino.js'))
 
 it('writes to custom pino log', () => checkOut('pino-custom.js'))
 
-it('writes using custom reporter', () => checkOut('custom-reporter.js'))
+it('writes using custom report composer', () =>
+  checkOut('custom-report-composer.js'))

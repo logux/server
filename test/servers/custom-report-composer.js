@@ -6,7 +6,7 @@ let app = new Server({
   subprotocol: '1.0.0',
   supports: '1.x',
   port: 2000,
-  reporter: (name, details) => {
+  reportComposer: (name, details) => {
     console.log('Event:', name)
     console.log('Details:', JSON.stringify(details))
   }
