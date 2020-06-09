@@ -70,7 +70,7 @@ export type BaseServerOptions = {
   /**
    * Server current application subprotocol version in SemVer format.
    */
-  subprotocol: string
+  subprotocol?: string
 
   /**
    * npm’s version requirements for client subprotocol version.

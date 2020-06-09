@@ -93,7 +93,6 @@ it('generates node ID', () => {
 
 it('throws on missed subprotocol', () => {
   expect(() => {
-    // @ts-expect-error
     new BaseServer({})
   }).toThrow(/Missed `subprotocol` option/)
 })

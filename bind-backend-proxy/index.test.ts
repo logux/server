@@ -39,6 +39,10 @@ const ACTION = {
   meta: { id: '1 server:rails 0', reasons: ['test'] }
 }
 
+function privateMethods (obj: object): any {
+  return obj
+}
+
 function createServer (opts?: TestServerOptions) {
   lastPort += 1
   let server = new TestServer({
@@ -136,9 +140,9 @@ let httpServer = http.createServer((req, res) => {
       if (command.userId === '10' && command.token === 'good') {
         res.write('[{"answer":"authent')
         await delay(100)
-        res.end(`icated",${id}}]`)
+        res.end(`icated",${id},"subprotocol":"1.0.0"}]`)
       } else if (command.userId === '30' && command.cookie.token === 'good') {
-        res.end(`[{"answer":"authenticated",${id}}]`)
+        res.end(`[{"answer":"authenticated",${id},"subprotocol":"1.0.0"}]`)
       } else if (command.token === 'error') {
         res.end(`[{"answer":"error",${id},"details":"stack"}]`)
       } else if (command.token === 'subprotocol') {
@@ -307,10 +311,12 @@ it('reports bad HTTP answers', async () => {
 
 it('authenticates user on backend', async () => {
   let app = createServer({ ...OPTIONS, auth: false })
-  await app.connect('10', {
+  let client = await app.connect('10', {
     token: 'good',
     headers: { lang: 'fr' }
   })
+  expect(privateMethods(client).node.remoteSubprotocol).toEqual('1.0.0')
+  expect(app.options.subprotocol).toEqual('1.0.0')
   let authId = sent[0][2].commands[0].authId
   expect(typeof authId).toEqual('string')
   expect(sent).toEqual([

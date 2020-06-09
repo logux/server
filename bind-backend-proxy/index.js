@@ -227,7 +227,11 @@ function bindBackendProxy (app) {
                 })
               )
             },
-            authenticated () {
+            authenticated ({ subprotocol }) {
+              if (subprotocol) {
+                app.options.subprotocol = subprotocol
+                client.node.options.subprotocol = subprotocol
+              }
               resolve(true)
             },
             denied () {
