@@ -30,10 +30,16 @@ class BaseServer {
     this.reporter = this.options.reporter || function () {}
     this.env = this.options.env || process.env.NODE_ENV || 'development'
 
-    if (typeof this.options.subprotocol === 'undefined') {
+    if (
+      typeof this.options.subprotocol === 'undefined' &&
+      typeof this.options.backend === 'undefined'
+    ) {
       throw optionError('Missed `subprotocol` option in server constructor')
     }
-    if (typeof this.options.supports === 'undefined') {
+    if (
+      typeof this.options.supports === 'undefined' &&
+      typeof this.options.backend === 'undefined'
+    ) {
       throw optionError('Missed `supports` option in server constructor')
     }
 

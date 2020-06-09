@@ -38,7 +38,13 @@ async function connect (
   if (typeof details !== 'undefined') {
     await sendTo(client, ['connect', protocol, nodeId, 0, details])
   } else {
-    await sendTo(client, ['connect', protocol, nodeId, 0])
+    await sendTo(client, [
+      'connect',
+      protocol,
+      nodeId,
+      0,
+      { subprotocol: '0.0.1' }
+    ])
   }
 }
 
@@ -200,6 +206,8 @@ it('removes itself on destroy', async () => {
 
   await client1.connection.connect()
   await client2.connection.connect()
+  client1.node.remoteSubprotocol = '0.0.1'
+  client2.node.remoteSubprotocol = '0.0.1'
   privateMethods(client1).auth('10:uuid', {})
   privateMethods(client2).auth('10:other', {})
   test.app.subscribers = {
@@ -279,7 +287,7 @@ it('reports on wrong authentication', async () => {
     {
       connectionId: '1',
       nodeId: '10:uuid',
-      subprotocol: '0.0.0'
+      subprotocol: '0.0.1'
     }
   ])
 })
@@ -351,7 +359,7 @@ it('reports on server in user name', async () => {
     {
       connectionId: '1',
       nodeId: 'server:x',
-      subprotocol: '0.0.0'
+      subprotocol: '0.0.1'
     }
   ])
 })
@@ -493,9 +501,11 @@ it('disconnects zombie', async () => {
   let client2 = createClient(test.app)
 
   await client1.connection.connect()
+  client1.node.remoteSubprotocol = '0.0.1'
   privateMethods(client1).auth('10:client:a', {})
-  await client2.connection.connect()
 
+  await client2.connection.connect()
+  client2.node.remoteSubprotocol = '0.0.1'
   privateMethods(client2).auth('10:client:b', {})
   await delay(0)
 
@@ -661,7 +671,7 @@ it('checks user access for action', async () => {
   test.app.type<FooAction>('FOO', {
     async access (ctx, action, meta) {
       expect(ctx.userId).toEqual('10')
-      expect(ctx.subprotocol).toEqual('0.0.0')
+      expect(ctx.subprotocol).toEqual('0.0.1')
       expect(meta.id).toBeDefined()
       return !!action.bar
     }
@@ -1076,7 +1086,7 @@ it('decompress subprotocol', async () => {
     { id: [2, '10:uuid', 0], time: 2, subprotocol: '2.0.0' }
   ] as any)
 
-  expect(app.log.entries()[0][1].subprotocol).toEqual('0.0.0')
+  expect(app.log.entries()[0][1].subprotocol).toEqual('0.0.1')
   expect(app.log.entries()[1][1].subprotocol).toEqual('2.0.0')
 })
 

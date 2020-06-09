@@ -46,14 +46,6 @@ class ServerClient {
       err.connectionId = this.key
       this.app.emitter.emit('error', err)
     })
-    this.node.on('connect', () => {
-      if (!this.isSubprotocol(this.app.options.supports)) {
-        throw new LoguxError('wrong-subprotocol', {
-          supported: this.app.options.supports,
-          used: this.node.remoteSubprotocol
-        })
-      }
-    })
     this.node.on('state', () => {
       if (!this.node.connected && !this.destroyed) this.destroy()
     })
@@ -107,6 +99,15 @@ class ServerClient {
     this.clientId = clientId
     this.userId = userId
 
+    if (this.app.options.supports) {
+      if (!this.isSubprotocol(this.app.options.supports)) {
+        throw new LoguxError('wrong-subprotocol', {
+          supported: this.app.options.supports,
+          used: this.node.remoteSubprotocol
+        })
+      }
+    }
+
     if (nodeId === 'server' || userId === 'server') {
       this.app.reporter('unauthenticated', reportDetails(this))
       return false
@@ -129,9 +130,13 @@ class ServerClient {
         token
       })
     } catch (e) {
-      e.nodeId = nodeId
-      this.app.emitter.emit('error', e)
-      result = false
+      if (e.name === 'LoguxError') {
+        throw e
+      } else {
+        e.nodeId = nodeId
+        this.app.emitter.emit('error', e)
+        result = false
+      }
     }
 
     if (this.app.isBruteforce(this.remoteAddress)) {

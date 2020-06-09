@@ -1,7 +1,7 @@
 import { delay } from 'nanodelay'
 import http from 'http'
 
-import { TestServerOptions, TestServer } from '..'
+import { BaseServer, TestServerOptions, TestServer } from '..'
 
 let destroyable: { destroy(): Promise<void> }[] = []
 let lastPort = 8111
@@ -141,6 +141,8 @@ let httpServer = http.createServer((req, res) => {
         res.end(`[{"answer":"authenticated",${id}}]`)
       } else if (command.token === 'error') {
         res.end(`[{"answer":"error",${id},"details":"stack"}]`)
+      } else if (command.token === 'subprotocol') {
+        res.end(`[{"answer":"wrongSubprotocol",${id},"supported":"^1.0"}]`)
       } else if (command.token === 'empty') {
         res.end('')
       } else {
@@ -195,6 +197,14 @@ let httpServer = http.createServer((req, res) => {
         res.end(`,{"answer":"processed",${id}}]`)
       }
     }
+  })
+})
+
+it('allows to miss subprotocol swith backend option', () => {
+  new BaseServer({
+    controlSecret: 'secret',
+    subprotocol: '1.0.0',
+    backend: 'http://example.com'
   })
 })
 
@@ -316,6 +326,7 @@ it('authenticates user on backend', async () => {
             authId,
             userId: '10',
             token: 'good',
+            subprotocol: '0.0.0',
             headers: { lang: 'fr' },
             cookie: {}
           }
@@ -344,6 +355,7 @@ it('authenticates user by cookie', async () => {
             command: 'auth',
             authId,
             userId: '30',
+            subprotocol: '0.0.0',
             headers: {},
             cookie: { token: 'good' }
           }
@@ -359,7 +371,7 @@ it('checks user credentials', async () => {
   expect(error.message).toEqual('Wrong credentials')
 })
 
-it('process errors during authentication', async () => {
+it('processes errors during authentication', async () => {
   let app = createServer({ ...OPTIONS, auth: false })
   let errors: string[] = []
   app.on('error', e => {
@@ -370,6 +382,17 @@ it('process errors during authentication', async () => {
   expect(err.toString()).toContain('Wrong credentials')
   expect(app.connected.size).toEqual(0)
   expect(errors).toEqual(['Error on back-end server'])
+})
+
+it('checks subprotocol', async () => {
+  let app = createServer({ ...OPTIONS, auth: false })
+  let errors: string[] = []
+  app.on('error', e => {
+    errors.push(e.message)
+  })
+
+  let err = await catchError(() => app.connect('10', { token: 'subprotocol' }))
+  expect(err.toString()).toContain('Only ^1.0 application subprotocols')
 })
 
 it('process wrong answer during authentication', async () => {

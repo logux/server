@@ -1,3 +1,4 @@
+let { LoguxError } = require('@logux/core')
 let JSONStream = require('JSONStream')
 let { nanoid } = require('nanoid')
 let https = require('https')
@@ -200,15 +201,31 @@ function bindBackendProxy (app) {
   }
 
   app.auth(
-    ({ userId, headers, cookie, token }) =>
+    ({ userId, headers, cookie, token, client }) =>
       new Promise((resolve, reject) => {
         let random = nanoid()
         send(
           backend,
-          { command: 'auth', authId: random, userId, token, headers, cookie },
+          {
+            command: 'auth',
+            authId: random,
+            userId,
+            token,
+            headers,
+            cookie,
+            subprotocol: client.node.remoteSubprotocol
+          },
           {
             filter ({ authId }) {
               return random === authId
+            },
+            wrongSubprotocol ({ supported }) {
+              reject(
+                new LoguxError('wrong-subprotocol', {
+                  used: client.node.remoteSubprotocol,
+                  supported
+                })
+              )
             },
             authenticated () {
               resolve(true)

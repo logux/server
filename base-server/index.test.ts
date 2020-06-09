@@ -100,7 +100,6 @@ it('throws on missed subprotocol', () => {
 
 it('throws on missed supported subprotocols', () => {
   expect(() => {
-    // @ts-expect-error
     new BaseServer({ subprotocol: '0.0.0' })
   }).toThrow(/Missed `supports` option/)
 })

@@ -75,7 +75,7 @@ export type BaseServerOptions = {
   /**
    * npm’s version requirements for client subprotocol version.
    */
-  supports: string
+  supports?: string
 
   /**
    * Application root to load files and show errors.
