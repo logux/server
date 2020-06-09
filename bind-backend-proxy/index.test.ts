@@ -189,10 +189,24 @@ let httpServer = http.createServer((req, res) => {
         res.end()
       } else if (command.action.type === 'RESEND') {
         res.end(`[
-        {"answer":"resend",${id},"channels":["A"]},
-        {"answer":"approved",${id}},
-        {"answer":"processed",${id}}
-      ]`)
+          {"answer":"resend",${id},"channels":["A"]},
+          {"answer":"approved",${id}},
+          {"answer":"processed",${id}}
+        ]`)
+      } else if (command.action.channel === 'a') {
+        res.write('[{"answer":"appro')
+        await delay(1)
+        res.write(`ved",${id}}`)
+        await delay(100)
+        res.write(
+          `,{"answer":"action",${id},` +
+            '"action":{"type":"a/load1"},"meta":{"user":10}}'
+        )
+        res.write(
+          `,{"answer":"action",${id},` +
+            '"action":{"type":"a/load2"},"meta":{"user":10}}'
+        )
+        res.end(`,{"answer":"processed",${id}}]`)
       } else {
         res.write('[{"answer":"appro')
         await delay(1)
@@ -494,6 +508,8 @@ it('notifies about actions and subscriptions', async () => {
     { type: 'A' },
     { type: 'logux/subscribe', channel: 'a' },
     { type: 'logux/processed', id: '1 10:1:1 0' },
+    { type: 'a/load1' },
+    { type: 'a/load2' },
     { type: 'logux/processed', id: '2 10:1:1 0' }
   ])
   expect(app.log.entries()[0][1].status).toEqual('processed')

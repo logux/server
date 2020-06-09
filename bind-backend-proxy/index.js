@@ -90,27 +90,37 @@ function bindBackendProxy (app) {
   let backend = new URL(app.options.backend)
   backend.secret = app.options.controlSecret
 
-  let resending = {}
-  let accessing = {}
-  let processing = {}
+  let resending = new Map()
+  let accessing = new Map()
+  let processing = new Map()
+  let actions = new Map()
 
   function sendAction (action, meta, headers) {
     let resendResolve
     if (action.type !== 'logux/subscribe') {
-      resending[meta.id] = new Promise(resolve => {
-        resendResolve = resolve
-      })
+      resending.set(
+        meta.id,
+        new Promise(resolve => {
+          resendResolve = resolve
+        })
+      )
     }
     let accessResolve, accessReject
-    accessing[meta.id] = new Promise((resolve, reject) => {
-      accessResolve = resolve
-      accessReject = reject
-    })
+    accessing.set(
+      meta.id,
+      new Promise((resolve, reject) => {
+        accessResolve = resolve
+        accessReject = reject
+      })
+    )
     let processResolve, processReject
-    processing[meta.id] = new Promise((resolve, reject) => {
-      processResolve = resolve
-      processReject = reject
-    })
+    processing.set(
+      meta.id,
+      new Promise((resolve, reject) => {
+        processResolve = resolve
+        processReject = reject
+      })
+    )
 
     let checked = false
     let processed = false
@@ -150,6 +160,14 @@ function bindBackendProxy (app) {
             resendResolve(resend)
           }
         },
+        action (data) {
+          let promise = app.process(data.action, data.meta)
+          if (actions.has(meta.id)) {
+            actions.get(meta.id).push(promise)
+          } else {
+            actions.set(meta.id, [promise])
+          }
+        },
         approved () {
           if (resendResolve) resendResolve()
           app.emitter.emit('backendGranted', action, meta, Date.now() - start)
@@ -161,12 +179,13 @@ function bindBackendProxy (app) {
           error = true
           accessResolve(false)
         },
-        processed () {
+        async processed () {
           if (!checked) {
             error = true
             accessReject(new Error('Processed answer was sent before access'))
           } else {
             processed = true
+            await Promise.all(actions.get(meta.id) || [])
             app.emitter.emit(
               'backendProcessed',
               action,
@@ -247,31 +266,33 @@ function bindBackendProxy (app) {
   app.otherType({
     access (ctx, action, meta) {
       sendAction(action, meta, ctx.headers)
-      return accessing[meta.id]
+      return accessing.get(meta.id)
     },
     resend (ctx, action, meta) {
-      return resending[meta.id]
+      return resending.get(meta.id)
     },
     process (ctx, action, meta) {
-      return processing[meta.id]
+      return processing.get(meta.id)
     },
     finally (ctx, action, meta) {
-      delete resending[meta.id]
-      delete accessing[meta.id]
-      delete processing[meta.id]
+      actions.delete(meta.id)
+      resending.delete(meta.id)
+      accessing.delete(meta.id)
+      processing.delete(meta.id)
     }
   })
   app.otherChannel({
     access (ctx, action, meta) {
       sendAction(action, meta, ctx.headers)
-      return accessing[meta.id]
+      return accessing.get(meta.id)
     },
     load (ctx, action, meta) {
-      return processing[meta.id]
+      return processing.get(meta.id)
     },
     finally (ctx, action, meta) {
-      delete accessing[meta.id]
-      delete processing[meta.id]
+      actions.delete(meta.id)
+      accessing.delete(meta.id)
+      processing.delete(meta.id)
     }
   })
 
