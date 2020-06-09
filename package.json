@@ -35,14 +35,14 @@
   "dependencies": {
     "@logux/core": "logux/core#next",
     "JSONStream": "^1.3.5",
-    "chalk": "^4.0.0",
+    "chalk": "^4.1.0",
     "cookie": "^0.4.1",
     "dotenv": "^8.2.0",
     "globby": "^11.0.1",
     "ip": "^1.1.5",
     "nanoevents": "^5.1.7",
     "nanoid": "^3.1.9",
-    "pino": "^6.3.1",
+    "pino": "^6.3.2",
     "semver": "^7.3.2",
     "strip-ansi": "^6.0.0",
     "url-pattern": "^1.0.3",
@@ -54,20 +54,20 @@
     "@logux/eslint-config": "^39.0.3",
     "@logux/sharec-config": "^0.7.3",
     "@types/cross-spawn": "^6.0.2",
-    "@types/jest": "^25.2.2",
-    "@types/node": "^14.0.9",
+    "@types/jest": "^26.0.0",
+    "@types/node": "^14.0.12",
     "@types/pino": "^6.0.1",
-    "@types/ws": "^7.2.4",
-    "@typescript-eslint/eslint-plugin": "^3.1.0",
-    "@typescript-eslint/parser": "^3.1.0",
+    "@types/ws": "^7.2.5",
+    "@typescript-eslint/eslint-plugin": "^3.2.0",
+    "@typescript-eslint/parser": "^3.2.0",
     "check-dts": "^0.3.0",
     "clean-publish": "^1.1.7",
     "cross-spawn": "^7.0.3",
-    "eslint": "^7.1.0",
+    "eslint": "^7.2.0",
     "eslint-ci": "^1.0.0",
     "eslint-config-standard": "^14.1.1",
     "eslint-plugin-es5": "^1.5.0",
-    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-import": "^2.21.1",
     "eslint-plugin-jest": "^23.13.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prefer-let": "^1.0.1",
@@ -79,12 +79,12 @@
     "husky": "^4.2.5",
     "jest": "^26.0.1",
     "jest-ci": "^0.1.1",
-    "lint-staged": "^10.2.7",
+    "lint-staged": "^10.2.9",
     "nanodelay": "^1.0.2",
     "print-snapshots": "^0.3.0",
     "rimraf": "^3.0.2",
     "ts-jest": "^26.1.0",
-    "typescript": "^3.9.2",
+    "typescript": "^3.9.5",
     "typescript-fsa": "^3.0.0",
     "yaspeller-ci": "^1.0.2"
   },
@@ -130,6 +130,15 @@
         ],
         "rules": {
           "node/global-require": "off"
+        }
+      },
+      {
+        "files": [
+          "create-reporter/index.test.ts",
+          "server/types.ts"
+        ],
+        "rules": {
+          "import/order": "off"
         }
       }
     ]
