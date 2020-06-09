@@ -34,6 +34,8 @@ const ENVS = {
   cert: 'LOGUX_CERT',
   logger: 'LOGUX_LOGGER',
   redis: 'LOGUX_REDIS',
+  supports: 'LOGUX_SUPPORTS',
+  subprotocol: 'LOGUX_SUBPROTOCOL',
   controlMask: 'LOGUX_CONTROL_MASK',
   controlSecret: 'LOGUX_CONTROL_SECRET',
   backend: 'LOGUX_BACKEND'
@@ -70,6 +72,14 @@ yargs
   })
   .option('cert', {
     describe: 'Path to SSL certificate',
+    type: 'string'
+  })
+  .option('supports', {
+    describe: 'Range of supported client subprotocols',
+    type: 'string'
+  })
+  .option('subprotocol', {
+    describe: 'Server subprotocol',
     type: 'string'
   })
   .option('logger', {

@@ -29,6 +29,8 @@ exports[`shows help 1`] = `
   --port, -p        Port to bind server                                 [number]
   --key             Path to SSL key                                     [string]
   --cert            Path to SSL certificate                             [string]
+  --supports        Range of supported client subprotocols              [string]
+  --subprotocol     Server subprotocol                                  [string]
   --logger, -l      Logger type              [string] [choices: \\"human\\", \\"json\\"]
   --backend         Backend to process actions and authentication       [string]
   --control-secret  Secret to control Logux server                      [string]
@@ -42,7 +44,8 @@ Examples:
 
 Environment variables:
   LOGUX_HOST, LOGUX_PORT, LOGUX_KEY, LOGUX_CERT, LOGUX_LOGGER, LOGUX_REDIS
-  LOGUX_CONTROL_MASK, LOGUX_CONTROL_SECRET, LOGUX_BACKEND
+  LOGUX_SUPPORTS, LOGUX_SUBPROTOCOL, LOGUX_CONTROL_MASK, LOGUX_CONTROL_SECRET
+  LOGUX_BACKEND
 "
 `;
 
