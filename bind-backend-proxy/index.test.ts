@@ -675,3 +675,12 @@ it('sets meta to resend', async () => {
   ])
   expect(app.log.entries()[0][1].channels).toEqual(['A'])
 })
+
+it('receives actions without backend', async () => {
+  let app = createServer({ controlSecret: 'S' })
+  await app.listen()
+  let code = await send({ version: 4, secret: 'S', commands: [ACTION] })
+  expect(code).toEqual(200)
+  expect(app.log.actions()).toEqual([{ type: 'A' }])
+  expect(sent).toEqual([])
+})

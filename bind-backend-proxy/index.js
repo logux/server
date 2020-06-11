@@ -81,6 +81,27 @@ function send (backend, command, events) {
 }
 
 function bindBackendProxy (app) {
+  if (app.options.controlSecret) {
+    app.controls['POST /'] = {
+      isValid ({ command, action, meta }) {
+        return (
+          command === 'action' &&
+          typeof action === 'object' &&
+          typeof action.type === 'string' &&
+          typeof meta === 'object'
+        )
+      },
+      command ({ action, meta }, req) {
+        if (!app.types[action.type]) {
+          meta.status = 'processed'
+        }
+        meta.backend = req.connection.remoteAddress
+        return app.log.add(action, meta)
+      }
+    }
+  }
+
+  if (!app.options.backend) return
   if (!app.options.controlSecret) {
     let e = new Error('`backend` requires `controlSecret` option')
     e.code = 'LOGUX_NO_CONTROL_SECRET'
@@ -295,24 +316,6 @@ function bindBackendProxy (app) {
       processing.delete(meta.id)
     }
   })
-
-  app.controls['POST /'] = {
-    isValid ({ command, action, meta }) {
-      return (
-        command === 'action' &&
-        typeof action === 'object' &&
-        typeof action.type === 'string' &&
-        typeof meta === 'object'
-      )
-    },
-    command ({ action, meta }, req) {
-      if (!app.types[action.type]) {
-        meta.status = 'processed'
-      }
-      meta.backend = req.connection.remoteAddress
-      return app.log.add(action, meta)
-    }
-  }
 }
 
 module.exports = bindBackendProxy

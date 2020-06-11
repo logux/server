@@ -231,9 +231,7 @@ class BaseServer {
     }
 
     this.listenNotes = {}
-    if (this.options.backend) {
-      bindBackendProxy(this)
-    }
+    bindBackendProxy(this)
 
     this.unbind.push(() => {
       for (let i of this.connected.values()) i.destroy()
