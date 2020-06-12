@@ -26,42 +26,42 @@ export type ServerMeta = Meta & {
   server: string
 
   /**
-   * All clients subscribed to listed channels will receive the action.
+   * All nodes subscribed to listed channels will receive the action.
    */
   channels?: string[]
 
   /**
-   * All clients subscribed to channel will receive the action.
+   * All nodes subscribed to channel will receive the action.
    */
   channel?: string
 
   /**
-   * All clients with listed user IDs will receive the action.
+   * All nodes with listed user IDs will receive the action.
    */
   users?: string[]
 
   /**
-   * All clients with listed user ID will receive the action.
+   * All nodes with listed user ID will receive the action.
    */
   user?: string
 
   /**
-   * All clients with listed client IDs will receive the action.
+   * All nodes with listed client IDs will receive the action.
    */
   clients?: string[]
 
   /**
-   * All clients with listed client ID will receive the action.
+   * All nodes with listed client ID will receive the action.
    */
   client?: string
 
   /**
-   * All clients with listed node IDs will receive the action.
+   * All nodes with listed node IDs will receive the action.
    */
   nodes?: string[]
 
   /**
-   * Client with listed node ID will receive the action.
+   * Node with listed node ID will receive the action.
    */
   node?: string
 }
