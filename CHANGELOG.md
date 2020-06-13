@@ -1,6 +1,25 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.9 “Robby the Robot”
+* Use WebSocket Protocol version 4.
+* Use Back-end Protocol version 4.
+* Replace `bunyan` logger with `pino` (by Alexander Slepchenkov).
+* Clean up logger options (by Alexander Slepchenkov).
+* Allow to return actions from `load` callback.
+* Add cookie-based authentication.
+* Add `Server#process()`.
+* Allow to use action creator in `Server#type()`.
+* Add `LOGUX_SUBPROTOCOL` and `LOGUX_SUPPORTS` environment variables support.
+* Add `Server#autoloadModules()` (by Andrey Berezhnoy).
+* Add `Context#headers`.
+* Add argument to `TestServer#connect()`.
+* Add `auth: false` option to `TestServer`.
+* Fix action double sending.
+* Fix infinite reconnecting on authentication error.
+* Fix multiple servers usage in tests.
+* Fix types.
+
 ## 0.8.6
 * Add `BaseServer#options` types.
 
