@@ -785,6 +785,9 @@ export default class BaseServer<
   /**
    * @param actionCreator Action creator function.
    * @param callbacks Callbacks for action created by creator.
+   *
+   * @template AC Action creator function.
+   * @template D Type for `ctx.data`.
    */
   type<AC extends ActionCreator, D extends object = {}> (
     actionCreator: AC,
