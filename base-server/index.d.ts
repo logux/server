@@ -782,6 +782,10 @@ export default class BaseServer<
     callbacks: ActionCallbacks<A, D, H>
   ): void
 
+  /**
+   * @param actionCreator Action creator function.
+   * @param callbacks Callbacks for action created by creator.
+   */
   type<AC extends ActionCreator, D extends object = {}> (
     actionCreator: AC,
     callbacks: ActionCallbacks<ReturnType<AC>, D, H>
