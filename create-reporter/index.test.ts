@@ -37,13 +37,15 @@ function clean (str: string) {
 function check (type: string, details?: object) {
   let json = new MemoryStream()
   let jsonReporter = createReporter({
-    logger: pino(
-      {
-        name: 'test',
-        timestamp: pino.stdTimeFunctions.isoTime
-      },
-      json
-    )
+    reporter: {
+      logger: pino(
+        {
+          name: 'test',
+          timestamp: pino.stdTimeFunctions.isoTime
+        },
+        json
+      )
+    }
   })
 
   jsonReporter(type, details)
@@ -56,14 +58,16 @@ function check (type: string, details?: object) {
     color: true
   }
   let humanReporter = createReporter({
-    logger: pino(
-      {
-        name: 'test',
-        prettyPrint: humanReporterOpts as any,
-        prettifier: humanFormatter
-      },
-      human
-    )
+    reporter: {
+      logger: pino(
+        {
+          name: 'test',
+          prettyPrint: humanReporterOpts as any,
+          prettifier: humanFormatter
+        },
+        human
+      )
+    }
   })
 
   humanReporter(type, details)
@@ -89,13 +93,13 @@ afterEach(() => {
 
 it('uses passed logger instance', () => {
   let logger = pino({ name: 'test' })
-  let reporter = createReporter({ logger })
+  let reporter = createReporter({ reporter: { logger } })
   expect(reporter.logger).toEqual(logger)
 })
 
 it('creates JSON reporter', () => {
   let reporterStream = new MemoryStream()
-  let reporter = createReporter({ reporterStream })
+  let reporter = createReporter({ reporter: { stream: reporterStream } })
   reporter('unknownType', {})
   expect(clean(reporterStream.string)).toMatchSnapshot()
 })
@@ -103,8 +107,10 @@ it('creates JSON reporter', () => {
 it('creates human reporter', () => {
   let reporterStream = new MemoryStream()
   let reporter = createReporter({
-    reporterStream,
-    logger: 'human',
+    reporter: {
+      stream: reporterStream,
+      logger: 'human'
+    },
     root: '/dir/'
   })
   reporter('unknownType', {})
@@ -112,24 +118,27 @@ it('creates human reporter', () => {
 })
 
 it('adds trailing slash to path', () => {
-  let reporter = createReporter({ logger: 'human', root: '/dir' })
+  let reporter = createReporter({ reporter: { logger: 'human' }, root: '/dir' })
   expect(reporter.logger.basepath).toEqual('/dir/')
 })
 
 it('uses colors by default', () => {
   delete process.env.NODE_ENV
-  let reporter = createReporter({ logger: 'human' })
+  let reporter = createReporter({ reporter: { logger: 'human' } })
   expect(reporter.logger.chalk.level).toBeGreaterThan(0)
 })
 
 it('uses color in development', () => {
-  let reporter = createReporter({ env: 'development', logger: 'human' })
+  let reporter = createReporter({
+    env: 'development',
+    reporter: { logger: 'human' }
+  })
   expect(reporter.logger.chalk.level).toBeGreaterThan(0)
 })
 
 it('uses environment variable to detect environment', () => {
   process.env.NODE_ENV = 'production'
-  let reporter = createReporter({ logger: 'human' })
+  let reporter = createReporter({ reporter: { logger: 'human' } })
   expect(reporter.logger.chalk.level).toEqual(0)
 })
 

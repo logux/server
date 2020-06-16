@@ -3,6 +3,7 @@ import { join } from 'path'
 import spawn from 'cross-spawn'
 
 import { Server } from '..'
+import { ReporterOptions } from './index'
 
 const DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
 
@@ -117,7 +118,7 @@ it('uses CLI args for options', () => {
 
   expect(options.host).toEqual('192.168.1.1')
   expect(options.port).toEqual(1337)
-  expect(options.logger).toEqual('json')
+  expect((<ReporterOptions>options.reporter).logger).toEqual('json')
   expect(options.cert).toBeUndefined()
   expect(options.key).toBeUndefined()
   expect(options.redis).toEqual('//localhost')
@@ -143,7 +144,7 @@ it('uses env for options', () => {
 
   expect(options.host).toEqual('127.0.1.1')
   expect(options.port).toEqual(31337)
-  expect(options.logger).toEqual('json')
+  expect((<ReporterOptions>options.reporter).logger).toEqual('json')
   expect(options.redis).toEqual('//localhost')
   expect(options.backend).toEqual('http://localhost:8080/logux')
   expect(options.controlSecret).toEqual('secret')
@@ -258,6 +259,3 @@ it('uses logger param for constructor errors', () => {
 it('writes to pino log', () => checkOut('pino.js'))
 
 it('writes to custom pino log', () => checkOut('pino-custom.js'))
-
-it('writes using custom report composer', () =>
-  checkOut('custom-report-composer.js'))

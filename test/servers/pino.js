@@ -6,7 +6,7 @@ let app = new Server({
   subprotocol: '1.0.0',
   supports: '1.x',
   port: 2000,
-  logger: 'json'
+  reporter: { logger: 'json' }
 })
 app.nodeId = 'server:FnXaqDxY'
 

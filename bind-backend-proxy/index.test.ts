@@ -64,7 +64,7 @@ function createReporter (opts: TestServerOptions = {}) {
   let reports: [string, object][] = []
   let app = createServer({
     ...opts,
-    reportComposer (name: string, details: any) {
+    reporter (name: string, details: any) {
       names.push(name)
       reports.push([name, details])
     }

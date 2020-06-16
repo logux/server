@@ -1,33 +1,12 @@
 import BaseServer, {
   Logger,
   BaseServerOptions,
-  ReportComposer
+  ReportComposer,
+  Reporter
 } from '../base-server'
 
-export type ServerOptions = BaseServerOptions & {
-  /**
-   * TODO [sl.aleksandr 06.05.2020] Update docs
-   * Custom reporter for process/errors. You should use it only for test purposes
-   * or unavoidable hacks.
-   *
-   * ```js
-   * new Server({
-   *   …,
-   *   reporter: (name, details) => {
-   *     console.log('Event:', name)
-   *     console.log('Details:', JSON.stringify(details))
-   *   }
-   * })
-   * ```
-   */
-  reportComposer?: ReportComposer
-
-  /**
-   * Stream to be used by reporter to write log.
-   */
-  reporterStream?: {
-    write(str: string): void
-  }
+export type ReporterOptions = {
+  composer?: ReportComposer
 
   /**
    * Logger with custom settings.
@@ -56,6 +35,31 @@ export type ServerOptions = BaseServerOptions & {
    * Other logger examples can be found here http://getpino.io/#/docs/ecosystem
    */
   logger?: 'human' | 'json' | Logger
+  /**
+   * Stream to be used by reporter to write log.
+   */
+  stream?: {
+    write(str: string): void
+  }
+}
+
+export type ServerOptions = BaseServerOptions & {
+  /**
+   * TODO [sl.aleksandr 06.05.2020] Update docs
+   * Custom reporter for process/errors. You should use it only for test purposes
+   * or unavoidable hacks.
+   *
+   * ```js
+   * new Server({
+   *   …,
+   *   reporter: (name, details) => {
+   *     console.log('Event:', name)
+   *     console.log('Details:', JSON.stringify(details))
+   *   }
+   * })
+   * ```
+   */
+  reporter?: Reporter | ReporterOptions
 }
 
 /**

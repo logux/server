@@ -127,15 +127,20 @@ class Server extends BaseServer {
     }
 
     opts.port = parseInt(opts.port, 10)
+    if (opts.logger) {
+      opts.reporter = { logger: opts.logger }
+    }
     return opts
   }
 
   constructor (opts) {
     if (!opts) opts = {}
 
-    opts.logger = opts.logger || 'human'
-    opts.reporter = createReporter(opts)
-    delete opts.reportComposer
+    if (typeof opts.reporter !== 'function') {
+      opts.reporter = opts.reporter || {}
+      opts.reporter.logger = opts.reporter.logger || 'human'
+      opts.reporter = createReporter(opts)
+    }
 
     let initialized = false
     let onError = err => {

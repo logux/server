@@ -7,7 +7,9 @@ let server = new Server<{ locale: string }>(
   Server.loadOptions(process, {
     subprotocol: '1.0.0',
     supports: '1.x',
-    logger: pino({ name: 'logux' }),
+    reporter: {
+      logger: pino({ name: 'logux' })
+    },
     root: __dirname
   })
 )

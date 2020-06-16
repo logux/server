@@ -9,8 +9,12 @@ class TestServer extends BaseServer {
     if (!opts.time) {
       opts.time = new TestTime()
     }
-    if (opts.reportComposer || opts.logger) {
-      opts.reporter = createReporter(opts)
+    // By default we don't want any reporter at all
+    if (opts.reporter) {
+      if (typeof opts.reporter !== 'function') {
+        opts.reporter.logger = opts.reporter.logger || 'human'
+        opts.reporter = createReporter(opts)
+      }
     }
     opts.time.lastId += 1
     super({

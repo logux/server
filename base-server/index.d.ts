@@ -473,7 +473,7 @@ export type Report = {
 export type ReportComposer = <E extends keyof ReportersArguments>(
   event: E,
   payload: ReportersArguments[E]
-) => Report | void
+) => Report
 
 export type Reporter = <E extends keyof ReportersArguments>(
   event: E,
