@@ -20,7 +20,7 @@ exports[`reports EACCES error 2`] = `
 "[41m[37m FATAL [39m[49m [1m[31mYou are not allowed to run server on port [33m80[39m[31m[39m[22m [2mat 1970-01-01 00:00:00[22m
         [90mNon-privileged users can't start a listening socket on ports below 1024.[39m
         [90mTry to change user or take another port.[39m
-        
+        [90m[39m
         [90m$ su - [1m<username>[22m[39m
         [90m$ npm start -p 80[39m
 
@@ -37,7 +37,7 @@ exports[`reports EADDRINUSE error 2`] = `
         [90mAnother Logux server or other app already running on this port.[39m
         [90mProbably you haven’t stopped server from other project or previous[39m
         [90mversion of this server was not killed.[39m
-        
+        [90m[39m
         [90m$ su - root[39m
         [90m# netstat -nlp | grep 31337[39m
         [90mProto   Local Address   State    PID/Program name[39m
@@ -85,8 +85,8 @@ exports[`reports add 2`] = `
           id:   [1m100[22m
           data: 
             name:  \\"[1mJohn[22m\\"
-            role:  [1mnull[22m
-            array: [[1m1[22m, [[1m2[22m], { a: \\"[1m1[22m\\", b: { c: [1m2[22m }, d: [], e: [1mnull[22m }, [1mnull[22m]
+            role:  null
+            array: [[1m1[22m, [[1m2[22m], { a: \\"[1m1[22m\\", b: { c: [1m2[22m }, d: [], e: null }, ]
         Meta:   
           id:          [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
           time:        [1m1487805099387[22m
@@ -266,7 +266,7 @@ exports[`reports listen 2`] = `
         Subprotocol:    [1m0.0.0[22m
         Supports:       [1m0.x[22m
         Control listen: [1mhttp://127.0.0.1:31337/[22m
-        Control mask:   [1mundefined[22m
+        Control mask:   undefined
         Backend send:   [1mhttp://127.0.0.1:3000/logux[22m
         Listen:         [1mws://127.0.0.1:31337/[22m
         [90mServer was started in non-secure development mode[39m
@@ -310,7 +310,7 @@ exports[`reports listen for production 2`] = `
         Subprotocol:    [1m0.0.0[22m
         Supports:       [1m0.x[22m
         Control listen: [1mhttp://127.0.0.1:31337/[22m
-        Control mask:   [1mundefined[22m
+        Control mask:   undefined
         Redis:          [1m//localhost[22m
         Listen:         [1mwss://127.0.0.1:31337/[22m
 
@@ -449,7 +449,7 @@ exports[`reports wrongChannel without name 1`] = `
 
 exports[`reports wrongChannel without name 2`] = `
 "[43m[30m WARN [39m[49m  [1m[33mWrong channel name[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Channel:   [1mundefined[22m
+        Channel:   undefined
         Action ID: [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
 
 "
