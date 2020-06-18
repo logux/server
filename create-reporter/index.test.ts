@@ -119,18 +119,18 @@ it('adds trailing slash to path', () => {
 it('uses colors by default', () => {
   delete process.env.NODE_ENV
   let reporter = createReporter({ logger: 'human' })
-  expect(reporter.logger.chalk.level).toBeGreaterThan(0)
+  expect(reporter.logger.color).toBe(true)
 })
 
 it('uses color in development', () => {
   let reporter = createReporter({ env: 'development', logger: 'human' })
-  expect(reporter.logger.chalk.level).toBeGreaterThan(0)
+  expect(reporter.logger.color).toBe(true)
 })
 
 it('uses environment variable to detect environment', () => {
   process.env.NODE_ENV = 'production'
   let reporter = createReporter({ logger: 'human' })
-  expect(reporter.logger.chalk.level).toEqual(0)
+  expect(reporter.logger.color).toBe(false)
 })
 
 it('reports listen', () => {

@@ -1,6 +1,6 @@
 let stripAnsi = require('strip-ansi')
 let yyyymmdd = require('yyyy-mm-dd')
-let chalk = require('chalk')
+let kleur = require('kleur/colors')
 let path = require('path')
 let os = require('os')
 
@@ -41,12 +41,10 @@ function rightPag (str, length) {
 }
 
 function label (c, type, color, labelBg, labelText, message) {
-  let labelFormat = c[labelBg][labelText]
-  let messageFormat = c.bold[color]
-  let pagged = rightPag(labelFormat(type), 8)
+  let pagged = rightPag(c[labelBg](c[labelText](type)), 8)
   let time = c.dim(`at ${yyyymmdd.withTime(new Date())}`)
   let highlighted = message.replace(/`([^`]+)`/g, c.yellow('$1'))
-  return `${pagged}${messageFormat(highlighted)} ${time}`
+  return `${pagged}${c.bold(c[color](highlighted))} ${time}`
 }
 
 function formatName (key) {
@@ -172,16 +170,16 @@ function prettyStackTrace (c, stack, basepath) {
 }
 
 function humanFormatter (options) {
-  let c
-  if (options.color === undefined) {
-    c = chalk
+  let c = kleur
+  if (options.color === false) {
+    kleur.$.enabled = false
   } else {
-    c = new chalk.Instance({ level: options.color ? 3 : 0 })
+    kleur.$.enabled = true
   }
   let basepath = options.basepath || process.cwd()
   if (basepath.slice(-1) !== path.sep) basepath += path.sep
   // Pino passes logger instance as this to prettifier constructor
-  this.chalk = c
+  this.color = kleur.$.enabled
   this.basepath = basepath
 
   return function (record) {

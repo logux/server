@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 let { delay } = require('nanodelay')
-let chalk = require('chalk')
+let kleur = require('kleur')
 let http = require('http')
 
 function send (action, meta) {
@@ -25,7 +25,7 @@ function send (action, meta) {
         if (res.statusCode < 200 || res.statusCode > 299) {
           reject(new Error('Logux error'))
         } else {
-          process.stdout.write(chalk.blue('R'))
+          process.stdout.write(kleur.blue('R'))
           resolve()
         }
       }
@@ -52,15 +52,15 @@ let server = http.createServer((req, res) => {
         await send({ type: 'project/name', value: 'A' }, { nodes })
         await send({ type: 'project/status', value: 'ok' }, { nodes })
         await send({ type: 'project/payment', value: 'paid' }, { nodes })
-        process.stdout.write(chalk.green('S'))
+        process.stdout.write(kleur.green('S'))
       } else if (type === 'action' && action.type === 'project/name') {
         await delay(500)
-        process.stdout.write(chalk.yellow('A'))
+        process.stdout.write(kleur.yellow('A'))
       }
       res.write(`,["processed","${meta.id}"]]`)
       res.end()
     } catch (e) {
-      process.stderr.write(chalk.red(e.stack))
+      process.stderr.write(kleur.red(e.stack))
       process.exit(1)
     }
   })
