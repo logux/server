@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.9.2
+* Fix cookie support (by Eduard Aksamitov).
+
 ## 0.9.1
 * Reduce dependencies.
 
