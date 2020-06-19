@@ -290,7 +290,8 @@ class BaseServer {
 
     let pkg = JSON.parse(await readFile(join(__dirname, '../package.json')))
 
-    this.ws.on('connection', ws => {
+    this.ws.on('connection', (ws, req) => {
+      ws.upgradeReq = req
       this.addClient(new ServerConnection(ws))
     })
     this.reporter('listen', {
