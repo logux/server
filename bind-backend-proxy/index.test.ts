@@ -430,6 +430,13 @@ it('process wrong answer during authentication', async () => {
 
 it('notifies about actions and subscriptions', async () => {
   let app = createServer(OPTIONS)
+  let processed = 0
+  app.type('a/load1', {
+    access: () => false,
+    process () {
+      processed += 1
+    }
+  })
   app.on('error', e => {
     throw e
   })
@@ -521,6 +528,7 @@ it('notifies about actions and subscriptions', async () => {
     'backendProcessed',
     'backendProcessed'
   ])
+  expect(processed).toEqual(0)
 })
 
 it('asks about action access', async () => {

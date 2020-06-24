@@ -182,7 +182,10 @@ function bindBackendProxy (app) {
           }
         },
         action (data) {
-          let promise = app.process(data.action, data.meta)
+          let promise = app.log.add(data.action, {
+            status: 'processed',
+            ...data.meta
+          })
           if (actions.has(meta.id)) {
             actions.get(meta.id).push(promise)
           } else {

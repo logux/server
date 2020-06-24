@@ -127,6 +127,8 @@ export default class Context<D extends object = {}, H extends object = {}> {
    * ctx.sendBack({ type: 'login/success', token })
    * ```
    *
+   * Action will not be processed by server’s callbacks from `Server#type`.
+   *
    * @param action The action.
    * @param meta Action’s meta.
    * @returns Promise until action was added to the server log.

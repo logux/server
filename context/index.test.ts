@@ -2,7 +2,7 @@ import { Action } from '@logux/core'
 
 import { Context, ServerMeta } from '..'
 
-let processed: [Action, ServerMeta][] = []
+let added: [Action, ServerMeta][] = []
 
 const FAKE_SERVER: any = {
   clientIds: new Map([
@@ -12,14 +12,16 @@ const FAKE_SERVER: any = {
     ]
   ]),
 
-  process (action: Action, meta: ServerMeta) {
-    processed.push([action, meta])
-    return Promise.resolve()
+  log: {
+    add (action: Action, meta: ServerMeta) {
+      added.push([action, meta])
+      return Promise.resolve()
+    }
   }
 }
 
 beforeEach(() => {
-  processed = []
+  added = []
 })
 
 function createContext (
@@ -78,8 +80,8 @@ it('sends action back', () => {
   let ctx = createContext()
   expect(ctx.sendBack({ type: 'A' }) instanceof Promise).toBe(true)
   ctx.sendBack({ type: 'B' }, { reasons: ['1'], clients: [] })
-  expect(processed).toEqual([
-    [{ type: 'A' }, { clients: ['10:client'] }],
-    [{ type: 'B' }, { reasons: ['1'], clients: [] }]
+  expect(added).toEqual([
+    [{ type: 'A' }, { clients: ['10:client'], status: 'processed' }],
+    [{ type: 'B' }, { reasons: ['1'], clients: [], status: 'processed' }]
   ])
 })

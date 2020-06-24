@@ -1458,3 +1458,45 @@ it('allows to return actions', async () => {
     ['sync', 9, { type: 'logux/processed', id: '3 10:1:uuid 0' }, meta(6)]
   ])
 })
+
+it('does not process send-back actions', async () => {
+  let app = createServer()
+  app.channel('a', {
+    access: () => true,
+    load () {
+      return { type: 'A', data: 'load' }
+    }
+  })
+
+  let processed: string[] = []
+  let resended: string[] = []
+  app.type('A', {
+    access: () => true,
+    resend (ctx, action) {
+      resended.push(action.data)
+      return {}
+    },
+    process (ctx, action) {
+      processed.push(action.data)
+    }
+  })
+
+  app.log.add({ type: 'A', data: 'server' })
+  let client = await connectClient(app, '10:1:uuid')
+  await sendTo(client, [
+    'sync',
+    1,
+    { type: 'A', data: 'client' },
+    { id: [1, '10:1:uuid', 0], time: 1 }
+  ])
+  await sendTo(client, [
+    'sync',
+    2,
+    { type: 'logux/subscribe', channel: 'a' },
+    { id: [2, '10:1:uuid', 0], time: 2 }
+  ])
+  await delay(10)
+
+  expect(resended).toEqual(['server', 'client'])
+  expect(processed).toEqual(['server', 'client'])
+})
