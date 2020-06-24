@@ -17,7 +17,7 @@ exports[`reports EACCES error 1`] = `
 `;
 
 exports[`reports EACCES error 2`] = `
-"[41m[37m FATAL [39m[49m [1m[31mYou are not allowed to run server on port [33m80[39m[31m[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[41m[37m FATAL [39m[49m [1m[31mYou are not allowed to run server on port [33m80[31m[39m[22m [2mat 1970-01-01 00:00:00[22m
         [90mNon-privileged users can't start a listening socket on ports below 1024.[39m
         [90mTry to change user or take another port.[39m
         [90m[39m
@@ -33,7 +33,7 @@ exports[`reports EADDRINUSE error 1`] = `
 `;
 
 exports[`reports EADDRINUSE error 2`] = `
-"[41m[37m FATAL [39m[49m [1m[31mPort [33m31337[39m[31m already in use[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[41m[37m FATAL [39m[49m [1m[31mPort [33m31337[31m already in use[39m[22m [2mat 1970-01-01 00:00:00[22m
         [90mAnother Logux server or other app already running on this port.[39m
         [90mProbably you haven’t stopped server from other project or previous[39m
         [90mversion of this server was not killed.[39m
@@ -53,7 +53,7 @@ exports[`reports LOGUX_NO_CONTROL_SECRET error 1`] = `
 `;
 
 exports[`reports LOGUX_NO_CONTROL_SECRET error 2`] = `
-"[41m[37m FATAL [39m[49m [1m[31m[33mbackend[39m[31m requires also [33mcontrolSecret[39m[31m option[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[41m[37m FATAL [39m[49m [1m[31m[33mbackend[31m requires also [33mcontrolSecret[31m option[39m[22m [2mat 1970-01-01 00:00:00[22m
         [90mCall [1mnpx nanoid[22m and set result as [1mcontrolSecret[22m or[39m
         [90m[1mLOGUX_CONTROL_SECRET[22m environment variable[39m
 
@@ -66,7 +66,7 @@ exports[`reports Logux error 1`] = `
 `;
 
 exports[`reports Logux error 2`] = `
-"[41m[37m FATAL [39m[49m [1m[31mUnknown option [33msuprotocol[39m[31m in server constructor[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[41m[37m FATAL [39m[49m [1m[31mUnknown option [33msuprotocol[31m in server constructor[39m[22m [2mat 1970-01-01 00:00:00[22m
         [90mMaybe there is a mistake in option name or this version of Logux Server[39m
         [90mdoesn’t support this option[39m
 
@@ -85,8 +85,8 @@ exports[`reports add 2`] = `
           id:   [1m100[22m
           data: 
             name:  \\"[1mJohn[22m\\"
-            role:  null
-            array: [[1m1[22m, [[1m2[22m], { a: \\"[1m1[22m\\", b: { c: [1m2[22m }, d: [], e: null }, ]
+            role:  [1mnull[22m
+            array: [[1m1[22m, [[1m2[22m], { a: \\"[1m1[22m\\", b: { c: [1m2[22m }, d: [], e: [1mnull[22m }, [1mnull[22m]
         Meta:   
           id:          [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
           time:        [1m1487805099387[22m
@@ -266,7 +266,7 @@ exports[`reports listen 2`] = `
         Subprotocol:    [1m0.0.0[22m
         Supports:       [1m0.x[22m
         Control listen: [1mhttp://127.0.0.1:31337/[22m
-        Control mask:   undefined
+        Control mask:   [1mundefined[22m
         Backend send:   [1mhttp://127.0.0.1:3000/logux[22m
         Listen:         [1mws://127.0.0.1:31337/[22m
         [90mServer was started in non-secure development mode[39m
@@ -310,7 +310,7 @@ exports[`reports listen for production 2`] = `
         Subprotocol:    [1m0.0.0[22m
         Supports:       [1m0.x[22m
         Control listen: [1mhttp://127.0.0.1:31337/[22m
-        Control mask:   undefined
+        Control mask:   [1mundefined[22m
         Redis:          [1m//localhost[22m
         Listen:         [1mwss://127.0.0.1:31337/[22m
 
@@ -349,7 +349,7 @@ exports[`reports sync error 1`] = `
 `;
 
 exports[`reports sync error 2`] = `
-"[41m[37m ERROR [39m[49m [1m[31mLogux received unknown-message error (Unknown message [33mbad[39m[31m type)[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[41m[37m ERROR [39m[49m [1m[31mLogux received unknown-message error (Unknown message [33mbad[31m type)[39m[22m [2mat 1970-01-01 00:00:00[22m
         Connection ID: [1m670[22m
 
 "
@@ -449,7 +449,7 @@ exports[`reports wrongChannel without name 1`] = `
 
 exports[`reports wrongChannel without name 2`] = `
 "[43m[30m WARN [39m[49m  [1m[33mWrong channel name[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Channel:   undefined
+        Channel:   [1mundefined[22m
         Action ID: [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
 
 "

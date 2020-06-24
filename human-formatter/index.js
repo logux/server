@@ -1,6 +1,19 @@
+let {
+  green,
+  bgGreen,
+  yellow,
+  bgYellow,
+  red,
+  bgRed,
+  black,
+  white,
+  gray,
+  dim,
+  bold,
+  options: colorette
+} = require('colorette')
 let stripAnsi = require('strip-ansi')
 let yyyymmdd = require('yyyy-mm-dd')
-let kleur = require('kleur/colors')
 let path = require('path')
 let os = require('os')
 
@@ -170,16 +183,27 @@ function prettyStackTrace (c, stack, basepath) {
 }
 
 function humanFormatter (options) {
-  let c = kleur
-  if (options.color === false) {
-    kleur.$.enabled = false
-  } else {
-    kleur.$.enabled = true
+  let c = {
+    green,
+    bgGreen,
+    yellow,
+    bgYellow,
+    red,
+    bgRed,
+    black,
+    white,
+    gray,
+    dim,
+    bold
+  }
+  this.color = true
+  if (options.color === false || !colorette.enabled) {
+    this.color = false
+    let empty = str => str
+    for (let color in c) c[color] = empty
   }
   let basepath = options.basepath || process.cwd()
   if (basepath.slice(-1) !== path.sep) basepath += path.sep
-  // Pino passes logger instance as this to prettifier constructor
-  this.color = kleur.$.enabled
   this.basepath = basepath
 
   return function (record) {
@@ -213,7 +237,7 @@ function humanFormatter (options) {
             .map(row => splitByLength(row, 80 - PADDING.length))
         )
       }
-      message.push(note.map(i => PADDING + c.grey(i)).join(NEXT_LINE))
+      message.push(note.map(i => PADDING + c.gray(i)).join(NEXT_LINE))
     }
 
     return message.filter(i => i !== '').join(NEXT_LINE) + SEPARATOR
