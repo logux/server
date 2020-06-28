@@ -720,7 +720,9 @@ class BaseServer {
     if (processor) {
       return processor
     } else {
-      return this.otherProcessor
+      let regexps = Object.keys(this.types).filter(key => key.startsWith('/') && key.endsWith('/') && key.length > 1)
+      let match = regexps.find(regexp => type.match(regexp.substr(1, regexp.length - 2)) !== null)
+      return match !== undefined ? this.types[match] : this.otherProcessor
     }
   }
 

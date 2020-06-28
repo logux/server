@@ -778,7 +778,7 @@ export default class BaseServer<
    * @template D Type for `ctx.data`.
    */
   type<A extends Action = AnyAction, D extends object = {}> (
-    name: A['type'],
+    name: A['type'] | RegExp,
     callbacks: ActionCallbacks<A, D, H>
   ): void
 
