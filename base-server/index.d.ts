@@ -778,7 +778,7 @@ export default class BaseServer<
    * @template D Type for `ctx.data`.
    */
   type<A extends Action = AnyAction, D extends object = {}> (
-    name: A['type'] | RegExp,
+    name: A['type'],
     callbacks: ActionCallbacks<A, D, H>
   ): void
 
@@ -792,6 +792,36 @@ export default class BaseServer<
   type<AC extends ActionCreator, D extends object = {}> (
     actionCreator: AC,
     callbacks: ActionCallbacks<ReturnType<AC>, D, H>
+  ): void
+
+  /**
+   * Define action type’s callbacks with regex expression action name match.
+   *
+   * ```js
+   * server.type(\/^TODO.*\/, {
+   *   access (ctx, action, meta) {
+   *     return action.user === ctx.userId
+   *   },
+   *   resend (ctx, action) {
+   *     return { channel: `user/${ action.user }` }
+   *   }
+   *   process (ctx, action, meta) {
+   *     if (isFirstOlder(lastNameChange(action.user), meta)) {
+   *       return db.changeUserName({ id: action.user, name: action.name })
+   *     }
+   *   }
+   * })
+   * ```
+   *
+   * @param regex The action’s type matching rule as RegExp.
+   * @param callbacks Callbacks for actions with this type.
+   *
+   * @template A Action’s type.
+   * @template D Type for `ctx.data`.
+   */
+  regexType<A extends Action = AnyAction, D extends object = {}> (
+    regex: RegExp,
+    callbacks: ActionCallbacks<A, D, H>
   ): void
 
   /**

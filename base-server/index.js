@@ -209,6 +209,7 @@ class BaseServer {
     this.clientIds = new Map()
     this.userIds = new Map()
     this.types = {}
+    this.regexTypes = {}
     this.processing = 0
 
     this.lastClient = 0
@@ -335,6 +336,16 @@ class BaseServer {
       throw new Error(`Action type ${name} must have access callback`)
     }
     this.types[name] = callbacks
+  }
+
+  regexType (name, callbacks) {
+    if (this.regexTypes[name]) {
+      throw new Error(`Action type ${name} was already defined`)
+    }
+    if (!callbacks || !callbacks.access) {
+      throw new Error(`Action type ${name} must have access callback`)
+    }
+    this.regexTypes[name] = callbacks
   }
 
   otherType (callbacks) {
@@ -719,11 +730,21 @@ class BaseServer {
     let processor = this.types[type]
     if (processor) {
       return processor
+    } else if (Object.keys(this.regexTypes).length > 0) {
+      return this.getRegexProcessor(type) || this.otherProcessor
     } else {
-      let regexps = Object.keys(this.types).filter(key => key.startsWith('/') && key.endsWith('/') && key.length > 1)
-      let match = regexps.find(regexp => type.match(regexp.substr(1, regexp.length - 2)) !== null)
-      return match !== undefined ? this.types[match] : this.otherProcessor
+      return this.otherProcessor
     }
+  }
+
+  getRegexProcessor (type) {
+    let regexps = Object.keys(this.regexTypes).filter(
+      key => key.startsWith('/') && key.endsWith('/') && key.length > 1
+    )
+    let match = regexps.find(
+      regexp => type.match(regexp.substr(1, regexp.length - 2)) !== null
+    )
+    return match !== undefined ? this.regexTypes[match] : undefined
   }
 
   finally (processor, ctx, action, meta) {

@@ -445,6 +445,12 @@ it('defines actions types', () => {
   expect(privateMethods(app).types.FOO).not.toBeUndefined()
 })
 
+it('defines regex matching actions types', () => {
+  let app = createServer()
+  app.regexType(/.*TODO$/, { access: () => true })
+  expect(privateMethods(app).regexTypes['/.*TODO$/']).not.toBeUndefined()
+})
+
 it('does not allow to define type twice', () => {
   let app = createServer()
   app.type('FOO', { access: () => true })
@@ -453,11 +459,27 @@ it('does not allow to define type twice', () => {
   }).toThrow(/already/)
 })
 
+it('does not allow to define regexType twice', () => {
+  let app = createServer()
+  app.regexType(/.*TODO$/, { access: () => true })
+  expect(() => {
+    app.regexType(/.*TODO$/, { access: () => true })
+  }).toThrow(/already/)
+})
+
 it('requires access callback for type', () => {
   let app = createServer()
   expect(() => {
     // @ts-expect-error
     app.type('FOO')
+  }).toThrow(/access callback/)
+})
+
+it('requires access callback for regexType', () => {
+  let app = createServer()
+  expect(() => {
+    // @ts-expect-error
+    app.regexType(/.*TODO$/)
   }).toThrow(/access callback/)
 })
 
