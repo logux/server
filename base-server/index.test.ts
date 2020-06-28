@@ -577,6 +577,39 @@ it('processes actions', async () => {
   expect(test.reports[1][1].latency).toBeCloseTo(25, -2)
 })
 
+it('processes regex matching action', async () => {
+  let test = createReporter()
+  let processed: Action[] = []
+  let fired: Action[] = []
+
+  test.app.regexType(/.*TODO$/, {
+    access: () => true,
+    async process (ctx, action, meta) {
+      expect(meta.added).toEqual(1)
+      expect(ctx.isServer).toBe(true)
+      await delay(25)
+      processed.push(action)
+    }
+  })
+  test.app.on('processed', (action, meta, latency) => {
+    expect(typeof latency).toEqual('number')
+    expect(meta.added).toEqual(1)
+    fired.push(action)
+  })
+
+  await test.app.log.add({ type: 'ADD_TODO' }, { reasons: ['test'] })
+  expect(fired).toEqual([])
+  expect(test.app.log.entries()[0][1].status).toEqual('waiting')
+  await delay(30)
+  expect(test.app.log.entries()[0][1].status).toEqual('processed')
+  expect(processed).toEqual([{ type: 'ADD_TODO' }])
+  expect(fired).toEqual([{ type: 'ADD_TODO' }])
+  expect(test.names).toEqual(['add', 'processed'])
+  expect(Object.keys(test.reports[1][1])).toEqual(['actionId', 'latency'])
+  expect(test.reports[1][1].actionId).toEqual('1 server:uuid 0')
+  expect(test.reports[1][1].latency).toBeCloseTo(25, -2)
+})
+
 it('has full events API', () => {
   let app = createServer()
 

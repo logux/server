@@ -92,7 +92,7 @@ function bindBackendProxy (app) {
         )
       },
       command ({ action, meta }, req) {
-        if (!app.types[action.type]) {
+        if (!app.types[action.type] && !app.getRegexProcessor(action.type)) {
           meta.status = 'processed'
         }
         meta.backend = req.connection.remoteAddress

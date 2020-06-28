@@ -84,7 +84,12 @@ class BaseServer {
         if (!meta.subprotocol) {
           meta.subprotocol = this.options.subprotocol
         }
-        if (!this.options.backend && !this.types[action.type] && !isLogux) {
+        if (
+          !this.options.backend &&
+          !this.types[action.type] &&
+          !this.getRegexProcessor(action.type) &&
+          !isLogux
+        ) {
           meta.status = 'processed'
         }
       }
@@ -701,7 +706,11 @@ class BaseServer {
   }
 
   isUseless (action, meta) {
-    if (meta.status !== 'processed' || this.types[action.type]) {
+    if (
+      meta.status !== 'processed' ||
+      this.types[action.type] ||
+      this.getRegexProcessor(action.type)
+    ) {
       return false
     }
     for (let i of ['channels', 'nodes', 'clients', 'users']) {
