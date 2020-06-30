@@ -447,8 +447,9 @@ it('defines actions types', () => {
 
 it('defines regex matching actions types', () => {
   let app = createServer()
-  app.type(/.*TODO$/, { access: () => true })
-  expect(privateMethods(app).regexTypes['/.*TODO$/']).not.toBeUndefined()
+  let pattern = /.*TODO$/
+  app.type(pattern, { access: () => true })
+  expect(privateMethods(app).regexTypes.has(pattern)).toBe(true)
 })
 
 it('does not allow to define type twice', () => {
@@ -456,14 +457,6 @@ it('does not allow to define type twice', () => {
   app.type('FOO', { access: () => true })
   expect(() => {
     app.type('FOO', { access: () => true })
-  }).toThrow(/already/)
-})
-
-it('does not allow to define regexType twice', () => {
-  let app = createServer()
-  app.type(/.*TODO$/, { access: () => true })
-  expect(() => {
-    app.type(/.*TODO$/, { access: () => true })
   }).toThrow(/already/)
 })
 

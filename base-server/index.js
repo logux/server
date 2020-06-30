@@ -214,7 +214,7 @@ class BaseServer {
     this.clientIds = new Map()
     this.userIds = new Map()
     this.types = {}
-    this.regexTypes = {}
+    this.regexTypes = new Map()
     this.processing = 0
 
     this.lastClient = 0
@@ -333,22 +333,17 @@ class BaseServer {
   }
 
   type (name, callbacks) {
+    if (typeof name === 'function') name = name.toString()
+    if (this.types[name] && !(name instanceof RegExp)) {
+      throw new Error(`Action type ${name} was already defined`)
+    }
+    if (!callbacks || !callbacks.access) {
+      throw new Error(`Action type ${name} must have access callback`)
+    }
+
     if (name instanceof RegExp) {
-      if (this.regexTypes[name]) {
-        throw new Error(`Action type ${name} was already defined`)
-      }
-      if (!callbacks || !callbacks.access) {
-        throw new Error(`Action type ${name} must have access callback`)
-      }
-      this.regexTypes[name] = callbacks
+      this.regexTypes.set(name, callbacks)
     } else {
-      if (typeof name === 'function') name = name.toString()
-      if (this.types[name]) {
-        throw new Error(`Action type ${name} was already defined`)
-      }
-      if (!callbacks || !callbacks.access) {
-        throw new Error(`Action type ${name} must have access callback`)
-      }
       this.types[name] = callbacks
     }
   }
@@ -739,7 +734,7 @@ class BaseServer {
     let processor = this.types[type]
     if (processor) {
       return processor
-    } else if (Object.keys(this.regexTypes).length > 0) {
+    } else if (this.regexTypes.size > 0) {
       return this.getRegexProcessor(type) || this.otherProcessor
     } else {
       return this.otherProcessor
@@ -747,13 +742,10 @@ class BaseServer {
   }
 
   getRegexProcessor (type) {
-    let regexps = Object.keys(this.regexTypes).filter(
-      key => key.startsWith('/') && key.endsWith('/') && key.length > 1
+    let match = Array.from(this.regexTypes.keys()).find(
+      regexp => type.match(regexp) !== null
     )
-    let match = regexps.find(
-      regexp => type.match(regexp.substr(1, regexp.length - 2)) !== null
-    )
-    return match !== undefined ? this.regexTypes[match] : undefined
+    return match !== undefined ? this.regexTypes.get(match) : undefined
   }
 
   finally (processor, ctx, action, meta) {
