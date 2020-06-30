@@ -85,10 +85,10 @@ class BaseServer {
           meta.subprotocol = this.options.subprotocol
         }
         if (
+          !isLogux &&
           !this.options.backend &&
           !this.types[action.type] &&
-          !this.getRegexProcessor(action.type) &&
-          !isLogux
+          !this.getRegexProcessor(action.type)
         ) {
           meta.status = 'processed'
         }
@@ -334,9 +334,6 @@ class BaseServer {
 
   type (name, callbacks) {
     if (typeof name === 'function') name = name.toString()
-    if (this.types[name] && !(name instanceof RegExp)) {
-      throw new Error(`Action type ${name} was already defined`)
-    }
     if (!callbacks || !callbacks.access) {
       throw new Error(`Action type ${name} must have access callback`)
     }
@@ -344,6 +341,9 @@ class BaseServer {
     if (name instanceof RegExp) {
       this.regexTypes.set(name, callbacks)
     } else {
+      if (this.types[name]) {
+        throw new Error(`Action type ${name} was already defined`)
+      }
       this.types[name] = callbacks
     }
   }
@@ -731,21 +731,18 @@ class BaseServer {
   }
 
   getProcessor (type) {
-    let processor = this.types[type]
-    if (processor) {
-      return processor
-    } else if (this.regexTypes.size > 0) {
-      return this.getRegexProcessor(type) || this.otherProcessor
-    } else {
-      return this.otherProcessor
-    }
+    return (
+      this.types[type] || this.getRegexProcessor(type) || this.otherProcessor
+    )
   }
 
   getRegexProcessor (type) {
-    let match = Array.from(this.regexTypes.keys()).find(
-      regexp => type.match(regexp) !== null
-    )
-    return match !== undefined ? this.regexTypes.get(match) : undefined
+    for (let regexp of this.regexTypes.keys()) {
+      if (type.match(regexp) !== null) {
+        return this.regexTypes.get(regexp)
+      }
+    }
+    return undefined
   }
 
   finally (processor, ctx, action, meta) {
