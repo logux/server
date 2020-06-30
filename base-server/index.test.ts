@@ -445,6 +445,13 @@ it('defines actions types', () => {
   expect(privateMethods(app).types.FOO).not.toBeUndefined()
 })
 
+it('defines regex matching actions types', () => {
+  let app = createServer()
+  let pattern = /.*TODO$/
+  app.type(pattern, { access: () => true })
+  expect(privateMethods(app).regexTypes.has(pattern)).toBe(true)
+})
+
 it('does not allow to define type twice', () => {
   let app = createServer()
   app.type('FOO', { access: () => true })
@@ -458,6 +465,14 @@ it('requires access callback for type', () => {
   expect(() => {
     // @ts-expect-error
     app.type('FOO')
+  }).toThrow(/access callback/)
+})
+
+it('requires access callback for regexType', () => {
+  let app = createServer()
+  expect(() => {
+    // @ts-expect-error
+    app.type(/.*TODO$/)
   }).toThrow(/access callback/)
 })
 
@@ -549,6 +564,39 @@ it('processes actions', async () => {
   expect(test.app.log.entries()[0][1].status).toEqual('processed')
   expect(processed).toEqual([{ type: 'FOO' }])
   expect(fired).toEqual([{ type: 'FOO' }])
+  expect(test.names).toEqual(['add', 'processed'])
+  expect(Object.keys(test.reports[1][1])).toEqual(['actionId', 'latency'])
+  expect(test.reports[1][1].actionId).toEqual('1 server:uuid 0')
+  expect(test.reports[1][1].latency).toBeCloseTo(25, -2)
+})
+
+it('processes regex matching action', async () => {
+  let test = createReporter()
+  let processed: Action[] = []
+  let fired: Action[] = []
+
+  test.app.type(/.*TODO$/, {
+    access: () => true,
+    async process (ctx, action, meta) {
+      expect(meta.added).toEqual(1)
+      expect(ctx.isServer).toBe(true)
+      await delay(25)
+      processed.push(action)
+    }
+  })
+  test.app.on('processed', (action, meta, latency) => {
+    expect(typeof latency).toEqual('number')
+    expect(meta.added).toEqual(1)
+    fired.push(action)
+  })
+
+  await test.app.log.add({ type: 'ADD_TODO' }, { reasons: ['test'] })
+  expect(fired).toEqual([])
+  expect(test.app.log.entries()[0][1].status).toEqual('waiting')
+  await delay(30)
+  expect(test.app.log.entries()[0][1].status).toEqual('processed')
+  expect(processed).toEqual([{ type: 'ADD_TODO' }])
+  expect(fired).toEqual([{ type: 'ADD_TODO' }])
   expect(test.names).toEqual(['add', 'processed'])
   expect(Object.keys(test.reports[1][1])).toEqual(['actionId', 'latency'])
   expect(test.reports[1][1].actionId).toEqual('1 server:uuid 0')

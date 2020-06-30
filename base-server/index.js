@@ -84,7 +84,12 @@ class BaseServer {
         if (!meta.subprotocol) {
           meta.subprotocol = this.options.subprotocol
         }
-        if (!this.options.backend && !this.types[action.type] && !isLogux) {
+        if (
+          !this.options.backend &&
+          !this.types[action.type] &&
+          !this.getRegexProcessor(action.type) &&
+          !isLogux
+        ) {
           meta.status = 'processed'
         }
       }
@@ -209,6 +214,7 @@ class BaseServer {
     this.clientIds = new Map()
     this.userIds = new Map()
     this.types = {}
+    this.regexTypes = new Map()
     this.processing = 0
 
     this.lastClient = 0
@@ -328,13 +334,18 @@ class BaseServer {
 
   type (name, callbacks) {
     if (typeof name === 'function') name = name.toString()
-    if (this.types[name]) {
+    if (this.types[name] && !(name instanceof RegExp)) {
       throw new Error(`Action type ${name} was already defined`)
     }
     if (!callbacks || !callbacks.access) {
       throw new Error(`Action type ${name} must have access callback`)
     }
-    this.types[name] = callbacks
+
+    if (name instanceof RegExp) {
+      this.regexTypes.set(name, callbacks)
+    } else {
+      this.types[name] = callbacks
+    }
   }
 
   otherType (callbacks) {
@@ -688,7 +699,11 @@ class BaseServer {
   }
 
   isUseless (action, meta) {
-    if (meta.status !== 'processed' || this.types[action.type]) {
+    if (
+      meta.status !== 'processed' ||
+      this.types[action.type] ||
+      this.getRegexProcessor(action.type)
+    ) {
       return false
     }
     for (let i of ['channels', 'nodes', 'clients', 'users']) {
@@ -717,9 +732,18 @@ class BaseServer {
     let processor = this.types[type]
     if (processor) {
       return processor
+    } else if (this.regexTypes.size > 0) {
+      return this.getRegexProcessor(type) || this.otherProcessor
     } else {
       return this.otherProcessor
     }
+  }
+
+  getRegexProcessor (type) {
+    let match = Array.from(this.regexTypes.keys()).find(
+      regexp => type.match(regexp) !== null
+    )
+    return match !== undefined ? this.regexTypes.get(match) : undefined
   }
 
   finally (processor, ctx, action, meta) {
