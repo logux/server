@@ -79,7 +79,7 @@ server.type('user/changeId', {
   }
 })
 
-// THROWS '"bad"' is not assignable to parameter of type '"user/rename"'
+// THROWS Argument of type '"bad"' is not assignable to parameter of type 'RegExp | "user/rename"'
 server.type<UserRenameAction>('bad', {
   access () {
     return true
