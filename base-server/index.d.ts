@@ -819,7 +819,7 @@ export default class BaseServer<
    * @template A Action’s type.
    * @template D Type for `ctx.data`.
    */
-  regexType<A extends Action = AnyAction, D extends object = {}> (
+  type<A extends Action = AnyAction, D extends object = {}> (
     regex: RegExp,
     callbacks: ActionCallbacks<A, D, H>
   ): void

@@ -333,24 +333,24 @@ class BaseServer {
   }
 
   type (name, callbacks) {
-    if (typeof name === 'function') name = name.toString()
-    if (this.types[name]) {
-      throw new Error(`Action type ${name} was already defined`)
+    if (name instanceof RegExp) {
+      if (this.regexTypes[name]) {
+        throw new Error(`Action type ${name} was already defined`)
+      }
+      if (!callbacks || !callbacks.access) {
+        throw new Error(`Action type ${name} must have access callback`)
+      }
+      this.regexTypes[name] = callbacks
+    } else {
+      if (typeof name === 'function') name = name.toString()
+      if (this.types[name]) {
+        throw new Error(`Action type ${name} was already defined`)
+      }
+      if (!callbacks || !callbacks.access) {
+        throw new Error(`Action type ${name} must have access callback`)
+      }
+      this.types[name] = callbacks
     }
-    if (!callbacks || !callbacks.access) {
-      throw new Error(`Action type ${name} must have access callback`)
-    }
-    this.types[name] = callbacks
-  }
-
-  regexType (name, callbacks) {
-    if (this.regexTypes[name]) {
-      throw new Error(`Action type ${name} was already defined`)
-    }
-    if (!callbacks || !callbacks.access) {
-      throw new Error(`Action type ${name} must have access callback`)
-    }
-    this.regexTypes[name] = callbacks
   }
 
   otherType (callbacks) {

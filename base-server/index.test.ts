@@ -447,7 +447,7 @@ it('defines actions types', () => {
 
 it('defines regex matching actions types', () => {
   let app = createServer()
-  app.regexType(/.*TODO$/, { access: () => true })
+  app.type(/.*TODO$/, { access: () => true })
   expect(privateMethods(app).regexTypes['/.*TODO$/']).not.toBeUndefined()
 })
 
@@ -461,9 +461,9 @@ it('does not allow to define type twice', () => {
 
 it('does not allow to define regexType twice', () => {
   let app = createServer()
-  app.regexType(/.*TODO$/, { access: () => true })
+  app.type(/.*TODO$/, { access: () => true })
   expect(() => {
-    app.regexType(/.*TODO$/, { access: () => true })
+    app.type(/.*TODO$/, { access: () => true })
   }).toThrow(/already/)
 })
 
@@ -479,7 +479,7 @@ it('requires access callback for regexType', () => {
   let app = createServer()
   expect(() => {
     // @ts-expect-error
-    app.regexType(/.*TODO$/)
+    app.type(/.*TODO$/)
   }).toThrow(/access callback/)
 })
 
@@ -582,7 +582,7 @@ it('processes regex matching action', async () => {
   let processed: Action[] = []
   let fired: Action[] = []
 
-  test.app.regexType(/.*TODO$/, {
+  test.app.type(/.*TODO$/, {
     access: () => true,
     async process (ctx, action, meta) {
       expect(meta.added).toEqual(1)
