@@ -8,10 +8,13 @@ export type LoggerOptions = {
 
   /**
    * Stream to be used by logger to write log.
-   * todo Note about flushSync
    */
   stream?: {
     write(str: string): void
+    /**
+     * Used by pino to synchronously write log messages on application failure.
+     */
+    flushSync?(): void
   }
 }
 
