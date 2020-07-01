@@ -228,7 +228,7 @@ function createReporter (options) {
   }
 
   let customLoggerProvided =
-    typeof options.logger !== 'string' && 'debug' in options.logger
+    typeof options.logger !== 'string' && 'info' in options.logger
   if (customLoggerProvided) {
     reporter.logger = options.logger
   } else {
