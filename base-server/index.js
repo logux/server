@@ -416,26 +416,23 @@ class BaseServer {
   sendAction (action, meta) {
     let from = parseId(meta.id).clientId
     let clients = new Set([from])
-    let send = client => {
-      if (!clients.has(client.clientId)) {
-        clients.add(client.clientId)
-        client.node.onAdd(action, meta)
-      }
-    }
 
     if (meta.nodes) {
       for (let id of meta.nodes) {
         let client = this.nodeIds.get(id)
-        if (client && client.clientId !== from) {
-          send(client)
+        if (client) {
+          clients.add(client.clientId)
+          client.node.onAdd(action, meta)
         }
       }
     }
 
     if (meta.clients) {
       for (let id of meta.clients) {
-        if (this.clientIds.has(id) && id !== from) {
-          send(this.clientIds.get(id))
+        if (this.clientIds.has(id)) {
+          let client = this.clientIds.get(id)
+          clients.add(client.clientId)
+          client.node.onAdd(action, meta)
         }
       }
     }
@@ -445,8 +442,9 @@ class BaseServer {
         let users = this.userIds.get(userId)
         if (users) {
           for (let client of users) {
-            if (client.clientId !== from) {
-              send(client)
+            if (!clients.has(client.clientId)) {
+              clients.add(client.clientId)
+              client.node.onAdd(action, meta)
             }
           }
         }

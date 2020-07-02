@@ -1276,10 +1276,6 @@ it('does not resend actions back', async () => {
   })
   app.type('B', {
     access: () => true,
-    resend: () => ({ clients: ['10:1'] })
-  })
-  app.type('C', {
-    access: () => true,
     resend: () => ({ channels: ['all'] })
   })
   app.channel('all', { access: () => true })
@@ -1306,14 +1302,12 @@ it('does not resend actions back', async () => {
     { type: 'A' },
     { id: [2, '10:1:uuid', 0], time: 2 },
     { type: 'B' },
-    { id: [3, '10:1:uuid', 0], time: 3 },
-    { type: 'C' },
-    { id: [4, '10:1:uuid', 0], time: 4 }
+    { id: [3, '10:1:uuid', 0], time: 3 }
   ] as any)
   await delay(10)
 
   expect(actions(client1)).toEqual([])
-  expect(actions(client2)).toEqual([{ type: 'A' }, { type: 'C' }])
+  expect(actions(client2)).toEqual([{ type: 'A' }, { type: 'B' }])
 })
 
 it('keeps context', async () => {
@@ -1499,4 +1493,42 @@ it('does not process send-back actions', async () => {
 
   expect(resended).toEqual(['server', 'client'])
   expect(processed).toEqual(['server', 'client'])
+})
+
+it('restores actions with old ID from history', async () => {
+  let app = createServer()
+  app.on('preadd', (action, meta) => {
+    meta.reasons = []
+  })
+  let history: [Action, ServerMeta][] = []
+  app.channel('a', {
+    access: () => true,
+    load () {
+      return history
+    }
+  })
+  app.type('A', {
+    access: () => true,
+    process (ctx, action, meta) {
+      history.push([action, meta])
+    }
+  })
+
+  let client1 = await connectClient(app, '10:1:uuid')
+  await sendTo(client1, [
+    'sync',
+    1,
+    { type: 'A' },
+    { id: [1, '10:1:uuid', 0], time: 1 }
+  ])
+
+  let client2 = await connectClient(app, '10:1:other')
+  await sendTo(client2, [
+    'sync',
+    2,
+    { type: 'logux/subscribe', channel: 'a' },
+    { id: [2, '10:1:uuid', 0], time: 2 }
+  ])
+  await delay(10)
+  expect(actions(client2)).toEqual([{ type: 'A' }])
 })
