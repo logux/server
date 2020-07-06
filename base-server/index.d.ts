@@ -144,7 +144,10 @@ export type BaseServerOptions = {
   pid?: number
 
   /**
-   * HTTP server to connect WebSocket server to it. Same as in `ws.Server`.
+   * HTTP server to serve Logux’s WebSocket and HTTP requests.
+   *
+   * Logux will remove previous HTTP callbacks. Do not use it with Express.js
+   * or other HTTP servers with defined routes.
    */
   server?: HTTPServer
 
