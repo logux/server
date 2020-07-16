@@ -1,11 +1,11 @@
 import { TestTime, TestLog } from '@logux/core'
 
-import TestClient, { TestClientOptions } from '../test-client'
+import TestClient, { TestClientOptions } from '../test-client/index.js'
 import BaseServer, {
   ServerMeta,
   BaseServerOptions,
   Reporter
-} from '../base-server'
+} from '../base-server/index.js'
 
 export type TestServerOptions = Omit<
   BaseServerOptions,

@@ -1,7 +1,7 @@
 import { delay } from 'nanodelay'
 import http from 'http'
 
-import { BaseServer, TestServerOptions, TestServer } from '..'
+import { BaseServer, TestServerOptions, TestServer } from '../index.js'
 
 let destroyable: { destroy(): Promise<void> }[] = []
 let lastPort = 8111

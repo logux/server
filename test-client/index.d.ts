@@ -4,8 +4,8 @@ import {
   LoguxAnySubscribeAction,
   LoguxUnsubscribeAction,
   ServerMeta
-} from '../base-server'
-import TestServer from '../test-server'
+} from '../base-server/index.js'
+import TestServer from '../test-server/index.js'
 
 export type TestClientOptions = {
   subprotocol?: string

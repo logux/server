@@ -1,7 +1,7 @@
 import { TestTime } from '@logux/core'
 import { delay } from 'nanodelay'
 
-import { LoguxAnySubscribeAction, TestClient, TestServer } from '..'
+import { LoguxAnySubscribeAction, TestClient, TestServer } from '../index.js'
 
 let server: TestServer
 afterEach(() => {

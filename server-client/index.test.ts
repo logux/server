@@ -9,8 +9,8 @@ import {
 } from '@logux/core'
 import { delay } from 'nanodelay'
 
-import { BaseServer, BaseServerOptions, ServerMeta } from '..'
-import ServerClient from '.'
+import { BaseServer, BaseServerOptions, ServerMeta } from '../index.js'
+import ServerClient from './index.js'
 
 let destroyable: { destroy(): void }[] = []
 

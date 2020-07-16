@@ -11,8 +11,8 @@ import {
 import { Unsubscribe } from 'nanoevents'
 import { Server as HTTPServer } from 'http'
 
-import Context, { ChannelContext } from '../context'
-import ServerClient from '../server-client'
+import Context, { ChannelContext } from '../context/index.js'
+import ServerClient from '../server-client/index.js'
 
 export type ServerMeta = Meta & {
   /**

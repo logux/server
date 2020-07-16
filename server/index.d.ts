@@ -1,4 +1,8 @@
-import BaseServer, { Logger, Reporter, BaseServerOptions } from '../base-server'
+import BaseServer, {
+  Logger,
+  Reporter,
+  BaseServerOptions
+} from '../base-server/index.js'
 
 export type ServerOptions = BaseServerOptions & {
   /**

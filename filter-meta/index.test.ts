@@ -1,4 +1,4 @@
-import { filterMeta, ServerMeta } from '..'
+import { filterMeta, ServerMeta } from '../index.js'
 
 it('filters meta', () => {
   let meta1: ServerMeta = {

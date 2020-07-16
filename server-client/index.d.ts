@@ -1,6 +1,6 @@
 import { ServerConnection, ServerNode } from '@logux/core'
 
-import Server from '../server'
+import Server from '../server/index.js'
 
 /**
  * Logux client connected to server.

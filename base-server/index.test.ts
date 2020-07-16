@@ -7,7 +7,7 @@ import { join } from 'path'
 import https from 'https'
 import http from 'http'
 
-import { BaseServer, BaseServerOptions, ServerMeta } from '..'
+import { BaseServer, BaseServerOptions, ServerMeta } from '../index.js'
 
 const DEFAULT_OPTIONS = {
   subprotocol: '0.0.0',

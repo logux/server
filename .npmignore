@@ -8,3 +8,4 @@ coverage/
 **/errors.ts
 
 __snapshots__
+tsconfig.json
