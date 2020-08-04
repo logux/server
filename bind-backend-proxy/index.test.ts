@@ -692,3 +692,14 @@ it('receives actions without backend', async () => {
   expect(app.log.actions()).toEqual([{ type: 'A' }])
   expect(sent).toEqual([])
 })
+
+it('processes server actions', async () => {
+  let app = createServer(OPTIONS)
+  app.on('error', e => {
+    throw e
+  })
+  app.log.add({ type: 'RESEND' })
+  await delay(50)
+  expect(app.log.actions()).toEqual([{ type: 'RESEND' }])
+  expect(app.log.entries()[0][1].status).toEqual('processed')
+})
