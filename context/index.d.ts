@@ -21,7 +21,8 @@ export default class Context<D extends object = {}, H extends object = {}> {
    * @param nodeId Unique node ID.
    * @param clientId Unique persistence client ID.
    * @param userId User ID taken node ID.
-   * @param subprotocol Action creator application subprotocol version in SemVer format.
+   * @param subprotocol Action creator application subprotocol version
+   *                    in SemVer format.
    * @param server Logux server
    */
   constructor (server: Server, meta: ServerMeta)
