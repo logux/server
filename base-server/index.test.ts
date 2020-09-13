@@ -631,7 +631,8 @@ it('reports about error during action processing', async () => {
   expect(test.reports[2][1].action).toEqual({
     type: 'logux/undo',
     reason: 'error',
-    id: '1 server:uuid 0'
+    id: '1 server:uuid 0',
+    action: { type: 'FOO' }
   })
 })
 
@@ -733,7 +734,8 @@ it('reports about wrong channel name', async () => {
   expect(test.reports[2][1].action).toEqual({
     id: '1 10:uuid 0',
     reason: 'wrongChannel',
-    type: 'logux/undo'
+    type: 'logux/undo',
+    action: { type: 'logux/subscribe' }
   })
   expect(client.connection.send).toHaveBeenCalledWith([
     'debug',
@@ -833,7 +835,8 @@ it('checks channel access', async () => {
   expect(test.reports[3][1].action).toEqual({
     type: 'logux/undo',
     id: '1 10:uuid 0',
-    reason: 'denied'
+    reason: 'denied',
+    action: { type: 'logux/subscribe', channel: 'user/10' }
   })
   expect(test.app.subscribers).toEqual({})
   expect(finalled).toEqual(1)
@@ -866,7 +869,8 @@ it('reports about errors during channel authorization', async () => {
   expect(test.reports[2][1].action).toEqual({
     type: 'logux/undo',
     id: '1 10:uuid 0',
-    reason: 'error'
+    reason: 'error',
+    action: { type: 'logux/subscribe', channel: 'user/10' }
   })
   expect(test.app.subscribers).toEqual({})
 })
@@ -1057,7 +1061,8 @@ it('reports about errors during channel initialization', async () => {
   expect(test.reports[4][1].action).toEqual({
     type: 'logux/undo',
     id: '1 10:uuid 0',
-    reason: 'error'
+    reason: 'error',
+    action: { type: 'logux/subscribe', channel: 'user/10' }
   })
   expect(test.app.subscribers).toEqual({})
 })

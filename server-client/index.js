@@ -189,7 +189,7 @@ class ServerClient {
     let wrongMeta = Object.keys(meta).some(i => !ALLOWED_META.includes(i))
     if (wrongUser || wrongMeta) {
       this.app.contexts.delete(action)
-      this.denyBack(meta)
+      this.denyBack(action, meta)
       return false
     }
 
@@ -212,24 +212,24 @@ class ServerClient {
         return false
       } else if (!result) {
         this.app.finally(processor, ctx, action, meta)
-        this.denyBack(meta)
+        this.denyBack(action, meta)
         return false
       } else {
         return true
       }
     } catch (e) {
-      this.app.undo(meta, 'error')
+      this.app.undo(meta, 'error', { action })
       this.app.emitter.emit('error', e, action, meta)
       this.app.finally(processor, ctx, action, meta)
       return false
     }
   }
 
-  denyBack (meta) {
+  denyBack (action, meta) {
     this.app.reporter('denied', { actionId: meta.id })
-    let [action, undoMeta] = this.app.buildUndo(meta, 'denied', {})
+    let [undoAction, undoMeta] = this.app.buildUndo(meta, 'denied', { action })
     undoMeta.clients = (undoMeta.clients || []).concat([this.clientId])
-    this.app.log.add(action, undoMeta)
+    this.app.log.add(undoAction, undoMeta)
     this.app.debugActionError(meta, `Action "${meta.id}" was denied`)
   }
 }

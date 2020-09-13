@@ -117,7 +117,7 @@ class BaseServer {
         try {
           resend = await processor.resend(ctx, action, meta)
         } catch (e) {
-          this.undo(meta, 'error')
+          this.undo(meta, 'error', { action })
           this.emitter.emit('error', e, action, meta)
           this.finally(processor, ctx, action, meta)
           return
@@ -499,7 +499,7 @@ class BaseServer {
     this.log.changeMeta(meta.id, { status: 'error' })
     this.reporter('unknownType', { type: action.type, actionId: meta.id })
     if (parseId(meta.id).userId !== 'server') {
-      this.undo(meta, 'unknownType')
+      this.undo(meta, 'unknownType', { action })
     }
     this.debugActionError(meta, `Action with unknown type ${action.type}`)
   }
@@ -510,7 +510,7 @@ class BaseServer {
       actionId: meta.id,
       channel: action.channel
     })
-    this.undo(meta, 'wrongChannel')
+    this.undo(meta, 'wrongChannel', { action })
     this.debugActionError(meta, `Wrong channel name ${action.channel}`)
   }
 
@@ -526,7 +526,7 @@ class BaseServer {
       this.markAsProcessed(meta)
     } catch (e) {
       this.log.changeMeta(meta.id, { status: 'error' })
-      this.undo(meta, 'error')
+      this.undo(meta, 'error', { action })
       this.emitter.emit('error', e, action, meta)
     } finally {
       this.finally(processor, ctx, action, meta)
@@ -586,7 +586,7 @@ class BaseServer {
             return
           }
           if (!access) {
-            this.denyAction(meta)
+            this.denyAction(action, meta)
             return
           }
 
@@ -627,7 +627,7 @@ class BaseServer {
           this.markAsProcessed(meta)
         } catch (e) {
           this.emitter.emit('error', e, action, meta)
-          this.undo(meta, 'error')
+          this.undo(meta, 'error', { action })
           if (subscribed) {
             this.unsubscribeAction(action, meta)
           }
@@ -664,9 +664,9 @@ class BaseServer {
     this.contexts.delete(action)
   }
 
-  denyAction (meta) {
+  denyAction (action, meta) {
     this.reporter('denied', { actionId: meta.id })
-    this.undo(meta, 'denied')
+    this.undo(meta, 'denied', { action })
     this.debugActionError(meta, `Action "${meta.id}" was denied`)
   }
 
