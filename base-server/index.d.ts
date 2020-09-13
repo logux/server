@@ -198,9 +198,10 @@ export type LoguxProcessedAction = {
 
 export type LoguxUndoAction = {
   type: 'logux/undo'
-  action: Action
   id: ID
+  action?: Action
   reason?: string
+  [key: string]: any
 }
 
 export type LoguxAction =
