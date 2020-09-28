@@ -540,7 +540,12 @@ it('checks action access', async () => {
 
   expect(test.names).toEqual(['connect', 'authenticated', 'denied', 'add'])
   expect(test.app.log.actions()).toEqual([
-    { type: 'logux/undo', id: '1 10:uuid 0', reason: 'denied' }
+    {
+      type: 'logux/undo',
+      id: '1 10:uuid 0',
+      reason: 'denied',
+      action: { type: 'FOO' }
+    }
   ])
   expect(finalled).toEqual(1)
 })
@@ -572,7 +577,12 @@ it('checks action creator', async () => {
   expect(test.reports[4][1].meta.id).toEqual('1 10:uuid 0')
   expect(test.app.log.actions()).toEqual([
     { type: 'GOOD' },
-    { type: 'logux/undo', id: '2 1:uuid 0', reason: 'denied' },
+    {
+      type: 'logux/undo',
+      id: '2 1:uuid 0',
+      reason: 'denied',
+      action: { type: 'BAD' }
+    },
     { type: 'logux/processed', id: '1 10:uuid 0' }
   ])
 })
@@ -623,7 +633,12 @@ it('checks action meta', async () => {
 
   expect(test.app.log.actions()).toEqual([
     { type: 'GOOD' },
-    { type: 'logux/undo', id: '1 10:uuid 0', reason: 'denied' },
+    {
+      type: 'logux/undo',
+      id: '1 10:uuid 0',
+      reason: 'denied',
+      action: { type: 'BAD' }
+    },
     { type: 'logux/processed', id: '2 10:uuid 0' }
   ])
   expect(test.names).toEqual([
@@ -650,7 +665,12 @@ it('ignores unknown action types', async () => {
   ])
 
   expect(test.app.log.actions()).toEqual([
-    { type: 'logux/undo', reason: 'unknownType', id: '1 10:uuid 0' }
+    {
+      type: 'logux/undo',
+      reason: 'unknownType',
+      id: '1 10:uuid 0',
+      action: { type: 'UNKNOWN' }
+    }
   ])
   expect(test.names).toEqual(['connect', 'authenticated', 'unknownType', 'add'])
   expect(test.reports[2]).toEqual([
@@ -690,7 +710,12 @@ it('checks user access for action', async () => {
   await delay(50)
   expect(test.app.log.actions()).toEqual([
     { type: 'FOO', bar: true },
-    { type: 'logux/undo', reason: 'denied', id: '1 10:uuid 0' },
+    {
+      type: 'logux/undo',
+      reason: 'denied',
+      id: '1 10:uuid 0',
+      action: { type: 'FOO' }
+    },
     { type: 'logux/processed', id: '1 10:uuid 1' }
   ])
   expect(test.names).toEqual([
@@ -757,7 +782,12 @@ it('reports about errors in access callback', async () => {
   ])
 
   expect(test.app.log.actions()).toEqual([
-    { type: 'logux/undo', reason: 'error', id: '1 10:uuid 0' }
+    {
+      type: 'logux/undo',
+      reason: 'error',
+      id: '1 10:uuid 0',
+      action: { type: 'FOO', bar: true }
+    }
   ])
   expect(test.names).toEqual(['connect', 'authenticated', 'error', 'add'])
   expect(test.reports[2]).toEqual([

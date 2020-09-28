@@ -303,7 +303,12 @@ it('reports about network errors', async () => {
 
   expect(errors).toEqual(['connect ECONNREFUSED 127.0.0.1:7110'])
   expect(app.log.actions()).toEqual([
-    { type: 'logux/undo', reason: 'error', id: '1 10:1:1 0' }
+    {
+      type: 'logux/undo',
+      reason: 'error',
+      id: '1 10:1:1 0',
+      action: { type: 'A' }
+    }
   ])
 })
 
@@ -319,7 +324,12 @@ it('reports bad HTTP answers', async () => {
 
   expect(errors).toEqual(['Backend responsed with 404 code'])
   expect(app.log.actions()).toEqual([
-    { type: 'logux/undo', reason: 'error', id: '1 10:1:1 0' }
+    {
+      type: 'logux/undo',
+      reason: 'error',
+      id: '1 10:1:1 0',
+      action: { type: 'NO' }
+    }
   ])
 })
 
@@ -541,7 +551,12 @@ it('asks about action access', async () => {
   await delay(50)
 
   expect(app.log.actions()).toEqual([
-    { type: 'logux/undo', reason: 'denied', id: '1 10:1:1 0' }
+    {
+      type: 'logux/undo',
+      reason: 'denied',
+      id: '1 10:1:1 0',
+      action: { type: 'BAD' }
+    }
   ])
 })
 
@@ -555,7 +570,12 @@ it('reacts on unknown action', async () => {
   client.log.add({ type: 'UNKNOWN' })
   await delay(100)
   expect(app.log.actions()).toEqual([
-    { type: 'logux/undo', reason: 'unknownType', id: '1 10:1:1 0' }
+    {
+      type: 'logux/undo',
+      reason: 'unknownType',
+      id: '1 10:1:1 0',
+      action: { type: 'UNKNOWN' }
+    }
   ])
   let debug = client.pair.rightSent.find(i => i[0] === 'debug')
   expect(debug).toEqual(['debug', 'error', 'Action with unknown type UNKNOWN'])
@@ -572,7 +592,12 @@ it('reacts on unknown channel', async () => {
   await delay(100)
   expect(app.log.actions()).toEqual([
     { type: 'logux/subscribe', channel: 'unknown' },
-    { type: 'logux/undo', reason: 'wrongChannel', id: '1 10:1:1 0' }
+    {
+      type: 'logux/undo',
+      reason: 'wrongChannel',
+      id: '1 10:1:1 0',
+      action: { type: 'logux/subscribe', channel: 'unknown' }
+    }
   ])
   let debug = client.pair.rightSent.find(i => i[0] === 'debug')
   expect(debug).toEqual(['debug', 'error', 'Wrong channel name unknown'])
@@ -612,15 +637,60 @@ it('reacts on wrong backend answer', async () => {
     { type: 'BROKEN2' },
     { type: 'BROKEN6' },
     { type: 'logux/subscribe', channel: 'resend' },
-    { type: 'logux/undo', reason: 'error', id: '1 10:1:1 0' },
-    { type: 'logux/undo', reason: 'error', id: '2 10:1:1 0' },
-    { type: 'logux/undo', reason: 'error', id: '3 10:1:1 0' },
-    { type: 'logux/undo', reason: 'error', id: '4 10:1:1 0' },
-    { type: 'logux/undo', reason: 'error', id: '5 10:1:1 0' },
-    { type: 'logux/undo', reason: 'error', id: '6 10:1:1 0' },
-    { type: 'logux/undo', reason: 'error', id: '7 10:1:1 0' },
-    { type: 'logux/undo', reason: 'error', id: '8 10:1:1 0' },
-    { type: 'logux/undo', reason: 'error', id: '9 10:1:1 0' }
+    {
+      type: 'logux/undo',
+      reason: 'error',
+      id: '1 10:1:1 0',
+      action: { type: 'EMPTY' }
+    },
+    {
+      type: 'logux/undo',
+      reason: 'error',
+      id: '2 10:1:1 0',
+      action: { type: 'BROKEN1' }
+    },
+    {
+      type: 'logux/undo',
+      reason: 'error',
+      id: '3 10:1:1 0',
+      action: { type: 'BROKEN2' }
+    },
+    {
+      type: 'logux/undo',
+      reason: 'error',
+      id: '4 10:1:1 0',
+      action: { type: 'BROKEN3' }
+    },
+    {
+      type: 'logux/undo',
+      reason: 'error',
+      id: '5 10:1:1 0',
+      action: { type: 'BROKEN4' }
+    },
+    {
+      type: 'logux/undo',
+      reason: 'error',
+      id: '6 10:1:1 0',
+      action: { type: 'BROKEN5' }
+    },
+    {
+      type: 'logux/undo',
+      reason: 'error',
+      id: '7 10:1:1 0',
+      action: { type: 'BROKEN6' }
+    },
+    {
+      type: 'logux/undo',
+      reason: 'error',
+      id: '8 10:1:1 0',
+      action: { type: 'BROKEN7' }
+    },
+    {
+      type: 'logux/undo',
+      reason: 'error',
+      id: '9 10:1:1 0',
+      action: { type: 'logux/subscribe', channel: 'resend' }
+    }
   ])
 })
 
@@ -642,8 +712,18 @@ it('reacts on backend error', async () => {
   ])
   expect(app.log.actions()).toEqual([
     { type: 'PERROR' },
-    { type: 'logux/undo', reason: 'error', id: '1 10:1:1 0' },
-    { type: 'logux/undo', reason: 'error', id: '2 10:1:1 0' }
+    {
+      type: 'logux/undo',
+      reason: 'error',
+      id: '1 10:1:1 0',
+      action: { type: 'AERROR' }
+    },
+    {
+      type: 'logux/undo',
+      reason: 'error',
+      id: '2 10:1:1 0',
+      action: { type: 'PERROR' }
+    }
   ])
 })
 
