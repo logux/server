@@ -142,7 +142,10 @@
           "import/order": "off"
         }
       }
-    ]
+    ],
+    "globals": {
+      "NodeJS": false
+    }
   },
   "eslintIgnore": [
     "**/errors.ts"
