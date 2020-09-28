@@ -218,7 +218,7 @@ class ServerClient {
         return true
       }
     } catch (e) {
-      this.app.undo(meta, 'error', { action })
+      this.app.undo(action, meta, 'error')
       this.app.emitter.emit('error', e, action, meta)
       this.app.finally(processor, ctx, action, meta)
       return false
@@ -227,7 +227,7 @@ class ServerClient {
 
   denyBack (action, meta) {
     this.app.reporter('denied', { actionId: meta.id })
-    let [undoAction, undoMeta] = this.app.buildUndo(meta, 'denied', { action })
+    let [undoAction, undoMeta] = this.app.buildUndo(action, meta, 'denied')
     undoMeta.clients = (undoMeta.clients || []).concat([this.clientId])
     this.app.log.add(undoAction, undoMeta)
     this.app.debugActionError(meta, `Action "${meta.id}" was denied`)

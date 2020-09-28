@@ -93,7 +93,7 @@ it('tracks action processing', async () => {
   server.type('UNDO', {
     access: () => true,
     process (ctx, action, meta) {
-      server.undo(meta)
+      server.undo(action, meta)
     }
   })
   let client = await server.connect('10')

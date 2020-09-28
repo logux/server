@@ -639,6 +639,7 @@ it('reports about error during action processing', async () => {
 it('undoes actions on client', async () => {
   let app = createServer()
   app.undo(
+    { type: 'FOO' },
     {
       id: '1 1:client:uuid 0',
       time: 1,
@@ -659,6 +660,9 @@ it('undoes actions on client', async () => {
   expect(app.log.entries()).toEqual([
     [
       {
+        action: {
+          type: 'FOO'
+        },
         id: '1 1:client:uuid 0',
         one: 1,
         type: 'logux/undo',
