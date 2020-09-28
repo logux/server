@@ -202,7 +202,9 @@ export type LoguxProcessedAction = {
 export type LoguxUndoAction = {
   type: 'logux/undo'
   id: ID
+  action: Action
   reason?: string
+  [key: string]: any
 }
 
 export type LoguxAction =
@@ -913,16 +915,22 @@ export default class BaseServer<
    *
    * ```js
    * if (couldNotFixConflict(action, meta)) {
-   *   server.undo(meta)
+   *   server.undo(action, meta)
    * }
    * ```
    *
+   * @param action The original action to undo.
    * @param meta The action’s metadata.
    * @param reason Optional code for reason. Default is `'error'`
    * @param extra Extra fields to `logux/undo` action.
    * @returns When action was saved to the log.
    */
-  undo (meta: ServerMeta, reason?: string, extra?: object): Promise<void>
+  undo (
+    action: Action,
+    meta: ServerMeta,
+    reason?: string,
+    extra?: object
+  ): Promise<void>
 
   /**
    * Send runtime error stacktrace to all clients.

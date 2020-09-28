@@ -122,7 +122,7 @@ class BaseServer {
         try {
           resend = await processor.resend(ctx, action, meta)
         } catch (e) {
-          this.undo(meta, 'error')
+          this.undo(action, meta, 'error')
           this.emitter.emit('error', e, action, meta)
           this.finally(processor, ctx, action, meta)
           return
@@ -407,11 +407,11 @@ class BaseServer {
     })
   }
 
-  undo (meta, reason = 'error', extra = {}) {
+  undo (action, meta, reason = 'error', extra = {}) {
     let clientId = parseId(meta.id).clientId
-    let [action, undoMeta] = this.buildUndo(meta, reason, extra)
+    let [undoAction, undoMeta] = this.buildUndo(action, meta, reason, extra)
     undoMeta.clients = (undoMeta.clients || []).concat([clientId])
-    return this.log.add(action, undoMeta)
+    return this.log.add(undoAction, undoMeta)
   }
 
   debugError (error) {
@@ -509,7 +509,7 @@ class BaseServer {
     this.log.changeMeta(meta.id, { status: 'error' })
     this.reporter('unknownType', { type: action.type, actionId: meta.id })
     if (parseId(meta.id).userId !== 'server') {
-      this.undo(meta, 'unknownType')
+      this.undo(action, meta, 'unknownType')
     }
     this.debugActionError(meta, `Action with unknown type ${action.type}`)
   }
@@ -520,7 +520,7 @@ class BaseServer {
       actionId: meta.id,
       channel: action.channel
     })
-    this.undo(meta, 'wrongChannel')
+    this.undo(action, meta, 'wrongChannel')
     this.debugActionError(meta, `Wrong channel name ${action.channel}`)
   }
 
@@ -536,7 +536,7 @@ class BaseServer {
       this.markAsProcessed(meta)
     } catch (e) {
       this.log.changeMeta(meta.id, { status: 'error' })
-      this.undo(meta, 'error')
+      this.undo(action, meta, 'error')
       this.emitter.emit('error', e, action, meta)
     } finally {
       this.finally(processor, ctx, action, meta)
@@ -596,7 +596,7 @@ class BaseServer {
             return
           }
           if (!access) {
-            this.denyAction(meta)
+            this.denyAction(action, meta)
             return
           }
 
@@ -637,7 +637,7 @@ class BaseServer {
           this.markAsProcessed(meta)
         } catch (e) {
           this.emitter.emit('error', e, action, meta)
-          this.undo(meta, 'error')
+          this.undo(action, meta, 'error')
           if (subscribed) {
             this.unsubscribeAction(action, meta)
           }
@@ -674,9 +674,9 @@ class BaseServer {
     this.contexts.delete(action)
   }
 
-  denyAction (meta) {
+  denyAction (action, meta) {
     this.reporter('denied', { actionId: meta.id })
-    this.undo(meta, 'denied')
+    this.undo(action, meta, 'denied')
     this.debugActionError(meta, `Action "${meta.id}" was denied`)
   }
 
@@ -754,7 +754,7 @@ class BaseServer {
     }
   }
 
-  buildUndo (meta, reason, extra) {
+  buildUndo (action, meta, reason, extra) {
     let undoMeta = { status: 'processed' }
 
     if (meta.users) undoMeta.users = meta.users.slice(0)
@@ -763,8 +763,14 @@ class BaseServer {
     if (meta.reasons) undoMeta.reasons = meta.reasons.slice(0)
     if (meta.channels) undoMeta.channels = meta.channels.slice(0)
 
-    let action = { ...extra, type: 'logux/undo', id: meta.id, reason }
-    return [action, undoMeta]
+    let undoAction = {
+      ...extra,
+      type: 'logux/undo',
+      id: meta.id,
+      action,
+      reason
+    }
+    return [undoAction, undoMeta]
   }
 
   replaceResendShortcuts (meta) {
