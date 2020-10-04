@@ -649,12 +649,16 @@ export default class BaseServer<
    * * `clientError`: wrong client behaviour.
    * * `connected`: new client was connected.
    * * `disconnected`: client was disconnected.
+   * * `authenticated`: client was authenticated
    * * `preadd`: action is going to be added to the log.
    *   The best place to set `reasons`.
    * * `add`: action was added to the log.
    * * `clean`: action was cleaned from the log.
    * * `processed`: action processing was finished.
    * * `subscribed`: channel initial data was loaded.
+   * * `subscribing`: channel initial data started to be loaded.
+   * * `unsubscribed`: node was unsubscribed.
+   * * `subscriptionCancelled`: subscription was cancelled because the client is not connected.
    *
    * ```js
    * server.on('error', error => {
@@ -731,6 +735,15 @@ export default class BaseServer<
       meta: ServerMeta,
       latencyMilliseconds: number
     ) => void
+  ): Unsubscribe
+
+  /**
+   * @param event The event name.
+   * @param listener Subscription listener.
+   */
+  on (
+    event: 'unsubscribed',
+    listener: (action: LoguxUnsubscribeAction, meta: ServerMeta) => void
   ): Unsubscribe
 
   /**
