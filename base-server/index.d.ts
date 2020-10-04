@@ -649,7 +649,7 @@ export default class BaseServer<
    * * `clientError`: wrong client behaviour.
    * * `connected`: new client was connected.
    * * `disconnected`: client was disconnected.
-   * * `authenticated`: client was authenticated
+   * * `authenticated`: client was authenticated.
    * * `preadd`: action is going to be added to the log.
    *   The best place to set `reasons`.
    * * `add`: action was added to the log.
