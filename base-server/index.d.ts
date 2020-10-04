@@ -742,6 +742,15 @@ export default class BaseServer<
    * @param listener Subscription listener.
    */
   on (
+    event: 'subscribing',
+    listener: (action: LoguxSubscribeAction, meta: ServerMeta) => void
+  ): Unsubscribe
+
+  /**
+   * @param event The event name.
+   * @param listener Subscription listener.
+   */
+  on (
     event: 'unsubscribed',
     listener: (action: LoguxUnsubscribeAction, meta: ServerMeta) => void
   ): Unsubscribe
