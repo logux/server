@@ -1,6 +1,6 @@
 import { ServerConnection, ServerNode } from '@logux/core'
 
-import Server from '../server/index.js'
+import BaseServer from '../base-server/index.js'
 
 /**
  * Logux client connected to server.
@@ -15,12 +15,12 @@ export default class ServerClient {
    * @param connection The Logux connection.
    * @param key Client number used as `app.connected` key.
    */
-  constructor (app: Server, connection: ServerConnection, key: number)
+  constructor (app: BaseServer, connection: ServerConnection, key: number)
 
   /**
    * Server, which received client.
    */
-  app: Server
+  app: BaseServer
 
   /**
    * User ID. It will be filled from client’s node ID.
