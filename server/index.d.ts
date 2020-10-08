@@ -115,4 +115,16 @@ export default class Server<H extends object = {}> extends BaseServer<H> {
    * ```
    */
   options: ServerOptions
+
+  /**
+   * Load module creators and apply to the server. By default, it will load
+   * files from `modules/*`.
+   *
+   * ```js
+   * server.autoloadModules()
+   * ```
+   *
+   * @param files Pattern for module files.
+   */
+  autoloadModules (files: string[] | string): Promise<void>
 }
