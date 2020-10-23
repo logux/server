@@ -3,9 +3,9 @@ yarn.lock
 
 test/
 coverage/
+tsconfig.json
 **/*.test.ts
 **/types.ts
 **/errors.ts
 
 __snapshots__
-tsconfig.json
