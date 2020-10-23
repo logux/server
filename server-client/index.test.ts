@@ -563,7 +563,7 @@ it('checks action creator', async () => {
     { id: [1, '10:uuid', 0], time: 1 },
     { type: 'BAD' },
     { id: [2, '1:uuid', 0], time: 2 }
-  ] as any)
+  ])
 
   expect(test.names).toEqual([
     'connect',
@@ -601,7 +601,7 @@ it('allows subscribe and unsubscribe actions', async () => {
     { id: [2, '10:uuid', 0], time: 2 },
     { type: 'logux/undo' },
     { id: [3, '10:uuid', 0], time: 3 }
-  ] as any)
+  ])
 
   expect(test.names[2]).toEqual('unknownType')
   expect(test.reports[2][1].actionId).toEqual('3 10:uuid 0')
@@ -629,7 +629,7 @@ it('checks action meta', async () => {
       time: 3,
       subprotocol: '1.0.0'
     }
-  ] as any)
+  ])
 
   expect(test.app.log.actions()).toEqual([
     { type: 'GOOD' },
@@ -706,7 +706,7 @@ it('checks user access for action', async () => {
     { id: [1, '10:uuid', 0], time: 1 },
     { type: 'FOO', bar: true },
     { id: [1, '10:uuid', 1], time: 1 }
-  ] as any)
+  ])
   await delay(50)
   expect(test.app.log.actions()).toEqual([
     { type: 'FOO', bar: true },
@@ -834,7 +834,7 @@ it('adds resend keys', async () => {
     { id: [1, '10:uuid', 0], time: 1 },
     { type: 'EMPTY' },
     { id: [2, '10:uuid', 0], time: 2 }
-  ] as any)
+  ])
 
   expect(test.app.log.actions()).toEqual([
     { type: 'FOO' },
@@ -1114,7 +1114,7 @@ it('decompress subprotocol', async () => {
     { id: [1, '10:uuid', 0], time: 1 },
     { type: 'A' },
     { id: [2, '10:uuid', 0], time: 2, subprotocol: '2.0.0' }
-  ] as any)
+  ])
 
   expect(app.log.entries()[0][1].subprotocol).toEqual('0.0.1')
   expect(app.log.entries()[1][1].subprotocol).toEqual('2.0.0')
@@ -1273,7 +1273,7 @@ it('has finally callback', async () => {
     { id: [4, '10:client:other', 0], time: 1 },
     { type: 'E' },
     { id: [5, '10:client:other', 0], time: 1 }
-  ] as any)
+  ])
 
   expect(calls).toEqual(['D', 'A', 'C', 'E', 'B'])
   expect(errors).toEqual(['D', 'C', 'E', 'EE'])
@@ -1333,7 +1333,7 @@ it('does not resend actions back', async () => {
     { id: [2, '10:1:uuid', 0], time: 2 },
     { type: 'B' },
     { id: [3, '10:1:uuid', 0], time: 3 }
-  ] as any)
+  ])
   await delay(10)
 
   expect(actions(client1)).toEqual([])

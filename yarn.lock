@@ -521,12 +521,11 @@
     "@types/yargs" "^15.0.0"
     chalk "^4.0.0"
 
-"@logux/core@^0.6.2":
+"@logux/core@logux/core#next":
   version "0.6.2"
-  resolved "https://registry.yarnpkg.com/@logux/core/-/core-0.6.2.tgz#5065b9179508d2b599d1b286c368063203a9df48"
-  integrity sha512-yn8WSSVvb6Fn89Rnt7FCGR1VDfn37/V/zemYNwwX5QPjShVUVS8ueQU+s6WGfxuXuvOzPSZnMR7dY5Q9QmatmA==
+  resolved "https://codeload.github.com/logux/core/tar.gz/9cbb3934b5dd12834d0406136ec0393b20c0885c"
   dependencies:
-    nanoevents "^5.1.8"
+    nanoevents "^5.1.10"
 
 "@logux/eslint-config@^41.0.2":
   version "41.0.2"
@@ -4222,7 +4221,7 @@ nanodelay@^1.0.6:
   resolved "https://registry.yarnpkg.com/nanodelay/-/nanodelay-1.0.6.tgz#912b206e1ddffaf19144062fc32c2c402d454729"
   integrity sha512-UXxoLdFU5m9IOWZfPTbz/rsCgmfQDTYxJkPJblJVts5YlJaf5Ys1ldPrEd3SAuoxzmFGPfc9EEcEECNzFXYtrQ==
 
-nanoevents@^5.1.10, nanoevents@^5.1.8:
+nanoevents@^5.1.10:
   version "5.1.10"
   resolved "https://registry.yarnpkg.com/nanoevents/-/nanoevents-5.1.10.tgz#9165199eed228c4787086dd1ea579b64257b8f8e"
   integrity sha512-QOE78g63vQ7V1JzhOLP8UNlaLOF/llDtfUhCj9GlbhQQc0YdPi5GNJKZdeWE0fvDtGF39un6uSf7RObeBm0eAg==

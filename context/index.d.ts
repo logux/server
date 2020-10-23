@@ -1,4 +1,4 @@
-import { Action } from '@logux/core'
+import { AnyAction } from '@logux/core'
 
 import { ServerMeta } from '../base-server/index.js'
 import Server from '../server/index.js'
@@ -134,7 +134,7 @@ export default class Context<D extends object = {}, H extends object = {}> {
    * @param meta Action’s meta.
    * @returns Promise until action was added to the server log.
    */
-  sendBack (action: Action, meta?: Partial<ServerMeta>): Promise<void>
+  sendBack (action: AnyAction, meta?: Partial<ServerMeta>): Promise<void>
 }
 
 /**
