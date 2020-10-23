@@ -89,13 +89,18 @@ class TestClient {
         let unbindError = this.server.on('error', e => {
           lastError = e
         })
-        let unbindAdd = this.log.on('add', other => {
-          if (other.type === 'logux/processed' && other.id === id) {
-            unbindAdd()
+        let unbindProcessed = this.log.type('logux/processed', other => {
+          if (other.id === id) {
+            unbindProcessed()
+            unbindUndo()
             unbindError()
             resolve()
-          } else if (other.type === 'logux/undo' && other.id === id) {
-            unbindAdd()
+          }
+        })
+        let unbindUndo = this.log.type('logux/undo', other => {
+          if (other.id === id) {
+            unbindProcessed()
+            unbindUndo()
             unbindError()
             let error
             if (other.reason === 'denied') {
