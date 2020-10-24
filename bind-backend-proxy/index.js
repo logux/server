@@ -293,6 +293,9 @@ function bindBackendProxy (app) {
       return accessing.get(meta.id)
     },
     resend (ctx, action, meta) {
+      if (!resending.has(meta.id)) {
+        sendAction(action, meta, ctx.headers)
+      }
       return resending.get(meta.id)
     },
     process (ctx, action, meta) {

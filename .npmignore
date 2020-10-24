@@ -3,6 +3,7 @@ yarn.lock
 
 test/
 coverage/
+tsconfig.json
 **/*.test.ts
 **/types.ts
 **/errors.ts

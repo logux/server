@@ -3,7 +3,7 @@ import { delay } from 'nanodelay'
 import WebSocket from 'ws'
 import http from 'http'
 
-import { BaseServer, BaseServerOptions } from '..'
+import { BaseServer, BaseServerOptions } from '../index.js'
 
 let lastPort = 10111
 function createServer (opts: Partial<BaseServerOptions> = {}) {

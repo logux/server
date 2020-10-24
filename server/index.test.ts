@@ -2,7 +2,7 @@ import { ChildProcess, SpawnOptions } from 'child_process'
 import { join } from 'path'
 import spawn from 'cross-spawn'
 
-import { Server } from '..'
+import { Server } from '../index.js'
 
 const DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
 

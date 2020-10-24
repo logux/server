@@ -11,8 +11,8 @@ import {
 import { Unsubscribe } from 'nanoevents'
 import { Server as HTTPServer } from 'http'
 
-import Context, { ChannelContext } from '../context'
-import ServerClient from '../server-client'
+import Context, { ChannelContext } from '../context/index.js'
+import ServerClient from '../server-client/index.js'
 
 export type ServerMeta = Meta & {
   /**
@@ -144,7 +144,10 @@ export type BaseServerOptions = {
   pid?: number
 
   /**
-   * HTTP server to connect WebSocket server to it. Same as in `ws.Server`.
+   * HTTP server to serve Logux’s WebSocket and HTTP requests.
+   *
+   * Logux will remove previous HTTP callbacks. Do not use it with Express.js
+   * or other HTTP servers with defined routes.
    */
   server?: HTTPServer
 
@@ -199,7 +202,9 @@ export type LoguxProcessedAction = {
 export type LoguxUndoAction = {
   type: 'logux/undo'
   id: ID
+  action: Action
   reason?: string
+  [key: string]: any
 }
 
 export type LoguxAction =
@@ -649,12 +654,16 @@ export default class BaseServer<
    * * `clientError`: wrong client behaviour.
    * * `connected`: new client was connected.
    * * `disconnected`: client was disconnected.
+   * * `authenticated`: client was authenticated.
    * * `preadd`: action is going to be added to the log.
    *   The best place to set `reasons`.
    * * `add`: action was added to the log.
    * * `clean`: action was cleaned from the log.
    * * `processed`: action processing was finished.
    * * `subscribed`: channel initial data was loaded.
+   * * `subscribing`: channel initial data started to be loaded.
+   * * `unsubscribed`: node was unsubscribed.
+   * * `subscriptionCancelled`: subscription was cancelled because the client is not connected.
    *
    * ```js
    * server.on('error', error => {
@@ -731,6 +740,24 @@ export default class BaseServer<
       meta: ServerMeta,
       latencyMilliseconds: number
     ) => void
+  ): Unsubscribe
+
+  /**
+   * @param event The event name.
+   * @param listener Subscription listener.
+   */
+  on (
+    event: 'subscribing',
+    listener: (action: LoguxSubscribeAction, meta: ServerMeta) => void
+  ): Unsubscribe
+
+  /**
+   * @param event The event name.
+   * @param listener Subscription listener.
+   */
+  on (
+    event: 'unsubscribed',
+    listener: (action: LoguxUnsubscribeAction, meta: ServerMeta) => void
   ): Unsubscribe
 
   /**
@@ -916,16 +943,22 @@ export default class BaseServer<
    *
    * ```js
    * if (couldNotFixConflict(action, meta)) {
-   *   server.undo(meta)
+   *   server.undo(action, meta)
    * }
    * ```
    *
+   * @param action The original action to undo.
    * @param meta The action’s metadata.
    * @param reason Optional code for reason. Default is `'error'`
    * @param extra Extra fields to `logux/undo` action.
    * @returns When action was saved to the log.
    */
-  undo (meta: ServerMeta, reason?: string, extra?: object): Promise<void>
+  undo (
+    action: Action,
+    meta: ServerMeta,
+    reason?: string,
+    extra?: object
+  ): Promise<void>
 
   /**
    * Send runtime error stacktrace to all clients.

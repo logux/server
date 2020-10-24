@@ -1,6 +1,6 @@
 import { actionCreatorFactory } from 'typescript-fsa'
 
-import { Server, Action, LoguxSubscribeAction } from '..'
+import { Server, Action, LoguxSubscribeAction } from '../index.js'
 import pino = require('pino')
 
 let server = new Server<{ locale: string }>(

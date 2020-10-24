@@ -1,7 +1,7 @@
 import { TestTime } from '@logux/core'
 import { delay } from 'nanodelay'
 
-import { LoguxAnySubscribeAction, TestClient, TestServer } from '..'
+import { LoguxAnySubscribeAction, TestClient, TestServer } from '../index.js'
 
 let server: TestServer
 afterEach(() => {
@@ -93,7 +93,7 @@ it('tracks action processing', async () => {
   server.type('UNDO', {
     access: () => true,
     process (ctx, action, meta) {
-      server.undo(meta)
+      server.undo(action, meta)
     }
   })
   let client = await server.connect('10')
@@ -106,7 +106,8 @@ it('tracks action processing', async () => {
   expect(serverError.action).toEqual({
     type: 'logux/undo',
     id: '3 10:1:1 0',
-    reason: 'error'
+    reason: 'error',
+    action: { type: 'ERR' }
   })
 
   let accessError = await catchError(() => client.process({ type: 'DENIED' }))

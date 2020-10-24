@@ -1,7 +1,7 @@
 import { LoguxError } from '@logux/core'
 
-import createReporter from '../create-reporter'
-import humanFormatter from '../human-formatter'
+import createReporter from '../create-reporter/index.js'
+import humanFormatter from '../human-formatter/index.js'
 import pino = require('pino')
 
 jest.mock('os', () => {

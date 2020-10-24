@@ -1,6 +1,6 @@
 import { actionCreatorFactory } from 'typescript-fsa'
 
-import { Server, Action, LoguxSubscribeAction } from '..'
+import { Server, Action, LoguxSubscribeAction } from '../index.js'
 
 let server = new Server<{ locale: string }>(
   Server.loadOptions(process, {
@@ -64,6 +64,7 @@ server.type<UserRenameAction, UserData>('user/rename', {
   async process (ctx, action) {
     // THROWS Property 'lang' does not exist on type '{ locale: string; }'
     console.log(ctx.headers.lang)
+    // THROWS 'newName' does not exist on type 'UserRenameAction'
     ctx.data.user.name = action.newName
     // THROWS Property 'admin' does not exist on type 'UserData'.
     await ctx.data.admin.save()
@@ -103,7 +104,7 @@ server.channel<UserParams, UserData, UserSubscribeAction>('user/:id', {
     }
   },
   async load (ctx) {
-    // THROWS is not assignable to parameter of type 'Action'
+    // THROWS is not assignable to parameter of type 'AnyAction'
     await ctx.sendBack({
       userId: ctx.data.user.id,
       name: ctx.data.user.name

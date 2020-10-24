@@ -1,6 +1,15 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.9.6
+* Update `yargs`.
+
+## 0.9.5
+* Fixed sending server’s actions to backend.
+
+## 0.9.4
+* Fix using old action’s IDs in `Server#channel→load`.
+
 ## 0.9.3
 * Do not process actions from `Server#channel→load` in `Server#type`.
 * Replace color output library.

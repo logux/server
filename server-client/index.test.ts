@@ -9,8 +9,8 @@ import {
 } from '@logux/core'
 import { delay } from 'nanodelay'
 
-import { BaseServer, BaseServerOptions, ServerMeta } from '..'
-import ServerClient from '.'
+import { BaseServer, BaseServerOptions, ServerMeta } from '../index.js'
+import ServerClient from './index.js'
 
 let destroyable: { destroy(): void }[] = []
 
@@ -538,7 +538,12 @@ it('checks action access', async () => {
 
   expect(test.names).toEqual(['connect', 'authenticated', 'denied', 'add'])
   expect(test.app.log.actions()).toEqual([
-    { type: 'logux/undo', id: '1 10:uuid 0', reason: 'denied' }
+    {
+      type: 'logux/undo',
+      id: '1 10:uuid 0',
+      reason: 'denied',
+      action: { type: 'FOO' }
+    }
   ])
   expect(finalled).toEqual(1)
 })
@@ -556,7 +561,7 @@ it('checks action creator', async () => {
     { id: [1, '10:uuid', 0], time: 1 },
     { type: 'BAD' },
     { id: [2, '1:uuid', 0], time: 2 }
-  ] as any)
+  ])
 
   expect(test.names).toEqual([
     'connect',
@@ -570,7 +575,12 @@ it('checks action creator', async () => {
   expect(test.reports[4][1].meta.id).toEqual('1 10:uuid 0')
   expect(test.app.log.actions()).toEqual([
     { type: 'GOOD' },
-    { type: 'logux/undo', id: '2 1:uuid 0', reason: 'denied' },
+    {
+      type: 'logux/undo',
+      id: '2 1:uuid 0',
+      reason: 'denied',
+      action: { type: 'BAD' }
+    },
     { type: 'logux/processed', id: '1 10:uuid 0' }
   ])
 })
@@ -589,7 +599,7 @@ it('allows subscribe and unsubscribe actions', async () => {
     { id: [2, '10:uuid', 0], time: 2 },
     { type: 'logux/undo' },
     { id: [3, '10:uuid', 0], time: 3 }
-  ] as any)
+  ])
 
   expect(test.names[2]).toEqual('unknownType')
   expect(test.reports[2][1].actionId).toEqual('3 10:uuid 0')
@@ -617,11 +627,16 @@ it('checks action meta', async () => {
       time: 3,
       subprotocol: '1.0.0'
     }
-  ] as any)
+  ])
 
   expect(test.app.log.actions()).toEqual([
     { type: 'GOOD' },
-    { type: 'logux/undo', id: '1 10:uuid 0', reason: 'denied' },
+    {
+      type: 'logux/undo',
+      id: '1 10:uuid 0',
+      reason: 'denied',
+      action: { type: 'BAD' }
+    },
     { type: 'logux/processed', id: '2 10:uuid 0' }
   ])
   expect(test.names).toEqual([
@@ -648,7 +663,12 @@ it('ignores unknown action types', async () => {
   ])
 
   expect(test.app.log.actions()).toEqual([
-    { type: 'logux/undo', reason: 'unknownType', id: '1 10:uuid 0' }
+    {
+      type: 'logux/undo',
+      reason: 'unknownType',
+      id: '1 10:uuid 0',
+      action: { type: 'UNKNOWN' }
+    }
   ])
   expect(test.names).toEqual(['connect', 'authenticated', 'unknownType', 'add'])
   expect(test.reports[2]).toEqual([
@@ -684,11 +704,16 @@ it('checks user access for action', async () => {
     { id: [1, '10:uuid', 0], time: 1 },
     { type: 'FOO', bar: true },
     { id: [1, '10:uuid', 1], time: 1 }
-  ] as any)
+  ])
   await delay(50)
   expect(test.app.log.actions()).toEqual([
     { type: 'FOO', bar: true },
-    { type: 'logux/undo', reason: 'denied', id: '1 10:uuid 0' },
+    {
+      type: 'logux/undo',
+      reason: 'denied',
+      id: '1 10:uuid 0',
+      action: { type: 'FOO' }
+    },
     { type: 'logux/processed', id: '1 10:uuid 1' }
   ])
   expect(test.names).toEqual([
@@ -755,7 +780,12 @@ it('reports about errors in access callback', async () => {
   ])
 
   expect(test.app.log.actions()).toEqual([
-    { type: 'logux/undo', reason: 'error', id: '1 10:uuid 0' }
+    {
+      type: 'logux/undo',
+      reason: 'error',
+      id: '1 10:uuid 0',
+      action: { type: 'FOO', bar: true }
+    }
   ])
   expect(test.names).toEqual(['connect', 'authenticated', 'error', 'add'])
   expect(test.reports[2]).toEqual([
@@ -802,7 +832,7 @@ it('adds resend keys', async () => {
     { id: [1, '10:uuid', 0], time: 1 },
     { type: 'EMPTY' },
     { id: [2, '10:uuid', 0], time: 2 }
-  ] as any)
+  ])
 
   expect(test.app.log.actions()).toEqual([
     { type: 'FOO' },
@@ -1082,7 +1112,7 @@ it('decompress subprotocol', async () => {
     { id: [1, '10:uuid', 0], time: 1 },
     { type: 'A' },
     { id: [2, '10:uuid', 0], time: 2, subprotocol: '2.0.0' }
-  ] as any)
+  ])
 
   expect(app.log.entries()[0][1].subprotocol).toEqual('0.0.1')
   expect(app.log.entries()[1][1].subprotocol).toEqual('2.0.0')
@@ -1241,7 +1271,7 @@ it('has finally callback', async () => {
     { id: [4, '10:client:other', 0], time: 1 },
     { type: 'E' },
     { id: [5, '10:client:other', 0], time: 1 }
-  ] as any)
+  ])
 
   expect(calls).toEqual(['D', 'A', 'C', 'E', 'B'])
   expect(errors).toEqual(['D', 'C', 'E', 'EE'])
@@ -1274,10 +1304,6 @@ it('does not resend actions back', async () => {
   })
   app.type('B', {
     access: () => true,
-    resend: () => ({ clients: ['10:1'] })
-  })
-  app.type('C', {
-    access: () => true,
     resend: () => ({ channels: ['all'] })
   })
   app.channel('all', { access: () => true })
@@ -1304,14 +1330,12 @@ it('does not resend actions back', async () => {
     { type: 'A' },
     { id: [2, '10:1:uuid', 0], time: 2 },
     { type: 'B' },
-    { id: [3, '10:1:uuid', 0], time: 3 },
-    { type: 'C' },
-    { id: [4, '10:1:uuid', 0], time: 4 }
-  ] as any)
+    { id: [3, '10:1:uuid', 0], time: 3 }
+  ])
   await delay(10)
 
   expect(actions(client1)).toEqual([])
-  expect(actions(client2)).toEqual([{ type: 'A' }, { type: 'C' }])
+  expect(actions(client2)).toEqual([{ type: 'A' }, { type: 'B' }])
 })
 
 it('keeps context', async () => {
@@ -1497,4 +1521,42 @@ it('does not process send-back actions', async () => {
 
   expect(resended).toEqual(['server', 'client'])
   expect(processed).toEqual(['server', 'client'])
+})
+
+it('restores actions with old ID from history', async () => {
+  let app = createServer()
+  app.on('preadd', (action, meta) => {
+    meta.reasons = []
+  })
+  let history: [Action, ServerMeta][] = []
+  app.channel('a', {
+    access: () => true,
+    load () {
+      return history
+    }
+  })
+  app.type('A', {
+    access: () => true,
+    process (ctx, action, meta) {
+      history.push([action, meta])
+    }
+  })
+
+  let client1 = await connectClient(app, '10:1:uuid')
+  await sendTo(client1, [
+    'sync',
+    1,
+    { type: 'A' },
+    { id: [1, '10:1:uuid', 0], time: 1 }
+  ])
+
+  let client2 = await connectClient(app, '10:1:other')
+  await sendTo(client2, [
+    'sync',
+    2,
+    { type: 'logux/subscribe', channel: 'a' },
+    { id: [2, '10:1:uuid', 0], time: 2 }
+  ])
+  await delay(10)
+  expect(actions(client2)).toEqual([{ type: 'A' }])
 })

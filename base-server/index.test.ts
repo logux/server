@@ -7,7 +7,7 @@ import { join } from 'path'
 import https from 'https'
 import http from 'http'
 
-import { BaseServer, BaseServerOptions, ServerMeta } from '..'
+import { BaseServer, BaseServerOptions, ServerMeta } from '../index.js'
 
 const DEFAULT_OPTIONS = {
   subprotocol: '0.0.0',
@@ -664,13 +664,15 @@ it('reports about error during action processing', async () => {
   expect(test.reports[2][1].action).toEqual({
     type: 'logux/undo',
     reason: 'error',
-    id: '1 server:uuid 0'
+    id: '1 server:uuid 0',
+    action: { type: 'FOO' }
   })
 })
 
 it('undoes actions on client', async () => {
   let app = createServer()
   app.undo(
+    { type: 'FOO' },
     {
       id: '1 1:client:uuid 0',
       time: 1,
@@ -691,6 +693,9 @@ it('undoes actions on client', async () => {
   expect(app.log.entries()).toEqual([
     [
       {
+        action: {
+          type: 'FOO'
+        },
         id: '1 1:client:uuid 0',
         one: 1,
         type: 'logux/undo',
@@ -766,7 +771,8 @@ it('reports about wrong channel name', async () => {
   expect(test.reports[2][1].action).toEqual({
     id: '1 10:uuid 0',
     reason: 'wrongChannel',
-    type: 'logux/undo'
+    type: 'logux/undo',
+    action: { type: 'logux/subscribe' }
   })
   expect(client.connection.send).toHaveBeenCalledWith([
     'debug',
@@ -866,7 +872,8 @@ it('checks channel access', async () => {
   expect(test.reports[3][1].action).toEqual({
     type: 'logux/undo',
     id: '1 10:uuid 0',
-    reason: 'denied'
+    reason: 'denied',
+    action: { type: 'logux/subscribe', channel: 'user/10' }
   })
   expect(test.app.subscribers).toEqual({})
   expect(finalled).toEqual(1)
@@ -899,7 +906,8 @@ it('reports about errors during channel authorization', async () => {
   expect(test.reports[2][1].action).toEqual({
     type: 'logux/undo',
     id: '1 10:uuid 0',
-    reason: 'error'
+    reason: 'error',
+    action: { type: 'logux/subscribe', channel: 'user/10' }
   })
   expect(test.app.subscribers).toEqual({})
 })
@@ -1090,7 +1098,8 @@ it('reports about errors during channel initialization', async () => {
   expect(test.reports[4][1].action).toEqual({
     type: 'logux/undo',
     id: '1 10:uuid 0',
-    reason: 'error'
+    reason: 'error',
+    action: { type: 'logux/subscribe', channel: 'user/10' }
   })
   expect(test.app.subscribers).toEqual({})
 })

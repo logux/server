@@ -1,7 +1,7 @@
-import { Action } from '@logux/core'
+import { AnyAction } from '@logux/core'
 
-import { ServerMeta } from '../base-server'
-import Server from '../server'
+import { ServerMeta } from '../base-server/index.js'
+import Server from '../server/index.js'
 
 /**
  * Action context.
@@ -21,7 +21,8 @@ export default class Context<D extends object = {}, H extends object = {}> {
    * @param nodeId Unique node ID.
    * @param clientId Unique persistence client ID.
    * @param userId User ID taken node ID.
-   * @param subprotocol Action creator application subprotocol version in SemVer format.
+   * @param subprotocol Action creator application subprotocol version
+   *                    in SemVer format.
    * @param server Logux server
    */
   constructor (server: Server, meta: ServerMeta)
@@ -133,7 +134,7 @@ export default class Context<D extends object = {}, H extends object = {}> {
    * @param meta Action’s meta.
    * @returns Promise until action was added to the server log.
    */
-  sendBack (action: Action, meta?: Partial<ServerMeta>): Promise<void>
+  sendBack (action: AnyAction, meta?: Partial<ServerMeta>): Promise<void>
 }
 
 /**

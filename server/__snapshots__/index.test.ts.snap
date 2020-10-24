@@ -25,18 +25,18 @@ exports[`disables colors for constructor errors 1`] = `
 
 exports[`shows help 1`] = `
 "Options:
-  --host, -h        Host to bind server.                                [string]
-  --port, -p        Port to bind server                                 [number]
-  --key             Path to SSL key                                     [string]
-  --cert            Path to SSL certificate                             [string]
-  --supports        Range of supported client subprotocols              [string]
-  --subprotocol     Server subprotocol                                  [string]
-  --logger, -l      Logger type              [string] [choices: \\"human\\", \\"json\\"]
-  --backend         Backend to process actions and authentication       [string]
-  --control-secret  Secret to control Logux server                      [string]
-  --control-mask    CIDR masks for IP addresses of control servers      [string]
-  --redis           URL to Redis for Logux Server Pro scaling           [string]
-  --help            Show help                                          [boolean]
+  -h, --host            Host to bind server.                            [string]
+  -p, --port            Port to bind server                             [number]
+      --key             Path to SSL key                                 [string]
+      --cert            Path to SSL certificate                         [string]
+      --supports        Range of supported client subprotocols          [string]
+      --subprotocol     Server subprotocol                              [string]
+  -l, --logger          Logger type          [string] [choices: \\"human\\", \\"json\\"]
+      --backend         Backend to process actions and authentication   [string]
+      --control-secret  Secret to control Logux server                  [string]
+      --control-mask    CIDR masks for IP addresses of control servers  [string]
+      --redis           URL to Redis for Logux Server Pro scaling       [string]
+      --help            Show help                                      [boolean]
 
 Examples:
   options.js --port 31337 --host 127.0.0.1

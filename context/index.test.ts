@@ -1,6 +1,6 @@
 import { Action } from '@logux/core'
 
-import { Context, ServerMeta } from '..'
+import { Context, ServerMeta } from '../index.js'
 
 let added: [Action, ServerMeta][] = []
 
