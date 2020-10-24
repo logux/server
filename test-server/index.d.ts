@@ -6,7 +6,7 @@ import BaseServer, {
   BaseServerOptions,
   Logger
 } from '../base-server/index.js'
-import { LoggerOptions } from '../server'
+import { LoggerOptions } from '../server/index.js'
 
 export type TestServerOptions = Omit<
   BaseServerOptions,
