@@ -109,7 +109,7 @@ class ServerClient {
     }
 
     if (nodeId === 'server' || userId === 'server') {
-      this.app.reporter('unauthenticated', reportDetails(this))
+      this.app.emitter.emit('report', 'unauthenticated', reportDetails(this))
       return false
     }
 
@@ -150,7 +150,7 @@ class ServerClient {
       let zombie = this.app.clientIds.get(this.clientId)
       if (zombie) {
         zombie.zombie = true
-        this.app.reporter('zombie', { nodeId: zombie.nodeId })
+        this.app.emitter.emit('report', 'zombie', { nodeId: zombie.nodeId })
         zombie.destroy()
       }
       this.app.clientIds.set(this.clientId, this)
@@ -163,9 +163,9 @@ class ServerClient {
         }
       }
       this.app.emitter.emit('authenticated', this, Date.now() - start)
-      this.app.reporter('authenticated', reportDetails(this))
+      this.app.emitter.emit('report', 'authenticated', reportDetails(this))
     } else {
-      this.app.reporter('unauthenticated', reportDetails(this))
+      this.app.emitter.emit('report', 'unauthenticated', reportDetails(this))
       this.app.rememberBadAuth(this.remoteAddress)
     }
     return result
@@ -226,7 +226,7 @@ class ServerClient {
   }
 
   denyBack (action, meta) {
-    this.app.reporter('denied', { actionId: meta.id })
+    this.app.emitter.emit('report', 'denied', { actionId: meta.id })
     let [undoAction, undoMeta] = this.app.buildUndo(action, meta, 'denied')
     undoMeta.clients = (undoMeta.clients || []).concat([this.clientId])
     this.app.log.add(undoAction, undoMeta)

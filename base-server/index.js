@@ -27,12 +27,6 @@ function optionError (msg) {
 class BaseServer {
   constructor (opts = {}) {
     this.options = opts
-    this.reporter = function (type, details) {
-      this.emitter.emit('report', type, details)
-      if (this.options.reporter) {
-        this.options.reporter(type, details)
-      }
-    }
     this.env = this.options.env || process.env.NODE_ENV || 'development'
 
     if (
@@ -102,7 +96,7 @@ class BaseServer {
     })
     this.on('add', async (action, meta) => {
       let start = Date.now()
-      this.reporter('add', { action, meta })
+      this.emitter.emit('report', 'add', { action, meta })
 
       if (this.destroying) return
 
@@ -144,7 +138,7 @@ class BaseServer {
       }
 
       if (this.isUseless(action, meta)) {
-        this.reporter('useless', { action, meta })
+        this.emitter.emit('report', 'useless', { action, meta })
       }
 
       this.sendAction(action, meta)
@@ -172,32 +166,38 @@ class BaseServer {
       }
     })
     this.on('clean', (action, meta) => {
-      this.reporter('clean', { actionId: meta.id })
+      this.emitter.emit('report', 'clean', { actionId: meta.id })
     })
 
     this.emitter = createNanoEvents()
     this.on('fatal', err => {
-      this.reporter('error', { err, fatal: true })
+      this.emitter.emit('report', 'error', { err, fatal: true })
     })
     this.on('error', (err, action, meta) => {
       if (meta) {
-        this.reporter('error', { err, actionId: meta.id })
+        this.emitter.emit('report', 'error', { err, actionId: meta.id })
       } else if (err.nodeId) {
-        this.reporter('error', { err, nodeId: err.nodeId })
+        this.emitter.emit('report', 'error', { err, nodeId: err.nodeId })
       } else if (err.connectionId) {
-        this.reporter('error', { err, connectionId: err.connectionId })
+        this.emitter.emit('report', 'error', {
+          err,
+          connectionId: err.connectionId
+        })
       }
       if (this.env === 'development') this.debugError(err)
     })
     this.on('clientError', err => {
       if (err.nodeId) {
-        this.reporter('clientError', { err, nodeId: err.nodeId })
+        this.emitter.emit('report', 'clientError', { err, nodeId: err.nodeId })
       } else if (err.connectionId) {
-        this.reporter('clientError', { err, connectionId: err.connectionId })
+        this.emitter.emit('report', 'clientError', {
+          err,
+          connectionId: err.connectionId
+        })
       }
     })
     this.on('connected', client => {
-      this.reporter('connect', {
+      this.emitter.emit('report', 'connect', {
         connectionId: client.key,
         ipAddress: client.remoteAddress
       })
@@ -205,9 +205,11 @@ class BaseServer {
     this.on('disconnected', client => {
       if (!client.zombie) {
         if (client.nodeId) {
-          this.reporter('disconnect', { nodeId: client.nodeId })
+          this.emitter.emit('report', 'disconnect', { nodeId: client.nodeId })
         } else {
-          this.reporter('disconnect', { connectionId: client.key })
+          this.emitter.emit('report', 'disconnect', {
+            connectionId: client.key
+          })
         }
       }
     })
@@ -305,7 +307,7 @@ class BaseServer {
       ws.upgradeReq = req
       this.addClient(new ServerConnection(ws))
     })
-    this.reporter('listen', {
+    this.emitter.emit('report', 'listen', {
       controlSecret: this.options.controlSecret,
       controlMask: this.options.controlMask,
       loguxServer: pkg.version,
@@ -333,7 +335,7 @@ class BaseServer {
 
   destroy () {
     this.destroying = true
-    this.reporter('destroy')
+    this.emitter.emit('report', 'destroy')
     return Promise.all(this.unbind.map(i => i()))
   }
 
@@ -512,7 +514,10 @@ class BaseServer {
   internalUnkownType (action, meta) {
     this.contexts.delete(action)
     this.log.changeMeta(meta.id, { status: 'error' })
-    this.reporter('unknownType', { type: action.type, actionId: meta.id })
+    this.emitter.emit('report', 'unknownType', {
+      type: action.type,
+      actionId: meta.id
+    })
     if (parseId(meta.id).userId !== 'server') {
       this.undo(action, meta, 'unknownType')
     }
@@ -521,7 +526,7 @@ class BaseServer {
 
   internalWrongChannel (action, meta) {
     this.contexts.delete(action)
-    this.reporter('wrongChannel', {
+    this.emitter.emit('report', 'wrongChannel', {
       actionId: meta.id,
       channel: action.channel
     })
@@ -537,7 +542,7 @@ class BaseServer {
     try {
       await processor.process(ctx, action, meta)
       latency = Date.now() - start
-      this.reporter('processed', { actionId: meta.id, latency })
+      this.emitter.emit('report', 'processed', { actionId: meta.id, latency })
       this.markAsProcessed(meta)
     } catch (e) {
       this.log.changeMeta(meta.id, { status: 'error' })
@@ -614,7 +619,7 @@ class BaseServer {
           let filter = true
           if (channel.filter) filter = await channel.filter(ctx, action, meta)
 
-          this.reporter('subscribed', {
+          this.emitter.emit('report', 'subscribed', {
             actionId: meta.id,
             channel: action.channel
           })
@@ -671,7 +676,7 @@ class BaseServer {
     }
 
     this.emitter.emit('unsubscribed', action, meta)
-    this.reporter('unsubscribed', {
+    this.emitter.emit('report', 'unsubscribed', {
       actionId: meta.id,
       channel: action.channel
     })
@@ -680,7 +685,7 @@ class BaseServer {
   }
 
   denyAction (action, meta) {
-    this.reporter('denied', { actionId: meta.id })
+    this.emitter.emit('report', 'denied', { actionId: meta.id })
     this.undo(action, meta, 'denied')
     this.debugActionError(meta, `Action "${meta.id}" was denied`)
   }

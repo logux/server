@@ -148,8 +148,9 @@ class Server extends BaseServer {
     process.on('uncaughtException', onError)
     process.on('unhandledRejection', onError)
 
-    super({ ...opts, reporter })
+    super(opts)
 
+    this.on('report', reporter)
     this.on('fatal', async () => {
       if (initialized) {
         if (!this.destroying) {
@@ -192,7 +193,7 @@ class Server extends BaseServer {
     try {
       return BaseServer.prototype.listen.apply(this, args)
     } catch (err) {
-      this.reporter('error', { err })
+      this.emitter.emit('report', 'error', { err })
       return process.exit(1)
     }
   }

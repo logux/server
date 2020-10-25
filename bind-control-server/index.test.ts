@@ -43,13 +43,11 @@ function createReporter (opts = {}) {
   let names: string[] = []
   let reports: [string, object][] = []
 
-  app = createServer({
-    ...opts,
-    reporter (name: string, details: object) {
-      names.push(name)
-      reports.push([name, details])
-    }
-  } as any)
+  app = createServer(opts)
+  app.on('report', (name: string, details?: any) => {
+    names.push(name)
+    reports.push([name, details])
+  })
   return { names, reports, app }
 }
 

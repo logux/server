@@ -21,7 +21,7 @@ function bindControlServer (app) {
   app.http.on('request', (req, res) => {
     let ipAddress = req.connection.remoteAddress
     if (masks.every(i => !i.contains(ipAddress))) {
-      app.reporter('wrongControlIp', {
+      app.emitter.emit('report', 'wrongControlIp', {
         ipAddress,
         mask: app.options.controlMask
       })
@@ -69,7 +69,7 @@ function bindControlServer (app) {
           res.end('Too many wrong secret attempts')
         } else if (body.secret !== app.options.controlSecret) {
           app.rememberBadAuth(req.connection.remoteAddress)
-          app.reporter('wrongControlSecret', {
+          app.emitter.emit('report', 'wrongControlSecret', {
             ipAddress,
             wrongSecret: body.secret
           })
@@ -99,7 +99,7 @@ function bindControlServer (app) {
           return
         } else if (reqUrl.search !== '?' + app.options.controlSecret) {
           app.rememberBadAuth(req.connection.remoteAddress)
-          app.reporter('wrongControlSecret', {
+          app.emitter.emit('report', 'wrongControlSecret', {
             ipAddress,
             wrongSecret: reqUrl.search.slice(1)
           })

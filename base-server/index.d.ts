@@ -536,11 +536,6 @@ export default class BaseServer<
   options: BaseServerOptions
 
   /**
-   * Function to show current server status.
-   */
-  reporter: Reporter
-
-  /**
    * Production or development mode.
    *
    * ```js
