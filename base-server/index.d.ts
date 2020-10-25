@@ -139,7 +139,7 @@ export type BaseServerOptions = {
   env?: 'production' | 'development'
 
   /**
-   * Process ID, to display in reporter.
+   * Process ID, to display in logs.
    */
   pid?: number
 
