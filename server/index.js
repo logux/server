@@ -20,7 +20,6 @@ const AVAILABLE_OPTIONS = [
   'cert',
   'env',
   'logger',
-  'reporter',
   'backend',
   'controlMask',
   'controlSecret',
@@ -132,18 +131,17 @@ class Server extends BaseServer {
 
   constructor (opts) {
     if (!opts) opts = {}
-
-    if (typeof opts.reporter !== 'function') {
-      opts.logger = opts.logger || 'human'
-      opts.reporter = createReporter(opts)
+    if (!opts.logger) {
+      opts.logger = 'human'
     }
+    let reporter = createReporter(opts)
 
     let initialized = false
     let onError = err => {
       if (initialized) {
         this.emitter.emit('fatal', err)
       } else {
-        opts.reporter('error', { err, fatal: true })
+        reporter('error', { err, fatal: true })
         process.exit(1)
       }
     }
@@ -152,6 +150,7 @@ class Server extends BaseServer {
 
     super(opts)
 
+    this.on('report', reporter)
     this.on('fatal', async () => {
       if (initialized) {
         if (!this.destroying) {
@@ -194,7 +193,7 @@ class Server extends BaseServer {
     try {
       return BaseServer.prototype.listen.apply(this, args)
     } catch (err) {
-      this.reporter('error', { err })
+      this.emitter.emit('report', 'error', { err })
       return process.exit(1)
     }
   }

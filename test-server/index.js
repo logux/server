@@ -9,9 +9,7 @@ class TestServer extends BaseServer {
     if (!opts.time) {
       opts.time = new TestTime()
     }
-    if (opts.logger === 'human') {
-      opts.reporter = createReporter(opts)
-    }
+
     opts.time.lastId += 1
     super({
       subprotocol: '0.0.0',
@@ -19,6 +17,9 @@ class TestServer extends BaseServer {
       id: `${opts.time.lastId}`,
       ...opts
     })
+    if (opts.logger) {
+      this.on('report', createReporter(opts))
+    }
     if (opts.auth !== false) this.auth(() => true)
     this.testUsers = {}
   }

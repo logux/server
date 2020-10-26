@@ -196,9 +196,9 @@ const REPORTERS = {
 }
 
 function createLogger (options) {
-  let stream = options.reporterStream || pino.destination()
+  let stream = options.logger.stream || pino.destination()
   let prettifier = {}
-  if (options.logger === 'human') {
+  if (options.logger === 'human' || options.logger.type === 'human') {
     let env = options.env || process.env.NODE_ENV || 'development'
     let color = env !== 'development' ? false : undefined
     prettifier = {
@@ -226,8 +226,14 @@ function createReporter (options) {
     let level = report.level || 'info'
     reporter.logger[level](report.details || details || {}, report.msg)
   }
-  reporter.logger =
-    typeof options.logger === 'object' ? options.logger : createLogger(options)
+
+  let customLoggerProvided =
+    typeof options.logger !== 'string' && 'info' in options.logger
+  if (customLoggerProvided) {
+    reporter.logger = options.logger
+  } else {
+    reporter.logger = createLogger(options)
+  }
   return reporter
 }
 

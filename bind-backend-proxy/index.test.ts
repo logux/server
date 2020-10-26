@@ -59,19 +59,6 @@ function createServer (opts?: TestServerOptions) {
   return server
 }
 
-function createReporter (opts: TestServerOptions = {}) {
-  let names: string[] = []
-  let reports: [string, object][] = []
-  let app = createServer({
-    ...opts,
-    reporter (name: string, details: any) {
-      names.push(name)
-      reports.push([name, details])
-    }
-  })
-  return { names, reports, app }
-}
-
 type RequestOptions = {
   method?: 'GET' | 'POST' | 'PUT'
   path?: string
@@ -233,8 +220,12 @@ it('checks secret option', () => {
 })
 
 it('validates HTTP requests', async () => {
-  let test = createReporter(OPTIONS)
-  await test.app.listen()
+  let app = createServer(OPTIONS)
+  let reports: [string, object][] = []
+  app.on('report', (name: string, details: any) => {
+    reports.push([name, details])
+  })
+  await app.listen()
 
   function check (...commands: any[]) {
     return send({ version: 4, secret: 'S', commands })
@@ -253,8 +244,8 @@ it('validates HTTP requests', async () => {
   expect(await check({ command: 'action', action: { type: 'A' } })).toEqual(400)
   expect(await check({ command: 'action', action: {}, meta: {} })).toEqual(400)
   expect(await send({ version: 4, secret: 'wrong', commands: [] })).toEqual(403)
-  expect(test.app.log.actions()).toEqual([])
-  expect(test.reports[1]).toEqual([
+  expect(app.log.actions()).toEqual([])
+  expect(reports[1]).toEqual([
     'wrongControlSecret',
     { ipAddress: '127.0.0.1', wrongSecret: 'wrong' }
   ])

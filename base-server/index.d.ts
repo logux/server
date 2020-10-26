@@ -139,7 +139,7 @@ export type BaseServerOptions = {
   env?: 'production' | 'development'
 
   /**
-   * Process ID, to display in reporter.
+   * Process ID, to display in logs.
    */
   pid?: number
 
@@ -536,11 +536,6 @@ export default class BaseServer<
   options: BaseServerOptions
 
   /**
-   * Function to show current server status.
-   */
-  reporter: Reporter
-
-  /**
    * Production or development mode.
    *
    * ```js
@@ -765,6 +760,12 @@ export default class BaseServer<
    * @param listener Event listener.
    */
   on (event: 'subscriptionCancelled', listener: () => void): Unsubscribe
+
+  /**
+   * @param event The event name.
+   * @param listener Report listener.
+   */
+  on (event: 'report', listener: Reporter): Unsubscribe
 
   /**
    * Stop server and unbind all listeners.
