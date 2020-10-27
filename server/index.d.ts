@@ -11,6 +11,7 @@ export type LoggerOptions = {
    */
   stream?: {
     write(str: string): void
+
     /**
      * Used by pino to synchronously write log messages on application failure.
      */
