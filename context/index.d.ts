@@ -134,7 +134,10 @@ export default class Context<D extends object = {}, H extends object = {}> {
    * @param meta Action’s meta.
    * @returns Promise until action was added to the server log.
    */
-  sendBack (action: AnyAction, meta?: Partial<ServerMeta>): Promise<void>
+  sendBack (
+    action: AnyAction,
+    meta?: Partial<ServerMeta>
+  ): Promise<ServerMeta | false>
 }
 
 /**
