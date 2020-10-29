@@ -4,6 +4,7 @@ let semver = require('semver')
 class Context {
   constructor (server, meta) {
     this.server = server
+    this.meta = meta
     this.data = {}
 
     let parsed = parseId(meta.id)
@@ -37,6 +38,11 @@ class Context {
       clients: [this.clientId],
       ...meta
     })
+  }
+
+  answer (action, meta = {}) {
+    meta.answer = this.meta.id
+    return this.sendBack(action, meta)
   }
 }
 

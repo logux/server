@@ -138,6 +138,28 @@ export default class Context<D extends object = {}, H extends object = {}> {
     action: AnyAction,
     meta?: Partial<ServerMeta>
   ): Promise<ServerMeta | false>
+
+  /**
+   * Send answer action to the client.
+   *
+   * ```js
+   * ctx.answer({ type: 'cart/clear', token })
+   * ctx.answer({ type: 'user/logout', token })
+   * ```
+   *
+   * Action will be marked as an answer with `meta.answer`,
+   * which is equal to the action ID received from the client.
+   *
+   * Also, it will not be processed by server’s callbacks from `Server#type`.
+   *
+   * @param action The action.
+   * @param meta Action’s meta.
+   * @returns Promise until action was added to the server log.
+   */
+  answer (
+    action: AnyAction,
+    meta?: Partial<ServerMeta>
+  ): Promise<ServerMeta | false>
 }
 
 /**

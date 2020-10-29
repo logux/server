@@ -85,3 +85,11 @@ it('sends action back', () => {
     [{ type: 'B' }, { reasons: ['1'], clients: [], status: 'processed' }]
   ])
 })
+
+it('sends answer actions', () => {
+  let ctx = createContext()
+  expect(ctx.answer({ type: 'A' }) instanceof Promise).toBe(true)
+  ctx.answer({ type: 'B' }, { reasons: ['1'], clients: [] })
+  expect(added[0][1].answer).toEqual('1 10:client:uuid 0')
+  expect(added[1][1].answer).toEqual('1 10:client:uuid 0')
+})
