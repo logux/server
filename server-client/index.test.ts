@@ -31,7 +31,7 @@ async function sendTo (client: ServerClient, msg: Message) {
 async function connect (
   client: ServerClient,
   nodeId: string = '10:uuid',
-  details?: object
+  details: object | undefined = undefined
 ) {
   await client.connection.connect()
   let protocol = client.node.localProtocol
