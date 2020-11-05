@@ -30,7 +30,7 @@
       "require": "./index.js",
       "import": "./index.mjs"
     },
-    "./": "./"
+    "./*": "./*"
   },
   "types": "./index.d.ts",
   "dependencies": {
