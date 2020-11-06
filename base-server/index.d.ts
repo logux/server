@@ -944,7 +944,7 @@ export default class BaseServer<
    *
    * @param action The original action to undo.
    * @param meta The action’s metadata.
-   * @param reason Optional code for reason. Default is `'error'`
+   * @param reason Optional code for reason. Default is `'error'`.
    * @param extra Extra fields to `logux/undo` action.
    * @returns When action was saved to the log.
    */
