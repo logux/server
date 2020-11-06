@@ -127,7 +127,7 @@ export default class TestClient {
    * ```
    *
    * @param test Function, where do you expect action will be received
-   * @returns Promise will all received actions
+   * @returns Promise with all received actions
    */
   collect (test: () => Promise<void>): Promise<Action[]>
 
