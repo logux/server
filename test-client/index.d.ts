@@ -116,7 +116,7 @@ export default class TestClient {
   disconnect (): Promise<void>
 
   /**
-   * Actions added server and other clients during the `test` call.
+   * Collect actions added by server and other clients during the `test` call.
    *
    * ```js
    * let answers = await client.collect(async () => {

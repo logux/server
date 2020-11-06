@@ -75,6 +75,7 @@ export default class TestServer<H extends object = {}> extends BaseServer<H> {
    *
    * @param userId User ID.
    * @param opts Other options.
+   * @returns Promise with new client.
    */
   connect (userId: string, opts?: TestClientOptions): Promise<TestClient>
 }
