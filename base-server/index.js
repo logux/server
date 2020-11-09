@@ -127,7 +127,13 @@ class BaseServer {
           return
         }
         if (resend) {
-          this.replaceResendShortcuts(resend)
+          if (typeof resend === 'string') {
+            resend = { channels: [resend] }
+          } else if (Array.isArray(resend)) {
+            resend = { channels: resend }
+          } else {
+            this.replaceResendShortcuts(resend)
+          }
           let diff = {}
           for (let i of RESEND_META) {
             if (resend[i]) diff[i] = resend[i]

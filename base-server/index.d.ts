@@ -474,16 +474,19 @@ export type Reporter = <E extends keyof ReportersArguments>(
   payload: ReportersArguments[E]
 ) => void
 
-export type Resend = {
-  channel?: string
-  channels?: string[]
-  user?: string
-  users?: string[]
-  client?: string
-  clients?: string[]
-  node?: string
-  nodes?: string[]
-}
+export type Resend =
+  | string
+  | string[]
+  | {
+      channel?: string
+      channels?: string[]
+      user?: string
+      users?: string[]
+      client?: string
+      clients?: string[]
+      node?: string
+      nodes?: string[]
+    }
 
 export type Logger = {
   info(details: object, message: string): void
@@ -789,7 +792,7 @@ export default class BaseServer<
    *     return action.user === ctx.userId
    *   },
    *   resend (ctx, action) {
-   *     return { channel: `user/${ action.user }` }
+   *     return `user/${ action.user }`
    *   }
    *   process (ctx, action, meta) {
    *     if (isFirstOlder(lastNameChange(action.user), meta)) {
