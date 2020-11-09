@@ -857,6 +857,41 @@ it('adds resend keys', async () => {
   expect(test.reports[3][1].meta.users).not.toBeDefined()
 })
 
+it('has channel resend shortcut', async () => {
+  let app = createServer()
+  app.type('FOO', {
+    access: () => true,
+    resend () {
+      return 'bar'
+    }
+  })
+  app.type('FOOS', {
+    access: () => true,
+    resend () {
+      return ['bar1', 'bar2']
+    }
+  })
+
+  let client = await connectClient(app)
+  await sendTo(client, [
+    'sync',
+    2,
+    { type: 'FOO' },
+    { id: [1, '10:uuid', 0], time: 1 },
+    { type: 'FOOS' },
+    { id: [2, '10:uuid', 0], time: 2 }
+  ])
+
+  expect(app.log.actions()).toEqual([
+    { type: 'FOO' },
+    { type: 'logux/processed', id: '1 10:uuid 0' },
+    { type: 'FOOS' },
+    { type: 'logux/processed', id: '2 10:uuid 0' }
+  ])
+  expect(app.log.entries()[0][1].channels).toEqual(['bar'])
+  expect(app.log.entries()[2][1].channels).toEqual(['bar1', 'bar2'])
+})
+
 it('sends old actions by node ID', async () => {
   let app = createServer()
   app.type('A', { access: () => true })
