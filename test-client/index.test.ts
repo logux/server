@@ -32,6 +32,18 @@ it('connects and disconnect', async () => {
   expect(Array.from(server.clientIds.keys())).toEqual(['10:2'])
 })
 
+it('keeps actions by request', () => {
+  server = new TestServer()
+  let client = new TestClient(server, '10')
+
+  client.log.add({ type: 'A' })
+  expect(client.log.actions()).toEqual([])
+
+  client.keepActions()
+  client.log.add({ type: 'B' })
+  expect(client.log.actions()).toEqual([{ type: 'B' }])
+})
+
 it('sends and collect actions', async () => {
   server = new TestServer()
   server.type('FOO', {
@@ -48,6 +60,7 @@ it('sends and collect actions', async () => {
     server.connect('10'),
     server.connect('11')
   ])
+  client1.keepActions()
   let received = await client1.collect(async () => {
     await client1.log.add({ type: 'FOO' })
     await delay(10)
@@ -128,6 +141,7 @@ it('detects action ID dublicate', async () => {
     access: () => true
   })
   let client = await server.connect('10')
+  client.keepActions()
 
   let processed = await client.process({ type: 'FOO' }, { id: '1 10:1:1 0' })
   expect(processed).toEqual([{ type: 'logux/processed', id: '1 10:1:1 0' }])

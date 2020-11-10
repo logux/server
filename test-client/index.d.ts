@@ -172,4 +172,16 @@ export default class TestClient {
    * @returns Promise until server will remove client from subscribers.
    */
   unsubscribe (channel: string | LoguxUnsubscribeAction): Promise<Action[]>
+
+  /**
+   * Keep actions without `meta.reasons` in the log by setting `test` reason
+   * during adding to the log.
+   *
+   * ```js
+   * client.keepActions()
+   * client.log.add({ type: 'test' })
+   * client.log.actions() //=> { type: 'test' }
+   * ```
+   */
+  keepActions (): void
 }
