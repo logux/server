@@ -7,7 +7,7 @@ let destroyable: { destroy(): Promise<void> }[] = []
 let lastPort = 8111
 
 beforeAll(() => {
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     httpServer.on('error', reject)
     httpServer.listen(8110, resolve)
   })
@@ -89,7 +89,7 @@ function request ({ method, path, string, data }: DataRequest | StringRequest) {
         }
       },
       res => {
-        resolve(res.statusCode)
+        resolve(res.statusCode ?? 0)
       }
     )
     req.on('error', reject)

@@ -9,7 +9,7 @@ const DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
 let started: ChildProcess | undefined
 
 function start (name: string, args?: string[]) {
-  return new Promise<ChildProcess>(resolve => {
+  return new Promise<void>(resolve => {
     started = spawn(join(__dirname, '../test/servers/', name), args)
     let running = false
     function callback () {

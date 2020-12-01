@@ -394,7 +394,7 @@ it('accepts custom HTTP server', async () => {
   httpServer = http.createServer()
   let app = createServer({ server: httpServer })
 
-  await new Promise(resolve => {
+  await new Promise<void>(resolve => {
     httpServer?.listen(app.options.port, resolve)
   })
   await app.listen()
