@@ -49,7 +49,7 @@ function check (
         .replace(/"loguxServer":"\d+.\d+.\d+"/g, '"loguxServer":"0.0.0"')
         .replace(/"hostname":"[^"]+"/g, '"hostname":"localhost"')
       fixed = fixed.replace(/\r\v/g, '\n')
-      resolve([fixed, exit])
+      resolve([fixed, exit || 0])
     })
 
     function waitOut () {
