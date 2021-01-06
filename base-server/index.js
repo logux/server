@@ -377,7 +377,9 @@ class BaseServer {
     }
     let channel = Object.assign({}, callbacks)
     if (typeof pattern === 'string') {
-      channel.pattern = new UrlPattern(pattern)
+      channel.pattern = new UrlPattern(pattern, {
+        segmentValueCharset: 'a-zA-Z0-9:_-'
+      })
     } else {
       channel.regexp = pattern
     }
