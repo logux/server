@@ -37,7 +37,7 @@ function bindControlServer (app) {
 
     if (!rule) {
       let accepts = Object.keys(app.controls)
-      if (accepts.find(i => i.endsWith(' ' + reqUrl.pathname))) {
+      if (accepts.some(i => i.endsWith(' ' + reqUrl.pathname))) {
         res.statusCode = 405
         res.end('Wrong method')
       } else {

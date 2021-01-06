@@ -192,13 +192,13 @@ it('uses user port', () => {
 
 it('throws a error on key without certificate', () => {
   expect(() => {
-    let app = createServer({ key: readFileSync(KEY).toString() })
+    createServer({ key: readFileSync(KEY).toString() })
   }).toThrow(/set `cert` option/)
 })
 
 it('throws a error on certificate without key', () => {
   expect(() => {
-    let app = createServer({ cert: readFileSync(CERT).toString() })
+    createServer({ cert: readFileSync(CERT).toString() })
   }).toThrow(/set `key` option/)
 })
 

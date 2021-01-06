@@ -130,7 +130,9 @@ function actions (client: ServerClient) {
 }
 
 afterEach(() => {
-  destroyable.forEach(i => i.destroy())
+  destroyable.forEach(i => {
+    i.destroy()
+  })
   destroyable = []
 })
 
