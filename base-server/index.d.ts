@@ -9,7 +9,7 @@ import {
   TestTime
 } from '@logux/core'
 import { Unsubscribe } from 'nanoevents'
-import { Server as HTTPServer } from 'http'
+import { Server as HTTPServer, ServerResponse, IncomingMessage } from 'http'
 
 import Context, { ChannelContext } from '../context/index.js'
 import ServerClient from '../server-client/index.js'
@@ -639,9 +639,12 @@ export default class BaseServer<
   /**
    * Start WebSocket server and listen for clients.
    *
+   * @param http Non-WS HTTP request processor.
    * @returns When the server has been bound.
    */
-  listen (): Promise<void>
+  listen (
+    http?: (req: IncomingMessage, res: ServerResponse) => void
+  ): Promise<void>
 
   /**
    * Subscribe for synchronization events. It implements nanoevents API.

@@ -221,3 +221,14 @@ it('checks incoming IP address', async () => {
     { ipAddress: '127.0.0.1', mask: controlMask }
   ])
 })
+
+it('allows to set custom HTTP processor', async () => {
+  let test = createReporter()
+  await test.app.listen((req, res) => {
+    res.statusCode = 200
+    res.end(`test ${req.url}`)
+  })
+
+  let response = await request('GET', '/test')
+  expect(response.body).toEqual('test /test')
+})
