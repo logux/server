@@ -276,7 +276,11 @@ class BaseServer {
     this.authenticator = authenticator
   }
 
-  async listen (http) {
+  http (listener) {
+    this.httpListener = listener
+  }
+
+  async listen () {
     if (!this.authenticator) {
       throw new Error('You must set authentication callback by server.auth()')
     }
@@ -288,7 +292,7 @@ class BaseServer {
         this.http.listen(this.options.port, this.options.host, resolve)
       })
     }
-    bindControlServer(this, http)
+    bindControlServer(this, this.httpListener)
 
     this.unbind.push(
       () =>
