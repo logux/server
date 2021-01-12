@@ -224,10 +224,11 @@ it('checks incoming IP address', async () => {
 
 it('allows to set custom HTTP processor', async () => {
   let test = createReporter()
-  await test.app.listen((req, res) => {
+  test.app.http((req, res) => {
     res.statusCode = 200
     res.end(`test ${req.url}`)
   })
+  await test.app.listen()
 
   let response = await request('GET', '/test')
   expect(response.body).toEqual('test /test')

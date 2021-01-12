@@ -639,12 +639,29 @@ export default class BaseServer<
   /**
    * Start WebSocket server and listen for clients.
    *
-   * @param http Non-WS HTTP request processor.
    * @returns When the server has been bound.
    */
-  listen (
-    http?: (req: IncomingMessage, res: ServerResponse) => void
-  ): Promise<void>
+  listen (): Promise<void>
+
+  /**
+   * Add non-WebSocket HTTP request processor.
+   *
+   * ```js
+   * server.http((req, res) => {
+   *   if (req.url === '/auth') {
+   *     let token = signIn(req)
+   *     if (token) {
+   *       res.setHeader('Set-Cookie', `token=${token}; Secure; HttpOnly`)
+   *       res.end()
+   *     } else {
+   *       res.statusCode = 400
+   *       res.end('Wrong user or password')
+   *     }
+   *   }
+   * })
+   * ```
+   */
+  http (listener: (req: IncomingMessage, res: ServerResponse) => void): void
 
   /**
    * Subscribe for synchronization events. It implements nanoevents API.
