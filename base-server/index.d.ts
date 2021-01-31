@@ -681,7 +681,8 @@ export default class BaseServer<
    * * `subscribed`: channel initial data was loaded.
    * * `subscribing`: channel initial data started to be loaded.
    * * `unsubscribed`: node was unsubscribed.
-   * * `subscriptionCancelled`: subscription was cancelled because the client is not connected.
+   * * `subscriptionCancelled`: subscription was cancelled because the client
+   *    is not connected.
    *
    * ```js
    * server.on('error', error => {
