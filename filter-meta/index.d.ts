@@ -6,4 +6,4 @@ import { ServerMeta } from '../base-server/index.js'
  * @param meta Meta to remove keys.
  * @returns Meta with removed keys.
  */
-export default function filterMeta (meta: ServerMeta): ServerMeta
+export function filterMeta (meta: ServerMeta): ServerMeta

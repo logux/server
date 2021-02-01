@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-let os = require('os')
+import os from 'os'
 
-let { Server } = require('../..')
+import { Server } from '../../index.js'
 
 os.platform = () => 'linux'
 

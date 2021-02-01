@@ -2,7 +2,7 @@
  * List of meta keys permitted for clients.
  *
  *```js
- * const { ALLOWED_META } = require('@logux/server')
+ * import { ALLOWED_META } from '@logux/server'
  * async function outMap (action, meta) {
  *   const filtered = { }
  *   for (const i in meta) {
@@ -14,6 +14,4 @@
  * }
  * ```
  */
-declare const ALLOWED_META: string[]
-
-export default ALLOWED_META
+export const ALLOWED_META: string[]

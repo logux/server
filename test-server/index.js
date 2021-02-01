@@ -1,10 +1,10 @@
-let { TestTime } = require('@logux/core')
+import { TestTime } from '@logux/core'
 
-let createReporter = require('../create-reporter')
-let BaseServer = require('../base-server')
-let TestClient = require('../test-client')
+import { createReporter } from '../create-reporter/index.js'
+import { BaseServer } from '../base-server/index.js'
+import { TestClient } from '../test-client/index.js'
 
-class TestServer extends BaseServer {
+export class TestServer extends BaseServer {
   constructor (opts = {}) {
     if (!opts.time) {
       opts.time = new TestTime()
@@ -30,5 +30,3 @@ class TestServer extends BaseServer {
     return client
   }
 }
-
-module.exports = TestServer

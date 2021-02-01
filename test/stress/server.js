@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-let { delay } = require('nanodelay')
+import { delay } from 'nanodelay'
 
-let { Server } = require('../..')
+import { Server } from '../../index.js'
 
 let app = new Server({
   controlSecret: 'secret',

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-let pino = require('pino')
+import pino from 'pino'
 
-let { Server } = require('../..')
+import { Server } from '../../index.js'
 
 let logger = pino({
   name: 'logux-server-custom',

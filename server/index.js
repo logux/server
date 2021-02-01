@@ -1,10 +1,10 @@
-let { join, relative } = require('path')
-let dotenv = require('dotenv')
-let yargs = require('yargs')
-let globby = require('globby')
+import { join, relative } from 'path'
+import buildYargs from 'yargs'
+import dotenv from 'dotenv'
+import globby from 'globby'
 
-let createReporter = require('../create-reporter')
-let BaseServer = require('../base-server')
+import { createReporter } from '../create-reporter/index.js'
+import { BaseServer } from '../base-server/index.js'
 
 const AVAILABLE_OPTIONS = [
   'subprotocol',
@@ -53,6 +53,8 @@ function envHelp () {
   }
   return lines.join('\n')
 }
+
+let yargs = buildYargs()
 
 yargs
   .option('host', {
@@ -110,7 +112,7 @@ yargs
   .help()
   .version(false)
 
-class Server extends BaseServer {
+export class Server extends BaseServer {
   static loadOptions (process, defaults) {
     if (defaults.root) {
       dotenv.config({ path: join(defaults.root, '.env') })
@@ -205,26 +207,22 @@ class Server extends BaseServer {
       onlyFiles: true
     })
 
-    for (let modulePath of matches) {
-      // eslint-disable-next-line security/detect-non-literal-require
-      let serverModule = require(modulePath)
-
-      if (typeof serverModule === 'function') {
-        serverModule(this)
-      } else {
-        let moduleName = relative(this.options.root, modulePath)
-
-        let error = new Error(
-          'Server module should export ' + 'a function that accepts a server.'
-        )
-        error.logux = true
-        error.note =
-          `Your module ${moduleName} ` + `exports ${typeof serverModule}.`
-
-        throw error
-      }
-    }
+    await Promise.all(
+      matches.map(async file => {
+        let serverModule = (await import(file)).default
+        if (typeof serverModule === 'function') {
+          await serverModule(this)
+        } else {
+          let name = relative(this.options.root, file)
+          let error = new Error(
+            'Server module should has default export with function ' +
+              'that accepts a server'
+          )
+          error.logux = true
+          error.note = `${name} default export is ${typeof serverModule}`
+          throw error
+        }
+      })
+    )
   }
 }
-
-module.exports = Server

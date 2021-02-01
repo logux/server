@@ -8,9 +8,10 @@ import {
   Action
 } from '@logux/core'
 import { delay } from 'nanodelay'
+import { jest } from '@jest/globals'
 
 import { BaseServer, BaseServerOptions, ServerMeta } from '../index.js'
-import ServerClient from './index.js'
+import { ServerClient } from './index.js'
 
 let destroyable: { destroy(): void }[] = []
 

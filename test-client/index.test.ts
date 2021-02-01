@@ -1,5 +1,6 @@
 import { TestTime } from '@logux/core'
 import { delay } from 'nanodelay'
+import { jest } from '@jest/globals'
 
 import { LoguxAnySubscribeAction, TestClient, TestServer } from '../index.js'
 

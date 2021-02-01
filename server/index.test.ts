@@ -1,16 +1,18 @@
 import { ChildProcess, SpawnOptions } from 'child_process'
+import { fileURLToPath } from 'url'
 import { join } from 'path'
 import spawn from 'cross-spawn'
 
 import { Server } from '../index.js'
 
+const ROOT = join(fileURLToPath(import.meta.url), '..', '..')
 const DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
 
 let started: ChildProcess | undefined
 
 function start (name: string, args?: string[]) {
   return new Promise<void>(resolve => {
-    started = spawn(join(__dirname, '../test/servers/', name), args)
+    started = spawn(join(ROOT, 'test/servers/', name), args)
     let running = false
     function callback () {
       if (!running) {
@@ -31,7 +33,7 @@ function check (
 ) {
   return new Promise<[string, number]>(resolve => {
     let out = ''
-    let server = spawn(join(__dirname, '../test/servers/', name), args, opts)
+    let server = spawn(join(ROOT, 'test/servers/', name), args, opts)
     server.stdout?.on('data', chank => {
       out += chank
     })
@@ -217,7 +219,7 @@ it('uses .env cwd', async () => {
   let result = await check(
     'options.js',
     [],
-    { cwd: join(__dirname, '../test/fixtures') },
+    { cwd: join(ROOT, 'test/fixtures') },
     true
   )
   expect(result[0]).toMatchSnapshot()

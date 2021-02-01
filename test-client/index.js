@@ -1,9 +1,9 @@
-let { ClientNode, TestPair } = require('@logux/core')
-let cookie = require('cookie')
+import { ClientNode, TestPair } from '@logux/core'
+import cookie from 'cookie'
 
-let filterMeta = require('../filter-meta')
+import { filterMeta } from '../filter-meta/index.js'
 
-class TestClient {
+export class TestClient {
   constructor (server, userId, opts = {}) {
     this.server = server
     this.pair = new TestPair()
@@ -153,5 +153,3 @@ class TestClient {
     })
   }
 }
-
-module.exports = TestClient

@@ -5,7 +5,7 @@ import {
   LoguxUnsubscribeAction,
   ServerMeta
 } from '../base-server/index.js'
-import TestServer from '../test-server/index.js'
+import { TestServer } from '../test-server/index.js'
 
 export type TestClientOptions = {
   subprotocol?: string
@@ -55,7 +55,7 @@ export type TestClientOptions = {
  * })
  * ```
  */
-export default class TestClient {
+export class TestClient {
   /**
    * @param server Test server.
    * @param userId User ID.

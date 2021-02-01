@@ -1,10 +1,10 @@
-let { ServerNode } = require('@logux/core')
+import { ServerNode } from '@logux/core'
 
 function has (array, item) {
   return array && array.includes(item)
 }
 
-class FilteredNode extends ServerNode {
+export class FilteredNode extends ServerNode {
   constructor (client, nodeId, log, connection, options) {
     super(nodeId, log, connection, options)
     this.client = client
@@ -36,5 +36,3 @@ class FilteredNode extends ServerNode {
     return data
   }
 }
-
-module.exports = FilteredNode

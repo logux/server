@@ -1,11 +1,14 @@
 #!/usr/bin/env node
 
-let { Server } = require('../..')
+import { fileURLToPath } from 'url'
+import { dirname } from 'path'
+
+import { Server } from '../../index.js'
 
 let app = new Server({
   subprotocol: '1.0.0',
   supports: '1.x',
-  root: __dirname
+  root: dirname(fileURLToPath(import.meta.url))
 })
 app.nodeId = 'server:FnXaqDxY'
 

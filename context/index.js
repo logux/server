@@ -1,7 +1,7 @@
-let { parseId } = require('@logux/core')
-let semver = require('semver')
+import { parseId } from '@logux/core'
+import semver from 'semver'
 
-class Context {
+export class Context {
   constructor (server, meta) {
     this.server = server
     this.data = {}
@@ -39,5 +39,3 @@ class Context {
     })
   }
 }
-
-module.exports = Context

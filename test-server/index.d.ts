@@ -1,9 +1,10 @@
 import { TestTime, TestLog } from '@logux/core'
 
-import TestClient, { TestClientOptions } from '../test-client/index.js'
-import BaseServer, {
-  ServerMeta,
+import { TestClient, TestClientOptions } from '../test-client/index.js'
+import {
   BaseServerOptions,
+  BaseServer,
+  ServerMeta,
   Logger
 } from '../base-server/index.js'
 import { LoggerOptions } from '../server/index.js'
@@ -45,7 +46,7 @@ export type TestServerOptions = Omit<
  * })
  * ```
  */
-export default class TestServer<H extends object = {}> extends BaseServer<H> {
+export class TestServer<H extends object = {}> extends BaseServer<H> {
   /**
    * @param opts The limit subset of server options.
    */

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-let { Server } = require('../..')
+import { Server } from '../../index.js'
 
 let app = new Server({
   subprotocol: '1.0.0',
