@@ -23,7 +23,8 @@ const AVAILABLE_OPTIONS = [
   'backend',
   'controlMask',
   'controlSecret',
-  'redis'
+  'redis',
+  'fileUrl'
 ]
 
 const ENVS = {
@@ -123,8 +124,10 @@ export class Server extends BaseServer {
     let opts = {}
 
     for (let name of AVAILABLE_OPTIONS) {
-      let arg = name.replace(/[A-Z]/g, char => '-' + char.toLowerCase())
-      opts[name] = argv[arg] || process.env[ENVS[name]] || defaults[name]
+      if (name !== 'fileUrl') {
+        let arg = name.replace(/[A-Z]/g, char => '-' + char.toLowerCase())
+        opts[name] = argv[arg] || process.env[ENVS[name]] || defaults[name]
+      }
     }
 
     opts.port = parseInt(opts.port, 10)
