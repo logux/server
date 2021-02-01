@@ -2,7 +2,7 @@ import { ServerConnection, MemoryStore, Log, parseId } from '@logux/core'
 import { createNanoEvents } from 'nanoevents'
 import { promises as fs } from 'fs'
 import { fileURLToPath } from 'url'
-import { join } from 'path'
+import { join, dirname } from 'path'
 import UrlPattern from 'url-pattern'
 import { nanoid } from 'nanoid'
 import WebSocket from 'ws'
@@ -53,6 +53,10 @@ export class BaseServer {
     }
 
     this.nodeId = `server:${this.options.id || nanoid(8)}`
+
+    if (this.options.fileUrl) {
+      this.options.root = dirname(fileURLToPath(this.options.fileUrl))
+    }
 
     this.options.root = this.options.root || process.cwd()
     this.options.controlMask = this.options.controlMask || '127.0.0.1/8'

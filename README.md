@@ -33,8 +33,6 @@ This repository contains Logux server with:
 
 ```js
 import { fileURLToPath } from 'url'
-import { dirname } from 'path'
-import { Server } from '@logux/server'
 
 const server = new Server(
   Server.loadOptions(process, {
@@ -42,7 +40,7 @@ const server = new Server(
     subprotocol: '1.0.0',
     supports: '0.6.2',
     backend: 'http://localhost:3000/logux',
-    root: dirname(fileURLToPath(import.meta.url))
+    fileUrl: import.meta.url
   })
 )
 
@@ -62,7 +60,7 @@ const server = new Server(
   Server.loadOptions(process, {
     subprotocol: '1.0.0',
     supports: '1.x',
-    root: dirname(fileURLToPath(import.meta.url))
+    fileUrl: import.meta.url
   })
 )
 

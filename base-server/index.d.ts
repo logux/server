@@ -80,8 +80,22 @@ export type BaseServerOptions = {
   /**
    * Application root to load files and show errors.
    * Default is `process.cwd()`.
+   *
+   * ```js
+   * root: __dirname
+   * ```
    */
   root?: string
+
+  /**
+   * URL of main JS file in the root dir. Shortcut to set `root` in ES modules
+   * without `fileURLToPath`.
+   *
+   * ```
+   * fileUrl: import.meta.url
+   * ```
+   */
+  fileUrl?: string
 
   /**
    * Timeout in milliseconds to disconnect connection.
