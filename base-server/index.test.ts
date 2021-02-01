@@ -1292,3 +1292,12 @@ it('has shortcut API for action creators', async () => {
   await app.process({ type: 'A' })
   expect(processed).toEqual([{ type: 'A' }])
 })
+
+it('has alias to root from file URL', () => {
+  let app = new BaseServer({
+    subprotocol: '1.0.0',
+    supports: '1.0.0',
+    fileUrl: import.meta.url
+  })
+  expect(app.options.root).toEqual(join(fileURLToPath(import.meta.url), '..'))
+})

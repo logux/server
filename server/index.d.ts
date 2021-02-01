@@ -54,8 +54,6 @@ export type ServerOptions = BaseServerOptions & {
  * End-user API to create Logux server.
  *
  * ```js
- * import { fileURLToPath } from 'url'
- * import { dirname } from 'path'
  * import { Server } from '@logux/server'
  *
  * const env = process.env.NODE_ENV || 'development'
@@ -68,7 +66,7 @@ export type ServerOptions = BaseServerOptions & {
  * const server = new Server(Object.assign({
  *   subprotocol: '1.0.0',
  *   supports: '1.x || 0.x',
- *   root: dirname(fileURLToPath(import.meta.url))
+ *   fileUrl: import.meta.url
  * }, envOptions))
  *
  * server.listen()
@@ -82,7 +80,7 @@ export class Server<H extends object = {}> extends BaseServer<H> {
    * const server = new Server(Server.loadOptions(process, {
    *   subprotocol: '1.0.0',
    *   supports: '1.x',
-   *   root: dirname(fileURLToPath(import.meta.url)),
+   *   fileUrl: import.meta.url,
    *   port: 31337
    * }))
    * ```
