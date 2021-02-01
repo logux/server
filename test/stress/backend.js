@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-let { blue, green, yellow, red } = require('colorette')
-let { delay } = require('nanodelay')
-let http = require('http')
+import { blue, green, yellow, red } from 'colorette'
+import { delay } from 'nanodelay'
+import http from 'http'
 
 function send (action, meta) {
   let body = JSON.stringify({

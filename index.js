@@ -1,17 +1,7 @@
-let ALLOWED_META = require('./allowed-meta')
-let filterMeta = require('./filter-meta')
-let BaseServer = require('./base-server')
-let TestServer = require('./test-server')
-let TestClient = require('./test-client')
-let Context = require('./context')
-let Server = require('./server')
-
-module.exports = {
-  BaseServer,
-  TestServer,
-  TestClient,
-  Server,
-  ALLOWED_META,
-  filterMeta,
-  Context
-}
+export { ALLOWED_META } from './allowed-meta/index.js'
+export { BaseServer } from './base-server/index.js'
+export { TestServer } from './test-server/index.js'
+export { TestClient } from './test-client/index.js'
+export { filterMeta } from './filter-meta/index.js'
+export { Context } from './context/index.js'
+export { Server } from './server/index.js'

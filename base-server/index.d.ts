@@ -11,8 +11,8 @@ import {
 import { Unsubscribe } from 'nanoevents'
 import { Server as HTTPServer, ServerResponse, IncomingMessage } from 'http'
 
-import Context, { ChannelContext } from '../context/index.js'
-import ServerClient from '../server-client/index.js'
+import { Context, ChannelContext } from '../context/index.js'
+import { ServerClient } from '../server-client/index.js'
 
 export type ServerMeta = Meta & {
   /**
@@ -520,7 +520,7 @@ type PostProcessor = {
 /**
  * Base server class to extend.
  */
-export default class BaseServer<
+export class BaseServer<
   H extends object = {},
   L extends Log = Log<ServerMeta>
 > {

@@ -1,7 +1,7 @@
 import { AnyAction } from '@logux/core'
 
 import { ServerMeta } from '../base-server/index.js'
-import Server from '../server/index.js'
+import { Server } from '../server/index.js'
 
 /**
  * Action context.
@@ -16,7 +16,7 @@ import Server from '../server/index.js'
  *
  * @template D Type for `ctx.data`.
  */
-export default class Context<D extends object = {}, H extends object = {}> {
+export class Context<D extends object = {}, H extends object = {}> {
   /**
    * @param nodeId Unique node ID.
    * @param clientId Unique persistence client ID.

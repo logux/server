@@ -1,8 +1,8 @@
-let { LoguxError } = require('@logux/core')
-let JSONStream = require('JSONStream')
-let { nanoid } = require('nanoid')
-let https = require('https')
-let http = require('http')
+import { LoguxError } from '@logux/core'
+import JSONStream from 'JSONStream'
+import { nanoid } from 'nanoid'
+import https from 'https'
+import http from 'http'
 
 const VERSION = 4
 
@@ -80,7 +80,7 @@ function send (backend, command, events) {
   req.end(body)
 }
 
-function bindBackendProxy (app) {
+export function bindBackendProxy (app) {
   if (app.options.controlSecret) {
     app.controls['POST /'] = {
       isValid ({ command, action, meta }) {
@@ -323,5 +323,3 @@ function bindBackendProxy (app) {
     }
   })
 }
-
-module.exports = bindBackendProxy

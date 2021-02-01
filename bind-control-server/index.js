@@ -1,4 +1,4 @@
-let ip = require('ip')
+import ip from 'ip'
 
 const MAX_VERSION = 4
 const MIN_VERSION = 4
@@ -16,7 +16,7 @@ function isValidBody (body) {
   return true
 }
 
-function bindControlServer (app, custom) {
+export function bindControlServer (app, custom) {
   let masks = app.options.controlMask.split(/,\s*/).map(i => ip.cidrSubnet(i))
   app.http.on('request', (req, res) => {
     let urlString = req.url
@@ -121,5 +121,3 @@ function bindControlServer (app, custom) {
     }
   })
 }
-
-module.exports = bindControlServer

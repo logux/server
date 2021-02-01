@@ -1,6 +1,6 @@
 import { ClientNode, TestPair, TestTime, TestLog } from '@logux/core'
 
-import FilteredNode from '../filtered-node/index.js'
+import { FilteredNode } from '../filtered-node/index.js'
 
 type Test = {
   client: ClientNode<{}, TestLog>

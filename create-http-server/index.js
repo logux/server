@@ -1,10 +1,7 @@
-let { isAbsolute, join } = require('path')
-let { promisify } = require('util')
-let https = require('https')
-let http = require('http')
-let fs = require('fs')
-
-let readFile = promisify(fs.readFile)
+import { isAbsolute, join } from 'path'
+import { promises as fs } from 'fs'
+import https from 'https'
+import http from 'http'
 
 const PEM_PREAMBLE = '-----BEGIN'
 
@@ -19,10 +16,10 @@ function isPem (content) {
 function readFrom (root, file) {
   file = file.toString()
   if (!isAbsolute(file)) file = join(root, file)
-  return readFile(file)
+  return fs.readFile(file)
 }
 
-async function createHttpServer (opts) {
+export async function createHttpServer (opts) {
   let server
   if (opts.server) {
     server = opts.server
@@ -43,5 +40,3 @@ async function createHttpServer (opts) {
 
   return server
 }
-
-module.exports = createHttpServer

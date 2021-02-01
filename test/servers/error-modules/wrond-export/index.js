@@ -1,1 +1,1 @@
-module.exports = 'wrong module export'
+export default 'wrong module export'

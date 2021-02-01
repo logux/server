@@ -1,4 +1,4 @@
-import BaseServer, { Logger, BaseServerOptions } from '../base-server/index.js'
+import { BaseServer, Logger, BaseServerOptions } from '../base-server/index.js'
 
 export type LoggerOptions = {
   /**
@@ -28,8 +28,8 @@ export type ServerOptions = BaseServerOptions & {
    * elasticsearch
    *
    * ```js
-   * const pino = require('pino')
-   * const pinoElastic = require('pino-elasticsearch')
+   * import pino from 'pino'
+   * import pinoElastic from 'pino-elasticsearch'
    *
    * const streamToElastic = pinoElastic({
    *   consistency: 'one',
@@ -54,7 +54,9 @@ export type ServerOptions = BaseServerOptions & {
  * End-user API to create Logux server.
  *
  * ```js
- * const { Server } = require('@logux/server')
+ * import { fileURLToPath } from 'url'
+ * import { dirname } from 'path'
+ * import { Server } from '@logux/server'
  *
  * const env = process.env.NODE_ENV || 'development'
  * const envOptions = {}
@@ -66,13 +68,13 @@ export type ServerOptions = BaseServerOptions & {
  * const server = new Server(Object.assign({
  *   subprotocol: '1.0.0',
  *   supports: '1.x || 0.x',
- *   root: __dirname
+ *   root: dirname(fileURLToPath(import.meta.url))
  * }, envOptions))
  *
  * server.listen()
  * ```
  */
-export default class Server<H extends object = {}> extends BaseServer<H> {
+export class Server<H extends object = {}> extends BaseServer<H> {
   /**
    * Load options from command-line arguments and/or environment.
    *
@@ -80,7 +82,7 @@ export default class Server<H extends object = {}> extends BaseServer<H> {
    * const server = new Server(Server.loadOptions(process, {
    *   subprotocol: '1.0.0',
    *   supports: '1.x',
-   *   root: __dirname,
+   *   root: dirname(fileURLToPath(import.meta.url)),
    *   port: 31337
    * }))
    * ```
@@ -114,7 +116,7 @@ export default class Server<H extends object = {}> extends BaseServer<H> {
    * files from `modules/*`.
    *
    * ```js
-   * server.autoloadModules()
+   * await server.autoloadModules()
    * ```
    *
    * @param files Pattern for module files.

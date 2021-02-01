@@ -32,7 +32,9 @@ This repository contains Logux server with:
 ### Logux Server as Proxy
 
 ```js
-const { Server } = require('@logux/server')
+import { fileURLToPath } from 'url'
+import { dirname } from 'path'
+import { Server } from '@logux/server'
 
 const server = new Server(
   Server.loadOptions(process, {
@@ -40,7 +42,7 @@ const server = new Server(
     subprotocol: '1.0.0',
     supports: '0.6.2',
     backend: 'http://localhost:3000/logux',
-    root: __dirname
+    root: dirname(fileURLToPath(import.meta.url))
   })
 )
 
@@ -51,14 +53,16 @@ server.listen()
 ### Logux Server as Framework
 
 ```js
-const { isFirstOlder } = require('@logux/core')
-const { Server } = require('@logux/server')
+import { fileURLToPath } from 'url'
+import { isFirstOlder } from '@logux/core'
+import { dirname } from 'path'
+import { Server } from '@logux/server'
 
 const server = new Server(
   Server.loadOptions(process, {
     subprotocol: '1.0.0',
     supports: '1.x',
-    root: __dirname
+    root: dirname(fileURLToPath(import.meta.url))
   })
 )
 

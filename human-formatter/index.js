@@ -1,4 +1,4 @@
-let {
+import {
   green,
   bgGreen,
   yellow,
@@ -10,12 +10,12 @@ let {
   gray,
   dim,
   bold,
-  options: colorette
-} = require('colorette')
-let stripAnsi = require('strip-ansi')
-let yyyymmdd = require('yyyy-mm-dd')
-let path = require('path')
-let os = require('os')
+  options as colorette
+} from 'colorette'
+import stripAnsi from 'strip-ansi'
+import yyyymmdd from 'yyyy-mm-dd'
+import path from 'path'
+import os from 'os'
 
 const INDENT = '  '
 const PADDING = '        '
@@ -182,7 +182,7 @@ function prettyStackTrace (c, stack, basepath) {
     .join(NEXT_LINE)
 }
 
-function humanFormatter (options) {
+export function humanFormatter (options) {
   let c = {
     green,
     bgGreen,
@@ -243,5 +243,3 @@ function humanFormatter (options) {
     return message.filter(i => i !== '').join(NEXT_LINE) + SEPARATOR
   }
 }
-
-module.exports = humanFormatter

@@ -1,7 +1,7 @@
-let pino = require('pino')
-let os = require('os')
+import pino from 'pino'
+import os from 'os'
 
-let humanFormatter = require('../human-formatter')
+import { humanFormatter } from '../human-formatter/index.js'
 
 const ERROR_CODES = {
   EADDRINUSE: e => {
@@ -220,7 +220,7 @@ function createLogger (options) {
   )
 }
 
-function createReporter (options) {
+export function createReporter (options) {
   function reporter (type, details) {
     let report = REPORTERS[type](details)
     let level = report.level || 'info'
@@ -236,5 +236,3 @@ function createReporter (options) {
   }
   return reporter
 }
-
-module.exports = createReporter

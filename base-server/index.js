@@ -1,19 +1,17 @@
-let { ServerConnection, MemoryStore, Log, parseId } = require('@logux/core')
-let { createNanoEvents } = require('nanoevents')
-let { promisify } = require('util')
-let UrlPattern = require('url-pattern')
-let { nanoid } = require('nanoid')
-let WebSocket = require('ws')
-let { join } = require('path')
-let fs = require('fs')
+import { ServerConnection, MemoryStore, Log, parseId } from '@logux/core'
+import { createNanoEvents } from 'nanoevents'
+import { promises as fs } from 'fs'
+import { fileURLToPath } from 'url'
+import { join } from 'path'
+import UrlPattern from 'url-pattern'
+import { nanoid } from 'nanoid'
+import WebSocket from 'ws'
 
-let bindControlServer = require('../bind-control-server')
-let bindBackendProxy = require('../bind-backend-proxy')
-let createHttpServer = require('../create-http-server')
-let ServerClient = require('../server-client')
-let Context = require('../context')
-
-let readFile = promisify(fs.readFile)
+import { bindControlServer } from '../bind-control-server/index.js'
+import { bindBackendProxy } from '../bind-backend-proxy/index.js'
+import { createHttpServer } from '../create-http-server/index.js'
+import { ServerClient } from '../server-client/index.js'
+import { Context } from '../context/index.js'
 
 const RESEND_META = ['channels', 'users', 'clients', 'nodes']
 
@@ -24,7 +22,7 @@ function optionError (msg) {
   throw error
 }
 
-class BaseServer {
+export class BaseServer {
   constructor (opts = {}) {
     this.options = opts
     this.env = this.options.env || process.env.NODE_ENV || 'development'
@@ -311,7 +309,11 @@ class BaseServer {
       )
     }
 
-    let pkg = JSON.parse(await readFile(join(__dirname, '../package.json')))
+    let pkg = JSON.parse(
+      await fs.readFile(
+        join(fileURLToPath(import.meta.url), '..', '..', 'package.json')
+      )
+    )
 
     this.ws.on('connection', (ws, req) => {
       ws.upgradeReq = req
@@ -814,5 +816,3 @@ class BaseServer {
     }
   }
 }
-
-module.exports = BaseServer

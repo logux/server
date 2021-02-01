@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
-let { ClientNode, WsConnection, Log, MemoryStore } = require('@logux/core')
-let { delay } = require('nanodelay')
-let WebSocket = require('ws')
+import { ClientNode, WsConnection, Log, MemoryStore } from '@logux/core'
+import { delay } from 'nanodelay'
+import WebSocket from 'ws'
 
-let { ALLOWED_META } = require('../..')
+import { ALLOWED_META } from '../../index.js'
 
 let index = 0
 let stop = false

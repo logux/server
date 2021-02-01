@@ -1,20 +1,24 @@
 import { MemoryStore, TestTime, Log, Action, TestLog } from '@logux/core'
 import { actionCreatorFactory } from 'typescript-fsa'
+import { fileURLToPath } from 'url'
 import { readFileSync } from 'fs'
 import { delay } from 'nanodelay'
 import WebSocket from 'ws'
+import { jest } from '@jest/globals'
 import { join } from 'path'
 import https from 'https'
 import http from 'http'
 
 import { BaseServer, BaseServerOptions, ServerMeta } from '../index.js'
 
+const ROOT = join(fileURLToPath(import.meta.url), '..', '..')
+
 const DEFAULT_OPTIONS = {
   subprotocol: '0.0.0',
   supports: '0.x'
 }
-const CERT = join(__dirname, '../test/fixtures/cert.pem')
-const KEY = join(__dirname, '../test/fixtures/key.pem')
+const CERT = join(ROOT, 'test/fixtures/cert.pem')
+const KEY = join(ROOT, 'test/fixtures/key.pem')
 
 let lastPort = 9111
 function createServer (options: Partial<BaseServerOptions> = {}) {
@@ -222,7 +226,7 @@ it('loads keys by absolute path', async () => {
 
 it('loads keys by relative path', async () => {
   let app = createServer({
-    root: join(__dirname, '../test/'),
+    root: join(ROOT, 'test/'),
     cert: 'fixtures/cert.pem',
     key: 'fixtures/key.pem'
   })
@@ -245,7 +249,7 @@ it('reporters on start listening', async () => {
     backend: 'http://127.0.0.1:3000/logux',
     redis: '//localhost'
   })
-  let pkgFile = readFileSync(join(__dirname, '..', 'package.json'))
+  let pkgFile = readFileSync(join(ROOT, 'package.json'))
   let pkg = JSON.parse(pkgFile.toString())
 
   privateMethods(test.app).listenNotes.prometheus =

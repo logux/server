@@ -1,6 +1,6 @@
-const ALLOWED_META = require('../allowed-meta')
+import { ALLOWED_META } from '../allowed-meta/index.js'
 
-module.exports = function filterMeta (meta) {
+export function filterMeta (meta) {
   let result = {}
   for (let i of ALLOWED_META) {
     if (typeof meta[i] !== 'undefined') result[i] = meta[i]

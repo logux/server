@@ -1,10 +1,10 @@
-let { LoguxError, parseId } = require('@logux/core')
-let cookie = require('cookie')
-let semver = require('semver')
+import { LoguxError, parseId } from '@logux/core'
+import cookie from 'cookie'
+import semver from 'semver'
 
-let FilteredNode = require('../filtered-node')
-let ALLOWED_META = require('../allowed-meta')
-let filterMeta = require('../filter-meta')
+import { FilteredNode } from '../filtered-node/index.js'
+import { ALLOWED_META } from '../allowed-meta/index.js'
+import { filterMeta } from '../filter-meta/index.js'
 
 function reportDetails (client) {
   return {
@@ -14,7 +14,7 @@ function reportDetails (client) {
   }
 }
 
-class ServerClient {
+export class ServerClient {
   constructor (app, connection, key) {
     this.app = app
     this.userId = undefined
@@ -233,5 +233,3 @@ class ServerClient {
     this.app.debugActionError(meta, `Action "${meta.id}" was denied`)
   }
 }
-
-module.exports = ServerClient
