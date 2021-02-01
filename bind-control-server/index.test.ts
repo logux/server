@@ -167,6 +167,19 @@ it('passes headers', async () => {
   expect(response.headers['content-type']).toContain('text/plain')
 })
 
+it('supports promise', async () => {
+  app = createServer({ controlSecret: 'secret' })
+  app.controls['GET /test'] = {
+    async request () {
+      return { body: 'done' }
+    }
+  }
+  await app.listen()
+  let response = await request('GET', '/test%3Fsecret')
+
+  expect(response.body).toContain('done')
+})
+
 it('has bruteforce protection', async () => {
   app = createServer({ controlSecret: 'secret' })
   app.controls['GET /test'] = {

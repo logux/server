@@ -509,7 +509,7 @@ type Response = {
 
 type GetProcessor = {
   safe?: boolean
-  request(request: object): Response
+  request(request: object): Response | Promise<Response>
 }
 
 type PostProcessor = {

@@ -18,7 +18,7 @@ function isValidBody (body) {
 
 export function bindControlServer (app, custom) {
   let masks = app.options.controlMask.split(/,\s*/).map(i => ip.cidrSubnet(i))
-  app.http.on('request', (req, res) => {
+  app.http.on('request', async (req, res) => {
     let urlString = req.url
     if (/^\/\w+%3F/.test(urlString)) urlString = decodeURIComponent(urlString)
     let reqUrl = new URL(urlString, 'http://localhost')
@@ -112,7 +112,7 @@ export function bindControlServer (app, custom) {
             return
           }
         }
-        let answer = rule.request(req)
+        let answer = await rule.request(req)
         for (let name in answer.headers) {
           res.setHeader(name, answer.headers[name])
         }
