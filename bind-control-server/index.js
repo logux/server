@@ -39,14 +39,16 @@ export function bindControlServer (app, custom) {
       }
     } else {
       let ipAddress = req.connection.remoteAddress
-      if (masks.every(i => !i.contains(ipAddress))) {
-        app.emitter.emit('report', 'wrongControlIp', {
-          ipAddress,
-          mask: app.options.controlMask
-        })
-        res.statusCode = 403
-        res.end('IP address is not in LOGUX_CONTROL_MASK/controlMask')
-        return
+      if (!(req.method === 'GET' && rule.safe)) {
+        if (masks.every(i => !i.contains(ipAddress))) {
+          app.emitter.emit('report', 'wrongControlIp', {
+            ipAddress,
+            mask: app.options.controlMask
+          })
+          res.statusCode = 403
+          res.end('IP address is not in LOGUX_CONTROL_MASK/controlMask')
+          return
+        }
       }
       if (req.method !== 'GET') {
         let json = ''

@@ -99,6 +99,20 @@ it('has health check', async () => {
   expect(response.body).toEqual('OK\n')
 })
 
+it('has health check without control server', async () => {
+  app = createServer()
+  await app.listen()
+  let response = await request('GET', '/')
+  expect(response.body).toEqual('OK\n')
+})
+
+it('does not apply control mask to health check', async () => {
+  app = createServer({ controlMask: '8.8.8.8/32' })
+  await app.listen()
+  let response = await request('GET', '/')
+  expect(response.body).toEqual('OK\n')
+})
+
 it('responses 404', async () => {
   app = createServer()
   await app.listen()
