@@ -141,6 +141,7 @@ it('reports listen', () => {
     controlSecret: 'RhBaK0kuOBtqJalq2C4df',
     loguxServer: '0.0.0',
     environment: 'development',
+    controlMask: '127.0.0.0/255',
     subprotocol: '0.0.0',
     supports: '0.x',
     backend: 'http://127.0.0.1:3000/logux',
