@@ -22,6 +22,17 @@ function optionError (msg) {
   throw error
 }
 
+let helloCache
+async function readHello () {
+  if (!helloCache) {
+    let hello = await fs.readFile(
+      join(fileURLToPath(import.meta.url), '..', 'hello.html')
+    )
+    helloCache = hello.toString()
+  }
+  return helloCache
+}
+
 export class BaseServer {
   constructor (opts = {}) {
     this.options = opts
@@ -245,6 +256,15 @@ export class BaseServer {
     this.lastTimeout = 0
 
     this.controls = {
+      'GET /': {
+        safe: true,
+        async request () {
+          return {
+            headers: { 'Content-Type': 'text/html' },
+            body: await readHello()
+          }
+        }
+      },
       'GET /health': {
         safe: true,
         request: () => ({
