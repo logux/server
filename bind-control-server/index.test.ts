@@ -95,22 +95,22 @@ async function requestError (
 it('has health check', async () => {
   app = createServer({ controlSecret: 'secret', backend: 'http://localhost/' })
   await app.listen()
-  let response = await request('GET', '/')
-  expect(response.body).toEqual('OK\n')
+  let response = await request('GET', '/health')
+  expect(response.body).toContain('OK')
 })
 
 it('has health check without control server', async () => {
   app = createServer()
   await app.listen()
-  let response = await request('GET', '/')
-  expect(response.body).toEqual('OK\n')
+  let response = await request('GET', '/health')
+  expect(response.body).toContain('OK')
 })
 
 it('does not apply control mask to health check', async () => {
   app = createServer({ controlMask: '8.8.8.8/32' })
   await app.listen()
-  let response = await request('GET', '/')
-  expect(response.body).toEqual('OK\n')
+  let response = await request('GET', '/health')
+  expect(response.body).toContain('OK')
 })
 
 it('responses 404', async () => {
@@ -238,8 +238,11 @@ it('does not break WebSocket', async () => {
 it('checks incoming IP address', async () => {
   let controlMask = '128.0.0.1/8, 127.1.0.0/16'
   let test = createReporter({ controlMask })
+  test.app.controls['GET /test'] = {
+    request: () => ({ body: 'done' })
+  }
   await test.app.listen()
-  let err = await requestError('GET', '/')
+  let err = await requestError('GET', '/test')
 
   expect(err.statusCode).toEqual(403)
   expect(err.message).toContain('LOGUX_CONTROL_MASK')
