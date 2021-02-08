@@ -253,7 +253,7 @@ exports[`reports error from node 2`] = `
 `;
 
 exports[`reports listen 1`] = `
-"{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"development\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"0.0.0\\",\\"supports\\":\\"0.x\\",\\"note\\":[\\"Server was started in non-secure development mode\\",\\"Press Ctrl-C to shutdown server\\"],\\"listen\\":\\"ws://127.0.0.1:31337/\\",\\"healthCheck\\":\\"http://127.0.0.1:31337/\\",\\"controlListen\\":\\"http://127.0.0.1:31337/\\",\\"backendSend\\":\\"http://127.0.0.1:3000/logux\\",\\"msg\\":\\"Logux server is listening\\"}
+"{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"loguxServer\\":\\"0.0.0\\",\\"environment\\":\\"development\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"0.0.0\\",\\"supports\\":\\"0.x\\",\\"note\\":[\\"Server was started in non-secure development mode\\",\\"Press Ctrl-C to shutdown server\\"],\\"listen\\":\\"ws://127.0.0.1:31337/\\",\\"healthCheck\\":\\"http://127.0.0.1:31337/\\",\\"controlListen\\":\\"http://127.0.0.1:31337/\\",\\"controlMask\\":\\"127.0.0.0/255\\",\\"backendSend\\":\\"http://127.0.0.1:3000/logux\\",\\"msg\\":\\"Logux server is listening\\"}
 "
 `;
 
@@ -267,7 +267,7 @@ exports[`reports listen 2`] = `
         Supports:       [1m0.x[22m
         Health check:   [1mhttp://127.0.0.1:31337/[22m
         Control listen: [1mhttp://127.0.0.1:31337/[22m
-        Control mask:   [1mundefined[22m
+        Control mask:   [1m127.0.0.0/255[22m
         Backend send:   [1mhttp://127.0.0.1:3000/logux[22m
         Listen:         [1mws://127.0.0.1:31337/[22m
         [90mServer was started in non-secure development mode[39m
