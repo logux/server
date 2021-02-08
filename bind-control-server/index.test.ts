@@ -92,6 +92,14 @@ async function requestError (
   throw new Error('Error was not found')
 }
 
+it('has hello page', async () => {
+  app = createServer({})
+  await app.listen()
+  let response = await request('GET', '/')
+  expect(response.body).toContain('Logux Server')
+  expect(response.body).toContain('<svg ')
+})
+
 it('has health check', async () => {
   app = createServer({ controlSecret: 'secret', backend: 'http://localhost/' })
   await app.listen()
