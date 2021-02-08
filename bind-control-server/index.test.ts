@@ -96,7 +96,7 @@ it('has health check', async () => {
   app = createServer({ controlSecret: 'secret', backend: 'http://localhost/' })
   await app.listen()
   let response = await request('GET', '/')
-  expect(response.body).toEqual('OK')
+  expect(response.body).toEqual('OK\n')
 })
 
 it('responses 404', async () => {

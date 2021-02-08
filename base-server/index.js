@@ -247,7 +247,7 @@ export class BaseServer {
     this.controls = {
       'GET /': {
         safe: true,
-        request: () => ({ body: 'OK' })
+        request: () => ({ body: 'OK\n' })
       }
     }
 
