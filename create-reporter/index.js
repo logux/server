@@ -72,7 +72,9 @@ const REPORTERS = {
       details.server = r.server
     } else {
       let wsProtocol = r.cert ? 'wss://' : 'ws://'
+      let httpProtocol = r.cert ? 'https://' : 'http://'
       details.listen = `${wsProtocol}${r.host}:${r.port}/`
+      details.healthCheck = `${httpProtocol}${r.host}:${r.port}/`
     }
 
     if (r.controlSecret) {
