@@ -245,9 +245,12 @@ export class BaseServer {
     this.lastTimeout = 0
 
     this.controls = {
-      'GET /': {
+      'GET /health': {
         safe: true,
-        request: () => ({ body: 'OK\n' })
+        request: () => ({
+          headers: { 'Content-Type': 'text/plain' },
+          body: 'Logux Server: OK\n'
+        })
       }
     }
 
