@@ -119,5 +119,5 @@ export class Server<H extends object = {}> extends BaseServer<H> {
    *
    * @param files Pattern for module files.
    */
-  autoloadModules (files: string[] | string): Promise<void>
+  autoloadModules (files?: string[] | string): Promise<void>
 }
