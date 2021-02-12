@@ -384,24 +384,36 @@ interface ChannelFinally<
   (ctx: ChannelContext<D, P, H>, action: A, meta: ServerMeta): void
 }
 
-type ActionCallbacks<A extends Action, D extends object, H extends object> = {
-  access: Authorizer<A, D, H>
-  resend?: Resender<A, D, H>
-  process?: Processor<A, D, H>
-  finally?: ActionFinally<A, D, H>
-}
+type ActionCallbacks<A extends Action, D extends object, H extends object> =
+  | {
+      access: Authorizer<A, D, H>
+      resend?: Resender<A, D, H>
+      process?: Processor<A, D, H>
+      finally?: ActionFinally<A, D, H>
+    }
+  | {
+      accessAndProcess: Processor<A, D, H>
+      resend?: Resender<A, D, H>
+      finally?: ActionFinally<A, D, H>
+    }
 
 type ChannelCallbacks<
   A extends Action,
   D extends object,
   P extends object | string[],
   H extends object
-> = {
-  access: ChannelAuthorizer<A, D, P, H>
-  filter?: FilterCreator<A, D, P, H>
-  load?: ChannelLoader<A, D, P, H>
-  finally?: ChannelFinally<A, D, P, H>
-}
+> =
+  | {
+      access: ChannelAuthorizer<A, D, P, H>
+      filter?: FilterCreator<A, D, P, H>
+      load?: ChannelLoader<A, D, P, H>
+      finally?: ChannelFinally<A, D, P, H>
+    }
+  | {
+      accessAndLoad: ChannelLoader<A, D, P, H>
+      filter?: FilterCreator<A, D, P, H>
+      finally?: ChannelFinally<A, D, P, H>
+    }
 
 type ActionReporter = {
   action: Action
