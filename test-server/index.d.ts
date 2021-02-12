@@ -86,12 +86,15 @@ export class TestServer<H extends object = {}> extends BaseServer<H> {
    *
    * ```js
    * server = new TestServer()
-   * await wrongCredentials.connect('10')
+   * await server.expectWrongCredentials('10')
    * ```
    *
    * @param userId User ID.
    * @param opts Other options.
    * @returns Promise until check.
    */
-  wrongCredentials (userId: string, opts?: TestClientOptions): Promise<void>
+  expectWrongCredentials (
+    userId: string,
+    opts?: TestClientOptions
+  ): Promise<void>
 }

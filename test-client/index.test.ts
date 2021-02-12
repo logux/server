@@ -207,7 +207,7 @@ it('tests authentication', async () => {
   })
   expect(wrong.message).toEqual('Wrong credentials')
 
-  await server.wrongCredentials('10', { token: 'bad' })
+  await server.expectWrongCredentials('10', { token: 'bad' })
 
   let error1 = await catchError(async () => {
     await server.connect('10', { subprotocol: '1.0.0' })
@@ -215,14 +215,14 @@ it('tests authentication', async () => {
   expect(error1.message).toContain('wrong-subprotocol')
 
   let error2 = await catchError(async () => {
-    await server.wrongCredentials('10', { subprotocol: '1.0.0' })
+    await server.expectWrongCredentials('10', { subprotocol: '1.0.0' })
   })
   expect(error2.message).toContain('wrong-subprotocol')
 
   await server.connect('10', { token: 'good' })
 
   let notWrong = await catchError(async () => {
-    await server.wrongCredentials('10', { token: 'good' })
+    await server.expectWrongCredentials('10', { token: 'good' })
   })
   expect(notWrong.message).toEqual('Credentials passed')
 })
@@ -243,5 +243,5 @@ it('sets client cookie', async () => {
   server = new TestServer()
   server.auth(({ cookie }) => cookie.token === 'good')
   await server.connect('10', { cookie: { token: 'good' } })
-  await server.wrongCredentials('10', { cookie: { token: 'bad' } })
+  await server.expectWrongCredentials('10', { cookie: { token: 'bad' } })
 })

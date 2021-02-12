@@ -30,7 +30,7 @@ export class TestServer extends BaseServer {
     return client
   }
 
-  async wrongCredentials (userId, opts = {}) {
+  async expectWrongCredentials (userId, opts = {}) {
     try {
       await this.connect(userId, opts)
     } catch (e) {
