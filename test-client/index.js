@@ -10,7 +10,9 @@ export class TestClient {
     let clientId = server.testUsers[userId] || 0
     clientId += 1
     server.testUsers[userId] = clientId
-    this.nodeId = `${userId}:${clientId}:1`
+    this.userId = userId
+    this.clientId = `${userId}:${clientId}`
+    this.nodeId = `${this.clientId}:1`
     this.log = server.options.time.nextLog({ nodeId: this.nodeId })
     this.node = new ClientNode(this.nodeId, this.log, this.pair.left, {
       ...opts,

@@ -77,10 +77,30 @@ export class TestClient {
    *
    * ```js
    * let client = new TestClient(server, '10')
-   * client.nodeId //=> '10:1:test'
+   * client.nodeId //=> '10:1:1'
    * ```
    */
   nodeId: string
+
+  /**
+   * Client’s ID.
+   *
+   * ```js
+   * let client = new TestClient(server, '10')
+   * client.clientId //=> '10:1'
+   * ```
+   */
+  clientId: string
+
+  /**
+   * User ID.
+   *
+   * ```js
+   * let client = new TestClient(server, '10')
+   * client.userId //=> '10'
+   * ```
+   */
+  userId: string
 
   /**
    * Connection channel between client and server to track sent messages.
