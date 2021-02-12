@@ -33,13 +33,22 @@ export class TestServer extends BaseServer {
   async expectWrongCredentials (userId, opts = {}) {
     try {
       await this.connect(userId, opts)
+      throw new Error('Credentials passed')
     } catch (e) {
-      if (e.message === 'Wrong credentials') {
-        return true
-      } else {
+      if (e.message !== 'Wrong credentials') {
         throw e
       }
     }
-    throw new Error('Credentials passed')
+  }
+
+  async expectDenied (cb) {
+    try {
+      await cb()
+      throw new Error('Actions passed without error')
+    } catch (e) {
+      if (e.message !== 'Action was denied') {
+        throw e
+      }
+    }
   }
 }

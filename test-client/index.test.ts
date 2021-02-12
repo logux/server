@@ -119,11 +119,16 @@ it('tracks action processing', async () => {
   let processed = await client.process({ type: 'FOO' })
   expect(processed).toEqual([{ type: 'logux/processed', id: '1 10:1:1 0' }])
 
+  let notDenied = await catchError(async () => {
+    await server.expectDenied(() => client.process({ type: 'FOO' }))
+  })
+  expect(notDenied.message).toEqual('Actions passed without error')
+
   let serverError = await catchError(() => client.process({ type: 'ERR' }))
   expect(serverError.message).toEqual('test')
   expect(serverError.action).toEqual({
     type: 'logux/undo',
-    id: '3 10:1:1 0',
+    id: '5 10:1:1 0',
     reason: 'error',
     action: { type: 'ERR' }
   })
@@ -131,13 +136,20 @@ it('tracks action processing', async () => {
   let accessError = await catchError(() => client.process({ type: 'DENIED' }))
   expect(accessError.message).toEqual('Action was denied')
 
+  await server.expectDenied(() => client.process({ type: 'DENIED' }))
+
   let unknownError = await catchError(() => client.process({ type: 'UNKNOWN' }))
   expect(unknownError.message).toEqual(
     'Server does not have callbacks for UNKNOWN actions'
   )
 
-  let customError = await catchError(() => client.process({ type: 'UNDO' }))
-  expect(customError.message).toEqual('Server undid action')
+  let customError1 = await catchError(() => client.process({ type: 'UNDO' }))
+  expect(customError1.message).toEqual('Server undid action')
+
+  let customError2 = await catchError(async () => {
+    await server.expectDenied(() => client.process({ type: 'UNDO' }))
+  })
+  expect(customError2.message).toEqual('Server undid action')
 })
 
 it('detects action ID dublicate', async () => {
