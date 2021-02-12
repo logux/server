@@ -97,4 +97,18 @@ export class TestServer<H extends object = {}> extends BaseServer<H> {
     userId: string,
     opts?: TestClientOptions
   ): Promise<void>
+
+  /**
+   * Call callback and throw an error if there was no `Action was denied`
+   * during callback.
+   *
+   * ```js
+   * await server.expectDenied(async () => {
+   *   client.subscribe('secrets')
+   * })
+   * ```
+   *
+   * @param test Callback with subscripting or action sending.
+   */
+  expectDenied (test: () => any | Promise<any>): Promise<void>
 }
