@@ -79,4 +79,19 @@ export class TestServer<H extends object = {}> extends BaseServer<H> {
    * @returns Promise with new client.
    */
   connect (userId: string, opts?: TestClientOptions): Promise<TestClient>
+
+  /**
+   * Try to connect client and throw an error is client didn’t received
+   * `Wrong Cregentials` message from the server.
+   *
+   * ```js
+   * server = new TestServer()
+   * await wrongCredentials.connect('10')
+   * ```
+   *
+   * @param userId User ID.
+   * @param opts Other options.
+   * @returns Promise until check.
+   */
+  wrongCredentials (userId: string, opts?: TestClientOptions): Promise<void>
 }

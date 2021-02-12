@@ -29,4 +29,17 @@ export class TestServer extends BaseServer {
     await client.connect()
     return client
   }
+
+  async wrongCredentials (userId, opts = {}) {
+    try {
+      await this.connect(userId, opts)
+    } catch (e) {
+      if (e.message === 'Wrong credentials') {
+        return true
+      } else {
+        throw e
+      }
+    }
+    throw new Error('Credentials passed')
+  }
 }
