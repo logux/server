@@ -6,6 +6,7 @@ export {
   LoguxProcessedAction,
   LoguxSubscribeAction,
   BaseServerOptions,
+  SendBackActions,
   LoguxUndoAction,
   LoguxAction,
   BaseServer,

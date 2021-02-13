@@ -235,7 +235,11 @@ export type AuthenticatorOptions<H extends object> = {
   token: string
 }
 
-type SendBackActions = void | Action | Action[] | [Action, Partial<Meta>][]
+export type SendBackActions =
+  | void
+  | Action
+  | Action[]
+  | [Action, Partial<Meta>][]
 
 /**
  * The authentication callback.
