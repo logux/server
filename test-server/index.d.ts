@@ -111,4 +111,19 @@ export class TestServer<H extends object = {}> extends BaseServer<H> {
    * @param test Callback with subscripting or action sending.
    */
   expectDenied (test: () => any | Promise<any>): Promise<void>
+
+  /**
+   * Call callback and throw an error if there was no `logux/undo` in return
+   * with specific reason.
+   *
+   * ```js
+   * await server.expectUndo('notFound', async () => {
+   *   client.subscribe('projects/nothing')
+   * })
+   * ```
+   *
+   * @param reason The reason in undo action.
+   * @param test Callback with subscripting or action sending.
+   */
+  expectUndo (reason: string, test: () => any | Promise<any>): Promise<void>
 }

@@ -149,7 +149,21 @@ it('tracks action processing', async () => {
   let customError2 = await catchError(async () => {
     await server.expectDenied(() => client.process({ type: 'UNDO' }))
   })
-  expect(customError2.message).toEqual('Server undid action')
+  expect(customError2.message).toEqual('Undo was with error reason, not denied')
+
+  await server.expectUndo('error', () => client.process({ type: 'UNDO' }))
+
+  let reasonError = await catchError(async () => {
+    await server.expectUndo('another', () => client.process({ type: 'UNDO' }))
+  })
+  expect(reasonError.message).toEqual('Undo was with error reason, not another')
+
+  let noReasonError = await catchError(async () => {
+    await server.expectUndo('error', () => client.process({ type: 'UNKNOWN' }))
+  })
+  expect(noReasonError.message).toEqual(
+    'Server does not have callbacks for UNKNOWN actions'
+  )
 })
 
 it('detects action ID dublicate', async () => {

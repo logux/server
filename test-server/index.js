@@ -41,12 +41,23 @@ export class TestServer extends BaseServer {
     }
   }
 
-  async expectDenied (cb) {
+  async expectDenied (test) {
+    await this.expectUndo('denied', test)
+  }
+
+  async expectUndo (reason, test) {
     try {
-      await cb()
+      await test()
       throw new Error('Actions passed without error')
     } catch (e) {
-      if (e.message !== 'Action was denied') {
+      if (reason === 'denied' && e.message === 'Action was denied') return
+      if (e.message === 'Server undid action') {
+        if (e.action.reason !== reason) {
+          throw new Error(
+            `Undo was with ${e.action.reason} reason, not ${reason}`
+          )
+        }
+      } else {
         throw e
       }
     }
