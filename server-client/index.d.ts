@@ -79,6 +79,15 @@ export class ServerClient {
   remoteAddress: string
 
   /**
+   * HTTP headers of WS connection.
+   *
+   * ```js
+   * client.httpHeaders['User-Agent']
+   * ```
+   */
+  httpHeaders: { [name: string]: string }
+
+  /**
    * Node instance to synchronize logs.
    *
    * ```js

@@ -342,6 +342,9 @@ it('creates a client manually', () => {
     ws: {
       _socket: {
         remoteAddress: '127.0.0.1'
+      },
+      upgradeReq: {
+        headers: {}
       }
     }
   } as any)

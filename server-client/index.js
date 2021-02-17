@@ -25,8 +25,10 @@ export class ServerClient {
     this.key = key.toString()
     if (connection.ws) {
       this.remoteAddress = connection.ws._socket.remoteAddress
+      this.httpHeaders = connection.ws.upgradeReq.headers
     } else {
       this.remoteAddress = '127.0.0.1'
+      this.httpHeaders = {}
     }
 
     this.node = new FilteredNode(this, app.nodeId, app.log, connection, {

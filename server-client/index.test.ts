@@ -54,6 +54,9 @@ function createConnection (): ServerConnection {
   privateMethods(pair.left).ws = {
     _socket: {
       remoteAddress: '127.0.0.1'
+    },
+    upgradeReq: {
+      headers: { 'user-agent': 'browser' }
     }
   }
   return pair.left as any
@@ -168,6 +171,11 @@ it('uses string key', () => {
 it('has remote address shortcut', () => {
   let client = new ServerClient(createServer(), createConnection(), 1)
   expect(client.remoteAddress).toEqual('127.0.0.1')
+})
+
+it('has HTTP headers shortcut', () => {
+  let client = new ServerClient(createServer(), createConnection(), 1)
+  expect(client.httpHeaders['user-agent']).toEqual('browser')
 })
 
 it('has default remote address if ws param does not set', () => {
