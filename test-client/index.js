@@ -26,7 +26,7 @@ export class TestClient {
         remoteAddress: '127.0.0.1'
       },
       upgradeReq: {
-        headers: {}
+        headers: opts.httpHeaders || {}
       }
     }
     if (opts.headers) {

@@ -8,6 +8,7 @@ import {
 import { TestServer } from '../test-server/index.js'
 
 export type TestClientOptions = {
+  httpHeaders?: { [key: string]: string }
   subprotocol?: string
   headers?: object
   cookie?: object
