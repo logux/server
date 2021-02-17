@@ -271,3 +271,13 @@ it('sets client cookie', async () => {
   await server.connect('10', { cookie: { token: 'good' } })
   await server.expectWrongCredentials('10', { cookie: { token: 'bad' } })
 })
+
+it('sets custom HTTP headers', async () => {
+  server = new TestServer()
+  server.auth(({ client }) => client.httpHeaders.authorization === 'good')
+  await server.connect('10', { httpHeaders: { authorization: 'good' } })
+  await server.expectWrongCredentials('10', {
+    httpHeaders: { authorization: 'bad' }
+  })
+  await server.expectWrongCredentials('10')
+})
