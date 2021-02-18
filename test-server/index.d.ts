@@ -1,4 +1,4 @@
-import { TestTime, TestLog } from '@logux/core'
+import { TestTime, TestLog, Action } from '@logux/core'
 
 import { TestClient, TestClientOptions } from '../test-client/index.js'
 import {
@@ -126,4 +126,19 @@ export class TestServer<H extends object = {}> extends BaseServer<H> {
    * @param test Callback with subscripting or action sending.
    */
   expectUndo (reason: string, test: () => any | Promise<any>): Promise<void>
+
+  /**
+   * Collect actions sent by client during the `test` call.
+   *
+   * ```js
+   * let answers = await client.received(async () => {
+   *   client.log.add({ type: 'local' })
+   * })
+   * expect(actions).toEqual([{ type: 'local' }])
+   * ```
+   *
+   * @param test Function, where do you expect action will be received
+   * @returns Promise with all received actions
+   */
+  received (test: () => Promise<void> | void): Promise<Action[]>
 }
