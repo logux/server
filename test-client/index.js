@@ -1,4 +1,5 @@
 import { ClientNode, TestPair } from '@logux/core'
+import { delay } from 'nanodelay'
 import cookie from 'cookie'
 
 import { filterMeta } from '../filter-meta/index.js'
@@ -149,9 +150,16 @@ export class TestClient {
     return this.process(action)
   }
 
-  keepActions () {
-    this.log.on('preadd', (action, meta) => {
-      meta.reasons.push('test')
+  async received (test) {
+    let actions = []
+    let unbind = this.log.on('add', (action, meta) => {
+      if (!meta.id.includes(` ${this.nodeId} `)) {
+        actions.push(action)
+      }
     })
+    await test()
+    await delay(1)
+    unbind()
+    return actions
   }
 }

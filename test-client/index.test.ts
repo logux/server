@@ -53,7 +53,7 @@ it('sends and collect actions', async () => {
     server.connect('10'),
     server.connect('11')
   ])
-  client1.keepActions()
+  client1.log.keepActions()
   let received = await client1.collect(async () => {
     await client1.log.add({ type: 'FOO' })
     await delay(10)
@@ -160,7 +160,7 @@ it('detects action ID dublicate', async () => {
     access: () => true
   })
   let client = await server.connect('10')
-  client.keepActions()
+  client.log.keepActions()
 
   let processed = await client.process({ type: 'FOO' }, { id: '1 10:1:1 0' })
   expect(processed).toEqual([{ type: 'logux/processed', id: '1 10:1:1 0' }])
@@ -268,4 +268,22 @@ it('sets custom HTTP headers', async () => {
     httpHeaders: { authorization: 'bad' }
   })
   await server.expectWrongCredentials('10')
+})
+
+it('collects received actions', async () => {
+  server = new TestServer()
+  server.type('foo', {
+    access: () => true,
+    process (ctx) {
+      ctx.sendBack({ type: 'bar' })
+    }
+  })
+  let client = await server.connect('10')
+  let actions = await client.received(async () => {
+    await client.process({ type: 'foo' })
+  })
+  expect(actions).toEqual([
+    { type: 'bar' },
+    { type: 'logux/processed', id: '1 10:1:1 0' }
+  ])
 })
