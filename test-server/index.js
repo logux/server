@@ -62,10 +62,4 @@ export class TestServer extends BaseServer {
       }
     }
   }
-
-  keepActions () {
-    this.log.on('preadd', (action, meta) => {
-      meta.reasons.push('test')
-    })
-  }
 }
