@@ -37,7 +37,7 @@ it('connects and disconnect', async () => {
   expect(Array.from(server.clientIds.keys())).toEqual(['10:2'])
 })
 
-it('keeps actions by request', () => {
+it('keeps actions by request', async () => {
   server = new TestServer()
   let client = new TestClient(server, '10')
 
@@ -47,6 +47,13 @@ it('keeps actions by request', () => {
   client.keepActions()
   client.log.add({ type: 'B' })
   expect(client.log.actions()).toEqual([{ type: 'B' }])
+
+  await server.log.add({ type: 'A' })
+  expect(server.log.actions()).toEqual([])
+
+  server.keepActions()
+  await server.log.add({ type: 'B' })
+  expect(server.log.actions()).toEqual([{ type: 'B' }])
 })
 
 it('sends and collect actions', async () => {
