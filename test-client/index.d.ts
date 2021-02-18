@@ -195,14 +195,17 @@ export class TestClient {
   unsubscribe (channel: string | LoguxUnsubscribeAction): Promise<Action[]>
 
   /**
-   * Keep actions without `meta.reasons` in the log by setting `test` reason
-   * during adding to the log.
+   * Collect actions received from server during the `test` call.
    *
    * ```js
-   * client.keepActions()
-   * client.log.add({ type: 'test' })
-   * client.log.actions() //=> { type: 'test' }
+   * let answers = await client1.received(async () => {
+   *   await client2.process({ type: 'resend' })
+   * })
+   * expect(actions).toEqual([{ type: 'local' }])
    * ```
+   *
+   * @param test Function, where do you expect action will be received
+   * @returns Promise with all received actions
    */
-  keepActions (): void
+  received (test: () => Promise<void> | void): Promise<Action[]>
 }
