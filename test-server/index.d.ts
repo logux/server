@@ -126,4 +126,16 @@ export class TestServer<H extends object = {}> extends BaseServer<H> {
    * @param test Callback with subscripting or action sending.
    */
   expectUndo (reason: string, test: () => any | Promise<any>): Promise<void>
+
+  /**
+   * Keep actions without `meta.reasons` in the log by setting `test` reason
+   * during adding to the log.
+   *
+   * ```js
+   * server.keepActions()
+   * server.log.add({ type: 'test' })
+   * server.log.actions() //=> [{ type: 'test' }]
+   * ```
+   */
+  keepActions (): void
 }
