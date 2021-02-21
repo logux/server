@@ -1,10 +1,7 @@
+import { LoguxSubscribeAction, LoguxUnsubscribeAction } from '@logux/actions'
 import { Action, AnyAction, TestLog, TestPair } from '@logux/core'
 
-import {
-  LoguxAnySubscribeAction,
-  LoguxUnsubscribeAction,
-  ServerMeta
-} from '../base-server/index.js'
+import { ServerMeta } from '../base-server/index.js'
 import { TestServer } from '../test-server/index.js'
 
 export type TestClientOptions = {
@@ -180,7 +177,7 @@ export class TestClient {
    * @param channel Channel name or `logux/subscribe` action.
    * @returns Promise with all actions from the server.
    */
-  subscribe (channel: string | LoguxAnySubscribeAction): Promise<Action[]>
+  subscribe (channel: string | LoguxSubscribeAction): Promise<Action[]>
 
   /**
    * Unsubscribe client from the channel.

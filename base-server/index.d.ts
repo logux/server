@@ -8,8 +8,9 @@ import {
   LogStore,
   TestTime
 } from '@logux/core'
-import { Unsubscribe } from 'nanoevents'
 import { Server as HTTPServer, ServerResponse, IncomingMessage } from 'http'
+import { LoguxSubscribeAction, LoguxUnsubscribeAction } from '@logux/actions'
+import { Unsubscribe } from 'nanoevents'
 
 import { Context, ChannelContext } from '../context/index.js'
 import { ServerClient } from '../server-client/index.js'
@@ -189,43 +190,6 @@ export type BaseServerOptions = {
    */
   cert?: string
 }
-
-export type LoguxSubscribeAction = {
-  type: 'logux/subscribe'
-  channel: string
-  since?: {
-    id: string
-    time: number
-  }
-}
-
-export type LoguxAnySubscribeAction = LoguxSubscribeAction & {
-  [key: string]: any
-}
-
-export type LoguxUnsubscribeAction = {
-  type: 'logux/unsubscribe'
-  channel: string
-}
-
-export type LoguxProcessedAction = {
-  type: 'logux/processed'
-  id: ID
-}
-
-export type LoguxUndoAction = {
-  type: 'logux/undo'
-  id: ID
-  action: Action
-  reason?: string
-  [key: string]: any
-}
-
-export type LoguxAction =
-  | LoguxSubscribeAction
-  | LoguxUnsubscribeAction
-  | LoguxProcessedAction
-  | LoguxUndoAction
 
 export type AuthenticatorOptions<H extends object> = {
   headers: H
