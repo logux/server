@@ -1,8 +1,9 @@
+import { LoguxSubscribeAction } from '@logux/actions'
 import { TestTime } from '@logux/core'
 import { delay } from 'nanodelay'
 import { jest } from '@jest/globals'
 
-import { LoguxAnySubscribeAction, TestClient, TestServer } from '../index.js'
+import { TestClient, TestServer } from '../index.js'
 
 let server: TestServer
 afterEach(() => {
@@ -173,10 +174,10 @@ it('detects action ID dublicate', async () => {
 
 it('tracks subscriptions', async () => {
   server = new TestServer()
-  server.channel<{}, {}, LoguxAnySubscribeAction>('foo', {
+  server.channel<{}, {}, LoguxSubscribeAction>('foo', {
     access: () => true,
     load (ctx, action) {
-      ctx.sendBack({ type: 'FOO', a: action.a })
+      ctx.sendBack({ type: 'FOO', a: action.filter?.a })
     }
   })
   let client = await server.connect('10')
@@ -189,7 +190,7 @@ it('tracks subscriptions', async () => {
   let actions2 = await client.subscribe({
     type: 'logux/subscribe',
     channel: 'foo',
-    a: 1
+    filter: { a: 1 }
   })
   expect(actions2).toEqual([{ type: 'FOO', a: 1 }])
 
