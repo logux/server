@@ -209,7 +209,7 @@ it('uses environment variables for config', () => {
   })
 })
 
-it('uses logger param', () => checkOut('options.js', ['', '--l', 'json']))
+it('uses logger param', () => checkOut('options.js', ['', '-l', 'json']))
 
 it('uses autoload modules', () => checkOut('autoload-modules.js'))
 
@@ -254,7 +254,7 @@ it('disables colors for constructor errors', () => {
 })
 
 it('uses logger param for constructor errors', () => {
-  return checkError('missed.js', ['', '--l', 'json'])
+  return checkError('missed.js', ['', '-l', 'json'])
 })
 
 it('writes to pino log', () => checkOut('pino.js'))
