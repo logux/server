@@ -155,6 +155,7 @@ export class Server extends BaseServer {
 
     super(opts)
 
+    this.logger = reporter.logger
     this.on('report', reporter)
     this.on('fatal', async () => {
       if (initialized) {

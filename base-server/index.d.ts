@@ -11,6 +11,7 @@ import {
 import { Server as HTTPServer, ServerResponse, IncomingMessage } from 'http'
 import { LoguxSubscribeAction, LoguxUnsubscribeAction } from '@logux/actions'
 import { Unsubscribe } from 'nanoevents'
+import { LogFn } from 'pino'
 
 import { Context, ChannelContext } from '../context/index.js'
 import { ServerClient } from '../server-client/index.js'
@@ -613,6 +614,26 @@ export class BaseServer<
    */
   controls: {
     [path: string]: GetProcessor | PostProcessor
+  }
+
+  /**
+   * Console for custom log records. It uses `pino` API.
+   *
+   * ```js
+   * server.on('connected', client => {
+   *   server.logger.info(
+   *     { domain: client.httpHeaders.domain },
+   *     'Client domain'
+   *   )
+   * })
+   * ```
+   */
+  logger: {
+    fatal: LogFn
+    error: LogFn
+    warn: LogFn
+    info: LogFn
+    debug: LogFn
   }
 
   /**

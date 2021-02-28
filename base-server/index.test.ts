@@ -1304,3 +1304,14 @@ it('has alias to root from file URL', () => {
   })
   expect(app.options.root).toEqual(join(fileURLToPath(import.meta.url), '..'))
 })
+
+it('has custom logger', () => {
+  let app = new BaseServer({
+    subprotocol: '1.0.0',
+    supports: '1.0.0',
+    fileUrl: import.meta.url
+  })
+  jest.spyOn(console, 'warn').mockImplementation(() => {})
+  app.logger.warn({ test: 1 }, 'test')
+  expect(console.warn).toHaveBeenCalledWith({ test: 1 }, 'test')
+})

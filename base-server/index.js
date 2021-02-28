@@ -81,6 +81,8 @@ export class BaseServer {
       log = new Log({ store, nodeId: this.nodeId })
     }
 
+    this.logger = console
+
     this.contexts = new WeakMap()
     this.log = log
 
