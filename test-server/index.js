@@ -19,6 +19,14 @@ export class TestServer extends BaseServer {
     })
     if (opts.logger) {
       this.on('report', createReporter(opts))
+    } else {
+      this.logger = {
+        fatal: () => {},
+        error: () => {},
+        warn: () => {},
+        info: () => {},
+        debug: () => {}
+      }
     }
     if (opts.auth !== false) this.auth(() => true)
     this.testUsers = {}
