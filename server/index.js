@@ -1,9 +1,10 @@
 import { join, relative } from 'path'
 import globby from 'globby'
+import { bgRed, black } from 'colorette'
 
 import { createReporter } from '../create-reporter/index.js'
 import { BaseServer } from '../base-server/index.js'
-import { loadOptions, oneOf } from '../options-loader/index.js'
+import { loadOptions, oneOf, number } from '../options-loader/index.js'
 
 let cliOptionsSpec = {
   options: {
@@ -14,7 +15,7 @@ let cliOptionsSpec = {
     port: {
       alias: 'p',
       description: 'Port to bind server',
-      parse: it => Number.parseInt(it, 10)
+      parse: number
     },
     key: {
       description: 'Path to SSL key'
@@ -52,12 +53,22 @@ let cliOptionsSpec = {
 
 export class Server extends BaseServer {
   static loadOptions (process, defaults) {
-    return loadOptions(
+    let [help, options] = loadOptions(
       cliOptionsSpec,
       process,
-      defaults.root ? { path: join(defaults.root, '.env') } : undefined,
-      defaults
+      defaults.root ? { path: join(defaults.root, '.env') } : undefined
     )
+    if (help) {
+      console.log(help)
+      process.exit(0)
+    } else {
+      try {
+        return Object.assign(defaults, options)
+      } catch (e) {
+        console.error(`${bgRed(black(' ERROR '))} ${e.message}`)
+        process.exit(1)
+      }
+    }
   }
 
   constructor (opts = {}) {

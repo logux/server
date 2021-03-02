@@ -1,11 +1,10 @@
-import { yellow, cyan, bold } from 'colorette'
+import { bold, cyan, yellow, green, red } from 'colorette'
 import dotenv from 'dotenv'
 
-export function loadOptions (spec, process, env, defaults) {
+export function loadOptions (spec, process, env) {
   let rawCliArgs = gatherCliArgs(process.argv)
   if (rawCliArgs['--help']) {
-    console.log(composeHelp(spec, process.argv))
-    process.exit(0)
+    return [composeHelp(spec, process.argv), null]
   }
 
   let namesMap = {}
@@ -28,14 +27,7 @@ export function loadOptions (spec, process, env, defaults) {
     spec,
     mapArgs(Object.assign(envArgs, parseEnvArgs(env)), namesMap)
   )
-  let opts = {}
-  for (let key in spec.options) {
-    let maybeValue = cliArgs[key] || envArgs[key] || defaults[key]
-    if (maybeValue !== undefined) {
-      opts[key] = maybeValue
-    }
-  }
-  return opts
+  return [null, Object.assign(envArgs, cliArgs)]
 }
 
 function gatherCliArgs (argv) {
@@ -67,10 +59,16 @@ function gatherCliArgs (argv) {
 }
 
 function parseValues (spec, args) {
-  let parsed = { ...args }
-  for (let key in args) {
-    if (spec.options[key].parse) {
-      parsed[key] = spec.options[key].parse(args[key])
+  let parsed = {}
+  for (let key of Object.keys(args)) {
+    let parse = spec.options[key].parse || string
+    let parsingResult = parse(args[key])
+    if (parsingResult[0] === null) {
+      parsed[key] = parsingResult[1]
+    } else {
+      throw Error(
+        `Failed to parse ${bold(key)} argument value. \n${parsingResult[0]}`
+      )
     }
   }
   return parsed
@@ -84,9 +82,7 @@ function mapArgs (parsedCliArgs, argsSpec) {
   return Object.fromEntries(
     Object.entries(parsedCliArgs).map(([name, value]) => {
       if (!argsSpec[name]) {
-        let error = new Error(`Unknown argument: ${name}`)
-        error.arg = name
-        throw error
+        throw new Error(`Unknown argument: ${name}`)
       }
       return [argsSpec[name], value]
     })
@@ -97,7 +93,7 @@ function composeHelp (spec, argv) {
   let options = Object.entries(spec.options).map(([name, option]) => ({
     alias: option.alias ? composeCliAliasName(option.alias) : '',
     full: composeCliFullName(name),
-    env: (spec.envPrefix && composeEnvName(spec.envPrefix, name)) || '',
+    env: spec.envPrefix ? composeEnvName(spec.envPrefix, name) : '',
     description: option.description
   }))
   let aliasColumnLength = Math.max(...options.map(it => it.alias.length))
@@ -105,7 +101,7 @@ function composeHelp (spec, argv) {
   let envColumnLength = Math.max(...options.map(it => it.env.length))
 
   let composeAlias = alias =>
-    yellow(alias.padEnd(aliasColumnLength && aliasColumnLength + 3))
+    yellow(alias.padEnd(aliasColumnLength && aliasColumnLength + 2))
   let composeName = name => yellow(name.padEnd(nameColumnLength + 5))
   let composeEnv = env => cyan(env.padEnd(envColumnLength + 5))
   let composeOptionHelp = option => {
@@ -118,6 +114,7 @@ function composeHelp (spec, argv) {
   if (spec.examples) {
     let pathParts = argv[1].split('/')
     examples = [
+      '',
       bold('Examples:'),
       ...spec.examples.map(it =>
         it.replace('$0', pathParts[pathParts.length - 1])
@@ -151,10 +148,32 @@ function toKebabCase (word) {
   return word.replace(/[A-Z]/, match => `-${match.toLowerCase()}`)
 }
 
-export function oneOf (options, value) {
-  if (!options.includes(value)) {
-    throw new Error(`Expected one of ${JSON.stringify(options)}, got ${value}`)
+export function oneOf (options, rawValue) {
+  if (!options.includes(rawValue)) {
+    return [
+      `Expected ${green('one of ' + JSON.stringify(options))}, got ${red(
+        rawValue
+      )}`,
+      null
+    ]
   } else {
-    return value
+    return [null, rawValue]
+  }
+}
+
+export function number (rawValue) {
+  let parsed = Number.parseInt(rawValue, 10)
+  if (Number.isNaN(parsed)) {
+    return [`Expected ${green('number')}, got ${red(rawValue)}`, null]
+  } else {
+    return [null, parsed]
+  }
+}
+
+export function string (rawValue) {
+  if (typeof rawValue !== 'string') {
+    return [`Expected ${green('string')}, got ${red(rawValue)}`, null]
+  } else {
+    return [null, rawValue]
   }
 }

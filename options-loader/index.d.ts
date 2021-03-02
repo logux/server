@@ -17,8 +17,11 @@ export type CliOptionsSpec<T extends Record<string, any>> = {
 export function loadOptions<T extends Record<string, any>> (
   spec: CliOptionsSpec<T>,
   process: NodeJS.Process,
-  env?: DotenvConfigOptions,
-  defaults?: Partial<T>
-): T
+  env?: DotenvConfigOptions
+): [string, null] | [null, T]
 
-export function oneOf (choices: string[], rawValue: unknown): string | null
+export function oneOf<T> (choices: T, rawValue: string): ParsingResult<T>
+
+export function number (rawValue: string): ParsingResult<number>
+
+type ParsingResult<T> = [string, null] | [null, T]

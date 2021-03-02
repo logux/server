@@ -18,4 +18,4 @@ const optionsSpec: CliOptionsSpec<{
   envPrefix: 'LOGUX'
 }
 
-loadOptions(optionsSpec, process, {}, { fullBlownCliArgument: 1 })
+loadOptions(optionsSpec, process, {})
