@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`loadOptions returns help 1`] = `
+"[1mOptions:[22m
+[33m[39m[33m--port     [39m[36m     [39mport
+
+[1mExamples:[22m
+test.js"
+`;
+
+exports[`loadOptions throws on missing values 1`] = `
+"Failed to parse [1mport[22m argument value. 
+Expected [32mstring[39m, got [31mtrue[39m"
+`;
+
+exports[`loadOptions throws on unknown args 1`] = `"Unknown argument: --unknown"`;
+
+exports[`loadOptions throws on unparsed args 1`] = `
+"Failed to parse [1mport[22m argument value. 
+Expected [32mnumber[39m, got [31mW_W[39m"
+`;
+
+exports[`parsers number should return error on invalid values 1`] = `"Expected [32mnumber[39m, got [31mnot a number[39m"`;
+
+exports[`parsers oneOf should return error on invalid values 1`] = `"Expected [32mone of [\\"1\\",\\"2\\"][39m, got [31m3[39m"`;
