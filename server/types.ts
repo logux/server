@@ -1,5 +1,4 @@
-import { actionCreatorFactory } from 'typescript-fsa'
-import { LoguxSubscribeAction } from '@logux/actions'
+import { LoguxSubscribeAction, defineAction } from '@logux/actions'
 
 import { Server, Action } from '../index.js'
 import pino from 'pino'
@@ -108,11 +107,13 @@ server.on('connected', client => {
   console.log(client.remoteAddress)
 })
 
-let createAction = actionCreatorFactory()
-let addUser = createAction<{ userId: string }>('user/remove')
+let addUser = defineAction<
+  { type: 'user/remove'; userId: string },
+  { userId: string }
+>('user/remove')
 
 server.type(addUser, {
   access (ctx, action) {
-    return action.payload.userId === ctx.userId
+    return action.userId === ctx.userId
   }
 })

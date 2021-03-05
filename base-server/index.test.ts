@@ -1,5 +1,5 @@
 import { MemoryStore, TestTime, Log, Action, TestLog } from '@logux/core'
-import { actionCreatorFactory } from 'typescript-fsa'
+import { defineAction } from '@logux/actions'
 import { fileURLToPath } from 'url'
 import { readFileSync } from 'fs'
 import { delay } from 'nanodelay'
@@ -1280,20 +1280,20 @@ it('tracks action processing on add', async () => {
 })
 
 it('has shortcut API for action creators', async () => {
-  let createAction = actionCreatorFactory()
-  let createA = createAction('A')
+  type ActionA = { type: 'A'; aValue: string }
+  let createA = defineAction<ActionA, { aValue: string }>('A')
 
-  let processed: Action[] = []
+  let processed: string[] = []
   let app = createServer()
   app.type(createA, {
     access: () => true,
     process (ctx, action) {
-      processed.push(action)
+      processed.push(action.aValue)
     }
   })
 
-  await app.process({ type: 'A' })
-  expect(processed).toEqual([{ type: 'A' }])
+  await app.process(createA({ aValue: 'test' }))
+  expect(processed).toEqual(['test'])
 })
 
 it('has alias to root from file URL', () => {
