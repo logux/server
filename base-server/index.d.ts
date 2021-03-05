@@ -486,7 +486,7 @@ export type Logger = {
 
 interface ActionCreator {
   (...args: any): Action
-  toString(): string
+  type: string
 }
 
 type Response = {

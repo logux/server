@@ -77,7 +77,6 @@
     "print-snapshots": "^0.3.2",
     "ts-jest": "^27.0.0-next.4",
     "typescript": "^4.2.2",
-    "typescript-fsa": "^3.0.0",
     "yaspeller": "^7.0.0"
   },
   "husky": {

@@ -1,5 +1,4 @@
-import { actionCreatorFactory } from 'typescript-fsa'
-import { LoguxSubscribeAction } from '@logux/actions'
+import { LoguxSubscribeAction, defineAction } from '@logux/actions'
 
 import { Server, Action } from '../index.js'
 
@@ -128,12 +127,14 @@ server.channel<BadParams>('posts', {
   }
 })
 
-let createAction = actionCreatorFactory()
-let addUser = createAction<{ userId: string }>('user/remove')
+let addUser = defineAction<
+  { type: 'user/remove'; userId: string },
+  { userId: string }
+>('user/remove')
 
 server.type(addUser, {
   access (ctx, action) {
-    // THROWS Property 'id' does not exist on type '{ userId: string; }'
-    return action.payload.id === ctx.userId
+    // THROWS Property 'id' does not exist on type '{ type: "user/remove";
+    return action.id === ctx.userId
   }
 })

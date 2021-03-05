@@ -381,7 +381,7 @@ export class BaseServer {
   }
 
   type (name, callbacks) {
-    if (typeof name === 'function') name = name.toString()
+    if (typeof name === 'function') name = name.type
     if (!callbacks || !callbacks.access) {
       throw new Error(`Action type ${name} must have access callback`)
     }
