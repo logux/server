@@ -15,17 +15,12 @@ export class ResponseError extends Error {
 
 export async function request (url, opts = {}, fetcher = fetch) {
   let response = await fetcher(url, opts)
-  if (response.statusCode === 204) {
+  if (response.status === 204) {
     return undefined
-  } else if (response.statusCode >= 200 && response.statusCode <= 299) {
+  } else if (response.status >= 200 && response.status <= 299) {
     return response.json()
   } else {
-    throw new ResponseError(
-      response.statusCode,
-      url,
-      opts,
-      await response.text()
-    )
+    throw new ResponseError(response.status, url, opts, await response.text())
   }
 }
 
