@@ -17,7 +17,7 @@ it('has error', () => {
 it('throws an error on non-2xx response', async () => {
   async function fetch () {
     return {
-      statusCode: 403,
+      status: 403,
       async text () {
         return 'answer'
       }
@@ -33,7 +33,7 @@ it('throws an error on non-2xx response', async () => {
 it('parses JSON body', async () => {
   async function fetch () {
     return {
-      statusCode: 200,
+      status: 200,
       async json () {
         return { answer: '1' }
       }
@@ -44,7 +44,7 @@ it('parses JSON body', async () => {
 
 it('has shortcut for GET', async () => {
   let fetch = jest.fn(async () => ({
-    statusCode: 200,
+    status: 200,
     async json () {
       return { answer: '1' }
     }
@@ -58,7 +58,7 @@ it('has shortcut for GET', async () => {
 })
 
 it('has shortcut for POST', async () => {
-  let fetch = jest.fn(async () => ({ statusCode: 204 }))
+  let fetch = jest.fn(async () => ({ status: 204 }))
   await post('/a', { headers: { a: 1 } }, fetch)
   expect(fetch).toHaveBeenCalledWith('/a', {
     method: 'POST',
@@ -67,7 +67,7 @@ it('has shortcut for POST', async () => {
 })
 
 it('has shortcut for PUT', async () => {
-  let fetch = jest.fn(async () => ({ statusCode: 204 }))
+  let fetch = jest.fn(async () => ({ status: 204 }))
   await put('/a', { headers: { a: 1 } }, fetch)
   expect(fetch).toHaveBeenCalledWith('/a', {
     method: 'PUT',
@@ -76,7 +76,7 @@ it('has shortcut for PUT', async () => {
 })
 
 it('has shortcut for PATCH', async () => {
-  let fetch = jest.fn(async () => ({ statusCode: 204 }))
+  let fetch = jest.fn(async () => ({ status: 204 }))
   await patch('/a', { headers: { a: 1 } }, fetch)
   expect(fetch).toHaveBeenCalledWith('/a', {
     method: 'PATCH',
@@ -85,7 +85,7 @@ it('has shortcut for PATCH', async () => {
 })
 
 it('has shortcut for DELETE', async () => {
-  let fetch = jest.fn(async () => ({ statusCode: 204 }))
+  let fetch = jest.fn(async () => ({ status: 204 }))
   await del('/a', { headers: { a: 1 } }, fetch)
   expect(fetch).toHaveBeenCalledWith('/a', {
     method: 'DELETE',
@@ -96,7 +96,7 @@ it('has shortcut for DELETE', async () => {
 it('works without option object', async () => {
   async function fetch () {
     return {
-      statusCode: 404,
+      status: 404,
       async text () {
         return 'answer'
       }
