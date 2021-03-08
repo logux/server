@@ -58,10 +58,10 @@ function check (
       if (out.length > 0) {
         server.kill('SIGINT')
       } else {
-        setTimeout(waitOut, 100)
+        setTimeout(waitOut, 500)
       }
     }
-    if (kill) setTimeout(waitOut, 200)
+    if (kill) setTimeout(waitOut, 500)
   })
 }
 
