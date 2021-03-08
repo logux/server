@@ -42,7 +42,6 @@
     "strip-ansi": "^6.0.0",
     "url-pattern": "^1.0.3",
     "ws": "^7.4.4",
-    "yargs": "^16.2.0",
     "yyyy-mm-dd": "^1.0.2"
   },
   "devDependencies": {
