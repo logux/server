@@ -7,6 +7,15 @@ export {
   ServerMeta,
   Logger
 } from './base-server/index.js'
+export {
+  ResponseError,
+  request,
+  patch,
+  post,
+  get,
+  put,
+  del
+} from './request/index.js'
 export { TestServer, TestServerOptions } from './test-server/index.js'
 export { TestClient, LoguxActionError } from './test-client/index.js'
 export { Context, ChannelContext } from './context/index.js'
