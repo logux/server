@@ -96,33 +96,31 @@ function composeHelp (spec, argv) {
     env: spec.envPrefix ? composeEnvName(spec.envPrefix, name) : '',
     description: option.description
   }))
-  let aliasColumnLength = Math.max(...options.map(it => it.alias.length))
   let nameColumnLength = Math.max(...options.map(it => it.full.length))
   let envColumnLength = Math.max(...options.map(it => it.env.length))
 
-  let composeAlias = alias =>
-    yellow(alias.padEnd(aliasColumnLength && aliasColumnLength + 2))
-  let composeName = name => yellow(name.padEnd(nameColumnLength + 5))
-  let composeEnv = env => cyan(env.padEnd(envColumnLength + 5))
+  let composeName = name => yellow(name.padEnd(nameColumnLength + 2))
+  let composeEnv = env => cyan(env.padEnd(envColumnLength + 2))
   let composeOptionHelp = option => {
-    return `${composeAlias(option.alias)}${composeName(
-      option.full
-    )}${composeEnv(option.env)}${option.description}`
+    return (
+      composeName(option.full) + composeEnv(option.env) + option.description
+    )
   }
 
   let examples = []
   if (spec.examples) {
     let pathParts = argv[1].split('/')
+    let lastPart = pathParts[pathParts.length - 1]
     examples = [
       '',
       bold('Examples:'),
-      ...spec.examples.map(it =>
-        it.replace('$0', pathParts[pathParts.length - 1])
-      )
+      ...spec.examples.map(i => i.replace('$0', lastPart))
     ]
   }
 
   return [
+    'Start Logux Server',
+    '',
     bold('Options:'),
     ...options.map(option => composeOptionHelp(option)),
     ...examples

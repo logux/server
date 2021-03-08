@@ -1,8 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`loadOptions returns help 1`] = `
-"[1mOptions:[22m
-[33m[39m[33m--port     [39m[36m     [39mport
+"Start Logux Server
+
+[1mOptions:[22m
+[33m--port  [39m[36m  [39mport
 
 [1mExamples:[22m
 test.js"

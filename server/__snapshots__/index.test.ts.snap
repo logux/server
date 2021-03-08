@@ -44,22 +44,24 @@ exports[`has custom logger 1`] = `
 `;
 
 exports[`shows help 1`] = `
-"Options:
--h  --host               LOGUX_HOST               Host to bind server
--p  --port               LOGUX_PORT               Port to bind server
-    --key                LOGUX_KEY                Path to SSL key
-    --cert               LOGUX_CERT               Path to SSL certificate
-    --supports           LOGUX_SUPPORTS           Range of supported client subprotocols
-    --subprotocol        LOGUX_SUBPROTOCOL        Server subprotocol
--l  --logger             LOGUX_LOGGER             Logger type
-    --backend            LOGUX_BACKEND            Backend to process actions and authentication
-    --control-secret     LOGUX_CONTROL_SECRET     Secret to control Logux server
-    --control-mask       LOGUX_CONTROL_MASK       CIDR masks for IP addresses of control servers
-    --redis              LOGUX_REDIS              URL to Redis for Logux Server Pro scaling
+"Start Logux Server
+
+Options:
+--host            LOGUX_HOST            Host to bind server
+--port            LOGUX_PORT            Port to bind server
+--key             LOGUX_KEY             Path to SSL key
+--cert            LOGUX_CERT            Path to SSL certificate
+--supports        LOGUX_SUPPORTS        Range of supported client subprotocols
+--subprotocol     LOGUX_SUBPROTOCOL     Server subprotocol
+--logger          LOGUX_LOGGER          Logger type
+--backend         LOGUX_BACKEND         Backend to process actions
+--control-secret  LOGUX_CONTROL_SECRET  Secret to control Logux server
+--control-mask    LOGUX_CONTROL_MASK    CIDR masks of control servers
+--redis           LOGUX_REDIS           Redis URL for Logux Server Pro scaling
 
 Examples:
 options.js --port 31337 --host 127.0.0.1
-LOGUX_PORT=1337 options.js
+LOGUX_PORT=1337 LOGUX_HOST=127.0.0.1 options.js
 "
 `;
 

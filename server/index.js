@@ -35,20 +35,23 @@ let cliOptionsSpec = {
       parse: value => oneOf(['human', 'json'], value)
     },
     backend: {
-      description: 'Backend to process actions and authentication'
+      description: 'Backend to process actions'
     },
     controlSecret: {
       description: 'Secret to control Logux server'
     },
     controlMask: {
-      description: 'CIDR masks for IP addresses of control servers'
+      description: 'CIDR masks of control servers'
     },
     redis: {
-      description: 'URL to Redis for Logux Server Pro scaling'
+      description: 'Redis URL for Logux Server Pro scaling'
     }
   },
   envPrefix: 'LOGUX',
-  examples: ['$0 --port 31337 --host 127.0.0.1', 'LOGUX_PORT=1337 $0']
+  examples: [
+    '$0 --port 31337 --host 127.0.0.1',
+    'LOGUX_PORT=1337 LOGUX_HOST=127.0.0.1 $0'
+  ]
 }
 
 export class Server extends BaseServer {
@@ -59,13 +62,13 @@ export class Server extends BaseServer {
       defaults.root ? { path: join(defaults.root, '.env') } : undefined
     )
     if (help) {
-      console.log(help)
+      process.stdout.write(help + '\n')
       process.exit(0)
     } else {
       try {
         return Object.assign(defaults, options)
       } catch (e) {
-        console.error(`${bgRed(black(' ERROR '))} ${e.message}`)
+        process.stderr.write(`${bgRed(black(' FATAL '))} ${e.message}\n`)
         process.exit(1)
       }
     }
