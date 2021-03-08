@@ -6,7 +6,7 @@ import http from 'http'
 import { BaseServer, BaseServerOptions } from '../index.js'
 
 let lastPort = 10111
-function createServer (opts: Partial<BaseServerOptions> = {}) {
+function createServer (opts: Partial<BaseServerOptions> = {}): BaseServer {
   lastPort += 1
   let server = new BaseServer({
     subprotocol: '0.0.0',
@@ -39,7 +39,13 @@ afterEach(async () => {
   await app.destroy()
 })
 
-function createReporter (opts = {}) {
+function createReporter (
+  opts = {}
+): {
+  names: string[]
+  reports: [string, object][]
+  app: BaseServer
+} {
   let names: string[] = []
   let reports: [string, object][] = []
 

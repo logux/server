@@ -20,12 +20,12 @@ class MemoryStream {
     this.string = ''
   }
 
-  write (chunk: string) {
+  write (chunk: string): void {
     this.string += chunk
   }
 }
 
-function clean (str: string) {
+function clean (str: string): string {
   return str
     .replace(/\r\v/g, '\n')
     .replace(/\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/g, '1970-01-01 00:00:00')
@@ -35,7 +35,7 @@ function clean (str: string) {
     .replace(/PID:(\s+.*m)\d+(.*m)/, 'PID:$121384$2')
 }
 
-function check (type: string, details?: object) {
+function check (type: string, details?: object): void {
   let json = new MemoryStream()
   let jsonReporter = createReporter({
     logger: pino(
@@ -71,7 +71,7 @@ function check (type: string, details?: object) {
   expect(clean(human.string)).toMatchSnapshot()
 }
 
-function createError (name: string, message: string) {
+function createError (name: string, message: string): Error {
   let err = new Error(message)
   err.name = name
   err.stack =

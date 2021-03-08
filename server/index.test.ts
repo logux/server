@@ -10,11 +10,11 @@ const DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
 
 let started: ChildProcess | undefined
 
-function start (name: string, args?: string[]) {
+function start (name: string, args?: string[]): Promise<void> {
   return new Promise<void>(resolve => {
     started = spawn(join(ROOT, 'test/servers/', name), args)
     let running = false
-    function callback () {
+    function callback (): void {
       if (!running) {
         running = true
         resolve()
@@ -30,7 +30,7 @@ function check (
   args?: string[],
   opts?: SpawnOptions,
   kill = false
-) {
+): Promise<[string, number]> {
   return new Promise<[string, number]>(resolve => {
     let out = ''
     let server = spawn(join(ROOT, 'test/servers/', name), args, opts)
@@ -54,7 +54,7 @@ function check (
       resolve([fixed, exit || 0])
     })
 
-    function waitOut () {
+    function waitOut (): void {
       if (out.length > 0) {
         server.kill('SIGINT')
       } else {
@@ -69,7 +69,11 @@ function fakeProcess (argv: string[] = [], env: object = {}): any {
   return { argv, env }
 }
 
-async function checkOut (name: string, args?: string[], opts?: SpawnOptions) {
+async function checkOut (
+  name: string,
+  args?: string[],
+  opts?: SpawnOptions
+): Promise<void> {
   let result = await check(name, args, opts, true)
   let out = result[0]
   let exit = result[1]
@@ -79,7 +83,11 @@ async function checkOut (name: string, args?: string[], opts?: SpawnOptions) {
   }
 }
 
-async function checkError (name: string, args?: string[], opts?: SpawnOptions) {
+async function checkError (
+  name: string,
+  args?: string[],
+  opts?: SpawnOptions
+): Promise<void> {
   let result = await check(name, args, opts)
   let out = result[0]
   let exit = result[1]

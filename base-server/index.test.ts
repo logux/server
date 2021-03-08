@@ -21,7 +21,9 @@ const CERT = join(ROOT, 'test/fixtures/cert.pem')
 const KEY = join(ROOT, 'test/fixtures/key.pem')
 
 let lastPort = 9111
-function createServer (options: Partial<BaseServerOptions> = {}) {
+function createServer (
+  options: Partial<BaseServerOptions> = {}
+): BaseServer<{}, TestLog<ServerMeta>> {
   let opts = {
     ...DEFAULT_OPTIONS,
     ...options
@@ -46,7 +48,13 @@ function createServer (options: Partial<BaseServerOptions> = {}) {
 let destroyable: BaseServer | undefined
 let httpServer: http.Server | undefined
 
-function createReporter (opts: Partial<BaseServerOptions> = {}) {
+function createReporter (
+  opts: Partial<BaseServerOptions> = {}
+): {
+  app: BaseServer<{}, TestLog<ServerMeta>>
+  names: string[]
+  reports: [string, any][]
+} {
   let names: string[] = []
   let reports: [string, any][] = []
 
@@ -64,7 +72,7 @@ function privateMethods (obj: object): any {
   return obj
 }
 
-function emit (obj: any, event: string, ...args: any) {
+function emit (obj: any, event: string, ...args: any): void {
   obj.emitter.emit(event, ...args)
 }
 
@@ -937,7 +945,7 @@ it('subscribes clients', async () => {
     }
   })
 
-  let filter = () => false
+  let filter = (): boolean => false
   test.app.channel('posts', {
     access () {
       return true
