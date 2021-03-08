@@ -4,6 +4,10 @@ import { Action, AnyAction, TestLog, TestPair } from '@logux/core'
 import { ServerMeta } from '../base-server/index.js'
 import { TestServer } from '../test-server/index.js'
 
+export class LoguxActionError extends Error {
+  action: Action
+}
+
 export type TestClientOptions = {
   httpHeaders?: { [key: string]: string }
   subprotocol?: string

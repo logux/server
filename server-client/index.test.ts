@@ -1,9 +1,9 @@
 import {
+  ServerConnection,
   LoguxError,
   TestPair,
   TestTime,
   TestLog,
-  ServerConnection,
   Message,
   Action
 } from '@logux/core'
@@ -23,7 +23,7 @@ function getPair (client: ServerClient): TestPair {
   return privateMethods(client.connection).pair
 }
 
-async function sendTo (client: ServerClient, msg: Message) {
+async function sendTo (client: ServerClient, msg: Message): Promise<void> {
   let pair = getPair(client)
   pair.right.send(msg)
   await pair.wait('right')
@@ -33,7 +33,7 @@ async function connect (
   client: ServerClient,
   nodeId: string = '10:uuid',
   details: object | undefined = undefined
-) {
+): Promise<void> {
   await client.connection.connect()
   let protocol = client.node.localProtocol
   if (typeof details !== 'undefined') {
@@ -62,7 +62,9 @@ function createConnection (): ServerConnection {
   return pair.left as any
 }
 
-function createServer (opts: Partial<BaseServerOptions> = {}) {
+function createServer (
+  opts: Partial<BaseServerOptions> = {}
+): BaseServer<{ locale: string }, TestLog<ServerMeta>> {
   opts.subprotocol = '0.0.1'
   opts.supports = '0.x'
   opts.time = new TestTime()
@@ -83,7 +85,13 @@ function createServer (opts: Partial<BaseServerOptions> = {}) {
   return server
 }
 
-function createReporter (opts: Partial<BaseServerOptions> = {}) {
+function createReporter (
+  opts: Partial<BaseServerOptions> = {}
+): {
+  app: BaseServer<{ locale: string }, TestLog<ServerMeta>>
+  reports: [string, any][]
+  names: string[]
+} {
   let names: string[] = []
   let reports: [string, any][] = []
 
@@ -95,7 +103,7 @@ function createReporter (opts: Partial<BaseServerOptions> = {}) {
   return { app, reports, names }
 }
 
-function createClient (app: BaseServer) {
+function createClient (app: BaseServer): ServerClient {
   let lastClient: number = ++privateMethods(app).lastClient
   let client = new ServerClient(app, createConnection(), lastClient)
   app.connected.set(`${lastClient}`, client)
@@ -103,7 +111,10 @@ function createClient (app: BaseServer) {
   return client
 }
 
-async function connectClient (server: BaseServer, nodeId = '10:uuid') {
+async function connectClient (
+  server: BaseServer,
+  nodeId = '10:uuid'
+): Promise<ServerClient> {
   let client = createClient(server)
   privateMethods(client.node).now = () => 0
   await connect(client, nodeId)
@@ -118,7 +129,7 @@ function sentNames (client: ServerClient): string[] {
   return sent(client).map(i => i[0])
 }
 
-function actions (client: ServerClient) {
+function actions (client: ServerClient): Action[] {
   let received: Action[] = []
   sent(client).forEach(i => {
     if (i[0] === 'sync') {
@@ -333,7 +344,7 @@ it('reports about authentication error', async () => {
 it('blocks authentication bruteforce', async () => {
   let test = createReporter()
   test.app.auth(async () => false)
-  async function connectNext (num: number) {
+  async function connectNext (num: number): Promise<void> {
     let client = new ServerClient(test.app, createConnection(), num)
     await connect(client, `${num}:uuid`)
   }
@@ -1460,7 +1471,7 @@ it('does not dublicate channel load actions', async () => {
   ])
   await delay(10)
 
-  function meta (time: number) {
+  function meta (time: number): object {
     return { id: time, time, subprotocol: '0.0.1' }
   }
   expect(sent(client).slice(1)).toEqual([
@@ -1511,7 +1522,7 @@ it('allows to return actions', async () => {
   ])
   await delay(10)
 
-  function meta (time: number) {
+  function meta (time: number): object {
     return { id: time, time, subprotocol: '0.0.1' }
   }
   expect(sent(client).slice(1)).toEqual([

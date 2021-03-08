@@ -3,14 +3,14 @@ import { TestTime } from '@logux/core'
 import { delay } from 'nanodelay'
 import { jest } from '@jest/globals'
 
-import { TestClient, TestServer } from '../index.js'
+import { TestClient, TestServer, LoguxActionError } from '../index.js'
 
 let server: TestServer
 afterEach(() => {
   server.destroy()
 })
 
-async function catchError (cb: () => Promise<any>) {
+async function catchError (cb: () => Promise<any>): Promise<LoguxActionError> {
   let err
   try {
     await cb()

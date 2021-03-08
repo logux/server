@@ -43,7 +43,7 @@ function privateMethods (obj: object): any {
   return obj
 }
 
-function createServer (opts?: TestServerOptions) {
+function createServer (opts?: TestServerOptions): TestServer {
   lastPort += 1
   let server = new TestServer({
     port: lastPort,
@@ -74,7 +74,12 @@ type StringRequest = RequestOptions & {
   data?: undefined
 }
 
-function request ({ method, path, string, data }: DataRequest | StringRequest) {
+function request ({
+  method,
+  path,
+  string,
+  data
+}: DataRequest | StringRequest): Promise<number> {
   let body = string ?? JSON.stringify(data)
   return new Promise<number>((resolve, reject) => {
     let req = http.request(
@@ -97,11 +102,11 @@ function request ({ method, path, string, data }: DataRequest | StringRequest) {
   })
 }
 
-function send (data: object) {
+function send (data: object): Promise<number> {
   return request({ data })
 }
 
-async function catchError (cb: () => Promise<any>) {
+async function catchError (cb: () => Promise<any>): Promise<Error> {
   let err
   try {
     await cb()
@@ -227,7 +232,7 @@ it('validates HTTP requests', async () => {
   })
   await app.listen()
 
-  function check (...commands: any[]) {
+  function check (...commands: any[]): Promise<number> {
     return send({ version: 4, secret: 'S', commands })
   }
 
