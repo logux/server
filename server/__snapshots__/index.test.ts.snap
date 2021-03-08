@@ -45,27 +45,21 @@ exports[`has custom logger 1`] = `
 
 exports[`shows help 1`] = `
 "Options:
-  -h, --host            Host to bind server.                            [string]
-  -p, --port            Port to bind server                             [number]
-      --key             Path to SSL key                                 [string]
-      --cert            Path to SSL certificate                         [string]
-      --supports        Range of supported client subprotocols          [string]
-      --subprotocol     Server subprotocol                              [string]
-  -l, --logger          Logger type          [string] [choices: \\"human\\", \\"json\\"]
-      --backend         Backend to process actions and authentication   [string]
-      --control-secret  Secret to control Logux server                  [string]
-      --control-mask    CIDR masks for IP addresses of control servers  [string]
-      --redis           URL to Redis for Logux Server Pro scaling       [string]
-      --help            Show help                                      [boolean]
+-h  --host               LOGUX_HOST               Host to bind server
+-p  --port               LOGUX_PORT               Port to bind server
+    --key                LOGUX_KEY                Path to SSL key
+    --cert               LOGUX_CERT               Path to SSL certificate
+    --supports           LOGUX_SUPPORTS           Range of supported client subprotocols
+    --subprotocol        LOGUX_SUBPROTOCOL        Server subprotocol
+-l  --logger             LOGUX_LOGGER             Logger type
+    --backend            LOGUX_BACKEND            Backend to process actions and authentication
+    --control-secret     LOGUX_CONTROL_SECRET     Secret to control Logux server
+    --control-mask       LOGUX_CONTROL_MASK       CIDR masks for IP addresses of control servers
+    --redis              LOGUX_REDIS              URL to Redis for Logux Server Pro scaling
 
 Examples:
-  options.js --port 31337 --host 127.0.0.1
-  LOGUX_PORT=1337 options.js
-
-Environment variables:
-  LOGUX_HOST, LOGUX_PORT, LOGUX_KEY, LOGUX_CERT, LOGUX_LOGGER, LOGUX_REDIS
-  LOGUX_SUPPORTS, LOGUX_SUBPROTOCOL, LOGUX_CONTROL_MASK, LOGUX_CONTROL_SECRET
-  LOGUX_BACKEND
+options.js --port 31337 --host 127.0.0.1
+LOGUX_PORT=1337 options.js
 "
 `;
 
