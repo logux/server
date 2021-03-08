@@ -10,7 +10,12 @@ import {
 import { delay } from 'nanodelay'
 import { jest } from '@jest/globals'
 
-import { BaseServer, BaseServerOptions, ServerMeta } from '../index.js'
+import {
+  BaseServerOptions,
+  ResponseError,
+  BaseServer,
+  ServerMeta
+} from '../index.js'
 import { ServerClient } from './index.js'
 
 let destroyable: { destroy(): void }[] = []
@@ -1616,4 +1621,159 @@ it('restores actions with old ID from history', async () => {
   ])
   await delay(10)
   expect(actions(client2)).toEqual([{ type: 'A' }])
+})
+
+it('has shortcut to access and process in one callback', async () => {
+  let app = createServer()
+  app.log.keepActions()
+
+  app.type('FOO', {
+    async accessAndProcess (ctx, action, meta) {
+      expect(typeof meta.id).toEqual('string')
+      expect(action.type).toEqual('FOO')
+      await ctx.sendBack({ type: 'REFOO' })
+    }
+  })
+  app.otherType({
+    async accessAndProcess (ctx, action, meta) {
+      expect(typeof meta.id).toEqual('string')
+      expect(typeof action.type).toEqual('string')
+      if (action.type === 'BAR') {
+        await ctx.sendBack({ type: 'REBAR' })
+      }
+    }
+  })
+  app.channel('foo', {
+    async accessAndLoad (ctx, action, meta) {
+      expect(typeof meta.id).toEqual('string')
+      expect(action.type).toEqual('logux/subscribe')
+      return { type: 'FOO:load' }
+    }
+  })
+  app.otherChannel({
+    accessAndLoad (ctx, action, meta) {
+      expect(typeof meta.id).toEqual('string')
+      expect(action.type).toEqual('logux/subscribe')
+      return [{ type: 'OTHER:load' }]
+    }
+  })
+
+  let client = await connectClient(app, '10:1:uuid')
+  await sendTo(client, [
+    'sync',
+    1,
+    { type: 'FOO' },
+    { id: [1, '10:1:uuid', 0], time: 1 }
+  ])
+  await delay(100)
+  await sendTo(client, [
+    'sync',
+    2,
+    { type: 'BAR' },
+    { id: [2, '10:1:uuid', 0], time: 1 }
+  ])
+  await delay(100)
+  await sendTo(client, [
+    'sync',
+    3,
+    { type: 'logux/subscribe', channel: 'foo' },
+    { id: [3, '10:1:uuid', 0], time: 1 }
+  ])
+  await delay(100)
+  await sendTo(client, [
+    'sync',
+    4,
+    { type: 'logux/subscribe', channel: 'bar' },
+    { id: [4, '10:1:uuid', 0], time: 1 }
+  ])
+  await delay(100)
+
+  expect(app.log.actions()).toEqual([
+    { type: 'FOO' },
+    { type: 'BAR' },
+    { type: 'logux/subscribe', channel: 'foo' },
+    { type: 'logux/subscribe', channel: 'bar' },
+    { type: 'REFOO' },
+    { type: 'logux/processed', id: '1 10:1:uuid 0' },
+    { type: 'REBAR' },
+    { type: 'logux/processed', id: '2 10:1:uuid 0' },
+    { type: 'FOO:load' },
+    { type: 'logux/processed', id: '3 10:1:uuid 0' },
+    { type: 'OTHER:load' },
+    { type: 'logux/processed', id: '4 10:1:uuid 0' }
+  ])
+})
+
+it('denies access on 403 error', async () => {
+  let app = createServer()
+  app.log.keepActions()
+
+  let error404 = new ResponseError(404, '/a', {}, '404')
+  let error403 = new ResponseError(403, '/a', {}, '403')
+  let error = new Error('test')
+
+  let catched: Error[] = []
+  app.on('error', e => {
+    catched.push(e)
+  })
+
+  app.type('E404', {
+    accessAndProcess () {
+      throw error404
+    }
+  })
+  app.type('E403', {
+    accessAndProcess () {
+      throw error403
+    }
+  })
+  app.type('ERROR', {
+    async accessAndProcess () {
+      throw error
+    }
+  })
+
+  let client = await connectClient(app, '10:1:uuid')
+  await sendTo(client, [
+    'sync',
+    2,
+    { type: 'E404' },
+    { id: [1, '10:1:uuid', 0], time: 1 }
+  ])
+  await delay(100)
+  await sendTo(client, [
+    'sync',
+    2,
+    { type: 'E403' },
+    { id: [2, '10:1:uuid', 0], time: 1 }
+  ])
+  await delay(100)
+  await sendTo(client, [
+    'sync',
+    2,
+    { type: 'ERROR' },
+    { id: [3, '10:1:uuid', 0], time: 1 }
+  ])
+  await delay(100)
+  expect(app.log.actions()).toEqual([
+    {
+      type: 'logux/undo',
+      id: '1 10:1:uuid 0',
+      reason: 'error',
+      action: { type: 'E404' }
+    },
+    {
+      type: 'logux/undo',
+      id: '2 10:1:uuid 0',
+      reason: 'denied',
+      action: { type: 'E403' }
+    },
+    {
+      type: 'logux/undo',
+      id: '3 10:1:uuid 0',
+      reason: 'error',
+      action: { type: 'ERROR' }
+    }
+  ])
+  expect(catched).toEqual([error404, error])
 })
