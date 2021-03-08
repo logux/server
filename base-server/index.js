@@ -33,6 +33,45 @@ async function readHello () {
   return helloCache
 }
 
+async function wasNot403 (cb) {
+  try {
+    await cb()
+    return true
+  } catch (e) {
+    if (e.name === 'ResponseError' && e.statusCode === 403) {
+      return false
+    }
+    throw e
+  }
+}
+
+function normalizeTypeCallbacks (name, callbacks) {
+  if (callbacks && callbacks.accessAndProcess) {
+    callbacks.access = (...args) => {
+      return wasNot403(async () => {
+        await callbacks.accessAndProcess(...args)
+      })
+    }
+  }
+  if (!callbacks || !callbacks.access) {
+    throw new Error(`${name} must have access callback`)
+  }
+}
+
+function normalizeChannelCallbacks (pattern, callbacks) {
+  if (callbacks && callbacks.accessAndLoad) {
+    callbacks.access = (ctx, ...args) => {
+      return wasNot403(async () => {
+        ctx.data.load = await callbacks.accessAndLoad(ctx, ...args)
+      })
+    }
+    callbacks.load = ctx => ctx.data.load
+  }
+  if (!callbacks || !callbacks.access) {
+    throw new Error(`Channel ${pattern} must have access callback`)
+  }
+}
+
 export class BaseServer {
   constructor (opts = {}) {
     this.options = opts
@@ -382,9 +421,7 @@ export class BaseServer {
 
   type (name, callbacks) {
     if (typeof name === 'function') name = name.type
-    if (!callbacks || !callbacks.access) {
-      throw new Error(`Action type ${name} must have access callback`)
-    }
+    normalizeTypeCallbacks(`Action type ${name}`, callbacks)
 
     if (name instanceof RegExp) {
       this.regexTypes.set(name, callbacks)
@@ -400,16 +437,12 @@ export class BaseServer {
     if (this.otherProcessor) {
       throw new Error('Callbacks for unknown types are already defined')
     }
-    if (!callbacks || !callbacks.access) {
-      throw new Error('Unknown type must have access callback')
-    }
+    normalizeTypeCallbacks('Unknown type', callbacks)
     this.otherProcessor = callbacks
   }
 
   channel (pattern, callbacks) {
-    if (!callbacks || !callbacks.access) {
-      throw new Error(`Channel ${pattern} must have access callback`)
-    }
+    normalizeChannelCallbacks(`Channel ${pattern}`, callbacks)
     let channel = Object.assign({}, callbacks)
     if (typeof pattern === 'string') {
       channel.pattern = new UrlPattern(pattern, {
@@ -422,9 +455,7 @@ export class BaseServer {
   }
 
   otherChannel (callbacks) {
-    if (!callbacks || !callbacks.access) {
-      throw new Error('Unknown channel must have access callback')
-    }
+    normalizeChannelCallbacks('Unknown channel', callbacks)
     if (this.otherSubscriber) {
       throw new Error('Callbacks for unknown channel are already defined')
     }

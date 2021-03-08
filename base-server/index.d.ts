@@ -353,12 +353,18 @@ interface ChannelFinally<
   (ctx: ChannelContext<D, P, H>, action: A, meta: ServerMeta): void
 }
 
-type ActionCallbacks<A extends Action, D extends object, H extends object> = {
-  access: Authorizer<A, D, H>
-  resend?: Resender<A, D, H>
-  process?: Processor<A, D, H>
-  finally?: ActionFinally<A, D, H>
-}
+type ActionCallbacks<A extends Action, D extends object, H extends object> =
+  | {
+      access: Authorizer<A, D, H>
+      resend?: Resender<A, D, H>
+      process?: Processor<A, D, H>
+      finally?: ActionFinally<A, D, H>
+    }
+  | {
+      accessAndProcess: Processor<A, D, H>
+      resend?: Resender<A, D, H>
+      finally?: ActionFinally<A, D, H>
+    }
 
 type ChannelCallbacks<
   A extends Action,
@@ -964,7 +970,7 @@ export class BaseServer<
    * @param meta Action’s meta.
    * @returns Promise until new action will be resend to clients and processed.
    */
-  process (action: Action, meta?: Partial<ServerMeta>): Promise<ServerMeta>
+  process (action: AnyAction, meta?: Partial<ServerMeta>): Promise<ServerMeta>
 
   /**
    * Undo action from client.
