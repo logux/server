@@ -5,6 +5,7 @@ export {
   SendBackActions,
   BaseServer,
   ServerMeta,
+  wasNot403,
   Logger
 } from './base-server/index.js'
 export {

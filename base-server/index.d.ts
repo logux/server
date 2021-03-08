@@ -513,6 +513,23 @@ type PostProcessor = {
 }
 
 /**
+ * Return `false` if `cb()` got response error with 403.
+ *
+ * ```js
+ * import { wasNot403 } from '@logux/server'
+ *
+ * server.auth(({ userId, token }) => {
+ *   return wasNot403(async () => {
+ *     get(`/checkUser/${userId}/${token}`)
+ *   })
+ * })
+ * ```
+ *
+ * @param cb Callback with `request` calls.
+ */
+export function wasNot403 (cb: () => Promise<void>): Promise<boolean>
+
+/**
  * Base server class to extend.
  */
 export class BaseServer<

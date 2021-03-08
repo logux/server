@@ -33,7 +33,7 @@ async function readHello () {
   return helloCache
 }
 
-async function wasNot403 (cb) {
+export async function wasNot403 (cb) {
   try {
     await cb()
     return true
