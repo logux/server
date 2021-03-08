@@ -235,7 +235,14 @@ it('uses .env cwd', async () => {
 
 it('uses .env from root', () => checkOut('root.js'))
 
-it('shows help', () => checkOut('options.js', ['', '--help']))
+it('shows help', async () => {
+  await checkOut('options.js', ['', '--help'], {
+    env: {
+      ...process.env,
+      NO_COLOR: '1'
+    }
+  })
+})
 
 it('shows help about port in use', async () => {
   await start('eaddrinuse.js')
