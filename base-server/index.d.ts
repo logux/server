@@ -530,6 +530,25 @@ type PostProcessor = {
 export function wasNot403 (cb: () => Promise<void>): Promise<boolean>
 
 /**
+ * An error for `load()` callback to return `logux/undo` with 404.
+ *
+ * ```js
+ * import { LoguxNotFoundError } from '@logux/server'
+ *
+ * server.channel('posts/:id', {
+ *   …
+ *   load () {
+ *     throw new LoguxNotFoundError()
+ *   }
+ * })
+ * ```
+ */
+export class LoguxNotFoundError extends Error {
+  name: 'LoguxNotFoundError'
+  constructor ()
+}
+
+/**
  * Base server class to extend.
  */
 export class BaseServer<

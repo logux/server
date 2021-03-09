@@ -45,6 +45,13 @@ export async function wasNot403 (cb) {
   }
 }
 
+export class LoguxNotFoundError extends Error {
+  constructor () {
+    super('Not found')
+    this.name = 'LoguxNotFoundError'
+  }
+}
+
 function normalizeTypeCallbacks (name, callbacks) {
   if (callbacks && callbacks.accessAndProcess) {
     callbacks.access = (...args) => {
@@ -62,10 +69,24 @@ function normalizeChannelCallbacks (pattern, callbacks) {
   if (callbacks && callbacks.accessAndLoad) {
     callbacks.access = (ctx, ...args) => {
       return wasNot403(async () => {
-        ctx.data.load = await callbacks.accessAndLoad(ctx, ...args)
+        try {
+          ctx.data.load = await callbacks.accessAndLoad(ctx, ...args)
+        } catch (e) {
+          if (e.name === 'ResponseError' && e.statusCode === 404) {
+            ctx.data.notFound = true
+          } else {
+            throw e
+          }
+        }
       })
     }
-    callbacks.load = ctx => ctx.data.load
+    callbacks.load = ctx => {
+      if (ctx.data.notFound) {
+        throw new LoguxNotFoundError()
+      } else {
+        return ctx.data.load
+      }
+    }
   }
   if (!callbacks || !callbacks.access) {
     throw new Error(`Channel ${pattern} must have access callback`)
@@ -720,10 +741,14 @@ export class BaseServer {
           this.emitter.emit('subscribed', action, meta, Date.now() - start)
           this.markAsProcessed(meta)
         } catch (e) {
-          this.emitter.emit('error', e, action, meta)
-          this.undo(action, meta, 'error')
+          if (e.name === 'LoguxNotFoundError') {
+            this.undo(action, meta, 'notFound')
+          } else {
+            this.emitter.emit('error', e, action, meta)
+            this.undo(action, meta, 'error')
+          }
           if (subscribed) {
-            this.unsubscribeAction(action, meta)
+            this.unsubscribe(action, meta)
           }
         } finally {
           this.finally(channel, ctx, action, meta)
@@ -735,12 +760,7 @@ export class BaseServer {
     if (!match) this.wrongChannel(action, meta)
   }
 
-  unsubscribeAction (action, meta) {
-    if (typeof action.channel !== 'string') {
-      this.wrongChannel(action, meta)
-      return
-    }
-
+  unsubscribe (action, meta) {
     let nodeId = meta.id.split(' ')[1]
     if (this.subscribers[action.channel]) {
       delete this.subscribers[action.channel][nodeId]
@@ -748,12 +768,21 @@ export class BaseServer {
         delete this.subscribers[action.channel]
       }
     }
-
     this.emitter.emit('unsubscribed', action, meta)
     this.emitter.emit('report', 'unsubscribed', {
       actionId: meta.id,
       channel: action.channel
     })
+  }
+
+  unsubscribeAction (action, meta) {
+    if (typeof action.channel !== 'string') {
+      this.wrongChannel(action, meta)
+      return
+    }
+
+    this.unsubscribe(action, meta)
+
     this.markAsProcessed(meta)
     this.contexts.delete(action)
   }

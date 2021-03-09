@@ -1103,9 +1103,7 @@ it('reports about errors during channel initialization', async () => {
     'error',
     'add',
     'clean',
-    'unsubscribed',
-    'add',
-    'clean'
+    'unsubscribed'
   ])
   expect(test.reports[3][1]).toEqual({ actionId: '1 10:uuid 0', err })
   expect(test.reports[4][1].action).toEqual({

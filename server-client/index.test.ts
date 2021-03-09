@@ -1777,3 +1777,100 @@ it('denies access on 403 error', async () => {
   ])
   expect(catched).toEqual([error404, error])
 })
+
+it('undoes action with notFound on 404 error', async () => {
+  let app = createServer()
+  app.log.keepActions()
+
+  let error500 = new ResponseError(500, '/a', {}, '500')
+  let error404 = new ResponseError(404, '/a', {}, '404')
+  let error403 = new ResponseError(403, '/a', {}, '403')
+  let error = new Error('test')
+
+  let catched: Error[] = []
+  app.on('error', e => {
+    catched.push(e)
+  })
+
+  app.channel('e500', {
+    accessAndLoad () {
+      throw error500
+    }
+  })
+  app.channel('e404', {
+    accessAndLoad () {
+      throw error404
+    }
+  })
+  app.channel('e403', {
+    accessAndLoad () {
+      throw error403
+    }
+  })
+  app.channel('error', {
+    accessAndLoad () {
+      throw error
+    }
+  })
+
+  let client = await connectClient(app, '10:1:uuid')
+  await sendTo(client, [
+    'sync',
+    2,
+    { type: 'logux/subscribe', channel: 'e500' },
+    { id: [1, '10:1:uuid', 0], time: 1 }
+  ])
+  await delay(100)
+  await sendTo(client, [
+    'sync',
+    2,
+    { type: 'logux/subscribe', channel: 'e404' },
+    { id: [2, '10:1:uuid', 0], time: 1 }
+  ])
+  await delay(100)
+  await sendTo(client, [
+    'sync',
+    2,
+    { type: 'logux/subscribe', channel: 'e403' },
+    { id: [3, '10:1:uuid', 0], time: 1 }
+  ])
+  await delay(100)
+  await sendTo(client, [
+    'sync',
+    2,
+    { type: 'logux/subscribe', channel: 'error' },
+    { id: [4, '10:1:uuid', 0], time: 1 }
+  ])
+  await delay(100)
+  expect(app.log.actions()).toEqual([
+    { type: 'logux/subscribe', channel: 'e500' },
+    { type: 'logux/subscribe', channel: 'e404' },
+    { type: 'logux/subscribe', channel: 'e403' },
+    { type: 'logux/subscribe', channel: 'error' },
+    {
+      type: 'logux/undo',
+      id: '1 10:1:uuid 0',
+      reason: 'error',
+      action: { type: 'logux/subscribe', channel: 'e500' }
+    },
+    {
+      type: 'logux/undo',
+      id: '2 10:1:uuid 0',
+      reason: 'notFound',
+      action: { type: 'logux/subscribe', channel: 'e404' }
+    },
+    {
+      type: 'logux/undo',
+      id: '3 10:1:uuid 0',
+      reason: 'denied',
+      action: { type: 'logux/subscribe', channel: 'e403' }
+    },
+    {
+      type: 'logux/undo',
+      id: '4 10:1:uuid 0',
+      reason: 'error',
+      action: { type: 'logux/subscribe', channel: 'error' }
+    }
+  ])
+  expect(catched).toEqual([error500, error])
+})
