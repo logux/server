@@ -187,12 +187,18 @@ it('tracks subscriptions', async () => {
   await client.unsubscribe('foo')
   expect(privateMethods(server).subscribers).toEqual({})
 
-  let actions2 = await client.subscribe({
+  let actions2 = await client.subscribe('foo', { a: 1 })
+  expect(actions2).toEqual([{ type: 'FOO', a: 1 }])
+
+  await client.unsubscribe('foo', { a: 1 })
+  expect(privateMethods(server).subscribers).toEqual({})
+
+  let actions3 = await client.subscribe({
     type: 'logux/subscribe',
     channel: 'foo',
-    filter: { a: 1 }
+    filter: { a: 2 }
   })
-  expect(actions2).toEqual([{ type: 'FOO', a: 1 }])
+  expect(actions3).toEqual([{ type: 'FOO', a: 2 }])
 
   let unknownError = await catchError(() => client.subscribe('unknown'))
   expect(unknownError.message).toEqual(
