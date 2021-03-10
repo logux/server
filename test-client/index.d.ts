@@ -179,9 +179,13 @@ export class TestClient {
    * ```
    *
    * @param channel Channel name or `logux/subscribe` action.
+   * @param filter Optional filter for subscription.
    * @returns Promise with all actions from the server.
    */
-  subscribe (channel: string | LoguxSubscribeAction): Promise<Action[]>
+  subscribe (
+    channel: string | LoguxSubscribeAction,
+    filter?: object
+  ): Promise<Action[]>
 
   /**
    * Unsubscribe client from the channel.
@@ -191,9 +195,13 @@ export class TestClient {
    * ```
    *
    * @param channel Channel name or `logux/subscribe` action.
+   * @param filter Optional filter for subscription.
    * @returns Promise until server will remove client from subscribers.
    */
-  unsubscribe (channel: string | LoguxUnsubscribeAction): Promise<Action[]>
+  unsubscribe (
+    channel: string | LoguxUnsubscribeAction,
+    filter?: object
+  ): Promise<Action[]>
 
   /**
    * Collect actions received from server during the `test` call.

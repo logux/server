@@ -133,19 +133,25 @@ export class TestClient {
     })
   }
 
-  async subscribe (channel) {
+  async subscribe (channel, filter) {
     let action = channel
     if (typeof channel === 'string') {
       action = { type: 'logux/subscribe', channel }
+    }
+    if (filter) {
+      action.filter = filter
     }
     let actions = await this.process(action)
     return actions.filter(i => i.type !== 'logux/processed')
   }
 
-  unsubscribe (channel) {
+  unsubscribe (channel, filter) {
     let action = channel
     if (typeof channel === 'string') {
       action = { type: 'logux/unsubscribe', channel }
+    }
+    if (filter) {
+      action.filter = filter
     }
     return this.process(action)
   }
