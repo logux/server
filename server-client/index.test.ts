@@ -11,6 +11,7 @@ import { delay } from 'nanodelay'
 import { jest } from '@jest/globals'
 
 import {
+  LoguxNotFoundError,
   BaseServerOptions,
   ResponseError,
   BaseServer,
@@ -1873,4 +1874,38 @@ it('undoes action with notFound on 404 error', async () => {
     }
   ])
   expect(catched).toEqual([error500, error])
+})
+
+it('allows to throws LoguxNotFoundError', async () => {
+  let app = createServer()
+  app.log.keepActions()
+
+  let catched: Error[] = []
+  app.on('error', e => {
+    catched.push(e)
+  })
+
+  app.channel('notFound', {
+    accessAndLoad () {
+      throw new LoguxNotFoundError()
+    }
+  })
+
+  let client = await connectClient(app, '10:1:uuid')
+  await sendTo(client, [
+    'sync',
+    2,
+    { type: 'logux/subscribe', channel: 'notFound' },
+    { id: [2, '10:1:uuid', 0], time: 1 }
+  ])
+  await delay(100)
+  expect(app.log.actions()).toEqual([
+    { type: 'logux/subscribe', channel: 'notFound' },
+    {
+      type: 'logux/undo',
+      id: '2 10:1:uuid 0',
+      reason: 'notFound',
+      action: { type: 'logux/subscribe', channel: 'notFound' }
+    }
+  ])
 })
