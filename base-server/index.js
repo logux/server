@@ -72,7 +72,9 @@ function normalizeChannelCallbacks (pattern, callbacks) {
         try {
           ctx.data.load = await callbacks.accessAndLoad(ctx, ...args)
         } catch (e) {
-          if (e.name === 'ResponseError' && e.statusCode === 404) {
+          if (e.name === 'LoguxNotFoundError') {
+            ctx.data.notFound = true
+          } else if (e.name === 'ResponseError' && e.statusCode === 404) {
             ctx.data.notFound = true
           } else {
             throw e
