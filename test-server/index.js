@@ -5,7 +5,7 @@ import { BaseServer } from '../base-server/index.js'
 import { TestClient } from '../test-client/index.js'
 
 export class TestServer extends BaseServer {
-  constructor (opts = {}) {
+  constructor(opts = {}) {
     if (!opts.time) {
       opts.time = new TestTime()
     }
@@ -32,13 +32,13 @@ export class TestServer extends BaseServer {
     this.testUsers = {}
   }
 
-  async connect (userId, opts = {}) {
+  async connect(userId, opts = {}) {
     let client = new TestClient(this, userId, opts)
     await client.connect()
     return client
   }
 
-  async expectWrongCredentials (userId, opts = {}) {
+  async expectWrongCredentials(userId, opts = {}) {
     try {
       await this.connect(userId, opts)
       throw new Error('Credentials passed')
@@ -49,11 +49,11 @@ export class TestServer extends BaseServer {
     }
   }
 
-  async expectDenied (test) {
+  async expectDenied(test) {
     await this.expectUndo('denied', test)
   }
 
-  async expectUndo (reason, test) {
+  async expectUndo(reason, test) {
     try {
       await test()
       throw new Error('Actions passed without error')

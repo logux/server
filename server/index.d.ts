@@ -90,7 +90,7 @@ export class Server<H extends object = {}> extends BaseServer<H> {
    *                 variables will override them.
    * @returns Parsed options object.
    */
-  static loadOptions (
+  static loadOptions(
     process: NodeJS.Process,
     defaults: ServerOptions
   ): ServerOptions
@@ -98,7 +98,7 @@ export class Server<H extends object = {}> extends BaseServer<H> {
   /**
    * @param opts Server options.
    */
-  constructor (opts: ServerOptions)
+  constructor(opts: ServerOptions)
 
   /**
    * Server options.
@@ -119,5 +119,5 @@ export class Server<H extends object = {}> extends BaseServer<H> {
    *
    * @param files Pattern for module files.
    */
-  autoloadModules (files?: string[] | string): Promise<void>
+  autoloadModules(files?: string[] | string): Promise<void>
 }

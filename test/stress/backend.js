@@ -4,7 +4,7 @@ import { blue, green, yellow, red } from 'colorette'
 import { delay } from 'nanodelay'
 import http from 'http'
 
-function send (action, meta) {
+function send(action, meta) {
   let body = JSON.stringify({
     version: 0,
     secret: 'secret',

@@ -10,7 +10,7 @@ afterEach(() => {
   server.destroy()
 })
 
-async function catchError (cb: () => Promise<any>): Promise<LoguxActionError> {
+async function catchError(cb: () => Promise<any>): Promise<LoguxActionError> {
   let err
   try {
     await cb()
@@ -20,7 +20,7 @@ async function catchError (cb: () => Promise<any>): Promise<LoguxActionError> {
   return err
 }
 
-function privateMethods (obj: object): any {
+function privateMethods(obj: object): any {
   return obj
 }
 
@@ -42,7 +42,7 @@ it('sends and collect actions', async () => {
   server = new TestServer()
   server.type('FOO', {
     access: () => true,
-    process (ctx) {
+    process(ctx) {
       ctx.sendBack({ type: 'BAR' })
     }
   })
@@ -90,7 +90,7 @@ it('tracks action processing', async () => {
   })
   server.type('ERR', {
     access: () => true,
-    process () {
+    process() {
       throw new Error('test')
     }
   })
@@ -99,7 +99,7 @@ it('tracks action processing', async () => {
   })
   server.type('UNDO', {
     access: () => true,
-    process (ctx, action, meta) {
+    process(ctx, action, meta) {
       server.undo(action, meta)
     }
   })
@@ -176,7 +176,7 @@ it('tracks subscriptions', async () => {
   server = new TestServer()
   server.channel<{}, {}, LoguxSubscribeAction>('foo', {
     access: () => true,
-    load (ctx, action) {
+    load(ctx, action) {
       ctx.sendBack({ type: 'FOO', a: action.filter?.a })
     }
   })
@@ -208,7 +208,7 @@ it('tracks subscriptions', async () => {
 
 it('prints server log', async () => {
   let reporterStream = {
-    write () {}
+    write() {}
   }
   jest.spyOn(reporterStream, 'write').mockImplementation(() => {})
   server = new TestServer({
@@ -281,7 +281,7 @@ it('collects received actions', async () => {
   server = new TestServer()
   server.type('foo', {
     access: () => true,
-    process (ctx) {
+    process(ctx) {
       ctx.sendBack({ type: 'bar' })
     }
   })

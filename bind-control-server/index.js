@@ -7,7 +7,7 @@ const NO_SECRET =
   'to have access to this page.\n' +
   'Run `npx nanoid` to generate secure secret.'
 
-function isValidBody (body) {
+function isValidBody(body) {
   if (typeof body !== 'object') return false
   if (typeof body.version !== 'number') return false
   if (typeof body.secret !== 'string') return false
@@ -16,7 +16,7 @@ function isValidBody (body) {
   return true
 }
 
-export function bindControlServer (app, custom) {
+export function bindControlServer(app, custom) {
   let masks = app.options.controlMask.split(/,\s*/).map(i => ip.cidrSubnet(i))
   app.http.on('request', async (req, res) => {
     let urlString = req.url

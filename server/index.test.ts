@@ -10,11 +10,11 @@ const DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
 
 let started: ChildProcess | undefined
 
-function start (name: string, args?: string[]): Promise<void> {
+function start(name: string, args?: string[]): Promise<void> {
   return new Promise<void>(resolve => {
     started = spawn(join(ROOT, 'test/servers/', name), args)
     let running = false
-    function callback (): void {
+    function callback(): void {
       if (!running) {
         running = true
         resolve()
@@ -25,7 +25,7 @@ function start (name: string, args?: string[]): Promise<void> {
   })
 }
 
-function check (
+function check(
   name: string,
   args?: string[],
   opts?: SpawnOptions,
@@ -54,7 +54,7 @@ function check (
       resolve([fixed, exit || 0])
     })
 
-    function waitOut (): void {
+    function waitOut(): void {
       if (out.length > 0) {
         server.kill('SIGINT')
       } else {
@@ -65,11 +65,11 @@ function check (
   })
 }
 
-function fakeProcess (argv: string[] = [], env: object = {}): any {
+function fakeProcess(argv: string[] = [], env: object = {}): any {
   return { argv, env }
 }
 
-async function checkOut (
+async function checkOut(
   name: string,
   args?: string[],
   opts?: SpawnOptions
@@ -83,7 +83,7 @@ async function checkOut (
   }
 }
 
-async function checkError (
+async function checkError(
   name: string,
   args?: string[],
   opts?: SpawnOptions

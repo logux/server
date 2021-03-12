@@ -6,7 +6,7 @@ import http from 'http'
 import { BaseServer, BaseServerOptions } from '../index.js'
 
 let lastPort = 10111
-function createServer (opts: Partial<BaseServerOptions> = {}): BaseServer {
+function createServer(opts: Partial<BaseServerOptions> = {}): BaseServer {
   lastPort += 1
   let server = new BaseServer({
     subprotocol: '0.0.0',
@@ -21,7 +21,7 @@ function createServer (opts: Partial<BaseServerOptions> = {}): BaseServer {
 class RequestError extends Error {
   statusCode: number | undefined
 
-  constructor (statusCode: number | undefined, body: string) {
+  constructor(statusCode: number | undefined, body: string) {
     super(body)
     this.name = 'RequestError'
     this.statusCode = statusCode
@@ -39,7 +39,7 @@ afterEach(async () => {
   await app.destroy()
 })
 
-function createReporter (
+function createReporter(
   opts = {}
 ): {
   names: string[]
@@ -57,7 +57,7 @@ function createReporter (
   return { names, reports, app }
 }
 
-function request (method: 'GET', path: string): Promise<Response> {
+function request(method: 'GET', path: string): Promise<Response> {
   return new Promise<Response>((resolve, reject) => {
     let req = http.request(
       {
@@ -86,7 +86,7 @@ function request (method: 'GET', path: string): Promise<Response> {
   })
 }
 
-async function requestError (
+async function requestError(
   method: 'GET',
   path: string
 ): Promise<RequestError> {
@@ -138,7 +138,7 @@ it('responses 404', async () => {
 it('checks secret', async () => {
   let test = createReporter({ controlSecret: 'secret' })
   test.app.controls['GET /test'] = {
-    request () {
+    request() {
       return { body: 'done' }
     }
   }
@@ -198,7 +198,7 @@ it('passes headers', async () => {
 it('supports promise', async () => {
   app = createServer({ controlSecret: 'secret' })
   app.controls['GET /test'] = {
-    async request () {
+    async request() {
       return { body: 'done' }
     }
   }

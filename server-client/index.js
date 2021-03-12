@@ -6,7 +6,7 @@ import { FilteredNode } from '../filtered-node/index.js'
 import { ALLOWED_META } from '../allowed-meta/index.js'
 import { filterMeta } from '../filter-meta/index.js'
 
-function reportDetails (client) {
+function reportDetails(client) {
   return {
     connectionId: client.key,
     subprotocol: client.node.remoteSubprotocol,
@@ -15,7 +15,7 @@ function reportDetails (client) {
 }
 
 export class ServerClient {
-  constructor (app, connection, key) {
+  constructor(app, connection, key) {
     this.app = app
     this.userId = undefined
     this.clientId = undefined
@@ -61,11 +61,11 @@ export class ServerClient {
     this.app.emitter.emit('connected', this)
   }
 
-  isSubprotocol (range) {
+  isSubprotocol(range) {
     return semver.satisfies(this.node.remoteSubprotocol, range)
   }
 
-  destroy () {
+  destroy() {
     this.destroyed = true
     this.node.destroy()
     if (this.userId) {
@@ -95,7 +95,7 @@ export class ServerClient {
     this.app.connected.delete(this.key)
   }
 
-  async auth (nodeId, token) {
+  async auth(nodeId, token) {
     this.nodeId = nodeId
     let { clientId, userId } = parseId(nodeId)
     this.clientId = clientId
@@ -173,18 +173,18 @@ export class ServerClient {
     return result
   }
 
-  async outMap (action, meta) {
+  async outMap(action, meta) {
     return [action, filterMeta(meta)]
   }
 
-  async inMap (action, meta) {
+  async inMap(action, meta) {
     if (!meta.subprotocol) {
       meta.subprotocol = this.node.remoteSubprotocol
     }
     return [action, meta]
   }
 
-  async filter (action, meta) {
+  async filter(action, meta) {
     let ctx = this.app.createContext(action, meta)
 
     let wrongUser = !this.clientId || this.clientId !== ctx.clientId
@@ -227,7 +227,7 @@ export class ServerClient {
     }
   }
 
-  denyBack (action, meta) {
+  denyBack(action, meta) {
     this.app.emitter.emit('report', 'denied', { actionId: meta.id })
     let [undoAction, undoMeta] = this.app.buildUndo(action, meta, 'denied')
     undoMeta.clients = (undoMeta.clients || []).concat([this.clientId])

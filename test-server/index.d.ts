@@ -50,7 +50,7 @@ export class TestServer<H extends object = {}> extends BaseServer<H> {
   /**
    * @param opts The limit subset of server options.
    */
-  constructor (opts?: TestServerOptions)
+  constructor(opts?: TestServerOptions)
 
   /**
    * Time replacement without variable parts like current timestamp.
@@ -78,7 +78,7 @@ export class TestServer<H extends object = {}> extends BaseServer<H> {
    * @param opts Other options.
    * @returns Promise with new client.
    */
-  connect (userId: string, opts?: TestClientOptions): Promise<TestClient>
+  connect(userId: string, opts?: TestClientOptions): Promise<TestClient>
 
   /**
    * Try to connect client and throw an error is client didn’t received
@@ -93,7 +93,7 @@ export class TestServer<H extends object = {}> extends BaseServer<H> {
    * @param opts Other options.
    * @returns Promise until check.
    */
-  expectWrongCredentials (
+  expectWrongCredentials(
     userId: string,
     opts?: TestClientOptions
   ): Promise<void>
@@ -110,7 +110,7 @@ export class TestServer<H extends object = {}> extends BaseServer<H> {
    *
    * @param test Callback with subscripting or action sending.
    */
-  expectDenied (test: () => any | Promise<any>): Promise<void>
+  expectDenied(test: () => any | Promise<any>): Promise<void>
 
   /**
    * Call callback and throw an error if there was no `logux/undo` in return
@@ -125,5 +125,5 @@ export class TestServer<H extends object = {}> extends BaseServer<H> {
    * @param reason The reason in undo action.
    * @param test Callback with subscripting or action sending.
    */
-  expectUndo (reason: string, test: () => any | Promise<any>): Promise<void>
+  expectUndo(reason: string, test: () => any | Promise<any>): Promise<void>
 }
