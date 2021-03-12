@@ -17,7 +17,7 @@ const RESEND_KEYS = [
   'user'
 ]
 
-function send (backend, command, events) {
+function send(backend, command, events) {
   let body = JSON.stringify({
     version: VERSION,
     commands: [command],
@@ -80,10 +80,10 @@ function send (backend, command, events) {
   req.end(body)
 }
 
-export function bindBackendProxy (app) {
+export function bindBackendProxy(app) {
   if (app.options.controlSecret) {
     app.controls['POST /'] = {
-      isValid ({ command, action, meta }) {
+      isValid({ command, action, meta }) {
         return (
           command === 'action' &&
           typeof action === 'object' &&
@@ -91,7 +91,7 @@ export function bindBackendProxy (app) {
           typeof meta === 'object'
         )
       },
-      command ({ action, meta }, req) {
+      command({ action, meta }, req) {
         if (!app.types[action.type] && !app.getRegexProcessor(action.type)) {
           meta.status = 'processed'
         }
@@ -116,7 +116,7 @@ export function bindBackendProxy (app) {
   let processing = new Map()
   let actions = new Map()
 
-  function sendAction (action, meta, headers) {
+  function sendAction(action, meta, headers) {
     let resendResolve
     if (action.type !== 'logux/subscribe') {
       resending.set(
@@ -146,7 +146,7 @@ export function bindBackendProxy (app) {
     let checked = false
     let processed = false
     let error = false
-    function currentReject (e) {
+    function currentReject(e) {
       if (resendResolve) resendResolve()
       if (checked) {
         processReject(e)
@@ -161,10 +161,10 @@ export function bindBackendProxy (app) {
       backend,
       { command: 'action', action, meta, headers },
       {
-        filter ({ id }) {
+        filter({ id }) {
           return id === meta.id
         },
-        resend (answer) {
+        resend(answer) {
           if (checked) {
             error = true
             currentReject(new Error('Resend answer was sent after access'))
@@ -181,7 +181,7 @@ export function bindBackendProxy (app) {
             resendResolve(resend)
           }
         },
-        action (data) {
+        action(data) {
           let promise = app.log.add(data.action, {
             status: 'processed',
             ...data.meta
@@ -192,18 +192,18 @@ export function bindBackendProxy (app) {
             actions.set(meta.id, [promise])
           }
         },
-        approved () {
+        approved() {
           if (resendResolve) resendResolve()
           app.emitter.emit('backendGranted', action, meta, Date.now() - start)
           checked = true
           accessResolve(true)
         },
-        forbidden () {
+        forbidden() {
           if (resendResolve) resendResolve()
           error = true
           accessResolve(false)
         },
-        async processed () {
+        async processed() {
           if (!checked) {
             error = true
             accessReject(new Error('Processed answer was sent before access'))
@@ -219,22 +219,22 @@ export function bindBackendProxy (app) {
             processResolve()
           }
         },
-        unknownAction () {
+        unknownAction() {
           resendResolve()
           error = true
           app.unknownType(action, meta)
           accessResolve(false)
         },
-        unknownChannel () {
+        unknownChannel() {
           error = true
           app.wrongChannel(action, meta)
           accessResolve(false)
         },
-        error (e) {
+        error(e) {
           error = true
           currentReject(e)
         },
-        end () {
+        end() {
           if (!error && (!checked || !processed)) {
             currentReject(new Error('Back-end do not send required answers'))
           }
@@ -259,10 +259,10 @@ export function bindBackendProxy (app) {
             subprotocol: client.node.remoteSubprotocol
           },
           {
-            filter ({ authId }) {
+            filter({ authId }) {
               return random === authId
             },
-            wrongSubprotocol ({ supported }) {
+            wrongSubprotocol({ supported }) {
               reject(
                 new LoguxError('wrong-subprotocol', {
                   used: client.node.remoteSubprotocol,
@@ -270,17 +270,17 @@ export function bindBackendProxy (app) {
                 })
               )
             },
-            authenticated ({ subprotocol }) {
+            authenticated({ subprotocol }) {
               if (subprotocol) {
                 app.options.subprotocol = subprotocol
                 client.node.options.subprotocol = subprotocol
               }
               resolve(true)
             },
-            denied () {
+            denied() {
               resolve(false)
             },
-            error (e) {
+            error(e) {
               reject(e)
             }
           }
@@ -288,20 +288,20 @@ export function bindBackendProxy (app) {
       })
   )
   app.otherType({
-    access (ctx, action, meta) {
+    access(ctx, action, meta) {
       sendAction(action, meta, ctx.headers)
       return accessing.get(meta.id)
     },
-    resend (ctx, action, meta) {
+    resend(ctx, action, meta) {
       if (!resending.has(meta.id)) {
         sendAction(action, meta, ctx.headers)
       }
       return resending.get(meta.id)
     },
-    process (ctx, action, meta) {
+    process(ctx, action, meta) {
       return processing.get(meta.id)
     },
-    finally (ctx, action, meta) {
+    finally(ctx, action, meta) {
       actions.delete(meta.id)
       resending.delete(meta.id)
       accessing.delete(meta.id)
@@ -309,14 +309,14 @@ export function bindBackendProxy (app) {
     }
   })
   app.otherChannel({
-    access (ctx, action, meta) {
+    access(ctx, action, meta) {
       sendAction(action, meta, ctx.headers)
       return accessing.get(meta.id)
     },
-    load (ctx, action, meta) {
+    load(ctx, action, meta) {
       return processing.get(meta.id)
     },
-    finally (ctx, action, meta) {
+    finally(ctx, action, meta) {
       actions.delete(meta.id)
       accessing.delete(meta.id)
       processing.delete(meta.id)

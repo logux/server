@@ -15,7 +15,7 @@ export class ServerClient {
    * @param connection The Logux connection.
    * @param key Client number used as `app.connected` key.
    */
-  constructor (app: BaseServer, connection: ServerConnection, key: number)
+  constructor(app: BaseServer, connection: ServerConnection, key: number)
 
   /**
    * Server, which received client.
@@ -109,10 +109,10 @@ export class ServerClient {
    * @param range npm’s version requirements.
    * @returns Is version satisfies requirements.
    */
-  isSubprotocol (range: string): boolean
+  isSubprotocol(range: string): boolean
 
   /**
    * Disconnect client.
    */
-  destroy (): void
+  destroy(): void
 }

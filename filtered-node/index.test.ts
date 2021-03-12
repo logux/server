@@ -7,7 +7,7 @@ type Test = {
   server: FilteredNode
 }
 
-function createTest (): Test {
+function createTest(): Test {
   let time = new TestTime()
   let log1 = time.nextLog()
   let log2 = time.nextLog()

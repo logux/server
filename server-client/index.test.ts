@@ -21,21 +21,21 @@ import { ServerClient } from './index.js'
 
 let destroyable: { destroy(): void }[] = []
 
-function privateMethods (obj: object): any {
+function privateMethods(obj: object): any {
   return obj
 }
 
-function getPair (client: ServerClient): TestPair {
+function getPair(client: ServerClient): TestPair {
   return privateMethods(client.connection).pair
 }
 
-async function sendTo (client: ServerClient, msg: Message): Promise<void> {
+async function sendTo(client: ServerClient, msg: Message): Promise<void> {
   let pair = getPair(client)
   pair.right.send(msg)
   await pair.wait('right')
 }
 
-async function connect (
+async function connect(
   client: ServerClient,
   nodeId: string = '10:uuid',
   details: object | undefined = undefined
@@ -55,7 +55,7 @@ async function connect (
   }
 }
 
-function createConnection (): ServerConnection {
+function createConnection(): ServerConnection {
   let pair = new TestPair()
   privateMethods(pair.left).ws = {
     _socket: {
@@ -68,7 +68,7 @@ function createConnection (): ServerConnection {
   return pair.left as any
 }
 
-function createServer (
+function createServer(
   opts: Partial<BaseServerOptions> = {}
 ): BaseServer<{ locale: string }, TestLog<ServerMeta>> {
   opts.subprotocol = '0.0.1'
@@ -91,7 +91,7 @@ function createServer (
   return server
 }
 
-function createReporter (
+function createReporter(
   opts: Partial<BaseServerOptions> = {}
 ): {
   app: BaseServer<{ locale: string }, TestLog<ServerMeta>>
@@ -109,7 +109,7 @@ function createReporter (
   return { app, reports, names }
 }
 
-function createClient (app: BaseServer): ServerClient {
+function createClient(app: BaseServer): ServerClient {
   let lastClient: number = ++privateMethods(app).lastClient
   let client = new ServerClient(app, createConnection(), lastClient)
   app.connected.set(`${lastClient}`, client)
@@ -117,7 +117,7 @@ function createClient (app: BaseServer): ServerClient {
   return client
 }
 
-async function connectClient (
+async function connectClient(
   server: BaseServer,
   nodeId = '10:uuid'
 ): Promise<ServerClient> {
@@ -127,15 +127,15 @@ async function connectClient (
   return client
 }
 
-function sent (client: ServerClient): Message[] {
+function sent(client: ServerClient): Message[] {
   return getPair(client).leftSent
 }
 
-function sentNames (client: ServerClient): string[] {
+function sentNames(client: ServerClient): string[] {
   return sent(client).map(i => i[0])
 }
 
-function actions (client: ServerClient): Action[] {
+function actions(client: ServerClient): Action[] {
   let received: Action[] = []
   sent(client).forEach(i => {
     if (i[0] === 'sync') {
@@ -350,7 +350,7 @@ it('reports about authentication error', async () => {
 it('blocks authentication bruteforce', async () => {
   let test = createReporter()
   test.app.auth(async () => false)
-  async function connectNext (num: number): Promise<void> {
+  async function connectNext(num: number): Promise<void> {
     let client = new ServerClient(test.app, createConnection(), num)
     await connect(client, `${num}:uuid`)
   }
@@ -551,7 +551,7 @@ it('checks action access', async () => {
   let finalled = 0
   test.app.type('FOO', {
     access: () => false,
-    finally () {
+    finally() {
       finalled += 1
     }
   })
@@ -715,7 +715,7 @@ it('checks user access for action', async () => {
     bar: boolean
   }
   test.app.type<FooAction>('FOO', {
-    async access (ctx, action, meta) {
+    async access(ctx, action, meta) {
       expect(ctx.userId).toEqual('10')
       expect(ctx.subprotocol).toEqual('0.0.1')
       expect(meta.id).toBeDefined()
@@ -765,7 +765,7 @@ it('takes subprotocol from action meta', async () => {
   let subprotocols: string[] = []
   app.type('FOO', {
     access: () => true,
-    process (ctx) {
+    process(ctx) {
       subprotocols.push(ctx.subprotocol)
     }
   })
@@ -786,10 +786,10 @@ it('reports about errors in access callback', async () => {
   let test = createReporter()
   let finalled = 0
   test.app.type('FOO', {
-    access () {
+    access() {
       throw err
     },
-    finally () {
+    finally() {
       finalled += 1
     }
   })
@@ -831,7 +831,7 @@ it('adds resend keys', async () => {
   let test = createReporter()
   test.app.type('FOO', {
     access: () => true,
-    resend (ctx, action, meta) {
+    resend(ctx, action, meta) {
       expect(ctx.nodeId).toEqual('10:uuid')
       expect(action.type).toEqual('FOO')
       expect(meta.id).toEqual('1 10:uuid 0')
@@ -846,7 +846,7 @@ it('adds resend keys', async () => {
   // @ts-expect-error
   test.app.type('EMPTY', {
     access: () => true,
-    resend () {}
+    resend() {}
   })
 
   test.app.log.generateId()
@@ -889,13 +889,13 @@ it('has channel resend shortcut', async () => {
   let app = createServer()
   app.type('FOO', {
     access: () => true,
-    resend () {
+    resend() {
       return 'bar'
     }
   })
   app.type('FOOS', {
     access: () => true,
-    resend () {
+    resend() {
       return ['bar1', 'bar2']
     }
   })
@@ -1185,11 +1185,11 @@ it('has custom processor for unknown type', async () => {
   let test = createReporter()
   let calls: string[] = []
   test.app.otherType({
-    access () {
+    access() {
       calls.push('access')
       return true
     },
-    process () {
+    process() {
       calls.push('process')
     }
   })
@@ -1215,12 +1215,12 @@ it('allows to reports about unknown type in custom processor', async () => {
   let test = createReporter()
   let calls: string[] = []
   test.app.otherType({
-    access (ctx, action, meta) {
+    access(ctx, action, meta) {
       calls.push('access')
       test.app.unknownType(action, meta)
       return true
     },
-    process () {
+    process() {
       calls.push('process')
     }
   })
@@ -1240,7 +1240,7 @@ it('allows to use different node ID', async () => {
   let app = createServer()
   let calls = 0
   app.type('A', {
-    access (ctx, action, meta) {
+    access(ctx, action, meta) {
       expect(ctx.nodeId).toEqual('10:client:other')
       expect(meta.id).toEqual('1 10:client:other 0')
       calls += 1
@@ -1282,40 +1282,40 @@ it('has finally callback', async () => {
   })
   app.type('A', {
     access: () => true,
-    finally () {
+    finally() {
       calls.push('A')
     }
   })
   app.type('B', {
     access: () => true,
     process: () => {},
-    finally () {
+    finally() {
       calls.push('B')
     }
   })
   app.type('C', {
-    resend () {
+    resend() {
       throw new Error('C')
     },
     access: () => true,
-    finally () {
+    finally() {
       calls.push('C')
     }
   })
   app.type('D', {
-    access () {
+    access() {
       throw new Error('D')
     },
-    finally () {
+    finally() {
       calls.push('D')
     }
   })
   app.type('E', {
     access: () => true,
-    process () {
+    process() {
       throw new Error('E')
     },
-    finally () {
+    finally() {
       calls.push('E')
       throw new Error('EE')
     }
@@ -1404,14 +1404,14 @@ it('does not resend actions back', async () => {
 it('keeps context', async () => {
   let app = createServer()
   app.type<Action, { a: number }>('A', {
-    access (ctx) {
+    access(ctx) {
       ctx.data.a = 1
       return true
     },
-    process (ctx) {
+    process(ctx) {
       expect(ctx.data.a).toEqual(1)
     },
-    finally (ctx) {
+    finally(ctx) {
       expect(ctx.data.a).toEqual(1)
     }
   })
@@ -1464,7 +1464,7 @@ it('does not dublicate channel load actions', async () => {
   })
   app.channel('foo', {
     access: () => true,
-    async load (ctx) {
+    async load(ctx) {
       await ctx.sendBack({ type: 'FOO' })
     }
   })
@@ -1477,7 +1477,7 @@ it('does not dublicate channel load actions', async () => {
   ])
   await delay(10)
 
-  function meta (time: number): object {
+  function meta(time: number): object {
     return { id: time, time, subprotocol: '0.0.1' }
   }
   expect(sent(client).slice(1)).toEqual([
@@ -1491,19 +1491,19 @@ it('allows to return actions', async () => {
   let app = createServer()
   app.channel('a', {
     access: () => true,
-    load () {
+    load() {
       return { type: 'A' }
     }
   })
   app.channel('b', {
     access: () => true,
-    load () {
+    load() {
       return [{ type: 'B' }]
     }
   })
   app.channel('c', {
     access: () => true,
-    load () {
+    load() {
       return [[{ type: 'C' }, { time: 100 }]]
     }
   })
@@ -1528,7 +1528,7 @@ it('allows to return actions', async () => {
   ])
   await delay(10)
 
-  function meta (time: number): object {
+  function meta(time: number): object {
     return { id: time, time, subprotocol: '0.0.1' }
   }
   expect(sent(client).slice(1)).toEqual([
@@ -1548,7 +1548,7 @@ it('does not process send-back actions', async () => {
   let app = createServer()
   app.channel('a', {
     access: () => true,
-    load () {
+    load() {
       return { type: 'A', data: 'load' }
     }
   })
@@ -1557,11 +1557,11 @@ it('does not process send-back actions', async () => {
   let resended: string[] = []
   app.type('A', {
     access: () => true,
-    resend (ctx, action) {
+    resend(ctx, action) {
       resended.push(action.data)
       return {}
     },
-    process (ctx, action) {
+    process(ctx, action) {
       processed.push(action.data)
     }
   })
@@ -1594,13 +1594,13 @@ it('restores actions with old ID from history', async () => {
   let history: [Action, ServerMeta][] = []
   app.channel('a', {
     access: () => true,
-    load () {
+    load() {
       return history
     }
   })
   app.type('A', {
     access: () => true,
-    process (ctx, action, meta) {
+    process(ctx, action, meta) {
       history.push([action, meta])
     }
   })
@@ -1629,14 +1629,14 @@ it('has shortcut to access and process in one callback', async () => {
   app.log.keepActions()
 
   app.type('FOO', {
-    async accessAndProcess (ctx, action, meta) {
+    async accessAndProcess(ctx, action, meta) {
       expect(typeof meta.id).toEqual('string')
       expect(action.type).toEqual('FOO')
       await ctx.sendBack({ type: 'REFOO' })
     }
   })
   app.otherType({
-    async accessAndProcess (ctx, action, meta) {
+    async accessAndProcess(ctx, action, meta) {
       expect(typeof meta.id).toEqual('string')
       expect(typeof action.type).toEqual('string')
       if (action.type === 'BAR') {
@@ -1645,14 +1645,14 @@ it('has shortcut to access and process in one callback', async () => {
     }
   })
   app.channel('foo', {
-    async accessAndLoad (ctx, action, meta) {
+    async accessAndLoad(ctx, action, meta) {
       expect(typeof meta.id).toEqual('string')
       expect(action.type).toEqual('logux/subscribe')
       return { type: 'FOO:load' }
     }
   })
   app.otherChannel({
-    accessAndLoad (ctx, action, meta) {
+    accessAndLoad(ctx, action, meta) {
       expect(typeof meta.id).toEqual('string')
       expect(action.type).toEqual('logux/subscribe')
       return [{ type: 'OTHER:load' }]
@@ -1719,17 +1719,17 @@ it('denies access on 403 error', async () => {
   })
 
   app.type('E404', {
-    accessAndProcess () {
+    accessAndProcess() {
       throw error404
     }
   })
   app.type('E403', {
-    accessAndProcess () {
+    accessAndProcess() {
       throw error403
     }
   })
   app.type('ERROR', {
-    async accessAndProcess () {
+    async accessAndProcess() {
       throw error
     }
   })
@@ -1794,22 +1794,22 @@ it('undoes action with notFound on 404 error', async () => {
   })
 
   app.channel('e500', {
-    accessAndLoad () {
+    accessAndLoad() {
       throw error500
     }
   })
   app.channel('e404', {
-    accessAndLoad () {
+    accessAndLoad() {
       throw error404
     }
   })
   app.channel('e403', {
-    accessAndLoad () {
+    accessAndLoad() {
       throw error403
     }
   })
   app.channel('error', {
-    accessAndLoad () {
+    accessAndLoad() {
       throw error
     }
   })
@@ -1886,7 +1886,7 @@ it('allows to throws LoguxNotFoundError', async () => {
   })
 
   app.channel('notFound', {
-    accessAndLoad () {
+    accessAndLoad() {
       throw new LoguxNotFoundError()
     }
   })

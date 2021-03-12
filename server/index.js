@@ -55,7 +55,7 @@ let cliOptionsSpec = {
 }
 
 export class Server extends BaseServer {
-  static loadOptions (process, defaults) {
+  static loadOptions(process, defaults) {
     let [help, options] = loadOptions(
       cliOptionsSpec,
       process,
@@ -74,7 +74,7 @@ export class Server extends BaseServer {
     }
   }
 
-  constructor (opts = {}) {
+  constructor(opts = {}) {
     if (!opts.logger) {
       opts.logger = 'human'
     }
@@ -121,7 +121,7 @@ export class Server extends BaseServer {
     })
   }
 
-  async listen (...args) {
+  async listen(...args) {
     try {
       return BaseServer.prototype.listen.apply(this, args)
     } catch (err) {
@@ -130,7 +130,7 @@ export class Server extends BaseServer {
     }
   }
 
-  async autoloadModules (files = ['modules/*/index.js', 'modules/*.js']) {
+  async autoloadModules(files = ['modules/*/index.js', 'modules/*.js']) {
     let matches = await globby(files, {
       cwd: this.options.root,
       absolute: true,

@@ -527,7 +527,7 @@ type PostProcessor = {
  *
  * @param cb Callback with `request` calls.
  */
-export function wasNot403 (cb: () => Promise<void>): Promise<boolean>
+export function wasNot403(cb: () => Promise<void>): Promise<boolean>
 
 /**
  * An error for `load()` callback to return `logux/undo` with 404.
@@ -545,7 +545,7 @@ export function wasNot403 (cb: () => Promise<void>): Promise<boolean>
  */
 export class LoguxNotFoundError extends Error {
   name: 'LoguxNotFoundError'
-  constructor ()
+  constructor()
 }
 
 /**
@@ -558,7 +558,7 @@ export class BaseServer<
   /**
    * @param opts Server options.
    */
-  constructor (opts: BaseServerOptions)
+  constructor(opts: BaseServerOptions)
 
   /**
    * Server options.
@@ -685,14 +685,14 @@ export class BaseServer<
    *
    * @param authenticator The authentication callback.
    */
-  auth (authenticator: Authenticator<H>): void
+  auth(authenticator: Authenticator<H>): void
 
   /**
    * Start WebSocket server and listen for clients.
    *
    * @returns When the server has been bound.
    */
-  listen (): Promise<void>
+  listen(): Promise<void>
 
   /**
    * Add non-WebSocket HTTP request processor.
@@ -712,7 +712,7 @@ export class BaseServer<
    * })
    * ```
    */
-  http (listener: (req: IncomingMessage, res: ServerResponse) => void): void
+  http(listener: (req: IncomingMessage, res: ServerResponse) => void): void
 
   /**
    * Subscribe for synchronization events. It implements nanoevents API.
@@ -745,7 +745,7 @@ export class BaseServer<
    * @param listener The listener function.
    * @returns Unbind listener from event.
    */
-  on (
+  on(
     event: 'fatal' | 'clientError',
     listener: (err: Error) => void
   ): Unsubscribe
@@ -754,7 +754,7 @@ export class BaseServer<
    * @param event The event name.
    * @param listener Error listener.
    */
-  on (
+  on(
     event: 'error',
     listener: (err: Error, action: Action, meta: ServerMeta) => void
   ): Unsubscribe
@@ -763,7 +763,7 @@ export class BaseServer<
    * @param event The event name.
    * @param listener Client listener.
    */
-  on (
+  on(
     event: 'connected' | 'disconnected',
     listener: (client: ServerClient) => void
   ): Unsubscribe
@@ -772,7 +772,7 @@ export class BaseServer<
    * @param event The event name.
    * @param listener Client listener.
    */
-  on (
+  on(
     event: 'authenticated',
     listener: (client: ServerClient, latencyMilliseconds: number) => void
   ): Unsubscribe
@@ -781,7 +781,7 @@ export class BaseServer<
    * @param event The event name.
    * @param listener Action listener.
    */
-  on (
+  on(
     event: 'preadd' | 'add' | 'clean' | 'backendSent',
     listener: (action: Action, meta: ServerMeta) => void
   ): Unsubscribe
@@ -790,7 +790,7 @@ export class BaseServer<
    * @param event The event name.
    * @param listener Processing listener.
    */
-  on (
+  on(
     event: 'processed' | 'backendGranted' | 'backendProcessed',
     listener: (
       action: Action,
@@ -803,7 +803,7 @@ export class BaseServer<
    * @param event The event name.
    * @param listener Subscription listener.
    */
-  on (
+  on(
     event: 'subscribed',
     listener: (
       action: LoguxSubscribeAction,
@@ -816,7 +816,7 @@ export class BaseServer<
    * @param event The event name.
    * @param listener Subscription listener.
    */
-  on (
+  on(
     event: 'subscribing',
     listener: (action: LoguxSubscribeAction, meta: ServerMeta) => void
   ): Unsubscribe
@@ -825,7 +825,7 @@ export class BaseServer<
    * @param event The event name.
    * @param listener Subscription listener.
    */
-  on (
+  on(
     event: 'unsubscribed',
     listener: (action: LoguxUnsubscribeAction, meta: ServerMeta) => void
   ): Unsubscribe
@@ -834,13 +834,13 @@ export class BaseServer<
    * @param event The event name.
    * @param listener Event listener.
    */
-  on (event: 'subscriptionCancelled', listener: () => void): Unsubscribe
+  on(event: 'subscriptionCancelled', listener: () => void): Unsubscribe
 
   /**
    * @param event The event name.
    * @param listener Report listener.
    */
-  on (event: 'report', listener: Reporter): Unsubscribe
+  on(event: 'report', listener: Reporter): Unsubscribe
 
   /**
    * Stop server and unbind all listeners.
@@ -853,7 +853,7 @@ export class BaseServer<
    *
    * @returns Promise when all listeners will be removed.
    */
-  destroy (): Promise<void>
+  destroy(): Promise<void>
 
   /**
    * Define action type’s callbacks.
@@ -880,7 +880,7 @@ export class BaseServer<
    * @template A Action’s type.
    * @template D Type for `ctx.data`.
    */
-  type<A extends Action = AnyAction, D extends object = {}> (
+  type<A extends Action = AnyAction, D extends object = {}>(
     name: A['type'] | RegExp,
     callbacks: ActionCallbacks<A, D, H>
   ): void
@@ -892,7 +892,7 @@ export class BaseServer<
    * @template AC Action creator function.
    * @template D Type for `ctx.data`.
    */
-  type<AC extends ActionCreator, D extends object = {}> (
+  type<AC extends ActionCreator, D extends object = {}>(
     actionCreator: AC,
     callbacks: ActionCallbacks<ReturnType<AC>, D, H>
   ): void
@@ -925,7 +925,7 @@ export class BaseServer<
    *
    * @template D Type for `ctx.data`.
    */
-  otherType<D extends object = {}> (
+  otherType<D extends object = {}>(
     callbacks: ActionCallbacks<Action, D, H>
   ): void
 
@@ -960,7 +960,7 @@ export class BaseServer<
     P extends object = {},
     D extends object = {},
     A extends LoguxSubscribeAction = LoguxSubscribeAction
-  > (pattern: string, callbacks: ChannelCallbacks<A, D, P, H>): void
+  >(pattern: string, callbacks: ChannelCallbacks<A, D, P, H>): void
 
   /**
    * @param pattern Regular expression for channel name.
@@ -970,7 +970,7 @@ export class BaseServer<
     P extends string[] = string[],
     D extends object = {},
     A extends LoguxSubscribeAction = LoguxSubscribeAction
-  > (pattern: RegExp, callbacks: ChannelCallbacks<A, D, P, H>): void
+  >(pattern: RegExp, callbacks: ChannelCallbacks<A, D, P, H>): void
 
   /**
    * Set callbacks for unknown channel subscription.
@@ -994,7 +994,7 @@ export class BaseServer<
    * @template D Type for `ctx.data`.
    * @template A `logux/subscribe` Action’s type.
    */
-  otherChannel<D extends object = {}> (
+  otherChannel<D extends object = {}>(
     callbacks: ChannelCallbacks<LoguxSubscribeAction, D, [string], H>
   ): void
 
@@ -1006,7 +1006,7 @@ export class BaseServer<
    * @param meta Action’s meta.
    * @returns Promise until new action will be resend to clients and processed.
    */
-  process (action: AnyAction, meta?: Partial<ServerMeta>): Promise<ServerMeta>
+  process(action: AnyAction, meta?: Partial<ServerMeta>): Promise<ServerMeta>
 
   /**
    * Undo action from client.
@@ -1023,7 +1023,7 @@ export class BaseServer<
    * @param extra Extra fields to `logux/undo` action.
    * @returns When action was saved to the log.
    */
-  undo (
+  undo(
     action: Action,
     meta: ServerMeta,
     reason?: string,
@@ -1041,7 +1041,7 @@ export class BaseServer<
    *
    * @param error Runtime error instance.
    */
-  debugError (error: Error): void
+  debugError(error: Error): void
 
   /**
    * Send action, received by other server, to all clients of current server.
@@ -1061,7 +1061,7 @@ export class BaseServer<
    * @param action New action.
    * @param meta Action’s metadata.
    */
-  sendAction (action: Action, meta: ServerMeta): void
+  sendAction(action: Action, meta: ServerMeta): void
 
   /**
    * Add new client for server. You should call this method manually
@@ -1074,7 +1074,7 @@ export class BaseServer<
    * @param connection Logux connection to client.
    * @returns Client ID.
    */
-  addClient (connection: ServerConnection): number
+  addClient(connection: ServerConnection): number
 
   /**
    * If you receive action with unknown type, this method will mark this action
@@ -1098,7 +1098,7 @@ export class BaseServer<
    * @param action The action with unknown type.
    * @param meta Action’s metadata.
    */
-  unknownType (action: Action, meta: ServerMeta): void
+  unknownType(action: Action, meta: ServerMeta): void
 
   /**
    * Report that client try to subscribe for unknown channel.
@@ -1123,5 +1123,5 @@ export class BaseServer<
    * @param action The subscribe action.
    * @param meta Action’s metadata.
    */
-  wrongChannel (action: LoguxSubscribeAction, meta: ServerMeta): void
+  wrongChannel(action: LoguxSubscribeAction, meta: ServerMeta): void
 }

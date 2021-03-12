@@ -1,7 +1,7 @@
 import { bold, cyan, yellow, green, red } from 'colorette'
 import dotenv from 'dotenv'
 
-export function loadOptions (spec, process, env) {
+export function loadOptions(spec, process, env) {
   let rawCliArgs = gatherCliArgs(process.argv)
   if (rawCliArgs['--help']) {
     return [composeHelp(spec, process.argv), null]
@@ -30,7 +30,7 @@ export function loadOptions (spec, process, env) {
   return [null, Object.assign(envArgs, cliArgs)]
 }
 
-function gatherCliArgs (argv) {
+function gatherCliArgs(argv) {
   let args = {}
   let key = null
   let value = []
@@ -58,7 +58,7 @@ function gatherCliArgs (argv) {
   return args
 }
 
-function parseValues (spec, args) {
+function parseValues(spec, args) {
   let parsed = {}
   for (let key of Object.keys(args)) {
     let parse = spec.options[key].parse || string
@@ -74,11 +74,11 @@ function parseValues (spec, args) {
   return parsed
 }
 
-function parseEnvArgs (file) {
+function parseEnvArgs(file) {
   return dotenv.config(file).parsed
 }
 
-function mapArgs (parsedCliArgs, argsSpec) {
+function mapArgs(parsedCliArgs, argsSpec) {
   return Object.fromEntries(
     Object.entries(parsedCliArgs).map(([name, value]) => {
       if (!argsSpec[name]) {
@@ -89,7 +89,7 @@ function mapArgs (parsedCliArgs, argsSpec) {
   )
 }
 
-function composeHelp (spec, argv) {
+function composeHelp(spec, argv) {
   let options = Object.entries(spec.options).map(([name, option]) => ({
     alias: option.alias ? composeCliAliasName(option.alias) : '',
     full: composeCliFullName(name),
@@ -127,26 +127,26 @@ function composeHelp (spec, argv) {
   ].join('\n')
 }
 
-function composeEnvName (prefix, name) {
+function composeEnvName(prefix, name) {
   return `${prefix}_${name.replace(
     /[A-Z]/g,
     match => '_' + match
   )}`.toUpperCase()
 }
 
-function composeCliFullName (name) {
+function composeCliFullName(name) {
   return `--${toKebabCase(name)}`
 }
 
-function composeCliAliasName (name) {
+function composeCliAliasName(name) {
   return `-${name}`
 }
 
-function toKebabCase (word) {
+function toKebabCase(word) {
   return word.replace(/[A-Z]/, match => `-${match.toLowerCase()}`)
 }
 
-export function oneOf (options, rawValue) {
+export function oneOf(options, rawValue) {
   if (!options.includes(rawValue)) {
     return [
       `Expected ${green('one of ' + JSON.stringify(options))}, got ${red(
@@ -159,7 +159,7 @@ export function oneOf (options, rawValue) {
   }
 }
 
-export function number (rawValue) {
+export function number(rawValue) {
   let parsed = Number.parseInt(rawValue, 10)
   if (Number.isNaN(parsed)) {
     return [`Expected ${green('number')}, got ${red(rawValue)}`, null]
@@ -168,7 +168,7 @@ export function number (rawValue) {
   }
 }
 
-export function string (rawValue) {
+export function string(rawValue) {
   if (typeof rawValue !== 'string') {
     return [`Expected ${green('string')}, got ${red(rawValue)}`, null]
   } else {

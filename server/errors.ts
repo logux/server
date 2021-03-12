@@ -20,12 +20,12 @@ class User {
   id: string
   name: string
 
-  constructor (id: string) {
+  constructor(id: string) {
     this.id = id
     this.name = 'name'
   }
 
-  async save (): Promise<void> {}
+  async save(): Promise<void> {}
 }
 
 type UserRenameAction = Action & {
@@ -49,19 +49,19 @@ type UserParams = {
 type BadParams = number
 
 server.type<UserRenameAction, UserData>('user/rename', {
-  access (ctx, action) {
+  access(ctx, action) {
     ctx.data.user = new User(action.userId)
     return true
   },
 
   // THROWS is not assignable to type 'Resender
-  resend (_, action) {
+  resend(_, action) {
     return {
       subscriptions: `user/${action.userId}`
     }
   },
 
-  async process (ctx, action) {
+  async process(ctx, action) {
     // THROWS Property 'lang' does not exist on type '{ locale: string; }'
     console.log(ctx.headers.lang)
     // THROWS 'newName' does not exist on type 'UserRenameAction'
@@ -73,7 +73,7 @@ server.type<UserRenameAction, UserData>('user/rename', {
 
 // THROWS No overload matches this call.
 server.type('user/changeId', {
-  async process (_, action) {
+  async process(_, action) {
     let user = new User(action.userId)
     user.id = action.newId
     await user.save()
@@ -82,17 +82,17 @@ server.type('user/changeId', {
 
 // THROWS "bad"' is not assignable to parameter of type 'RegExp | "user/rename"'
 server.type<UserRenameAction>('bad', {
-  access () {
+  access() {
     return true
   }
 })
 
 server.channel<UserParams, UserData, UserSubscribeAction>('user/:id', {
-  access () {
+  access() {
     return true
   },
   // THROWS undefined>' is not assignable to type 'FilterCreator
-  async filter (_, action) {
+  async filter(_, action) {
     if (action.fields) {
       return (_: any, otherAction: Action) => {
         return (
@@ -103,7 +103,7 @@ server.channel<UserParams, UserData, UserSubscribeAction>('user/:id', {
       return undefined
     }
   },
-  async load (ctx) {
+  async load(ctx) {
     // THROWS is not assignable to parameter of type 'AnyAction'
     await ctx.sendBack({
       userId: ctx.data.user.id,
@@ -113,7 +113,7 @@ server.channel<UserParams, UserData, UserSubscribeAction>('user/:id', {
 })
 
 server.channel(/admin:\d/, {
-  access (ctx, action, meta) {
+  access(ctx, action, meta) {
     console.log(meta.id, action.since)
     // THROWS Property 'id' does not exist on type 'string[]'.
     return ctx.params.id === ctx.userId
@@ -122,7 +122,7 @@ server.channel(/admin:\d/, {
 
 // THROWS Type 'number' does not satisfy the constraint 'string[]'.
 server.channel<BadParams>('posts', {
-  access () {
+  access() {
     return true
   }
 })
@@ -133,7 +133,7 @@ let addUser = defineAction<
 >('user/remove')
 
 server.type(addUser, {
-  access (ctx, action) {
+  access(ctx, action) {
     // THROWS Property 'id' does not exist on type '{ type: "user/remove";
     return action.id === ctx.userId
   }

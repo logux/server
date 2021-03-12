@@ -15,10 +15,10 @@ it('has error', () => {
 })
 
 it('throws an error on non-2xx response', async () => {
-  async function fetch () {
+  async function fetch() {
     return {
       status: 403,
-      async text () {
+      async text() {
         return 'answer'
       }
     }
@@ -31,10 +31,10 @@ it('throws an error on non-2xx response', async () => {
 })
 
 it('parses JSON body', async () => {
-  async function fetch () {
+  async function fetch() {
     return {
       status: 200,
-      async json () {
+      async json() {
         return { answer: '1' }
       }
     }
@@ -45,7 +45,7 @@ it('parses JSON body', async () => {
 it('has shortcut for GET', async () => {
   let fetch = jest.fn(async () => ({
     status: 200,
-    async json () {
+    async json() {
       return { answer: '1' }
     }
   }))
@@ -94,10 +94,10 @@ it('has shortcut for DELETE', async () => {
 })
 
 it('works without option object', async () => {
-  async function fetch () {
+  async function fetch() {
     return {
       status: 404,
-      async text () {
+      async text() {
         return 'answer'
       }
     }

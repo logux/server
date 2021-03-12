@@ -47,20 +47,20 @@ const LABELS = {
   60: (c, str) => label(c, ' FATAL ', 'red', 'bgRed', 'white', str)
 }
 
-function rightPag (str, length) {
+function rightPag(str, length) {
   let add = length - stripAnsi(str).length
   for (let i = 0; i < add; i++) str += ' '
   return str
 }
 
-function label (c, type, color, labelBg, labelText, message) {
+function label(c, type, color, labelBg, labelText, message) {
   let pagged = rightPag(c[labelBg](c[labelText](type)), 8)
   let time = c.dim(`at ${yyyymmdd.withTime(new Date())}`)
   let highlighted = message.replace(/`([^`]+)`/g, c.yellow('$1'))
   return `${pagged}${c.bold(c[color](highlighted))} ${time}`
 }
 
-function formatName (key) {
+function formatName(key) {
   return key
     .replace(/[A-Z]/g, char => ` ${char.toLowerCase()}`)
     .split(' ')
@@ -69,7 +69,7 @@ function formatName (key) {
     .replace(/^\w/, char => char.toUpperCase())
 }
 
-function formatNodeId (c, nodeId) {
+function formatNodeId(c, nodeId) {
   let pos = nodeId.lastIndexOf(':')
   let id, random
   if (pos === -1) {
@@ -81,7 +81,7 @@ function formatNodeId (c, nodeId) {
   }
 }
 
-function formatValue (c, value) {
+function formatValue(c, value) {
   if (typeof value === 'string') {
     return '"' + c.bold(value) + '"'
   } else if (Array.isArray(value)) {
@@ -93,22 +93,22 @@ function formatValue (c, value) {
   }
 }
 
-function formatObject (c, obj) {
+function formatObject(c, obj) {
   let items = Object.keys(obj).map(k => `${k}: ${formatValue(c, obj[k])}`)
   return '{ ' + items.join(', ') + ' }'
 }
 
-function formatArray (c, array) {
+function formatArray(c, array) {
   let items = array.map(i => formatValue(c, i))
   return '[' + items.join(', ') + ']'
 }
 
-function formatActionId (c, id) {
+function formatActionId(c, id) {
   let p = id.split(' ')
   return `${c.bold(p[0])} ${formatNodeId(c, p[1])} ${c.bold(p[2])}`
 }
 
-function formatParams (c, params, parent) {
+function formatParams(c, params, parent) {
   let maxName = params.reduce((max, param) => {
     let name = param[0]
     return name.length > max ? name.length : max
@@ -148,7 +148,7 @@ function formatParams (c, params, parent) {
     .join(NEXT_LINE)
 }
 
-function splitByLength (string, max) {
+function splitByLength(string, max) {
   let words = string.split(' ')
   let lines = ['']
   for (let word of words) {
@@ -162,7 +162,7 @@ function splitByLength (string, max) {
   return lines.map(i => i.trim())
 }
 
-function prettyStackTrace (c, stack, basepath) {
+function prettyStackTrace(c, stack, basepath) {
   return stack
     .split('\n')
     .slice(1)
@@ -182,7 +182,7 @@ function prettyStackTrace (c, stack, basepath) {
     .join(NEXT_LINE)
 }
 
-export function humanFormatter (options) {
+export function humanFormatter(options) {
   let c = {
     green,
     bgGreen,

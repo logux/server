@@ -197,7 +197,7 @@ const REPORTERS = {
   }
 }
 
-function createLogger (options) {
+function createLogger(options) {
   let stream = options.logger.stream || pino.destination()
   let prettifier = {}
   if (options.logger === 'human' || options.logger.type === 'human') {
@@ -222,8 +222,8 @@ function createLogger (options) {
   )
 }
 
-export function createReporter (options) {
-  function reporter (type, details) {
+export function createReporter(options) {
+  function reporter(type, details) {
     let report = REPORTERS[type](details)
     let level = report.level || 'info'
     reporter.logger[level](report.details || details || {}, report.msg)

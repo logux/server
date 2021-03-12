@@ -13,7 +13,7 @@ const FAKE_SERVER: any = {
   ]),
 
   log: {
-    add (action: Action, meta: ServerMeta) {
+    add(action: Action, meta: ServerMeta) {
       added.push([action, meta])
       return Promise.resolve()
     }
@@ -24,7 +24,7 @@ beforeEach(() => {
   added = []
 })
 
-function createContext (
+function createContext(
   meta: Partial<ServerMeta> = { id: '1 10:client:uuid 0', subprotocol: '1.0.0' }
 ): Context {
   return new Context(FAKE_SERVER, meta as ServerMeta)

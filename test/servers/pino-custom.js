@@ -6,7 +6,7 @@ import { Server } from '../../index.js'
 
 let logger = pino({
   name: 'logux-server-custom',
-  mixin () {
+  mixin() {
     return { customProp: '42' }
   },
   timestamp: pino.stdTimeFunctions.isoTime

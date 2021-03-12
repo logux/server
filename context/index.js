@@ -2,7 +2,7 @@ import { parseId } from '@logux/core'
 import semver from 'semver'
 
 export class Context {
-  constructor (server, meta) {
+  constructor(server, meta) {
     this.server = server
     this.data = {}
 
@@ -27,11 +27,11 @@ export class Context {
     }
   }
 
-  isSubprotocol (range) {
+  isSubprotocol(range) {
     return semver.satisfies(this.subprotocol, range)
   }
 
-  sendBack (action, meta = {}) {
+  sendBack(action, meta = {}) {
     return this.server.log.add(action, {
       status: 'processed',
       clients: [this.clientId],

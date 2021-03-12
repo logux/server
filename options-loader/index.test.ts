@@ -1,6 +1,6 @@
 import { loadOptions, oneOf, number } from './index.js'
 
-function fakeProcess (argv: string[] = [], env: object = {}): any {
+function fakeProcess(argv: string[] = [], env: object = {}): any {
   return {
     argv,
     env

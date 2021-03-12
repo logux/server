@@ -39,11 +39,11 @@ const ACTION = {
   meta: { id: '1 server:rails 0', reasons: ['test'] }
 }
 
-function privateMethods (obj: object): any {
+function privateMethods(obj: object): any {
   return obj
 }
 
-function createServer (opts?: TestServerOptions): TestServer {
+function createServer(opts?: TestServerOptions): TestServer {
   lastPort += 1
   let server = new TestServer({
     port: lastPort,
@@ -74,7 +74,7 @@ type StringRequest = RequestOptions & {
   data?: undefined
 }
 
-function request ({
+function request({
   method,
   path,
   string,
@@ -102,11 +102,11 @@ function request ({
   })
 }
 
-function send (data: object): Promise<number> {
+function send(data: object): Promise<number> {
   return request({ data })
 }
 
-async function catchError (cb: () => Promise<any>): Promise<Error> {
+async function catchError(cb: () => Promise<any>): Promise<Error> {
   let err
   try {
     await cb()
@@ -232,7 +232,7 @@ it('validates HTTP requests', async () => {
   })
   await app.listen()
 
-  function check (...commands: any[]): Promise<number> {
+  function check(...commands: any[]): Promise<number> {
     return send({ version: 4, secret: 'S', commands })
   }
 
@@ -270,7 +270,7 @@ it('creates and processes actions', async () => {
   let processed = 0
   app.type('A', {
     access: () => true,
-    process () {
+    process() {
       processed += 1
     }
   })
@@ -439,7 +439,7 @@ it('notifies about actions and subscriptions', async () => {
   let processed = 0
   app.type('a/load1', {
     access: () => false,
-    process () {
+    process() {
       processed += 1
     }
   })

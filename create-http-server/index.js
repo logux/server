@@ -5,7 +5,7 @@ import http from 'http'
 
 const PEM_PREAMBLE = '-----BEGIN'
 
-function isPem (content) {
+function isPem(content) {
   if (typeof content === 'object' && content.pem) {
     return true
   } else {
@@ -13,13 +13,13 @@ function isPem (content) {
   }
 }
 
-function readFrom (root, file) {
+function readFrom(root, file) {
   file = file.toString()
   if (!isAbsolute(file)) file = join(root, file)
   return fs.readFile(file)
 }
 
-export async function createHttpServer (opts) {
+export async function createHttpServer(opts) {
   let server
   if (opts.server) {
     server = opts.server

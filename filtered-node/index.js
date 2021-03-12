@@ -1,11 +1,11 @@
 import { ServerNode } from '@logux/core'
 
-function has (array, item) {
+function has(array, item) {
   return array && array.includes(item)
 }
 
 export class FilteredNode extends ServerNode {
-  constructor (client, nodeId, log, connection, options) {
+  constructor(client, nodeId, log, connection, options) {
     super(nodeId, log, connection, options)
     this.client = client
 
@@ -16,7 +16,7 @@ export class FilteredNode extends ServerNode {
     delete this.received
   }
 
-  async syncSinceQuery (lastSynced) {
+  async syncSinceQuery(lastSynced) {
     let data = { added: 0, entries: [] }
     await this.log.each({ order: 'added' }, (action, meta) => {
       if (meta.added <= lastSynced) {

@@ -25,7 +25,7 @@ export class Context<D extends object = {}, H extends object = {}> {
    *                    in SemVer format.
    * @param server Logux server
    */
-  constructor (server: Server, meta: ServerMeta)
+  constructor(server: Server, meta: ServerMeta)
 
   /**
    * Open structure to save some data between different steps of processing.
@@ -119,7 +119,7 @@ export class Context<D extends object = {}, H extends object = {}> {
    * @param range npm’s version requirements.
    * @returns Is version satisfies requirements.
    */
-  isSubprotocol (range: string): boolean
+  isSubprotocol(range: string): boolean
 
   /**
    * Send action back to the client.
@@ -134,7 +134,7 @@ export class Context<D extends object = {}, H extends object = {}> {
    * @param meta Action’s meta.
    * @returns Promise until action was added to the server log.
    */
-  sendBack (action: AnyAction, meta?: Partial<ServerMeta>): Promise<void>
+  sendBack(action: AnyAction, meta?: Partial<ServerMeta>): Promise<void>
 }
 
 /**

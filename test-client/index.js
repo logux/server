@@ -5,7 +5,7 @@ import cookie from 'cookie'
 import { filterMeta } from '../filter-meta/index.js'
 
 export class TestClient {
-  constructor (server, userId, opts = {}) {
+  constructor(server, userId, opts = {}) {
     this.server = server
     this.pair = new TestPair()
     let clientId = server.testUsers[userId] || 0
@@ -43,7 +43,7 @@ export class TestClient {
     })
   }
 
-  connect () {
+  connect() {
     return new Promise((resolve, reject) => {
       this.node.throwsError = false
       let unbind = this.node.on('error', e => {
@@ -64,12 +64,12 @@ export class TestClient {
     })
   }
 
-  disconnect () {
+  disconnect() {
     this.node.connection.disconnect()
     return this.pair.wait('right')
   }
 
-  async collect (test) {
+  async collect(test) {
     let added = []
     let unbind = this.node.log.on('add', (action, meta) => {
       if (!meta.id.includes(` ${this.nodeId} `)) {
@@ -81,7 +81,7 @@ export class TestClient {
     return added
   }
 
-  process (action, meta) {
+  process(action, meta) {
     return this.collect(async () => {
       return new Promise((resolve, reject) => {
         let id
@@ -133,7 +133,7 @@ export class TestClient {
     })
   }
 
-  async subscribe (channel, filter) {
+  async subscribe(channel, filter) {
     let action = channel
     if (typeof channel === 'string') {
       action = { type: 'logux/subscribe', channel }
@@ -145,7 +145,7 @@ export class TestClient {
     return actions.filter(i => i.type !== 'logux/processed')
   }
 
-  unsubscribe (channel, filter) {
+  unsubscribe(channel, filter) {
     let action = channel
     if (typeof channel === 'string') {
       action = { type: 'logux/unsubscribe', channel }
@@ -156,7 +156,7 @@ export class TestClient {
     return this.process(action)
   }
 
-  async received (test) {
+  async received(test) {
     let actions = []
     let unbind = this.log.on('add', (action, meta) => {
       if (!meta.id.includes(` ${this.nodeId} `)) {

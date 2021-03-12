@@ -63,7 +63,7 @@ export class TestClient {
    * @param userId User ID.
    * @param opts Other options.
    */
-  constructor (server: TestServer, userId: string, opts?: TestClientOptions)
+  constructor(server: TestServer, userId: string, opts?: TestClientOptions)
 
   /**
    * Client’s log with extra methods to check actions inside.
@@ -124,7 +124,7 @@ export class TestClient {
    * @params Connection credentials.
    * @returns Promise until the authorization.
    */
-  connect (opts?: { token: string }): Promise<void>
+  connect(opts?: { token: string }): Promise<void>
 
   /**
    * Disconnect from test server.
@@ -135,7 +135,7 @@ export class TestClient {
    *
    * @returns Promise until connection close.
    */
-  disconnect (): Promise<void>
+  disconnect(): Promise<void>
 
   /**
    * Collect actions added by server and other clients during the `test` call.
@@ -151,7 +151,7 @@ export class TestClient {
    * @param test Function, where do you expect action will be received
    * @returns Promise with all received actions
    */
-  collect (test: () => Promise<void>): Promise<Action[]>
+  collect(test: () => Promise<void>): Promise<Action[]>
 
   /**
    * Send action to the sever and collect all response actions.
@@ -166,7 +166,7 @@ export class TestClient {
    * @param meta Optional action’s meta.
    * @returns Promise until `logux/processed` answer.
    */
-  process (action: AnyAction, meta?: Partial<ServerMeta>): Promise<Action[]>
+  process(action: AnyAction, meta?: Partial<ServerMeta>): Promise<Action[]>
 
   /**
    * Subscribe to the channel and collect all actions dunring the subscription.
@@ -182,7 +182,7 @@ export class TestClient {
    * @param filter Optional filter for subscription.
    * @returns Promise with all actions from the server.
    */
-  subscribe (
+  subscribe(
     channel: string | LoguxSubscribeAction,
     filter?: object
   ): Promise<Action[]>
@@ -198,7 +198,7 @@ export class TestClient {
    * @param filter Optional filter for subscription.
    * @returns Promise until server will remove client from subscribers.
    */
-  unsubscribe (
+  unsubscribe(
     channel: string | LoguxUnsubscribeAction,
     filter?: object
   ): Promise<Action[]>
@@ -216,5 +216,5 @@ export class TestClient {
    * @param test Function, where do you expect action will be received
    * @returns Promise with all received actions
    */
-  received (test: () => Promise<void> | void): Promise<Action[]>
+  received(test: () => Promise<void> | void): Promise<Action[]>
 }

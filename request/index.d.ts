@@ -8,7 +8,7 @@ export class ResponseError extends Error {
   name: 'ResponseError'
   statusCode: number
 
-  constructor (
+  constructor(
     statusCode: number,
     url: string,
     opts: RequestInit,
@@ -24,7 +24,7 @@ export class ResponseError extends Error {
  * @param opts `fetch()` options.
  * @param fetcher A way to replace `fetch()` for tests.
  */
-export function request<Body = any> (
+export function request<Body = any>(
   url: string,
   opts?: RequestInit,
   fetcher?: typeof fetch
@@ -44,7 +44,7 @@ export function request<Body = any> (
  * @param opts `fetch()` options.
  * @param fetcher A way to replace `fetch()` for tests.
  */
-export function get<Body = any> (
+export function get<Body = any>(
   url: string,
   opts?: Omit<RequestInit, 'method'>,
   fetcher?: typeof fetch
@@ -58,7 +58,7 @@ export function get<Body = any> (
  * @param opts `fetch()` options.
  * @param fetcher A way to replace `fetch()` for tests.
  */
-export function post<Body = any> (
+export function post<Body = any>(
   url: string,
   opts?: Omit<RequestInit, 'method'>,
   fetcher?: typeof fetch
@@ -72,7 +72,7 @@ export function post<Body = any> (
  * @param opts `fetch()` options.
  * @param fetcher A way to replace `fetch()` for tests.
  */
-export function put<Body = any> (
+export function put<Body = any>(
   url: string,
   opts?: Omit<RequestInit, 'method'>,
   fetcher?: typeof fetch
@@ -86,7 +86,7 @@ export function put<Body = any> (
  * @param opts `fetch()` options.
  * @param fetcher A way to replace `fetch()` for tests.
  */
-export function patch<Body = any> (
+export function patch<Body = any>(
   url: string,
   opts?: Omit<RequestInit, 'method'>,
   fetcher?: typeof fetch
@@ -100,7 +100,7 @@ export function patch<Body = any> (
  * @param opts `fetch()` options.
  * @param fetcher A way to replace `fetch()` for tests.
  */
-export function del<Body = any> (
+export function del<Body = any>(
   url: string,
   opts?: Omit<RequestInit, 'method'>,
   fetcher?: typeof fetch

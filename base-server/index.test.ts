@@ -21,7 +21,7 @@ const CERT = join(ROOT, 'test/fixtures/cert.pem')
 const KEY = join(ROOT, 'test/fixtures/key.pem')
 
 let lastPort = 9111
-function createServer (
+function createServer(
   options: Partial<BaseServerOptions> = {}
 ): BaseServer<{}, TestLog<ServerMeta>> {
   let opts = {
@@ -48,7 +48,7 @@ function createServer (
 let destroyable: BaseServer | undefined
 let httpServer: http.Server | undefined
 
-function createReporter (
+function createReporter(
   opts: Partial<BaseServerOptions> = {}
 ): {
   app: BaseServer<{}, TestLog<ServerMeta>>
@@ -68,11 +68,11 @@ function createReporter (
 
 let originEnv = process.env.NODE_ENV
 
-function privateMethods (obj: object): any {
+function privateMethods(obj: object): any {
   return obj
 }
 
-function emit (obj: any, event: string, ...args: any): void {
+function emit(obj: any, event: string, ...args: any): void {
   obj.emitter.emit(event, ...args)
 }
 
@@ -542,7 +542,7 @@ it('processes actions', async () => {
 
   test.app.type('FOO', {
     access: () => true,
-    async process (ctx, action, meta) {
+    async process(ctx, action, meta) {
       expect(meta.added).toEqual(1)
       expect(ctx.isServer).toBe(true)
       await delay(25)
@@ -575,7 +575,7 @@ it('processes regex matching action', async () => {
 
   test.app.type(/.*TODO$/, {
     access: () => true,
-    async process (ctx, action, meta) {
+    async process(ctx, action, meta) {
       expect(meta.added).toEqual(1)
       expect(ctx.isServer).toBe(true)
       await delay(25)
@@ -625,7 +625,7 @@ it('waits for last processing before destroy', async () => {
 
   app.type('FOO', {
     access: () => true,
-    process () {
+    process() {
       started += 1
       return new Promise(resolve => {
         process = resolve
@@ -658,7 +658,7 @@ it('reports about error during action processing', async () => {
   let err = new Error('Test')
   test.app.type('FOO', {
     access: () => true,
-    process () {
+    process() {
       throw err
     }
   })
@@ -771,7 +771,7 @@ it('reports about wrong channel name', async () => {
   test.app.channel('foo', { access: () => true })
   let client: any = {
     connection: { send: jest.fn() },
-    node: { onAdd () {} }
+    node: { onAdd() {} }
   }
   test.app.nodeIds.set('10:uuid', client)
   test.app.clientIds.set('10:uuid', client)
@@ -830,7 +830,7 @@ it('allows to have custom channel name check', async () => {
   let test = createReporter()
   let channels: string[] = []
   test.app.otherChannel({
-    access (ctx, action, meta) {
+    access(ctx, action, meta) {
       channels.push(ctx.params[0])
       test.app.wrongChannel(action, meta)
       return false
@@ -838,7 +838,7 @@ it('allows to have custom channel name check', async () => {
   })
   let client: any = {
     connection: { send: jest.fn() },
-    node: { onAdd () {} }
+    node: { onAdd() {} }
   }
   test.app.nodeIds.set('10:uuid', client)
   test.app.clientIds.set('10:uuid', client)
@@ -865,11 +865,11 @@ it('checks channel access', async () => {
   let finalled = 0
 
   test.app.channel(/^user\/(\d+)$/, {
-    async access (ctx) {
+    async access(ctx) {
       expect(ctx.params[1]).toEqual('10')
       return false
     },
-    finally () {
+    finally() {
       finalled += 1
     }
   })
@@ -902,7 +902,7 @@ it('reports about errors during channel authorization', async () => {
 
   let err = new Error()
   test.app.channel(/^user\/(\d+)$/, {
-    access () {
+    access() {
       throw err
     }
   })
@@ -935,7 +935,7 @@ it('subscribes clients', async () => {
 
   let userSubsriptions = 0
   test.app.channel<{ id: string }>('user/:id', {
-    access (ctx, action, meta) {
+    access(ctx, action, meta) {
       expect(ctx.params.id).toEqual('10')
       expect(action.channel).toEqual('user/10')
       expect(meta.id).toEqual('1 10:a:uuid 0')
@@ -947,10 +947,10 @@ it('subscribes clients', async () => {
 
   let filter = (): boolean => false
   test.app.channel('posts', {
-    access () {
+    access() {
       return true
     },
-    async filter () {
+    async filter() {
       return filter
     }
   })
@@ -1052,15 +1052,15 @@ it('cancels subscriptions on disconnect', async () => {
   })
 
   app.channel('test', {
-    access () {
+    access() {
       app.clientIds.delete('10:uuid')
       app.nodeIds.delete('10:uuid')
       return true
     },
-    filter () {
+    filter() {
       throw new Error('no calls')
     },
-    load () {
+    load() {
       throw new Error('no calls')
     }
   })
@@ -1085,7 +1085,7 @@ it('reports about errors during channel initialization', async () => {
   let err = new Error()
   test.app.channel(/^user\/(\d+)$/, {
     access: () => true,
-    load () {
+    load() {
       throw err
     }
   })
@@ -1131,7 +1131,7 @@ it('loads initial actions during subscription', async () => {
   let initializating: undefined | (() => void)
   test.app.channel<{ id: string }>('user/:id', {
     access: () => true,
-    load (ctx, action, meta) {
+    load(ctx, action, meta) {
       expect(ctx.params.id).toEqual('10')
       expect(action.channel).toEqual('user/10')
       expect(meta.id).toEqual('1 10:uuid 0')
@@ -1267,7 +1267,7 @@ it('tracks action processing on add', async () => {
   })
   app.type('ERROR', {
     access: () => false,
-    process () {
+    process() {
       throw error
     }
   })
@@ -1293,7 +1293,7 @@ it('has shortcut API for action creators', async () => {
   let app = createServer()
   app.type(createA, {
     access: () => true,
-    process (ctx, action) {
+    process(ctx, action) {
       processed.push(action.aValue)
     }
   })
