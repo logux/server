@@ -127,10 +127,9 @@ server.channel<BadParams>('posts', {
   }
 })
 
-let addUser = defineAction<
-  { type: 'user/remove'; userId: string },
-  { userId: string }
->('user/remove')
+let addUser = defineAction<{ type: 'user/remove'; userId: string }>(
+  'user/remove'
+)
 
 server.type(addUser, {
   access(ctx, action) {
