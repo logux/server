@@ -1287,7 +1287,7 @@ it('tracks action processing on add', async () => {
 
 it('has shortcut API for action creators', async () => {
   type ActionA = { type: 'A'; aValue: string }
-  let createA = defineAction<ActionA, { aValue: string }>('A')
+  let createA = defineAction<ActionA>('A')
 
   let processed: string[] = []
   let app = createServer()
