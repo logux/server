@@ -222,11 +222,30 @@ function createLogger(options) {
   )
 }
 
+function cleanFromKeys(obj, regexp) {
+  let result = {}
+  for (let key in obj) {
+    let v = obj[key]
+    if (typeof v === 'string') {
+      result[key] = v.replace(regexp, '[SECRET]')
+    } else if (typeof v === 'object' && !Array.isArray(v) && v !== null) {
+      result[key] = cleanFromKeys(v, regexp)
+    } else {
+      result[key] = v
+    }
+  }
+  return result
+}
+
 export function createReporter(options) {
+  let cleanFromLog = options.cleanFromLog || /Bearer [^\s"]+/g
   function reporter(type, details) {
     let report = REPORTERS[type](details)
     let level = report.level || 'info'
-    reporter.logger[level](report.details || details || {}, report.msg)
+    reporter.logger[level](
+      cleanFromKeys(report.details || details || {}, cleanFromLog),
+      report.msg.replace(cleanFromLog, '[SECRET]')
+    )
   }
 
   let customLoggerProvided =

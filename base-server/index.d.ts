@@ -190,6 +190,13 @@ export type BaseServerOptions = {
    * recommended.
    */
   cert?: string
+
+  /**
+   * Regular expression which should be cleaned from error message and stack.
+   *
+   * By default it cleans `Bearer [^\s"]+`.
+   */
+  cleanFromLog?: RegExp
 }
 
 export type AuthenticatorOptions<H extends object> = {
