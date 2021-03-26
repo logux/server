@@ -364,6 +364,13 @@ it('reports error from action', () => {
   })
 })
 
+it('reports error with token', () => {
+  check('error', {
+    actionId: '1487805099387 100:uImkcF4z 0',
+    err: createError('Error', '{"Authorization":"Bearer secret"}')
+  })
+})
+
 it('reports sync error', () => {
   let err = new LoguxError('unknown-message', 'bad', true)
   check('error', { connectionId: '670', err })
