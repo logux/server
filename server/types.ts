@@ -107,10 +107,9 @@ server.on('connected', client => {
   console.log(client.remoteAddress)
 })
 
-let addUser = defineAction<
-  { type: 'user/remove'; userId: string },
-  { userId: string }
->('user/remove')
+let addUser = defineAction<{ type: 'user/remove'; userId: string }>(
+  'user/remove'
+)
 
 server.type(addUser, {
   access(ctx, action) {
