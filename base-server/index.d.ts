@@ -1071,6 +1071,18 @@ export class BaseServer<
   sendAction(action: Action, meta: ServerMeta): void
 
   /**
+   * Send `logux/subscribed` if client was not already subscribed.
+   *
+   * ```js
+   * server.subscribe(ctx.nodeId, `users/${loaded}`)
+   * ```
+   *
+   * @param nodeId Node ID.
+   * @param channel Channel name.
+   */
+  subscribe(nodeId: string, channel: string): void
+
+  /**
    * Add new client for server. You should call this method manually
    * mostly for test purposes.
    *
