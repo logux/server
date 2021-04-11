@@ -1321,3 +1321,29 @@ it('has custom logger', () => {
   app.logger.warn({ test: 1 }, 'test')
   expect(console.warn).toHaveBeenCalledWith({ test: 1 }, 'test')
 })
+
+it('subscribes clients manually', async () => {
+  let app = new BaseServer({
+    subprotocol: '1.0.0',
+    supports: '1.0.0',
+    fileUrl: import.meta.url
+  })
+  let actions: Action[] = []
+  app.log.on('add', (action, meta) => {
+    expect(meta.nodes).toEqual(['test:1:1'])
+    actions.push(action)
+  })
+
+  app.subscribe('test:1:1', 'users/10')
+  await delay(10)
+  expect(app.subscribers).toEqual({
+    'users/10': {
+      'test:1:1': true
+    }
+  })
+  expect(actions).toEqual([{ type: 'logux/subscribed', channel: 'users/10' }])
+
+  app.subscribe('test:1:1', 'users/10')
+  await delay(10)
+  expect(actions).toEqual([{ type: 'logux/subscribed', channel: 'users/10' }])
+})

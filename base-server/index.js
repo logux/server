@@ -528,6 +528,16 @@ export class BaseServer {
     }
   }
 
+  subscribe(nodeId, channel) {
+    if (!this.subscribers[channel] || !this.subscribers[channel][nodeId]) {
+      if (!this.subscribers[channel]) {
+        this.subscribers[channel] = {}
+      }
+      this.subscribers[channel][nodeId] = true
+      this.log.add({ type: 'logux/subscribed', channel }, { nodes: [nodeId] })
+    }
+  }
+
   sendAction(action, meta) {
     let from = parseId(meta.id).clientId
     let clients = new Set([from])
