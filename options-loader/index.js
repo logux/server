@@ -18,6 +18,14 @@ export function loadOptions(spec, process, env) {
   }
 
   let cliArgs = parseValues(spec, mapArgs(rawCliArgs, namesMap))
+  let dotenvArgs = parseEnvArgs(env)
+  if (dotenvArgs) {
+    dotenvArgs = Object.fromEntries(
+      Object.entries(dotenvArgs).filter(([key]) =>
+        key.startsWith(spec.envPrefix)
+      )
+    )
+  }
   let envArgs = Object.fromEntries(
     Object.entries(process.env).filter(([key]) =>
       key.startsWith(spec.envPrefix)
@@ -25,7 +33,7 @@ export function loadOptions(spec, process, env) {
   )
   envArgs = parseValues(
     spec,
-    mapArgs(Object.assign(envArgs, parseEnvArgs(env)), namesMap)
+    mapArgs(Object.assign(envArgs, dotenvArgs), namesMap)
   )
   return [null, Object.assign(envArgs, cliArgs)]
 }
