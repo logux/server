@@ -1,3 +1,5 @@
+import { resolve } from 'path'
+
 import { loadOptions, oneOf, number } from './index.js'
 
 function fakeProcess(argv: string[] = [], env: object = {}): any {
@@ -56,6 +58,26 @@ describe('loadOptions', () => {
         LOGUX_PORT: '31337'
       }),
       {}
+    )
+
+    expect(options?.port).toEqual(31337)
+  })
+
+  it('uses dotenv file for options', () => {
+    let [, options] = loadOptions(
+      {
+        options: {
+          port: {
+            description: 'port',
+            parse: number
+          }
+        },
+        envPrefix: 'LOGUX'
+      },
+      fakeProcess([], {}),
+      {
+        path: resolve(process.cwd(), 'options-loader/test.env')
+      }
     )
 
     expect(options?.port).toEqual(31337)
