@@ -14,7 +14,7 @@
     "collaborative"
   ],
   "scripts": {
-    "test": "node --experimental-vm-modules node_modules/.bin/jest --forceExit --runInBand --coverage && eslint . && check-dts && yaspeller *.md"
+    "test": "node --experimental-vm-modules node_modules/.bin/jest --coverage && eslint . && check-dts && yaspeller *.md"
   },
   "author": "Andrey Sitnik <andrey@sitnik.ru>",
   "license": "MIT",
