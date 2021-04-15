@@ -21,6 +21,7 @@ const CERT = join(ROOT, 'test/fixtures/cert.pem')
 const KEY = join(ROOT, 'test/fixtures/key.pem')
 
 let lastPort = 9111
+
 function createServer(
   options: Partial<BaseServerOptions> = {}
 ): BaseServer<{}, TestLog<ServerMeta>> {
@@ -983,7 +984,7 @@ it('subscribes clients', async () => {
   expect(test.reports[3][1].meta.status).toEqual('processed')
   expect(test.app.subscribers).toEqual({
     'user/10': {
-      '10:a:uuid': true
+      '10:a:uuid': { filter: true }
     }
   })
   await test.app.log.add(
@@ -995,10 +996,10 @@ it('subscribes clients', async () => {
   expect(events).toEqual(2)
   expect(test.app.subscribers).toEqual({
     'user/10': {
-      '10:a:uuid': true
+      '10:a:uuid': { filter: true }
     },
     'posts': {
-      '10:a:uuid': filter
+      '10:a:uuid': { filter }
     }
   })
   await test.app.log.add(
@@ -1033,7 +1034,7 @@ it('subscribes clients', async () => {
   })
   expect(test.app.subscribers).toEqual({
     posts: {
-      '10:a:uuid': filter
+      '10:a:uuid': { filter }
     }
   })
 })
@@ -1151,7 +1152,7 @@ it('loads initial actions during subscription', async () => {
   expect(userLoaded).toEqual(1)
   expect(test.app.subscribers).toEqual({
     'user/10': {
-      '10:uuid': true
+      '10:uuid': { filter: true }
     }
   })
   expect(test.app.log.actions()).toEqual([
@@ -1167,6 +1168,56 @@ it('loads initial actions during subscription', async () => {
     { type: 'logux/subscribe', channel: 'user/10' },
     { type: 'logux/processed', id: '1 10:uuid 0' }
   ])
+})
+
+it('calls unsubscribe() channel callback with logux/unsubscribe', async () => {
+  let test = createReporter({})
+  let client: any = {
+    node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
+  }
+  let nodeId = '10:uuid'
+  test.app.nodeIds.set(nodeId, client)
+  test.app.clientIds.set('10:uuid', client)
+  test.app.on('preadd', (action, meta) => {
+    meta.reasons.push('test')
+  })
+  let unsubscribeCallback = jest.fn()
+  test.app.channel<{ id: string }>('user/:id', {
+    access: () => true,
+    unsubscribe: unsubscribeCallback
+  })
+
+  await test.app.log.add(
+    { type: 'logux/subscribe', channel: 'user/10' },
+    { id: `1 ${nodeId}` }
+  )
+  expect(Object.keys(test.app.subscribers)).toHaveLength(1)
+
+  await test.app.log.add(
+    { type: 'logux/unsubscribe', channel: 'user/10' },
+    { id: `2 ${nodeId}` }
+  )
+  expect(Object.keys(test.app.subscribers)).toHaveLength(0)
+
+  expect(test.app.log.actions()).toEqual([
+    { type: 'logux/subscribe', channel: 'user/10' },
+    { type: 'logux/processed', id: `1 ${nodeId}` },
+    { type: 'logux/unsubscribe', channel: 'user/10' },
+    { type: 'logux/processed', id: `2 ${nodeId}` }
+  ])
+  expect(unsubscribeCallback).toHaveBeenCalledTimes(1)
+  expect(unsubscribeCallback).toHaveBeenCalledWith(
+    expect.objectContaining({
+      nodeId
+    }),
+    expect.objectContaining({
+      type: 'logux/unsubscribe',
+      channel: 'user/10'
+    }),
+    expect.objectContaining({
+      status: 'processed'
+    })
+  )
 })
 
 it('does not need type definition for own actions', async () => {
@@ -1338,7 +1389,7 @@ it('subscribes clients manually', async () => {
   await delay(10)
   expect(app.subscribers).toEqual({
     'users/10': {
-      'test:1:1': true
+      'test:1:1': { filter: true }
     }
   })
   expect(actions).toEqual([{ type: 'logux/subscribed', channel: 'users/10' }])

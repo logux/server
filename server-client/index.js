@@ -82,10 +82,13 @@ export class ServerClient {
     if (this.clientId) {
       this.app.clientIds.delete(this.clientId)
       this.app.nodeIds.delete(this.nodeId)
-      for (let i in this.app.subscribers) {
-        delete this.app.subscribers[i][this.nodeId]
-        if (Object.keys(this.app.subscribers[i]).length === 0) {
-          delete this.app.subscribers[i]
+      let lastDestroyIndex = 0
+      for (let channel in this.app.subscribers) {
+        if (this.app.subscribers[channel][this.nodeId]) {
+          this.app.log.add(
+            { type: 'logux/unsubscribe', channel },
+            { id: `destroy${++lastDestroyIndex} ${this.nodeId}` }
+          )
         }
       }
     }
