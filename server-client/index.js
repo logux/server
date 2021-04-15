@@ -82,10 +82,14 @@ export class ServerClient {
     if (this.clientId) {
       this.app.clientIds.delete(this.clientId)
       this.app.nodeIds.delete(this.nodeId)
-      for (let i in this.app.subscribers) {
-        delete this.app.subscribers[i][this.nodeId]
-        if (Object.keys(this.app.subscribers[i]).length === 0) {
-          delete this.app.subscribers[i]
+
+      for (let channel in this.app.subscribers) {
+        let subscriber = this.app.subscribers[channel][this.nodeId]
+        if (subscriber) {
+          let action = { type: 'logux/unsubscribe', channel }
+          let actionId = this.app.log.generateId()
+          let meta = { id: actionId, time: parseInt(actionId), reasons: [] }
+          this.app.performUnsubscribe(this.nodeId, action, meta)
         }
       }
     }

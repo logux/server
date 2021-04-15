@@ -360,6 +360,26 @@ interface ChannelFinally<
   (ctx: ChannelContext<D, P, H>, action: A, meta: ServerMeta): void
 }
 
+/**
+ * Callback which will be called on listener unsubscribe
+ * (with explicit intent or because of disconnect)
+ *
+ * @param ctx Information about node, who create this action.
+ * @param action The action data.
+ * @param meta The action metadata.
+ */
+interface ChannelUnsubscribe<
+  D extends object,
+  P extends object | string[],
+  H extends object
+> {
+  (
+    ctx: ChannelContext<D, P, H>,
+    action: LoguxUnsubscribeAction,
+    meta: ServerMeta
+  ): void
+}
+
 type ActionCallbacks<A extends Action, D extends object, H extends object> =
   | {
       access: Authorizer<A, D, H>
@@ -384,6 +404,7 @@ type ChannelCallbacks<
       filter?: FilterCreator<A, D, P, H>
       load?: ChannelLoader<A, D, P, H>
       finally?: ChannelFinally<A, D, P, H>
+      unsubscribe?: ChannelUnsubscribe<D, P, H>
     }
   | {
       accessAndLoad: ChannelLoader<A, D, P, H>
@@ -648,7 +669,10 @@ export class BaseServer<
    */
   subscribers: {
     [channel: string]: {
-      [nodeId: string]: ChannelFilter<{}> | true
+      [nodeId: string]: {
+        filter: ChannelFilter<{}> | true
+        unsubscribe?: ChannelUnsubscribe<any, any, any>
+      }
     }
   }
 
