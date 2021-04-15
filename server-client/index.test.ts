@@ -221,13 +221,6 @@ it('reports about connection', () => {
 })
 
 it('removes itself on destroy', async () => {
-  let originalDateNow = Date.now
-  Date.now = () => 1600000000000
-  destroyable.push({
-    destroy: () => {
-      Date.now = originalDateNow
-    }
-  })
   let test = createReporter()
   let disconnectedKeys: string[] = []
   test.app.on('disconnected', client => {
@@ -273,20 +266,14 @@ it('removes itself on destroy', async () => {
   })
   expect(client1.connection.connected).toBe(false)
   expect(pullNewReports()).toMatchObject([
-    [
-      'unsubscribed',
-      { actionId: '1600000000000 10:client1 0', channel: 'user/10' }
-    ],
+    ['unsubscribed', { channel: 'user/10' }],
     ['disconnect', { nodeId: '10:client1' }]
   ])
 
   client2.destroy()
   await delay(1)
   expect(pullNewReports()).toMatchObject([
-    [
-      'unsubscribed',
-      { actionId: '1600000000000 10:client2 0', channel: 'user/10' }
-    ],
+    ['unsubscribed', { channel: 'user/10' }],
     ['disconnect', { nodeId: '10:client2' }]
   ])
   expect(test.app.connected.size).toEqual(0)

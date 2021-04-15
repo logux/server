@@ -784,16 +784,16 @@ export class BaseServer {
     if (!match) this.wrongChannel(action, meta)
   }
 
-  unsubscribe(action, meta) {
-    let nodeId = meta.id.split(' ')[1]
+  performUnsubscribe(clientNodeId, action, meta) {
     if (this.subscribers[action.channel]) {
-      let subscriber = this.subscribers[action.channel][nodeId]
+      let subscriber = this.subscribers[action.channel][clientNodeId]
       if (subscriber) {
         if (subscriber.unsubscribe) {
           let ctx = this.createContext(action, meta)
           subscriber.unsubscribe(ctx, action, meta)
+          this.contexts.delete(action)
         }
-        delete this.subscribers[action.channel][nodeId]
+        delete this.subscribers[action.channel][clientNodeId]
         if (Object.keys(this.subscribers[action.channel]).length === 0) {
           delete this.subscribers[action.channel]
         }
@@ -804,6 +804,11 @@ export class BaseServer {
       actionId: meta.id,
       channel: action.channel
     })
+  }
+
+  unsubscribe(action, meta) {
+    let clientNodeId = meta.id.split(' ')[1]
+    this.performUnsubscribe(clientNodeId, action, meta)
   }
 
   unsubscribeAction(action, meta) {

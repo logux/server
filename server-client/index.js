@@ -1,4 +1,4 @@
-import { Log, LoguxError, MemoryStore, parseId } from '@logux/core'
+import { LoguxError, parseId } from '@logux/core'
 import cookie from 'cookie'
 import semver from 'semver'
 
@@ -82,17 +82,14 @@ export class ServerClient {
     if (this.clientId) {
       this.app.clientIds.delete(this.clientId)
       this.app.nodeIds.delete(this.nodeId)
-      let clientNodeLog = new Log({
-        nodeId: this.nodeId,
-        store: new MemoryStore()
-      })
+
       for (let channel in this.app.subscribers) {
         let subscriber = this.app.subscribers[channel][this.nodeId]
         if (subscriber) {
           let action = { type: 'logux/unsubscribe', channel }
-          let actionId = clientNodeLog.generateId()
+          let actionId = this.app.log.generateId()
           let meta = { id: actionId, time: parseInt(actionId), reasons: [] }
-          this.app.unsubscribe(action, meta)
+          this.app.performUnsubscribe(this.nodeId, action, meta)
         }
       }
     }
