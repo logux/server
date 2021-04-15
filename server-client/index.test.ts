@@ -1,20 +1,20 @@
+import { jest } from '@jest/globals'
 import {
-  ServerConnection,
+  Action,
   LoguxError,
-  TestPair,
-  TestTime,
-  TestLog,
   Message,
-  Action
+  ServerConnection,
+  TestLog,
+  TestPair,
+  TestTime
 } from '@logux/core'
 import { delay } from 'nanodelay'
-import { jest } from '@jest/globals'
 
 import {
-  LoguxNotFoundError,
-  BaseServerOptions,
-  ResponseError,
   BaseServer,
+  BaseServerOptions,
+  LoguxNotFoundError,
+  ResponseError,
   ServerMeta
 } from '../index.js'
 import { ServerClient } from './index.js'
@@ -220,7 +220,14 @@ it('reports about connection', () => {
   expect(fired).toEqual(['1'])
 })
 
-it('emits logux/unsubscribe action for every subscription channel on destroy', async () => {
+it('removes itself on destroy', async () => {
+  let originalDateNow = Date.now
+  Date.now = () => 1600000000000
+  destroyable.push({
+    destroy: () => {
+      Date.now = originalDateNow
+    }
+  })
   let test = createReporter()
   let disconnectedKeys: string[] = []
   test.app.on('disconnected', client => {
@@ -266,31 +273,21 @@ it('emits logux/unsubscribe action for every subscription channel on destroy', a
   })
   expect(client1.connection.connected).toBe(false)
   expect(pullNewReports()).toMatchObject([
-    ['disconnect', { nodeId: '10:client1' }],
     [
-      'add',
-      {
-        action: { type: 'logux/unsubscribe', channel: 'user/10' },
-        meta: { id: 'destroy1 10:client1' }
-      }
+      'unsubscribed',
+      { actionId: '1600000000000 10:client1 0', channel: 'user/10' }
     ],
-    ['unsubscribed', { actionId: 'destroy1 10:client1', channel: 'user/10' }],
-    ['add', { action: { type: 'logux/processed', id: 'destroy1 10:client1' } }]
+    ['disconnect', { nodeId: '10:client1' }]
   ])
 
   client2.destroy()
   await delay(1)
   expect(pullNewReports()).toMatchObject([
-    ['disconnect', { nodeId: '10:client2' }],
     [
-      'add',
-      {
-        action: { type: 'logux/unsubscribe', channel: 'user/10' },
-        meta: { id: 'destroy1 10:client2' }
-      }
+      'unsubscribed',
+      { actionId: '1600000000000 10:client2 0', channel: 'user/10' }
     ],
-    ['unsubscribed', { actionId: 'destroy1 10:client2', channel: 'user/10' }],
-    ['add', { action: { type: 'logux/processed', id: 'destroy1 10:client2' } }]
+    ['disconnect', { nodeId: '10:client2' }]
   ])
   expect(test.app.connected.size).toEqual(0)
   expect(test.app.clientIds.size).toEqual(0)
