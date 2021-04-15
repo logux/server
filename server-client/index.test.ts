@@ -1,20 +1,20 @@
+import { jest } from '@jest/globals'
 import {
-  ServerConnection,
+  Action,
   LoguxError,
-  TestPair,
-  TestTime,
-  TestLog,
   Message,
-  Action
+  ServerConnection,
+  TestLog,
+  TestPair,
+  TestTime
 } from '@logux/core'
 import { delay } from 'nanodelay'
-import { jest } from '@jest/globals'
 
 import {
-  LoguxNotFoundError,
-  BaseServerOptions,
-  ResponseError,
   BaseServer,
+  BaseServerOptions,
+  LoguxNotFoundError,
+  ResponseError,
   ServerMeta
 } from '../index.js'
 import { ServerClient } from './index.js'
@@ -222,10 +222,17 @@ it('reports about connection', () => {
 
 it('removes itself on destroy', async () => {
   let test = createReporter()
-  let fired: string[] = []
+  let disconnectedKeys: string[] = []
   test.app.on('disconnected', client => {
-    fired.push(client.key)
+    disconnectedKeys.push(client.key)
   })
+  let lastPulledReports = new Set()
+  let pullNewReports = (): [string, any][] => {
+    let reports = test.reports
+    let result = reports.filter(x => !lastPulledReports.has(x))
+    lastPulledReports = new Set(reports)
+    return result
+  }
 
   let client1 = createClient(test.app)
   let client2 = createClient(test.app)
@@ -234,38 +241,47 @@ it('removes itself on destroy', async () => {
   await client2.connection.connect()
   client1.node.remoteSubprotocol = '0.0.1'
   client2.node.remoteSubprotocol = '0.0.1'
-  privateMethods(client1).auth('10:uuid', {})
-  privateMethods(client2).auth('10:other', {})
+  privateMethods(client1).auth('10:client1', {})
+  privateMethods(client2).auth('10:client2', {})
+  await delay(1)
+  expect(pullNewReports()).toMatchObject([
+    ['connect', { connectionId: '1' }],
+    ['connect', { connectionId: '2' }],
+    ['authenticated', { connectionId: '1', nodeId: '10:client1' }],
+    ['authenticated', { connectionId: '2', nodeId: '10:client2' }]
+  ])
+
   test.app.subscribers = {
     'user/10': {
-      '10:uuid': true,
-      '10:other': true
+      '10:client1': { filter: true },
+      '10:client2': { filter: true }
     }
   }
+  client1.destroy()
   await delay(1)
 
-  client1.destroy()
   expect(Array.from(test.app.userIds.keys())).toEqual(['10'])
   expect(test.app.subscribers).toEqual({
-    'user/10': { '10:other': true }
+    'user/10': { '10:client2': { filter: true } }
   })
   expect(client1.connection.connected).toBe(false)
-  expect(test.names).toEqual([
-    'connect',
-    'connect',
-    'authenticated',
-    'authenticated',
-    'disconnect'
+  expect(pullNewReports()).toMatchObject([
+    ['unsubscribed', { channel: 'user/10' }],
+    ['disconnect', { nodeId: '10:client1' }]
   ])
-  expect(test.reports[4]).toEqual(['disconnect', { nodeId: '10:uuid' }])
 
   client2.destroy()
+  await delay(1)
+  expect(pullNewReports()).toMatchObject([
+    ['unsubscribed', { channel: 'user/10' }],
+    ['disconnect', { nodeId: '10:client2' }]
+  ])
   expect(test.app.connected.size).toEqual(0)
   expect(test.app.clientIds.size).toEqual(0)
   expect(test.app.nodeIds.size).toEqual(0)
   expect(test.app.userIds.size).toEqual(0)
   expect(test.app.subscribers).toEqual({})
-  expect(fired).toEqual(['1', '2'])
+  expect(disconnectedKeys).toEqual(['1', '2'])
 })
 
 it('reports client ID before authentication', async () => {
@@ -350,10 +366,12 @@ it('reports about authentication error', async () => {
 it('blocks authentication bruteforce', async () => {
   let test = createReporter()
   test.app.auth(async () => false)
+
   async function connectNext(num: number): Promise<void> {
     let client = new ServerClient(test.app, createConnection(), num)
     await connect(client, `${num}:uuid`)
   }
+
   await Promise.all([1, 2, 3, 4, 5].map(i => connectNext(i)))
   expect(test.names.filter(i => i === 'disconnect')).toHaveLength(5)
   expect(test.names.filter(i => i === 'unauthenticated')).toHaveLength(5)
@@ -1047,13 +1065,15 @@ it('sends new actions by channel', async () => {
 
   let client = await connectClient(app)
   app.subscribers.foo = {
-    '10:uuid': true
+    '10:uuid': { filter: true }
   }
   app.subscribers.bar = {
-    '10:uuid': (ctx, action, meta) => {
-      expect(meta.id).toContain(' server:x ')
-      expect(ctx.isServer).toBe(true)
-      return privateMethods(action).secret !== true
+    '10:uuid': {
+      filter: (ctx, action, meta) => {
+        expect(meta.id).toContain(' server:x ')
+        expect(ctx.isServer).toBe(true)
+        return privateMethods(action).secret !== true
+      }
     }
   }
   await app.log.add({ type: 'FOO' }, { id: '1 server:x 0' })
@@ -1093,8 +1113,8 @@ it('works with channel according client ID', async () => {
 
   let client = await connectClient(app, '10:uuid:a')
   app.subscribers.foo = {
-    '10:uuid:b': true,
-    '10:uuid:c': true
+    '10:uuid:b': { filter: true },
+    '10:uuid:c': { filter: true }
   }
   await app.log.add({ type: 'FOO' }, { id: '2 server:x 0', channels: ['foo'] })
   sendTo(client, ['synced', 1])
@@ -1480,6 +1500,7 @@ it('does not dublicate channel load actions', async () => {
   function meta(time: number): object {
     return { id: time, time, subprotocol: '0.0.1' }
   }
+
   expect(sent(client).slice(1)).toEqual([
     ['synced', 1],
     ['sync', 2, { type: 'FOO' }, meta(1)],
@@ -1531,6 +1552,7 @@ it('allows to return actions', async () => {
   function meta(time: number): object {
     return { id: time, time, subprotocol: '0.0.1' }
   }
+
   expect(sent(client).slice(1)).toEqual([
     ['synced', 1],
     ['sync', 2, { type: 'A' }, meta(1)],
