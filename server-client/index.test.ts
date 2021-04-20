@@ -1020,6 +1020,23 @@ it('sends new actions by client ID', async () => {
   ])
 })
 
+it('does not send old action on client exluding', async () => {
+  let app = createServer()
+  app.type('A', { access: () => true })
+
+  await app.log.add({ type: 'A' }, { id: '1 server:x 0' })
+  await app.log.add(
+    { type: 'A' },
+    { id: '2 server:x 0', users: ['10'], excludeClients: ['10:client'] }
+  )
+  let client = await connectClient(app, '10:client:uuid')
+
+  sendTo(client, ['synced', 2])
+  await client.node.waitFor('synchronized')
+  expect(sentNames(client)).toEqual(['connected'])
+  expect(sent(client)[1]).toEqual([])
+})
+
 it('sends old actions by user', async () => {
   let app = createServer()
   app.type('A', { access: () => true })
@@ -1103,6 +1120,32 @@ it('sends new actions by channel', async () => {
     4,
     { type: 'BAR' },
     { id: [4, 'server:x', 0], time: 4 }
+  ])
+})
+
+it('excludes client from channel', async () => {
+  let app = createServer()
+  app.type('FOO', { access: () => true })
+
+  let client1 = await connectClient(app, '10:1:uuid')
+  let client2 = await connectClient(app, '10:2:uuid')
+  app.subscribers.foo = {
+    '10:1:uuid': { filter: true },
+    '10:2:uuid': { filter: true }
+  }
+  await app.log.add(
+    { type: 'FOO' },
+    { id: '2 server:x 0', channels: ['foo'], excludeClients: ['10:1'] }
+  )
+  await delay(10)
+
+  expect(sentNames(client1)).toEqual(['connected'])
+  expect(sentNames(client2)).toEqual(['connected', 'sync'])
+  expect(sent(client2)[1]).toEqual([
+    'sync',
+    1,
+    { type: 'FOO' },
+    { id: [2, 'server:x', 0], time: 2 }
   ])
 })
 

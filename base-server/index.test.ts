@@ -696,7 +696,8 @@ it('undoes actions on client', async () => {
       server: 'server:uuid',
       clients: ['2:client'],
       reasons: ['user/1/lastValue'],
-      channels: ['user/1']
+      channels: ['user/1'],
+      excludeClients: ['3:client']
     },
     'magic',
     {
@@ -726,7 +727,8 @@ it('undoes actions on client', async () => {
         clients: ['2:client', '1:client'],
         reasons: ['user/1/lastValue'],
         channels: ['user/1'],
-        subprotocol: '0.0.0'
+        subprotocol: '0.0.0',
+        excludeClients: ['3:client']
       }
     ]
   ])

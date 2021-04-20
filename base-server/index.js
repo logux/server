@@ -546,13 +546,14 @@ export class BaseServer {
 
   sendAction(action, meta) {
     let from = parseId(meta.id).clientId
-    let clients = new Set([from])
+    let ignoreClients = new Set(meta.excludeClients || [])
+    ignoreClients.add(from)
 
     if (meta.nodes) {
       for (let id of meta.nodes) {
         let client = this.nodeIds.get(id)
         if (client) {
-          clients.add(client.clientId)
+          ignoreClients.add(client.clientId)
           client.node.onAdd(action, meta)
         }
       }
@@ -562,7 +563,7 @@ export class BaseServer {
       for (let id of meta.clients) {
         if (this.clientIds.has(id)) {
           let client = this.clientIds.get(id)
-          clients.add(client.clientId)
+          ignoreClients.add(client.clientId)
           client.node.onAdd(action, meta)
         }
       }
@@ -573,8 +574,8 @@ export class BaseServer {
         let users = this.userIds.get(userId)
         if (users) {
           for (let client of users) {
-            if (!clients.has(client.clientId)) {
-              clients.add(client.clientId)
+            if (!ignoreClients.has(client.clientId)) {
+              ignoreClients.add(client.clientId)
               client.node.onAdd(action, meta)
             }
           }
@@ -588,7 +589,7 @@ export class BaseServer {
         if (this.subscribers[channel]) {
           for (let nodeId in this.subscribers[channel]) {
             let clientId = parseId(nodeId).clientId
-            if (!clients.has(clientId)) {
+            if (!ignoreClients.has(clientId)) {
               let subscriber = this.subscribers[channel][nodeId]
               if (subscriber) {
                 let filter = subscriber.filter
@@ -598,7 +599,7 @@ export class BaseServer {
                 }
                 let client = this.clientIds.get(clientId)
                 if (filter && client) {
-                  clients.add(clientId)
+                  ignoreClients.add(clientId)
                   client.node.onAdd(action, meta)
                 }
               }
@@ -911,6 +912,9 @@ export class BaseServer {
     if (meta.clients) undoMeta.clients = meta.clients.slice(0)
     if (meta.reasons) undoMeta.reasons = meta.reasons.slice(0)
     if (meta.channels) undoMeta.channels = meta.channels.slice(0)
+    if (meta.expludeClients) {
+      undoMeta.expludeClients = meta.expludeClients.slice(0)
+    }
 
     let undoAction = {
       ...extra,

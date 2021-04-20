@@ -23,9 +23,10 @@ export class FilteredNode extends ServerNode {
         return false
       } else {
         if (
-          has(meta.clients, this.client.clientId) ||
-          has(meta.nodes, this.client.nodeId) ||
-          has(meta.users, this.client.userId)
+          (has(meta.clients, this.client.clientId) ||
+            has(meta.nodes, this.client.nodeId) ||
+            has(meta.users, this.client.userId)) &&
+          !has(meta.excludeClients, this.client.clientId)
         ) {
           if (meta.added > data.added) data.added = meta.added
           data.entries.push([action, meta])
