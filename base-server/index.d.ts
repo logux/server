@@ -66,6 +66,11 @@ export type ServerMeta = Meta & {
    * Node with listed node ID will receive the action.
    */
   node?: string
+
+  /**
+   * Client IDs, which will not recieve the action.
+   */
+  excludeClients?: string[]
 }
 
 export type BaseServerOptions = {
@@ -509,6 +514,7 @@ export type Resend =
       clients?: string[]
       node?: string
       nodes?: string[]
+      excludeClients?: string[]
     }
 
 export type Logger = {
