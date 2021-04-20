@@ -912,8 +912,8 @@ export class BaseServer {
     if (meta.clients) undoMeta.clients = meta.clients.slice(0)
     if (meta.reasons) undoMeta.reasons = meta.reasons.slice(0)
     if (meta.channels) undoMeta.channels = meta.channels.slice(0)
-    if (meta.expludeClients) {
-      undoMeta.expludeClients = meta.expludeClients.slice(0)
+    if (meta.excludeClients) {
+      undoMeta.excludeClients = meta.excludeClients.slice(0)
     }
 
     let undoAction = {

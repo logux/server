@@ -1034,7 +1034,6 @@ it('does not send old action on client exluding', async () => {
   sendTo(client, ['synced', 2])
   await client.node.waitFor('synchronized')
   expect(sentNames(client)).toEqual(['connected'])
-  expect(sent(client)[1]).toEqual([])
 })
 
 it('sends old actions by user', async () => {
