@@ -72,7 +72,7 @@ export interface ServerOptions extends BaseServerOptions {
  * server.listen()
  * ```
  */
-export class Server<H extends object = {}> extends BaseServer<H> {
+export class Server<Headers extends object = {}> extends BaseServer<Headers> {
   /**
    * Load options from command-line arguments and/or environment.
    *

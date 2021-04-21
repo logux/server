@@ -226,8 +226,8 @@ export type SendBackActions =
  * @param client Client object.
  * @returns `true` if credentials was correct
  */
-interface Authenticator<H extends object> {
-  (user: AuthenticatorOptions<H>): boolean | Promise<boolean>
+interface Authenticator<Headers extends object> {
+  (user: AuthenticatorOptions<Headers>): boolean | Promise<boolean>
 }
 
 /**
@@ -238,8 +238,14 @@ interface Authenticator<H extends object> {
  * @param meta The action metadata.
  * @returns `true` if client are allowed to use this action.
  */
-interface Authorizer<A extends Action, D extends object, H extends object> {
-  (ctx: Context<D, H>, action: A, meta: ServerMeta): boolean | Promise<boolean>
+interface Authorizer<
+  TypeAction extends Action,
+  Data extends object,
+  Headers extends object
+> {
+  (ctx: Context<Data, Headers>, action: TypeAction, meta: ServerMeta):
+    | boolean
+    | Promise<boolean>
 }
 
 /**
@@ -250,8 +256,14 @@ interface Authorizer<A extends Action, D extends object, H extends object> {
  * @param meta The action metadata.
  * @returns Meta’s keys.
  */
-interface Resender<A extends Action, D extends object, H extends object> {
-  (ctx: Context<D, H>, action: A, meta: ServerMeta): Resend | Promise<Resend>
+interface Resender<
+  TypeAction extends Action,
+  Data extends object,
+  Headers extends object
+> {
+  (ctx: Context<Data, Headers>, action: TypeAction, meta: ServerMeta):
+    | Resend
+    | Promise<Resend>
 }
 
 /**
@@ -262,8 +274,16 @@ interface Resender<A extends Action, D extends object, H extends object> {
  * @param meta The action metadata.
  * @returns Promise when processing will be finished.
  */
-interface Processor<A extends Action, D extends object, H extends object> {
-  (ctx: Context<D, H>, action: A, meta: ServerMeta): void | Promise<void>
+interface Processor<
+  TypeAction extends Action,
+  Data extends object,
+  Headers extends object
+> {
+  (
+    ctx: Context<Data, Headers>,
+    action: TypeAction,
+    meta: ServerMeta
+  ): void | Promise<void>
 }
 
 /**
@@ -274,8 +294,12 @@ interface Processor<A extends Action, D extends object, H extends object> {
  * @param action The action data.
  * @param meta The action metadata.
  */
-interface ActionFinally<A extends Action, D extends object, H extends object> {
-  (ctx: Context<D, H>, action: A, meta: ServerMeta): void
+interface ActionFinally<
+  TypeAction extends Action,
+  Data extends object,
+  Headers extends object
+> {
+  (ctx: Context<Data, Headers>, action: TypeAction, meta: ServerMeta): void
 }
 
 /**
@@ -286,8 +310,8 @@ interface ActionFinally<A extends Action, D extends object, H extends object> {
  * @param meta The action metadata.
  * @returns Should action be sent to client.
  */
-interface ChannelFilter<H extends object> {
-  (ctx: Context<{}, H>, action: Action, meta: ServerMeta): boolean
+interface ChannelFilter<Headers extends object> {
+  (ctx: Context<{}, Headers>, action: Action, meta: ServerMeta): boolean
 }
 
 /**
@@ -299,14 +323,16 @@ interface ChannelFilter<H extends object> {
  * @returns `true` if client are allowed to subscribe to this channel.
  */
 interface ChannelAuthorizer<
-  A extends Action,
-  D extends object,
-  P extends object | string[],
-  H extends object
+  SubscribeAction extends Action,
+  Data extends object,
+  ChannelParams extends object | string[],
+  Headers extends object
 > {
-  (ctx: ChannelContext<D, P, H>, action: A, meta: ServerMeta):
-    | boolean
-    | Promise<boolean>
+  (
+    ctx: ChannelContext<Data, ChannelParams, Headers>,
+    action: SubscribeAction,
+    meta: ServerMeta
+  ): boolean | Promise<boolean>
 }
 
 /**
@@ -318,15 +344,16 @@ interface ChannelAuthorizer<
  * @returns Actions filter.
  */
 interface FilterCreator<
-  A extends Action,
-  D extends object,
-  P extends object | string[],
-  H extends object
+  SubscribeAction extends Action,
+  Data extends object,
+  ChannelParams extends object | string[],
+  Headers extends object
 > {
-  (ctx: ChannelContext<D, P, H>, action: A, meta: ServerMeta):
-    | Promise<ChannelFilter<H>>
-    | ChannelFilter<H>
-    | void
+  (
+    ctx: ChannelContext<Data, ChannelParams, Headers>,
+    action: SubscribeAction,
+    meta: ServerMeta
+  ): Promise<ChannelFilter<Headers>> | ChannelFilter<Headers> | void
 }
 
 /**
@@ -338,14 +365,16 @@ interface FilterCreator<
  * @returns Promise during current actions loading.
  */
 interface ChannelLoader<
-  A extends Action,
-  D extends object,
-  P extends object | string[],
-  H extends object
+  SubscribeAction extends Action,
+  Data extends object,
+  ChannelParams extends object | string[],
+  Headers extends object
 > {
-  (ctx: ChannelContext<D, P, H>, action: A, meta: ServerMeta):
-    | SendBackActions
-    | Promise<SendBackActions>
+  (
+    ctx: ChannelContext<Data, ChannelParams, Headers>,
+    action: SubscribeAction,
+    meta: ServerMeta
+  ): SendBackActions | Promise<SendBackActions>
 }
 
 /**
@@ -357,12 +386,16 @@ interface ChannelLoader<
  * @param meta The action metadata.
  */
 interface ChannelFinally<
-  A extends Action,
-  D extends object,
-  P extends object | string[],
-  H extends object
+  SubscribeAction extends Action,
+  Data extends object,
+  ChannelParams extends object | string[],
+  Headers extends object
 > {
-  (ctx: ChannelContext<D, P, H>, action: A, meta: ServerMeta): void
+  (
+    ctx: ChannelContext<Data, ChannelParams, Headers>,
+    action: SubscribeAction,
+    meta: ServerMeta
+  ): void
 }
 
 /**
@@ -374,47 +407,56 @@ interface ChannelFinally<
  * @param meta The action metadata.
  */
 interface ChannelUnsubscribe<
-  D extends object,
-  P extends object | string[],
-  H extends object
+  Data extends object,
+  ChannelParams extends object | string[],
+  Headers extends object
 > {
   (
-    ctx: ChannelContext<D, P, H>,
+    ctx: ChannelContext<Data, ChannelParams, Headers>,
     action: LoguxUnsubscribeAction,
     meta: ServerMeta
   ): void
 }
 
-type ActionCallbacks<A extends Action, D extends object, H extends object> = (
+type ActionCallbacks<
+  TypeAction extends Action,
+  Data extends object,
+  Headers extends object
+> = (
   | {
-      access: Authorizer<A, D, H>
-      process?: Processor<A, D, H>
+      access: Authorizer<TypeAction, Data, Headers>
+      process?: Processor<TypeAction, Data, Headers>
     }
   | {
-      accessAndProcess: Processor<A, D, H>
+      accessAndProcess: Processor<TypeAction, Data, Headers>
     }
 ) & {
-  resend?: Resender<A, D, H>
-  finally?: ActionFinally<A, D, H>
+  resend?: Resender<TypeAction, Data, Headers>
+  finally?: ActionFinally<TypeAction, Data, Headers>
 }
 
 type ChannelCallbacks<
-  A extends Action,
-  D extends object,
-  P extends object | string[],
-  H extends object
+  SubscribeAction extends Action,
+  Data extends object,
+  ChannelParams extends object | string[],
+  Headers extends object
 > = (
   | {
-      access: ChannelAuthorizer<A, D, P, H>
-      load?: ChannelLoader<A, D, P, H>
+      access: ChannelAuthorizer<SubscribeAction, Data, ChannelParams, Headers>
+      load?: ChannelLoader<SubscribeAction, Data, ChannelParams, Headers>
     }
   | {
-      accessAndLoad: ChannelLoader<A, D, P, H>
+      accessAndLoad: ChannelLoader<
+        SubscribeAction,
+        Data,
+        ChannelParams,
+        Headers
+      >
     }
 ) & {
-  filter?: FilterCreator<A, D, P, H>
-  finally?: ChannelFinally<A, D, P, H>
-  unsubscribe?: ChannelUnsubscribe<D, P, H>
+  filter?: FilterCreator<SubscribeAction, Data, ChannelParams, Headers>
+  finally?: ChannelFinally<SubscribeAction, Data, ChannelParams, Headers>
+  unsubscribe?: ChannelUnsubscribe<Data, ChannelParams, Headers>
 }
 
 interface ActionReporter {
@@ -498,9 +540,9 @@ interface ReportersArguments {
 }
 
 export interface Reporter {
-  <E extends keyof ReportersArguments>(
-    event: E,
-    payload: ReportersArguments[E]
+  <Event extends keyof ReportersArguments>(
+    event: Event,
+    payload: ReportersArguments[Event]
   ): void
 }
 
@@ -588,8 +630,8 @@ export class LoguxNotFoundError extends Error {
  * Base server class to extend.
  */
 export class BaseServer<
-  H extends object = {},
-  L extends Log = Log<ServerMeta>
+  Headers extends object = {},
+  ServerLog extends Log = Log<ServerMeta>
 > {
   /**
    * @param opts Server options.
@@ -632,7 +674,7 @@ export class BaseServer<
    * server.log.each(finder)
    * ```
    */
-  log: L
+  log: ServerLog
 
   /**
    * Connected clients.
@@ -724,7 +766,7 @@ export class BaseServer<
    *
    * @param authenticator The authentication callback.
    */
-  auth(authenticator: Authenticator<H>): void
+  auth(authenticator: Authenticator<Headers>): void
 
   /**
    * Start WebSocket server and listen for clients.
@@ -915,25 +957,19 @@ export class BaseServer<
    *
    * @param name The action’s type or action’s type matching rule as RegExp..
    * @param callbacks Callbacks for actions with this type.
-   *
-   * @template A Action’s type.
-   * @template D Type for `ctx.data`.
    */
-  type<A extends Action = AnyAction, D extends object = {}>(
-    name: A['type'] | RegExp,
-    callbacks: ActionCallbacks<A, D, H>
+  type<TypeAction extends Action = AnyAction, Data extends object = {}>(
+    name: TypeAction['type'] | RegExp,
+    callbacks: ActionCallbacks<TypeAction, Data, Headers>
   ): void
 
   /**
    * @param actionCreator Action creator function.
    * @param callbacks Callbacks for action created by creator.
-   *
-   * @template AC Action creator function.
-   * @template D Type for `ctx.data`.
    */
-  type<AC extends ActionCreator, D extends object = {}>(
-    actionCreator: AC,
-    callbacks: ActionCallbacks<ReturnType<AC>, D, H>
+  type<Creator extends ActionCreator, Data extends object = {}>(
+    actionCreator: Creator,
+    callbacks: ActionCallbacks<ReturnType<Creator>, Data, Headers>
   ): void
 
   /**
@@ -961,11 +997,9 @@ export class BaseServer<
    * ```
    *
    * @param callbacks Callbacks for actions with this type.
-   *
-   * @template D Type for `ctx.data`.
    */
-  otherType<D extends object = {}>(
-    callbacks: ActionCallbacks<Action, D, H>
+  otherType<Data extends object = {}>(
+    callbacks: ActionCallbacks<Action, Data, Headers>
   ): void
 
   /**
@@ -990,26 +1024,28 @@ export class BaseServer<
    *
    * @param pattern Pattern for channel name.
    * @param callbacks Callback during subscription process.
-   *
-   * @template P Type for `ctx.params`.
-   * @template D Type for `ctx.data`.
-   * @template A `logux/subscribe` Action’s type.
    */
   channel<
-    P extends object = {},
-    D extends object = {},
-    A extends LoguxSubscribeAction = LoguxSubscribeAction
-  >(pattern: string, callbacks: ChannelCallbacks<A, D, P, H>): void
+    ChannelParams extends object = {},
+    Data extends object = {},
+    SubscribeAction extends LoguxSubscribeAction = LoguxSubscribeAction
+  >(
+    pattern: string,
+    callbacks: ChannelCallbacks<SubscribeAction, Data, ChannelParams, Headers>
+  ): void
 
   /**
    * @param pattern Regular expression for channel name.
    * @param callbacks Callback during subscription process.
    */
   channel<
-    P extends string[] = string[],
-    D extends object = {},
-    A extends LoguxSubscribeAction = LoguxSubscribeAction
-  >(pattern: RegExp, callbacks: ChannelCallbacks<A, D, P, H>): void
+    ChannelParams extends string[] = string[],
+    Data extends object = {},
+    SubscribeAction extends LoguxSubscribeAction = LoguxSubscribeAction
+  >(
+    pattern: RegExp,
+    callbacks: ChannelCallbacks<SubscribeAction, Data, ChannelParams, Headers>
+  ): void
 
   /**
    * Set callbacks for unknown channel subscription.
@@ -1029,12 +1065,9 @@ export class BaseServer<
    * ```
    *
    * @param callbacks Callback during subscription process.
-   *
-   * @template D Type for `ctx.data`.
-   * @template A `logux/subscribe` Action’s type.
    */
-  otherChannel<D extends object = {}>(
-    callbacks: ChannelCallbacks<LoguxSubscribeAction, D, [string], H>
+  otherChannel<Data extends object = {}>(
+    callbacks: ChannelCallbacks<LoguxSubscribeAction, Data, [string], Headers>
   ): void
 
   /**
