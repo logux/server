@@ -13,10 +13,8 @@ import { Server } from '../server/index.js'
  *   }
  * })
  * ```
- *
- * @template D Type for `ctx.data`.
  */
-export class Context<D extends object = {}, H extends object = {}> {
+export class Context<Data extends object = {}, Headers extends object = {}> {
   /**
    * @param nodeId Unique node ID.
    * @param clientId Unique persistence client ID.
@@ -42,7 +40,7 @@ export class Context<D extends object = {}, H extends object = {}> {
    * })
    * ```
    */
-  data: D
+  data: Data
 
   /**
    * Client’s headers.
@@ -54,7 +52,7 @@ export class Context<D extends object = {}, H extends object = {}> {
    * })
    * ```
    */
-  headers: H
+  headers: Headers
 
   /**
    * Unique node ID.
@@ -149,10 +147,10 @@ export class Context<D extends object = {}, H extends object = {}> {
  * ```
  */
 export class ChannelContext<
-  D extends object,
-  P extends object | string[],
-  H extends object
-> extends Context<D, H> {
+  Data extends object,
+  ChannelParams extends object | string[],
+  Headers extends object
+> extends Context<Data, Headers> {
   /**
    * Parsed variable parts of channel pattern.
    *
@@ -171,5 +169,5 @@ export class ChannelContext<
    * })
    * ```
    */
-  params: P
+  params: ChannelParams
 }

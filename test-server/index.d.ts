@@ -44,7 +44,9 @@ export interface TestServerOptions
  * })
  * ```
  */
-export class TestServer<H extends object = {}> extends BaseServer<H> {
+export class TestServer<
+  Headers extends object = {}
+> extends BaseServer<Headers> {
   /**
    * @param opts The limit subset of server options.
    */
