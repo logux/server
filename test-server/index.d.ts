@@ -9,10 +9,8 @@ import {
 } from '../base-server/index.js'
 import { LoggerOptions } from '../server/index.js'
 
-export type TestServerOptions = Omit<
-  BaseServerOptions,
-  'subprotocol' | 'supports'
-> & {
+export interface TestServerOptions
+  extends Omit<BaseServerOptions, 'subprotocol' | 'supports'> {
   subprotocol?: string
   supports?: string
 

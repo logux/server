@@ -16,7 +16,7 @@ import { LogFn } from 'pino'
 import { Context, ChannelContext } from '../context/index.js'
 import { ServerClient } from '../server-client/index.js'
 
-export type ServerMeta = Meta & {
+export interface ServerMeta extends Meta {
   /**
    * Action processing status
    */
@@ -73,7 +73,7 @@ export type ServerMeta = Meta & {
   excludeClients?: string[]
 }
 
-export type BaseServerOptions = {
+export interface BaseServerOptions {
   /**
    * Server current application subprotocol version in SemVer format.
    */
@@ -204,11 +204,11 @@ export type BaseServerOptions = {
   cleanFromLog?: RegExp
 }
 
-export type AuthenticatorOptions<H extends object> = {
-  headers: H
+export interface AuthenticatorOptions<Headers extends object> {
+  headers: Headers
   client: ServerClient
   userId: string
-  cookie: { [name: string]: string }
+  cookie: Record<string, string>
   token: string
 }
 
@@ -417,27 +417,27 @@ type ChannelCallbacks<
   unsubscribe?: ChannelUnsubscribe<D, P, H>
 }
 
-type ActionReporter = {
+interface ActionReporter {
   action: Action
   meta: ServerMeta
 }
 
-type SubscriptionReporter = {
+interface SubscriptionReporter {
   actionId: ID
   channel: string
 }
 
-type CleanReporter = {
+interface CleanReporter {
   actionId: ID
 }
 
-type AuthenticationReporter = {
+interface AuthenticationReporter {
   connectionId: string
   subprotocol: string
   nodeId: string
 }
 
-type ReportersArguments = {
+interface ReportersArguments {
   add: ActionReporter
   useless: ActionReporter
   clean: CleanReporter
@@ -497,10 +497,12 @@ type ReportersArguments = {
   }
 }
 
-export type Reporter = <E extends keyof ReportersArguments>(
-  event: E,
-  payload: ReportersArguments[E]
-) => void
+export interface Reporter {
+  <E extends keyof ReportersArguments>(
+    event: E,
+    payload: ReportersArguments[E]
+  ): void
+}
 
 export type Resend =
   | string
@@ -517,7 +519,7 @@ export type Resend =
       excludeClients?: string[]
     }
 
-export type Logger = {
+export interface Logger {
   info(details: object, message: string): void
   warn(details: object, message: string): void
   error(details: object, message: string): void
@@ -529,19 +531,19 @@ interface ActionCreator {
   type: string
 }
 
-type Response = {
+interface Response {
   header?: {
     [name: string]: string
   }
   body: string
 }
 
-type GetProcessor = {
+interface GetProcessor {
   safe?: boolean
   request(request: object): Response | Promise<Response>
 }
 
-type PostProcessor = {
+interface PostProcessor {
   isValid(command: object): false
   command(command: object, request: object): Promise<void>
 }

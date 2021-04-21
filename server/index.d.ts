@@ -1,6 +1,6 @@
 import { BaseServer, Logger, BaseServerOptions } from '../base-server/index.js'
 
-export type LoggerOptions = {
+export interface LoggerOptions {
   /**
    * Logger message format.
    */
@@ -19,7 +19,7 @@ export type LoggerOptions = {
   }
 }
 
-export type ServerOptions = BaseServerOptions & {
+export interface ServerOptions extends BaseServerOptions {
   /**
    * Logger with custom settings.
    *
