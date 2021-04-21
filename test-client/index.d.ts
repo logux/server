@@ -8,7 +8,7 @@ export class LoguxActionError extends Error {
   action: Action
 }
 
-export type TestClientOptions = {
+export interface TestClientOptions {
   httpHeaders?: { [key: string]: string }
   subprotocol?: string
   headers?: object
