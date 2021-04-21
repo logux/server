@@ -21,8 +21,8 @@ export interface TestClientOptions {
  *
  * ```js
  * import { TestServer } from '@logux/server'
- * import postsModule from '.'
- * import authModule from '.'
+ * import postsModule from './posts.js'
+ * import authModule from './auth.js'
  *
  * let destroyable
  * afterEach(() => {

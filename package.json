@@ -25,6 +25,10 @@
   },
   "type": "module",
   "types": "./index.d.ts",
+  "exports": {
+    ".": "./index.js",
+    "./": "./"
+  },
   "dependencies": {
     "@logux/actions": "logux/actions",
     "@logux/core": "logux/core#next",

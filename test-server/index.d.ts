@@ -30,7 +30,7 @@ export interface TestServerOptions
  *
  * ```js
  * import { TestServer } from '@logux/server'
- * import usersModule from '.'
+ * import usersModule from './users.js'
  *
  * let server
  * afterEach(() => {
