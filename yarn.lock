@@ -524,7 +524,7 @@
 
 "@logux/actions@logux/actions":
   version "0.0.0"
-  resolved "https://codeload.github.com/logux/actions/tar.gz/3926be005f94d0a6c48684b710a0eb5e1aba5297"
+  resolved "https://codeload.github.com/logux/actions/tar.gz/6d9320931794693980ca58ceaf509b3e4e81212a"
 
 "@logux/core@logux/core#next":
   version "0.6.2"
