@@ -26,8 +26,7 @@
   "type": "module",
   "types": "./index.d.ts",
   "exports": {
-    ".": "./index.js",
-    "./": "./"
+    ".": "./index.js"
   },
   "dependencies": {
     "@logux/actions": "logux/actions",
