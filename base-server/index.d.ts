@@ -9,7 +9,11 @@ import {
   TestTime
 } from '@logux/core'
 import { Server as HTTPServer, ServerResponse, IncomingMessage } from 'http'
-import { LoguxSubscribeAction, LoguxUnsubscribeAction } from '@logux/actions'
+import {
+  LoguxUnsubscribeAction,
+  AbstractActionCreator,
+  LoguxSubscribeAction
+} from '@logux/actions'
 import { Unsubscribe } from 'nanoevents'
 import { LogFn } from 'pino'
 
@@ -568,11 +572,6 @@ export interface Logger {
   fatal(details: object, message: string): void
 }
 
-interface ActionCreator {
-  (...args: any): Action
-  type: string
-}
-
 interface Response {
   header?: {
     [name: string]: string
@@ -967,7 +966,7 @@ export class BaseServer<
    * @param actionCreator Action creator function.
    * @param callbacks Callbacks for action created by creator.
    */
-  type<Creator extends ActionCreator, Data extends object = {}>(
+  type<Creator extends AbstractActionCreator, Data extends object = {}>(
     actionCreator: Creator,
     callbacks: ActionCallbacks<ReturnType<Creator>, Data, Headers>
   ): void
