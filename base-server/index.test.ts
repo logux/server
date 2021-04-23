@@ -1182,8 +1182,10 @@ it('calls unsubscribe() channel callback with logux/unsubscribe', async () => {
     }
   }
   let nodeId = '10:uuid'
+  let clientId = '10:uuid'
+  let userId = '10'
   test.app.nodeIds.set(nodeId, client)
-  test.app.clientIds.set('10:uuid', client)
+  test.app.clientIds.set(clientId, client)
   test.app.on('preadd', (action, meta) => {
     meta.reasons.push('test')
   })
@@ -1218,6 +1220,8 @@ it('calls unsubscribe() channel callback with logux/unsubscribe', async () => {
   expect(unsubscribeCallback).toHaveBeenCalledWith(
     expect.objectContaining({
       nodeId,
+      userId,
+      clientId,
       data: { preservedInitialData: true },
       headers: { preservedSubscribedClientHeaders: true },
       params: { id: '10' },
