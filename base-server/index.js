@@ -748,6 +748,8 @@ export class BaseServer {
           this.subscribers[action.channel][ctx.nodeId] = {
             filter,
             unsubscribe: channel.unsubscribe
+              ? this.bindToSubscriptionContext(channel.unsubscribe, ctx)
+              : undefined
           }
           subscribed = true
 
@@ -785,13 +787,23 @@ export class BaseServer {
     if (!match) this.wrongChannel(action, meta)
   }
 
+  bindToSubscriptionContext(channelUnsubscribe, subscriptionContext) {
+    let { data, headers, params } = subscriptionContext
+    return (action, meta) => {
+      let ctx = this.createContext(action, meta)
+      ctx.data = data
+      ctx.headers = headers
+      ctx.params = params
+      return channelUnsubscribe(ctx, action, meta)
+    }
+  }
+
   performUnsubscribe(clientNodeId, action, meta) {
     if (this.subscribers[action.channel]) {
       let subscriber = this.subscribers[action.channel][clientNodeId]
       if (subscriber) {
         if (subscriber.unsubscribe) {
-          let ctx = this.createContext(action, meta)
-          subscriber.unsubscribe(ctx, action, meta)
+          subscriber.unsubscribe(action, meta)
           this.contexts.delete(action)
         }
         delete this.subscribers[action.channel][clientNodeId]
