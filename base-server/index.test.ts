@@ -1175,19 +1175,31 @@ it('loads initial actions during subscription', async () => {
 it('calls unsubscribe() channel callback with logux/unsubscribe', async () => {
   let test = createReporter({})
   let client: any = {
-    node: { remoteSubprotocol: '0.0.0', onAdd: () => false }
+    node: {
+      remoteSubprotocol: '0.0.0',
+      remoteHeaders: { preservedClientHeaders: true },
+      onAdd: () => false
+    }
   }
   let nodeId = '10:uuid'
+  let clientId = '10:uuid'
+  let userId = '10'
   test.app.nodeIds.set(nodeId, client)
-  test.app.clientIds.set('10:uuid', client)
+  test.app.clientIds.set(clientId, client)
   test.app.on('preadd', (action, meta) => {
     meta.reasons.push('test')
   })
   let unsubscribeCallback = jest.fn()
-  test.app.channel<{ id: string }>('user/:id', {
-    access: () => true,
-    unsubscribe: unsubscribeCallback
-  })
+  test.app.channel<{ id: string }, { preservedInitialData?: boolean }>(
+    'user/:id',
+    {
+      access(ctx) {
+        ctx.data.preservedInitialData = true
+        return true
+      },
+      unsubscribe: unsubscribeCallback
+    }
+  )
 
   await test.app.log.add(
     { type: 'logux/subscribe', channel: 'user/10' },
@@ -1210,7 +1222,13 @@ it('calls unsubscribe() channel callback with logux/unsubscribe', async () => {
   expect(unsubscribeCallback).toHaveBeenCalledTimes(1)
   expect(unsubscribeCallback).toHaveBeenCalledWith(
     expect.objectContaining({
-      nodeId
+      nodeId,
+      userId,
+      clientId,
+      data: { preservedInitialData: true },
+      headers: { preservedClientHeaders: true },
+      params: { id: '10' },
+      subprotocol: '0.0.0'
     }),
     expect.objectContaining({
       type: 'logux/unsubscribe',
