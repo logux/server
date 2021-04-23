@@ -1177,7 +1177,7 @@ it('calls unsubscribe() channel callback with logux/unsubscribe', async () => {
   let client: any = {
     node: {
       remoteSubprotocol: '0.0.0',
-      remoteHeaders: { preservedSubscribedClientHeaders: true },
+      remoteHeaders: { preservedClientHeaders: true },
       onAdd: () => false
     }
   }
@@ -1190,13 +1190,16 @@ it('calls unsubscribe() channel callback with logux/unsubscribe', async () => {
     meta.reasons.push('test')
   })
   let unsubscribeCallback = jest.fn()
-  test.app.channel<{ id: string }>('user/:id', {
-    access(ctx) {
-      ;(ctx.data as any).preservedInitialData = true
-      return true
-    },
-    unsubscribe: unsubscribeCallback
-  })
+  test.app.channel<{ id: string }, { preservedInitialData?: boolean }>(
+    'user/:id',
+    {
+      access(ctx) {
+        ctx.data.preservedInitialData = true
+        return true
+      },
+      unsubscribe: unsubscribeCallback
+    }
+  )
 
   await test.app.log.add(
     { type: 'logux/subscribe', channel: 'user/10' },
@@ -1223,7 +1226,7 @@ it('calls unsubscribe() channel callback with logux/unsubscribe', async () => {
       userId,
       clientId,
       data: { preservedInitialData: true },
-      headers: { preservedSubscribedClientHeaders: true },
+      headers: { preservedClientHeaders: true },
       params: { id: '10' },
       subprotocol: '0.0.0'
     }),
