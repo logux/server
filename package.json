@@ -38,8 +38,8 @@
     "dotenv": "^8.2.0",
     "globby": "^11.0.3",
     "ip": "^1.1.5",
-    "nanodelay": "^1.0.8",
-    "nanoevents": "^5.1.13",
+    "nanodelay": "^2.0.0",
+    "nanoevents": "^6.0.0",
     "nanoid": "^3.1.22",
     "node-fetch": "^2.6.1",
     "pino": "^6.11.3",
@@ -51,7 +51,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.13.16",
-    "@logux/eslint-config": "^45.2.3",
+    "@logux/eslint-config": "^45.4.0",
     "@logux/sharec-config": "^0.10.1",
     "@types/cross-spawn": "^6.0.2",
     "@types/jest": "^26.0.22",
@@ -63,7 +63,7 @@
     "check-dts": "^0.4.4",
     "clean-publish": "^2.1.1",
     "cross-spawn": "^7.0.3",
-    "eslint": "^7.24.0",
+    "eslint": "^7.25.0",
     "eslint-config-standard": "^16.0.2",
     "eslint-plugin-es5": "^1.5.0",
     "eslint-plugin-import": "^2.22.1",
@@ -72,14 +72,13 @@
     "eslint-plugin-prefer-let": "^1.1.0",
     "eslint-plugin-promise": "^5.1.0",
     "eslint-plugin-security": "^1.4.0",
-    "eslint-plugin-unicorn": "^30.0.0",
-    "esm": "^3.2.25",
-    "jest": "^27.0.0-next.2",
+    "eslint-plugin-unicorn": "^31.0.0",
+    "jest": "^27.0.0-next.8",
     "lint-staged": "^10.5.4",
     "prettier": "^2.2.1",
     "print-snapshots": "^0.3.2",
-    "simple-git-hooks": "^2.3.1",
-    "ts-jest": "^27.0.0-next.4",
+    "simple-git-hooks": "^2.4.1",
+    "ts-jest": "^27.0.0-next.11",
     "typescript": "^4.2.4",
     "yaspeller": "^7.0.0"
   },
@@ -124,7 +123,7 @@
     ]
   },
   "eslintConfig": {
-    "extends": "@logux/eslint-config/ts",
+    "extends": "@logux/eslint-config/esm",
     "rules": {
       "import/extensions": [
         "error",
