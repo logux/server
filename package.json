@@ -51,7 +51,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.13.16",
-    "@logux/eslint-config": "^45.4.0",
+    "@logux/eslint-config": "^45.4.1",
     "@logux/sharec-config": "^0.10.1",
     "@types/cross-spawn": "^6.0.2",
     "@types/jest": "^26.0.22",
@@ -125,13 +125,6 @@
   "eslintConfig": {
     "extends": "@logux/eslint-config/esm",
     "rules": {
-      "import/extensions": [
-        "error",
-        "always",
-        {
-          "ignorePackages": true
-        }
-      ],
       "@typescript-eslint/no-explicit-any": "off"
     },
     "overrides": [
