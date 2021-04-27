@@ -522,13 +522,15 @@
     "@types/yargs" "^16.0.0"
     chalk "^4.0.0"
 
-"@logux/actions@logux/actions":
-  version "0.0.0"
-  resolved "https://codeload.github.com/logux/actions/tar.gz/fad4251133caddaf6abbaf1181ee79f4bee60b37"
+"@logux/actions@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@logux/actions/-/actions-0.1.0.tgz#4ee83b3d26101f2fde21b3a198e6605fb032fd8b"
+  integrity sha512-TPz7g3fW7BhmwMU4XEEe2y9dSimPMutw64AjpHTNHqIVgRL4KyUHc1tkOxSursdq05zGJtnSmy5y1R2PleVmNw==
 
-"@logux/core@logux/core#next":
-  version "0.6.2"
-  resolved "https://codeload.github.com/logux/core/tar.gz/727b2b88ab27c7e881f663b6ab9190ae783477b5"
+"@logux/core@^0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@logux/core/-/core-0.7.0.tgz#b167e97127f2eb9b9faf37ca637ce929aa6e5f3e"
+  integrity sha512-vUpJ3KBlPoIqSpvNxf9hTUVT8zn1eNRAE8p4mbHbaOyNVEE9LQpYnBqxm6yQxcojhz/I/3NdeaBY0F2XbAwJsg==
   dependencies:
     nanoevents "^6.0.0"
 
