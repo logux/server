@@ -77,6 +77,15 @@ function emit(obj: any, event: string, ...args: any): void {
   obj.emitter.emit(event, ...args)
 }
 
+async function catchError(cb: () => Promise<any>): Promise<Error> {
+  try {
+    await cb()
+  } catch (e) {
+    return e
+  }
+  throw new Error('Error was not thown')
+}
+
 afterEach(async () => {
   process.env.NODE_ENV = originEnv
   if (destroyable) {
@@ -184,12 +193,11 @@ it('destroys application without runned server', async () => {
   app.destroy()
 })
 
-it('throws without authenticator', () => {
+it('throws without authenticator', async () => {
   expect.assertions(1)
   let app = new BaseServer(DEFAULT_OPTIONS)
-  return app.listen().catch(e => {
-    expect(e.message).toMatch(/authentication/)
-  })
+  let error = await catchError(() => app.listen())
+  expect(error.message).toMatch(/authentication/)
 })
 
 it('sets default ports and hosts', () => {
