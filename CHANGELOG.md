@@ -1,6 +1,36 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.10 “Doraemon”
+* Moved project to ESM-only type. Applications must use ESM too.
+* Dropped Node.js 10 support.
+* Moved health check to `/health`.
+* Added `Server#http()` for custom HTTP processing.
+* Added `unsubscribe` callback to `Server#channel` (by @erictheswift).
+* Added reverted action to `logux/undo` (by Eduard Aksamitov).
+* Added RegExp support to `BaseServer#type()` (by Taras Vozniuk).
+* Added `accessAndLoad` and `accessAndProcess` callbacks for REST integration.
+* Added `LoguxNotFoundError` error for `accessAndLoad` and `accessAndProcess`.
+* Added request functions and `wasNot403()` for REST integration.
+* Added `ServerClient#httpHeaders`.
+* Added support for returning string from `resend` callback.
+* Added `Server#subscribe()` to send `logux/subscribed` action.
+* Added `Server#autoloadModules()`.
+* Added `fileUrl` option for ESM servers.
+* Added `Server#logger` for custom log messages.
+* Added `meta.excludeClients`.
+* Added `TestServer#expectUndo()`.
+* Added `TestServer#expectDenied()`.
+* Added `TestClient#received()`.
+* Added `TestServer#expectWrongCredentials()`.
+* Added `TestClient#clientId` and `TestClient#userId`.
+* Added `filter` option to `TestClient#subscribe()`.
+* Added Logux logotype to `GET /`.
+* Removed `reporter` option (by Aleksandr Slepchenkov).
+* Removed `yargs` dependency (by Aleksandr Slepchenkov).
+* Fixed `:` symbol support for channel names.
+* Fixed types performance by replacing `type` to `interface`.
+
 ## 0.9.6
 * Update `yargs`.
 
