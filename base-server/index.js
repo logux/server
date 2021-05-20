@@ -469,7 +469,7 @@ export class BaseServer {
     let channel = Object.assign({}, callbacks)
     if (typeof pattern === 'string') {
       channel.pattern = new UrlPattern(pattern, {
-        segmentValueCharset: 'a-zA-Z0-9-_~ %:'
+        segmentValueCharset: '^/'
       })
     } else {
       channel.regexp = pattern
