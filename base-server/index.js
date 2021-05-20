@@ -1,4 +1,5 @@
 import { ServerConnection, MemoryStore, Log, parseId } from '@logux/core'
+import { LoguxNotFoundError } from '@logux/actions'
 import { createNanoEvents } from 'nanoevents'
 import { promises as fs } from 'fs'
 import { fileURLToPath } from 'url'
@@ -42,13 +43,6 @@ export async function wasNot403(cb) {
       return false
     }
     throw e
-  }
-}
-
-export class LoguxNotFoundError extends Error {
-  constructor() {
-    super('Not found')
-    this.name = 'LoguxNotFoundError'
   }
 }
 

@@ -1,4 +1,3 @@
-import { jest } from '@jest/globals'
 import {
   Action,
   LoguxError,
@@ -8,13 +7,14 @@ import {
   TestPair,
   TestTime
 } from '@logux/core'
+import { LoguxNotFoundError } from '@logux/actions'
 import { delay } from 'nanodelay'
+import { jest } from '@jest/globals'
 
 import {
-  BaseServer,
   BaseServerOptions,
-  LoguxNotFoundError,
   ResponseError,
+  BaseServer,
   ServerMeta
 } from '../index.js'
 import { ServerClient } from './index.js'
@@ -91,9 +91,7 @@ function createServer(
   return server
 }
 
-function createReporter(
-  opts: Partial<BaseServerOptions> = {}
-): {
+function createReporter(opts: Partial<BaseServerOptions> = {}): {
   app: BaseServer<{ locale: string }, TestLog<ServerMeta>>
   reports: [string, any][]
   names: string[]

@@ -7,11 +7,7 @@ export {
   put,
   del
 } from './request/index.js'
-export {
-  LoguxNotFoundError,
-  BaseServer,
-  wasNot403
-} from './base-server/index.js'
+export { BaseServer, wasNot403 } from './base-server/index.js'
 export { ALLOWED_META } from './allowed-meta/index.js'
 export { TestServer } from './test-server/index.js'
 export { TestClient } from './test-client/index.js'

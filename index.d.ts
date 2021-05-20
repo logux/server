@@ -1,7 +1,6 @@
 export { Action } from '@logux/core'
 
 export {
-  LoguxNotFoundError,
   BaseServerOptions,
   SendBackActions,
   BaseServer,
