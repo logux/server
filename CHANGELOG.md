@@ -1,6 +1,10 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.10.1
+* Fixed channel name parameters parsing (by Aleksandr Slepchenkov).
+* Used `LoguxNotFoundError` from `@logux/actions`.
+
 ## 0.10 “Doraemon”
 * Moved project to ESM-only type. Applications must use ESM too.
 * Dropped Node.js 10 support.
