@@ -130,7 +130,9 @@ export class Server extends BaseServer {
     }
   }
 
-  async autoloadModules(files = ['modules/*/index.js', 'modules/*.js']) {
+  async autoloadModules(
+    files = ['modules/*/index.js', 'modules/*.js', '!**/*.{test,spec}.js']
+  ) {
     let matches = await globby(files, {
       cwd: this.options.root,
       absolute: true,

@@ -118,9 +118,13 @@
         "statements": 100
       }
     },
+    "testPathIgnorePatterns": [
+      "<rootDir>/node_modules/",
+      "<rootDir>/test/servers"
+    ],
     "coveragePathIgnorePatterns": [
-      "/node_modules/",
-      "/server/index.js"
+      "<rootDir>/node_modules/",
+      "<rootDir>/server/index.js"
     ]
   },
   "eslintConfig": {
