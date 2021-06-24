@@ -222,14 +222,19 @@ function createLogger(options) {
   )
 }
 
-function cleanFromKeys(obj, regexp) {
+function cleanFromKeys(obj, regexp, seen) {
   let result = {}
   for (let key in obj) {
     let v = obj[key]
     if (typeof v === 'string') {
       result[key] = v.replace(regexp, '[SECRET]')
     } else if (typeof v === 'object' && !Array.isArray(v) && v !== null) {
-      result[key] = cleanFromKeys(v, regexp)
+      if (seen.includes(v)) {
+        throw new Error('Circular reference in action')
+      }
+      seen.push(v)
+      result[key] = cleanFromKeys(v, regexp, seen)
+      seen.pop()
     } else {
       result[key] = v
     }
@@ -242,8 +247,9 @@ export function createReporter(options) {
   function reporter(type, details) {
     let report = REPORTERS[type](details)
     let level = report.level || 'info'
+    let seen = []
     reporter.logger[level](
-      cleanFromKeys(report.details || details || {}, cleanFromLog),
+      cleanFromKeys(report.details || details || {}, cleanFromLog, seen),
       report.msg.replace(cleanFromLog, '[SECRET]')
     )
   }

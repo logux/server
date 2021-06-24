@@ -235,6 +235,25 @@ it('reports add', () => {
   })
 })
 
+it('throws on circulal reference', () => {
+  let a: { b: any } = { b: undefined }
+  let b: { a: any } = { a: undefined }
+  a.b = b
+  b.a = a
+  expect(() => {
+    check('add', {
+      action: { type: 'CHANGE_USER', a },
+      meta: {
+        id: '1487805099387 100:uImkcF4z 0',
+        time: 1487805099387,
+        reasons: ['lastValue', 'debug'],
+        server: 'server:H1f8LAyzl',
+        subprotocol: '1.0.0'
+      }
+    })
+  }).toThrow('Circular reference in action')
+})
+
 it('reports clean', () => {
   check('clean', {
     actionId: '1487805099387 100:uImkcF4z 0'
