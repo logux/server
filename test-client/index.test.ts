@@ -155,7 +155,7 @@ it('tracks action processing', async () => {
   )
 })
 
-it('detects action ID dublicate', async () => {
+it('detects action ID duplicate', async () => {
   server = new TestServer()
   server.type('FOO', {
     access: () => true

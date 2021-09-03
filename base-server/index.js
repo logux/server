@@ -13,6 +13,7 @@ import { createHttpServer } from '../create-http-server/index.js'
 import { ServerClient } from '../server-client/index.js'
 import { Context } from '../context/index.js'
 
+const SKIP_PROCESS = Symbol('skipProcess')
 const RESEND_META = ['channels', 'users', 'clients', 'nodes']
 
 function optionError(msg) {
@@ -54,10 +55,14 @@ export class LoguxNotFoundError extends Error {
 
 function normalizeTypeCallbacks(name, callbacks) {
   if (callbacks && callbacks.accessAndProcess) {
-    callbacks.access = (...args) => {
+    callbacks.access = (ctx, ...args) => {
       return wasNot403(async () => {
-        await callbacks.accessAndProcess(...args)
+        await callbacks.accessAndProcess(ctx, ...args)
+        ctx[SKIP_PROCESS] = true
       })
+    }
+    callbacks.process = async (ctx, ...args) => {
+      if (!ctx[SKIP_PROCESS]) await callbacks.accessAndProcess(ctx, ...args)
     }
   }
   if (!callbacks || !callbacks.access) {

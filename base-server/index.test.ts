@@ -83,7 +83,7 @@ async function catchError(cb: () => Promise<any>): Promise<Error> {
   } catch (e) {
     return e
   }
-  throw new Error('Error was not thown')
+  throw new Error('Error was not thrown')
 }
 
 afterEach(async () => {
@@ -1422,4 +1422,14 @@ it('subscribes clients manually', async () => {
   app.subscribe('test:1:1', 'users/10')
   await delay(10)
   expect(actions).toEqual([{ type: 'logux/subscribed', channel: 'users/10' }])
+})
+
+it('processes action with accessAndProcess callback', () => {
+  let test = createReporter()
+  let accessAndProcess = jest.fn(() => {})
+  test.app.type('A', {
+    accessAndProcess
+  })
+  test.app.process({ type: 'A' })
+  expect(accessAndProcess).toHaveBeenCalledTimes(1)
 })
