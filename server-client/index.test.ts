@@ -1767,6 +1767,49 @@ it('has shortcut to access and process in one callback', async () => {
   ])
 })
 
+it('process action exactly once with accessAndProcess callback', async () => {
+  let app = createServer()
+  app.log.keepActions()
+
+  app.type('FOO', {
+    async accessAndProcess(ctx) {
+      await ctx.sendBack({ type: 'REFOO' })
+    }
+  })
+  app.otherType({
+    async accessAndProcess(ctx, action) {
+      if (action.type === 'BAR') {
+        await ctx.sendBack({ type: 'REBAR' })
+      }
+    }
+  })
+
+  let client = await connectClient(app, '10:1:uuid')
+  await sendTo(client, [
+    'sync',
+    1,
+    { type: 'FOO' },
+    { id: [1, '10:1:uuid', 0], time: 1 }
+  ])
+  await delay(100)
+  await sendTo(client, [
+    'sync',
+    2,
+    { type: 'BAR' },
+    { id: [2, '10:1:uuid', 0], time: 1 }
+  ])
+  await delay(100)
+
+  expect(app.log.actions()).toEqual([
+    { type: 'FOO' },
+    { type: 'BAR' },
+    { type: 'REFOO' },
+    { type: 'logux/processed', id: '1 10:1:uuid 0' },
+    { type: 'REBAR' },
+    { type: 'logux/processed', id: '2 10:1:uuid 0' }
+  ])
+})
+
 it('denies access on 403 error', async () => {
   let app = createServer()
   app.log.keepActions()
