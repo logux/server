@@ -64,7 +64,7 @@ server.type<UserRenameAction, UserData>('user/rename', {
   async process(ctx, action) {
     // THROWS Property 'lang' does not exist on type '{ locale: string; }'
     console.log(ctx.headers.lang)
-    // THROWS 'newName' does not exist on type 'UserRenameAction'
+    // THROWS 'newName' does not exist on type 'Readonly<UserRenameAction>'
     ctx.data.user.name = action.newName
     // THROWS Property 'admin' does not exist on type 'UserData'.
     await ctx.data.admin.save()
@@ -91,7 +91,7 @@ server.channel<UserParams, UserData, UserSubscribeAction>('user/:id', {
   access() {
     return true
   },
-  // THROWS undefined>' is not assignable to type 'FilterCreator
+  // THROWS ...>' is not assignable to type 'FilterCreator
   async filter(_, action) {
     if (action.fields) {
       return (_: any, otherAction: Action) => {
@@ -127,13 +127,12 @@ server.channel<BadParams>('posts', {
   }
 })
 
-let addUser = defineAction<{ type: 'user/remove'; userId: string }>(
-  'user/remove'
-)
+let addUser =
+  defineAction<{ type: 'user/remove'; userId: string }>('user/remove')
 
 server.type(addUser, {
   access(ctx, action) {
-    // THROWS Property 'id' does not exist on type '{ type: "user/remove";
+    // THROWS Property 'id' does not exist on type 'Readonly<{ type: "user/remove";
     return action.id === ctx.userId
   }
 })

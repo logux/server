@@ -247,9 +247,11 @@ interface Authorizer<
   Data extends object,
   Headers extends object
 > {
-  (ctx: Context<Data, Headers>, action: TypeAction, meta: ServerMeta):
-    | boolean
-    | Promise<boolean>
+  (
+    ctx: Context<Data, Headers>,
+    action: Readonly<TypeAction>,
+    meta: Readonly<ServerMeta>
+  ): boolean | Promise<boolean>
 }
 
 /**
@@ -265,9 +267,11 @@ interface Resender<
   Data extends object,
   Headers extends object
 > {
-  (ctx: Context<Data, Headers>, action: TypeAction, meta: ServerMeta):
-    | Resend
-    | Promise<Resend>
+  (
+    ctx: Context<Data, Headers>,
+    action: Readonly<TypeAction>,
+    meta: Readonly<ServerMeta>
+  ): Resend | Promise<Resend>
 }
 
 /**
@@ -285,8 +289,8 @@ interface Processor<
 > {
   (
     ctx: Context<Data, Headers>,
-    action: TypeAction,
-    meta: ServerMeta
+    action: Readonly<TypeAction>,
+    meta: Readonly<ServerMeta>
   ): void | Promise<void>
 }
 
@@ -303,7 +307,11 @@ interface ActionFinally<
   Data extends object,
   Headers extends object
 > {
-  (ctx: Context<Data, Headers>, action: TypeAction, meta: ServerMeta): void
+  (
+    ctx: Context<Data, Headers>,
+    action: Readonly<TypeAction>,
+    meta: Readonly<ServerMeta>
+  ): void
 }
 
 /**
@@ -315,7 +323,11 @@ interface ActionFinally<
  * @returns Should action be sent to client.
  */
 interface ChannelFilter<Headers extends object> {
-  (ctx: Context<{}, Headers>, action: Action, meta: ServerMeta): boolean
+  (
+    ctx: Context<{}, Headers>,
+    action: Readonly<Action>,
+    meta: Readonly<ServerMeta>
+  ): boolean
 }
 
 /**
@@ -334,8 +346,8 @@ interface ChannelAuthorizer<
 > {
   (
     ctx: ChannelContext<Data, ChannelParams, Headers>,
-    action: SubscribeAction,
-    meta: ServerMeta
+    action: Readonly<SubscribeAction>,
+    meta: Readonly<ServerMeta>
   ): boolean | Promise<boolean>
 }
 
@@ -355,8 +367,8 @@ interface FilterCreator<
 > {
   (
     ctx: ChannelContext<Data, ChannelParams, Headers>,
-    action: SubscribeAction,
-    meta: ServerMeta
+    action: Readonly<SubscribeAction>,
+    meta: Readonly<ServerMeta>
   ): Promise<ChannelFilter<Headers>> | ChannelFilter<Headers> | void
 }
 
@@ -376,8 +388,8 @@ interface ChannelLoader<
 > {
   (
     ctx: ChannelContext<Data, ChannelParams, Headers>,
-    action: SubscribeAction,
-    meta: ServerMeta
+    action: Readonly<SubscribeAction>,
+    meta: Readonly<ServerMeta>
   ): SendBackActions | Promise<SendBackActions>
 }
 
@@ -397,8 +409,8 @@ interface ChannelFinally<
 > {
   (
     ctx: ChannelContext<Data, ChannelParams, Headers>,
-    action: SubscribeAction,
-    meta: ServerMeta
+    action: Readonly<SubscribeAction>,
+    meta: Readonly<ServerMeta>
   ): void
 }
 
@@ -418,7 +430,7 @@ interface ChannelUnsubscribe<
   (
     ctx: ChannelContext<Data, ChannelParams, Headers>,
     action: LoguxUnsubscribeAction,
-    meta: ServerMeta
+    meta: Readonly<ServerMeta>
   ): void
 }
 
@@ -464,8 +476,8 @@ type ChannelCallbacks<
 }
 
 interface ActionReporter {
-  action: Action
-  meta: ServerMeta
+  action: Readonly<Action>
+  meta: Readonly<ServerMeta>
 }
 
 interface SubscriptionReporter {
@@ -817,7 +829,7 @@ export class BaseServer<
    */
   on(
     event: 'error',
-    listener: (err: Error, action: Action, meta: ServerMeta) => void
+    listener: (err: Error, action: Action, meta: Readonly<ServerMeta>) => void
   ): Unsubscribe
 
   /**
@@ -843,7 +855,16 @@ export class BaseServer<
    * @param listener Action listener.
    */
   on(
-    event: 'preadd' | 'add' | 'clean' | 'backendSent',
+    event: 'add' | 'clean' | 'backendSent',
+    listener: (action: Action, meta: Readonly<ServerMeta>) => void
+  ): Unsubscribe
+
+  /**
+   * @param event The event name.
+   * @param listener Action listener.
+   */
+  on(
+    event: 'preadd',
     listener: (action: Action, meta: ServerMeta) => void
   ): Unsubscribe
 
@@ -855,7 +876,7 @@ export class BaseServer<
     event: 'processed' | 'backendGranted' | 'backendProcessed',
     listener: (
       action: Action,
-      meta: ServerMeta,
+      meta: Readonly<ServerMeta>,
       latencyMilliseconds: number
     ) => void
   ): Unsubscribe
@@ -868,7 +889,7 @@ export class BaseServer<
     event: 'subscribed',
     listener: (
       action: LoguxSubscribeAction,
-      meta: ServerMeta,
+      meta: Readonly<ServerMeta>,
       latencyMilliseconds: number
     ) => void
   ): Unsubscribe
@@ -879,7 +900,7 @@ export class BaseServer<
    */
   on(
     event: 'subscribing',
-    listener: (action: LoguxSubscribeAction, meta: ServerMeta) => void
+    listener: (action: LoguxSubscribeAction, meta: Readonly<ServerMeta>) => void
   ): Unsubscribe
 
   /**
@@ -888,7 +909,10 @@ export class BaseServer<
    */
   on(
     event: 'unsubscribed',
-    listener: (action: LoguxUnsubscribeAction, meta: ServerMeta) => void
+    listener: (
+      action: LoguxUnsubscribeAction,
+      meta: Readonly<ServerMeta>
+    ) => void
   ): Unsubscribe
 
   /**
@@ -1058,7 +1082,10 @@ export class BaseServer<
    * @param meta Action’s meta.
    * @returns Promise until new action will be resend to clients and processed.
    */
-  process(action: AnyAction, meta?: Partial<ServerMeta>): Promise<ServerMeta>
+  process(
+    action: AnyAction,
+    meta?: Partial<ServerMeta>
+  ): Promise<Readonly<ServerMeta>>
 
   /**
    * Undo action from client.
