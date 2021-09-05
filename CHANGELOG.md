@@ -1,6 +1,11 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.10.2
+* Fixed `accessAndProcess` on server’s action (by Aleksandr Slepchenkov).
+* Added warning about circular reference in action.
+* Marked `action` and `meta` in callbacks as read-only.
+
 ## 0.10.1
 * Fixed channel name parameters parsing (by Aleksandr Slepchenkov).
 * Used `LoguxNotFoundError` from `@logux/actions`.
