@@ -11,12 +11,13 @@ afterEach(() => {
 })
 
 async function catchError(cb: () => Promise<any>): Promise<LoguxActionError> {
-  let err
+  let err: LoguxActionError | undefined
   try {
     await cb()
   } catch (e) {
-    err = e
+    err = e as LoguxActionError
   }
+  if (!err) throw new Error('Error was no thrown')
   return err
 }
 

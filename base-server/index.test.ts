@@ -49,9 +49,7 @@ function createServer(
 let destroyable: BaseServer | undefined
 let httpServer: http.Server | undefined
 
-function createReporter(
-  opts: Partial<BaseServerOptions> = {}
-): {
+function createReporter(opts: Partial<BaseServerOptions> = {}): {
   app: BaseServer<{}, TestLog<ServerMeta>>
   names: string[]
   reports: [string, any][]
@@ -81,7 +79,7 @@ async function catchError(cb: () => Promise<any>): Promise<Error> {
   try {
     await cb()
   } catch (e) {
-    return e
+    if (e instanceof Error) return e
   }
   throw new Error('Error was not thown')
 }

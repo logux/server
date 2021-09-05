@@ -107,12 +107,13 @@ function send(data: object): Promise<number> {
 }
 
 async function catchError(cb: () => Promise<any>): Promise<Error> {
-  let err
+  let err: Error | undefined
   try {
     await cb()
   } catch (e) {
-    err = e
+    if (e instanceof Error) err = e
   }
+  if (!err) throw new Error('Error was no thrown')
   return err
 }
 

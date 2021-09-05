@@ -2,11 +2,8 @@ import { resolve } from 'path'
 
 import { loadOptions, oneOf, number } from './index.js'
 
-function fakeProcess(argv: string[] = [], env: object = {}): any {
-  return {
-    argv,
-    env
-  }
+function fakeProcess(argv, env = {}) {
+  return { argv, env }
 }
 
 describe('loadOptions', () => {
@@ -40,7 +37,7 @@ describe('loadOptions', () => {
       },
       fakeProcess(['', '--port', '1337'])
     )
-    expect(options?.port).toEqual(1337)
+    expect(options.port).toEqual(1337)
   })
 
   it('uses env for options', () => {
@@ -60,7 +57,7 @@ describe('loadOptions', () => {
       {}
     )
 
-    expect(options?.port).toEqual(31337)
+    expect(options.port).toEqual(31337)
   })
 
   it('uses dotenv file for options', () => {
@@ -80,7 +77,7 @@ describe('loadOptions', () => {
       }
     )
 
-    expect(options?.port).toEqual(31337)
+    expect(options.port).toEqual(31337)
   })
 
   it('composes correct env and CLI names for argument with complex name', () => {
@@ -100,7 +97,7 @@ describe('loadOptions', () => {
       {}
     )
 
-    expect(options?.somePort).toEqual(1)
+    expect(options.somePort).toEqual(1)
   })
 
   it('uses combined options', () => {
@@ -119,8 +116,8 @@ describe('loadOptions', () => {
       fakeProcess(['', '--key', './key.pem'], { LOGUX_CERT: './cert.pem' })
     )
 
-    expect(options?.cert).toEqual('./cert.pem')
-    expect(options?.key).toEqual('./key.pem')
+    expect(options.cert).toEqual('./cert.pem')
+    expect(options.key).toEqual('./key.pem')
   })
 
   it('uses arg and env in given priority', () => {
@@ -151,8 +148,8 @@ describe('loadOptions', () => {
       undefined
     )
 
-    expect(options1?.port).toEqual(3)
-    expect(options2?.port).toEqual(2)
+    expect(options1.port).toEqual(3)
+    expect(options2.port).toEqual(2)
   })
 
   it('parses aliases', () => {
@@ -167,7 +164,7 @@ describe('loadOptions', () => {
       },
       fakeProcess(['', '-p', '1'])
     )
-    expect(options?.port).toEqual('1')
+    expect(options.port).toEqual('1')
   })
 
   it('parses multiple args', () => {
@@ -185,8 +182,8 @@ describe('loadOptions', () => {
       },
       fakeProcess(['', '-p', '1', '--key', '1'])
     )
-    expect(options?.port).toEqual('1')
-    expect(options?.key).toEqual('1')
+    expect(options.port).toEqual('1')
+    expect(options.key).toEqual('1')
   })
 
   it('throws on missing values', () => {

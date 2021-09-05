@@ -39,9 +39,7 @@ afterEach(async () => {
   await app.destroy()
 })
 
-function createReporter(
-  opts = {}
-): {
+function createReporter(opts = {}): {
   names: string[]
   reports: [string, object][]
   app: BaseServer
@@ -93,7 +91,7 @@ async function requestError(
   try {
     await request(method, path)
   } catch (e) {
-    return e
+    if (e instanceof RequestError) return e
   }
   throw new Error('Error was not found')
 }

@@ -31,11 +31,8 @@ export function loadOptions(spec, process, env) {
       key.startsWith(spec.envPrefix)
     )
   )
-  envArgs = parseValues(
-    spec,
-    mapArgs(Object.assign(envArgs, dotenvArgs), namesMap)
-  )
-  return [null, Object.assign(envArgs, cliArgs)]
+  envArgs = parseValues(spec, mapArgs({ ...envArgs, ...dotenvArgs }, namesMap))
+  return [null, { ...envArgs, ...cliArgs }]
 }
 
 function gatherCliArgs(argv) {
