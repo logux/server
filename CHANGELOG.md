@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.10.3
+* Replaced `colorette` with `nanocolors`.
+
 ## 0.10.2
 * Fixed `accessAndProcess` on server’s action (by Aleksandr Slepchenkov).
 * Added warning about circular reference in action.
