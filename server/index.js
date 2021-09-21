@@ -1,6 +1,6 @@
 import { join, relative } from 'path'
 import globby from 'globby'
-import { bgRed, black } from 'colorette'
+import { bgRed, black } from 'nanocolors'
 
 import { createReporter } from '../create-reporter/index.js'
 import { BaseServer } from '../base-server/index.js'

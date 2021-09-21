@@ -1,4 +1,4 @@
-import { bold, cyan, yellow, green, red } from 'colorette'
+import { bold, cyan, yellow, green, red } from 'nanocolors'
 import dotenv from 'dotenv'
 
 export function loadOptions(spec, process, env) {

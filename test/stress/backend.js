@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { blue, green, yellow, red } from 'colorette'
+import { blue, green, yellow, red } from 'nanocolors'
 import { delay } from 'nanodelay'
 import http from 'http'
 
