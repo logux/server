@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.10.4
+* Updated `nanocolors`.
+
 ## 0.10.3
 * Replaced `colorette` with `nanocolors`.
 
