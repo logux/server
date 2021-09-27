@@ -328,7 +328,7 @@ exports[`reports listen for production 2`] = `
         Supports:       [1m0.x[22m
         Health check:   [1mhttps://127.0.0.1:31337/health[22m
         Control listen: [1mhttp://127.0.0.1:31337/[22m
-        Control mask:   
+        Control mask:   [1mundefined[22m
         Redis:          [1m//localhost[22m
         Listen:         [1mwss://127.0.0.1:31337/[22m
 
@@ -467,7 +467,7 @@ exports[`reports wrongChannel without name 1`] = `
 
 exports[`reports wrongChannel without name 2`] = `
 "[43m[30m WARN [39m[49m  [1m[33mWrong channel name[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Channel:   
+        Channel:   [1mundefined[22m
         Action ID: [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
 
 "
