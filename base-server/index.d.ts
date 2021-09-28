@@ -597,7 +597,7 @@ interface GetProcessor {
 }
 
 interface PostProcessor {
-  isValid(command: object): false
+  isValid(command: object): boolean
   command(command: object, request: object): Promise<void>
 }
 
