@@ -227,7 +227,7 @@ it('uses HTTPS', async () => {
     key: readFileSync(KEY).toString()
   })
   await app.listen()
-  expect(privateMethods(app).http instanceof https.Server).toBe(true)
+  expect(privateMethods(app).httpServer instanceof https.Server).toBe(true)
 })
 
 it('loads keys by absolute path', async () => {
@@ -236,7 +236,7 @@ it('loads keys by absolute path', async () => {
     key: KEY
   })
   await app.listen()
-  expect(privateMethods(app).http instanceof https.Server).toBe(true)
+  expect(privateMethods(app).httpServer instanceof https.Server).toBe(true)
 })
 
 it('loads keys by relative path', async () => {
@@ -246,7 +246,7 @@ it('loads keys by relative path', async () => {
     key: 'fixtures/key.pem'
   })
   await app.listen()
-  expect(privateMethods(app).http instanceof https.Server).toBe(true)
+  expect(privateMethods(app).httpServer instanceof https.Server).toBe(true)
 })
 
 it('supports object in SSL key', async () => {
@@ -255,7 +255,7 @@ it('supports object in SSL key', async () => {
     key: { pem: readFileSync(KEY).toString() }
   })
   await app.listen()
-  expect(privateMethods(app).http instanceof https.Server).toBe(true)
+  expect(privateMethods(app).httpServer instanceof https.Server).toBe(true)
 })
 
 it('reporters on start listening', async () => {

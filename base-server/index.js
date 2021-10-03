@@ -378,12 +378,12 @@ export class BaseServer {
     if (!this.authenticator) {
       throw new Error('You must set authentication callback by server.auth()')
     }
-    this.http = await createHttpServer(this.options)
-    this.ws = new WebSocket.Server({ server: this.http })
+    this.httpServer = await createHttpServer(this.options)
+    this.ws = new WebSocket.Server({ server: this.httpServer })
     if (!this.options.server) {
       await new Promise((resolve, reject) => {
         this.ws.on('error', reject)
-        this.http.listen(this.options.port, this.options.host, resolve)
+        this.httpServer.listen(this.options.port, this.options.host, resolve)
       })
     }
     bindControlServer(this, this.httpListener)
@@ -395,12 +395,12 @@ export class BaseServer {
           this.ws.close()
         })
     )
-    if (this.http) {
+    if (this.httpServer) {
       this.unbind.push(
         () =>
           new Promise(resolve => {
-            this.http.on('close', resolve)
-            this.http.close()
+            this.httpServer.on('close', resolve)
+            this.httpServer.close()
           })
       )
     }
