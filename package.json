@@ -1,6 +1,6 @@
 {
   "name": "@logux/server",
-  "version": "0.10.4",
+  "version": "0.10.5",
   "description": "Build own Logux server or make proxy between WebSocket and HTTP backend on any language",
   "keywords": [
     "logux",

@@ -1,6 +1,10 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.10.5
+* Fixed `Server#http()`.
+* Fixed types (by Eduard Aksamitov).
+
 ## 0.10.4
 * Updated `nanocolors`.
 
