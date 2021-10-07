@@ -327,7 +327,7 @@ interface ChannelFilter<Headers extends object> {
     ctx: Context<{}, Headers>,
     action: Readonly<Action>,
     meta: Readonly<ServerMeta>
-  ): boolean
+  ): boolean | Promise<boolean>
 }
 
 /**
@@ -1140,7 +1140,7 @@ export class BaseServer<
    * @param action New action.
    * @param meta Action’s metadata.
    */
-  sendAction(action: Action, meta: ServerMeta): void
+  sendAction(action: Action, meta: ServerMeta): void | Promise<void>
 
   /**
    * Send `logux/subscribed` if client was not already subscribed.
