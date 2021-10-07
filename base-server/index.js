@@ -543,7 +543,7 @@ export class BaseServer {
     }
   }
 
-  sendAction(action, meta) {
+  async sendAction(action, meta) {
     let from = parseId(meta.id).clientId
     let ignoreClients = new Set(meta.excludeClients || [])
     ignoreClients.add(from)
@@ -594,7 +594,7 @@ export class BaseServer {
                 let filter = subscriber.filter
                 if (typeof filter === 'function') {
                   if (!ctx) ctx = this.createContext(action, meta)
-                  filter = filter(ctx, action, meta)
+                  filter = await filter(ctx, action, meta)
                 }
                 let client = this.clientIds.get(clientId)
                 if (filter && client) {
