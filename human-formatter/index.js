@@ -1,6 +1,6 @@
-import { createColors } from 'nanocolors'
 import stripAnsi from 'strip-ansi'
 import yyyymmdd from 'yyyy-mm-dd'
+import pico from 'picocolors'
 import path from 'path'
 import os from 'os'
 
@@ -170,7 +170,7 @@ function prettyStackTrace(c, stack, basepath) {
 }
 
 export function humanFormatter(options) {
-  let c = createColors(options.color)
+  let c = pico.createColors(options.color)
   this.color = c.isColorSupported
   let basepath = options.basepath || process.cwd()
   if (basepath.slice(-1) !== path.sep) basepath += path.sep

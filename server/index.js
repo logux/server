@@ -1,6 +1,6 @@
 import { join, relative } from 'path'
 import globby from 'globby'
-import { bgRed, black } from 'nanocolors'
+import pico from 'picocolors'
 
 import { createReporter } from '../create-reporter/index.js'
 import { BaseServer } from '../base-server/index.js'
@@ -68,7 +68,9 @@ export class Server extends BaseServer {
       try {
         return Object.assign(defaults, options)
       } catch (e) {
-        process.stderr.write(`${bgRed(black(' FATAL '))} ${e.message}\n`)
+        process.stderr.write(
+          `${pico.bgRed(pico.black(' FATAL '))} ${e.message}\n`
+        )
         process.exit(1)
       }
     }

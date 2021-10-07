@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import { blue, green, yellow, red } from 'nanocolors'
 import { delay } from 'nanodelay'
+import pico from 'picocolors'
 import http from 'http'
 
 function send(action, meta) {
@@ -25,7 +25,7 @@ function send(action, meta) {
         if (res.statusCode < 200 || res.statusCode > 299) {
           reject(new Error('Logux error'))
         } else {
-          process.stdout.write(blue('R'))
+          process.stdout.write(pico.blue('R'))
           resolve()
         }
       }
@@ -52,15 +52,15 @@ let server = http.createServer((req, res) => {
         await send({ type: 'project/name', value: 'A' }, { nodes })
         await send({ type: 'project/status', value: 'ok' }, { nodes })
         await send({ type: 'project/payment', value: 'paid' }, { nodes })
-        process.stdout.write(green('S'))
+        process.stdout.write(pico.green('S'))
       } else if (type === 'action' && action.type === 'project/name') {
         await delay(500)
-        process.stdout.write(yellow('A'))
+        process.stdout.write(pico.yellow('A'))
       }
       res.write(`,["processed","${meta.id}"]]`)
       res.end()
     } catch (e) {
-      process.stderr.write(red(e.stack))
+      process.stderr.write(pico.red(e.stack))
       process.exit(1)
     }
   })
