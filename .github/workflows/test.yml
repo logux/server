@@ -1,9 +1,7 @@
 name: Test
-"on":
-  push: null
-  pull_request: null
-env:
-  FORCE_COLOR: 2
+on:
+  push:
+  pull_request:
 jobs:
   full:
     name: Node.js 16 Full
