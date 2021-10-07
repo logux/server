@@ -1,6 +1,10 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.10.6
+* Fixed `Promise` support in channel’s `filter` (by Eduard Aksamitov).
+* Replaced `nanocolors` with `picocolors`.
+
 ## 0.10.5
 * Fixed `Server#http()`.
 * Fixed types (by Eduard Aksamitov).
