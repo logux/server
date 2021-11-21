@@ -1,6 +1,6 @@
 import { join, relative } from 'path'
-import globby from 'globby'
 import pico from 'picocolors'
+import glob from 'fast-glob'
 
 import { createReporter } from '../create-reporter/index.js'
 import { BaseServer } from '../base-server/index.js'
@@ -63,16 +63,15 @@ export class Server extends BaseServer {
     )
     if (help) {
       process.stdout.write(help + '\n')
-      process.exit(0)
-    } else {
-      try {
-        return Object.assign(defaults, options)
-      } catch (e) {
-        process.stderr.write(
-          `${pico.bgRed(pico.black(' FATAL '))} ${e.message}\n`
-        )
-        process.exit(1)
-      }
+      return process.exit(0)
+    }
+    try {
+      return Object.assign(defaults, options)
+    } catch (e) {
+      process.stderr.write(
+        `${pico.bgRed(pico.black(' FATAL '))} ${e.message}\n`
+      )
+      return process.exit(1)
     }
   }
 
@@ -135,7 +134,7 @@ export class Server extends BaseServer {
   async autoloadModules(
     files = ['modules/*/index.js', 'modules/*.js', '!**/*.{test,spec}.js']
   ) {
-    let matches = await globby(files, {
+    let matches = await glob(files, {
       cwd: this.options.root,
       absolute: true,
       onlyFiles: true
