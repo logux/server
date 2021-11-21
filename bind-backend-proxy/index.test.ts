@@ -298,7 +298,8 @@ it('reports about network errors', async () => {
   client.log.add({ type: 'A' })
   await delay(100)
 
-  expect(errors).toEqual(['connect ECONNREFUSED 127.0.0.1:7110'])
+  expect(errors.length).toEqual(1)
+  expect(errors[0]).toContain('connect ECONNREFUSED')
   expect(app.log.actions()).toEqual([
     {
       type: 'logux/undo',
