@@ -60,7 +60,7 @@ function request(method: 'GET', path: string): Promise<Response> {
     let req = http.request(
       {
         method,
-        host: 'localhost',
+        host: '127.0.0.1',
         port: app.options.port,
         path
       },
@@ -240,7 +240,7 @@ it('does not break WebSocket', async () => {
 
   let nodeId = '10:client:node'
   let log = new Log({ store: new MemoryStore(), nodeId })
-  let con = new WsConnection(`ws://localhost:${app.options.port}`, WebSocket)
+  let con = new WsConnection(`ws://127.0.0.1:${app.options.port}`, WebSocket)
   let node = new ClientNode(nodeId, log, con)
 
   node.connection.connect()

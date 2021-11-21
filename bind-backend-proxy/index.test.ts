@@ -288,7 +288,7 @@ it('creates and processes actions', async () => {
 it('reports about network errors', async () => {
   let app = createServer({
     controlSecret: 'S',
-    backend: 'https://localhost:7110/'
+    backend: 'https://127.0.0.1:7110/'
   })
   let errors: string[] = []
   app.on('error', e => {
@@ -298,8 +298,7 @@ it('reports about network errors', async () => {
   client.log.add({ type: 'A' })
   await delay(100)
 
-  expect(errors.length).toEqual(1)
-  expect(errors[0]).toContain('connect ECONNREFUSED')
+  expect(errors).toEqual(['connect ECONNREFUSED 127.0.0.1:7110'])
   expect(app.log.actions()).toEqual([
     {
       type: 'logux/undo',
