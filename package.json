@@ -46,7 +46,7 @@
     "semver": "^7.3.5",
     "strip-ansi": "^7.0.1",
     "url-pattern": "^1.0.3",
-    "ws": "^7.5.0",
+    "ws": "^8.2.3",
     "yyyy-mm-dd": "^1.0.2"
   },
   "devDependencies": {
@@ -57,12 +57,13 @@
     "@types/node": "^16.11.9",
     "@types/node-fetch": "^2.5.12",
     "@types/pino": "^6.3.11",
-    "@types/ws": "^7.4.7",
+    "@types/ws": "^8.2.0",
     "@typescript-eslint/eslint-plugin": "^5.4.0",
     "@typescript-eslint/parser": "^5.4.0",
     "check-dts": "^0.6.4",
     "clean-publish": "^3.4.3",
     "cross-spawn": "^7.0.3",
+    "enhanced-resolve": "^5.8.3",
     "eslint": "^8.3.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.25.3",
@@ -91,6 +92,7 @@
       }
     },
     "testEnvironment": "node",
+    "resolver": "<rootDir>/test/resolver.cjs",
     "coverageThreshold": {
       "global": {
         "statements": 100

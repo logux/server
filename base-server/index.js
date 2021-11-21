@@ -1,12 +1,12 @@
 import { ServerConnection, MemoryStore, Log, parseId } from '@logux/core'
 import { LoguxNotFoundError } from '@logux/actions'
 import { createNanoEvents } from 'nanoevents'
+import { WebSocketServer } from 'ws'
 import { promises as fs } from 'fs'
 import { fileURLToPath } from 'url'
 import { join, dirname } from 'path'
 import UrlPattern from 'url-pattern'
 import { nanoid } from 'nanoid'
-import WebSocket from 'ws'
 
 import { bindControlServer } from '../bind-control-server/index.js'
 import { bindBackendProxy } from '../bind-backend-proxy/index.js'
@@ -379,7 +379,7 @@ export class BaseServer {
       throw new Error('You must set authentication callback by server.auth()')
     }
     this.httpServer = await createHttpServer(this.options)
-    this.ws = new WebSocket.Server({ server: this.httpServer })
+    this.ws = new WebSocketServer({ server: this.httpServer })
     if (!this.options.server) {
       await new Promise((resolve, reject) => {
         this.ws.on('error', reject)
