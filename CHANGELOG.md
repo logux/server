@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.10.7
+* Reduced dependencies.
+
 ## 0.10.6
 * Fixed `Promise` support in channel’s `filter` (by Eduard Aksamitov).
 * Replaced `nanocolors` with `picocolors`.
