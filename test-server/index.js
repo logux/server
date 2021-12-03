@@ -30,6 +30,10 @@ export class TestServer extends BaseServer {
     }
     if (opts.auth !== false) this.auth(() => true)
     this.testUsers = {}
+
+    this.on('fatal', () => {
+      this.destroy()
+    })
   }
 
   async connect(userId, opts = {}) {

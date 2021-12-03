@@ -295,3 +295,11 @@ it('collects received actions', async () => {
     { type: 'logux/processed', id: '1 10:1:1 0' }
   ])
 })
+
+it('destroys on fatal', () => {
+  server = new TestServer()
+  // @ts-expect-error
+  server.emitter.emit('fatal')
+  // @ts-expect-error
+  expect(server.destroying).toBe(true)
+})
