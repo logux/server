@@ -14,7 +14,7 @@
     "collaborative"
   ],
   "scripts": {
-    "test": "node --experimental-vm-modules node_modules/.bin/jest --coverage && eslint . && check-dts"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage && eslint . && check-dts"
   },
   "author": "Andrey Sitnik <andrey@sitnik.ru>",
   "license": "MIT",
@@ -51,6 +51,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.16.5",
+    "@jest/globals": "^27.4.4",
     "@logux/eslint-config": "^46.1.1",
     "@types/cross-spawn": "^6.0.2",
     "@types/jest": "^27.0.3",
