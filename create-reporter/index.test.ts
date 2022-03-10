@@ -235,6 +235,27 @@ it('reports add', () => {
   })
 })
 
+it('reports add and clean', () => {
+  check('addClean', {
+    action: {
+      type: 'CHANGE_USER',
+      id: 100,
+      data: {
+        name: 'John',
+        role: null,
+        array: [1, [2], { a: '1', b: { c: 2 }, d: [], e: null }, null]
+      }
+    },
+    meta: {
+      id: '1487805099387 100:uImkcF4z 0',
+      time: 1487805099387,
+      reasons: ['lastValue', 'debug'],
+      server: 'server:H1f8LAyzl',
+      subprotocol: '1.0.0'
+    }
+  })
+})
+
 it('throws on circulal reference', () => {
   let a: { b: any } = { b: undefined }
   let b: { a: any } = { a: undefined }

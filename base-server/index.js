@@ -153,6 +153,8 @@ export class BaseServer {
     this.contexts = new WeakMap()
     this.log = log
 
+    let cleaned = {}
+
     this.on('preadd', (action, meta) => {
       let isLogux = action.type.slice(0, 6) === 'logux/'
       if (!meta.server) {
@@ -178,7 +180,12 @@ export class BaseServer {
     })
     this.on('add', async (action, meta) => {
       let start = Date.now()
-      this.emitter.emit('report', 'add', { action, meta })
+      if (meta.reasons.length === 0) {
+        cleaned[meta.id] = true
+        this.emitter.emit('report', 'addClean', { action, meta })
+      } else {
+        this.emitter.emit('report', 'add', { action, meta })
+      }
 
       if (this.destroying) return
 
@@ -254,6 +261,10 @@ export class BaseServer {
       }
     })
     this.on('clean', (action, meta) => {
+      if (cleaned[meta.id]) {
+        delete cleaned[meta.id]
+        return
+      }
       this.emitter.emit('report', 'clean', { actionId: meta.id })
     })
 

@@ -97,6 +97,30 @@ exports[`reports add 2`] = `
 "
 `;
 
+exports[`reports add and clean 1`] = `
+"{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"action\\":{\\"type\\":\\"CHANGE_USER\\",\\"id\\":100,\\"data\\":{\\"name\\":\\"John\\",\\"role\\":null,\\"array\\":[1,[2],{\\"a\\":\\"1\\",\\"b\\":{\\"c\\":2},\\"d\\":[],\\"e\\":null},null]}},\\"meta\\":{\\"id\\":\\"1487805099387 100:uImkcF4z 0\\",\\"time\\":1487805099387,\\"reasons\\":[\\"lastValue\\",\\"debug\\"],\\"server\\":\\"server:H1f8LAyzl\\",\\"subprotocol\\":\\"1.0.0\\"},\\"msg\\":\\"Action was added and cleaned\\"}
+"
+`;
+
+exports[`reports add and clean 2`] = `
+"[42m[30m INFO [39m[49m  [1m[32mAction was added and cleaned[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Action: 
+          type: \\"[1mCHANGE_USER[22m\\"
+          id:   [1m100[22m
+          data: 
+            name:  \\"[1mJohn[22m\\"
+            role:  [1mnull[22m
+            array: [[1m1[22m, [[1m2[22m], { a: \\"[1m1[22m\\", b: { c: [1m2[22m }, d: [], e: [1mnull[22m }, [1mnull[22m]
+        Meta:   
+          id:          [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
+          time:        [1m1487805099387[22m
+          reasons:     [\\"[1mlastValue[22m\\", \\"[1mdebug[22m\\"]
+          server:      \\"[1mserver:H1f8LAyzl[22m\\"
+          subprotocol: \\"[1m1.0.0[22m\\"
+
+"
+`;
+
 exports[`reports authenticated 1`] = `
 "{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"connectionId\\":\\"670\\",\\"subprotocol\\":\\"1.0.0\\",\\"nodeId\\":\\"admin:100:uImkcF4z\\",\\"msg\\":\\"User was authenticated\\"}
 "
