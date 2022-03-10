@@ -109,8 +109,6 @@ const REPORTERS = {
 
   clean: () => ({ msg: 'Action was cleaned' }),
 
-  processed: () => ({ msg: 'Action was processed' }),
-
   subscribed: () => ({ msg: 'Client was subscribed' }),
 
   unsubscribed: () => ({ msg: 'Client was unsubscribed' }),

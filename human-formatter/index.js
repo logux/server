@@ -9,8 +9,6 @@ const PADDING = '        '
 const SEPARATOR = os.EOL + os.EOL
 const NEXT_LINE = os.EOL === '\n' ? '\r\v' : os.EOL
 
-const LATENCY_UNIT = ' ms'
-
 const PARAMS_BLACKLIST = {
   v: true,
   msg: true,
@@ -124,8 +122,6 @@ function formatParams(c, params, parent) {
             .split(NEXT_LINE)
             .join(NEXT_LINE + INDENT)
         )
-      } else if (name === 'Latency' && !parent) {
-        return start + c.bold(value) + LATENCY_UNIT
       } else if (typeof value === 'string' && parent) {
         return start + '"' + c.bold(value) + '"'
       } else {

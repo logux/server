@@ -1261,13 +1261,7 @@ it('has custom processor for unknown type', async () => {
     { id: [1, '10:uuid', 0], time: 1 }
   ])
 
-  expect(test.names).toEqual([
-    'connect',
-    'authenticated',
-    'add',
-    'processed',
-    'add'
-  ])
+  expect(test.names).toEqual(['connect', 'authenticated', 'add', 'add'])
   expect(calls).toEqual(['access', 'process'])
 })
 

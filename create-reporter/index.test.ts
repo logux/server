@@ -315,13 +315,6 @@ it('reports wrongChannel without name', () => {
   })
 })
 
-it('reports processed', () => {
-  check('processed', {
-    actionId: '1487805099387 100:uImkcF4z 0',
-    latency: 500
-  })
-})
-
 it('reports subscribed', () => {
   check('subscribed', {
     channel: 'user/100',

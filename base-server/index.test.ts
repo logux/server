@@ -592,10 +592,6 @@ it('processes actions', async () => {
   expect(test.app.log.entries()[0][1].status).toEqual('processed')
   expect(processed).toEqual([{ type: 'FOO' }])
   expect(fired).toEqual([{ type: 'FOO' }])
-  expect(test.names).toEqual(['add', 'processed'])
-  expect(Object.keys(test.reports[1][1])).toEqual(['actionId', 'latency'])
-  expect(test.reports[1][1].actionId).toEqual('1 server:uuid 0')
-  expect(test.reports[1][1].latency).toBeCloseTo(25, -2)
 })
 
 it('processes regex matching action', async () => {
@@ -625,10 +621,6 @@ it('processes regex matching action', async () => {
   expect(test.app.log.entries()[0][1].status).toEqual('processed')
   expect(processed).toEqual([{ type: 'ADD_TODO' }])
   expect(fired).toEqual([{ type: 'ADD_TODO' }])
-  expect(test.names).toEqual(['add', 'processed'])
-  expect(Object.keys(test.reports[1][1])).toEqual(['actionId', 'latency'])
-  expect(test.reports[1][1].actionId).toEqual('1 server:uuid 0')
-  expect(test.reports[1][1].latency).toBeCloseTo(25, -2)
 })
 
 it('has full events API', () => {
@@ -1301,16 +1293,11 @@ it('reports about useless actions', async () => {
     'add',
     'useless',
     'add',
-    'processed',
     'add',
     'add',
-    'processed',
     'add',
-    'processed',
     'add',
-    'processed',
-    'add',
-    'processed'
+    'add'
   ])
 })
 

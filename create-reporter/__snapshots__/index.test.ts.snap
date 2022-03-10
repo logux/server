@@ -359,19 +359,6 @@ exports[`reports listen for production 2`] = `
 "
 `;
 
-exports[`reports processed 1`] = `
-"{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"latency\\":500,\\"msg\\":\\"Action was processed\\"}
-"
-`;
-
-exports[`reports processed 2`] = `
-"[42m[30m INFO [39m[49m  [1m[32mAction was processed[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Action ID: [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
-        Latency:   [1m500[22m ms
-
-"
-`;
-
 exports[`reports subscribed 1`] = `
 "{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"channel\\":\\"user/100\\",\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"msg\\":\\"Client was subscribed\\"}
 "

@@ -669,7 +669,6 @@ export class BaseServer {
     try {
       await processor.process(ctx, action, meta)
       latency = Date.now() - start
-      this.emitter.emit('report', 'processed', { actionId: meta.id, latency })
       this.markAsProcessed(meta)
     } catch (e) {
       this.log.changeMeta(meta.id, { status: 'error' })
