@@ -17,6 +17,11 @@ export {
   put,
   del
 } from './request/index.js'
+export {
+  addSyncMapFilter,
+  SyncMapData,
+  addSyncMap
+} from './add-sync-map/index.js'
 export { TestServer, TestServerOptions } from './test-server/index.js'
 export { TestClient, LoguxActionError } from './test-client/index.js'
 export { Context, ChannelContext } from './context/index.js'

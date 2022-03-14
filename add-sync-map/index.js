@@ -1,0 +1,192 @@
+async function addFinished(server, ctx, type, action, meta) {
+  await server.process(
+    { ...action, type },
+    { time: meta.time, excludeClients: [ctx.clientId] }
+  )
+}
+
+function resendFinished(server, plural, type, all = true) {
+  if (all) {
+    server.type(type, {
+      access() {
+        return false
+      },
+      resend(ctx, action) {
+        return [plural, `${plural}/${action.id}`]
+      }
+    })
+  } else {
+    server.type(type, {
+      access() {
+        return false
+      },
+      resend(ctx, action) {
+        return [`${plural}/${action.id}`]
+      }
+    })
+  }
+}
+
+function isValueWithTime(value) {
+  return (
+    Array.isArray(value) && value.length === 2 && typeof value[1] === 'number'
+  )
+}
+
+function buildFilter(filter) {
+  return (ctx, action) => {
+    if (action.type.endsWith('/created')) {
+      for (let key in filter) {
+        if (action.fields[key] !== filter[key]) return false
+      }
+    }
+    return true
+  }
+}
+
+async function sendMap(server, changedType, data, since) {
+  let { id, ...other } = data
+  let byTime = new Map()
+  for (let key in other) {
+    if (!isValueWithTime(other[key])) {
+      if (!byTime.has('now')) byTime.set('now', {})
+      byTime.get('now')[key] = other[key]
+    } else {
+      let time = other[key][1]
+      if (!byTime.has(time)) byTime.set(time, {})
+      byTime.get(time)[key] = other[key][0]
+    }
+  }
+  for (let [time, fields] of byTime.entries()) {
+    let changedMeta
+    if (time !== 'now') {
+      changedMeta = { time }
+      if (time < since) continue
+    }
+    await server.process(
+      {
+        type: changedType,
+        id,
+        fields
+      },
+      changedMeta
+    )
+  }
+}
+
+export function addSyncMap(server, plural, operations) {
+  let createdType = `${plural}/created`
+  let changedType = `${plural}/changed`
+  let deletedType = `${plural}/deleted`
+  resendFinished(server, plural, createdType)
+  resendFinished(server, plural, changedType)
+  resendFinished(server, plural, deletedType, false)
+
+  if (operations.load) {
+    server.channel(`${plural}/:id`, {
+      access(ctx, action, meta) {
+        return operations.access(ctx, ctx.params.id, action, meta)
+      },
+      async load(ctx, action, meta) {
+        let data = await operations.load(
+          ctx,
+          ctx.params.id,
+          action.since,
+          action,
+          meta
+        )
+        await sendMap(
+          server,
+          changedType,
+          data,
+          action.since ? action.since.time : 0
+        )
+      }
+    })
+  }
+
+  if (operations.create) {
+    server.type(`${plural}/create`, {
+      access(ctx, action, meta) {
+        return operations.access(ctx, action.id, action, meta)
+      },
+      async process(ctx, action, meta) {
+        await operations.create(
+          ctx,
+          action.id,
+          action.fields,
+          meta.time,
+          action,
+          meta
+        )
+        await addFinished(server, ctx, createdType, action, meta)
+      }
+    })
+  }
+
+  if (operations.change) {
+    server.type(`${plural}/change`, {
+      access(ctx, action, meta) {
+        return operations.access(ctx, action.id, action, meta)
+      },
+      async process(ctx, action, meta) {
+        await operations.change(
+          ctx,
+          action.id,
+          action.fields,
+          meta.time,
+          action,
+          meta
+        )
+        await addFinished(server, ctx, changedType, action, meta)
+      }
+    })
+  }
+
+  if (operations.delete) {
+    server.type(`${plural}/delete`, {
+      access(ctx, action, meta) {
+        return operations.access(ctx, action.id, action, meta)
+      },
+      async process(ctx, action, meta) {
+        await operations.delete(ctx, action.id, action, meta)
+        await addFinished(server, ctx, deletedType, action, meta)
+      }
+    })
+  }
+}
+
+export function addSyncMapFilter(server, plural, operations) {
+  let changedType = `${plural}/changed`
+
+  server.channel(plural, {
+    access(ctx, action, meta) {
+      return operations.access(ctx, action.filter, action, meta)
+    },
+    filter(ctx, action, meta) {
+      let filter = action.filter ? buildFilter(action.filter) : () => true
+      let custom = operations.actions
+        ? operations.actions(ctx, action.filter, action, meta)
+        : () => true
+      return (ctx2, action2, meta2) => {
+        return filter(ctx2, action2, meta2) && custom(ctx2, action2, meta2)
+      }
+    },
+    async load(ctx, action, meta) {
+      let data = await operations.initial(
+        ctx,
+        action.filter,
+        action.since,
+        action,
+        meta
+      )
+      let since = action.since ? action.since.time : 0
+      await Promise.all(
+        data.map(async i => {
+          await server.subscribe(ctx.nodeId, `${plural}/${i.id}`)
+          await sendMap(server, changedType, i, since)
+        })
+      )
+    }
+  })
+}
