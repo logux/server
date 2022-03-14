@@ -133,13 +133,16 @@ export class TestClient {
     })
   }
 
-  async subscribe(channel, filter) {
+  async subscribe(channel, filter, since) {
     let action = channel
     if (typeof channel === 'string') {
       action = { type: 'logux/subscribe', channel }
     }
     if (filter) {
       action.filter = filter
+    }
+    if (since) {
+      action.since = since
     }
     let actions = await this.process(action)
     return actions.filter(i => i.type !== 'logux/processed')

@@ -151,7 +151,7 @@ export class TestClient {
    * @param test Function, where do you expect action will be received
    * @returns Promise with all received actions
    */
-  collect(test: () => Promise<void>): Promise<Action[]>
+  collect(test: () => Promise<any>): Promise<Action[]>
 
   /**
    * Send action to the sever and collect all response actions.
@@ -180,11 +180,13 @@ export class TestClient {
    *
    * @param channel Channel name or `logux/subscribe` action.
    * @param filter Optional filter for subscription.
+   * @param since Optional time from last data.
    * @returns Promise with all actions from the server.
    */
   subscribe(
     channel: string | LoguxSubscribeAction,
-    filter?: object
+    filter?: object,
+    since?: { id: string; time: number }
   ): Promise<Action[]>
 
   /**
@@ -216,5 +218,5 @@ export class TestClient {
    * @param test Function, where do you expect action will be received
    * @returns Promise with all received actions
    */
-  received(test: () => Promise<void> | void): Promise<Action[]>
+  received(test: () => Promise<any> | any): Promise<Action[]>
 }
