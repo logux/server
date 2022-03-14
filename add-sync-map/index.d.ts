@@ -161,7 +161,7 @@ export function addSyncMap<Values extends SyncMapValues>(
   operations: SyncMapOperations<Values>
 ): void
 
-/*
+/**
  * Add callbacks for client’s `useFilter`.
  *
  * ```js
