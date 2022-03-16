@@ -50,7 +50,7 @@
     "yyyy-mm-dd": "^1.0.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.17.5",
+    "@babel/core": "^7.17.7",
     "@jest/globals": "^27.5.1",
     "@logux/eslint-config": "^46.1.1",
     "@types/cross-spawn": "^6.0.2",
@@ -59,8 +59,8 @@
     "@types/node-fetch": "^2.6.1",
     "@types/pino": "^6.3.12",
     "@types/ws": "^8.5.3",
-    "@typescript-eslint/eslint-plugin": "^5.14.0",
-    "@typescript-eslint/parser": "^5.14.0",
+    "@typescript-eslint/eslint-plugin": "^5.15.0",
+    "@typescript-eslint/parser": "^5.15.0",
     "check-dts": "^0.6.6",
     "clean-publish": "^4.0.0",
     "cross-spawn": "^7.0.3",
