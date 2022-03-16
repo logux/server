@@ -1,16 +1,18 @@
 import {
   defineSyncMapActions,
   LoguxNotFoundError,
-  loguxProcessed,
-  loguxSubscribed
+  loguxSubscribed,
+  loguxProcessed
 } from '@logux/actions'
 
 import {
+  NoConflictResolution,
   addSyncMapFilter,
   SyncMapData,
   TestServer,
   TestClient,
-  addSyncMap
+  addSyncMap,
+  ChangedAt
 } from '../index.js'
 
 type TaskValue = {
@@ -73,8 +75,8 @@ function getServer(): TestServer {
       if (!task) throw new LoguxNotFoundError()
       return {
         id,
-        text: [task.text, task.textChanged],
-        finished: [task.finished, task.finishedChanged]
+        text: ChangedAt(task.text, task.textChanged),
+        finished: ChangedAt(task.finished, task.finishedChanged)
       }
     },
     create(ctx, id, fields, time, action, meta) {
@@ -137,8 +139,8 @@ function getServer(): TestServer {
         }
         selected.push({
           id,
-          text: [task.text, task.textChanged],
-          finished: [task.finished, task.finishedChanged]
+          text: ChangedAt(task.text, task.textChanged),
+          finished: ChangedAt(task.finished, task.finishedChanged)
         })
       }
       return selected
@@ -331,9 +333,17 @@ it('supports simpler SyncMap', async () => {
     },
     load(ctx, id, since) {
       if (since) {
-        return { id, text: 'updated', author: 'A' }
+        return {
+          id,
+          text: NoConflictResolution('updated'),
+          author: NoConflictResolution('A')
+        }
       }
-      return { id, text: 'full', author: 'A' }
+      return {
+        id,
+        text: NoConflictResolution('full'),
+        author: NoConflictResolution('A')
+      }
     }
   })
   addSyncMapFilter<CommentValue>(server, 'comments', {
@@ -372,7 +382,7 @@ it('allows to disable changes', async () => {
       return true
     },
     load(ctx, id) {
-      return { id, text: 'full', author: 'A' }
+      return { id }
     },
     create(ctx, id) {
       return id !== 'bad'
@@ -413,4 +423,21 @@ it('allows to disable changes', async () => {
     changedComment({ id: 'good', fields: {} }),
     deletedComment({ id: 'good' })
   ])
+})
+
+it('throws an error on missed value wrapper', async () => {
+  let server = getServer()
+  addSyncMap<CommentValue>(server, 'comments', {
+    access() {
+      return true
+    },
+    // @ts-expect-error
+    load(ctx, id) {
+      return { id, text: 'Text' }
+    }
+  })
+
+  let client = await server.connect('1')
+
+  await server.expectError(/Wrap value/, () => client.subscribe('comments/1'))
 })

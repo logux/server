@@ -3,15 +3,57 @@ import {
   SyncMapChangeAction,
   SyncMapCreateAction,
   SyncMapDeleteAction,
-  SyncMapValues
+  SyncMapValues,
+  SyncMapTypes
 } from '@logux/actions'
 
 import { BaseServer, ServerMeta } from '../base-server/index.js'
 import { Context } from '../context/index.js'
 
-export type SyncMapData<Value extends SyncMapValues> = { id: string } & {
-  [Key in keyof Value]: Value[Key] | [Value[Key], number]
+declare const WITH_TIME: unique symbol
+
+export type WithTime<Value extends SyncMapTypes | SyncMapTypes[]> = {
+  value: Value
+  time: number
+  [WITH_TIME]: true
 }
+
+export type WithoutTime<Value extends SyncMapTypes | SyncMapTypes[]> = {
+  value: Value
+  time: undefined
+  [WITH_TIME]: false
+}
+
+export type SyncMapData<Value extends SyncMapValues> = { id: string } & {
+  [Key in keyof Value]: WithTime<Value[Key]> | WithoutTime<Value[Key]>
+}
+
+/**
+ * Add last changed time to value to use in conflict resolution.
+ *
+ * If you do not know the time, use {@link NoConflictResolution}.
+ *
+ * @param value The value.
+ * @param time UNIX milliseconds.
+ * @returns Wrapper.
+ */
+export function ChangedAt<Value extends SyncMapTypes | SyncMapTypes[]>(
+  value: Value,
+  time: number
+): WithTime<Value>
+
+/**
+ * Mark that the value has no last changed date and conflict resolution
+ * can’t be applied.
+ *
+ * @param value The value.
+ * @returns Wrapper.
+ */
+export function NoConflictResolution<
+  Value extends SyncMapTypes | SyncMapTypes[]
+>(
+  value: Value
+): WithTime<Value>
 
 interface SyncMapActionFilter<Value extends SyncMapValues> {
   (
@@ -95,7 +137,7 @@ interface SyncMapFilterOperations<Value extends SyncMapValues> {
  * Add callbacks for client’s `SyncMap`.
  *
  * ```js
- * import { addSyncMap, isFirstTimeOlder } from '@logux/server'
+ * import { addSyncMap, isFirstTimeOlder, ChangedAt } from '@logux/server'
  * import { LoguxNotFoundError } from '@logux/actions'
  *
  * addSyncMap(server, 'tasks', {
@@ -109,8 +151,8 @@ interface SyncMapFilterOperations<Value extends SyncMapValues> {
  *     if (!task) throw new LoguxNotFoundError()
  *     return {
  *       id: task.id,
- *       text: [task.text, task.textChanged],
- *       finished: [task.finished, task.finishedChanged],
+ *       text: ChangedAt(task.text, task.textChanged),
+ *       finished: ChangedAt(task.finished, task.finishedChanged),
  *     }
  *   },
  *
@@ -165,7 +207,7 @@ export function addSyncMap<Values extends SyncMapValues>(
  * Add callbacks for client’s `useFilter`.
  *
  * ```js
- * import { addSyncMapFilter } from '@logux/server'
+ * import { addSyncMapFilter, ChangedAt } from '@logux/server'
  *
  * addSyncMapFilter(server, 'tasks', {
  *   access (ctx, filter) {
@@ -177,8 +219,8 @@ export function addSyncMap<Values extends SyncMapValues>(
  *     // You can return only data changed after `since`
  *     return tasks.map(task => ({
  *       id: task.id,
- *       text: [task.text, task.textChanged],
- *       finished: [task.finished, task.finishedChanged],
+ *       text: ChangedAt(task.text, task.textChanged),
+ *       finished: ChangedAt(task.finished, task.finishedChanged),
  *     }))
  *   },
  *

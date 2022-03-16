@@ -7,7 +7,12 @@ export {
   put,
   del
 } from './request/index.js'
-export { addSyncMapFilter, addSyncMap } from './add-sync-map/index.js'
+export {
+  NoConflictResolution,
+  addSyncMapFilter,
+  addSyncMap,
+  ChangedAt
+} from './add-sync-map/index.js'
 export { BaseServer, wasNot403 } from './base-server/index.js'
 export { ALLOWED_META } from './allowed-meta/index.js'
 export { TestServer } from './test-server/index.js'

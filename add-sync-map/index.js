@@ -1,3 +1,13 @@
+const WITH_TIME = Symbol('WITH_TIME')
+
+export function ChangedAt(value, time) {
+  return { value, time, [WITH_TIME]: true }
+}
+
+export function NoConflictResolution(value) {
+  return { value, [WITH_TIME]: false }
+}
+
 async function addFinished(server, ctx, type, action, meta) {
   await server.process(
     { ...action, type },
@@ -27,12 +37,6 @@ function resendFinished(server, plural, type, all = true) {
   }
 }
 
-function isValueWithTime(value) {
-  return (
-    Array.isArray(value) && value.length === 2 && typeof value[1] === 'number'
-  )
-}
-
 function buildFilter(filter) {
   return (ctx, action) => {
     if (action.type.endsWith('/created')) {
@@ -48,13 +52,15 @@ async function sendMap(server, changedType, data, since) {
   let { id, ...other } = data
   let byTime = new Map()
   for (let key in other) {
-    if (!isValueWithTime(other[key])) {
-      if (!byTime.has('now')) byTime.set('now', {})
-      byTime.get('now')[key] = other[key]
-    } else {
-      let time = other[key][1]
+    if (other[key][WITH_TIME] === true) {
+      let time = other[key].time
       if (!byTime.has(time)) byTime.set(time, {})
-      byTime.get(time)[key] = other[key][0]
+      byTime.get(time)[key] = other[key].value
+    } else if (other[key][WITH_TIME] === false) {
+      if (!byTime.has('now')) byTime.set('now', {})
+      byTime.get('now')[key] = other[key].value
+    } else {
+      throw new Error('Wrap value into ChangedAt() or NoConflictResolution()')
     }
   }
   for (let [time, fields] of byTime.entries()) {
