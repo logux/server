@@ -154,6 +154,25 @@ it('tracks action processing', async () => {
   expect(noReasonError.message).toEqual(
     'Server does not have callbacks for UNKNOWN actions'
   )
+
+  await server.expectError('test', async () => {
+    await client.process({ type: 'ERR' })
+  })
+  await server.expectError(/te/, async () => {
+    await client.process({ type: 'ERR' })
+  })
+  let wrongMessageError = await catchError(async () => {
+    await server.expectError('te', async () => {
+      await client.process({ type: 'ERR' })
+    })
+  })
+  expect(wrongMessageError.message).toEqual('test')
+  let noErrorError = await catchError(async () => {
+    await server.expectError('te', async () => {
+      await client.process({ type: 'FOO' })
+    })
+  })
+  expect(noErrorError.message).toEqual('Actions passed without error')
 })
 
 it('detects action ID duplicate', async () => {

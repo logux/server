@@ -126,4 +126,16 @@ export class TestServer<
    * @param test Callback with subscripting or action sending.
    */
   expectUndo(reason: string, test: () => any | Promise<any>): Promise<void>
+
+  /**
+   * Call callback and throw an error if there was no error during
+   * server processing.
+   *
+   * @param text RegExp or string of error message.
+   * @param test Callback with subscripting or action sending.
+   */
+  expectError(
+    text: string | RegExp,
+    test: () => any | Promise<any>
+  ): Promise<void>
 }

@@ -74,4 +74,18 @@ export class TestServer extends BaseServer {
       }
     }
   }
+
+  async expectError(text, test) {
+    try {
+      await test()
+      throw new Error('Actions passed without error')
+    } catch (e) {
+      if (
+        (typeof text === 'string' && e.message !== text) ||
+        (text instanceof RegExp && !text.test(e.message))
+      ) {
+        throw e
+      }
+    }
+  }
 }
