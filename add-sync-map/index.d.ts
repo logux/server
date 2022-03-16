@@ -48,7 +48,7 @@ interface SyncMapOperations<Value extends SyncMapValues> {
     time: number,
     action: SyncMapCreateAction<Value>,
     meta: ServerMeta
-  ): Promise<void> | void
+  ): Promise<void | boolean> | void | boolean
 
   change?(
     ctx: Context,
@@ -57,14 +57,14 @@ interface SyncMapOperations<Value extends SyncMapValues> {
     time: number,
     action: SyncMapChangeAction<Value>,
     meta: ServerMeta
-  ): Promise<void> | void
+  ): Promise<void | boolean> | void | boolean
 
   delete?(
     ctx: Context,
     id: string,
     action: SyncMapDeleteAction,
     meta: ServerMeta
-  ): Promise<void> | void
+  ): Promise<void | boolean> | void | boolean
 }
 
 interface SyncMapFilterOperations<Value extends SyncMapValues> {

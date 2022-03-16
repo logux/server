@@ -111,7 +111,7 @@ export function addSyncMap(server, plural, operations) {
         return operations.access(ctx, action.id, action, meta)
       },
       async process(ctx, action, meta) {
-        await operations.create(
+        let result = await operations.create(
           ctx,
           action.id,
           action.fields,
@@ -119,7 +119,9 @@ export function addSyncMap(server, plural, operations) {
           action,
           meta
         )
-        await addFinished(server, ctx, createdType, action, meta)
+        if (result !== false) {
+          await addFinished(server, ctx, createdType, action, meta)
+        }
       }
     })
   }
@@ -130,7 +132,7 @@ export function addSyncMap(server, plural, operations) {
         return operations.access(ctx, action.id, action, meta)
       },
       async process(ctx, action, meta) {
-        await operations.change(
+        let result = await operations.change(
           ctx,
           action.id,
           action.fields,
@@ -138,7 +140,9 @@ export function addSyncMap(server, plural, operations) {
           action,
           meta
         )
-        await addFinished(server, ctx, changedType, action, meta)
+        if (result !== false) {
+          await addFinished(server, ctx, changedType, action, meta)
+        }
       }
     })
   }
@@ -149,8 +153,10 @@ export function addSyncMap(server, plural, operations) {
         return operations.access(ctx, action.id, action, meta)
       },
       async process(ctx, action, meta) {
-        await operations.delete(ctx, action.id, action, meta)
-        await addFinished(server, ctx, deletedType, action, meta)
+        let result = await operations.delete(ctx, action.id, action, meta)
+        if (result !== false) {
+          await addFinished(server, ctx, deletedType, action, meta)
+        }
       }
     })
   }

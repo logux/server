@@ -1,5 +1,4 @@
 import {
-  defineChangedSyncMap,
   defineSyncMapActions,
   LoguxNotFoundError,
   loguxProcessed,
@@ -32,6 +31,19 @@ let [
   changedTask,
   deletedTask
 ] = defineSyncMapActions('tasks')
+
+type CommentValue = {
+  text?: string
+  author?: string
+}
+let [
+  createComment,
+  changeComment,
+  deleteComment,
+  createdComment,
+  changedComment,
+  deletedComment
+] = defineSyncMapActions('comments')
 
 let tasks = new Map<string, TaskRecord>()
 
@@ -312,9 +324,6 @@ it('supports SyncMap filters', async () => {
 })
 
 it('supports simpler SyncMap', async () => {
-  type CommentValue = { text: string; author: string }
-  let commentChanged = defineChangedSyncMap('comments')
-
   let server = getServer()
   addSyncMap<CommentValue>(server, 'comments', {
     access() {
@@ -339,19 +348,69 @@ it('supports simpler SyncMap', async () => {
   let client1 = await server.connect('1')
 
   expect(await client1.subscribe('comments/1')).toEqual([
-    commentChanged({ id: '1', fields: { text: 'full', author: 'A' } })
+    changedComment({ id: '1', fields: { text: 'full', author: 'A' } })
   ])
   expect(
     await client1.subscribe('comments/2', undefined, { id: '', time: 2 })
   ).toEqual([
-    commentChanged({ id: '2', fields: { text: 'updated', author: 'A' } })
+    changedComment({ id: '2', fields: { text: 'updated', author: 'A' } })
   ])
 
   let client2 = await server.connect('2')
   await client2.subscribe('comments')
   await client2.collect(() =>
     server.process(
-      commentChanged({ id: '10', fields: { text: '2', author: 'A' } })
+      changedComment({ id: '10', fields: { text: '2', author: 'A' } })
     )
   )
+})
+
+it('allows to disable changes', async () => {
+  let server = getServer()
+  addSyncMap<CommentValue>(server, 'comments', {
+    access() {
+      return true
+    },
+    load(ctx, id) {
+      return { id, text: 'full', author: 'A' }
+    },
+    create(ctx, id) {
+      return id !== 'bad'
+    },
+    change(ctx, id) {
+      return id !== 'bad'
+    },
+    delete(ctx, id) {
+      return id !== 'bad'
+    }
+  })
+  addSyncMapFilter<CommentValue>(server, 'comments', {
+    access() {
+      return true
+    },
+    initial() {
+      return []
+    }
+  })
+
+  let client1 = await server.connect('1')
+  let client2 = await server.connect('2')
+
+  await client2.subscribe('comments')
+  await client2.subscribe('comments/good')
+  await client2.subscribe('comments/bad')
+  expect(
+    await client2.collect(async () => {
+      await client1.process(createComment({ id: 'good', fields: {} }))
+      await client1.process(changeComment({ id: 'good', fields: {} }))
+      await client1.process(deleteComment({ id: 'good' }))
+      await client1.process(createComment({ id: 'bad', fields: {} }))
+      await client1.process(changeComment({ id: 'bad', fields: {} }))
+      await client1.process(deleteComment({ id: 'bad' }))
+    })
+  ).toEqual([
+    createdComment({ id: 'good', fields: {} }),
+    changedComment({ id: 'good', fields: {} }),
+    deletedComment({ id: 'good' })
+  ])
 })
