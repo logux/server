@@ -750,8 +750,8 @@ export class BaseServer<
    * and node ID. It should return a Promise with `true` or `false`.
    *
    * ```js
-   * server.auth(async ({ userId, token }) => {
-   *   const user = await findUserByToken(token)
+   * server.auth(async ({ userId, cookie }) => {
+   *   const user = await findUserByToken(cookie.token)
    *   return !!user && userId === user.id
    * })
    * ```
