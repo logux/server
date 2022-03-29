@@ -1,13 +1,43 @@
 import { LoguxError } from '@logux/core'
 
-import { createReporter } from '../create-reporter/index.js'
-import { humanFormatter } from '../human-formatter/index.js'
 import { jest } from '@jest/globals'
 import pino from 'pino'
 import { join } from "path";
 import os from "os";
 import fs from "fs";
-import { watchFileCreated } from '../test/helper.js'
+
+import { createReporter, PATH_TO_PRETTIFYING_PINO_TRANSPORT } from './index.js'
+
+/**
+ * Source: https://github.com/pinojs/pino/blob/03dac4d1b7e567f4a70f5fb448acc0ea8b75b2a6/test/helper.js#L55
+ *
+ * @param filename
+ */
+export function watchFileCreated(filename: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    let TIMEOUT = Number(process.env.PINO_TEST_WAIT_WATCHFILE_TIMEOUT) || 4000
+    let INTERVAL = 100
+    let threshold = TIMEOUT / INTERVAL
+    let counter = 0
+    let interval = setInterval(() => {
+      let exists = fs.existsSync(filename)
+      // On some CI runs file is created but not filled
+      if (exists && fs.statSync(filename).size !== 0) {
+        clearInterval(interval)
+        resolve()
+      } else if (counter <= threshold) {
+        counter++
+      } else {
+        clearInterval(interval)
+        reject(new Error(
+          `${filename} hasn't been created within ${TIMEOUT} ms. ` +
+          (exists ? 'File exist, but still empty.' : 'File not yet created.')
+        ))
+      }
+    }, INTERVAL)
+  })
+}
+
 
 jest.mock('os', () => {
   return {
@@ -39,7 +69,7 @@ function clean(str: string): string {
     .replace(/PID:(\s+.*m)\d+(.*m)/, 'PID:$121384$2')
 }
 
-function check(type: string, details?: object): void {
+async function check(type: string, details?: object): Promise<void> {
   let json = new MemoryStream()
   let jsonReporter = createReporter({
     logger: pino(
@@ -54,24 +84,34 @@ function check(type: string, details?: object): void {
   jsonReporter(type, details)
   expect(clean(json.string)).toMatchSnapshot()
 
-  let human = new MemoryStream()
+  let destination = join(
+    os.tmpdir(),
+    '_' + Math.random().toString(36).substr(2, 9)
+  )
+
   let humanReporter = createReporter({
     logger: pino(
       {
         name: 'test',
-        prettyPrint: {
-          suppressFlushSyncWarning: true,
-          basepath: '/dev/app',
-          color: true
-        } as any,
-        prettifier: humanFormatter
+        transport: {
+          pipeline: [{
+            target: PATH_TO_PRETTIFYING_PINO_TRANSPORT,
+            options: {
+              basepath: '/dev/app/',
+              color: true,
+            }
+          }, {
+            target: 'pino/file',
+            options: { destination },
+          }]
+        }
       },
-      human
     )
   })
 
   humanReporter(type, details)
-  expect(clean(human.string)).toMatchSnapshot()
+  await watchFileCreated(destination)
+  expect(clean(fs.readFileSync(destination).toString())).toMatchSnapshot()
 }
 
 function createError(name: string, message: string): Error {
@@ -104,7 +144,7 @@ it('creates JSON reporter', () => {
   expect(clean(reporterStream.string)).toMatchSnapshot()
 })
 
-it('creates human reporter',  async () => {
+it('creates human reporter', async () => {
   let destination = join(
     os.tmpdir(),
     '_' + Math.random().toString(36).substr(2, 9)
@@ -144,8 +184,8 @@ it('uses environment variable to detect environment', () => {
   expect(reporter.logger.color).toBe(false)
 })
 
-it('reports listen', () => {
-  check('listen', {
+it('reports listen', async () => {
+  await check('listen', {
     controlSecret: 'RhBaK0kuOBtqJalq2C4df',
     loguxServer: '0.0.0',
     environment: 'development',
@@ -163,8 +203,8 @@ it('reports listen', () => {
   })
 })
 
-it('reports listen for production', () => {
-  check('listen', {
+it('reports listen for production', async () => {
+  await check('listen', {
     controlSecret: 'RhBaK0kuOBtqJalq2C4df',
     loguxServer: '0.0.0',
     environment: 'production',
@@ -180,8 +220,8 @@ it('reports listen for production', () => {
   })
 })
 
-it('reports listen for custom domain', () => {
-  check('listen', {
+it('reports listen for custom domain', async () => {
+  await check('listen', {
     loguxServer: '0.0.0',
     environment: 'development',
     subprotocol: '0.0.0',
@@ -194,36 +234,36 @@ it('reports listen for custom domain', () => {
   })
 })
 
-it('reports connect', () => {
-  check('connect', { connectionId: '670', ipAddress: '10.110.6.56' })
+it('reports connect', async () => {
+  await check('connect', { connectionId: '670', ipAddress: '10.110.6.56' })
 })
 
-it('reports authenticated', () => {
-  check('authenticated', {
+it('reports authenticated', async () => {
+  await check('authenticated', {
     connectionId: '670',
     subprotocol: '1.0.0',
     nodeId: 'admin:100:uImkcF4z'
   })
 })
 
-it('reports authenticated without user ID', () => {
-  check('authenticated', {
+it('reports authenticated without user ID', async () => {
+  await check('authenticated', {
     connectionId: '670',
     subprotocol: '1.0.0',
     nodeId: 'uImkcF4z'
   })
 })
 
-it('reports unauthenticated', () => {
-  check('unauthenticated', {
+it('reports unauthenticated', async () => {
+  await check('unauthenticated', {
     connectionId: '670',
     subprotocol: '1.0.0',
     nodeId: '100:uImkcF4z'
   })
 })
 
-it('reports add', () => {
-  check('add', {
+it('reports add', async () => {
+  await check('add', {
     action: {
       type: 'CHANGE_USER',
       id: 100,
@@ -243,8 +283,8 @@ it('reports add', () => {
   })
 })
 
-it('reports add and clean', () => {
-  check('addClean', {
+it('reports add and clean', async () => {
+  await check('addClean', {
     action: {
       type: 'CHANGE_USER',
       id: 100,
@@ -269,8 +309,7 @@ it('throws on circulal reference', () => {
   let b: { a: any } = { a: undefined }
   a.b = b
   b.a = a
-  expect(() => {
-    check('add', {
+  expect(() => check('add', {
       action: { type: 'CHANGE_USER', a },
       meta: {
         id: '1487805099387 100:uImkcF4z 0',
@@ -280,110 +319,110 @@ it('throws on circulal reference', () => {
         subprotocol: '1.0.0'
       }
     })
-  }).toThrow('Circular reference in action')
+  ).rejects.toThrow('Circular reference in action')
 })
 
-it('reports clean', () => {
-  check('clean', {
+it('reports clean', async () => {
+  await check('clean', {
     actionId: '1487805099387 100:uImkcF4z 0'
   })
 })
 
-it('reports denied', () => {
-  check('denied', {
+it('reports denied', async () => {
+  await check('denied', {
     actionId: '1487805099387 100:uImkcF4z 0'
   })
 })
 
-it('reports unknownType', () => {
-  check('unknownType', {
+it('reports unknownType', async () => {
+  await check('unknownType', {
     type: 'CHANGE_SER',
     actionId: '1487805099387 100:uImkcF4z 0'
   })
 })
 
-it('reports unknownType from server', () => {
-  check('unknownType', {
+it('reports unknownType from server', async () => {
+  await check('unknownType', {
     type: 'CHANGE_SER',
     actionId: '1487805099387 server:FnXaqDxY 0'
   })
 })
 
-it('reports wrongChannel', () => {
-  check('wrongChannel', {
+it('reports wrongChannel', async () => {
+  await check('wrongChannel', {
     actionId: '1487805099387 100:uImkcF4z 0',
     channel: 'ser/100'
   })
 })
 
-it('reports wrongChannel without name', () => {
-  check('wrongChannel', {
+it('reports wrongChannel without name', async () => {
+  await check('wrongChannel', {
     channel: undefined,
     actionId: '1487805099387 100:uImkcF4z 0'
   })
 })
 
-it('reports subscribed', () => {
-  check('subscribed', {
+it('reports subscribed', async () => {
+  await check('subscribed', {
     channel: 'user/100',
     actionId: '1487805099387 100:uImkcF4z 0'
   })
 })
 
-it('reports unsubscribed', () => {
-  check('unsubscribed', {
+it('reports unsubscribed', async () => {
+  await check('unsubscribed', {
     channel: 'user/100',
     actionId: '1487805099387 100:uImkcF4z 0'
   })
 })
 
-it('reports disconnect', () => {
-  check('disconnect', { nodeId: '100:uImkcF4z' })
+it('reports disconnect', async () => {
+  await check('disconnect', { nodeId: '100:uImkcF4z' })
 })
 
-it('reports disconnect from unauthenticated user', () => {
-  check('disconnect', { connectionId: '670' })
+it('reports disconnect from unauthenticated user', async () => {
+  await check('disconnect', { connectionId: '670' })
 })
 
-it('reports zombie', () => {
-  check('zombie', { nodeId: '100:uImkcF4z' })
+it('reports zombie', async () => {
+  await check('zombie', { nodeId: '100:uImkcF4z' })
 })
 
-it('reports wrongControlIp', () => {
-  check('wrongControlIp', {
+it('reports wrongControlIp', async () => {
+  await check('wrongControlIp', {
     ipAddress: '6.0.0.1',
     mask: '127.0.0.1/8'
   })
 })
 
-it('reports wrongControlSecret', () => {
-  check('wrongControlSecret', {
+it('reports wrongControlSecret', async () => {
+  await check('wrongControlSecret', {
     ipAddress: '6.0.0.1',
     wrongSecret: 'ArgDCPc1IxfU97V1ukeN6'
   })
 })
 
-it('reports destroy', () => {
-  check('destroy')
+it('reports destroy', async () => {
+  await check('destroy')
 })
 
-it('reports EACCES error', () => {
-  check('error', { fatal: true, err: { code: 'EACCES', port: 80 } })
+it('reports EACCES error', async () => {
+  await check('error', { fatal: true, err: { code: 'EACCES', port: 80 } })
 })
 
-it('reports EADDRINUSE error', () => {
-  check('error', { fatal: true, err: { code: 'EADDRINUSE', port: 31337 } })
+it('reports EADDRINUSE error', async () => {
+  await check('error', { fatal: true, err: { code: 'EADDRINUSE', port: 31337 } })
 })
 
-it('reports LOGUX_NO_CONTROL_SECRET error', () => {
+it('reports LOGUX_NO_CONTROL_SECRET error', async () => {
   let err = {
     code: 'LOGUX_NO_CONTROL_SECRET',
     message: '`backend` requires also `controlSecret` option'
   }
-  check('error', { fatal: true, err })
+  await check('error', { fatal: true, err })
 })
 
-it('reports Logux error', () => {
+it('reports Logux error', async () => {
   let err = {
     message: 'Unknown option `suprotocol` in server constructor',
     logux: true,
@@ -391,44 +430,44 @@ it('reports Logux error', () => {
       'Maybe there is a mistake in option name or this version ' +
       'of Logux Server doesn’t support this option'
   }
-  check('error', { fatal: true, err })
+  await check('error', { fatal: true, err })
 })
 
-it('reports error', () => {
-  check('error', { fatal: true, err: createError('Error', 'Some mistake') })
+it('reports error', async () => {
+  await check('error', { fatal: true, err: createError('Error', 'Some mistake') })
 })
 
-it('reports error from action', () => {
-  check('error', {
+it('reports error from action', async () => {
+  await check('error', {
     actionId: '1487805099387 100:uImkcF4z 0',
     err: createError('Error', 'Some mistake')
   })
 })
 
-it('reports error with token', () => {
-  check('error', {
+it('reports error with token', async () => {
+  await check('error', {
     actionId: '1487805099387 100:uImkcF4z 0',
     err: createError('Error', '{"Authorization":"Bearer secret"}')
   })
 })
 
-it('reports sync error', () => {
+it('reports sync error', async () => {
   let err = new LoguxError('unknown-message', 'bad', true)
-  check('error', { connectionId: '670', err })
+  await check('error', { connectionId: '670', err })
 })
 
-it('reports error from client', () => {
+it('reports error from client', async () => {
   let err = new LoguxError('timeout', 5000, true)
-  check('clientError', { connectionId: '670', err })
+  await check('clientError', { connectionId: '670', err })
 })
 
-it('reports error from node', () => {
+it('reports error from node', async () => {
   let err = new LoguxError('timeout', 5000, false)
-  check('clientError', { nodeId: '100:uImkcF4z', err })
+  await check('clientError', { nodeId: '100:uImkcF4z', err })
 })
 
-it('reports useless actions', () => {
-  check('useless', {
+it('reports useless actions', async () => {
+  await check('useless', {
     action: {
       type: 'ADD_USER',
       id: 100,

@@ -3,7 +3,7 @@ import os from 'os'
 import path from "path"
 import tty from 'tty'
 
-export const PATH_TO_PRITTIFING_PINO_TRANSPORT = '../human-formatter/createPinoTransport.js';
+export const PATH_TO_PRETTIFYING_PINO_TRANSPORT = '../human-formatter/index.js';
 
 const ERROR_CODES = {
   EADDRINUSE: e => {
@@ -222,7 +222,7 @@ function createLogger(options) {
       timestamp: pino.stdTimeFunctions.isoTime,
       transport: {
         pipeline: [{
-          target: PATH_TO_PRITTIFING_PINO_TRANSPORT,
+          target: PATH_TO_PRETTIFYING_PINO_TRANSPORT,
           options: {
             basepath,
             color,

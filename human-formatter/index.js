@@ -1,8 +1,9 @@
 import stripAnsi from 'strip-ansi'
 import yyyymmdd from 'yyyy-mm-dd'
 import pico from 'picocolors'
-import path from 'path'
 import os from 'os'
+import abstractTransport from "pino-abstract-transport";
+import { pipeline, Transform } from "stream";
 
 const INDENT = '  '
 const PADDING = '        '
@@ -165,7 +166,7 @@ function prettyStackTrace(c, stack, basepath) {
     .join(NEXT_LINE)
 }
 
-export function humanFormatter(options) {
+function humanFormatter(options) {
   let c = pico.createColors(options.color)
   let basepath = options.basepath
 
@@ -205,4 +206,24 @@ export function humanFormatter(options) {
 
     return message.filter(i => i !== '').join(NEXT_LINE) + SEPARATOR
   }
+}
+
+export default function createPinoTransport(options) {
+  let format = humanFormatter(options);
+
+  return abstractTransport((source) => {
+    let prettier = new Transform({
+      autoDestroy: true,
+      objectMode: true,
+      transform (chunk, enc, cb) {
+        this.push(format(chunk))
+        cb()
+      }
+    })
+
+    pipeline(source, prettier, () => {})
+    return prettier
+  }, {
+    enablePipelining: true
+  })
 }
