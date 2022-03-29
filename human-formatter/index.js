@@ -167,12 +167,9 @@ function prettyStackTrace(c, stack, basepath) {
 
 export function humanFormatter(options) {
   let c = pico.createColors(options.color)
-  this.color = c.isColorSupported
-  let basepath = options.basepath || process.cwd()
-  if (basepath.slice(-1) !== path.sep) basepath += path.sep
-  this.basepath = basepath
+  let basepath = options.basepath
 
-  return function (record) {
+  return function format(record) {
     let message = [LABELS[record.level](c, record.msg)]
     let params = Object.keys(record)
       .filter(key => !PARAMS_BLACKLIST[key])

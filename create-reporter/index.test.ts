@@ -4,6 +4,10 @@ import { createReporter } from '../create-reporter/index.js'
 import { humanFormatter } from '../human-formatter/index.js'
 import { jest } from '@jest/globals'
 import pino from 'pino'
+import { join } from "path";
+import os from "os";
+import fs from "fs";
+import { watchFileCreated } from '../test/helper.js'
 
 jest.mock('os', () => {
   return {
@@ -51,16 +55,15 @@ function check(type: string, details?: object): void {
   expect(clean(json.string)).toMatchSnapshot()
 
   let human = new MemoryStream()
-  let humanReporterOpts = {
-    suppressFlushSyncWarning: true,
-    basepath: '/dev/app',
-    color: true
-  }
   let humanReporter = createReporter({
     logger: pino(
       {
         name: 'test',
-        prettyPrint: humanReporterOpts as any,
+        prettyPrint: {
+          suppressFlushSyncWarning: true,
+          basepath: '/dev/app',
+          color: true
+        } as any,
         prettifier: humanFormatter
       },
       human
@@ -101,17 +104,22 @@ it('creates JSON reporter', () => {
   expect(clean(reporterStream.string)).toMatchSnapshot()
 })
 
-it('creates human reporter', () => {
-  let reporterStream = new MemoryStream()
+it('creates human reporter',  async () => {
+  let destination = join(
+    os.tmpdir(),
+    '_' + Math.random().toString(36).substr(2, 9)
+  )
+
   let reporter = createReporter({
     logger: {
-      stream: reporterStream,
+      destination,
       type: 'human'
     },
     root: '/dir/'
   })
   reporter('unknownType', {})
-  expect(clean(reporterStream.string)).toMatchSnapshot()
+  await watchFileCreated(destination)
+  expect(clean(fs.readFileSync(destination).toString())).toMatchSnapshot()
 })
 
 it('adds trailing slash to path', () => {

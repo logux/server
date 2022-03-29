@@ -1,7 +1,9 @@
 import pino from 'pino'
 import os from 'os'
+import path from "path"
+import tty from 'tty'
 
-import { humanFormatter } from '../human-formatter/index.js'
+export const PATH_TO_PRITTIFING_PINO_TRANSPORT = '../human-formatter/createPinoTransport.js';
 
 const ERROR_CODES = {
   EADDRINUSE: e => {
@@ -197,26 +199,50 @@ const REPORTERS = {
   }
 }
 
+// https://github.com/alexeyraspopov/picocolors/blob/147fbdbd5aea8e49d246fd5faee5e1c4f97d560a/picocolors.js#L3
+let isColorSupported =
+  !("NO_COLOR" in process.env || process.argv.includes("--no-color")) &&
+  ("FORCE_COLOR" in process.env ||
+    process.argv.includes("--color") ||
+    process.platform === "win32" ||
+    (tty.isatty(1) && process.env.TERM !== "dumb") ||
+    "CI" in process.env)
+
+
 function createLogger(options) {
   let stream = options.logger.stream || pino.destination()
-  let prettifier = {}
   if (options.logger === 'human' || options.logger.type === 'human') {
     let env = options.env || process.env.NODE_ENV || 'development'
-    let color = env !== 'development' ? false : undefined
-    prettifier = {
-      prettyPrint: {
-        suppressFlushSyncWarning: true,
-        basepath: options.root,
-        color
-      },
-      prettifier: humanFormatter
-    }
+    let color = env !== 'development' ? false : isColorSupported
+    let basepath = options.root || process.cwd();
+    if (basepath.slice(-1) !== path.sep) basepath += path.sep
+
+    let logger = pino({
+      name: 'logux-server',
+      timestamp: pino.stdTimeFunctions.isoTime,
+      transport: {
+        pipeline: [{
+          target: PATH_TO_PRITTIFING_PINO_TRANSPORT,
+          options: {
+            basepath,
+            color,
+          }
+        }, {
+          target: 'pino/file',
+          options: { destination: options.logger.destination },
+        }]
+      }
+    })
+
+    logger.basepath = basepath;
+    logger.color = color;
+
+    return logger
   }
   return pino(
     {
       name: 'logux-server',
       timestamp: pino.stdTimeFunctions.isoTime,
-      ...prettifier
     },
     stream
   )
