@@ -116,7 +116,7 @@ function formatParams(c, params, parent) {
       } else if (typeof value === 'object' && value) {
         let nested = Object.keys(value).map(key => [key, value[key]])
         return (
-          start +
+          start.trimEnd() +
           NEXT_LINE +
           INDENT +
           formatParams(c, nested, name)
@@ -201,7 +201,16 @@ function humanFormatter(options) {
             .map(row => splitByLength(row, 80 - PADDING.length))
         )
       }
-      message.push(note.map(i => PADDING + c.gray(i)).join(NEXT_LINE))
+      message.push(
+        note
+          .map(i => {
+            if (i === '') {
+              return ''
+            }
+            return PADDING + c.gray(i.trimEnd())
+          })
+          .join(NEXT_LINE)
+      )
     }
 
     return message.filter(i => i !== '').join(NEXT_LINE) + SEPARATOR

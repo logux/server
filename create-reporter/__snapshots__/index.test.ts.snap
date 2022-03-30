@@ -20,7 +20,7 @@ exports[`reports EACCES error 2`] = `
 "[41m[37m FATAL [39m[49m [1m[31mYou are not allowed to run server on port [33m80[31m[39m[22m [2mat 1970-01-01 00:00:00[22m
         [90mNon-privileged users can't start a listening socket on ports below 1024.[39m
         [90mTry to change user or take another port.[39m
-        [90m[39m
+
         [90m$ su - [1m<username>[22m[39m
         [90m$ npm start -p 80[39m
 
@@ -37,7 +37,7 @@ exports[`reports EADDRINUSE error 2`] = `
         [90mAnother Logux server or other app already running on this port.[39m
         [90mProbably you haven’t stopped server from other project or previous[39m
         [90mversion of this server was not killed.[39m
-        [90m[39m
+
         [90m$ su - root[39m
         [90m# netstat -nlp | grep 31337[39m
         [90mProto   Local Address   State    PID/Program name[39m

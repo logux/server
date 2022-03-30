@@ -14,7 +14,7 @@ app.nodeId = 'server:FnXaqDxY'
 app.auth(async () => true)
 
 app.unbind.push(async () => {
-  await delay(10)
+  await delay(50)
   process.stderr.write(' Custom destroy task finished\n')
 })
 
