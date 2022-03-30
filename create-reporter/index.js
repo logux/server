@@ -1,11 +1,11 @@
 import pino from 'pino'
 import os from 'os'
-import path from 'path'
+import { dirname, join, sep } from 'path'
 import tty from 'tty'
-import url from 'url'
+import { fileURLToPath } from 'url'
 
-const __dirname = path.dirname(url.fileURLToPath(import.meta.url))
-export const PATH_TO_PRETTIFYING_PINO_TRANSPORT = path.join(
+const __dirname = dirname(fileURLToPath(import.meta.url))
+export const PATH_TO_PRETTIFYING_PINO_TRANSPORT = join(
   __dirname,
   '../human-formatter/index.js'
 )
@@ -219,7 +219,7 @@ function createLogger(options) {
     let env = options.env || process.env.NODE_ENV || 'development'
     let color = env !== 'development' ? false : isColorSupported
     let basepath = options.root || process.cwd()
-    if (basepath.slice(-1) !== path.sep) basepath += path.sep
+    if (basepath.slice(-1) !== sep) basepath += sep
 
     let logger = pino({
       name: 'logux-server',
