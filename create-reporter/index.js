@@ -2,8 +2,13 @@ import pino from 'pino'
 import os from 'os'
 import path from 'path'
 import tty from 'tty'
+import url from 'url'
 
-export const PATH_TO_PRETTIFYING_PINO_TRANSPORT = '../human-formatter/index.js'
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url))
+export const PATH_TO_PRETTIFYING_PINO_TRANSPORT = path.join(
+  __dirname,
+  '../human-formatter/index.js'
+)
 
 const ERROR_CODES = {
   EADDRINUSE: e => {
