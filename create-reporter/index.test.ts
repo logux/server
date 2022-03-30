@@ -2,9 +2,9 @@ import { LoguxError } from '@logux/core'
 
 import { jest } from '@jest/globals'
 import pino from 'pino'
-import { join } from "path";
-import os from "os";
-import fs from "fs";
+import { join } from 'path'
+import os from 'os'
+import fs from 'fs'
 
 import { createReporter, PATH_TO_PRETTIFYING_PINO_TRANSPORT } from './index.js'
 
@@ -29,15 +29,18 @@ export function watchFileCreated(filename: string): Promise<void> {
         counter++
       } else {
         clearInterval(interval)
-        reject(new Error(
-          `${filename} hasn't been created within ${TIMEOUT} ms. ` +
-          (exists ? 'File exist, but still empty.' : 'File not yet created.')
-        ))
+        reject(
+          new Error(
+            `${filename} hasn't been created within ${TIMEOUT} ms. ` +
+              (exists
+                ? 'File exist, but still empty.'
+                : 'File not yet created.')
+          )
+        )
       }
     }, INTERVAL)
   })
 }
-
 
 jest.mock('os', () => {
   return {
@@ -90,23 +93,24 @@ async function check(type: string, details?: object): Promise<void> {
   )
 
   let humanReporter = createReporter({
-    logger: pino(
-      {
-        name: 'test',
-        transport: {
-          pipeline: [{
+    logger: pino({
+      name: 'test',
+      transport: {
+        pipeline: [
+          {
             target: PATH_TO_PRETTIFYING_PINO_TRANSPORT,
             options: {
               basepath: '/dev/app/',
-              color: true,
+              color: true
             }
-          }, {
+          },
+          {
             target: 'pino/file',
-            options: { destination },
-          }]
-        }
-      },
-    )
+            options: { destination }
+          }
+        ]
+      }
+    })
   })
 
   humanReporter(type, details)
@@ -309,7 +313,8 @@ it('throws on circulal reference', () => {
   let b: { a: any } = { a: undefined }
   a.b = b
   b.a = a
-  expect(() => check('add', {
+  expect(() =>
+    check('add', {
       action: { type: 'CHANGE_USER', a },
       meta: {
         id: '1487805099387 100:uImkcF4z 0',
@@ -411,7 +416,10 @@ it('reports EACCES error', async () => {
 })
 
 it('reports EADDRINUSE error', async () => {
-  await check('error', { fatal: true, err: { code: 'EADDRINUSE', port: 31337 } })
+  await check('error', {
+    fatal: true,
+    err: { code: 'EADDRINUSE', port: 31337 }
+  })
 })
 
 it('reports LOGUX_NO_CONTROL_SECRET error', async () => {
@@ -434,7 +442,10 @@ it('reports Logux error', async () => {
 })
 
 it('reports error', async () => {
-  await check('error', { fatal: true, err: createError('Error', 'Some mistake') })
+  await check('error', {
+    fatal: true,
+    err: createError('Error', 'Some mistake')
+  })
 })
 
 it('reports error from action', async () => {
