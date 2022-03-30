@@ -168,24 +168,24 @@ it('creates human reporter', async () => {
 
 it('adds trailing slash to path', () => {
   let reporter = createReporter({ logger: 'human', root: '/dir' })
-  expect(reporter.logger.basepath).toEqual('/dir/')
+  expect(reporter.logger._basepath).toEqual('/dir/')
 })
 
 it('uses colors by default', () => {
   delete process.env.NODE_ENV
   let reporter = createReporter({ logger: 'human' })
-  expect(reporter.logger.color).toBe(true)
+  expect(reporter.logger._color).toBe(true)
 })
 
 it('uses color in development', () => {
   let reporter = createReporter({ env: 'development', logger: 'human' })
-  expect(reporter.logger.color).toBe(true)
+  expect(reporter.logger._color).toBe(true)
 })
 
 it('uses environment variable to detect environment', () => {
   process.env.NODE_ENV = 'production'
   let reporter = createReporter({ logger: 'human' })
-  expect(reporter.logger.color).toBe(false)
+  expect(reporter.logger._color).toBe(false)
 })
 
 it('reports listen', async () => {

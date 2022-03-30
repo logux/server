@@ -1,7 +1,7 @@
 import pino from 'pino'
 import os from 'os'
 import { dirname, join, sep } from 'path'
-import tty from 'tty'
+import pico from 'picocolors'
 import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -204,20 +204,12 @@ const REPORTERS = {
   }
 }
 
-// https://github.com/alexeyraspopov/picocolors/blob/147fbdbd5aea8e49d246fd5faee5e1c4f97d560a/picocolors.js#L3
-let isColorSupported =
-  !('NO_COLOR' in process.env || process.argv.includes('--no-color')) &&
-  ('FORCE_COLOR' in process.env ||
-    process.argv.includes('--color') ||
-    process.platform === 'win32' ||
-    (tty.isatty(1) && process.env.TERM !== 'dumb') ||
-    'CI' in process.env)
-
 function createLogger(options) {
   let stream = options.logger.stream || pino.destination()
   if (options.logger === 'human' || options.logger.type === 'human') {
     let env = options.env || process.env.NODE_ENV || 'development'
-    let color = env !== 'development' ? false : isColorSupported
+    let color =
+      env !== 'development' ? false : pico.createColors().isColorSupported
     let basepath = options.root || process.cwd()
     if (basepath.slice(-1) !== sep) basepath += sep
 
@@ -241,8 +233,9 @@ function createLogger(options) {
       }
     })
 
-    logger.basepath = basepath
-    logger.color = color
+    // NOTE: needed only for tests
+    logger._basepath = basepath
+    logger._color = color
 
     return logger
   }
