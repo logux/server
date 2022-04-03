@@ -86,7 +86,7 @@ exports[`shows help about port in use 1`] = `
         Another Logux server or other app already running on this port.
         Probably you haven’t stopped server from other project or previous
         version of this server was not killed.
-
+        
         $ su - root
         # netstat -nlp | grep 2001
         Proto   Local Address   State    PID/Program name
@@ -102,7 +102,7 @@ exports[`shows help about privileged port 1`] = `
 " FATAL  You are not allowed to run server on port 1000 at 1970-01-01 00:00:00
         Non-privileged users can't start a listening socket on ports below 1024.
         Try to change user or take another port.
-
+        
         $ su - <username>
         $ npm start -p 1000
 
