@@ -1,7 +1,14 @@
 import pino from 'pino'
 import os from 'os'
+import { dirname, join, sep } from 'path'
+import pico from 'picocolors'
+import { fileURLToPath } from 'url'
 
-import { humanFormatter } from '../human-formatter/index.js'
+const __dirname = dirname(fileURLToPath(import.meta.url))
+export const PATH_TO_PRETTIFYING_PINO_TRANSPORT = join(
+  __dirname,
+  '../human-formatter/index.js'
+)
 
 const ERROR_CODES = {
   EADDRINUSE: e => {
@@ -198,27 +205,36 @@ const REPORTERS = {
 }
 
 function createLogger(options) {
-  let stream = options.logger.stream || pino.destination()
-  let prettifier = {}
   if (options.logger === 'human' || options.logger.type === 'human') {
     let env = options.env || process.env.NODE_ENV || 'development'
-    let color = env !== 'development' ? false : undefined
-    prettifier = {
-      prettyPrint: {
-        suppressFlushSyncWarning: true,
-        basepath: options.root,
-        color
-      },
-      prettifier: humanFormatter
-    }
+    let color =
+      env !== 'development' ? false : pico.createColors().isColorSupported
+    let basepath = options.root || process.cwd()
+    if (basepath.slice(-1) !== sep) basepath += sep
+
+    let logger = pino(
+      pino.transport({
+        target: PATH_TO_PRETTIFYING_PINO_TRANSPORT,
+        options: {
+          basepath,
+          color,
+          destination: options.logger.destination
+        }
+      })
+    )
+
+    // NOTE: needed only for tests
+    logger._basepath = basepath
+    logger._color = color
+
+    return logger
   }
   return pino(
     {
       name: 'logux-server',
-      timestamp: pino.stdTimeFunctions.isoTime,
-      ...prettifier
+      timestamp: pino.stdTimeFunctions.isoTime
     },
-    stream
+    options.logger.stream || pino.destination()
   )
 }
 

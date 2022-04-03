@@ -1,0 +1,18 @@
+test.sh
+
+*.dockerfile
+
+# Dependency directory
+node_modules
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+# Coverage directory used by tools like istanbul
+coverage

@@ -8,7 +8,7 @@ let app = new Server({
 })
 app.nodeId = 'server:FnXaqDxY'
 
-app.on('fatal', e => console.log(`Fatal event: ${e.message}`))
+app.on('fatal', e => app.logger.info(`Fatal event: ${e.message}`))
 
 setTimeout(() => {
   let error = new Error('Test Error')

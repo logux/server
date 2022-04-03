@@ -15,7 +15,7 @@ app.auth(async () => true)
 
 app.unbind.push(async () => {
   await delay(10)
-  process.stderr.write(' Custom destroy task finished\n')
+  app.logger.info('Custom destroy task finished')
 })
 
 app.listen()
