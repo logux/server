@@ -210,15 +210,6 @@ function humanFormatter(options) {
   }
 }
 
-/**
- *
- * @param {object} options
- * @param {Parameters<typeof pino.destination>['dest']} options.destination
- * @param {boolean} options.sync
- * @param {boolean} options.color
- * @param {string} options.basepath
- * @returns {ReturnType<typeof abstractTransport>}
- */
 export default async function (options) {
   let format = humanFormatter(options)
   let destination = pino.destination({

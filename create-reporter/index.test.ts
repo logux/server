@@ -1,18 +1,14 @@
 import { LoguxError } from '@logux/core'
 
+import { existsSync, statSync, readFileSync } from 'fs'
 import { jest } from '@jest/globals'
-import pino from 'pino'
 import { join } from 'path'
+import pino from 'pino'
 import os from 'os'
-import fs from 'fs'
 
 import { createReporter, PATH_TO_PRETTIFYING_PINO_TRANSPORT } from './index.js'
 
-/**
- * Source: https://github.com/pinojs/pino/blob/03dac4d1b7e567f4a70f5fb448acc0ea8b75b2a6/test/helper.js#L55
- *
- * @param filename
- */
+// Source: https://github.com/pinojs/pino/blob/03dac4d1b7e567f4a70f5fb448acc0ea8b75b2a6/test/helper.js#L55
 export function watchFileCreated(filename: string): Promise<void> {
   return new Promise((resolve, reject) => {
     let TIMEOUT = Number(process.env.PINO_TEST_WAIT_WATCHFILE_TIMEOUT) || 4000
@@ -20,9 +16,9 @@ export function watchFileCreated(filename: string): Promise<void> {
     let threshold = TIMEOUT / INTERVAL
     let counter = 0
     let interval = setInterval(() => {
-      let exists = fs.existsSync(filename)
+      let exists = existsSync(filename)
       // On some CI runs file is created but not filled
-      if (exists && fs.statSync(filename).size !== 0) {
+      if (exists && statSync(filename).size !== 0) {
         clearInterval(interval)
         resolve()
       } else if (counter <= threshold) {
@@ -106,7 +102,7 @@ async function check(type: string, details?: object): Promise<void> {
 
   humanReporter(type, details)
   await watchFileCreated(destination)
-  expect(clean(fs.readFileSync(destination).toString())).toMatchSnapshot()
+  expect(clean(readFileSync(destination).toString())).toMatchSnapshot()
 }
 
 function createError(name: string, message: string): Error {
@@ -154,7 +150,7 @@ it('creates human reporter', async () => {
   })
   reporter('unknownType', {})
   await watchFileCreated(destination)
-  expect(clean(fs.readFileSync(destination).toString())).toMatchSnapshot()
+  expect(clean(readFileSync(destination).toString())).toMatchSnapshot()
 })
 
 it('adds trailing slash to path', () => {
