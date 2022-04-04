@@ -1,8 +1,11 @@
 import stripAnsi from 'strip-ansi'
 import yyyymmdd from 'yyyy-mm-dd'
 import pico from 'picocolors'
-import path from 'path'
 import os from 'os'
+import abstractTransport from 'pino-abstract-transport'
+import { Transform } from 'stream'
+import pino from 'pino'
+import { once } from 'events'
 
 const INDENT = '  '
 const PADDING = '        '
@@ -165,14 +168,11 @@ function prettyStackTrace(c, stack, basepath) {
     .join(NEXT_LINE)
 }
 
-export function humanFormatter(options) {
+function humanFormatter(options) {
   let c = pico.createColors(options.color)
-  this.color = c.isColorSupported
-  let basepath = options.basepath || process.cwd()
-  if (basepath.slice(-1) !== path.sep) basepath += path.sep
-  this.basepath = basepath
+  let basepath = options.basepath
 
-  return function (record) {
+  return function format(record) {
     let message = [LABELS[record.level](c, record.msg)]
     let params = Object.keys(record)
       .filter(key => !PARAMS_BLACKLIST[key])
@@ -208,4 +208,42 @@ export function humanFormatter(options) {
 
     return message.filter(i => i !== '').join(NEXT_LINE) + SEPARATOR
   }
+}
+
+/**
+ *
+ * @param {object} options
+ * @param {Parameters<typeof pino.destination>['dest']} options.destination
+ * @param {boolean} options.sync
+ * @param {boolean} options.color
+ * @param {string} options.basepath
+ * @returns {ReturnType<typeof abstractTransport>}
+ */
+export default async function (options) {
+  let format = humanFormatter(options)
+  let destination = pino.destination({
+    dest: options.destination || 1,
+    sync: options.sync || false
+  })
+  await once(destination, 'ready')
+  let transform = new Transform({
+    autoDestroy: true,
+    objectMode: true,
+    transform(chunk, encoding, callback) {
+      callback(null, format(chunk))
+    }
+  })
+
+  return abstractTransport(
+    source => {
+      source.pipe(transform)
+      transform.pipe(destination)
+    },
+    {
+      close(err, cb) {
+        transform.end()
+        transform.on('close', cb.bind(null, err))
+      }
+    }
+  )
 }

@@ -13,7 +13,8 @@ exports[`destroys everything on exit 1`] = `
 
  INFO   Shutting down Logux server at 1970-01-01 00:00:00
 
- Custom destroy task finished
+ INFO   Custom destroy task finished at 1970-01-01 00:00:00
+
 "
 `;
 
@@ -123,7 +124,8 @@ exports[`shows uncatch errors 1`] = `
 
  INFO   Shutting down Logux server at 1970-01-01 00:00:00
 
-Fatal event: Test Error
+ INFO   Fatal event: Test Error at 1970-01-01 00:00:00
+
 "
 `;
 
@@ -133,7 +135,8 @@ exports[`shows uncatch rejects 1`] = `
 
  INFO   Shutting down Logux server at 1970-01-01 00:00:00
 
-Fatal event: Test Error
+ INFO   Fatal event: Test Error at 1970-01-01 00:00:00
+
 "
 `;
 
