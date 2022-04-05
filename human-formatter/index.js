@@ -7,6 +7,8 @@ import { Transform } from 'stream'
 import pino from 'pino'
 import { once } from 'events'
 
+import { colorizeRandom } from './colorizeRandom.js'
+
 const INDENT = '  '
 const PADDING = '        '
 const SEPARATOR = os.EOL + os.EOL
@@ -61,11 +63,11 @@ function formatNodeId(c, nodeId) {
   let pos = nodeId.lastIndexOf(':')
   let id, random
   if (pos === -1) {
-    return nodeId
+    return colorizeRandom(c, nodeId)
   } else {
     id = nodeId.slice(0, pos)
     random = nodeId.slice(pos)
-    return c.bold(id) + random
+    return colorizeRandom(c, c.bold(id) + random)
   }
 }
 
@@ -93,7 +95,10 @@ function formatArray(c, array) {
 
 function formatActionId(c, id) {
   let p = id.split(' ')
-  return `${c.bold(p[0])} ${formatNodeId(c, p[1])} ${c.bold(p[2])}`
+  let pre = c.bold(colorizeRandom(c, p[0]))
+  let idf = formatNodeId(c, p[1])
+  let post = c.bold(colorizeRandom(c, p[2]))
+  return `${pre} ${idf} ${post}`
 }
 
 function formatParams(c, params, parent) {

@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should colorize blue 1`] = `"[34m10:client:Eizt7-PG[39m"`;
+
+exports[`should colorize cyan 1`] = `"[36m10:client:uFPMXJDO[39m"`;
+
+exports[`should colorize in green 1`] = `"[32m10:client:GX0kXIgq[39m"`;
+
+exports[`should colorize in magenta 1`] = `"[35m10:client:44FWEisN[39m"`;
+
+exports[`should colorize in yellow 1`] = `"[33m10:client:V40axO_O[39m"`;
+
+exports[`should colorize it red 1`] = `"[31m10:client:6KBKxMBs[39m"`;
