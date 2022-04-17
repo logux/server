@@ -35,6 +35,8 @@ const LABELS = {
   60: (c, str) => label(c, ' FATAL ', 'red', 'bgRed', 'white', str)
 }
 
+const COLORS = ['red', 'green', 'yellow', 'blue', 'magenta', 'cyan']
+
 function rightPag(str, length) {
   let add = length - stripAnsi(str).length
   for (let i = 0; i < add; i++) str += ' '
@@ -57,15 +59,85 @@ function formatName(key) {
     .replace(/^\w/, char => char.toUpperCase())
 }
 
+function xmur3(str) {
+  let h = 1779033703 ^ str.length
+  for (let i = 0; i < str.length; i++) {
+    h = Math.imul(h ^ str.charCodeAt(i), 3432918353)
+    h = (h << 13) | (h >>> 19)
+  }
+  return function () {
+    h = Math.imul(h ^ (h >>> 16), 2246822507)
+    h = Math.imul(h ^ (h >>> 13), 3266489909)
+    return (h ^= h >>> 16) >>> 0
+  }
+}
+
+function mulberry32(a) {
+  return function () {
+    a |= 0
+    a = (a + 0x6d2b79f5) | 0
+    let t = Math.imul(a ^ (a >>> 15), 1 | a)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+function getRand(random, lower, upper) {
+  return lower + Math.floor(random() * (upper - lower + 1))
+}
+
+function shuffle(seed, collection) {
+  let index = -1
+  let result = Array.from(collection)
+  let length = result.length
+  let lastIndex = length - 1
+  let random = mulberry32(seed)
+
+  while (++index < collection.length) {
+    let rand = getRand(random, index, lastIndex)
+    let value = result[rand]
+
+    result[rand] = result[index]
+    result[index] = value
+  }
+  result.length = collection.length
+  return result
+}
+
+function splitAndColorize(c, partLength, str) {
+  let strBuilder = []
+  let seed = xmur3(str)()
+  let colors = shuffle(seed, COLORS)
+
+  for (
+    let start = 0, end = partLength, n = 0, color = colors[n];
+    start < str.length;
+    start += partLength,
+      end += partLength,
+      n = (n + 1) % colors.length,
+      color = colors[n]
+  ) {
+    strBuilder.push(c[color](str.slice(start, end)))
+  }
+
+  return strBuilder.join('')
+}
+
+function colorizeString(c, str) {
+  let index = xmur3(str)() % COLORS.length
+  let color = COLORS[index]
+  return c[color](str)
+}
+
 function formatNodeId(c, nodeId) {
   let pos = nodeId.lastIndexOf(':')
-  let id, random
   if (pos === -1) {
     return nodeId
   } else {
-    id = nodeId.slice(0, pos)
-    random = nodeId.slice(pos)
-    return c.bold(id) + random
+    let [id, random] = nodeId.split(':')
+    id = c.bold(colorizeString(c, id))
+    random = splitAndColorize(c, 3, random)
+    return `${id}:${random}`
   }
 }
 

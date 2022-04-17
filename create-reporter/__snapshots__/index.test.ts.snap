@@ -88,7 +88,7 @@ exports[`reports add 2`] = `
             role:  [1mnull[22m
             array: [[1m1[22m, [[1m2[22m], { a: \\"[1m1[22m\\", b: { c: [1m2[22m }, d: [], e: [1mnull[22m }, [1mnull[22m]
         Meta:   
-          id:          [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
+          id:          [1m1487805099387[22m [1m[32m100[39m[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
           time:        [1m1487805099387[22m
           reasons:     [\\"[1mlastValue[22m\\", \\"[1mdebug[22m\\"]
           server:      \\"[1mserver:H1f8LAyzl[22m\\"
@@ -112,7 +112,7 @@ exports[`reports add and clean 2`] = `
             role:  [1mnull[22m
             array: [[1m1[22m, [[1m2[22m], { a: \\"[1m1[22m\\", b: { c: [1m2[22m }, d: [], e: [1mnull[22m }, [1mnull[22m]
         Meta:   
-          id:          [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
+          id:          [1m1487805099387[22m [1m[32m100[39m[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
           time:        [1m1487805099387[22m
           reasons:     [\\"[1mlastValue[22m\\", \\"[1mdebug[22m\\"]
           server:      \\"[1mserver:H1f8LAyzl[22m\\"
@@ -130,7 +130,7 @@ exports[`reports authenticated 2`] = `
 "[42m[30m INFO [39m[49m  [1m[32mUser was authenticated[39m[22m [2mat 1970-01-01 00:00:00[22m
         Connection ID: [1m670[22m
         Subprotocol:   [1m1.0.0[22m
-        Node ID:       [1madmin:100[22m:uImkcF4z
+        Node ID:       [1m[31madmin[39m[22m:[31m100[39m
 
 "
 `;
@@ -156,7 +156,7 @@ exports[`reports clean 1`] = `
 
 exports[`reports clean 2`] = `
 "[42m[30m INFO [39m[49m  [1m[32mAction was cleaned[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Action ID: [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
+        Action ID: [1m1487805099387[22m [1m[32m100[39m[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
 
 "
 `;
@@ -181,7 +181,7 @@ exports[`reports denied 1`] = `
 
 exports[`reports denied 2`] = `
 "[43m[30m WARN [39m[49m  [1m[33mAction was denied[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Action ID: [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
+        Action ID: [1m1487805099387[22m [1m[32m100[39m[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
 
 "
 `;
@@ -204,7 +204,7 @@ exports[`reports disconnect 1`] = `
 
 exports[`reports disconnect 2`] = `
 "[42m[30m INFO [39m[49m  [1m[32mClient was disconnected[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Node ID: [1m100[22m:uImkcF4z
+        Node ID: [1m[32m100[39m[22m:[32muIm[39m[36mkcF[39m[33m4z[39m
 
 "
 `;
@@ -247,7 +247,7 @@ exports[`reports error from action 2`] = `
 [90m        at Module._compile (module.js:573:32)[39m
 [90m        at at runTest (./node_modules/jest/index.js:50:10)[39m
 [90m        at process._tickCallback (internal/process/next_tick.js:103:7)[39m
-        Action ID: [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
+        Action ID: [1m1487805099387[22m [1m[32m100[39m[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
 
 "
 `;
@@ -271,7 +271,7 @@ exports[`reports error from node 1`] = `
 
 exports[`reports error from node 2`] = `
 "[43m[30m WARN [39m[49m  [1m[33mSync error: A timeout was reached (5000 ms)[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Node ID: [1m100[22m:uImkcF4z
+        Node ID: [1m[32m100[39m[22m:[32muIm[39m[36mkcF[39m[33m4z[39m
 
 "
 `;
@@ -287,7 +287,7 @@ exports[`reports error with token 2`] = `
 [90m        at Module._compile (module.js:573:32)[39m
 [90m        at at runTest (./node_modules/jest/index.js:50:10)[39m
 [90m        at process._tickCallback (internal/process/next_tick.js:103:7)[39m
-        Action ID: [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
+        Action ID: [1m1487805099387[22m [1m[32m100[39m[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
 
 "
 `;
@@ -302,7 +302,7 @@ exports[`reports listen 2`] = `
         PID:            [1m21384[22m
         Logux server:   [1m0.0.0[22m
         Environment:    [1mdevelopment[22m
-        Node ID:        [1mserver[22m:FnXaqDxY
+        Node ID:        [1m[32mserver[39m[22m:[31mFnX[39m[35maqD[39m[34mxY[39m
         Subprotocol:    [1m0.0.0[22m
         Supports:       [1m0.x[22m
         Health check:   [1mhttp://127.0.0.1:31337/health[22m
@@ -326,7 +326,7 @@ exports[`reports listen for custom domain 2`] = `
         PID:          [1m21384[22m
         Logux server: [1m0.0.0[22m
         Environment:  [1mdevelopment[22m
-        Node ID:      [1mserver[22m:FnXaqDxY
+        Node ID:      [1m[32mserver[39m[22m:[31mFnX[39m[35maqD[39m[34mxY[39m
         Subprotocol:  [1m0.0.0[22m
         Supports:     [1m0.x[22m
         Prometheus:   [1mhttp://127.0.0.1:31338/prometheus[22m
@@ -347,7 +347,7 @@ exports[`reports listen for production 2`] = `
         PID:            [1m21384[22m
         Logux server:   [1m0.0.0[22m
         Environment:    [1mproduction[22m
-        Node ID:        [1mserver[22m:FnXaqDxY
+        Node ID:        [1m[32mserver[39m[22m:[31mFnX[39m[35maqD[39m[34mxY[39m
         Subprotocol:    [1m0.0.0[22m
         Supports:       [1m0.x[22m
         Health check:   [1mhttps://127.0.0.1:31337/health[22m
@@ -366,7 +366,7 @@ exports[`reports subscribed 1`] = `
 exports[`reports subscribed 2`] = `
 "[42m[30m INFO [39m[49m  [1m[32mClient was subscribed[39m[22m [2mat 1970-01-01 00:00:00[22m
         Channel:   [1muser/100[22m
-        Action ID: [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
+        Action ID: [1m1487805099387[22m [1m[32m100[39m[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
 
 "
 `;
@@ -392,7 +392,7 @@ exports[`reports unauthenticated 2`] = `
 "[43m[30m WARN [39m[49m  [1m[33mBad authentication[39m[22m [2mat 1970-01-01 00:00:00[22m
         Connection ID: [1m670[22m
         Subprotocol:   [1m1.0.0[22m
-        Node ID:       [1m100[22m:uImkcF4z
+        Node ID:       [1m[32m100[39m[22m:[32muIm[39m[36mkcF[39m[33m4z[39m
 
 "
 `;
@@ -405,7 +405,7 @@ exports[`reports unknownType 1`] = `
 exports[`reports unknownType 2`] = `
 "[43m[30m WARN [39m[49m  [1m[33mAction with unknown type[39m[22m [2mat 1970-01-01 00:00:00[22m
         Type:      [1mCHANGE_SER[22m
-        Action ID: [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
+        Action ID: [1m1487805099387[22m [1m[32m100[39m[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
 
 "
 `;
@@ -418,7 +418,7 @@ exports[`reports unknownType from server 1`] = `
 exports[`reports unknownType from server 2`] = `
 "[43m[30m WARN [39m[49m  [1m[33mAction with unknown type[39m[22m [2mat 1970-01-01 00:00:00[22m
         Type:      [1mCHANGE_SER[22m
-        Action ID: [1m1487805099387[22m [1mserver[22m:FnXaqDxY [1m0[22m
+        Action ID: [1m1487805099387[22m [1m[32mserver[39m[22m:[31mFnX[39m[35maqD[39m[34mxY[39m [1m0[22m
 
 "
 `;
@@ -431,7 +431,7 @@ exports[`reports unsubscribed 1`] = `
 exports[`reports unsubscribed 2`] = `
 "[42m[30m INFO [39m[49m  [1m[32mClient was unsubscribed[39m[22m [2mat 1970-01-01 00:00:00[22m
         Channel:   [1muser/100[22m
-        Action ID: [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
+        Action ID: [1m1487805099387[22m [1m[32m100[39m[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
 
 "
 `;
@@ -448,7 +448,7 @@ exports[`reports useless actions 2`] = `
           id:   [1m100[22m
           name: \\"[1mJohn[22m\\"
         Meta:   
-          id:          [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
+          id:          [1m1487805099387[22m [1m[32m100[39m[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
           time:        [1m1487805099387[22m
           reasons:     []
           server:      \\"[1mserver:H1f8LAyzl[22m\\"
@@ -464,7 +464,7 @@ exports[`reports wrongChannel 1`] = `
 
 exports[`reports wrongChannel 2`] = `
 "[43m[30m WARN [39m[49m  [1m[33mWrong channel name[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Action ID: [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
+        Action ID: [1m1487805099387[22m [1m[32m100[39m[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
         Channel:   [1mser/100[22m
 
 "
@@ -477,7 +477,7 @@ exports[`reports wrongChannel without name 1`] = `
 
 exports[`reports wrongChannel without name 2`] = `
 "[43m[30m WARN [39m[49m  [1m[33mWrong channel name[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Action ID: [1m1487805099387[22m [1m100[22m:uImkcF4z [1m0[22m
+        Action ID: [1m1487805099387[22m [1m[32m100[39m[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
 
 "
 `;
@@ -515,7 +515,7 @@ exports[`reports zombie 1`] = `
 
 exports[`reports zombie 2`] = `
 "[43m[30m WARN [39m[49m  [1m[33mZombie client was disconnected[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Node ID: [1m100[22m:uImkcF4z
+        Node ID: [1m[32m100[39m[22m:[32muIm[39m[36mkcF[39m[33m4z[39m
 
 "
 `;
