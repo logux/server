@@ -7,6 +7,8 @@ import { Transform } from 'stream'
 import pino from 'pino'
 import { once } from 'events'
 
+import { mulberry32, onceXmur3 } from './utils.js'
+
 const INDENT = '  '
 const PADDING = '        '
 const SEPARATOR = os.EOL + os.EOL
@@ -59,29 +61,6 @@ function formatName(key) {
     .replace(/^\w/, char => char.toUpperCase())
 }
 
-function xmur3(str) {
-  let h = 1779033703 ^ str.length
-  for (let i = 0; i < str.length; i++) {
-    h = Math.imul(h ^ str.charCodeAt(i), 3432918353)
-    h = (h << 13) | (h >>> 19)
-  }
-  return function () {
-    h = Math.imul(h ^ (h >>> 16), 2246822507)
-    h = Math.imul(h ^ (h >>> 13), 3266489909)
-    return (h ^= h >>> 16) >>> 0
-  }
-}
-
-function mulberry32(a) {
-  return function () {
-    a |= 0
-    a = (a + 0x6d2b79f5) | 0
-    let t = Math.imul(a ^ (a >>> 15), 1 | a)
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
-  }
-}
-
 function getRand(random, lower, upper) {
   return lower + Math.floor(random() * (upper - lower + 1))
 }
@@ -106,7 +85,7 @@ function shuffle(seed, collection) {
 
 function splitAndColorize(c, partLength, str) {
   let strBuilder = []
-  let seed = xmur3(str)()
+  let seed = onceXmur3(str)
   let colors = shuffle(seed, COLORS)
 
   for (
@@ -124,7 +103,7 @@ function splitAndColorize(c, partLength, str) {
 }
 
 function colorizeString(c, str) {
-  let index = xmur3(str)() % COLORS.length
+  let index = onceXmur3(str) % COLORS.length
   let color = COLORS[index]
   return c[color](str)
 }
@@ -165,7 +144,10 @@ function formatArray(c, array) {
 
 function formatActionId(c, id) {
   let p = id.split(' ')
-  return `${c.bold(p[0])} ${formatNodeId(c, p[1])} ${c.bold(p[2])}`
+  return `${c.bold(splitAndColorize(c, 4, p[0]))} ${formatNodeId(
+    c,
+    p[1]
+  )} ${c.bold(p[2])}`
 }
 
 function formatParams(c, params, parent) {
