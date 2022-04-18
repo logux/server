@@ -424,14 +424,14 @@ exports[`reports unknownType from server 2`] = `
 `;
 
 exports[`reports unsubscribed 1`] = `
-"{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"channel\\":\\"user/100\\",\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"msg\\":\\"Client was unsubscribed\\"}
+"{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"channel\\":\\"user/100\\",\\"actionId\\":\\"1650271940900 100:uImkcF4z 0\\",\\"msg\\":\\"Client was unsubscribed\\"}
 "
 `;
 
 exports[`reports unsubscribed 2`] = `
 "[42m[30m INFO [39m[49m  [1m[32mClient was unsubscribed[39m[22m [2mat 1970-01-01 00:00:00[22m
         Channel:   [1muser/100[22m
-        Action ID: [1m[32m1487[39m[35m8050[39m[33m9938[39m[33m7[39m[22m [1m[32m100[39m[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
+        Action ID: [1m[36m1650[39m[34m2719[39m[35m4090[39m[35m0[39m[22m [1m[32m100[39m[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
 
 "
 `;
