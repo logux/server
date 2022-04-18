@@ -61,32 +61,26 @@ function formatName(key) {
     .replace(/^\w/, char => char.toUpperCase())
 }
 
-function getRand(random, lower, upper) {
-  return lower + Math.floor(random() * (upper - lower + 1))
-}
-
-function shuffle(seed, collection) {
+function shuffledColors(str) {
   let index = -1
-  let result = Array.from(collection)
-  let length = result.length
-  let lastIndex = length - 1
-  let random = mulberry32(seed)
+  let result = Array.from(COLORS)
+  let lastIndex = result.length - 1
+  let seed = onceXmur3(str)
+  let randomFn = mulberry32(seed)
 
-  while (++index < collection.length) {
-    let rand = getRand(random, index, lastIndex)
-    let value = result[rand]
+  while (++index < COLORS.length) {
+    let randIndex = index + Math.floor(randomFn() * (lastIndex - index + 1))
+    let value = result[randIndex]
 
-    result[rand] = result[index]
+    result[randIndex] = result[index]
     result[index] = value
   }
-  result.length = collection.length
   return result
 }
 
 function splitAndColorize(c, partLength, str) {
   let strBuilder = []
-  let seed = onceXmur3(str)
-  let colors = shuffle(seed, COLORS)
+  let colors = shuffledColors(str)
 
   for (
     let start = 0, end = partLength, n = 0, color = colors[n];
