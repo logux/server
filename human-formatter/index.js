@@ -87,10 +87,14 @@ function splitAndColorize(c, partLength, str) {
     start < str.length;
     start += partLength,
       end += partLength,
-      n = (n + 1) % colors.length,
-      color = colors[n]
+      n = n + 1,
+      color = colors[n % colors.length]
   ) {
-    strBuilder.push(c[color](str.slice(start, end)))
+    let strToColorize = str.slice(start, end)
+    if (strToColorize.length === 1) {
+      color = colors[Math.abs(n - 1) % colors.length]
+    }
+    strBuilder.push(c[color](strToColorize))
   }
 
   return strBuilder.join('')
