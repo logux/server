@@ -111,9 +111,9 @@ function formatNodeId(c, nodeId) {
   if (pos === -1) {
     return nodeId
   } else {
-    let [id, random] = nodeId.split(':')
-    id = c.bold(colorizeString(c, id))
-    random = splitAndColorize(c, 3, random)
+    let s = nodeId.split(':')
+    let id = c.bold(colorizeString(c, s[0]))
+    let random = splitAndColorize(c, 3, s[1])
     return `${id}:${random}`
   }
 }
