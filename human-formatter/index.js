@@ -158,13 +158,12 @@ function formatParams(c, params, parent) {
 
       let start = PADDING + rightPag(`${name}: `, maxName + 2)
 
-      if (name === 'Node ID') {
+      if (name === 'Node ID' || (parent === 'Meta' && name === 'server')) {
         return start + formatNodeId(c, value)
-      } else if (parent === 'Meta' && name === 'server') {
-        return start + formatNodeId(c, value)
-      } else if (parent === 'Meta' && name === 'clients') {
-        return `${start}[${value.map(v => `"${formatNodeId(c, v)}"`).join()}]`
-      } else if (parent === 'Meta' && name === 'excludeClients') {
+      } else if (
+        parent === 'Meta' &&
+        (name === 'clients' || name === 'excludeClients')
+      ) {
         return `${start}[${value.map(v => `"${formatNodeId(c, v)}"`).join()}]`
       } else if (name === 'Action ID' || (parent === 'Meta' && name === 'id')) {
         return start + formatActionId(c, value)
