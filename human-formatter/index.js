@@ -166,11 +166,7 @@ function formatParams(c, params, parent) {
         return `${start}[${value.map(v => `"${formatNodeId(c, v)}"`).join()}]`
       } else if (parent === 'Meta' && name === 'excludeClients') {
         return `${start}[${value.map(v => `"${formatNodeId(c, v)}"`).join()}]`
-      } else if (
-        name === 'Action ID' ||
-        (parent === 'Meta' && name === 'id') ||
-        (parent === 'Action' && name === 'id')
-      ) {
+      } else if (name === 'Action ID' || (parent === 'Meta' && name === 'id')) {
         return start + formatActionId(c, value)
       } else if (Array.isArray(value)) {
         return start + formatArray(c, value)
