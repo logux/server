@@ -73,6 +73,50 @@ exports[`reports Logux error 2`] = `
 "
 `;
 
+exports[`reports actions with metadata containing 'clients' array 1`] = `
+"{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"action\\":{\\"type\\":\\"ADD_USER\\",\\"id\\":100,\\"name\\":\\"John\\"},\\"meta\\":{\\"clients\\":[\\"1:-lCr7e9s\\",\\"2:wv0r_O5C\\"],\\"id\\":\\"1487805099387 100:uImkcF4z 0\\",\\"time\\":1487805099387,\\"reasons\\":[],\\"server\\":\\"server:H1f8LAyzl\\",\\"subprotocol\\":\\"1.0.0\\"},\\"msg\\":\\"Action was added\\"}
+"
+`;
+
+exports[`reports actions with metadata containing 'clients' array 2`] = `
+"[42m[30m INFO [39m[49m  [1m[32mAction was added[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Action: 
+          type: \\"[1mADD_USER[22m\\"
+          id:   [1m100[22m
+          name: \\"[1mJohn[22m\\"
+        Meta:   
+          clients:     [\\"[1m1[22m:[33m-lC[39m[35mr7e[39m[31m9s[39m\\",\\"[1m2[22m:[33mwv0[39m[31mr_O[39m[34m5C[39m\\"]
+          id:          [1m[32m1487[39m[35m8050[39m[33m9938[39m[33m7[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
+          time:        [1m1487805099387[22m
+          reasons:     []
+          server:      [1mserver[22m:[34mH1f[39m[35m8LA[39m[36myzl[39m
+          subprotocol: \\"[1m1.0.0[22m\\"
+
+"
+`;
+
+exports[`reports actions with metadata containing 'excludeClients' array 1`] = `
+"{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"action\\":{\\"type\\":\\"ADD_USER\\",\\"id\\":100,\\"name\\":\\"John\\"},\\"meta\\":{\\"excludeClients\\":[\\"1:-lCr7e9s\\",\\"2:wv0r_O5C\\"],\\"id\\":\\"1487805099387 100:uImkcF4z 0\\",\\"time\\":1487805099387,\\"reasons\\":[],\\"server\\":\\"server:H1f8LAyzl\\",\\"subprotocol\\":\\"1.0.0\\"},\\"msg\\":\\"Action was added\\"}
+"
+`;
+
+exports[`reports actions with metadata containing 'excludeClients' array 2`] = `
+"[42m[30m INFO [39m[49m  [1m[32mAction was added[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Action: 
+          type: \\"[1mADD_USER[22m\\"
+          id:   [1m100[22m
+          name: \\"[1mJohn[22m\\"
+        Meta:   
+          excludeClients: [\\"[1m1[22m:[33m-lC[39m[35mr7e[39m[31m9s[39m\\",\\"[1m2[22m:[33mwv0[39m[31mr_O[39m[34m5C[39m\\"]
+          id:             [1m[32m1487[39m[35m8050[39m[33m9938[39m[33m7[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
+          time:           [1m1487805099387[22m
+          reasons:        []
+          server:         [1mserver[22m:[34mH1f[39m[35m8LA[39m[36myzl[39m
+          subprotocol:    \\"[1m1.0.0[22m\\"
+
+"
+`;
+
 exports[`reports add 1`] = `
 "{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"action\\":{\\"type\\":\\"CHANGE_USER\\",\\"id\\":100,\\"data\\":{\\"name\\":\\"John\\",\\"role\\":null,\\"array\\":[1,[2],{\\"a\\":\\"1\\",\\"b\\":{\\"c\\":2},\\"d\\":[],\\"e\\":null},null]}},\\"meta\\":{\\"id\\":\\"1487805099387 100:uImkcF4z 0\\",\\"time\\":1487805099387,\\"reasons\\":[\\"lastValue\\",\\"debug\\"],\\"server\\":\\"server:H1f8LAyzl\\",\\"subprotocol\\":\\"1.0.0\\"},\\"msg\\":\\"Action was added\\"}
 "

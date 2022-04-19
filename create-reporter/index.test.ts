@@ -480,3 +480,39 @@ it('reports useless actions', async () => {
     }
   })
 })
+
+it("reports actions with metadata containing 'clients' array", async () => {
+  await check('add', {
+    action: {
+      type: 'ADD_USER',
+      id: 100,
+      name: 'John'
+    },
+    meta: {
+      clients: ['1:-lCr7e9s', '2:wv0r_O5C'],
+      id: '1487805099387 100:uImkcF4z 0',
+      time: 1487805099387,
+      reasons: [],
+      server: 'server:H1f8LAyzl',
+      subprotocol: '1.0.0'
+    }
+  })
+})
+
+it("reports actions with metadata containing 'excludeClients' array", async () => {
+  await check('add', {
+    action: {
+      type: 'ADD_USER',
+      id: 100,
+      name: 'John'
+    },
+    meta: {
+      excludeClients: ['1:-lCr7e9s', '2:wv0r_O5C'],
+      id: '1487805099387 100:uImkcF4z 0',
+      time: 1487805099387,
+      reasons: [],
+      server: 'server:H1f8LAyzl',
+      subprotocol: '1.0.0'
+    }
+  })
+})
