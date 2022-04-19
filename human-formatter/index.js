@@ -100,19 +100,13 @@ function splitAndColorize(c, partLength, str) {
   return strBuilder.join('')
 }
 
-function colorizeString(c, str) {
-  let index = onceXmur3(str) % COLORS.length
-  let color = COLORS[index]
-  return c[color](str)
-}
-
 function formatNodeId(c, nodeId) {
   let pos = nodeId.lastIndexOf(':')
   if (pos === -1) {
     return nodeId
   } else {
     let s = nodeId.split(':')
-    let id = c.bold(colorizeString(c, s[0]))
+    let id = c.bold(s[0])
     let random = splitAndColorize(c, 3, s[1])
     return `${id}:${random}`
   }
