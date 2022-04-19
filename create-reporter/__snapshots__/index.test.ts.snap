@@ -91,7 +91,7 @@ exports[`reports add 2`] = `
           id:          [1m[32m1487[39m[35m8050[39m[33m9938[39m[33m7[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
           time:        [1m1487805099387[22m
           reasons:     [\\"[1mlastValue[22m\\", \\"[1mdebug[22m\\"]
-          server:      \\"[1mserver:H1f8LAyzl[22m\\"
+          server:      [1mserver[22m:[34mH1f[39m[35m8LA[39m[36myzl[39m
           subprotocol: \\"[1m1.0.0[22m\\"
 
 "
@@ -115,7 +115,7 @@ exports[`reports add and clean 2`] = `
           id:          [1m[32m1487[39m[35m8050[39m[33m9938[39m[33m7[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
           time:        [1m1487805099387[22m
           reasons:     [\\"[1mlastValue[22m\\", \\"[1mdebug[22m\\"]
-          server:      \\"[1mserver:H1f8LAyzl[22m\\"
+          server:      [1mserver[22m:[34mH1f[39m[35m8LA[39m[36myzl[39m
           subprotocol: \\"[1m1.0.0[22m\\"
 
 "
@@ -451,7 +451,7 @@ exports[`reports useless actions 2`] = `
           id:          [1m[32m1487[39m[35m8050[39m[33m9938[39m[33m7[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
           time:        [1m1487805099387[22m
           reasons:     []
-          server:      \\"[1mserver:H1f8LAyzl[22m\\"
+          server:      [1mserver[22m:[34mH1f[39m[35m8LA[39m[36myzl[39m
           subprotocol: \\"[1m1.0.0[22m\\"
 
 "
