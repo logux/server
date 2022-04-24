@@ -1,6 +1,14 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.11 “Five Pebbles”
+* Added `addSyncMap()` and `addSyncMapFilter()`.
+* Added colorization to action ID and client ID (by Bijela Gora).
+* Added `TestServer#expectError()`.
+* Added `since` to `TestClient#subscribe()`.
+* Reduced noise in server log.
+* Moved to `pino` 7 (by Bijela Gora).
+
 ## 0.10.8
 * Fixed test server destroying on fatal error.
 
