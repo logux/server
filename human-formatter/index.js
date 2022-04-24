@@ -7,6 +7,8 @@ import { Transform } from 'stream'
 import pino from 'pino'
 import { once } from 'events'
 
+import { mulberry32, onceXmur3 } from './utils.js'
+
 const INDENT = '  '
 const PADDING = '        '
 const SEPARATOR = os.EOL + os.EOL
@@ -35,6 +37,8 @@ const LABELS = {
   60: (c, str) => label(c, ' FATAL ', 'red', 'bgRed', 'white', str)
 }
 
+const COLORS = ['red', 'green', 'yellow', 'blue', 'magenta', 'cyan']
+
 function rightPag(str, length) {
   let add = length - stripAnsi(str).length
   for (let i = 0; i < add; i++) str += ' '
@@ -57,15 +61,54 @@ function formatName(key) {
     .replace(/^\w/, char => char.toUpperCase())
 }
 
+function shuffledColors(str) {
+  let index = -1
+  let result = Array.from(COLORS)
+  let lastIndex = result.length - 1
+  let seed = onceXmur3(str)
+  let randomFn = mulberry32(seed)
+
+  while (++index < COLORS.length) {
+    let randIndex = index + Math.floor(randomFn() * (lastIndex - index + 1))
+    let value = result[randIndex]
+
+    result[randIndex] = result[index]
+    result[index] = value
+  }
+  return result
+}
+
+function splitAndColorize(c, partLength, str) {
+  let strBuilder = []
+  let colors = shuffledColors(str)
+
+  for (
+    let start = 0, end = partLength, n = 0, color = colors[n];
+    start < str.length;
+    start += partLength,
+      end += partLength,
+      n = n + 1,
+      color = colors[n % colors.length]
+  ) {
+    let strToColorize = str.slice(start, end)
+    if (strToColorize.length === 1) {
+      color = colors[Math.abs(n - 1) % colors.length]
+    }
+    strBuilder.push(c[color](strToColorize))
+  }
+
+  return strBuilder.join('')
+}
+
 function formatNodeId(c, nodeId) {
   let pos = nodeId.lastIndexOf(':')
-  let id, random
   if (pos === -1) {
     return nodeId
   } else {
-    id = nodeId.slice(0, pos)
-    random = nodeId.slice(pos)
-    return c.bold(id) + random
+    let s = nodeId.split(':')
+    let id = c.bold(s[0])
+    let random = splitAndColorize(c, 3, s[1])
+    return `${id}:${random}`
   }
 }
 
@@ -93,7 +136,13 @@ function formatArray(c, array) {
 
 function formatActionId(c, id) {
   let p = id.split(' ')
-  return `${c.bold(p[0])} ${formatNodeId(c, p[1])} ${c.bold(p[2])}`
+  if (p.length === 1) {
+    return p
+  }
+  return `${c.bold(splitAndColorize(c, 4, p[0]))} ${formatNodeId(
+    c,
+    p[1]
+  )} ${c.bold(p[2])}`
 }
 
 function formatParams(c, params, parent) {
@@ -109,8 +158,13 @@ function formatParams(c, params, parent) {
 
       let start = PADDING + rightPag(`${name}: `, maxName + 2)
 
-      if (name === 'Node ID') {
+      if (name === 'Node ID' || (parent === 'Meta' && name === 'server')) {
         return start + formatNodeId(c, value)
+      } else if (
+        parent === 'Meta' &&
+        (name === 'clients' || name === 'excludeClients')
+      ) {
+        return `${start}[${value.map(v => `"${formatNodeId(c, v)}"`).join()}]`
       } else if (name === 'Action ID' || (parent === 'Meta' && name === 'id')) {
         return start + formatActionId(c, value)
       } else if (Array.isArray(value)) {
