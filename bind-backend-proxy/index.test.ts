@@ -211,7 +211,7 @@ let httpServer = http.createServer((req, res) => {
   })
 })
 
-it('allows to miss subprotocol swith backend option', () => {
+it('allows to miss subprotocol with backend option', () => {
   new BaseServer({
     controlSecret: 'secret',
     subprotocol: '1.0.0',
@@ -319,7 +319,7 @@ it('reports bad HTTP answers', async () => {
   client.log.add({ type: 'NO' })
   await delay(100)
 
-  expect(errors).toEqual(['Backend responsed with 404 code'])
+  expect(errors).toEqual(['Backend responded with 404 code'])
   expect(app.log.actions()).toEqual([
     {
       type: 'logux/undo',

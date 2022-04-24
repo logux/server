@@ -37,7 +37,7 @@ function send(backend, command, events) {
     },
     res => {
       if (res.statusCode < 200 || res.statusCode > 299) {
-        events.error(new Error(`Backend responsed with ${res.statusCode} code`))
+        events.error(new Error(`Backend responded with ${res.statusCode} code`))
       } else {
         let data = false
         res
