@@ -206,6 +206,14 @@ export interface BaseServerOptions {
    * By default it cleans `Bearer [^\s"]+`.
    */
   cleanFromLog?: RegExp
+
+  /**
+   * Disable health check endpoint, control HTTP API, {@link Server#http}.
+   *
+   * The server will process only WebSocket connection and ignore all other
+   * HTTP request (so they can be processed by other HTTP server).
+   */
+  disableHttpServer?: boolean
 }
 
 export interface AuthenticatorOptions<Headers extends object> {

@@ -39,7 +39,7 @@ afterEach(async () => {
   await app.destroy()
 })
 
-function createReporter(opts = {}): {
+function createReporter(opts: Partial<BaseServerOptions> = {}): {
   names: string[]
   reports: [string, object][]
   app: BaseServer
@@ -104,15 +104,36 @@ it('has hello page', async () => {
   expect(response.body).toContain('<svg ')
 })
 
+it('disables HTTP on request', async () => {
+  app = createServer({ disableHttpServer: true })
+  await app.listen()
+  let response = false
+  let req = http.request(
+    {
+      method: 'GET',
+      host: '127.0.0.1',
+      port: app.options.port,
+      path: '/health'
+    },
+    () => {
+      response = true
+    }
+  )
+  req.on('error', () => {})
+  await delay(100)
+  expect(response).toBe(false)
+  req.destroy()
+})
+
 it('has health check', async () => {
-  app = createServer({ controlSecret: 'secret', backend: 'http://localhost/' })
+  app = createServer()
   await app.listen()
   let response = await request('GET', '/health')
   expect(response.body).toContain('OK')
 })
 
-it('has health check without control server', async () => {
-  app = createServer()
+it('has health check with control server', async () => {
+  app = createServer({ controlSecret: 'secret', backend: 'http://localhost/' })
   await app.listen()
   let response = await request('GET', '/health')
   expect(response.body).toContain('OK')
@@ -275,3 +296,27 @@ it('allows to set custom HTTP processor', async () => {
   let response = await request('GET', '/test')
   expect(response.body).toEqual('test /test')
 })
+
+it('does not allow to set custom HTTP processor on disabled HTTP', async () => {
+  app = createServer({ disableHttpServer: true })
+  expect(() => {
+    app.http((req, res) => {
+      res.statusCode = 200
+      res.end(`test ${req.url}`)
+    })
+  }).toThrow(/can not be called when `disableHttpServer` enabled/)
+})
+
+it('does not allow to have control secret on disabled HTTP', async () => {
+  app = createServer({ disableHttpServer: true, controlSecret: 'x' })
+  let err: Error | undefined
+  try {
+    await app.listen()
+  } catch (e) {
+    if (e instanceof Error) err = e
+  }
+  expect(err?.message).toBe(
+    '`controlSecret` can be set together with `disableHttpServer` option'
+  )
+})
+

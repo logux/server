@@ -382,6 +382,11 @@ export class BaseServer {
   }
 
   http(listener) {
+    if (this.options.disableHttpServer) {
+      throw new Error(
+        '`server.http()` can not be called when `disableHttpServer` enabled'
+      )
+    }
     this.httpListener = listener
   }
 

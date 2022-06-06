@@ -17,6 +17,17 @@ function isValidBody(body) {
 }
 
 export function bindControlServer(app, custom) {
+  if (app.options.disableHttpServer) {
+    if (app.options.controlSecret) {
+      let err = new Error(
+        '`controlSecret` can be set together with `disableHttpServer` option'
+      )
+      err.logux = true
+      throw err
+    }
+    return
+  }
+
   let masks = app.options.controlMask.split(/,\s*/).map(i => ip.cidrSubnet(i))
   app.httpServer.on('request', async (req, res) => {
     let urlString = req.url
