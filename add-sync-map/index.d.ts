@@ -81,7 +81,7 @@ interface SyncMapOperations<Value extends SyncMapValues> {
     since: number | undefined,
     action: LoguxSubscribeAction,
     meta: ServerMeta
-  ): Promise<SyncMapData<Value>> | SyncMapData<Value>
+  ): Promise<SyncMapData<Value>> | SyncMapData<Value> | false | Promise<false>
 
   create?(
     ctx: Context,

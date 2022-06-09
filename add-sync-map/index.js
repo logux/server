@@ -101,12 +101,14 @@ export function addSyncMap(server, plural, operations) {
           action,
           meta
         )
-        await sendMap(
-          server,
-          changedType,
-          data,
-          action.since ? action.since.time : 0
-        )
+        if (data !== false) {
+          await sendMap(
+            server,
+            changedType,
+            data,
+            action.since ? action.since.time : 0
+          )
+        }
       }
     })
   }
