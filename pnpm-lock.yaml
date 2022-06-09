@@ -22,7 +22,7 @@ specifiers:
   eslint: ^8.17.0
   eslint-config-standard: ^17.0.0
   eslint-plugin-import: ^2.26.0
-  eslint-plugin-n: ^15.2.1
+  eslint-plugin-n: ^15.2.2
   eslint-plugin-prefer-let: ^3.0.1
   eslint-plugin-promise: ^6.0.0
   fast-glob: ^3.2.11
@@ -68,7 +68,7 @@ dependencies:
 devDependencies:
   '@babel/core': 7.18.2
   '@jest/globals': 28.1.1
-  '@logux/eslint-config': 47.2.0_s3vbsifhc3yqc2pcruxf6a7u6a
+  '@logux/eslint-config': 47.2.0_ibifbjavvqfqwc2532ptvuroeq
   '@types/cross-spawn': 6.0.2
   '@types/jest': 28.1.1
   '@types/node': 17.0.41
@@ -80,9 +80,9 @@ devDependencies:
   clean-publish: 4.0.1
   cross-spawn: 7.0.3
   eslint: 8.17.0
-  eslint-config-standard: 17.0.0_k2gkawvnhbuxb7ddaipaawnv5q
+  eslint-config-standard: 17.0.0_2vzjc6wa644febnedshovlwyla
   eslint-plugin-import: 2.26.0_pv5w3e62ssxduf5aiwxbc3knra
-  eslint-plugin-n: 15.2.1_eslint@8.17.0
+  eslint-plugin-n: 15.2.2_eslint@8.17.0
   eslint-plugin-prefer-let: 3.0.1
   eslint-plugin-promise: 6.0.0_eslint@8.17.0
   jest: 28.1.1_@types+node@17.0.41
@@ -731,7 +731,7 @@ packages:
       nanoevents: 6.0.2
     dev: false
 
-  /@logux/eslint-config/47.2.0_s3vbsifhc3yqc2pcruxf6a7u6a:
+  /@logux/eslint-config/47.2.0_ibifbjavvqfqwc2532ptvuroeq:
     resolution: {integrity: sha512-nNPPkw+kfA2bLyhkxaqGzd3MWSN4S2dUf69xo2syskBd5ZfFk2WT9ssO+yDDUd26yNgN3AmweKztEwyUim9wOQ==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
@@ -743,9 +743,9 @@ packages:
       eslint-plugin-promise: ^6.0.0
     dependencies:
       eslint: 8.17.0
-      eslint-config-standard: 17.0.0_k2gkawvnhbuxb7ddaipaawnv5q
+      eslint-config-standard: 17.0.0_2vzjc6wa644febnedshovlwyla
       eslint-plugin-import: 2.26.0_pv5w3e62ssxduf5aiwxbc3knra
-      eslint-plugin-n: 15.2.1_eslint@8.17.0
+      eslint-plugin-n: 15.2.2_eslint@8.17.0
       eslint-plugin-prefer-let: 3.0.1
       eslint-plugin-promise: 6.0.0_eslint@8.17.0
     dev: true
@@ -1113,7 +1113,7 @@ packages:
       call-bind: 1.0.2
       define-properties: 1.1.4
       es-abstract: 1.20.1
-      get-intrinsic: 1.1.1
+      get-intrinsic: 1.1.2
       is-string: 1.0.7
     dev: true
 
@@ -1240,8 +1240,8 @@ packages:
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
     dependencies:
-      caniuse-lite: 1.0.30001350
-      electron-to-chromium: 1.4.148
+      caniuse-lite: 1.0.30001352
+      electron-to-chromium: 1.4.150
       escalade: 3.1.1
       node-releases: 2.0.5
       picocolors: 1.0.0
@@ -1274,7 +1274,7 @@ packages:
     resolution: {integrity: sha512-7O+FbCihrB5WGbFYesctwmTKae6rOiIzmz1icreWJ+0aA7LJfuqhEso2T9ncpcFtzMQtzXf2QGGueWJGTYsqrA==}
     dependencies:
       function-bind: 1.1.1
-      get-intrinsic: 1.1.1
+      get-intrinsic: 1.1.2
     dev: true
 
   /callsites/3.1.0:
@@ -1292,8 +1292,8 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /caniuse-lite/1.0.30001350:
-    resolution: {integrity: sha512-NZBql38Pzd+rAu5SPXv+qmTWGQuFsRiemHCJCAPvkoDxWV19/xqL2YHF32fDJ9SDLdLqfax8+S0CO3ncDCp9Iw==}
+  /caniuse-lite/1.0.30001352:
+    resolution: {integrity: sha512-GUgH8w6YergqPQDGWhJGt8GDRnY0L/iJVQcU3eJ46GYf52R8tk0Wxp0PymuFVZboJYXGiCqwozAYZNRjVj6IcA==}
     dev: true
 
   /chalk/2.4.2:
@@ -1545,8 +1545,8 @@ packages:
       stream-shift: 1.0.1
     dev: false
 
-  /electron-to-chromium/1.4.148:
-    resolution: {integrity: sha512-8MJk1bcQUAYkuvCyWZxaldiwoDG0E0AMzBGA6cv3WfuvJySiPgfidEPBFCRRH3cZm6SVZwo/oRlK1ehi1QNEIQ==}
+  /electron-to-chromium/1.4.150:
+    resolution: {integrity: sha512-MP3oBer0X7ZeS9GJ0H6lmkn561UxiwOIY9TTkdxVY7lI9G6GVCKfgJaHaDcakwdKxBXA4T3ybeswH/WBIN/KTA==}
     dev: true
 
   /emittery/0.10.2:
@@ -1578,7 +1578,7 @@ packages:
       es-to-primitive: 1.2.1
       function-bind: 1.1.1
       function.prototype.name: 1.1.5
-      get-intrinsic: 1.1.1
+      get-intrinsic: 1.1.2
       get-symbol-description: 1.0.0
       has: 1.0.3
       has-property-descriptors: 1.0.0
@@ -1634,7 +1634,7 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /eslint-config-standard/17.0.0_k2gkawvnhbuxb7ddaipaawnv5q:
+  /eslint-config-standard/17.0.0_2vzjc6wa644febnedshovlwyla:
     resolution: {integrity: sha512-/2ks1GKyqSOkH7JFvXJicu0iMpoojkwB+f5Du/1SC0PtBL+s8v30k9njRZ21pm2drKYm2342jFnGWzttxPmZVg==}
     peerDependencies:
       eslint: ^8.0.1
@@ -1644,7 +1644,7 @@ packages:
     dependencies:
       eslint: 8.17.0
       eslint-plugin-import: 2.26.0_pv5w3e62ssxduf5aiwxbc3knra
-      eslint-plugin-n: 15.2.1_eslint@8.17.0
+      eslint-plugin-n: 15.2.2_eslint@8.17.0
       eslint-plugin-promise: 6.0.0_eslint@8.17.0
     dev: true
 
@@ -1725,8 +1725,8 @@ packages:
       - supports-color
     dev: true
 
-  /eslint-plugin-n/15.2.1_eslint@8.17.0:
-    resolution: {integrity: sha512-uMG50pvKqXK9ab163bSI5OpyZR0F5yIB0pEC4ciGpBLrXVjVDOlx5oTq8GQULWzbelJt7wL5Rw4T+FfAff5Cxg==}
+  /eslint-plugin-n/15.2.2_eslint@8.17.0:
+    resolution: {integrity: sha512-MLjZVAv4TiCIoXqjibNqCJjLkGHfrOY3XZ0ZBLoW0OnS3o98PUBnzB/kfp8dCz/4A4Y18jjX50PRnqI4ACFY1Q==}
     engines: {node: '>=12.22.0'}
     peerDependencies:
       eslint: '>=7.0.0'
@@ -2056,8 +2056,8 @@ packages:
     engines: {node: 6.* || 8.* || >= 10.*}
     dev: true
 
-  /get-intrinsic/1.1.1:
-    resolution: {integrity: sha512-kWZrnVM42QCiEA2Ig1bG8zjoIMOgxWwYCEeNdwY6Tv/cOSeGpcoX4pXHfKUxNKVoArnrEr2e9srnAxxGIraS9Q==}
+  /get-intrinsic/1.1.2:
+    resolution: {integrity: sha512-Jfm3OyCxHh9DJyc28qGk+JmfkpO41A4XkneDSujN9MDXrm4oDKdHvndhZ2dN94+ERNfkYJWDclW6k2L/ZGHjXA==}
     dependencies:
       function-bind: 1.1.1
       has: 1.0.3
@@ -2079,7 +2079,7 @@ packages:
     engines: {node: '>= 0.4'}
     dependencies:
       call-bind: 1.0.2
-      get-intrinsic: 1.1.1
+      get-intrinsic: 1.1.2
     dev: true
 
   /glob-parent/5.1.2:
@@ -2151,7 +2151,7 @@ packages:
   /has-property-descriptors/1.0.0:
     resolution: {integrity: sha512-62DVLZGoiEBDHQyqG4w9xCuZ7eJEwNmJRWw2VY84Oedb7WFcA27fiEVe8oUQx9hAUJ4ekurquucTGwsyO1XGdQ==}
     dependencies:
-      get-intrinsic: 1.1.1
+      get-intrinsic: 1.1.2
     dev: true
 
   /has-symbols/1.0.3:
@@ -2223,7 +2223,7 @@ packages:
     resolution: {integrity: sha512-O0DB1JC/sPyZl7cIo78n5dR7eUSwwpYPiXRhTzNxZVAMUuB8vlnRFyLxdrVToks6XPLVnFfbzaVd5WLjhgg+vA==}
     engines: {node: '>= 0.4'}
     dependencies:
-      get-intrinsic: 1.1.1
+      get-intrinsic: 1.1.2
       has: 1.0.3
       side-channel: 1.0.4
     dev: true
@@ -3468,7 +3468,7 @@ packages:
     resolution: {integrity: sha512-q5XPytqFEIKHkGdiMIrY10mvLRvnQh42/+GoBlFW3b2LXLE2xxJpZFdm94we0BaoV3RwJyGqg5wS7epxTv0Zvw==}
     dependencies:
       call-bind: 1.0.2
-      get-intrinsic: 1.1.1
+      get-intrinsic: 1.1.2
       object-inspect: 1.12.2
     dev: true
 
@@ -3509,7 +3509,7 @@ packages:
     dev: false
 
   /sprintf-js/1.0.3:
-    resolution: {integrity: sha1-BOaSb2YolTVPPdAVIDYzuFcpfiw=}
+    resolution: {integrity: sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==}
     dev: true
 
   /stack-utils/2.0.5:
@@ -3577,7 +3577,7 @@ packages:
     dev: false
 
   /strip-bom/3.0.0:
-    resolution: {integrity: sha1-IzTBjpx1n3vdVv3vfprj1YjmjtM=}
+    resolution: {integrity: sha512-vavAMRXOgBVNF6nyEEmL3DBK19iRpDcoIwW+swQ+CbGiu7lju6t+JklA1MHweoWtadgt4ISVUsXLyDq34ddcwA==}
     engines: {node: '>=4'}
     dev: true
 
