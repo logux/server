@@ -94,6 +94,7 @@ export function addSyncMap(server, plural, operations) {
         return operations.access(ctx, ctx.params.id, action, meta)
       },
       async load(ctx, action, meta) {
+        if (action.creating) return
         let data = await operations.load(
           ctx,
           ctx.params.id,
