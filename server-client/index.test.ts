@@ -1,11 +1,11 @@
 import {
-  Action,
-  LoguxError,
-  Message,
   ServerConnection,
-  TestLog,
+  LoguxError,
   TestPair,
-  TestTime
+  TestTime,
+  Message,
+  TestLog,
+  Action
 } from '@logux/core'
 import { LoguxNotFoundError } from '@logux/actions'
 import { delay } from 'nanodelay'
