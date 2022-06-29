@@ -72,7 +72,7 @@ export interface ServerMeta extends Meta {
   node?: string
 
   /**
-   * Client IDs, which will not recieve the action.
+   * Client IDs, which will not receive the action.
    */
   excludeClients?: string[]
 }
