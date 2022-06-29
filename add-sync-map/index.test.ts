@@ -4,6 +4,7 @@ import {
   loguxSubscribed,
   loguxProcessed
 } from '@logux/actions'
+import { delay } from 'nanodelay'
 
 import {
   NoConflictResolution,
@@ -423,6 +424,37 @@ it('allows to disable changes', async () => {
     changedComment({ id: 'good', fields: {} }),
     deletedComment({ id: 'good' })
   ])
+})
+
+it('does not load data on creating', async () => {
+  let loaded = 0
+  let server = getServer()
+  addSyncMap<CommentValue>(server, 'comments', {
+    access() {
+      return true
+    },
+    load(ctx, id) {
+      loaded += 1
+      return { id }
+    }
+  })
+
+  let client = await server.connect('1')
+
+  await client.log.add({
+    type: 'logux/subscribe',
+    channel: 'comments/new'
+  })
+  await delay(10)
+  expect(loaded).toBe(1)
+
+  await client.log.add({
+    type: 'logux/subscribe',
+    channel: 'comments/new',
+    creating: true
+  })
+  await delay(10)
+  expect(loaded).toBe(1)
 })
 
 it('throws an error on missed value wrapper', async () => {
