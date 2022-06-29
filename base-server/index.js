@@ -560,6 +560,7 @@ export class BaseServer {
   }
 
   async sendAction(action, meta) {
+    if (meta.resend === false) return
     let from = parseId(meta.id).clientId
     let ignoreClients = new Set(meta.excludeClients || [])
     ignoreClients.add(from)

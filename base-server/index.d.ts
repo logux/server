@@ -75,6 +75,11 @@ export interface ServerMeta extends Meta {
    * Client IDs, which will not receive the action.
    */
   excludeClients?: string[]
+
+  /**
+   * Disable re-send for any action.
+   */
+  resend?: boolean
 }
 
 export interface BaseServerOptions {

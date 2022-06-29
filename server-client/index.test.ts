@@ -2008,3 +2008,29 @@ it('allows to throws LoguxNotFoundError', async () => {
     }
   ])
 })
+
+it('disables re-send on request', async () => {
+  let app = createServer()
+  app.type('FOO', {
+    access: () => true,
+    resend() {
+      return {
+        users: ['10']
+      }
+    }
+  })
+
+  let client = await connectClient(app)
+
+  await app.log.add({ type: 'FOO', id: 1 })
+  await delay(10)
+  expect(actions(client)).toEqual([{ type: 'FOO', id: 1 }])
+
+  app.log.on('preadd', (action, meta) => {
+    meta.resend = false
+  })
+
+  await app.log.add({ type: 'FOO', id: 2 })
+  await delay(10)
+  expect(actions(client)).toEqual([{ type: 'FOO', id: 1 }])
+})
