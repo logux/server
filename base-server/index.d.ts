@@ -330,7 +330,7 @@ interface ActionFinally<
  * @param meta The action metadata.
  * @returns Should action be sent to client.
  */
-interface ChannelFilter<Headers extends object> {
+export interface ChannelFilter<Headers extends object> {
   (
     ctx: Context<{}, Headers>,
     action: Readonly<Action>,
@@ -720,7 +720,7 @@ export class BaseServer<
   subscribers: {
     [channel: string]: {
       [nodeId: string]: {
-        filter: ChannelFilter<{}> | true
+        filters: ChannelFilter<{}>[] | true
         unsubscribe?: (action: LoguxUnsubscribeAction, meta: ServerMeta) => void
       }
     }
@@ -1083,6 +1083,30 @@ export class BaseServer<
   ): void
 
   /**
+   * Define the creator of filter for all resending actions.
+   *
+   * ```js
+   * server.filter((ctx, action, meta) => {
+   *   return (resentCtx, resentAction, resentMeta) => {
+   *     if (action.type === 'tags/deleted') {
+   *       if (action.postId !== resentAction.postId) {
+   *         return false
+   *       }
+   *     }
+   *     return true
+   *   }
+   * })
+   * ```
+   *
+   * @param callback Filter creator
+   */
+  filter<
+    SubscribeAction extends LoguxSubscribeAction = LoguxSubscribeAction,
+    Data extends object = {},
+    ChannelParams extends object | string[] = {}
+  >(callback: FilterCreator<SubscribeAction, Data, ChannelParams, Headers>): void
+
+  /**
    * Add new action to the server and return the Promise until it will be
    * resend to clients and processed.
    *
@@ -1160,7 +1184,7 @@ export class BaseServer<
    * @param nodeId Node ID.
    * @param channel Channel name.
    */
-  subscribe(nodeId: string, channel: string): void
+  subscribe(nodeId: string, channel: string): void | Promise<void>
 
   /**
    * Add new client for server. You should call this method manually

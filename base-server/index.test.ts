@@ -10,6 +10,7 @@ import https from 'https'
 import http from 'http'
 
 import { BaseServer, BaseServerOptions, ServerMeta } from '../index.js'
+import { ChannelFilter } from './index.js'
 
 const ROOT = join(fileURLToPath(import.meta.url), '..', '..')
 
@@ -1007,7 +1008,7 @@ it('subscribes clients', async () => {
   expect(test.reports[2][1].meta.status).toEqual('processed')
   expect(test.app.subscribers).toEqual({
     'user/10': {
-      '10:a:uuid': { filter: true }
+      '10:a:uuid': { filters: true }
     }
   })
   await test.app.log.add(
@@ -1019,10 +1020,10 @@ it('subscribes clients', async () => {
   expect(events).toEqual(2)
   expect(test.app.subscribers).toEqual({
     'user/10': {
-      '10:a:uuid': { filter: true }
+      '10:a:uuid': { filters: true }
     },
     'posts': {
-      '10:a:uuid': { filter }
+      '10:a:uuid': { filters: [filter] }
     }
   })
   await test.app.log.add(
@@ -1051,7 +1052,7 @@ it('subscribes clients', async () => {
   })
   expect(test.app.subscribers).toEqual({
     posts: {
-      '10:a:uuid': { filter }
+      '10:a:uuid': { filters: [filter] }
     }
   })
 })
@@ -1167,7 +1168,7 @@ it('loads initial actions during subscription', async () => {
   expect(userLoaded).toEqual(1)
   expect(test.app.subscribers).toEqual({
     'user/10': {
-      '10:uuid': { filter: true }
+      '10:uuid': { filters: true }
     }
   })
   expect(test.app.log.actions()).toEqual([
@@ -1414,7 +1415,7 @@ it('subscribes clients manually', async () => {
   await delay(10)
   expect(app.subscribers).toEqual({
     'users/10': {
-      'test:1:1': { filter: true }
+      'test:1:1': { filters: true }
     }
   })
   expect(actions).toEqual([{ type: 'logux/subscribed', channel: 'users/10' }])
@@ -1432,4 +1433,101 @@ it('processes action with accessAndProcess callback', () => {
   })
   test.app.process({ type: 'A' })
   expect(accessAndProcess).toHaveBeenCalledTimes(1)
+})
+
+it('filters all resending actions', async () => {
+  let calls = 0
+  let actions: Action[] = []
+  let simpleFilter = (): boolean => {
+    calls += 1
+    return true
+  }
+  let conditionalFilter: ChannelFilter<{}> = (
+    resentCtx,
+    resentAction,
+    resentMeta
+  ) => {
+    calls += 1
+    return resentMeta.custom === true
+  }
+  let asyncFilter: ChannelFilter<{}> = async (
+    resentCtx,
+    resentAction,
+    resentMeta
+  ) => {
+    calls += 1
+    await delay(1)
+    return resentMeta.noResend !== true
+  }
+
+  let server = createServer()
+  server.channel('a', {
+    access: () => true
+  })
+  server.type('A', {
+    access: () => true,
+    resend: () => ({ channels: ['a'] })
+  })
+  server.filter(() => simpleFilter)
+  server.filter(() => conditionalFilter)
+  server.filter(async () => {
+    await delay(1)
+    return asyncFilter
+  })
+
+  let client: any = {
+    node: {
+      onAdd: (action: Action) => {
+        actions.push(action)
+      }
+    }
+  }
+  server.clientIds.set('10:uuid', client)
+
+  await server.log.add(
+    { type: 'logux/subscribe', channel: 'a' },
+    { id: '1 10:uuid 0' }
+  )
+  await delay(1)
+  await server.log.add({ type: 'A' }, { id: '1 20:uuid 0', custom: true })
+  await delay(10)
+  expect(calls).toEqual(3)
+  expect(actions).toEqual([
+    { type: 'logux/processed', id: '1 10:uuid 0' },
+    { type: 'A' }
+  ])
+  await server.log.add({ type: 'A' }, { id: '1 20:uuid 0', noResend: true })
+  await delay(10)
+  expect(calls).toEqual(5)
+  expect(actions).toEqual([
+    { type: 'logux/processed', id: '1 10:uuid 0' },
+    { type: 'A' }
+  ])
+  await server.log.add({ type: 'A' }, { id: '1 20:uuid 0' })
+  await delay(10)
+  expect(calls).toEqual(7)
+  expect(actions).toEqual([
+    { type: 'logux/processed', id: '1 10:uuid 0' },
+    { type: 'A' }
+  ])
+
+  expect(server.subscribers).toEqual({
+    'a': {
+      '10:uuid': {
+        filters: [simpleFilter, conditionalFilter, asyncFilter]
+      }
+    }
+  })
+
+  server.clientIds.set('20:uuid', client)
+  await server.subscribe('20:uuid', 'a')
+  await server.process({ type: 'A' }, { id: '1 20:uuid 0', custom: true })
+  await delay(10)
+  expect(calls).toEqual(10)
+  expect(actions).toEqual([
+    { type: 'logux/processed', id: '1 10:uuid 0' },
+    { type: 'A' },
+    { type: 'logux/processed', id: '1 20:uuid 0' },
+    { type: 'A' }
+  ])
 })

@@ -325,6 +325,7 @@ export class BaseServer {
 
     this.lastClient = 0
 
+    this.filters = []
     this.channels = []
     this.subscribers = {}
 
@@ -512,6 +513,10 @@ export class BaseServer {
     this.otherSubscriber = channel
   }
 
+  filter(callback) {
+    this.filters.push(callback)
+  }
+
   process(action, meta = {}) {
     return new Promise((resolve, reject) => {
       let unbindError = this.on('error', (e, errorAction) => {
@@ -549,13 +554,23 @@ export class BaseServer {
     }
   }
 
-  subscribe(nodeId, channel) {
+  async subscribe(nodeId, channel) {
     if (!this.subscribers[channel] || !this.subscribers[channel][nodeId]) {
       if (!this.subscribers[channel]) {
         this.subscribers[channel] = {}
       }
-      this.subscribers[channel][nodeId] = { filter: true }
-      this.log.add({ type: 'logux/subscribed', channel }, { nodes: [nodeId] })
+      let id = this.log.generateId()
+      let meta = { id, nodes: [nodeId] }
+      let action = { type: 'logux/subscribed', channel }
+      let filters = true
+      if (this.filters.length) {
+        let ctx = this.createContext(action, meta)
+        filters = await Promise.all(
+          this.filters.map(filter => filter(ctx, action, meta))
+        )
+      }
+      this.subscribers[channel][nodeId] = { filters }
+      this.log.add(action, meta)
     }
   }
 
@@ -599,7 +614,6 @@ export class BaseServer {
     }
 
     if (meta.channels) {
-      let ctx
       for (let channel of meta.channels) {
         if (this.subscribers[channel]) {
           for (let nodeId in this.subscribers[channel]) {
@@ -607,13 +621,16 @@ export class BaseServer {
             if (!ignoreClients.has(clientId)) {
               let subscriber = this.subscribers[channel][nodeId]
               if (subscriber) {
-                let filter = subscriber.filter
-                if (typeof filter === 'function') {
-                  if (!ctx) ctx = this.createContext(action, meta)
-                  filter = await filter(ctx, action, meta)
+                let ctx = this.createContext(action, meta)
+                let filters = subscriber.filters
+                if (Array.isArray(filters)) {
+                  for (let filter of subscriber.filters) {
+                    filters = await filter(ctx, action, meta)
+                    if (!filters) break
+                  }
                 }
                 let client = this.clientIds.get(clientId)
-                if (filter && client) {
+                if (filters && client) {
                   ignoreClients.add(clientId)
                   client.node.onAdd(action, meta)
                 }
@@ -747,8 +764,17 @@ export class BaseServer {
             return
           }
 
-          let filter = true
-          if (channel.filter) filter = await channel.filter(ctx, action, meta)
+          let filters = true
+          if (this.filters.length || channel.filter) {
+            filters = []
+            if (this.filters.length) {
+              filters = this.filters.map(filter => filter(ctx, action, meta))
+            }
+            if (channel.filter) {
+              filters.push(channel.filter(ctx, action, meta))
+            }
+            filters = await Promise.all(filters)
+          }
 
           this.emitter.emit('report', 'subscribed', {
             actionId: meta.id,
@@ -760,7 +786,7 @@ export class BaseServer {
             this.emitter.emit('subscribing', action, meta)
           }
           this.subscribers[action.channel][ctx.nodeId] = {
-            filter,
+            filters,
             unsubscribe: channel.unsubscribe
               ? (unsubscribeAction, unsubscribeMeta) =>
                   channel.unsubscribe(ctx, unsubscribeAction, unsubscribeMeta)
