@@ -1510,7 +1510,7 @@ it('uses resend for own actions', async () => {
   expect(app.log.entries()[3][1].channels).not.toBeDefined()
 })
 
-it('does not dublicate channel load actions', async () => {
+it('does not duplicate channel load actions', async () => {
   let app = createServer()
   app.type('FOO', {
     access: () => true,
