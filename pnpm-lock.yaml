@@ -3,8 +3,8 @@ lockfileVersion: 5.4
 specifiers:
   '@babel/core': ^7.18.13
   '@jest/globals': ^28.1.3
-  '@logux/actions': ^0.2.3
-  '@logux/core': ^0.7.3
+  '@logux/actions': ^0.3.0
+  '@logux/core': ^0.8.0
   '@logux/eslint-config': ^47.2.0
   '@types/cross-spawn': ^6.0.2
   '@types/jest': ^28.1.8
@@ -45,8 +45,8 @@ specifiers:
   yyyy-mm-dd: ^1.0.2
 
 dependencies:
-  '@logux/actions': 0.2.3_@logux+core@0.7.3
-  '@logux/core': 0.7.3
+  '@logux/actions': 0.3.0_@logux+core@0.8.0
+  '@logux/core': 0.8.0
   JSONStream: 1.3.5
   cookie: 0.5.0
   dotenv: 16.0.2
@@ -730,20 +730,20 @@ packages:
       '@jridgewell/sourcemap-codec': 1.4.14
     dev: true
 
-  /@logux/actions/0.2.3_@logux+core@0.7.3:
-    resolution: {integrity: sha512-LITIzuRFYkss8dL+da8IkTrpPH/q/I9maT1Ip+sanMxIxNu3Ba7eYcxIin7lR/Fhsq1O8ngjzs/clsEgIaR/Og==}
-    engines: {node: ^12.0.0 || ^14.0.0 || >=16.0.0}
+  /@logux/actions/0.3.0_@logux+core@0.8.0:
+    resolution: {integrity: sha512-VKFwcw2wPwxN4QZPlOUyelEhE46tyOC/ekDb4Zgk9vboRZD3w/X7kodhoK7Ikm/YQiLlAreAOEwMf+jYmnMjMw==}
+    engines: {node: ^14.0.0 || ^16.0.0 || >=18.0.0}
     peerDependencies:
-      '@logux/core': ^0.7.0
+      '@logux/core': ^0.8.0
     dependencies:
-      '@logux/core': 0.7.3
+      '@logux/core': 0.8.0
     dev: false
 
-  /@logux/core/0.7.3:
-    resolution: {integrity: sha512-IMqhl8hEK/Ej/URUcpeREW9hMuKdakVHPyy3k0GSwcC+PlYmtCRirp7+4b7v3EfDjB+evSw8CnQTiNwnfev0gQ==}
-    engines: {node: ^12.0.0 || ^14.0.0 || >=16.0.0}
+  /@logux/core/0.8.0:
+    resolution: {integrity: sha512-jhV0gqAl6Busqh6lZMSYcoFegrUr+rR8yCpFHUrdurtGxla75ryeZ0/8knmotLYuPhxprWuQ2s8mGZ9PxWmn4g==}
+    engines: {node: ^14.0.0 || ^16.0.0 || >=18.0.0}
     dependencies:
-      nanoevents: 6.0.2
+      nanoevents: 7.0.1
     dev: false
 
   /@logux/eslint-config/47.2.0_c5zrp42zbc5s4i6yiprz55kwaq:
@@ -3014,11 +3014,6 @@ packages:
 
   /nanodelay/2.0.2:
     resolution: {integrity: sha512-6AS5aCSXsjoxq2Jr9CdaAeT60yoYDOTp6po9ziqeOeY6vf6uTEHYSqWql6EFILrM3fEfXgkZ4KqE9L0rTm/wlA==}
-    engines: {node: ^12.0.0 || ^14.0.0 || >=16.0.0}
-    dev: false
-
-  /nanoevents/6.0.2:
-    resolution: {integrity: sha512-FRS2otuFcPPYDPYViNWQ42+1iZqbXydinkRHTHFxrF4a1CpBfmydR9zkI44WSXAXCyPrkcGtPk5CnpW6Y3lFKQ==}
     engines: {node: ^12.0.0 || ^14.0.0 || >=16.0.0}
     dev: false
 

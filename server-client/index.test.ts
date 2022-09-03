@@ -610,22 +610,22 @@ it('checks action creator', async () => {
   expect(test.names).toEqual([
     'connect',
     'authenticated',
+    'add',
+    'add',
     'denied',
-    'add',
-    'add',
     'add'
   ])
-  expect(test.reports[2]).toEqual(['denied', { actionId: '2 1:uuid 0' }])
-  expect(test.reports[4][1].meta.id).toEqual('1 10:uuid 0')
+  expect(test.reports[4]).toEqual(['denied', { actionId: '2 1:uuid 0' }])
+  expect(test.reports[2][1].meta.id).toEqual('1 10:uuid 0')
   expect(test.app.log.actions()).toEqual([
     { type: 'GOOD' },
+    { type: 'logux/processed', id: '1 10:uuid 0' },
     {
       type: 'logux/undo',
       id: '2 1:uuid 0',
       reason: 'denied',
       action: { type: 'BAD' }
-    },
-    { type: 'logux/processed', id: '1 10:uuid 0' }
+    }
   ])
 })
 
@@ -645,8 +645,8 @@ it('allows subscribe and unsubscribe actions', async () => {
     { id: [3, '10:uuid', 0], time: 3 }
   ])
 
-  expect(test.names[2]).toEqual('unknownType')
-  expect(test.reports[2][1].actionId).toEqual('3 10:uuid 0')
+  expect(test.names[8]).toEqual('unknownType')
+  expect(test.reports[8][1].actionId).toEqual('3 10:uuid 0')
   expect(test.names).toContain('unsubscribed')
   expect(test.names).toContain('subscribed')
 })
@@ -881,8 +881,8 @@ it('adds resend keys', async () => {
   expect(test.app.log.actions()).toEqual([
     { type: 'FOO' },
     { type: 'EMPTY' },
-    { type: 'logux/processed', id: '2 10:uuid 0' },
-    { type: 'logux/processed', id: '1 10:uuid 0' }
+    { type: 'logux/processed', id: '1 10:uuid 0' },
+    { type: 'logux/processed', id: '2 10:uuid 0' }
   ])
   expect(test.names).toEqual([
     'connect',
@@ -897,8 +897,8 @@ it('adds resend keys', async () => {
   expect(test.reports[2][1].meta.clients).toEqual(['1:client'])
   expect(test.reports[2][1].meta.channels).toEqual(['a'])
   expect(test.reports[2][1].meta.users).toEqual(['1'])
-  expect(test.reports[3][1].action.type).toEqual('EMPTY')
-  expect(test.reports[3][1].meta.users).not.toBeDefined()
+  expect(test.reports[4][1].action.type).toEqual('EMPTY')
+  expect(test.reports[4][1].meta.users).not.toBeDefined()
 })
 
 it('has channel resend shortcut', async () => {
@@ -1390,8 +1390,8 @@ it('has finally callback', async () => {
     { id: [5, '10:client:other', 0], time: 1 }
   ])
 
-  expect(calls).toEqual(['D', 'A', 'C', 'E', 'B'])
-  expect(errors).toEqual(['D', 'C', 'E', 'EE'])
+  expect(calls).toEqual(['A', 'B', 'C', 'D', 'E'])
+  expect(errors).toEqual(['C', 'D', 'E', 'EE'])
 })
 
 it('sends error to author', async () => {
