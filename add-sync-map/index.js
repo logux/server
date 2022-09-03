@@ -185,14 +185,14 @@ export function addSyncMapFilter(server, plural, operations) {
       }
     },
     async load(ctx, action, meta) {
+      let since = action.since ? action.since.time : 0
       let data = await operations.initial(
         ctx,
         action.filter,
-        action.since,
+        since,
         action,
         meta
       )
-      let since = action.since ? action.since.time : 0
       await Promise.all(
         data.map(async i => {
           await server.subscribe(ctx.nodeId, `${plural}/${i.id}`)
