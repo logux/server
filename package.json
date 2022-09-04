@@ -14,7 +14,7 @@
     "collaborative"
   ],
   "scripts": {
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage && eslint . && check-dts"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --forceExit --coverage && eslint . && check-dts"
   },
   "author": "Andrey Sitnik <andrey@sitnik.ru>",
   "license": "MIT",
