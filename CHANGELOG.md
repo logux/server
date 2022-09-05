@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.12.2
+* Fixed `since` in `load` of `addSyncMap` (by Nikita Galaiko).
+
 ## 0.12.1
 * Fixed `since` in `initial` of `addSyncMapFilter` (by Nikita Galaiko).
 
