@@ -95,10 +95,11 @@ export function addSyncMap(server, plural, operations) {
       },
       async load(ctx, action, meta) {
         if (action.creating) return
+        let since = action.since ? action.since.time : 0
         let data = await operations.load(
           ctx,
           ctx.params.id,
-          action.since,
+          since,
           action,
           meta
         )
@@ -107,7 +108,7 @@ export function addSyncMap(server, plural, operations) {
             server,
             changedType,
             data,
-            action.since ? action.since.time : 0
+            since
           )
         }
       }
