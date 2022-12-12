@@ -13,6 +13,7 @@ import { bindBackendProxy } from '../bind-backend-proxy/index.js'
 import { createHttpServer } from '../create-http-server/index.js'
 import { ServerClient } from '../server-client/index.js'
 import { Context } from '../context/index.js'
+import { Queue } from '../queue/index.js'
 
 const SKIP_PROCESS = Symbol('skipProcess')
 const RESEND_META = ['channels', 'users', 'clients', 'nodes']
@@ -316,10 +317,12 @@ export class BaseServer {
     this.unbind = []
 
     this.connected = new Map()
+    this.queues = new Map()
     this.nodeIds = new Map()
     this.clientIds = new Map()
     this.userIds = new Map()
     this.types = {}
+    this.queueTypes = []
     this.regexTypes = new Map()
     this.processing = 0
 
@@ -375,6 +378,12 @@ export class BaseServer {
           }
         })
     )
+
+    this.unbind.push(async () => {
+      for (let i of this.queues.values()) {
+        await i.waitForProcess()
+      }
+    })
   }
 
   auth(authenticator) {
@@ -463,7 +472,7 @@ export class BaseServer {
     return Promise.all(this.unbind.map(i => i()))
   }
 
-  type(name, callbacks) {
+  type(name, callbacks, queue) {
     if (typeof name === 'function') name = name.type
     normalizeTypeCallbacks(`Action type ${name}`, callbacks)
 
@@ -474,6 +483,10 @@ export class BaseServer {
         throw new Error(`Action type ${name} was already defined`)
       }
       this.types[name] = callbacks
+    }
+
+    if (queue) {
+      this.queueTypes.push(name)
     }
   }
 
@@ -630,6 +643,10 @@ export class BaseServer {
     let key = this.lastClient.toString()
     let client = new ServerClient(this, connection, key)
     this.connected.set(key, client)
+    if (this.queueTypes.length) {
+      let queue = new Queue(this, this.queueTypes, key)
+      this.queues.set(key, queue)
+    }
     return this.lastClient
   }
 

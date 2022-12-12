@@ -978,10 +978,12 @@ export class BaseServer<
   /**
    * @param actionCreator Action creator function.
    * @param callbacks Callbacks for action created by creator.
+	 * @param queue Processes action in queue.
    */
   type<Creator extends AbstractActionCreator, Data extends object = {}>(
     actionCreator: Creator,
-    callbacks: ActionCallbacks<ReturnType<Creator>, Data, Headers>
+    callbacks: ActionCallbacks<ReturnType<Creator>, Data, Headers>,
+		queue?: boolean
   ): void
 
   /**

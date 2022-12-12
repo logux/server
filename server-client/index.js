@@ -188,7 +188,7 @@ export class ServerClient {
     return [action, meta]
   }
 
-  async filter(action, meta) {
+  async filter(action, meta, queueCall) {
     let ctx = this.app.createContext(action, meta)
 
     let wrongUser = !this.clientId || this.clientId !== ctx.clientId
@@ -202,6 +202,12 @@ export class ServerClient {
     let type = action.type
     if (type === 'logux/subscribe' || type === 'logux/unsubscribe') {
       return true
+    }
+
+    if (this.app.queueTypes.includes(type) && !queueCall) {
+      let queue = this.app.queues.get(this.key)
+      queue.add(action, meta)
+      return false
     }
 
     let processor = this.app.getProcessor(type)
