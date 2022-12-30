@@ -203,7 +203,6 @@ export class ServerClient {
 
     let type = action.type
     if (type === 'logux/subscribe' || type === 'logux/unsubscribe') {
-      if (action.channel === 'a') return true
       this.queue.add(action, meta)
       return false
     }
