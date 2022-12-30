@@ -15,7 +15,7 @@ function reportDetails(client) {
 }
 
 export class ServerClient {
-  constructor(app, connection, key) {
+  constructor(app, connection, key, queue) {
     this.app = app
     this.userId = undefined
     this.clientId = undefined
@@ -23,6 +23,7 @@ export class ServerClient {
     this.processing = false
     this.connection = connection
     this.key = key.toString()
+    this.queue = queue
     if (connection.ws) {
       this.remoteAddress = connection.ws._socket.remoteAddress
       this.httpHeaders = connection.ws.upgradeReq.headers
@@ -96,6 +97,7 @@ export class ServerClient {
     if (!this.app.destroying) {
       this.app.emitter.emit('disconnected', this)
     }
+    this.queue.destroy()
     this.app.connected.delete(this.key)
   }
 
@@ -104,7 +106,7 @@ export class ServerClient {
     let { clientId, userId } = parseId(nodeId)
     this.clientId = clientId
     this.userId = userId
-
+    this.queue.setClientId(clientId)
     if (this.app.options.supports) {
       if (!this.isSubprotocol(this.app.options.supports)) {
         throw new LoguxError('wrong-subprotocol', {
@@ -188,7 +190,7 @@ export class ServerClient {
     return [action, meta]
   }
 
-  async filter(action, meta, queueCall) {
+  async filter(action, meta) {
     let ctx = this.app.createContext(action, meta)
 
     let wrongUser = !this.clientId || this.clientId !== ctx.clientId
@@ -201,40 +203,19 @@ export class ServerClient {
 
     let type = action.type
     if (type === 'logux/subscribe' || type === 'logux/unsubscribe') {
-      return true
-    }
-
-    if (this.app.queueTypes.includes(type) && !queueCall) {
-      let queue = this.app.queues.get(this.key)
-      queue.add(action, meta)
+      if (action.channel === 'a') return true
+      this.queue.add(action, meta)
       return false
     }
 
     let processor = this.app.getProcessor(type)
     if (!processor) {
-      this.app.internalUnkownType(action, meta)
+      this.app.internalUnkownType(action, meta, this.clientId)
       return false
     }
 
-    try {
-      let result = await processor.access(ctx, action, meta)
-      if (this.app.unknownTypes[meta.id]) {
-        delete this.app.unknownTypes[meta.id]
-        this.app.finally(processor, ctx, action, meta)
-        return false
-      } else if (!result) {
-        this.app.finally(processor, ctx, action, meta)
-        this.denyBack(action, meta)
-        return false
-      } else {
-        return true
-      }
-    } catch (e) {
-      this.app.undo(action, meta, 'error')
-      this.app.emitter.emit('error', e, action, meta)
-      this.app.finally(processor, ctx, action, meta)
-      return false
-    }
+    this.queue.add(action, meta)
+    return false
   }
 
   denyBack(action, meta) {

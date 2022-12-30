@@ -19,6 +19,7 @@ import { LogFn } from 'pino'
 
 import { Context, ChannelContext } from '../context/index.js'
 import { ServerClient } from '../server-client/index.js'
+import { Queue, queueChannel } from '../queue/index.js'
 
 export interface ServerMeta extends Meta {
   /**
@@ -688,6 +689,20 @@ export class BaseServer<
   connected: Map<string, ServerClient>
 
   /**
+   * Queue channels.
+   * Queues for processing different actions.
+   * Default queue has 'main' as a key, other queues can be
+   * created for different channels.
+   */
+  queueChannels: Map<string, queueChannel>
+
+  /**
+   * Queues by client ID.
+   * each queue processes actions from one client.
+   */
+  queues: Map<string, Queue>
+
+  /**
    * Connected client by client ID.
    *
    * Do not rely on this data, when you have multiple Logux servers.
@@ -978,12 +993,10 @@ export class BaseServer<
   /**
    * @param actionCreator Action creator function.
    * @param callbacks Callbacks for action created by creator.
-	 * @param queue Processes action in queue.
    */
   type<Creator extends AbstractActionCreator, Data extends object = {}>(
     actionCreator: Creator,
-    callbacks: ActionCallbacks<ReturnType<Creator>, Data, Headers>,
-		queue?: boolean
+    callbacks: ActionCallbacks<ReturnType<Creator>, Data, Headers>
   ): void
 
   /**
@@ -1038,6 +1051,7 @@ export class BaseServer<
    *
    * @param pattern Pattern for channel name.
    * @param callbacks Callback during subscription process.
+   * @param queue Separate queue for channel actions.
    */
   channel<
     ChannelParams extends object = {},
@@ -1045,12 +1059,14 @@ export class BaseServer<
     SubscribeAction extends LoguxSubscribeAction = LoguxSubscribeAction
   >(
     pattern: string,
-    callbacks: ChannelCallbacks<SubscribeAction, Data, ChannelParams, Headers>
+    callbacks: ChannelCallbacks<SubscribeAction, Data, ChannelParams, Headers>,
+    queue?: boolean
   ): void
 
   /**
    * @param pattern Regular expression for channel name.
    * @param callbacks Callback during subscription process.
+   * @param queue Creates separate queue for channel actions.
    */
   channel<
     ChannelParams extends string[] = string[],
@@ -1058,7 +1074,8 @@ export class BaseServer<
     SubscribeAction extends LoguxSubscribeAction = LoguxSubscribeAction
   >(
     pattern: RegExp,
-    callbacks: ChannelCallbacks<SubscribeAction, Data, ChannelParams, Headers>
+    callbacks: ChannelCallbacks<SubscribeAction, Data, ChannelParams, Headers>,
+    queue?: boolean
   ): void
 
   /**

@@ -13,7 +13,7 @@ import { bindBackendProxy } from '../bind-backend-proxy/index.js'
 import { createHttpServer } from '../create-http-server/index.js'
 import { ServerClient } from '../server-client/index.js'
 import { Context } from '../context/index.js'
-import { Queue } from '../queue/index.js'
+import { Queue, queueChannel } from '../queue/index.js'
 
 const SKIP_PROCESS = Symbol('skipProcess')
 const RESEND_META = ['channels', 'users', 'clients', 'nodes']
@@ -322,7 +322,7 @@ export class BaseServer {
     this.clientIds = new Map()
     this.userIds = new Map()
     this.types = {}
-    this.queueTypes = []
+    this.queueChannels = new Map().set('main', queueChannel)
     this.regexTypes = new Map()
     this.processing = 0
 
@@ -472,7 +472,7 @@ export class BaseServer {
     return Promise.all(this.unbind.map(i => i()))
   }
 
-  type(name, callbacks, queue) {
+  type(name, callbacks) {
     if (typeof name === 'function') name = name.type
     normalizeTypeCallbacks(`Action type ${name}`, callbacks)
 
@@ -484,10 +484,6 @@ export class BaseServer {
       }
       this.types[name] = callbacks
     }
-
-    if (queue) {
-      this.queueTypes.push(name)
-    }
   }
 
   otherType(callbacks) {
@@ -498,7 +494,7 @@ export class BaseServer {
     this.otherProcessor = callbacks
   }
 
-  channel(pattern, callbacks) {
+  channel(pattern, callbacks, queue) {
     normalizeChannelCallbacks(`Channel ${pattern}`, callbacks)
     let channel = Object.assign({}, callbacks)
     if (typeof pattern === 'string') {
@@ -509,6 +505,10 @@ export class BaseServer {
       channel.regexp = pattern
     }
     this.channels.push(channel)
+
+    if (queue) {
+      this.queueChannels.set(pattern, queueChannel)
+    }
   }
 
   otherChannel(callbacks) {
@@ -641,12 +641,10 @@ export class BaseServer {
   addClient(connection) {
     this.lastClient += 1
     let key = this.lastClient.toString()
-    let client = new ServerClient(this, connection, key)
+    let queue = new Queue(this, this.queueChannels, key)
+    this.queues.set(key, queue)
+    let client = new ServerClient(this, connection, key, queue)
     this.connected.set(key, client)
-    if (this.queueTypes.length) {
-      let queue = new Queue(this, this.queueTypes, key)
-      this.queues.set(key, queue)
-    }
     return this.lastClient
   }
 
