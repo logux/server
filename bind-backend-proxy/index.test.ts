@@ -503,7 +503,7 @@ it('notifies about actions and subscriptions', async () => {
             command: 'action',
             action: { type: 'logux/subscribe', channel: 'a' },
             meta: {
-              added: 1,
+              added: 2,
               id: '2 10:1:1 0',
               time: 2,
               reasons: ['test'],
@@ -529,8 +529,8 @@ it('notifies about actions and subscriptions', async () => {
   expect(app.log.entries()[0][1].status).toEqual('processed')
   expect(events).toEqual([
     'backendSent',
-    'backendSent',
     'backendGranted',
+    'backendSent',
     'backendGranted',
     'backendProcessed',
     'backendProcessed'
