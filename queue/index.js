@@ -1,6 +1,8 @@
-export let queueChannel = {
-  processing: false,
-  data: []
+export class QueueChannel {
+  constructor(processing = false, data = []) {
+    this.processing = processing
+    this.data = data
+  }
 }
 
 export class Queue {

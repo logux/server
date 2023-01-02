@@ -13,7 +13,7 @@ import { bindBackendProxy } from '../bind-backend-proxy/index.js'
 import { createHttpServer } from '../create-http-server/index.js'
 import { ServerClient } from '../server-client/index.js'
 import { Context } from '../context/index.js'
-import { Queue, queueChannel } from '../queue/index.js'
+import { Queue, QueueChannel } from '../queue/index.js'
 
 const SKIP_PROCESS = Symbol('skipProcess')
 const RESEND_META = ['channels', 'users', 'clients', 'nodes']
@@ -322,7 +322,7 @@ export class BaseServer {
     this.clientIds = new Map()
     this.userIds = new Map()
     this.types = {}
-    this.queueChannels = new Map().set('main', queueChannel)
+    this.queueChannels = new Map().set('main', new QueueChannel)
     this.regexTypes = new Map()
     this.processing = 0
 
@@ -507,7 +507,7 @@ export class BaseServer {
     this.channels.push(channel)
 
     if (queue) {
-      this.queueChannels.set(pattern, queueChannel)
+      this.queueChannels.set(pattern, new QueueChannel)
     }
   }
 
