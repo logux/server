@@ -13,7 +13,7 @@ import { bindBackendProxy } from '../bind-backend-proxy/index.js'
 import { createHttpServer } from '../create-http-server/index.js'
 import { ServerClient } from '../server-client/index.js'
 import { Context } from '../context/index.js'
-import { Queue, QueueChannel } from '../queue/index.js'
+import { Queue } from '../queue/index.js'
 
 const SKIP_PROCESS = Symbol('skipProcess')
 const RESEND_META = ['channels', 'users', 'clients', 'nodes']
@@ -317,16 +317,17 @@ export class BaseServer {
     this.unbind = []
 
     this.connected = new Map()
-    this.queues = new Map()
     this.nodeIds = new Map()
     this.clientIds = new Map()
     this.userIds = new Map()
     this.types = {}
-    this.queueChannels = new Map().set('main', new QueueChannel)
     this.regexTypes = new Map()
     this.processing = 0
 
     this.lastClient = 0
+
+    this.queueTypes = []
+    this.queues = new Map()
 
     this.channels = []
     this.subscribers = {}
@@ -507,7 +508,7 @@ export class BaseServer {
     this.channels.push(channel)
 
     if (queue) {
-      this.queueChannels.set(pattern, new QueueChannel)
+      this.queueTypes.push(pattern)
     }
   }
 
@@ -641,9 +642,7 @@ export class BaseServer {
   addClient(connection) {
     this.lastClient += 1
     let key = this.lastClient.toString()
-    let queue = new Queue(this, this.queueChannels, key)
-    this.queues.set(key, queue)
-    let client = new ServerClient(this, connection, key, queue)
+    let client = new ServerClient(this, connection, key)
     this.connected.set(key, client)
     return this.lastClient
   }
@@ -679,6 +678,36 @@ export class BaseServer {
     })
     this.undo(action, meta, 'wrongChannel')
     this.debugActionError(meta, `Wrong channel name ${action.channel}`)
+  }
+
+  onAction(action, meta, clientId) {
+    let queueType
+    if (!this.queueTypes[0]) {
+      queueType = 'main'
+    }
+    else {
+      let type = action.type.slice(0, action.type.indexOf('/'))
+      if (type === 'logux') {
+        action.channel.indexOf('/')
+          ? (type = action.channel.slice(0, action.channel.indexOf('/')))
+          : (type = action.channel)
+      }
+      if (this.queueTypes.includes(type)) {
+        queueType = type
+      } else {
+        queueType = 'main'
+      }
+    }
+
+    let queueKey = clientId + '/' + queueType
+    let queue = this.queues.get(queueKey)
+    
+    if (!queue) {
+      queue = new Queue(this, clientId, queueKey)
+      this.queues.set(queueKey, queue)
+    }
+    
+    queue.add(action, meta)
   }
 
   async processAction(processor, action, meta, start) {

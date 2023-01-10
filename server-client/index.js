@@ -15,7 +15,7 @@ function reportDetails(client) {
 }
 
 export class ServerClient {
-  constructor(app, connection, key, queue) {
+  constructor(app, connection, key) {
     this.app = app
     this.userId = undefined
     this.clientId = undefined
@@ -23,7 +23,6 @@ export class ServerClient {
     this.processing = false
     this.connection = connection
     this.key = key.toString()
-    this.queue = queue
     if (connection.ws) {
       this.remoteAddress = connection.ws._socket.remoteAddress
       this.httpHeaders = connection.ws.upgradeReq.headers
@@ -97,7 +96,6 @@ export class ServerClient {
     if (!this.app.destroying) {
       this.app.emitter.emit('disconnected', this)
     }
-    this.queue.destroy()
     this.app.connected.delete(this.key)
   }
 
@@ -106,7 +104,7 @@ export class ServerClient {
     let { clientId, userId } = parseId(nodeId)
     this.clientId = clientId
     this.userId = userId
-    this.queue.setClientId(clientId)
+
     if (this.app.options.supports) {
       if (!this.isSubprotocol(this.app.options.supports)) {
         throw new LoguxError('wrong-subprotocol', {
@@ -203,7 +201,7 @@ export class ServerClient {
 
     let type = action.type
     if (type === 'logux/subscribe' || type === 'logux/unsubscribe') {
-      this.queue.add(action, meta)
+      this.app.onAction(action, meta, this.clientId)
       return false
     }
 
@@ -213,7 +211,7 @@ export class ServerClient {
       return false
     }
 
-    this.queue.add(action, meta)
+    this.app.onAction(action, meta, this.clientId)
     return false
   }
 

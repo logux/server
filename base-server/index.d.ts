@@ -689,15 +689,16 @@ export class BaseServer<
   connected: Map<string, ServerClient>
 
   /**
-   * Queue channels.
-   * Queues for processing different actions.
-   * Default queue has 'main' as a key, other queues can be
-   * created for different channels.
+   * Types of queues.
+   * 
+   * Queues for processing different actions in parallel.
+   * By default every action is processed in 'main' queue.
    */
-  queueChannels: Map<string, queueChannel>
+  queueTypes: Map<string, queueChannel>
 
   /**
-   * Queues by client ID.
+   * Queues by client ID and queue type.
+   * 
    * each queue processes actions from one client.
    */
   queues: Map<string, Queue>

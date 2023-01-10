@@ -1,7 +1,6 @@
 import { ServerConnection, ServerNode } from '@logux/core'
 
 import { BaseServer } from '../base-server/index.js'
-import { Queue } from '../queue/index.js'
 
 /**
  * Logux client connected to server.
@@ -15,14 +14,8 @@ export class ServerClient {
    * @param app The server.
    * @param connection The Logux connection.
    * @param key Client number used as `app.connected` key.
-   * @param queue Action processing queue.
    */
-  constructor(
-    app: BaseServer,
-    connection: ServerConnection,
-    key: number,
-    queue: Queue
-  )
+  constructor(app: BaseServer, connection: ServerConnection, key: number)
 
   /**
    * Server, which received client.
@@ -84,11 +77,6 @@ export class ServerClient {
    * ```
    */
   remoteAddress: string
-
-  /**
-   * Queue for client's actions
-   */
-  queue: Queue
 
   /**
    * HTTP headers of WS connection.
