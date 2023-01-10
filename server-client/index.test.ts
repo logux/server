@@ -17,7 +17,6 @@ import {
   BaseServer,
   ServerMeta
 } from '../index.js'
-import { Queue } from '../queue/index.js'
 import { ServerClient } from './index.js'
 
 let destroyable: { destroy(): void }[] = []
@@ -110,17 +109,10 @@ function createReporter(opts: Partial<BaseServerOptions> = {}): {
 
 function createClient(app: BaseServer): ServerClient {
   let lastClient: number = ++privateMethods(app).lastClient
-  let queue = createQueue(app, lastClient)
-  let client = new ServerClient(app, createConnection(), lastClient, queue)
+  let client = new ServerClient(app, createConnection(), lastClient)
   app.connected.set(`${lastClient}`, client)
   destroyable.push(client)
   return client
-}
-
-function createQueue(app: BaseServer, key: number): Queue {
-  let queueChannels = new Map().set('main', { processing: false, data: [] })
-  let queue = new Queue(app, queueChannels, key)
-  return queue
 }
 
 async function connectClient(
@@ -171,8 +163,7 @@ it('uses server options', () => {
     ping: 8000
   })
   app.nodeId = 'server:x'
-  let queue = createQueue(app, 1)
-  let client = new ServerClient(app, createConnection(), 1, queue)
+  let client = new ServerClient(app, createConnection(), 1)
 
   expect(client.node.options.subprotocol).toEqual('0.0.1')
   expect(client.node.options.timeout).toEqual(16000)
@@ -182,39 +173,29 @@ it('uses server options', () => {
 
 it('saves connection', () => {
   let connection = createConnection()
-  let app = createServer()
-  let queue = createQueue(app, 1)
-  let client = new ServerClient(app, connection, 1, queue)
+  let client = new ServerClient(createServer(), connection, 1)
   expect(client.connection).toBe(connection)
 })
 
 it('uses string key', () => {
-  let app = createServer()
-  let queue = createQueue(app, 1)
-  let client = new ServerClient(app, createConnection(), 1, queue)
+  let client = new ServerClient(createServer(), createConnection(), 1)
   expect(client.key).toEqual('1')
   expect(typeof client.key).toEqual('string')
 })
 
 it('has remote address shortcut', () => {
-  let app = createServer()
-  let queue = createQueue(app, 1)
-  let client = new ServerClient(app, createConnection(), 1, queue)
+  let client = new ServerClient(createServer(), createConnection(), 1)
   expect(client.remoteAddress).toEqual('127.0.0.1')
 })
 
 it('has HTTP headers shortcut', () => {
-  let app = createServer()
-  let queue = createQueue(app, 1)
-  let client = new ServerClient(app, createConnection(), 1, queue)
+  let client = new ServerClient(createServer(), createConnection(), 1)
   expect(client.httpHeaders['user-agent']).toEqual('browser')
 })
 
 it('has default remote address if ws param does not set', () => {
   let pair = new TestPair()
-  let app = createServer()
-  let queue = createQueue(app, 1)
-  let client = new ServerClient(app, pair.left as any, 1, queue)
+  let client = new ServerClient(createServer(), pair.left as any, 1)
   expect(client.remoteAddress).toEqual('127.0.0.1')
 })
 
@@ -224,7 +205,7 @@ it('reports about connection', () => {
   test.app.on('connected', client => {
     fired.push(client.key)
   })
-  new ServerClient(test.app, createConnection(), 1, createQueue(test.app, 1))
+  new ServerClient(test.app, createConnection(), 1)
   expect(test.reports).toEqual([
     [
       'connect',
@@ -337,7 +318,7 @@ it('destroys on disconnect', async () => {
 it('reports on wrong authentication', async () => {
   let test = createReporter()
   test.app.auth(async () => false)
-  let client = new ServerClient(test.app, createConnection(), 1, createQueue(test.app, 1))
+  let client = new ServerClient(test.app, createConnection(), 1)
   await connect(client)
 
   expect(test.names).toEqual(['connect', 'unauthenticated', 'disconnect'])
@@ -361,7 +342,7 @@ it('reports about authentication error', async () => {
   test.app.auth(() => {
     throw error
   })
-  let client = new ServerClient(test.app, createConnection(), 1, createQueue(test.app, 1))
+  let client = new ServerClient(test.app, createConnection(), 1)
   await connect(client)
 
   expect(test.names).toEqual([
@@ -385,7 +366,7 @@ it('blocks authentication bruteforce', async () => {
   test.app.auth(async () => false)
 
   async function connectNext(num: number): Promise<void> {
-    let client = new ServerClient(test.app, createConnection(), num, createQueue(test.app, num))
+    let client = new ServerClient(test.app, createConnection(), num)
     await connect(client, `${num}:uuid`)
   }
 
@@ -411,7 +392,7 @@ it('blocks authentication bruteforce', async () => {
 it('reports on server in user name', async () => {
   let test = createReporter()
   test.app.auth(async () => true)
-  let client = new ServerClient(test.app, createConnection(), 1, createQueue(test.app, 1))
+  let client = new ServerClient(test.app, createConnection(), 1)
   await connect(client, 'server:x')
 
   expect(test.names).toEqual(['connect', 'unauthenticated', 'disconnect'])
