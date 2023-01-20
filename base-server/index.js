@@ -380,10 +380,8 @@ export class BaseServer {
         })
     )
 
-    this.unbind.push(async () => {
-      for (let i of this.queues.values()) {
-        await i.waitForProcess()
-      }
+    this.unbind.push(() => {
+      this.queues.forEach(async i => await i.waitForProcess())
     })
   }
 
@@ -680,34 +678,18 @@ export class BaseServer {
     this.debugActionError(meta, `Wrong channel name ${action.channel}`)
   }
 
-  onAction(action, meta, clientId) {
-    let queueType
-    if (!this.queueTypes[0]) {
-      queueType = 'main'
-    }
-    else {
-      let type = action.type.slice(0, action.type.indexOf('/'))
-      if (type === 'logux') {
-        action.channel.indexOf('/')
-          ? (type = action.channel.slice(0, action.channel.indexOf('/')))
-          : (type = action.channel)
-      }
-      if (this.queueTypes.includes(type)) {
-        queueType = type
-      } else {
-        queueType = 'main'
-      }
-    }
-
-    let queueKey = clientId + '/' + queueType
+  onAction(action, meta) {
+    let clientId = parseId(meta.id).clientId
+    let queueKey = clientId + '/main'
     let queue = this.queues.get(queueKey)
-    
+
     if (!queue) {
       queue = new Queue(this, clientId, queueKey)
       this.queues.set(queueKey, queue)
     }
-    
-    queue.add(action, meta)
+    return new Promise(resolve => {
+      resolve(queue.add(action, meta))
+    })
   }
 
   async processAction(processor, action, meta, start) {
@@ -878,6 +860,12 @@ export class BaseServer {
       return
     }
 
+    let queueKey = parseId(meta.id).clientId + '/main'
+    let queue = this.queues.get(queueKey)
+    if (queue) {
+      queue.next()
+    }
+
     this.unsubscribe(action, meta)
 
     this.markAsProcessed(meta)
@@ -955,6 +943,13 @@ export class BaseServer {
 
   finally(processor, ctx, action, meta) {
     this.contexts.delete(action)
+
+    let queueKey = parseId(meta.id).clientId + '/main'
+    let queue = this.queues.get(queueKey)
+    if (queue) {
+      queue.next()
+    }
+
     if (processor && processor.finally) {
       try {
         processor.finally(ctx, action, meta)

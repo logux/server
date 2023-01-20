@@ -201,8 +201,7 @@ export class ServerClient {
 
     let type = action.type
     if (type === 'logux/subscribe' || type === 'logux/unsubscribe') {
-      this.app.onAction(action, meta, this.clientId)
-      return false
+      return this.app.onAction(action, meta)
     }
 
     let processor = this.app.getProcessor(type)
@@ -211,8 +210,7 @@ export class ServerClient {
       return false
     }
 
-    this.app.onAction(action, meta, this.clientId)
-    return false
+    return this.app.onAction(action, meta)
   }
 
   denyBack(action, meta) {
