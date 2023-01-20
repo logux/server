@@ -19,7 +19,7 @@ import { LogFn } from 'pino'
 
 import { Context, ChannelContext } from '../context/index.js'
 import { ServerClient } from '../server-client/index.js'
-import { Queue, queueChannel } from '../queue/index.js'
+import { Queue } from '../queue/index.js'
 
 export interface ServerMeta extends Meta {
   /**
@@ -690,15 +690,15 @@ export class BaseServer<
 
   /**
    * Types of queues.
-   * 
+   *
    * Queues for processing different actions in parallel.
    * By default every action is processed in 'main' queue.
    */
-  queueTypes: Map<string, queueChannel>
+  queueTypes: Map<string, string>
 
   /**
    * Queues by client ID and queue type.
-   * 
+   *
    * each queue processes actions from one client.
    */
   queues: Map<string, Queue>
@@ -985,10 +985,12 @@ export class BaseServer<
    *
    * @param name The action’s type or action’s type matching rule as RegExp..
    * @param callbacks Callbacks for actions with this type.
+   * @param queue Separate queue for actions withc this type.
    */
   type<TypeAction extends Action = AnyAction, Data extends object = {}>(
     name: TypeAction['type'] | RegExp,
-    callbacks: ActionCallbacks<TypeAction, Data, Headers>
+    callbacks: ActionCallbacks<TypeAction, Data, Headers>,
+    queue?: string
   ): void
 
   /**
@@ -1052,7 +1054,7 @@ export class BaseServer<
    *
    * @param pattern Pattern for channel name.
    * @param callbacks Callback during subscription process.
-   * @param queue Separate queue for channel actions.
+   * @param queue Separate queue for channel's actions.
    */
   channel<
     ChannelParams extends object = {},
@@ -1061,13 +1063,13 @@ export class BaseServer<
   >(
     pattern: string,
     callbacks: ChannelCallbacks<SubscribeAction, Data, ChannelParams, Headers>,
-    queue?: boolean
+    queue?: string
   ): void
 
   /**
    * @param pattern Regular expression for channel name.
    * @param callbacks Callback during subscription process.
-   * @param queue Creates separate queue for channel actions.
+   * @param queue Creates queue for channel parallel to 'main'.
    */
   channel<
     ChannelParams extends string[] = string[],
@@ -1076,7 +1078,7 @@ export class BaseServer<
   >(
     pattern: RegExp,
     callbacks: ChannelCallbacks<SubscribeAction, Data, ChannelParams, Headers>,
-    queue?: boolean
+    queue?: string
   ): void
 
   /**

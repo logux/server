@@ -326,7 +326,7 @@ export class BaseServer {
 
     this.lastClient = 0
 
-    this.queueTypes = []
+    this.queueTypes = new Map()
     this.queues = new Map()
 
     this.channels = []
@@ -471,7 +471,7 @@ export class BaseServer {
     return Promise.all(this.unbind.map(i => i()))
   }
 
-  type(name, callbacks) {
+  type(name, callbacks, queue) {
     if (typeof name === 'function') name = name.type
     normalizeTypeCallbacks(`Action type ${name}`, callbacks)
 
@@ -482,6 +482,11 @@ export class BaseServer {
         throw new Error(`Action type ${name} was already defined`)
       }
       this.types[name] = callbacks
+    }
+    if (queue) {
+      this.queueTypes.set(name, queue)
+    } else {
+      this.queueTypes.set(name, 'main')
     }
   }
 
@@ -506,7 +511,13 @@ export class BaseServer {
     this.channels.push(channel)
 
     if (queue) {
-      this.queueTypes.push(pattern)
+      channel.regexp
+        ? this.queueTypes.set(channel.regexp, queue)
+        : this.queueTypes.set(channel.pattern.regex)
+    } else {
+      channel.regexp
+        ? this.queueTypes.set(channel.regexp, 'main')
+        : this.queueTypes.set(channel.pattern.regex, 'main')
     }
   }
 
@@ -680,7 +691,29 @@ export class BaseServer {
 
   onAction(action, meta) {
     let clientId = parseId(meta.id).clientId
-    let queueKey = clientId + '/main'
+    let isLogux = action.type.slice(0, 6) === 'logux/'
+    let queueType
+    if (!isLogux) queueType = this.queueTypes.get(action.type)
+    else {
+      let match
+      let pattern
+      for (let channel of this.channels) {
+        if (channel.pattern) {
+          match = action.channel.match(channel.pattern.regex)
+          pattern = channel.pattern.regex
+        } else {
+          match = action.channel.match(channel.regexp)
+          pattern = channel.regex
+        }
+        if (match) {
+          queueType = this.queueTypes.get(pattern)
+          break
+        }
+      }
+    }
+    if (!queueType) queueType = 'main'
+    
+    let queueKey = clientId + '/' + queueType
     let queue = this.queues.get(queueKey)
 
     if (!queue) {
