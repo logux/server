@@ -19,7 +19,6 @@ import { LogFn } from 'pino'
 
 import { Context, ChannelContext } from '../context/index.js'
 import { ServerClient } from '../server-client/index.js'
-import { Queue } from '../queue/index.js'
 
 export interface ServerMeta extends Meta {
   /**
@@ -689,21 +688,6 @@ export class BaseServer<
   connected: Map<string, ServerClient>
 
   /**
-   * Types of queues.
-   *
-   * Queues for processing different actions in parallel.
-   * By default every action is processed in 'main' queue.
-   */
-  queueTypes: Map<string, string>
-
-  /**
-   * Queues by client ID and queue type.
-   *
-   * each queue processes actions from one client.
-   */
-  queues: Map<string, Queue>
-
-  /**
    * Connected client by client ID.
    *
    * Do not rely on this data, when you have multiple Logux servers.
@@ -1069,7 +1053,7 @@ export class BaseServer<
   /**
    * @param pattern Regular expression for channel name.
    * @param callbacks Callback during subscription process.
-   * @param queue Creates queue for channel parallel to 'main'.
+   * @param queue Separate queue for channel's actions.
    */
   channel<
     ChannelParams extends string[] = string[],
