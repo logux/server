@@ -110,7 +110,7 @@ export interface BaseServerOptions {
 
   /**
    * Timeout in milliseconds to disconnect connection.
-   * Default is `20000`.
+   * Default is `70000`.
    */
   timeout?: number
 
