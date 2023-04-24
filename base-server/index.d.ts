@@ -116,7 +116,7 @@ export interface BaseServerOptions {
 
   /**
    * Milliseconds since last message to test connection by sending ping.
-   * Default is `10000`.
+   * Default is `20000`.
    */
   ping?: number
 
