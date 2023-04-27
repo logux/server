@@ -1,12 +1,14 @@
+import { spyOn, restoreAll, Spy } from 'nanospy'
+import { it, expect, afterEach } from 'vitest'
 import { LoguxSubscribeAction } from '@logux/actions'
 import { TestTime } from '@logux/core'
 import { delay } from 'nanodelay'
-import { jest } from '@jest/globals'
 
 import { TestClient, TestServer, LoguxActionError } from '../index.js'
 
 let server: TestServer
 afterEach(() => {
+  restoreAll()
   server.destroy()
 })
 
@@ -236,12 +238,12 @@ it('prints server log', async () => {
   let reporterStream = {
     write() {}
   }
-  jest.spyOn(reporterStream, 'write').mockImplementation(() => {})
+  spyOn(reporterStream, 'write', () => {})
   server = new TestServer({
     logger: { stream: reporterStream }
   })
   await server.connect('10:uuid')
-  expect(reporterStream.write).toHaveBeenCalledTimes(2)
+  expect((reporterStream.write as any as Spy).callCount).toEqual(2)
 })
 
 it('tests authentication', async () => {

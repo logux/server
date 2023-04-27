@@ -1,10 +1,11 @@
 import { MemoryStore, TestTime, Log, Action, TestLog } from '@logux/core'
+import { spy, Spy, restoreAll, spyOn } from 'nanospy'
+import { it, expect, afterEach } from 'vitest'
 import { defineAction } from '@logux/actions'
 import { fileURLToPath } from 'url'
 import { readFileSync } from 'fs'
 import { delay } from 'nanodelay'
 import WebSocket from 'ws'
-import { jest } from '@jest/globals'
 import { join } from 'path'
 import https from 'https'
 import http from 'http'
@@ -87,7 +88,20 @@ async function catchError(cb: () => Promise<any>): Promise<Error> {
   throw new Error('Error was not thrown')
 }
 
+function calls(fn: Function | undefined): any[][] {
+  return (fn as any as Spy).calls
+}
+
+function called(fn: Function | undefined): boolean {
+  return (fn as any as Spy).called
+}
+
+function callCount(fn: Function | undefined): number {
+  return (fn as any as Spy).callCount
+}
+
 afterEach(async () => {
+  restoreAll()
   process.env.NODE_ENV = originEnv
   if (destroyable) {
     await destroyable.destroy()
@@ -395,14 +409,14 @@ it('sends debug message to clients on runtimeError', () => {
   app.connected.set('1', {
     connection: {
       connected: true,
-      send: jest.fn()
+      send: spy()
     },
     destroy: () => false
   } as any)
   app.connected.set('2', {
     connection: {
       connected: false,
-      send: jest.fn()
+      send: spy()
     },
     destroy: () => false
   } as any)
@@ -420,19 +434,17 @@ it('sends debug message to clients on runtimeError', () => {
   error.stack = `${error.stack?.split('\n')[0]}\nfake stacktrace`
 
   app.debugError(error)
-  expect(app.connected.get('1')?.connection.send).toHaveBeenCalledWith([
-    'debug',
-    'error',
-    'Error: Test Error\n' + 'fake stacktrace'
+  expect(calls(app.connected.get('1')?.connection.send)).toEqual([
+    [['debug', 'error', 'Error: Test Error\n' + 'fake stacktrace']]
   ])
-  expect(app.connected.get('2')?.connection.send).not.toHaveBeenCalled()
+  expect(called(app.connected.get('2')?.connection.send)).toBe(false)
 })
 
 it('disconnects client on destroy', () => {
   let app = createServer()
-  app.connected.set('1', { destroy: jest.fn() } as any)
+  app.connected.set('1', { destroy: spy() } as any)
   app.destroy()
-  expect(app.connected.get('1')?.destroy).toHaveBeenCalledTimes(1)
+  expect(callCount(app.connected.get('1')?.destroy)).toEqual(1)
 })
 
 it('accepts custom HTTP server', async () => {
@@ -538,7 +550,7 @@ it('reports about fatal error', () => {
 it('sends errors to clients in development', () => {
   let test = createReporter({ env: 'development' })
   test.app.connected.set('0', {
-    connection: { connected: true, send: jest.fn() },
+    connection: { connected: true, send: spy() },
     destroy: () => false
   } as any)
 
@@ -548,21 +560,19 @@ it('sends errors to clients in development', () => {
   emit(test.app, 'error', err)
 
   expect(test.reports).toEqual([['error', { err, nodeId: '10:uuid' }]])
-  expect(test.app.connected.get('0')?.connection.send).toHaveBeenCalledWith([
-    'debug',
-    'error',
-    'stack'
+  expect(calls(test.app.connected.get('0')?.connection.send)).toEqual([
+    [['debug', 'error', 'stack']]
   ])
 })
 
 it('does not send errors in non-development mode', () => {
   let app = createServer({ env: 'production' })
   app.connected.set('0', {
-    connection: { send: jest.fn() },
+    connection: { send: spy() },
     destroy: () => false
   } as any)
   emit(app, 'error', new Error('Test'))
-  expect(app.connected.get('0')?.connection.send).not.toHaveBeenCalled()
+  expect(called(app.connected.get('0')?.connection.send)).toBe(false)
 })
 
 it('processes actions', async () => {
@@ -794,7 +804,7 @@ it('reports about wrong channel name', async () => {
   let test = createReporter({ env: 'development' })
   test.app.channel('foo', { access: () => true })
   let client: any = {
-    connection: { send: jest.fn() },
+    connection: { send: spy() },
     node: { onAdd() {} }
   }
   test.app.nodeIds.set('10:uuid', client)
@@ -811,10 +821,8 @@ it('reports about wrong channel name', async () => {
     type: 'logux/undo',
     action: { type: 'logux/subscribe' }
   })
-  expect(client.connection.send).toHaveBeenCalledWith([
-    'debug',
-    'error',
-    'Wrong channel name undefined'
+  expect(calls(client.connection.send)).toEqual([
+    [['debug', 'error', 'Wrong channel name undefined']]
   ])
   await test.app.log.add({ type: 'logux/unsubscribe' })
 
@@ -861,7 +869,7 @@ it('allows to have custom channel name check', async () => {
     }
   })
   let client: any = {
-    connection: { send: jest.fn() },
+    connection: { send() {} },
     node: { onAdd() {} }
   }
   test.app.nodeIds.set('10:uuid', client)
@@ -1202,7 +1210,7 @@ it('calls unsubscribe() channel callback with logux/unsubscribe', async () => {
   test.app.on('preadd', (action, meta) => {
     meta.reasons.push('test')
   })
-  let unsubscribeCallback = jest.fn()
+  let unsubscribeCallback = spy()
   test.app.channel<{ id: string }, { preservedData?: boolean }>('user/:id', {
     access(ctx) {
       ctx.data.preservedData = true
@@ -1229,25 +1237,26 @@ it('calls unsubscribe() channel callback with logux/unsubscribe', async () => {
     { type: 'logux/unsubscribe', channel: 'user/10' },
     { type: 'logux/processed', id: `2 ${nodeId}` }
   ])
-  expect(unsubscribeCallback).toHaveBeenCalledTimes(1)
-  expect(unsubscribeCallback).toHaveBeenCalledWith(
-    expect.objectContaining({
-      nodeId,
-      userId,
-      clientId,
-      data: { preservedData: true },
-      headers: { preservedHeaders: true },
-      params: { id: '10' },
-      subprotocol: '0.0.0'
-    }),
-    expect.objectContaining({
-      type: 'logux/unsubscribe',
-      channel: 'user/10'
-    }),
-    expect.objectContaining({
-      status: 'processed'
-    })
-  )
+  expect(unsubscribeCallback.calls).toEqual([
+    [
+      expect.objectContaining({
+        nodeId,
+        userId,
+        clientId,
+        data: { preservedData: true },
+        headers: { preservedHeaders: true },
+        params: { id: '10' },
+        subprotocol: '0.0.0'
+      }),
+      expect.objectContaining({
+        type: 'logux/unsubscribe',
+        channel: 'user/10'
+      }),
+      expect.objectContaining({
+        status: 'processed'
+      })
+    ]
+  ])
 })
 
 it('does not need type definition for own actions', async () => {
@@ -1393,9 +1402,9 @@ it('has custom logger', () => {
     supports: '1.0.0',
     fileUrl: import.meta.url
   })
-  jest.spyOn(console, 'warn').mockImplementation(() => {})
+  spyOn(console, 'warn', () => {})
   app.logger.warn({ test: 1 }, 'test')
-  expect(console.warn).toHaveBeenCalledWith({ test: 1 }, 'test')
+  expect(calls(console.warn)).toEqual([[{ test: 1 }, 'test']])
 })
 
 it('subscribes clients manually', async () => {
@@ -1426,10 +1435,10 @@ it('subscribes clients manually', async () => {
 
 it('processes action with accessAndProcess callback', () => {
   let test = createReporter()
-  let accessAndProcess = jest.fn(() => {})
+  let accessAndProcess = spy()
   test.app.type('A', {
     accessAndProcess
   })
   test.app.process({ type: 'A' })
-  expect(accessAndProcess).toHaveBeenCalledTimes(1)
+  expect(accessAndProcess.callCount).toEqual(1)
 })

@@ -1,3 +1,5 @@
+import { it, expect } from 'vitest'
+
 import { filterMeta, ServerMeta } from '../index.js'
 
 it('filters meta', () => {

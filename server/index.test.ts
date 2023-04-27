@@ -1,4 +1,5 @@
 import { ChildProcess, SpawnOptions } from 'child_process'
+import { it, expect, afterEach } from 'vitest'
 import { fileURLToPath } from 'url'
 import { join } from 'path'
 import spawn from 'cross-spawn'

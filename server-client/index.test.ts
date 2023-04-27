@@ -7,9 +7,10 @@ import {
   TestLog,
   Action
 } from '@logux/core'
+import { spyOn, restoreAll, Spy } from 'nanospy'
+import { it, expect, afterEach } from 'vitest'
 import { LoguxNotFoundError } from '@logux/actions'
 import { delay } from 'nanodelay'
-import { jest } from '@jest/globals'
 
 import {
   BaseServerOptions,
@@ -149,6 +150,7 @@ function actions(client: ServerClient): Action[] {
 }
 
 afterEach(() => {
+  restoreAll()
   destroyable.forEach(i => {
     i.destroy()
   })
@@ -306,13 +308,13 @@ it('does not report users disconnects on server destroy', async () => {
 
 it('destroys on disconnect', async () => {
   let client = createClient(createServer())
-  jest.spyOn(client, 'destroy')
+  spyOn(client, 'destroy')
   await client.connection.connect()
   let pair = getPair(client)
   pair.right.disconnect()
   await pair.wait()
 
-  expect(client.destroy).toHaveBeenCalledTimes(1)
+  expect((client.destroy as any as Spy).callCount).toEqual(1)
 })
 
 it('reports on wrong authentication', async () => {
@@ -740,7 +742,6 @@ it('checks user access for action', async () => {
   })
 
   let client = await connectClient(test.app)
-  jest.spyOn(client.connection, 'send')
   await sendTo(client, [
     'sync',
     2,

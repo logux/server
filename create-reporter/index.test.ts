@@ -1,7 +1,7 @@
-import { LoguxError } from '@logux/core'
-
 import { existsSync, statSync, readFileSync } from 'fs'
-import { jest } from '@jest/globals'
+import { it, expect, afterEach } from 'vitest'
+import { LoguxError } from '@logux/core'
+import { nanoid } from 'nanoid'
 import { join } from 'path'
 import pino from 'pino'
 import os from 'os'
@@ -37,14 +37,6 @@ export function watchFileCreated(filename: string): Promise<void> {
     }, INTERVAL)
   })
 }
-
-jest.mock('os', () => {
-  return {
-    hostname: () => 'localhost',
-    platform: () => 'linux',
-    EOL: '\n'
-  }
-})
 
 class MemoryStream {
   string: string
@@ -83,10 +75,7 @@ async function check(type: string, details?: object): Promise<void> {
   jsonReporter(type, details)
   expect(clean(json.string)).toMatchSnapshot()
 
-  let destination = join(
-    os.tmpdir(),
-    '_' + Math.random().toString(36).substr(2, 9)
-  )
+  let destination = join(os.tmpdir(), '_' + nanoid())
   let logger = pino(
     pino.transport({
       target: PATH_TO_PRETTIFYING_PINO_TRANSPORT,
