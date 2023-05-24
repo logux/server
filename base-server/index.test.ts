@@ -1015,7 +1015,7 @@ it('subscribes clients', async () => {
   expect(test.reports[2][1].meta.status).toEqual('processed')
   expect(test.app.subscribers).toEqual({
     'user/10': {
-      '10:a:uuid': { filter: true }
+      '10:a:uuid': { filters: [true] }
     }
   })
   await test.app.log.add(
@@ -1027,10 +1027,10 @@ it('subscribes clients', async () => {
   expect(events).toEqual(2)
   expect(test.app.subscribers).toEqual({
     'user/10': {
-      '10:a:uuid': { filter: true }
+      '10:a:uuid': { filters: [true] }
     },
     'posts': {
-      '10:a:uuid': { filter }
+      '10:a:uuid': { filters: [filter] }
     }
   })
   await test.app.log.add(
@@ -1059,7 +1059,7 @@ it('subscribes clients', async () => {
   })
   expect(test.app.subscribers).toEqual({
     posts: {
-      '10:a:uuid': { filter }
+      '10:a:uuid': { filters: [filter] }
     }
   })
 })
@@ -1175,7 +1175,7 @@ it('loads initial actions during subscription', async () => {
   expect(userLoaded).toEqual(1)
   expect(test.app.subscribers).toEqual({
     'user/10': {
-      '10:uuid': { filter: true }
+      '10:uuid': { filters: [true] }
     }
   })
   expect(test.app.log.actions()).toEqual([
@@ -1423,7 +1423,7 @@ it('subscribes clients manually', async () => {
   await delay(10)
   expect(app.subscribers).toEqual({
     'users/10': {
-      'test:1:1': { filter: true }
+      'test:1:1': { filters: [true] }
     }
   })
   expect(actions).toEqual([{ type: 'logux/subscribed', channel: 'users/10' }])
