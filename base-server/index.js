@@ -607,17 +607,15 @@ export class BaseServer {
               let subscriber = this.subscribers[channel][nodeId]
               if (subscriber) {
                 let ctx = this.createContext(action, meta)
-                let filters = subscriber.filters
+                let client = this.clientIds.get(clientId)
                 for (let filter of subscriber.filters) {
-                  filters = typeof filter === 'function'
+                  filter = typeof filter === 'function'
                     ? await filter(ctx, action, meta)
                     : filter
-                  if (!filters) break
-                }
-                let client = this.clientIds.get(clientId)
-                if (filters && client) {
-                  ignoreClients.add(clientId)
-                  client.node.onAdd(action, meta)
+                  if (filter && client) {
+                    ignoreClients.add(clientId)
+                    client.node.onAdd(action, meta)
+                  }
                 }
               }
             }
