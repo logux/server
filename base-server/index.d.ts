@@ -720,7 +720,7 @@ export class BaseServer<
   subscribers: {
     [channel: string]: {
       [nodeId: string]: {
-        filter: ChannelFilter<{}> | true
+        filters: (ChannelFilter<{}> | true)[]
         unsubscribe?: (action: LoguxUnsubscribeAction, meta: ServerMeta) => void
       }
     }

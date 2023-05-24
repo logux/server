@@ -554,7 +554,7 @@ export class BaseServer {
       if (!this.subscribers[channel]) {
         this.subscribers[channel] = {}
       }
-      this.subscribers[channel][nodeId] = { filter: true }
+      this.subscribers[channel][nodeId] = { filters: [true] }
       this.log.add({ type: 'logux/subscribed', channel }, { nodes: [nodeId] })
     }
   }
@@ -599,7 +599,6 @@ export class BaseServer {
     }
 
     if (meta.channels) {
-      let ctx
       for (let channel of meta.channels) {
         if (this.subscribers[channel]) {
           for (let nodeId in this.subscribers[channel]) {
@@ -607,13 +606,16 @@ export class BaseServer {
             if (!ignoreClients.has(clientId)) {
               let subscriber = this.subscribers[channel][nodeId]
               if (subscriber) {
-                let filter = subscriber.filter
-                if (typeof filter === 'function') {
-                  if (!ctx) ctx = this.createContext(action, meta)
-                  filter = await filter(ctx, action, meta)
+                let ctx = this.createContext(action, meta)
+                let filters = subscriber.filters
+                for (let filter of subscriber.filters) {
+                  filters = typeof filter === 'function'
+                    ? await filter(ctx, action, meta)
+                    : filter
+                  if (!filters) break
                 }
                 let client = this.clientIds.get(clientId)
-                if (filter && client) {
+                if (filters && client) {
                   ignoreClients.add(clientId)
                   client.node.onAdd(action, meta)
                 }
@@ -747,8 +749,11 @@ export class BaseServer {
             return
           }
 
-          let filter = true
-          if (channel.filter) filter = await channel.filter(ctx, action, meta)
+          let filters = [true]
+          if (channel.filter) {
+            let filter = await channel.filter(ctx, action, meta)
+            filters = [filter]
+          }
 
           this.emitter.emit('report', 'subscribed', {
             actionId: meta.id,
@@ -759,8 +764,12 @@ export class BaseServer {
             this.subscribers[action.channel] = {}
             this.emitter.emit('subscribing', action, meta)
           }
+          let subscriber = this.subscribers[action.channel][ctx.nodeId]
+          if (subscriber) {
+            filters = [...subscriber.filters, ...filters]
+          }
           this.subscribers[action.channel][ctx.nodeId] = {
-            filter,
+            filters,
             unsubscribe: channel.unsubscribe
               ? (unsubscribeAction, unsubscribeMeta) =>
                   channel.unsubscribe(ctx, unsubscribeAction, unsubscribeMeta)
