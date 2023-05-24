@@ -94,6 +94,10 @@ function normalizeChannelCallbacks(pattern, callbacks) {
   }
 }
 
+function subscriberFilterId(action) {
+  return JSON.stringify(action.filter || {})
+}
+
 export class BaseServer {
   constructor(opts = {}) {
     this.options = opts
@@ -602,7 +606,7 @@ export class BaseServer {
               if (subscriber) {
                 let ctx = this.createContext(action, meta)
                 let client = this.clientIds.get(clientId)
-                for (let filter of subscriber.filters) {
+                for (let [, filter] of Object.entries(subscriber.filters)) {
                   filter = typeof filter === 'function'
                     ? await filter(ctx, action, meta)
                     : filter
@@ -741,10 +745,12 @@ export class BaseServer {
             return
           }
 
-          let filters = [true]
+          let filterId = subscriberFilterId(action)
+          let filters = { [filterId]: true }
+
           if (channel.filter) {
             let filter = await channel.filter(ctx, action, meta)
-            filters = [filter]
+            filters = { [filterId]: filter }
           }
 
           this.emitter.emit('report', 'subscribed', {
@@ -758,7 +764,7 @@ export class BaseServer {
           }
           let subscriber = this.subscribers[action.channel][ctx.nodeId]
           if (subscriber) {
-            filters = [...subscriber.filters, ...filters]
+            filters = { ...subscriber.filters, ...filters }
           }
           this.subscribers[action.channel][ctx.nodeId] = {
             filters,
@@ -811,7 +817,11 @@ export class BaseServer {
           subscriber.unsubscribe(action, meta)
           this.contexts.delete(action)
         }
-        delete this.subscribers[action.channel][clientNodeId]
+        let filterId = subscriberFilterId(action)
+        delete subscriber.filters[filterId]
+        if (Object.keys(subscriber.filters).length === 0) {
+          delete this.subscribers[action.channel][clientNodeId]
+        }
         if (Object.keys(this.subscribers[action.channel]).length === 0) {
           delete this.subscribers[action.channel]
         }

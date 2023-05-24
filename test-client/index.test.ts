@@ -219,6 +219,17 @@ it('tracks subscriptions', async () => {
   expect(actions3).toEqual([{ type: 'FOO', since: { id: '1 1:0:0', time: 1 } }])
 
   await client.unsubscribe('foo', { a: 1 })
+  expect(privateMethods(server).subscribers).toEqual({
+    foo: {
+      '10:1:1': {
+        filters: {
+          '{}': true
+        }
+      }
+    }
+  })
+
+  await client.unsubscribe('foo')
   expect(privateMethods(server).subscribers).toEqual({})
 
   let actions4 = await client.subscribe({
