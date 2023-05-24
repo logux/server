@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`creates JSON reporter 1`] = `
 "{\\"level\\":40,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"logux-server\\",\\"msg\\":\\"Action with unknown type\\"}
@@ -48,7 +48,7 @@ exports[`reports EADDRINUSE error 2`] = `
 `;
 
 exports[`reports LOGUX_NO_CONTROL_SECRET error 1`] = `
-"{\\"level\\":60,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"err\\":{\\"message\\":\\"\`backend\` requires also \`controlSecret\` option\\"},\\"note\\":\\"Call \`npx nanoid\` and set result as \`controlSecret\` or \`LOGUX_CONTROL_SECRET\` environment variable\\",\\"msg\\":\\"\`backend\` requires also \`controlSecret\` option\\"}
+"{\\"level\\":60,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"err\\":{\\"type\\":\\"Object\\",\\"message\\":\\"\`backend\` requires also \`controlSecret\` option\\",\\"stack\\":\\"\\"},\\"note\\":\\"Call \`npx nanoid\` and set result as \`controlSecret\` or \`LOGUX_CONTROL_SECRET\` environment variable\\",\\"msg\\":\\"\`backend\` requires also \`controlSecret\` option\\"}
 "
 `;
 
@@ -266,7 +266,7 @@ exports[`reports disconnect from unauthenticated user 2`] = `
 `;
 
 exports[`reports error 1`] = `
-"{\\"level\\":60,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"err\\":{\\"message\\":\\"Some mistake\\",\\"name\\":\\"Error\\",\\"stack\\":\\"Error: Some mistake\\\\n    at Object.<anonymous> (/dev/app/index.js:28:13)\\\\n    at Module._compile (module.js:573:32)\\\\n    at at runTest (/dev/app/node_modules/jest/index.js:50:10)\\\\n    at process._tickCallback (internal/process/next_tick.js:103:7)\\"},\\"msg\\":\\"Some mistake\\"}
+"{\\"level\\":60,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"err\\":{\\"type\\":\\"Object\\",\\"message\\":\\"Some mistake\\",\\"stack\\":\\"Error: Some mistake\\\\n    at Object.<anonymous> (/dev/app/index.js:28:13)\\\\n    at Module._compile (module.js:573:32)\\\\n    at at runTest (/dev/app/node_modules/jest/index.js:50:10)\\\\n    at process._tickCallback (internal/process/next_tick.js:103:7)\\",\\"name\\":\\"Error\\"},\\"msg\\":\\"Some mistake\\"}
 "
 `;
 
@@ -281,7 +281,7 @@ exports[`reports error 2`] = `
 `;
 
 exports[`reports error from action 1`] = `
-"{\\"level\\":50,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"err\\":{\\"message\\":\\"Some mistake\\",\\"name\\":\\"Error\\",\\"stack\\":\\"Error: Some mistake\\\\n    at Object.<anonymous> (/dev/app/index.js:28:13)\\\\n    at Module._compile (module.js:573:32)\\\\n    at at runTest (/dev/app/node_modules/jest/index.js:50:10)\\\\n    at process._tickCallback (internal/process/next_tick.js:103:7)\\"},\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"msg\\":\\"Some mistake\\"}
+"{\\"level\\":50,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"err\\":{\\"type\\":\\"Object\\",\\"message\\":\\"Some mistake\\",\\"stack\\":\\"Error: Some mistake\\\\n    at Object.<anonymous> (/dev/app/index.js:28:13)\\\\n    at Module._compile (module.js:573:32)\\\\n    at at runTest (/dev/app/node_modules/jest/index.js:50:10)\\\\n    at process._tickCallback (internal/process/next_tick.js:103:7)\\",\\"name\\":\\"Error\\"},\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"msg\\":\\"Some mistake\\"}
 "
 `;
 
@@ -321,7 +321,7 @@ exports[`reports error from node 2`] = `
 `;
 
 exports[`reports error with token 1`] = `
-"{\\"level\\":50,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"err\\":{\\"message\\":\\"{\\\\\\"Authorization\\\\\\":\\\\\\"[SECRET]\\\\\\"}\\",\\"name\\":\\"Error\\",\\"stack\\":\\"Error: {\\\\\\"Authorization\\\\\\":\\\\\\"[SECRET]\\\\\\"}\\\\n    at Object.<anonymous> (/dev/app/index.js:28:13)\\\\n    at Module._compile (module.js:573:32)\\\\n    at at runTest (/dev/app/node_modules/jest/index.js:50:10)\\\\n    at process._tickCallback (internal/process/next_tick.js:103:7)\\"},\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"msg\\":\\"{\\\\\\"Authorization\\\\\\":\\\\\\"[SECRET]\\\\\\"}\\"}
+"{\\"level\\":50,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"err\\":{\\"type\\":\\"Object\\",\\"message\\":\\"{\\\\\\"Authorization\\\\\\":\\\\\\"[SECRET]\\\\\\"}\\",\\"stack\\":\\"Error: {\\\\\\"Authorization\\\\\\":\\\\\\"[SECRET]\\\\\\"}\\\\n    at Object.<anonymous> (/dev/app/index.js:28:13)\\\\n    at Module._compile (module.js:573:32)\\\\n    at at runTest (/dev/app/node_modules/jest/index.js:50:10)\\\\n    at process._tickCallback (internal/process/next_tick.js:103:7)\\",\\"name\\":\\"Error\\"},\\"actionId\\":\\"1487805099387 100:uImkcF4z 0\\",\\"msg\\":\\"{\\\\\\"Authorization\\\\\\":\\\\\\"[SECRET]\\\\\\"}\\"}
 "
 `;
 
@@ -416,7 +416,7 @@ exports[`reports subscribed 2`] = `
 `;
 
 exports[`reports sync error 1`] = `
-"{\\"level\\":50,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"err\\":{\\"message\\":\\"Logux received unknown-message error (Unknown message \`bad\` type)\\",\\"name\\":\\"LoguxError\\"},\\"connectionId\\":\\"670\\",\\"msg\\":\\"Logux received unknown-message error (Unknown message \`bad\` type)\\"}
+"{\\"level\\":50,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"test\\",\\"err\\":{\\"type\\":\\"Object\\",\\"message\\":\\"Logux received unknown-message error (Unknown message \`bad\` type)\\",\\"stack\\":\\"\\",\\"name\\":\\"LoguxError\\"},\\"connectionId\\":\\"670\\",\\"msg\\":\\"Logux received unknown-message error (Unknown message \`bad\` type)\\"}
 "
 `;
 

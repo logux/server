@@ -1,3 +1,4 @@
+import { it, expect, beforeEach, afterEach, beforeAll, afterAll } from 'vitest'
 import { delay } from 'nanodelay'
 import http from 'http'
 
@@ -24,7 +25,9 @@ afterEach(async () => {
 
 afterAll(() => {
   return new Promise(resolve => {
-    httpServer.close(resolve)
+    httpServer.close(() => {
+      resolve()
+    })
   })
 })
 

@@ -110,13 +110,13 @@ export interface BaseServerOptions {
 
   /**
    * Timeout in milliseconds to disconnect connection.
-   * Default is `20000`.
+   * Default is `70000`.
    */
   timeout?: number
 
   /**
    * Milliseconds since last message to test connection by sending ping.
-   * Default is `10000`.
+   * Default is `20000`.
    */
   ping?: number
 

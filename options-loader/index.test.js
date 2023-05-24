@@ -1,3 +1,4 @@
+import { it, expect, describe } from 'vitest'
 import { resolve } from 'path'
 
 import { loadOptions, oneOf, number } from './index.js'

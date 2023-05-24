@@ -140,12 +140,6 @@ export class BaseServer {
       log = this.options.time.nextLog({ store, nodeId: this.nodeId })
     } else {
       log = new Log({ store, nodeId: this.nodeId })
-      if (typeof this.options.timeout === 'undefined') {
-        this.options.timeout = 20000
-      }
-      if (typeof this.options.ping === 'undefined') {
-        this.options.ping = 10000
-      }
     }
 
     this.logger = console

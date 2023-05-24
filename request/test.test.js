@@ -1,4 +1,5 @@
-import { jest } from '@jest/globals'
+import { it, expect } from 'vitest'
+import { spy } from 'nanospy'
 
 import { ResponseError, request, patch, post, get, put, del } from '../index.js'
 
@@ -43,7 +44,7 @@ it('parses JSON body', async () => {
 })
 
 it('has shortcut for GET', async () => {
-  let fetch = jest.fn(async () => ({
+  let fetch = spy(async () => ({
     status: 200,
     async json() {
       return { answer: '1' }
@@ -51,46 +52,71 @@ it('has shortcut for GET', async () => {
   }))
 
   expect(await get('/a', { headers: { a: 1 } }, fetch)).toEqual({ answer: '1' })
-  expect(fetch).toHaveBeenCalledWith('/a', {
-    method: 'GET',
-    headers: { a: 1 }
-  })
+  expect(fetch.calls).toEqual([
+    [
+      '/a',
+      {
+        method: 'GET',
+        headers: { a: 1 }
+      }
+    ]
+  ])
 })
 
 it('has shortcut for POST', async () => {
-  let fetch = jest.fn(async () => ({ status: 204 }))
+  let fetch = spy(async () => ({ status: 204 }))
   await post('/a', { headers: { a: 1 } }, fetch)
-  expect(fetch).toHaveBeenCalledWith('/a', {
-    method: 'POST',
-    headers: { a: 1 }
-  })
+  expect(fetch.calls).toEqual([
+    [
+      '/a',
+      {
+        method: 'POST',
+        headers: { a: 1 }
+      }
+    ]
+  ])
 })
 
 it('has shortcut for PUT', async () => {
-  let fetch = jest.fn(async () => ({ status: 204 }))
+  let fetch = spy(async () => ({ status: 204 }))
   await put('/a', { headers: { a: 1 } }, fetch)
-  expect(fetch).toHaveBeenCalledWith('/a', {
-    method: 'PUT',
-    headers: { a: 1 }
-  })
+  expect(fetch.calls).toEqual([
+    [
+      '/a',
+      {
+        method: 'PUT',
+        headers: { a: 1 }
+      }
+    ]
+  ])
 })
 
 it('has shortcut for PATCH', async () => {
-  let fetch = jest.fn(async () => ({ status: 204 }))
+  let fetch = spy(async () => ({ status: 204 }))
   await patch('/a', { headers: { a: 1 } }, fetch)
-  expect(fetch).toHaveBeenCalledWith('/a', {
-    method: 'PATCH',
-    headers: { a: 1 }
-  })
+  expect(fetch.calls).toEqual([
+    [
+      '/a',
+      {
+        method: 'PATCH',
+        headers: { a: 1 }
+      }
+    ]
+  ])
 })
 
 it('has shortcut for DELETE', async () => {
-  let fetch = jest.fn(async () => ({ status: 204 }))
+  let fetch = spy(async () => ({ status: 204 }))
   await del('/a', { headers: { a: 1 } }, fetch)
-  expect(fetch).toHaveBeenCalledWith('/a', {
-    method: 'DELETE',
-    headers: { a: 1 }
-  })
+  expect(fetch.calls).toEqual([
+    [
+      '/a',
+      {
+        method: 'DELETE',
+        headers: { a: 1 }
+      }
+    ]
+  ])
 })
 
 it('works without option object', async () => {
