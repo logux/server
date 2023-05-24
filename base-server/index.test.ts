@@ -1484,7 +1484,7 @@ it('subscribes clients manually', async () => {
   await delay(10)
   expect(app.subscribers).toEqual({
     'users/10': {
-      'test:1:1': { filters: [true] }
+      'test:1:1': { filters: { '{}': true } }
     }
   })
   expect(actions).toEqual([{ type: 'logux/subscribed', channel: 'users/10' }])

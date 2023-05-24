@@ -552,7 +552,7 @@ export class BaseServer {
       if (!this.subscribers[channel]) {
         this.subscribers[channel] = {}
       }
-      this.subscribers[channel][nodeId] = { filters: [true] }
+      this.subscribers[channel][nodeId] = { filters: { '{}': true } }
       this.log.add({ type: 'logux/subscribed', channel }, { nodes: [nodeId] })
     }
   }
