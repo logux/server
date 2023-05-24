@@ -606,7 +606,7 @@ export class BaseServer {
               if (subscriber) {
                 let ctx = this.createContext(action, meta)
                 let client = this.clientIds.get(clientId)
-                for (let [, filter] of Object.entries(subscriber.filters)) {
+                for (let filter of Object.values(subscriber.filters)) {
                   filter = typeof filter === 'function'
                     ? await filter(ctx, action, meta)
                     : filter
