@@ -244,8 +244,8 @@ it('removes itself on destroy', async () => {
 
   test.app.subscribers = {
     'user/10': {
-      '10:client1': { filter: true },
-      '10:client2': { filter: true }
+      '10:client1': { filters: { '{}': true } },
+      '10:client2': { filters: { '{}': true } }
     }
   }
   client1.destroy()
@@ -253,7 +253,7 @@ it('removes itself on destroy', async () => {
 
   expect(Array.from(test.app.userIds.keys())).toEqual(['10'])
   expect(test.app.subscribers).toEqual({
-    'user/10': { '10:client2': { filter: true } }
+    'user/10': { '10:client2': { filters: { '{}': true } } }
   })
   expect(client1.connection.connected).toBe(false)
   expect(pullNewReports()).toMatchObject([
@@ -1071,14 +1071,16 @@ it('sends new actions by channel', async () => {
 
   let client = await connectClient(app)
   app.subscribers.foo = {
-    '10:uuid': { filter: true }
+    '10:uuid': { filters: { '{}': true } }
   }
   app.subscribers.bar = {
     '10:uuid': {
-      filter: (ctx, action, meta) => {
-        expect(meta.id).toContain(' server:x ')
-        expect(ctx.isServer).toBe(true)
-        return privateMethods(action).secret !== true
+      filters: {
+        '{}': (ctx, action, meta) => {
+          expect(meta.id).toContain(' server:x ')
+          expect(ctx.isServer).toBe(true)
+          return privateMethods(action).secret !== true
+        }
       }
     }
   }
@@ -1119,8 +1121,8 @@ it('excludes client from channel', async () => {
   let client1 = await connectClient(app, '10:1:uuid')
   let client2 = await connectClient(app, '10:2:uuid')
   app.subscribers.foo = {
-    '10:1:uuid': { filter: true },
-    '10:2:uuid': { filter: true }
+    '10:1:uuid': { filters: { '{}': true } },
+    '10:2:uuid': { filters: { '{}': true } }
   }
   await app.log.add(
     { type: 'FOO' },
@@ -1145,8 +1147,8 @@ it('works with channel according client ID', async () => {
 
   let client = await connectClient(app, '10:uuid:a')
   app.subscribers.foo = {
-    '10:uuid:b': { filter: true },
-    '10:uuid:c': { filter: true }
+    '10:uuid:b': { filters: { '{}': true } },
+    '10:uuid:c': { filters: { '{}': true } }
   }
   await app.log.add({ type: 'FOO' }, { id: '2 server:x 0', channels: ['foo'] })
   sendTo(client, ['synced', 1])
