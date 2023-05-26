@@ -1,7 +1,6 @@
-import { AnyAction } from '@logux/core'
-
-import { ServerMeta } from '../base-server/index.js'
-import { Server } from '../server/index.js'
+import type { AnyAction } from '@logux/core'
+import type { ServerMeta } from '../base-server/index.js'
+import type { Server } from '../server/index.js'
 
 /**
  * Action context.

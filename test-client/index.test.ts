@@ -1,10 +1,13 @@
-import { spyOn, restoreAll, Spy } from 'nanospy'
+import type { Spy } from 'nanospy'
+import type { LoguxSubscribeAction } from '@logux/actions'
+import type { LoguxActionError } from '../index.js'
+
+import { spyOn, restoreAll } from 'nanospy'
 import { it, expect, afterEach } from 'vitest'
-import { LoguxSubscribeAction } from '@logux/actions'
 import { TestTime } from '@logux/core'
 import { delay } from 'nanodelay'
 
-import { TestClient, TestServer, LoguxActionError } from '../index.js'
+import { TestClient, TestServer } from '../index.js'
 
 let server: TestServer
 afterEach(() => {

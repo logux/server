@@ -1,4 +1,6 @@
-import { ClientNode, TestPair, TestTime, TestLog } from '@logux/core'
+import type { TestLog } from '@logux/core'
+
+import { ClientNode, TestPair, TestTime } from '@logux/core'
 import { it, expect, afterEach } from 'vitest'
 
 import { FilteredNode } from '../filtered-node/index.js'

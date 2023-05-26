@@ -1,13 +1,13 @@
-import { TestTime, TestLog } from '@logux/core'
-
-import { TestClient, TestClientOptions } from '../test-client/index.js'
-import {
+import type { TestTime, TestLog } from '@logux/core'
+import type { TestClient, TestClientOptions } from '../test-client/index.js'
+import type {
   BaseServerOptions,
-  BaseServer,
   ServerMeta,
   Logger
 } from '../base-server/index.js'
-import { LoggerOptions } from '../server/index.js'
+import type { LoggerOptions } from '../server/index.js'
+
+import { BaseServer } from '../base-server/index.js'
 
 export interface TestServerOptions
   extends Omit<BaseServerOptions, 'subprotocol' | 'supports'> {

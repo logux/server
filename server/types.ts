@@ -1,6 +1,8 @@
-import { LoguxSubscribeAction, defineAction } from '@logux/actions'
+import type { LoguxSubscribeAction } from '@logux/actions'
+import { defineAction } from '@logux/actions'
 
-import { Server, Action } from '../index.js'
+import type { Action } from '../index.js'
+import { Server } from '../index.js'
 import pino from 'pino'
 
 let server = new Server<{ locale: string }>(

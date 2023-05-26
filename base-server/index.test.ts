@@ -1,5 +1,9 @@
-import { MemoryStore, TestTime, Log, Action, TestLog } from '@logux/core'
-import { spy, Spy, restoreAll, spyOn } from 'nanospy'
+import type { Action, TestLog } from '@logux/core'
+import type { Spy } from 'nanospy'
+import type { BaseServerOptions, ServerMeta } from '../index.js'
+
+import { MemoryStore, TestTime, Log } from '@logux/core'
+import { spy, restoreAll, spyOn } from 'nanospy'
 import { it, expect, afterEach } from 'vitest'
 import { defineAction } from '@logux/actions'
 import { fileURLToPath } from 'url'
@@ -10,7 +14,7 @@ import { join } from 'path'
 import https from 'https'
 import http from 'http'
 
-import { BaseServer, BaseServerOptions, ServerMeta } from '../index.js'
+import { BaseServer } from '../index.js'
 
 const ROOT = join(fileURLToPath(import.meta.url), '..', '..')
 

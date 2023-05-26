@@ -1,10 +1,12 @@
+import type { BaseServerOptions } from '../index.js'
+
 import { ClientNode, Log, MemoryStore, WsConnection } from '@logux/core'
 import { it, expect, afterEach } from 'vitest'
 import { delay } from 'nanodelay'
 import WebSocket from 'ws'
 import http from 'http'
 
-import { BaseServer, BaseServerOptions } from '../index.js'
+import { BaseServer } from '../index.js'
 
 let lastPort = 10111
 function createServer(opts: Partial<BaseServerOptions> = {}): BaseServer {
@@ -320,4 +322,3 @@ it('does not allow to have control secret on disabled HTTP', async () => {
     '`controlSecret` can be set together with `disableHttpServer` option'
   )
 })
-

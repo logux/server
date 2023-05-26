@@ -1,4 +1,6 @@
-import { BaseServer, Logger, BaseServerOptions } from '../base-server/index.js'
+import type { Logger, BaseServerOptions } from '../base-server/index.js'
+
+import { BaseServer } from '../base-server/index.js'
 
 export interface LoggerOptions {
   /**

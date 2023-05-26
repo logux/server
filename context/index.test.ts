@@ -1,7 +1,9 @@
-import { it, expect, beforeEach } from 'vitest'
-import { Action } from '@logux/core'
+import type { Action } from '@logux/core'
+import type { ServerMeta } from '../index.js'
 
-import { Context, ServerMeta } from '../index.js'
+import { it, expect, beforeEach } from 'vitest'
+
+import { Context } from '../index.js'
 
 let added: [Action, ServerMeta][] = []
 

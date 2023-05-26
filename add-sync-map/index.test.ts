@@ -1,3 +1,5 @@
+import type { SyncMapData, TestClient } from '../index.js'
+
 import {
   defineSyncMapActions,
   LoguxNotFoundError,
@@ -10,9 +12,7 @@ import { delay } from 'nanodelay'
 import {
   NoConflictResolution,
   addSyncMapFilter,
-  SyncMapData,
   TestServer,
-  TestClient,
   addSyncMap,
   ChangedAt
 } from '../index.js'

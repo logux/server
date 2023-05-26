@@ -1,8 +1,10 @@
+import type { TestServerOptions } from '../index.js'
+
 import { it, expect, beforeEach, afterEach, beforeAll, afterAll } from 'vitest'
 import { delay } from 'nanodelay'
 import http from 'http'
 
-import { BaseServer, TestServerOptions, TestServer } from '../index.js'
+import { BaseServer, TestServer } from '../index.js'
 
 let destroyable: { destroy(): Promise<void> }[] = []
 let lastPort = 8111

@@ -1,4 +1,5 @@
-import fetch, { RequestInit } from 'node-fetch'
+import type { RequestInit } from 'node-fetch'
+import type fetch from 'node-fetch'
 
 /**
  * Throwing this error in `accessAndProcess` or `accessAndLoad`

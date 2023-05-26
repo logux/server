@@ -1,4 +1,4 @@
-import {
+import type {
   Action,
   AnyAction,
   ID,
@@ -8,17 +8,16 @@ import {
   LogStore,
   TestTime
 } from '@logux/core'
-import { Server as HTTPServer, ServerResponse, IncomingMessage } from 'http'
-import {
+import type { Server as HTTPServer, ServerResponse, IncomingMessage } from 'http'
+import type {
   LoguxUnsubscribeAction,
   AbstractActionCreator,
   LoguxSubscribeAction
 } from '@logux/actions'
-import { Unsubscribe } from 'nanoevents'
-import { LogFn } from 'pino'
-
-import { Context, ChannelContext } from '../context/index.js'
-import { ServerClient } from '../server-client/index.js'
+import type { Unsubscribe } from 'nanoevents'
+import type { LogFn } from 'pino'
+import type { Context, ChannelContext } from '../context/index.js'
+import type { ServerClient } from '../server-client/index.js'
 
 export interface ServerMeta extends Meta {
   /**

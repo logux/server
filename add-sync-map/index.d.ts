@@ -1,4 +1,4 @@
-import {
+import type {
   LoguxSubscribeAction,
   SyncMapChangeAction,
   SyncMapCreateAction,
@@ -6,9 +6,8 @@ import {
   SyncMapValues,
   SyncMapTypes
 } from '@logux/actions'
-
-import { BaseServer, ServerMeta } from '../base-server/index.js'
-import { Context } from '../context/index.js'
+import type { BaseServer, ServerMeta } from '../base-server/index.js'
+import type { Context } from '../context/index.js'
 
 declare const WITH_TIME: unique symbol
 

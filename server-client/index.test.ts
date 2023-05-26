@@ -1,23 +1,14 @@
-import {
-  ServerConnection,
-  LoguxError,
-  TestPair,
-  TestTime,
-  Message,
-  TestLog,
-  Action
-} from '@logux/core'
-import { spyOn, restoreAll, Spy } from 'nanospy'
+import type { ServerConnection, Message, TestLog, Action } from '@logux/core'
+import type { Spy } from 'nanospy'
+import type { BaseServerOptions, ServerMeta } from '../index.js'
+
+import { LoguxError, TestPair, TestTime } from '@logux/core'
+import { spyOn, restoreAll } from 'nanospy'
 import { it, expect, afterEach } from 'vitest'
 import { LoguxNotFoundError } from '@logux/actions'
 import { delay } from 'nanodelay'
 
-import {
-  BaseServerOptions,
-  ResponseError,
-  BaseServer,
-  ServerMeta
-} from '../index.js'
+import { ResponseError, BaseServer } from '../index.js'
 import { ServerClient } from './index.js'
 
 let destroyable: { destroy(): void }[] = []
