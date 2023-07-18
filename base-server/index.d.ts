@@ -968,10 +968,12 @@ export class BaseServer<
    *
    * @param name The action’s type or action’s type matching rule as RegExp..
    * @param callbacks Callbacks for actions with this type.
+   * @param queue Separate queue for actions withc this type.
    */
   type<TypeAction extends Action = AnyAction, Data extends object = {}>(
     name: TypeAction['type'] | RegExp,
-    callbacks: ActionCallbacks<TypeAction, Data, Headers>
+    callbacks: ActionCallbacks<TypeAction, Data, Headers>,
+    queue?: string
   ): void
 
   /**
@@ -1035,6 +1037,7 @@ export class BaseServer<
    *
    * @param pattern Pattern for channel name.
    * @param callbacks Callback during subscription process.
+   * @param queue Separate queue for channel's actions.
    */
   channel<
     ChannelParams extends object = {},
@@ -1042,12 +1045,14 @@ export class BaseServer<
     SubscribeAction extends LoguxSubscribeAction = LoguxSubscribeAction
   >(
     pattern: string,
-    callbacks: ChannelCallbacks<SubscribeAction, Data, ChannelParams, Headers>
+    callbacks: ChannelCallbacks<SubscribeAction, Data, ChannelParams, Headers>,
+    queue?: string
   ): void
 
   /**
    * @param pattern Regular expression for channel name.
    * @param callbacks Callback during subscription process.
+   * @param queue Separate queue for channel's actions.
    */
   channel<
     ChannelParams extends string[] = string[],
@@ -1055,7 +1060,8 @@ export class BaseServer<
     SubscribeAction extends LoguxSubscribeAction = LoguxSubscribeAction
   >(
     pattern: RegExp,
-    callbacks: ChannelCallbacks<SubscribeAction, Data, ChannelParams, Headers>
+    callbacks: ChannelCallbacks<SubscribeAction, Data, ChannelParams, Headers>,
+    queue?: string
   ): void
 
   /**

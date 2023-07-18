@@ -13,6 +13,7 @@ import { bindBackendProxy } from '../bind-backend-proxy/index.js'
 import { createHttpServer } from '../create-http-server/index.js'
 import { ServerClient } from '../server-client/index.js'
 import { Context } from '../context/index.js'
+import { Queue } from '../queue/index.js'
 
 const SKIP_PROCESS = Symbol('skipProcess')
 const RESEND_META = ['channels', 'users', 'clients', 'nodes']
@@ -323,6 +324,9 @@ export class BaseServer {
 
     this.lastClient = 0
 
+    this.queueTypes = new Map()
+    this.queues = new Map()
+
     this.channels = []
     this.subscribers = {}
 
@@ -373,6 +377,10 @@ export class BaseServer {
           }
         })
     )
+
+    this.unbind.push(async () => {
+      Promise.all(this.queues.values(i => i.waitForProcess()))
+    })
   }
 
   auth(authenticator) {
@@ -461,7 +469,7 @@ export class BaseServer {
     return Promise.all(this.unbind.map(i => i()))
   }
 
-  type(name, callbacks) {
+  type(name, callbacks, queue) {
     if (typeof name === 'function') name = name.type
     normalizeTypeCallbacks(`Action type ${name}`, callbacks)
 
@@ -473,6 +481,11 @@ export class BaseServer {
       }
       this.types[name] = callbacks
     }
+    if (queue) {
+      this.queueTypes.set(name, queue)
+    } else {
+      this.queueTypes.set(name, 'main')
+    }
   }
 
   otherType(callbacks) {
@@ -483,7 +496,7 @@ export class BaseServer {
     this.otherProcessor = callbacks
   }
 
-  channel(pattern, callbacks) {
+  channel(pattern, callbacks, queue) {
     normalizeChannelCallbacks(`Channel ${pattern}`, callbacks)
     let channel = Object.assign({}, callbacks)
     if (typeof pattern === 'string') {
@@ -494,6 +507,16 @@ export class BaseServer {
       channel.regexp = pattern
     }
     this.channels.push(channel)
+
+    if (queue) {
+      channel.regexp
+        ? this.queueTypes.set(`channel/${channel.regexp}`, queue)
+        : this.queueTypes.set(channel.pattern.regex, queue)
+    } else {
+      channel.regexp
+        ? this.queueTypes.set(`channel/${channel.regexp}`, 'main')
+        : this.queueTypes.set(channel.pattern.regex, 'main')
+    }
   }
 
   otherChannel(callbacks) {
@@ -662,6 +685,54 @@ export class BaseServer {
     })
     this.undo(action, meta, 'wrongChannel')
     this.debugActionError(meta, `Wrong channel name ${action.channel}`)
+  }
+
+  getQueueType(action) {
+    let isLogux = action.type.slice(0, 6) === 'logux/'
+    let queueType
+    if (!isLogux) queueType = this.queueTypes.get(action.type)
+    else if (action.channel !== undefined) {
+      let match
+      let pattern
+      for (let channel of this.channels) {
+        if (channel.pattern) {
+          match = action.channel.match(channel.pattern.regex)
+          pattern = channel.pattern.regex
+        } else {
+          match = action.channel.match(channel.regexp)
+          pattern = `channel/${channel.regexp}`
+        }
+        if (match) {
+          queueType = this.queueTypes.get(pattern)
+          break
+        }
+      }
+    }
+    if (!queueType) queueType = 'main'
+    return queueType
+  }
+
+  getQueue(action, meta) {
+    let queueType = this.getQueueType(action)
+    if (!queueType) queueType = 'main'
+    let clientId = parseId(meta.id).clientId
+    let queueKey = clientId + '/' + queueType
+    let queue = this.queues.get(queueKey)
+    return queue
+  }
+
+  onAction(action, meta) {
+    let queue = this.getQueue(action, meta)
+    if (!queue) {
+      let clientId = parseId(meta.id).clientId
+      let queueType = this.getQueueType(action)
+      let queueKey = clientId + '/' + queueType
+      queue = new Queue(this, clientId, queueKey)
+      this.queues.set(queueKey, queue)
+    }
+    return new Promise(resolve => {
+      resolve(queue.add(action, meta))
+    })
   }
 
   async processAction(processor, action, meta, start) {
@@ -845,6 +916,11 @@ export class BaseServer {
       return
     }
 
+    let queue = this.getQueue(action, meta)
+    if (queue) {
+      queue.next()
+    }
+
     this.unsubscribe(action, meta)
 
     this.markAsProcessed(meta)
@@ -922,6 +998,12 @@ export class BaseServer {
 
   finally(processor, ctx, action, meta) {
     this.contexts.delete(action)
+
+    let queue = this.getQueue(action, meta)
+    if (queue) {
+      queue.next()
+    }
+
     if (processor && processor.finally) {
       try {
         processor.finally(ctx, action, meta)

@@ -201,34 +201,16 @@ export class ServerClient {
 
     let type = action.type
     if (type === 'logux/subscribe' || type === 'logux/unsubscribe') {
-      return true
+      return this.app.onAction(action, meta)
     }
 
     let processor = this.app.getProcessor(type)
     if (!processor) {
-      this.app.internalUnkownType(action, meta)
+      this.app.internalUnkownType(action, meta, this.clientId)
       return false
     }
 
-    try {
-      let result = await processor.access(ctx, action, meta)
-      if (this.app.unknownTypes[meta.id]) {
-        delete this.app.unknownTypes[meta.id]
-        this.app.finally(processor, ctx, action, meta)
-        return false
-      } else if (!result) {
-        this.app.finally(processor, ctx, action, meta)
-        this.denyBack(action, meta)
-        return false
-      } else {
-        return true
-      }
-    } catch (e) {
-      this.app.undo(action, meta, 'error')
-      this.app.emitter.emit('error', e, action, meta)
-      this.app.finally(processor, ctx, action, meta)
-      return false
-    }
+    return this.app.onAction(action, meta)
   }
 
   denyBack(action, meta) {
