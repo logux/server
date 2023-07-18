@@ -1,7 +1,7 @@
 const WITH_TIME = Symbol('WITH_TIME')
 
 export function ChangedAt(value, time) {
-  return { value, time, [WITH_TIME]: true }
+  return { time, value, [WITH_TIME]: true }
 }
 
 export function NoConflictResolution(value) {
@@ -11,7 +11,7 @@ export function NoConflictResolution(value) {
 async function addFinished(server, ctx, type, action, meta) {
   await server.process(
     { ...action, type },
-    { time: meta.time, excludeClients: [ctx.clientId] }
+    { excludeClients: [ctx.clientId], time: meta.time }
   )
 }
 
@@ -71,9 +71,9 @@ async function sendMap(server, changedType, data, since) {
     }
     await server.process(
       {
-        type: changedType,
+        fields,
         id,
-        fields
+        type: changedType
       },
       changedMeta
     )

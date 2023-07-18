@@ -1,4 +1,5 @@
 import type { ServerConnection, ServerNode } from '@logux/core'
+
 import type { BaseServer } from '../base-server/index.js'
 
 /**
@@ -10,28 +11,53 @@ import type { BaseServer } from '../base-server/index.js'
  */
 export class ServerClient {
   /**
-   * @param app The server.
-   * @param connection The Logux connection.
-   * @param key Client number used as `app.connected` key.
-   */
-  constructor(app: BaseServer, connection: ServerConnection, key: number)
-
-  /**
    * Server, which received client.
    */
   app: BaseServer
-
-  /**
-   * User ID. It will be filled from client’s node ID.
-   * It will be undefined before correct authentication.
-   */
-  userId?: string
 
   /**
    * Unique persistence machine ID.
    * It will be undefined before correct authentication.
    */
   clientId?: string
+
+  /**
+   * The Logux wrapper to WebSocket connection.
+   *
+   * ```js
+   * console.log(client.connection.ws.upgradeReq.headers)
+   * ```
+   */
+  connection: ServerConnection
+
+  /**
+   * HTTP headers of WS connection.
+   *
+   * ```js
+   * client.httpHeaders['User-Agent']
+   * ```
+   */
+  httpHeaders: { [name: string]: string }
+
+  /**
+   * Client number used as `app.connected` key.
+   *
+   * ```js
+   * function stillConnected (client) {
+   *   return app.connected.has(client.key)
+   * }
+   * ```
+   */
+  key: string
+
+  /**
+   * Node instance to synchronize logs.
+   *
+   * ```js
+   * if (client.node.state === 'synchronized')
+   * ```
+   */
+  node: ServerNode
 
   /**
    * Unique node ID.
@@ -49,26 +75,6 @@ export class ServerClient {
   processing: boolean
 
   /**
-   * The Logux wrapper to WebSocket connection.
-   *
-   * ```js
-   * console.log(client.connection.ws.upgradeReq.headers)
-   * ```
-   */
-  connection: ServerConnection
-
-  /**
-   * Client number used as `app.connected` key.
-   *
-   * ```js
-   * function stillConnected (client) {
-   *   return app.connected.has(client.key)
-   * }
-   * ```
-   */
-  key: string
-
-  /**
    * Client IP address.
    *
    * ```js
@@ -78,22 +84,22 @@ export class ServerClient {
   remoteAddress: string
 
   /**
-   * HTTP headers of WS connection.
-   *
-   * ```js
-   * client.httpHeaders['User-Agent']
-   * ```
+   * User ID. It will be filled from client’s node ID.
+   * It will be undefined before correct authentication.
    */
-  httpHeaders: { [name: string]: string }
+  userId?: string
 
   /**
-   * Node instance to synchronize logs.
-   *
-   * ```js
-   * if (client.node.state === 'synchronized')
-   * ```
+   * @param app The server.
+   * @param connection The Logux connection.
+   * @param key Client number used as `app.connected` key.
    */
-  node: ServerNode
+  constructor(app: BaseServer, connection: ServerConnection, key: number)
+
+  /**
+   * Disconnect client.
+   */
+  destroy(): void
 
   /**
    * Check client subprotocol version. It uses `semver` npm package
@@ -109,9 +115,4 @@ export class ServerClient {
    * @returns Is version satisfies requirements.
    */
   isSubprotocol(range: string): boolean
-
-  /**
-   * Disconnect client.
-   */
-  destroy(): void
 }

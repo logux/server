@@ -1,9 +1,8 @@
 import type { ChildProcess, SpawnOptions } from 'child_process'
-
-import { it, expect, afterEach } from 'vitest'
-import { fileURLToPath } from 'url'
-import { join } from 'path'
 import spawn from 'cross-spawn'
+import { join } from 'path'
+import { fileURLToPath } from 'url'
+import { afterEach, expect, it } from 'vitest'
 
 import { Server } from '../index.js'
 
@@ -140,12 +139,12 @@ it('uses CLI args for options', () => {
 it('uses env for options', () => {
   let options = Server.loadOptions(
     fakeProcess([], {
-      LOGUX_HOST: '127.0.1.1',
-      LOGUX_PORT: '31337',
-      LOGUX_LOGGER: 'json',
-      LOGUX_REDIS: '//localhost',
       LOGUX_BACKEND: 'http://localhost:8080/logux',
-      LOGUX_CONTROL_SECRET: 'secret'
+      LOGUX_CONTROL_SECRET: 'secret',
+      LOGUX_HOST: '127.0.1.1',
+      LOGUX_LOGGER: 'json',
+      LOGUX_PORT: '31337',
+      LOGUX_REDIS: '//localhost'
     }),
     {
       subprotocol: '1.0.0',
@@ -164,7 +163,7 @@ it('uses env for options', () => {
 it('uses combined options', () => {
   let options = Server.loadOptions(
     fakeProcess(['', '--key', './key.pem'], { LOGUX_CERT: './cert.pem' }),
-    { subprotocol: '1.0.0', supports: '1.0.0', port: 31337 }
+    { port: 31337, subprotocol: '1.0.0', supports: '1.0.0' }
   )
 
   expect(options.port).toEqual(31337)
@@ -176,20 +175,20 @@ it('uses arg, env, options in given priority', () => {
   let options1 = Server.loadOptions(
     fakeProcess(['', '--port', '31337'], { LOGUX_PORT: 21337 }),
     {
+      port: 11337,
       subprotocol: '1.0.0',
-      supports: '1.0.0',
-      port: 11337
+      supports: '1.0.0'
     }
   )
   let options2 = Server.loadOptions(fakeProcess([], { LOGUX_PORT: 21337 }), {
+    port: 11337,
     subprotocol: '1.0.0',
-    supports: '1.0.0',
-    port: 11337
+    supports: '1.0.0'
   })
   let options3 = Server.loadOptions(fakeProcess(), {
+    port: 11337,
     subprotocol: '1.0.0',
-    supports: '1.0.0',
-    port: 11337
+    supports: '1.0.0'
   })
 
   expect(options1.port).toEqual(31337)

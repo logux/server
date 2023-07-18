@@ -1,30 +1,30 @@
-import type { SyncMapData, TestClient } from '../index.js'
-
 import {
   defineSyncMapActions,
   LoguxNotFoundError,
-  loguxSubscribed,
-  loguxProcessed
+  loguxProcessed,
+  loguxSubscribed
 } from '@logux/actions'
-import { it, expect, afterEach } from 'vitest'
 import { delay } from 'nanodelay'
+import { afterEach, expect, it } from 'vitest'
 
 import {
-  NoConflictResolution,
-  addSyncMapFilter,
-  TestServer,
   addSyncMap,
-  ChangedAt
+  addSyncMapFilter,
+  ChangedAt,
+  NoConflictResolution,
+  type SyncMapData,
+  type TestClient,
+  TestServer
 } from '../index.js'
 
 type TaskValue = {
-  text: string
   finished: boolean
+  text: string
 }
 
 type TaskRecord = TaskValue & {
-  textChanged: number
   finishedChanged: number
+  textChanged: number
 }
 
 let [
@@ -37,8 +37,8 @@ let [
 ] = defineSyncMapActions('tasks')
 
 type CommentValue = {
-  text?: string
   author?: string
+  text?: string
 }
 let [
   createComment,
@@ -69,28 +69,6 @@ function getServer(): TestServer {
       expect(typeof meta.id).toBe('string')
       return ctx.userId !== 'wrong' && id !== 'bad'
     },
-    load(ctx, id, since, action, meta) {
-      expect(typeof action.type).toBe('string')
-      expect(typeof meta.id).toBe('string')
-      expect(typeof ctx.userId).toBe('string')
-      let task = tasks.get(id)
-      if (!task) throw new LoguxNotFoundError()
-      return {
-        id,
-        text: ChangedAt(task.text, task.textChanged),
-        finished: ChangedAt(task.finished, task.finishedChanged)
-      }
-    },
-    create(ctx, id, fields, time, action, meta) {
-      expect(typeof action.type).toBe('string')
-      expect(typeof meta.id).toBe('string')
-      expect(typeof ctx.userId).toBe('string')
-      tasks.set(id, {
-        ...fields,
-        textChanged: time,
-        finishedChanged: time
-      })
-    },
     change(ctx, id, fields, time, action, meta) {
       expect(typeof action.type).toBe('string')
       expect(typeof meta.id).toBe('string')
@@ -108,11 +86,33 @@ function getServer(): TestServer {
         task.textChanged = time
       }
     },
+    create(ctx, id, fields, time, action, meta) {
+      expect(typeof action.type).toBe('string')
+      expect(typeof meta.id).toBe('string')
+      expect(typeof ctx.userId).toBe('string')
+      tasks.set(id, {
+        ...fields,
+        finishedChanged: time,
+        textChanged: time
+      })
+    },
     delete(ctx, id, action, meta) {
       expect(typeof action.type).toBe('string')
       expect(typeof meta.id).toBe('string')
       expect(typeof ctx.userId).toBe('string')
       tasks.delete(id)
+    },
+    load(ctx, id, since, action, meta) {
+      expect(typeof action.type).toBe('string')
+      expect(typeof meta.id).toBe('string')
+      expect(typeof ctx.userId).toBe('string')
+      let task = tasks.get(id)
+      if (!task) throw new LoguxNotFoundError()
+      return {
+        finished: ChangedAt(task.finished, task.finishedChanged),
+        id,
+        text: ChangedAt(task.text, task.textChanged)
+      }
     }
   })
   addSyncMapFilter<TaskValue>(server, 'tasks', {
@@ -140,9 +140,9 @@ function getServer(): TestServer {
           }
         }
         selected.push({
+          finished: ChangedAt(task.finished, task.finishedChanged),
           id,
-          text: ChangedAt(task.text, task.textChanged),
-          finished: ChangedAt(task.finished, task.finishedChanged)
+          text: ChangedAt(task.text, task.textChanged)
         })
       }
       return selected
@@ -168,7 +168,7 @@ it('checks SyncMap access', async () => {
   await server.expectDenied(() => correct.subscribe('tasks', { text: 'A' }))
   await server.expectDenied(() =>
     correct.process(
-      createdTask({ id: '10', fields: { text: 'One', finished: false } })
+      createdTask({ fields: { finished: false, text: 'One' }, id: '10' })
     )
   )
   await server.expectDenied(() => correct.process(deletedTask({ id: '10' })))
@@ -189,45 +189,45 @@ it('supports SyncMap', async () => {
   client2.log.keepActions()
 
   await client1.process(
-    createTask({ id: '10', fields: { text: 'One', finished: false } })
+    createTask({ fields: { finished: false, text: 'One' }, id: '10' })
   )
   expect(Object.fromEntries(tasks)).toEqual({
-    10: { text: 'One', finished: false, finishedChanged: 1, textChanged: 1 }
+    10: { finished: false, finishedChanged: 1, text: 'One', textChanged: 1 }
   })
 
   expect(await client1.subscribe('tasks/10')).toEqual([
-    changedTask({ id: '10', fields: { text: 'One', finished: false } })
+    changedTask({ fields: { finished: false, text: 'One' }, id: '10' })
   ])
   expect(getTime(client1, changedTask)).toEqual([1])
   await client2.subscribe('tasks/10')
 
   expect(
     await client2.collect(() =>
-      client1.process(changeTask({ id: '10', fields: { text: 'One1' } }))
+      client1.process(changeTask({ fields: { text: 'One1' }, id: '10' }))
     )
-  ).toEqual([changedTask({ id: '10', fields: { text: 'One1' } })])
+  ).toEqual([changedTask({ fields: { text: 'One1' }, id: '10' })])
   expect(Object.fromEntries(tasks)).toEqual({
-    10: { text: 'One1', finished: false, finishedChanged: 1, textChanged: 10 }
+    10: { finished: false, finishedChanged: 1, text: 'One1', textChanged: 10 }
   })
   expect(getTime(client2, changedTask)).toEqual([1, 10])
 
   expect(
     await client1.collect(async () => {
-      await client1.process(changeTask({ id: '10', fields: { text: 'One2' } }))
+      await client1.process(changeTask({ fields: { text: 'One2' }, id: '10' }))
     })
   ).toEqual([loguxProcessed({ id: '13 1:1:1 0' })])
 
-  await client1.process(changeTask({ id: '10', fields: { text: 'One0' } }), {
+  await client1.process(changeTask({ fields: { text: 'One0' }, id: '10' }), {
     time: 12
   })
   expect(Object.fromEntries(tasks)).toEqual({
-    10: { text: 'One2', finished: false, finishedChanged: 1, textChanged: 13 }
+    10: { finished: false, finishedChanged: 1, text: 'One2', textChanged: 13 }
   })
 
   let client3 = await server.connect('3')
   expect(
     await client3.subscribe('tasks/10', undefined, { id: '', time: 12 })
-  ).toEqual([changedTask({ id: '10', fields: { text: 'One2' } })])
+  ).toEqual([changedTask({ fields: { text: 'One2' }, id: '10' })])
 
   let client4 = await server.connect('3')
   expect(
@@ -244,28 +244,28 @@ it('supports SyncMap filters', async () => {
   expect(await client1.subscribe('tasks')).toEqual([])
   expect(
     await client1.process(
-      createTask({ id: '1', fields: { text: 'One', finished: false } })
+      createTask({ fields: { finished: false, text: 'One' }, id: '1' })
     )
   ).toEqual([loguxProcessed({ id: '3 1:1:1 0' })])
   await client1.process(
-    createTask({ id: '2', fields: { text: 'Two', finished: true } })
+    createTask({ fields: { finished: true, text: 'Two' }, id: '2' })
   )
   await client1.process(
-    createTask({ id: '3', fields: { text: 'Three', finished: false } })
+    createTask({ fields: { finished: false, text: 'Three' }, id: '3' })
   )
 
   expect(await client2.subscribe('tasks', { finished: false })).toEqual([
     loguxSubscribed({ channel: 'tasks/1' }),
     loguxSubscribed({ channel: 'tasks/3' }),
-    changedTask({ id: '1', fields: { text: 'One', finished: false } }),
-    changedTask({ id: '3', fields: { text: 'Three', finished: false } })
+    changedTask({ fields: { finished: false, text: 'One' }, id: '1' }),
+    changedTask({ fields: { finished: false, text: 'Three' }, id: '3' })
   ])
 
   expect(
     await client2.collect(async () => {
-      await client1.process(changeTask({ id: '1', fields: { text: 'One1' } }))
+      await client1.process(changeTask({ fields: { text: 'One1' }, id: '1' }))
     })
-  ).toEqual([changedTask({ id: '1', fields: { text: 'One1' } })])
+  ).toEqual([changedTask({ fields: { text: 'One1' }, id: '1' })])
 
   expect(
     await client2.collect(async () => {
@@ -273,24 +273,24 @@ it('supports SyncMap filters', async () => {
     })
   ).toEqual([deletedTask({ id: '3' })])
   expect(Object.fromEntries(tasks)).toEqual({
-    1: { text: 'One1', finished: false, finishedChanged: 3, textChanged: 18 },
-    2: { text: 'Two', finished: true, finishedChanged: 6, textChanged: 6 }
+    1: { finished: false, finishedChanged: 3, text: 'One1', textChanged: 18 },
+    2: { finished: true, finishedChanged: 6, text: 'Two', textChanged: 6 }
   })
 
   expect(
     await client2.collect(async () => {
       await client1.process(
-        createTask({ id: '4', fields: { text: 'Four', finished: false } })
+        createTask({ fields: { finished: false, text: 'Four' }, id: '4' })
       )
     })
   ).toEqual([
-    createdTask({ id: '4', fields: { text: 'Four', finished: false } })
+    createdTask({ fields: { finished: false, text: 'Four' }, id: '4' })
   ])
 
   expect(
     await client2.collect(async () => {
       await client1.process(
-        createTask({ id: '5', fields: { text: 'Five', finished: true } })
+        createTask({ fields: { finished: true, text: 'Five' }, id: '5' })
       )
     })
   ).toEqual([])
@@ -298,7 +298,7 @@ it('supports SyncMap filters', async () => {
   expect(
     await client2.collect(async () => {
       await client1.process(
-        createTask({ id: 'silence', fields: { text: 'S', finished: true } })
+        createTask({ fields: { finished: true, text: 'S' }, id: 'silence' })
       )
     })
   ).toEqual([])
@@ -312,19 +312,19 @@ it('supports SyncMap filters', async () => {
     loguxSubscribed({ channel: 'tasks/4' }),
     loguxSubscribed({ channel: 'tasks/5' }),
     loguxSubscribed({ channel: 'tasks/silence' }),
-    changedTask({ id: '1', fields: { text: 'One1' } }),
-    changedTask({ id: '4', fields: { text: 'Four', finished: false } }),
-    changedTask({ id: '5', fields: { text: 'Five', finished: true } }),
-    changedTask({ id: 'silence', fields: { text: 'S', finished: true } })
+    changedTask({ fields: { text: 'One1' }, id: '1' }),
+    changedTask({ fields: { finished: false, text: 'Four' }, id: '4' }),
+    changedTask({ fields: { finished: true, text: 'Five' }, id: '5' }),
+    changedTask({ fields: { finished: true, text: 'S' }, id: 'silence' })
   ])
 
   expect(
     await client3.collect(async () => {
       await client1.process(
-        createTask({ id: '6', fields: { text: 'Six', finished: true } })
+        createTask({ fields: { finished: true, text: 'Six' }, id: '6' })
       )
     })
-  ).toEqual([createdTask({ id: '6', fields: { text: 'Six', finished: true } })])
+  ).toEqual([createdTask({ fields: { finished: true, text: 'Six' }, id: '6' })])
 })
 
 it('supports simpler SyncMap', async () => {
@@ -336,15 +336,15 @@ it('supports simpler SyncMap', async () => {
     load(ctx, id, since) {
       if (since) {
         return {
+          author: NoConflictResolution('A'),
           id,
-          text: NoConflictResolution('updated'),
-          author: NoConflictResolution('A')
+          text: NoConflictResolution('updated')
         }
       }
       return {
+        author: NoConflictResolution('A'),
         id,
-        text: NoConflictResolution('full'),
-        author: NoConflictResolution('A')
+        text: NoConflictResolution('full')
       }
     }
   })
@@ -360,19 +360,19 @@ it('supports simpler SyncMap', async () => {
   let client1 = await server.connect('1')
 
   expect(await client1.subscribe('comments/1')).toEqual([
-    changedComment({ id: '1', fields: { text: 'full', author: 'A' } })
+    changedComment({ fields: { author: 'A', text: 'full' }, id: '1' })
   ])
   expect(
     await client1.subscribe('comments/2', undefined, { id: '', time: 2 })
   ).toEqual([
-    changedComment({ id: '2', fields: { text: 'updated', author: 'A' } })
+    changedComment({ fields: { author: 'A', text: 'updated' }, id: '2' })
   ])
 
   let client2 = await server.connect('2')
   await client2.subscribe('comments')
   await client2.collect(() =>
     server.process(
-      changedComment({ id: '10', fields: { text: '2', author: 'A' } })
+      changedComment({ fields: { author: 'A', text: '2' }, id: '10' })
     )
   )
 })
@@ -383,17 +383,17 @@ it('allows to disable changes', async () => {
     access() {
       return true
     },
-    load(ctx, id) {
-      return { id }
+    change(ctx, id) {
+      return id !== 'bad'
     },
     create(ctx, id) {
       return id !== 'bad'
     },
-    change(ctx, id) {
-      return id !== 'bad'
-    },
     delete(ctx, id) {
       return id !== 'bad'
+    },
+    load(ctx, id) {
+      return { id }
     }
   })
   addSyncMapFilter<CommentValue>(server, 'comments', {
@@ -413,16 +413,16 @@ it('allows to disable changes', async () => {
   await client2.subscribe('comments/bad')
   expect(
     await client2.collect(async () => {
-      await client1.process(createComment({ id: 'good', fields: {} }))
-      await client1.process(changeComment({ id: 'good', fields: {} }))
+      await client1.process(createComment({ fields: {}, id: 'good' }))
+      await client1.process(changeComment({ fields: {}, id: 'good' }))
       await client1.process(deleteComment({ id: 'good' }))
-      await client1.process(createComment({ id: 'bad', fields: {} }))
-      await client1.process(changeComment({ id: 'bad', fields: {} }))
+      await client1.process(createComment({ fields: {}, id: 'bad' }))
+      await client1.process(changeComment({ fields: {}, id: 'bad' }))
       await client1.process(deleteComment({ id: 'bad' }))
     })
   ).toEqual([
-    createdComment({ id: 'good', fields: {} }),
-    changedComment({ id: 'good', fields: {} }),
+    createdComment({ fields: {}, id: 'good' }),
+    changedComment({ fields: {}, id: 'good' }),
     deletedComment({ id: 'good' })
   ])
 })
@@ -443,16 +443,16 @@ it('does not load data on creating', async () => {
   let client = await server.connect('1')
 
   await client.log.add({
-    type: 'logux/subscribe',
-    channel: 'comments/new'
+    channel: 'comments/new',
+    type: 'logux/subscribe'
   })
   await delay(10)
   expect(loaded).toBe(1)
 
   await client.log.add({
-    type: 'logux/subscribe',
     channel: 'comments/new',
-    creating: true
+    creating: true,
+    type: 'logux/subscribe'
   })
   await delay(10)
   expect(loaded).toBe(1)

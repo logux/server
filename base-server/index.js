@@ -1,18 +1,18 @@
-import { ServerConnection, MemoryStore, Log, parseId } from '@logux/core'
 import { LoguxNotFoundError } from '@logux/actions'
-import { createNanoEvents } from 'nanoevents'
-import { WebSocketServer } from 'ws'
+import { Log, MemoryStore, parseId, ServerConnection } from '@logux/core'
 import { promises as fs } from 'fs'
-import { fileURLToPath } from 'url'
-import { join, dirname } from 'path'
-import UrlPattern from 'url-pattern'
+import { createNanoEvents } from 'nanoevents'
 import { nanoid } from 'nanoid'
+import { dirname, join } from 'path'
+import { fileURLToPath } from 'url'
+import UrlPattern from 'url-pattern'
+import { WebSocketServer } from 'ws'
 
-import { bindControlServer } from '../bind-control-server/index.js'
 import { bindBackendProxy } from '../bind-backend-proxy/index.js'
+import { bindControlServer } from '../bind-control-server/index.js'
+import { Context } from '../context/index.js'
 import { createHttpServer } from '../create-http-server/index.js'
 import { ServerClient } from '../server-client/index.js'
-import { Context } from '../context/index.js'
 
 const SKIP_PROCESS = Symbol('skipProcess')
 const RESEND_META = ['channels', 'users', 'clients', 'nodes']
@@ -141,9 +141,9 @@ export class BaseServer {
 
     let log
     if (this.options.time) {
-      log = this.options.time.nextLog({ store, nodeId: this.nodeId })
+      log = this.options.time.nextLog({ nodeId: this.nodeId, store })
     } else {
-      log = new Log({ store, nodeId: this.nodeId })
+      log = new Log({ nodeId: this.nodeId, store })
     }
 
     this.logger = console
@@ -272,13 +272,13 @@ export class BaseServer {
     })
     this.on('error', (err, action, meta) => {
       if (meta) {
-        this.emitter.emit('report', 'error', { err, actionId: meta.id })
+        this.emitter.emit('report', 'error', { actionId: meta.id, err })
       } else if (err.nodeId) {
         this.emitter.emit('report', 'error', { err, nodeId: err.nodeId })
       } else if (err.connectionId) {
         this.emitter.emit('report', 'error', {
-          err,
-          connectionId: err.connectionId
+          connectionId: err.connectionId,
+          err
         })
       }
       if (this.env === 'development') this.debugError(err)
@@ -288,8 +288,8 @@ export class BaseServer {
         this.emitter.emit('report', 'clientError', { err, nodeId: err.nodeId })
       } else if (err.connectionId) {
         this.emitter.emit('report', 'clientError', {
-          err,
-          connectionId: err.connectionId
+          connectionId: err.connectionId,
+          err
         })
       }
     })
@@ -335,20 +335,20 @@ export class BaseServer {
 
     this.controls = {
       'GET /': {
-        safe: true,
         async request() {
           return {
-            headers: { 'Content-Type': 'text/html' },
-            body: await readHello()
+            body: await readHello(),
+            headers: { 'Content-Type': 'text/html' }
           }
-        }
+        },
+        safe: true
       },
       'GET /health': {
-        safe: true,
         request: () => ({
-          headers: { 'Content-Type': 'text/plain' },
-          body: 'Logux Server: OK\n'
-        })
+          body: 'Logux Server: OK\n',
+          headers: { 'Content-Type': 'text/plain' }
+        }),
+        safe: true
       }
     }
 
@@ -375,8 +375,117 @@ export class BaseServer {
     )
   }
 
+  addClient(connection) {
+    this.lastClient += 1
+    let key = this.lastClient.toString()
+    let client = new ServerClient(this, connection, key)
+    this.connected.set(key, client)
+    return this.lastClient
+  }
+
   auth(authenticator) {
     this.authenticator = authenticator
+  }
+
+  buildUndo(action, meta, reason, extra) {
+    let undoMeta = { status: 'processed' }
+
+    if (meta.users) undoMeta.users = meta.users.slice(0)
+    if (meta.nodes) undoMeta.nodes = meta.nodes.slice(0)
+    if (meta.clients) undoMeta.clients = meta.clients.slice(0)
+    if (meta.reasons) undoMeta.reasons = meta.reasons.slice(0)
+    if (meta.channels) undoMeta.channels = meta.channels.slice(0)
+    if (meta.excludeClients) {
+      undoMeta.excludeClients = meta.excludeClients.slice(0)
+    }
+
+    let undoAction = {
+      ...extra,
+      action,
+      id: meta.id,
+      reason,
+      type: 'logux/undo'
+    }
+    return [undoAction, undoMeta]
+  }
+
+  channel(pattern, callbacks) {
+    normalizeChannelCallbacks(`Channel ${pattern}`, callbacks)
+    let channel = Object.assign({}, callbacks)
+    if (typeof pattern === 'string') {
+      channel.pattern = new UrlPattern(pattern, {
+        segmentValueCharset: '^/'
+      })
+    } else {
+      channel.regexp = pattern
+    }
+    this.channels.push(channel)
+  }
+
+  createContext(action, meta) {
+    let context = this.contexts.get(action)
+    if (!context) {
+      context = new Context(this, meta)
+      this.contexts.set(action, context)
+    }
+    return context
+  }
+
+  debugActionError(meta, msg) {
+    if (this.env === 'development') {
+      let clientId = parseId(meta.id).clientId
+      if (this.clientIds.has(clientId)) {
+        this.clientIds.get(clientId).connection.send(['debug', 'error', msg])
+      }
+    }
+  }
+
+  debugError(error) {
+    for (let i of this.connected.values()) {
+      if (i.connection.connected) {
+        try {
+          i.connection.send(['debug', 'error', error.stack])
+        } catch {}
+      }
+    }
+  }
+
+  denyAction(action, meta) {
+    this.emitter.emit('report', 'denied', { actionId: meta.id })
+    this.undo(action, meta, 'denied')
+    this.debugActionError(meta, `Action "${meta.id}" was denied`)
+  }
+
+  destroy() {
+    this.destroying = true
+    this.emitter.emit('report', 'destroy')
+    return Promise.all(this.unbind.map(i => i()))
+  }
+
+  finally(processor, ctx, action, meta) {
+    this.contexts.delete(action)
+    if (processor && processor.finally) {
+      try {
+        processor.finally(ctx, action, meta)
+      } catch (err) {
+        this.emitter.emit('error', err, action, meta)
+      }
+    }
+  }
+
+  getProcessor(type) {
+    return (
+      this.types[type] || this.getRegexProcessor(type) || this.otherProcessor
+    )
+  }
+
+  getRegexProcessor(type) {
+    for (let regexp of this.regexTypes.keys()) {
+      if (type.match(regexp) !== null) {
+        return this.regexTypes.get(regexp)
+      }
+    }
+    return undefined
   }
 
   http(listener) {
@@ -386,6 +495,48 @@ export class BaseServer {
       )
     }
     this.httpListener = listener
+  }
+
+  internalUnkownType(action, meta) {
+    this.contexts.delete(action)
+    this.log.changeMeta(meta.id, { status: 'error' })
+    this.emitter.emit('report', 'unknownType', {
+      actionId: meta.id,
+      type: action.type
+    })
+    if (parseId(meta.id).userId !== 'server') {
+      this.undo(action, meta, 'unknownType')
+    }
+    this.debugActionError(meta, `Action with unknown type ${action.type}`)
+  }
+
+  internalWrongChannel(action, meta) {
+    this.contexts.delete(action)
+    this.emitter.emit('report', 'wrongChannel', {
+      actionId: meta.id,
+      channel: action.channel
+    })
+    this.undo(action, meta, 'wrongChannel')
+    this.debugActionError(meta, `Wrong channel name ${action.channel}`)
+  }
+
+  isBruteforce(ip) {
+    let attempts = this.authAttempts[ip]
+    return attempts && attempts >= 3
+  }
+
+  isUseless(action, meta) {
+    if (
+      meta.status !== 'processed' ||
+      this.types[action.type] ||
+      this.getRegexProcessor(action.type)
+    ) {
+      return false
+    }
+    for (let i of ['channels', 'nodes', 'clients', 'users']) {
+      if (Array.isArray(meta[i]) && meta[i].length > 0) return false
+    }
+    return true
   }
 
   async listen() {
@@ -430,21 +581,32 @@ export class BaseServer {
       this.addClient(new ServerConnection(ws))
     })
     this.emitter.emit('report', 'listen', {
-      controlSecret: this.options.controlSecret,
-      controlMask: this.options.controlMask,
-      loguxServer: pkg.version,
-      environment: this.env,
-      subprotocol: this.options.subprotocol,
-      supports: this.options.supports,
       backend: this.options.backend,
-      server: !!this.options.server,
-      nodeId: this.nodeId,
-      redis: this.options.redis,
-      notes: this.listenNotes,
       cert: !!this.options.cert,
+      controlMask: this.options.controlMask,
+      controlSecret: this.options.controlSecret,
+      environment: this.env,
       host: this.options.host,
-      port: this.options.port
+      loguxServer: pkg.version,
+      nodeId: this.nodeId,
+      notes: this.listenNotes,
+      port: this.options.port,
+      redis: this.options.redis,
+      server: !!this.options.server,
+      subprotocol: this.options.subprotocol,
+      supports: this.options.supports
     })
+  }
+
+  markAsProcessed(meta) {
+    this.log.changeMeta(meta.id, { status: 'processed' })
+    let data = parseId(meta.id)
+    if (data.userId !== 'server') {
+      this.log.add(
+        { id: meta.id, type: 'logux/processed' },
+        { clients: [data.clientId], status: 'processed' }
+      )
+    }
   }
 
   on(event, listener) {
@@ -453,47 +615,6 @@ export class BaseServer {
     } else {
       return this.emitter.on(event, listener)
     }
-  }
-
-  destroy() {
-    this.destroying = true
-    this.emitter.emit('report', 'destroy')
-    return Promise.all(this.unbind.map(i => i()))
-  }
-
-  type(name, callbacks) {
-    if (typeof name === 'function') name = name.type
-    normalizeTypeCallbacks(`Action type ${name}`, callbacks)
-
-    if (name instanceof RegExp) {
-      this.regexTypes.set(name, callbacks)
-    } else {
-      if (this.types[name]) {
-        throw new Error(`Action type ${name} was already defined`)
-      }
-      this.types[name] = callbacks
-    }
-  }
-
-  otherType(callbacks) {
-    if (this.otherProcessor) {
-      throw new Error('Callbacks for unknown types are already defined')
-    }
-    normalizeTypeCallbacks('Unknown type', callbacks)
-    this.otherProcessor = callbacks
-  }
-
-  channel(pattern, callbacks) {
-    normalizeChannelCallbacks(`Channel ${pattern}`, callbacks)
-    let channel = Object.assign({}, callbacks)
-    if (typeof pattern === 'string') {
-      channel.pattern = new UrlPattern(pattern, {
-        segmentValueCharset: '^/'
-      })
-    } else {
-      channel.regexp = pattern
-    }
-    this.channels.push(channel)
   }
 
   otherChannel(callbacks) {
@@ -508,6 +629,39 @@ export class BaseServer {
       }
     }
     this.otherSubscriber = channel
+  }
+
+  otherType(callbacks) {
+    if (this.otherProcessor) {
+      throw new Error('Callbacks for unknown types are already defined')
+    }
+    normalizeTypeCallbacks('Unknown type', callbacks)
+    this.otherProcessor = callbacks
+  }
+
+  performUnsubscribe(clientNodeId, action, meta) {
+    if (this.subscribers[action.channel]) {
+      let subscriber = this.subscribers[action.channel][clientNodeId]
+      if (subscriber) {
+        if (subscriber.unsubscribe) {
+          subscriber.unsubscribe(action, meta)
+          this.contexts.delete(action)
+        }
+        let filterId = subscriberFilterId(action)
+        delete subscriber.filters[filterId]
+        if (Object.keys(subscriber.filters).length === 0) {
+          delete this.subscribers[action.channel][clientNodeId]
+        }
+        if (Object.keys(this.subscribers[action.channel]).length === 0) {
+          delete this.subscribers[action.channel]
+        }
+      }
+    }
+    this.emitter.emit('unsubscribed', action, meta)
+    this.emitter.emit('report', 'unsubscribed', {
+      actionId: meta.id,
+      channel: action.channel
+    })
   }
 
   process(action, meta = {}) {
@@ -530,30 +684,54 @@ export class BaseServer {
     })
   }
 
-  undo(action, meta, reason = 'error', extra = {}) {
-    let clientId = parseId(meta.id).clientId
-    let [undoAction, undoMeta] = this.buildUndo(action, meta, reason, extra)
-    undoMeta.clients = (undoMeta.clients || []).concat([clientId])
-    return this.log.add(undoAction, undoMeta)
-  }
+  async processAction(processor, action, meta, start) {
+    let ctx = this.createContext(action, meta)
 
-  debugError(error) {
-    for (let i of this.connected.values()) {
-      if (i.connection.connected) {
-        try {
-          i.connection.send(['debug', 'error', error.stack])
-        } catch {}
-      }
+    let latency
+    this.processing += 1
+    try {
+      await processor.process(ctx, action, meta)
+      latency = Date.now() - start
+      this.markAsProcessed(meta)
+    } catch (e) {
+      this.log.changeMeta(meta.id, { status: 'error' })
+      this.undo(action, meta, 'error')
+      this.emitter.emit('error', e, action, meta)
+    } finally {
+      this.finally(processor, ctx, action, meta)
     }
+    if (typeof latency === 'undefined') latency = Date.now() - start
+    this.processing -= 1
+    this.emitter.emit('processed', action, meta, latency)
   }
 
-  subscribe(nodeId, channel) {
-    if (!this.subscribers[channel] || !this.subscribers[channel][nodeId]) {
-      if (!this.subscribers[channel]) {
-        this.subscribers[channel] = {}
+  rememberBadAuth(ip) {
+    this.authAttempts[ip] = (this.authAttempts[ip] || 0) + 1
+    this.setTimeout(() => {
+      if (this.authAttempts[ip] === 1) {
+        delete this.authAttempts[ip]
+      } else {
+        this.authAttempts[ip] -= 1
       }
-      this.subscribers[channel][nodeId] = { filters: { '{}': true } }
-      this.log.add({ type: 'logux/subscribed', channel }, { nodes: [nodeId] })
+    }, 3000)
+  }
+
+  replaceResendShortcuts(meta) {
+    if (meta.channel) {
+      meta.channels = [meta.channel]
+      delete meta.channel
+    }
+    if (meta.user) {
+      meta.users = [meta.user]
+      delete meta.user
+    }
+    if (meta.client) {
+      meta.clients = [meta.client]
+      delete meta.client
+    }
+    if (meta.node) {
+      meta.nodes = [meta.node]
+      delete meta.node
     }
   }
 
@@ -623,86 +801,23 @@ export class BaseServer {
     }
   }
 
-  addClient(connection) {
-    this.lastClient += 1
-    let key = this.lastClient.toString()
-    let client = new ServerClient(this, connection, key)
-    this.connected.set(key, client)
-    return this.lastClient
+  setTimeout(callback, ms) {
+    this.lastTimeout += 1
+    let id = this.lastTimeout
+    this.timeouts[id] = setTimeout(() => {
+      delete this.timeouts[id]
+      callback()
+    }, ms)
   }
 
-  unknownType(action, meta) {
-    this.internalUnkownType(action, meta)
-    this.unknownTypes[meta.id] = true
-  }
-
-  wrongChannel(action, meta) {
-    this.internalWrongChannel(action, meta)
-    this.wrongChannels[meta.id] = true
-  }
-
-  internalUnkownType(action, meta) {
-    this.contexts.delete(action)
-    this.log.changeMeta(meta.id, { status: 'error' })
-    this.emitter.emit('report', 'unknownType', {
-      type: action.type,
-      actionId: meta.id
-    })
-    if (parseId(meta.id).userId !== 'server') {
-      this.undo(action, meta, 'unknownType')
+  subscribe(nodeId, channel) {
+    if (!this.subscribers[channel] || !this.subscribers[channel][nodeId]) {
+      if (!this.subscribers[channel]) {
+        this.subscribers[channel] = {}
+      }
+      this.subscribers[channel][nodeId] = { filters: { '{}': true } }
+      this.log.add({ channel, type: 'logux/subscribed' }, { nodes: [nodeId] })
     }
-    this.debugActionError(meta, `Action with unknown type ${action.type}`)
-  }
-
-  internalWrongChannel(action, meta) {
-    this.contexts.delete(action)
-    this.emitter.emit('report', 'wrongChannel', {
-      actionId: meta.id,
-      channel: action.channel
-    })
-    this.undo(action, meta, 'wrongChannel')
-    this.debugActionError(meta, `Wrong channel name ${action.channel}`)
-  }
-
-  async processAction(processor, action, meta, start) {
-    let ctx = this.createContext(action, meta)
-
-    let latency
-    this.processing += 1
-    try {
-      await processor.process(ctx, action, meta)
-      latency = Date.now() - start
-      this.markAsProcessed(meta)
-    } catch (e) {
-      this.log.changeMeta(meta.id, { status: 'error' })
-      this.undo(action, meta, 'error')
-      this.emitter.emit('error', e, action, meta)
-    } finally {
-      this.finally(processor, ctx, action, meta)
-    }
-    if (typeof latency === 'undefined') latency = Date.now() - start
-    this.processing -= 1
-    this.emitter.emit('processed', action, meta, latency)
-  }
-
-  markAsProcessed(meta) {
-    this.log.changeMeta(meta.id, { status: 'processed' })
-    let data = parseId(meta.id)
-    if (data.userId !== 'server') {
-      this.log.add(
-        { type: 'logux/processed', id: meta.id },
-        { clients: [data.clientId], status: 'processed' }
-      )
-    }
-  }
-
-  createContext(action, meta) {
-    let context = this.contexts.get(action)
-    if (!context) {
-      context = new Context(this, meta)
-      this.contexts.set(action, context)
-    }
-    return context
   }
 
   async subscribeAction(action, meta, start) {
@@ -809,29 +924,30 @@ export class BaseServer {
     if (!match) this.wrongChannel(action, meta)
   }
 
-  performUnsubscribe(clientNodeId, action, meta) {
-    if (this.subscribers[action.channel]) {
-      let subscriber = this.subscribers[action.channel][clientNodeId]
-      if (subscriber) {
-        if (subscriber.unsubscribe) {
-          subscriber.unsubscribe(action, meta)
-          this.contexts.delete(action)
-        }
-        let filterId = subscriberFilterId(action)
-        delete subscriber.filters[filterId]
-        if (Object.keys(subscriber.filters).length === 0) {
-          delete this.subscribers[action.channel][clientNodeId]
-        }
-        if (Object.keys(this.subscribers[action.channel]).length === 0) {
-          delete this.subscribers[action.channel]
-        }
+  type(name, callbacks) {
+    if (typeof name === 'function') name = name.type
+    normalizeTypeCallbacks(`Action type ${name}`, callbacks)
+
+    if (name instanceof RegExp) {
+      this.regexTypes.set(name, callbacks)
+    } else {
+      if (this.types[name]) {
+        throw new Error(`Action type ${name} was already defined`)
       }
+      this.types[name] = callbacks
     }
-    this.emitter.emit('unsubscribed', action, meta)
-    this.emitter.emit('report', 'unsubscribed', {
-      actionId: meta.id,
-      channel: action.channel
-    })
+  }
+
+  undo(action, meta, reason = 'error', extra = {}) {
+    let clientId = parseId(meta.id).clientId
+    let [undoAction, undoMeta] = this.buildUndo(action, meta, reason, extra)
+    undoMeta.clients = (undoMeta.clients || []).concat([clientId])
+    return this.log.add(undoAction, undoMeta)
+  }
+
+  unknownType(action, meta) {
+    this.internalUnkownType(action, meta)
+    this.unknownTypes[meta.id] = true
   }
 
   unsubscribe(action, meta) {
@@ -851,124 +967,8 @@ export class BaseServer {
     this.contexts.delete(action)
   }
 
-  denyAction(action, meta) {
-    this.emitter.emit('report', 'denied', { actionId: meta.id })
-    this.undo(action, meta, 'denied')
-    this.debugActionError(meta, `Action "${meta.id}" was denied`)
-  }
-
-  debugActionError(meta, msg) {
-    if (this.env === 'development') {
-      let clientId = parseId(meta.id).clientId
-      if (this.clientIds.has(clientId)) {
-        this.clientIds.get(clientId).connection.send(['debug', 'error', msg])
-      }
-    }
-  }
-
-  setTimeout(callback, ms) {
-    this.lastTimeout += 1
-    let id = this.lastTimeout
-    this.timeouts[id] = setTimeout(() => {
-      delete this.timeouts[id]
-      callback()
-    }, ms)
-  }
-
-  isUseless(action, meta) {
-    if (
-      meta.status !== 'processed' ||
-      this.types[action.type] ||
-      this.getRegexProcessor(action.type)
-    ) {
-      return false
-    }
-    for (let i of ['channels', 'nodes', 'clients', 'users']) {
-      if (Array.isArray(meta[i]) && meta[i].length > 0) return false
-    }
-    return true
-  }
-
-  rememberBadAuth(ip) {
-    this.authAttempts[ip] = (this.authAttempts[ip] || 0) + 1
-    this.setTimeout(() => {
-      if (this.authAttempts[ip] === 1) {
-        delete this.authAttempts[ip]
-      } else {
-        this.authAttempts[ip] -= 1
-      }
-    }, 3000)
-  }
-
-  isBruteforce(ip) {
-    let attempts = this.authAttempts[ip]
-    return attempts && attempts >= 3
-  }
-
-  getProcessor(type) {
-    return (
-      this.types[type] || this.getRegexProcessor(type) || this.otherProcessor
-    )
-  }
-
-  getRegexProcessor(type) {
-    for (let regexp of this.regexTypes.keys()) {
-      if (type.match(regexp) !== null) {
-        return this.regexTypes.get(regexp)
-      }
-    }
-    return undefined
-  }
-
-  finally(processor, ctx, action, meta) {
-    this.contexts.delete(action)
-    if (processor && processor.finally) {
-      try {
-        processor.finally(ctx, action, meta)
-      } catch (err) {
-        this.emitter.emit('error', err, action, meta)
-      }
-    }
-  }
-
-  buildUndo(action, meta, reason, extra) {
-    let undoMeta = { status: 'processed' }
-
-    if (meta.users) undoMeta.users = meta.users.slice(0)
-    if (meta.nodes) undoMeta.nodes = meta.nodes.slice(0)
-    if (meta.clients) undoMeta.clients = meta.clients.slice(0)
-    if (meta.reasons) undoMeta.reasons = meta.reasons.slice(0)
-    if (meta.channels) undoMeta.channels = meta.channels.slice(0)
-    if (meta.excludeClients) {
-      undoMeta.excludeClients = meta.excludeClients.slice(0)
-    }
-
-    let undoAction = {
-      ...extra,
-      type: 'logux/undo',
-      id: meta.id,
-      action,
-      reason
-    }
-    return [undoAction, undoMeta]
-  }
-
-  replaceResendShortcuts(meta) {
-    if (meta.channel) {
-      meta.channels = [meta.channel]
-      delete meta.channel
-    }
-    if (meta.user) {
-      meta.users = [meta.user]
-      delete meta.user
-    }
-    if (meta.client) {
-      meta.clients = [meta.client]
-      delete meta.client
-    }
-    if (meta.node) {
-      meta.nodes = [meta.node]
-      delete meta.node
-    }
+  wrongChannel(action, meta) {
+    this.internalWrongChannel(action, meta)
+    this.wrongChannels[meta.id] = true
   }
 }

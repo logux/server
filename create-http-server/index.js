@@ -1,7 +1,7 @@
-import { isAbsolute, join } from 'path'
 import { promises as fs } from 'fs'
-import https from 'https'
 import http from 'http'
+import https from 'https'
+import { isAbsolute, join } from 'path'
 
 const PEM_PREAMBLE = '-----BEGIN'
 
@@ -30,9 +30,9 @@ export async function createHttpServer(opts) {
     if (cert && !isPem(cert)) cert = await readFrom(opts.root, cert)
 
     if (key && key.pem) {
-      server = https.createServer({ key: key.pem, cert })
+      server = https.createServer({ cert, key: key.pem })
     } else if (key) {
-      server = https.createServer({ key, cert })
+      server = https.createServer({ cert, key })
     } else {
       server = http.createServer()
     }

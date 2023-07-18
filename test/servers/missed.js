@@ -4,8 +4,8 @@ import { Server } from '../../index.js'
 
 let app = new Server(
   Server.loadOptions(process, {
-    subprotocol: '1.0.0',
-    host: '127.0.0.1'
+    host: '127.0.0.1',
+    subprotocol: '1.0.0'
   })
 )
 app.nodeId = 'server:FnXaqDxY'

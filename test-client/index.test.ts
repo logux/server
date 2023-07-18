@@ -1,13 +1,10 @@
-import type { Spy } from 'nanospy'
 import type { LoguxSubscribeAction } from '@logux/actions'
-import type { LoguxActionError } from '../index.js'
-
-import { spyOn, restoreAll } from 'nanospy'
-import { it, expect, afterEach } from 'vitest'
 import { TestTime } from '@logux/core'
 import { delay } from 'nanodelay'
+import { restoreAll, type Spy, spyOn } from 'nanospy'
+import { afterEach, expect, it } from 'vitest'
 
-import { TestClient, TestServer } from '../index.js'
+import { type LoguxActionError, TestClient, TestServer } from '../index.js'
 
 let server: TestServer
 afterEach(() => {
@@ -69,13 +66,13 @@ it('sends and collect actions', async () => {
   })
   expect(received).toEqual([
     { type: 'BAR' },
-    { type: 'logux/processed', id: '1 10:1:1 0' },
+    { id: '1 10:1:1 0', type: 'logux/processed' },
     { type: 'RESEND' }
   ])
   expect(client1.log.actions()).toEqual([
     { type: 'FOO' },
     { type: 'BAR' },
-    { type: 'logux/processed', id: '1 10:1:1 0' },
+    { id: '1 10:1:1 0', type: 'logux/processed' },
     { type: 'RESEND' }
   ])
 })
@@ -112,7 +109,7 @@ it('tracks action processing', async () => {
   let client = await server.connect('10')
 
   let processed = await client.process({ type: 'FOO' })
-  expect(processed).toEqual([{ type: 'logux/processed', id: '1 10:1:1 0' }])
+  expect(processed).toEqual([{ id: '1 10:1:1 0', type: 'logux/processed' }])
 
   let notDenied = await catchError(async () => {
     await server.expectDenied(() => client.process({ type: 'FOO' }))
@@ -122,10 +119,10 @@ it('tracks action processing', async () => {
   let serverError = await catchError(() => client.process({ type: 'ERR' }))
   expect(serverError.message).toEqual('test')
   expect(serverError.action).toEqual({
-    type: 'logux/undo',
+    action: { type: 'ERR' },
     id: '5 10:1:1 0',
     reason: 'error',
-    action: { type: 'ERR' }
+    type: 'logux/undo'
   })
 
   let accessError = await catchError(() => client.process({ type: 'DENIED' }))
@@ -189,7 +186,7 @@ it('detects action ID duplicate', async () => {
   client.log.keepActions()
 
   let processed = await client.process({ type: 'FOO' }, { id: '1 10:1:1 0' })
-  expect(processed).toEqual([{ type: 'logux/processed', id: '1 10:1:1 0' }])
+  expect(processed).toEqual([{ id: '1 10:1:1 0', type: 'logux/processed' }])
 
   let err = await catchError(async () => {
     await client.process({ type: 'FOO' }, { id: '1 10:1:1 0' })
@@ -202,24 +199,24 @@ it('tracks subscriptions', async () => {
   server.channel<{}, {}, LoguxSubscribeAction>('foo', {
     access: () => true,
     load(ctx, action) {
-      ctx.sendBack({ type: 'FOO', a: action.filter?.a, since: action.since })
+      ctx.sendBack({ a: action.filter?.a, since: action.since, type: 'FOO' })
     }
   })
   let client = await server.connect('10')
   let actions1 = await client.subscribe('foo')
-  expect(actions1).toEqual([{ type: 'FOO', a: undefined }])
+  expect(actions1).toEqual([{ a: undefined, type: 'FOO' }])
 
   await client.unsubscribe('foo')
   expect(privateMethods(server).subscribers).toEqual({})
 
   let actions2 = await client.subscribe('foo', { a: 1 })
-  expect(actions2).toEqual([{ type: 'FOO', a: 1 }])
+  expect(actions2).toEqual([{ a: 1, type: 'FOO' }])
 
   let actions3 = await client.subscribe('foo', undefined, {
     id: '1 1:0:0',
     time: 1
   })
-  expect(actions3).toEqual([{ type: 'FOO', since: { id: '1 1:0:0', time: 1 } }])
+  expect(actions3).toEqual([{ since: { id: '1 1:0:0', time: 1 }, type: 'FOO' }])
 
   await client.unsubscribe('foo', { a: 1 })
   expect(privateMethods(server).subscribers).toEqual({
@@ -236,11 +233,11 @@ it('tracks subscriptions', async () => {
   expect(privateMethods(server).subscribers).toEqual({})
 
   let actions4 = await client.subscribe({
-    type: 'logux/subscribe',
     channel: 'foo',
-    filter: { a: 2 }
+    filter: { a: 2 },
+    type: 'logux/subscribe'
   })
-  expect(actions4).toEqual([{ type: 'FOO', a: 2 }])
+  expect(actions4).toEqual([{ a: 2, type: 'FOO' }])
 
   let unknownError = await catchError(() => client.subscribe('unknown'))
   expect(unknownError.message).toEqual(
@@ -263,7 +260,7 @@ it('prints server log', async () => {
 it('tests authentication', async () => {
   server = new TestServer()
   server.options.supports = '0.0.0'
-  server.auth(({ userId, token }) => userId === '10' && token === 'good')
+  server.auth(({ token, userId }) => userId === '10' && token === 'good')
 
   let wrong = await catchError(async () => {
     await server.connect('10', { token: 'bad' })
@@ -333,7 +330,7 @@ it('collects received actions', async () => {
   })
   expect(actions).toEqual([
     { type: 'bar' },
-    { type: 'logux/processed', id: '1 10:1:1 0' }
+    { id: '1 10:1:1 0', type: 'logux/processed' }
   ])
 })
 

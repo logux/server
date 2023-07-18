@@ -1,9 +1,7 @@
 import type { Action } from '@logux/core'
-import type { ServerMeta } from '../index.js'
+import { beforeEach, expect, it } from 'vitest'
 
-import { it, expect, beforeEach } from 'vitest'
-
-import { Context } from '../index.js'
+import { Context, type ServerMeta } from '../index.js'
 
 let added: [Action, ServerMeta][] = []
 
@@ -11,7 +9,7 @@ const FAKE_SERVER: any = {
   clientIds: new Map([
     [
       '20:client',
-      { node: { remoteSubprotocol: '2.0.0', remoteHeaders: { locale: 'fr' } } }
+      { node: { remoteHeaders: { locale: 'fr' }, remoteSubprotocol: '2.0.0' } }
     ]
   ]),
 
@@ -82,9 +80,9 @@ it('works on missed headers', () => {
 it('sends action back', () => {
   let ctx = createContext()
   expect(ctx.sendBack({ type: 'A' }) instanceof Promise).toBe(true)
-  ctx.sendBack({ type: 'B' }, { reasons: ['1'], clients: [] })
+  ctx.sendBack({ type: 'B' }, { clients: [], reasons: ['1'] })
   expect(added).toEqual([
     [{ type: 'A' }, { clients: ['10:client'], status: 'processed' }],
-    [{ type: 'B' }, { reasons: ['1'], clients: [], status: 'processed' }]
+    [{ type: 'B' }, { clients: [], reasons: ['1'], status: 'processed' }]
   ])
 })

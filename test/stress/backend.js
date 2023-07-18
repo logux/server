@@ -1,25 +1,25 @@
 #!/usr/bin/env node
 
+import http from 'http'
 import { delay } from 'nanodelay'
 import pico from 'picocolors'
-import http from 'http'
 
 function send(action, meta) {
   let body = JSON.stringify({
-    version: 0,
+    commands: [['action', action, meta]],
     secret: 'secret',
-    commands: [['action', action, meta]]
+    version: 0
   })
   return new Promise((resolve, reject) => {
     let req = http.request(
       {
-        method: 'POST',
-        host: 'localhost',
-        port: 31338,
         headers: {
-          'Content-Type': 'application/json',
-          'Content-Length': Buffer.byteLength(body)
-        }
+          'Content-Length': Buffer.byteLength(body),
+          'Content-Type': 'application/json'
+        },
+        host: 'localhost',
+        method: 'POST',
+        port: 31338
       },
       res => {
         if (res.statusCode < 200 || res.statusCode > 299) {

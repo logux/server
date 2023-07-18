@@ -1,7 +1,7 @@
 import { TestTime } from '@logux/core'
 
-import { createReporter } from '../create-reporter/index.js'
 import { BaseServer } from '../base-server/index.js'
+import { createReporter } from '../create-reporter/index.js'
 import { TestClient } from '../test-client/index.js'
 
 export class TestServer extends BaseServer {
@@ -12,20 +12,20 @@ export class TestServer extends BaseServer {
 
     opts.time.lastId += 1
     super({
+      id: `${opts.time.lastId}`,
       subprotocol: '0.0.0',
       supports: '0.0.0',
-      id: `${opts.time.lastId}`,
       ...opts
     })
     if (opts.logger) {
       this.on('report', createReporter(opts))
     } else {
       this.logger = {
-        fatal: () => {},
+        debug: () => {},
         error: () => {},
-        warn: () => {},
+        fatal: () => {},
         info: () => {},
-        debug: () => {}
+        warn: () => {}
       }
     }
     if (opts.auth !== false) this.auth(() => true)
@@ -42,19 +42,22 @@ export class TestServer extends BaseServer {
     return client
   }
 
-  async expectWrongCredentials(userId, opts = {}) {
+  async expectDenied(test) {
+    await this.expectUndo('denied', test)
+  }
+
+  async expectError(text, test) {
     try {
-      await this.connect(userId, opts)
-      throw new Error('Credentials passed')
+      await test()
+      throw new Error('Actions passed without error')
     } catch (e) {
-      if (e.message !== 'Wrong credentials') {
+      if (
+        (typeof text === 'string' && e.message !== text) ||
+        (text instanceof RegExp && !text.test(e.message))
+      ) {
         throw e
       }
     }
-  }
-
-  async expectDenied(test) {
-    await this.expectUndo('denied', test)
   }
 
   async expectUndo(reason, test) {
@@ -75,15 +78,12 @@ export class TestServer extends BaseServer {
     }
   }
 
-  async expectError(text, test) {
+  async expectWrongCredentials(userId, opts = {}) {
     try {
-      await test()
-      throw new Error('Actions passed without error')
+      await this.connect(userId, opts)
+      throw new Error('Credentials passed')
     } catch (e) {
-      if (
-        (typeof text === 'string' && e.message !== text) ||
-        (text instanceof RegExp && !text.test(e.message))
-      ) {
+      if (e.message !== 'Wrong credentials') {
         throw e
       }
     }

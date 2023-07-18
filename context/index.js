@@ -33,8 +33,8 @@ export class Context {
 
   sendBack(action, meta = {}) {
     return this.server.log.add(action, {
-      status: 'processed',
       clients: [this.clientId],
+      status: 'processed',
       ...meta
     })
   }

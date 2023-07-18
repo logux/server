@@ -2,15 +2,15 @@ import { LoguxError, parseId } from '@logux/core'
 import cookie from 'cookie'
 import semver from 'semver'
 
-import { FilteredNode } from '../filtered-node/index.js'
 import { ALLOWED_META } from '../allowed-meta/index.js'
 import { filterMeta } from '../filter-meta/index.js'
+import { FilteredNode } from '../filtered-node/index.js'
 
 function reportDetails(client) {
   return {
     connectionId: client.key,
-    subprotocol: client.node.remoteSubprotocol,
-    nodeId: client.nodeId
+    nodeId: client.nodeId,
+    subprotocol: client.node.remoteSubprotocol
   }
 }
 
@@ -32,13 +32,13 @@ export class ServerClient {
     }
 
     this.node = new FilteredNode(this, app.nodeId, app.log, connection, {
-      subprotocol: app.options.subprotocol,
+      auth: this.auth.bind(this),
       inFilter: this.filter.bind(this),
-      timeout: app.options.timeout,
-      outMap: this.outMap.bind(this),
       inMap: this.inMap.bind(this),
+      outMap: this.outMap.bind(this),
       ping: app.options.ping,
-      auth: this.auth.bind(this)
+      subprotocol: app.options.subprotocol,
+      timeout: app.options.timeout
     })
     if (this.app.env === 'development') {
       this.node.setLocalHeaders({ env: 'development' })
@@ -59,44 +59,6 @@ export class ServerClient {
     })
 
     this.app.emitter.emit('connected', this)
-  }
-
-  isSubprotocol(range) {
-    return semver.satisfies(this.node.remoteSubprotocol, range)
-  }
-
-  destroy() {
-    this.destroyed = true
-    this.node.destroy()
-    if (this.userId) {
-      let users = this.app.userIds.get(this.userId)
-      if (users) {
-        users = users.filter(i => i !== this)
-        if (users.length === 0) {
-          this.app.userIds.delete(this.userId)
-        } else {
-          this.app.userIds.set(this.userId, users)
-        }
-      }
-    }
-    if (this.clientId) {
-      this.app.clientIds.delete(this.clientId)
-      this.app.nodeIds.delete(this.nodeId)
-
-      for (let channel in this.app.subscribers) {
-        let subscriber = this.app.subscribers[channel][this.nodeId]
-        if (subscriber) {
-          let action = { type: 'logux/unsubscribe', channel }
-          let actionId = this.app.log.generateId()
-          let meta = { id: actionId, time: parseInt(actionId), reasons: [] }
-          this.app.performUnsubscribe(this.nodeId, action, meta)
-        }
-      }
-    }
-    if (!this.app.destroying) {
-      this.app.emitter.emit('disconnected', this)
-    }
-    this.app.connected.delete(this.key)
   }
 
   async auth(nodeId, token) {
@@ -129,11 +91,11 @@ export class ServerClient {
     let result
     try {
       result = await this.app.authenticator({
-        headers: this.node.remoteHeaders,
-        cookie: cookie.parse(headers.cookie || ''),
-        userId: this.userId,
         client: this,
-        token
+        cookie: cookie.parse(headers.cookie || ''),
+        headers: this.node.remoteHeaders,
+        token,
+        userId: this.userId
       })
     } catch (e) {
       if (e.name === 'LoguxError') {
@@ -177,15 +139,46 @@ export class ServerClient {
     return result
   }
 
-  async outMap(action, meta) {
-    return [action, filterMeta(meta)]
+  denyBack(action, meta) {
+    this.app.emitter.emit('report', 'denied', { actionId: meta.id })
+    let [undoAction, undoMeta] = this.app.buildUndo(action, meta, 'denied')
+    undoMeta.clients = (undoMeta.clients || []).concat([this.clientId])
+    this.app.log.add(undoAction, undoMeta)
+    this.app.debugActionError(meta, `Action "${meta.id}" was denied`)
   }
 
-  async inMap(action, meta) {
-    if (!meta.subprotocol) {
-      meta.subprotocol = this.node.remoteSubprotocol
+  destroy() {
+    this.destroyed = true
+    this.node.destroy()
+    if (this.userId) {
+      let users = this.app.userIds.get(this.userId)
+      if (users) {
+        users = users.filter(i => i !== this)
+        if (users.length === 0) {
+          this.app.userIds.delete(this.userId)
+        } else {
+          this.app.userIds.set(this.userId, users)
+        }
+      }
     }
-    return [action, meta]
+    if (this.clientId) {
+      this.app.clientIds.delete(this.clientId)
+      this.app.nodeIds.delete(this.nodeId)
+
+      for (let channel in this.app.subscribers) {
+        let subscriber = this.app.subscribers[channel][this.nodeId]
+        if (subscriber) {
+          let action = { channel, type: 'logux/unsubscribe' }
+          let actionId = this.app.log.generateId()
+          let meta = { id: actionId, reasons: [], time: parseInt(actionId) }
+          this.app.performUnsubscribe(this.nodeId, action, meta)
+        }
+      }
+    }
+    if (!this.app.destroying) {
+      this.app.emitter.emit('disconnected', this)
+    }
+    this.app.connected.delete(this.key)
   }
 
   async filter(action, meta) {
@@ -231,11 +224,18 @@ export class ServerClient {
     }
   }
 
-  denyBack(action, meta) {
-    this.app.emitter.emit('report', 'denied', { actionId: meta.id })
-    let [undoAction, undoMeta] = this.app.buildUndo(action, meta, 'denied')
-    undoMeta.clients = (undoMeta.clients || []).concat([this.clientId])
-    this.app.log.add(undoAction, undoMeta)
-    this.app.debugActionError(meta, `Action "${meta.id}" was denied`)
+  async inMap(action, meta) {
+    if (!meta.subprotocol) {
+      meta.subprotocol = this.node.remoteSubprotocol
+    }
+    return [action, meta]
+  }
+
+  isSubprotocol(range) {
+    return semver.satisfies(this.node.remoteSubprotocol, range)
+  }
+
+  async outMap(action, meta) {
+    return [action, filterMeta(meta)]
   }
 }

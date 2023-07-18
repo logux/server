@@ -1,11 +1,11 @@
-import stripAnsi from 'strip-ansi'
-import yyyymmdd from 'yyyy-mm-dd'
-import pico from 'picocolors'
+import { once } from 'events'
 import os from 'os'
+import pico from 'picocolors'
+import pino from 'pino'
 import abstractTransport from 'pino-abstract-transport'
 import { Transform } from 'stream'
-import pino from 'pino'
-import { once } from 'events'
+import stripAnsi from 'strip-ansi'
+import yyyymmdd from 'yyyy-mm-dd'
 
 import { mulberry32, onceXmur3 } from './utils.js'
 
@@ -15,19 +15,19 @@ const SEPARATOR = os.EOL + os.EOL
 const NEXT_LINE = os.EOL === '\n' ? '\r\v' : os.EOL
 
 const PARAMS_BLACKLIST = {
-  v: true,
-  msg: true,
+  component: true,
   err: true,
-  pid: true,
   hint: true,
-  note: true,
-  name: true,
-  time: true,
+  hostname: true,
   level: true,
   listen: true,
+  msg: true,
+  name: true,
+  note: true,
+  pid: true,
   server: true,
-  hostname: true,
-  component: true
+  time: true,
+  v: true
 }
 
 const LABELS = {

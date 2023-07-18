@@ -1,5 +1,6 @@
 import type { LoguxSubscribeAction, LoguxUnsubscribeAction } from '@logux/actions'
 import type { Action, AnyAction, TestLog, TestPair } from '@logux/core'
+
 import type { ServerMeta } from '../base-server/index.js'
 import type { TestServer } from '../test-server/index.js'
 
@@ -8,10 +9,10 @@ export class LoguxActionError extends Error {
 }
 
 export interface TestClientOptions {
+  cookie?: object
+  headers?: object
   httpHeaders?: { [key: string]: string }
   subprotocol?: string
-  headers?: object
-  cookie?: object
   token?: string
 }
 
@@ -58,11 +59,14 @@ export interface TestClientOptions {
  */
 export class TestClient {
   /**
-   * @param server Test server.
-   * @param userId User ID.
-   * @param opts Other options.
+   * Client’s ID.
+   *
+   * ```js
+   * let client = new TestClient(server, '10')
+   * client.clientId //=> '10:1'
+   * ```
    */
-  constructor(server: TestServer, userId: string, opts?: TestClientOptions)
+  clientId: string
 
   /**
    * Client’s log with extra methods to check actions inside.
@@ -84,14 +88,13 @@ export class TestClient {
   nodeId: string
 
   /**
-   * Client’s ID.
+   * Connection channel between client and server to track sent messages.
    *
    * ```js
-   * let client = new TestClient(server, '10')
-   * client.clientId //=> '10:1'
+   * console.log(client.pair.leftSent)
    * ```
    */
-  clientId: string
+  pair: TestPair
 
   /**
    * User ID.
@@ -104,13 +107,27 @@ export class TestClient {
   userId: string
 
   /**
-   * Connection channel between client and server to track sent messages.
+   * @param server Test server.
+   * @param userId User ID.
+   * @param opts Other options.
+   */
+  constructor(server: TestServer, userId: string, opts?: TestClientOptions)
+
+  /**
+   * Collect actions added by server and other clients during the `test` call.
    *
    * ```js
-   * console.log(client.pair.leftSent)
+   * let answers = await client.collect(async () => {
+   *   client.log.add({ type: 'pay' })
+   *   await delay(10)
+   * })
+   * expect(actions).toEqual([{ type: 'paid' }])
    * ```
+   *
+   * @param test Function, where do you expect action will be received
+   * @returns Promise with all received actions
    */
-  pair: TestPair
+  collect(test: () => Promise<any>): Promise<Action[]>
 
   /**
    * Connect to test server.
@@ -137,22 +154,6 @@ export class TestClient {
   disconnect(): Promise<void>
 
   /**
-   * Collect actions added by server and other clients during the `test` call.
-   *
-   * ```js
-   * let answers = await client.collect(async () => {
-   *   client.log.add({ type: 'pay' })
-   *   await delay(10)
-   * })
-   * expect(actions).toEqual([{ type: 'paid' }])
-   * ```
-   *
-   * @param test Function, where do you expect action will be received
-   * @returns Promise with all received actions
-   */
-  collect(test: () => Promise<any>): Promise<Action[]>
-
-  /**
    * Send action to the sever and collect all response actions.
    *
    * ```js
@@ -166,6 +167,21 @@ export class TestClient {
    * @returns Promise until `logux/processed` answer.
    */
   process(action: AnyAction, meta?: Partial<ServerMeta>): Promise<Action[]>
+
+  /**
+   * Collect actions received from server during the `test` call.
+   *
+   * ```js
+   * let answers = await client1.received(async () => {
+   *   await client2.process({ type: 'resend' })
+   * })
+   * expect(actions).toEqual([{ type: 'local' }])
+   * ```
+   *
+   * @param test Function, where do you expect action will be received
+   * @returns Promise with all received actions
+   */
+  received(test: () => any | Promise<any>): Promise<Action[]>
 
   /**
    * Subscribe to the channel and collect all actions dunring the subscription.
@@ -183,7 +199,7 @@ export class TestClient {
    * @returns Promise with all actions from the server.
    */
   subscribe(
-    channel: string | LoguxSubscribeAction,
+    channel: LoguxSubscribeAction | string,
     filter?: object,
     since?: { id: string; time: number }
   ): Promise<Action[]>
@@ -200,22 +216,7 @@ export class TestClient {
    * @returns Promise until server will remove client from subscribers.
    */
   unsubscribe(
-    channel: string | LoguxUnsubscribeAction,
+    channel: LoguxUnsubscribeAction | string,
     filter?: object
   ): Promise<Action[]>
-
-  /**
-   * Collect actions received from server during the `test` call.
-   *
-   * ```js
-   * let answers = await client1.received(async () => {
-   *   await client2.process({ type: 'resend' })
-   * })
-   * expect(actions).toEqual([{ type: 'local' }])
-   * ```
-   *
-   * @param test Function, where do you expect action will be received
-   * @returns Promise with all received actions
-   */
-  received(test: () => Promise<any> | any): Promise<Action[]>
 }

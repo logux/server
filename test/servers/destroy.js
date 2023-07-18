@@ -5,9 +5,9 @@ import { delay } from 'nanodelay'
 import { Server } from '../../index.js'
 
 let app = new Server({
+  port: 2000,
   subprotocol: '1.0.0',
-  supports: '1.x',
-  port: 2000
+  supports: '1.x'
 })
 app.nodeId = 'server:FnXaqDxY'
 

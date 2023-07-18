@@ -1,10 +1,8 @@
-import type { TestServerOptions } from '../index.js'
-
-import { it, expect, beforeEach, afterEach, beforeAll, afterAll } from 'vitest'
-import { delay } from 'nanodelay'
 import http from 'http'
+import { delay } from 'nanodelay'
+import { afterAll, afterEach, beforeAll, beforeEach, expect, it } from 'vitest'
 
-import { BaseServer, TestServer } from '../index.js'
+import { BaseServer, TestServer, type TestServerOptions } from '../index.js'
 
 let destroyable: { destroy(): Promise<void> }[] = []
 let lastPort = 8111
@@ -34,13 +32,13 @@ afterAll(() => {
 })
 
 const OPTIONS = {
-  controlSecret: 'S',
-  backend: 'http://127.0.0.1:8110/path'
+  backend: 'http://127.0.0.1:8110/path',
+  controlSecret: 'S'
 }
 
 const ACTION = {
-  command: 'action',
   action: { type: 'A' },
+  command: 'action',
   meta: { id: '1 server:rails 0', reasons: ['test'] }
 }
 
@@ -70,33 +68,33 @@ type RequestOptions = {
 }
 
 type DataRequest = RequestOptions & {
-  string?: undefined
   data: object
+  string?: undefined
 }
 
 type StringRequest = RequestOptions & {
-  string: string
   data?: undefined
+  string: string
 }
 
 function request({
+  data,
   method,
   path,
-  string,
-  data
+  string
 }: DataRequest | StringRequest): Promise<number> {
   let body = string ?? JSON.stringify(data)
   return new Promise<number>((resolve, reject) => {
     let req = http.request(
       {
-        method: method ?? 'POST',
-        host: '127.0.0.1',
-        port: lastPort,
-        path: path ?? '/',
         headers: {
-          'Content-Type': 'application/json',
-          'Content-Length': Buffer.byteLength(body)
-        }
+          'Content-Length': Buffer.byteLength(body),
+          'Content-Type': 'application/json'
+        },
+        host: '127.0.0.1',
+        method: method ?? 'POST',
+        path: path ?? '/',
+        port: lastPort
       },
       res => {
         resolve(res.statusCode ?? 0)
@@ -218,9 +216,9 @@ let httpServer = http.createServer((req, res) => {
 
 it('allows to miss subprotocol with backend option', () => {
   new BaseServer({
+    backend: 'http://example.com',
     controlSecret: 'secret',
-    subprotocol: '1.0.0',
-    backend: 'http://example.com'
+    subprotocol: '1.0.0'
   })
 })
 
@@ -239,7 +237,7 @@ it('validates HTTP requests', async () => {
   await app.listen()
 
   function check(...commands: any[]): Promise<number> {
-    return send({ version: 4, secret: 'S', commands })
+    return send({ commands, secret: 'S', version: 4 })
   }
 
   expect(await request({ method: 'PUT', string: '' })).toEqual(405)
@@ -247,14 +245,14 @@ it('validates HTTP requests', async () => {
   expect(await request({ string: '{' })).toEqual(400)
   expect(await request({ string: '""' })).toEqual(400)
   expect(await send({})).toEqual(400)
-  expect(await send({ version: 100, secret: 'S', commands: [] })).toEqual(400)
-  expect(await send({ version: 4, commands: [] })).toEqual(400)
-  expect(await send({ version: 4, secret: 'S', commands: {} })).toEqual(400)
+  expect(await send({ commands: [], secret: 'S', version: 100 })).toEqual(400)
+  expect(await send({ commands: [], version: 4 })).toEqual(400)
+  expect(await send({ commands: {}, secret: 'S', version: 4 })).toEqual(400)
   expect(await check(1)).toEqual(400)
   expect(await check({ command: 'auth' })).toEqual(400)
-  expect(await check({ command: 'action', action: { type: 'A' } })).toEqual(400)
-  expect(await check({ command: 'action', action: {}, meta: {} })).toEqual(400)
-  expect(await send({ version: 4, secret: 'wrong', commands: [] })).toEqual(403)
+  expect(await check({ action: { type: 'A' }, command: 'action' })).toEqual(400)
+  expect(await check({ action: {}, command: 'action', meta: {} })).toEqual(400)
+  expect(await send({ commands: [], secret: 'wrong', version: 4 })).toEqual(403)
   expect(app.log.actions()).toEqual([])
   expect(reports[1]).toEqual([
     'wrongControlSecret',
@@ -265,7 +263,7 @@ it('validates HTTP requests', async () => {
 it('creates actions', async () => {
   let app = createServer(OPTIONS)
   await app.listen()
-  let code = await send({ version: 4, secret: 'S', commands: [ACTION] })
+  let code = await send({ commands: [ACTION], secret: 'S', version: 4 })
   expect(code).toEqual(200)
   expect(app.log.actions()).toEqual([{ type: 'A' }])
   expect(sent).toEqual([])
@@ -281,7 +279,7 @@ it('creates and processes actions', async () => {
     }
   })
   await app.listen()
-  let code = await send({ version: 4, secret: 'S', commands: [ACTION] })
+  let code = await send({ commands: [ACTION], secret: 'S', version: 4 })
 
   expect(code).toEqual(200)
   expect(app.log.actions()).toEqual([{ type: 'A' }])
@@ -292,8 +290,8 @@ it('creates and processes actions', async () => {
 
 it('reports about network errors', async () => {
   let app = createServer({
-    controlSecret: 'S',
-    backend: 'https://127.0.0.1:7111/'
+    backend: 'https://127.0.0.1:7111/',
+    controlSecret: 'S'
   })
   let errors: string[] = []
   app.on('error', e => {
@@ -306,10 +304,10 @@ it('reports about network errors', async () => {
   expect(errors).toEqual(['connect ECONNREFUSED 127.0.0.1:7111'])
   expect(app.log.actions()).toEqual([
     {
-      type: 'logux/undo',
-      reason: 'error',
+      action: { type: 'A' },
       id: '1 10:1:1 0',
-      action: { type: 'A' }
+      reason: 'error',
+      type: 'logux/undo'
     }
   ])
 })
@@ -327,10 +325,10 @@ it('reports bad HTTP answers', async () => {
   expect(errors).toEqual(['Backend responded with 404 code'])
   expect(app.log.actions()).toEqual([
     {
-      type: 'logux/undo',
-      reason: 'error',
+      action: { type: 'NO' },
       id: '1 10:1:1 0',
-      action: { type: 'NO' }
+      reason: 'error',
+      type: 'logux/undo'
     }
   ])
 })
@@ -338,8 +336,8 @@ it('reports bad HTTP answers', async () => {
 it('authenticates user on backend', async () => {
   let app = createServer({ ...OPTIONS, auth: false })
   let client = await app.connect('10', {
-    token: 'good',
-    headers: { lang: 'fr' }
+    headers: { lang: 'fr' },
+    token: 'good'
   })
   expect(privateMethods(client).node.remoteSubprotocol).toEqual('1.0.0')
   expect(app.options.subprotocol).toEqual('1.0.0')
@@ -350,19 +348,19 @@ it('authenticates user on backend', async () => {
       'POST',
       '/path',
       {
-        version: 4,
-        secret: 'S',
         commands: [
           {
-            command: 'auth',
             authId,
-            userId: '10',
-            token: 'good',
-            subprotocol: '0.0.0',
+            command: 'auth',
+            cookie: {},
             headers: { lang: 'fr' },
-            cookie: {}
+            subprotocol: '0.0.0',
+            token: 'good',
+            userId: '10'
           }
-        ]
+        ],
+        secret: 'S',
+        version: 4
       }
     ]
   ])
@@ -380,18 +378,18 @@ it('authenticates user by cookie', async () => {
       'POST',
       '/path',
       {
-        version: 4,
-        secret: 'S',
         commands: [
           {
-            command: 'auth',
             authId,
-            userId: '30',
-            subprotocol: '0.0.0',
+            command: 'auth',
+            cookie: { token: 'good' },
             headers: {},
-            cookie: { token: 'good' }
+            subprotocol: '0.0.0',
+            userId: '30'
           }
-        ]
+        ],
+        secret: 'S',
+        version: 4
       }
     ]
   ])
@@ -472,12 +470,12 @@ it('notifies about actions and subscriptions', async () => {
   })
   let client = await app.connect('10', { headers: { lang: 'fr' } })
   client.log.add({ type: 'A' })
-  client.log.add({ type: 'logux/subscribe', channel: 'a' })
+  client.log.add({ channel: 'a', type: 'logux/subscribe' })
   await delay(100)
 
   expect(app.log.actions()).toEqual([
     { type: 'A' },
-    { type: 'logux/subscribe', channel: 'a' }
+    { channel: 'a', type: 'logux/subscribe' }
   ])
   expect(app.log.entries()[0][1].status).toEqual('waiting')
   expect(sent).toEqual([
@@ -485,39 +483,39 @@ it('notifies about actions and subscriptions', async () => {
       'POST',
       '/path',
       {
-        version: 4,
-        secret: 'S',
         commands: [
           {
-            command: 'action',
             action: { type: 'A' },
-            meta: { id: '1 10:1:1 0', time: 1, subprotocol: '0.0.0' },
-            headers: { lang: 'fr' }
+            command: 'action',
+            headers: { lang: 'fr' },
+            meta: { id: '1 10:1:1 0', subprotocol: '0.0.0', time: 1 }
           }
-        ]
+        ],
+        secret: 'S',
+        version: 4
       }
     ],
     [
       'POST',
       '/path',
       {
-        version: 4,
-        secret: 'S',
         commands: [
           {
+            action: { channel: 'a', type: 'logux/subscribe' },
             command: 'action',
-            action: { type: 'logux/subscribe', channel: 'a' },
+            headers: { lang: 'fr' },
             meta: {
               added: 1,
               id: '2 10:1:1 0',
-              time: 2,
               reasons: ['test'],
               server: 'server:uuid',
-              subprotocol: '0.0.0'
-            },
-            headers: { lang: 'fr' }
+              subprotocol: '0.0.0',
+              time: 2
+            }
           }
-        ]
+        ],
+        secret: 'S',
+        version: 4
       }
     ]
   ])
@@ -525,11 +523,11 @@ it('notifies about actions and subscriptions', async () => {
 
   expect(app.log.actions()).toEqual([
     { type: 'A' },
-    { type: 'logux/subscribe', channel: 'a' },
-    { type: 'logux/processed', id: '1 10:1:1 0' },
+    { channel: 'a', type: 'logux/subscribe' },
+    { id: '1 10:1:1 0', type: 'logux/processed' },
     { type: 'a/load1' },
     { type: 'a/load2' },
-    { type: 'logux/processed', id: '2 10:1:1 0' }
+    { id: '2 10:1:1 0', type: 'logux/processed' }
   ])
   expect(app.log.entries()[0][1].status).toEqual('processed')
   expect(events).toEqual([
@@ -554,10 +552,10 @@ it('asks about action access', async () => {
 
   expect(app.log.actions()).toEqual([
     {
-      type: 'logux/undo',
-      reason: 'denied',
+      action: { type: 'BAD' },
       id: '1 10:1:1 0',
-      action: { type: 'BAD' }
+      reason: 'denied',
+      type: 'logux/undo'
     }
   ])
 })
@@ -573,10 +571,10 @@ it('reacts on unknown action', async () => {
   await delay(100)
   expect(app.log.actions()).toEqual([
     {
-      type: 'logux/undo',
-      reason: 'unknownType',
+      action: { type: 'UNKNOWN' },
       id: '1 10:1:1 0',
-      action: { type: 'UNKNOWN' }
+      reason: 'unknownType',
+      type: 'logux/undo'
     }
   ])
   let debug = client.pair.rightSent.find(i => i[0] === 'debug')
@@ -590,15 +588,15 @@ it('reacts on unknown channel', async () => {
     errors.push(e.message)
   })
   let client = await app.connect('10')
-  client.log.add({ type: 'logux/subscribe', channel: 'unknown' })
+  client.log.add({ channel: 'unknown', type: 'logux/subscribe' })
   await delay(100)
   expect(app.log.actions()).toEqual([
-    { type: 'logux/subscribe', channel: 'unknown' },
+    { channel: 'unknown', type: 'logux/subscribe' },
     {
-      type: 'logux/undo',
-      reason: 'wrongChannel',
+      action: { channel: 'unknown', type: 'logux/subscribe' },
       id: '1 10:1:1 0',
-      action: { type: 'logux/subscribe', channel: 'unknown' }
+      reason: 'wrongChannel',
+      type: 'logux/undo'
     }
   ])
   let debug = client.pair.rightSent.find(i => i[0] === 'debug')
@@ -620,7 +618,7 @@ it('reacts on wrong backend answer', async () => {
   client.log.add({ type: 'BROKEN5' })
   client.log.add({ type: 'BROKEN6' })
   client.log.add({ type: 'BROKEN7' })
-  client.log.add({ type: 'logux/subscribe', channel: 'resend' })
+  client.log.add({ channel: 'resend', type: 'logux/subscribe' })
   await delay(100)
 
   expect(errors).toEqual([
@@ -638,60 +636,60 @@ it('reacts on wrong backend answer', async () => {
     { type: 'BROKEN1' },
     { type: 'BROKEN2' },
     { type: 'BROKEN6' },
-    { type: 'logux/subscribe', channel: 'resend' },
+    { channel: 'resend', type: 'logux/subscribe' },
     {
-      type: 'logux/undo',
-      reason: 'error',
+      action: { type: 'EMPTY' },
       id: '1 10:1:1 0',
-      action: { type: 'EMPTY' }
+      reason: 'error',
+      type: 'logux/undo'
     },
     {
-      type: 'logux/undo',
-      reason: 'error',
+      action: { type: 'BROKEN1' },
       id: '2 10:1:1 0',
-      action: { type: 'BROKEN1' }
+      reason: 'error',
+      type: 'logux/undo'
     },
     {
-      type: 'logux/undo',
-      reason: 'error',
+      action: { type: 'BROKEN2' },
       id: '3 10:1:1 0',
-      action: { type: 'BROKEN2' }
+      reason: 'error',
+      type: 'logux/undo'
     },
     {
-      type: 'logux/undo',
-      reason: 'error',
+      action: { type: 'BROKEN3' },
       id: '4 10:1:1 0',
-      action: { type: 'BROKEN3' }
+      reason: 'error',
+      type: 'logux/undo'
     },
     {
-      type: 'logux/undo',
-      reason: 'error',
+      action: { type: 'BROKEN4' },
       id: '5 10:1:1 0',
-      action: { type: 'BROKEN4' }
+      reason: 'error',
+      type: 'logux/undo'
     },
     {
-      type: 'logux/undo',
-      reason: 'error',
+      action: { type: 'BROKEN5' },
       id: '6 10:1:1 0',
-      action: { type: 'BROKEN5' }
+      reason: 'error',
+      type: 'logux/undo'
     },
     {
-      type: 'logux/undo',
-      reason: 'error',
+      action: { type: 'BROKEN6' },
       id: '7 10:1:1 0',
-      action: { type: 'BROKEN6' }
+      reason: 'error',
+      type: 'logux/undo'
     },
     {
-      type: 'logux/undo',
-      reason: 'error',
+      action: { type: 'BROKEN7' },
       id: '8 10:1:1 0',
-      action: { type: 'BROKEN7' }
+      reason: 'error',
+      type: 'logux/undo'
     },
     {
-      type: 'logux/undo',
-      reason: 'error',
+      action: { channel: 'resend', type: 'logux/subscribe' },
       id: '9 10:1:1 0',
-      action: { type: 'logux/subscribe', channel: 'resend' }
+      reason: 'error',
+      type: 'logux/undo'
     }
   ])
 })
@@ -715,16 +713,16 @@ it('reacts on backend error', async () => {
   expect(app.log.actions()).toEqual([
     { type: 'PERROR' },
     {
-      type: 'logux/undo',
-      reason: 'error',
+      action: { type: 'AERROR' },
       id: '1 10:1:1 0',
-      action: { type: 'AERROR' }
+      reason: 'error',
+      type: 'logux/undo'
     },
     {
-      type: 'logux/undo',
-      reason: 'error',
+      action: { type: 'PERROR' },
       id: '2 10:1:1 0',
-      action: { type: 'PERROR' }
+      reason: 'error',
+      type: 'logux/undo'
     }
   ])
 })
@@ -732,21 +730,21 @@ it('reacts on backend error', async () => {
 it('has bruteforce protection', async () => {
   let app = createServer(OPTIONS)
   await app.listen()
-  let code = await send({ version: 4, secret: 'wrong', commands: [] })
+  let code = await send({ commands: [], secret: 'wrong', version: 4 })
 
   expect(code).toEqual(403)
-  code = await send({ version: 4, secret: 'wrong', commands: [] })
+  code = await send({ commands: [], secret: 'wrong', version: 4 })
 
   expect(code).toEqual(403)
-  code = await send({ version: 4, secret: 'wrong', commands: [] })
+  code = await send({ commands: [], secret: 'wrong', version: 4 })
 
   expect(code).toEqual(403)
-  code = await send({ version: 4, secret: 'wrong', commands: [] })
+  code = await send({ commands: [], secret: 'wrong', version: 4 })
 
   expect(code).toEqual(429)
   await delay(3050)
 
-  code = await send({ version: 4, secret: 'wrong', commands: [] })
+  code = await send({ commands: [], secret: 'wrong', version: 4 })
 
   expect(code).toEqual(403)
 })
@@ -761,7 +759,7 @@ it('sets meta to resend', async () => {
   await delay(50)
   expect(app.log.actions()).toEqual([
     { type: 'RESEND' },
-    { type: 'logux/processed', id: '1 10:1:1 0' }
+    { id: '1 10:1:1 0', type: 'logux/processed' }
   ])
   expect(app.log.entries()[0][1].channels).toEqual(['A'])
 })
@@ -769,7 +767,7 @@ it('sets meta to resend', async () => {
 it('receives actions without backend', async () => {
   let app = createServer({ controlSecret: 'S' })
   await app.listen()
-  let code = await send({ version: 4, secret: 'S', commands: [ACTION] })
+  let code = await send({ commands: [ACTION], secret: 'S', version: 4 })
   expect(code).toEqual(200)
   expect(app.log.actions()).toEqual([{ type: 'A' }])
   expect(sent).toEqual([])

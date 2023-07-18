@@ -1,4 +1,5 @@
 import type { AnyAction } from '@logux/core'
+
 import type { ServerMeta } from '../base-server/index.js'
 import type { Server } from '../server/index.js'
 
@@ -15,14 +16,13 @@ import type { Server } from '../server/index.js'
  */
 export class Context<Data extends object = {}, Headers extends object = {}> {
   /**
-   * @param nodeId Unique node ID.
-   * @param clientId Unique persistence client ID.
-   * @param userId User ID taken node ID.
-   * @param subprotocol Action creator application subprotocol version
-   *                    in SemVer format.
-   * @param server Logux server
+   * Unique persistence client ID.
+   *
+   * ```js
+   * server.clientIds.get(node.clientId)
+   * ```
    */
-  constructor(server: Server, meta: ServerMeta)
+  clientId: string
 
   /**
    * Open structure to save some data between different steps of processing.
@@ -54,6 +54,15 @@ export class Context<Data extends object = {}, Headers extends object = {}> {
   headers: Headers
 
   /**
+   * Was action created by Logux server.
+   *
+   * ```js
+   * access: (ctx, action, meta) => ctx.isServer
+   * ```
+   */
+  isServer: boolean
+
+  /**
    * Unique node ID.
    *
    * ```js
@@ -61,6 +70,17 @@ export class Context<Data extends object = {}, Headers extends object = {}> {
    * ```
    */
   nodeId: string
+
+  /**
+   * Logux server
+   */
+  server: Server
+
+  /**
+   * Action creator application subprotocol version in SemVer format.
+   * Use {@link Context#isSubprotocol} to check it.
+   */
+  subprotocol: string
 
   /**
    * User ID taken node ID.
@@ -75,33 +95,14 @@ export class Context<Data extends object = {}, Headers extends object = {}> {
   userId: 'server' | string
 
   /**
-   * Unique persistence client ID.
-   *
-   * ```js
-   * server.clientIds.get(node.clientId)
-   * ```
+   * @param nodeId Unique node ID.
+   * @param clientId Unique persistence client ID.
+   * @param userId User ID taken node ID.
+   * @param subprotocol Action creator application subprotocol version
+   *                    in SemVer format.
+   * @param server Logux server
    */
-  clientId: string
-
-  /**
-   * Was action created by Logux server.
-   *
-   * ```js
-   * access: (ctx, action, meta) => ctx.isServer
-   * ```
-   */
-  isServer: boolean
-
-  /**
-   * Action creator application subprotocol version in SemVer format.
-   * Use {@link Context#isSubprotocol} to check it.
-   */
-  subprotocol: string
-
-  /**
-   * Logux server
-   */
-  server: Server
+  constructor(server: Server, meta: ServerMeta)
 
   /**
    * Check creator subprotocol version. It uses `semver` npm package

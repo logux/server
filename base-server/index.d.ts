@@ -1,34 +1,30 @@
 import type {
+  AbstractActionCreator,
+  LoguxSubscribeAction,
+  LoguxUnsubscribeAction
+} from '@logux/actions'
+import type {
   Action,
   AnyAction,
   ID,
   Log,
+  LogStore,
   Meta,
   ServerConnection,
-  LogStore,
   TestTime
 } from '@logux/core'
-import type { Server as HTTPServer, ServerResponse, IncomingMessage } from 'http'
-import type {
-  LoguxUnsubscribeAction,
-  AbstractActionCreator,
-  LoguxSubscribeAction
-} from '@logux/actions'
+import type { Server as HTTPServer, IncomingMessage, ServerResponse } from 'http'
 import type { Unsubscribe } from 'nanoevents'
 import type { LogFn } from 'pino'
-import type { Context, ChannelContext } from '../context/index.js'
+
+import type { ChannelContext, Context } from '../context/index.js'
 import type { ServerClient } from '../server-client/index.js'
 
 export interface ServerMeta extends Meta {
   /**
-   * Action processing status
+   * All nodes subscribed to channel will receive the action.
    */
-  status?: 'waiting' | 'processed' | 'error'
-
-  /**
-   * Node ID of the server received the action.
-   */
-  server: string
+  channel?: string
 
   /**
    * All nodes subscribed to listed channels will receive the action.
@@ -36,19 +32,9 @@ export interface ServerMeta extends Meta {
   channels?: string[]
 
   /**
-   * All nodes subscribed to channel will receive the action.
+   * All nodes with listed client ID will receive the action.
    */
-  channel?: string
-
-  /**
-   * All nodes with listed user IDs will receive the action.
-   */
-  users?: string[]
-
-  /**
-   * All nodes with listed user ID will receive the action.
-   */
-  user?: string
+  client?: string
 
   /**
    * All nodes with listed client IDs will receive the action.
@@ -56,14 +42,9 @@ export interface ServerMeta extends Meta {
   clients?: string[]
 
   /**
-   * All nodes with listed client ID will receive the action.
+   * Client IDs, which will not receive the action.
    */
-  client?: string
-
-  /**
-   * All nodes with listed node IDs will receive the action.
-   */
-  nodes?: string[]
+  excludeClients?: string[]
 
   /**
    * Node with listed node ID will receive the action.
@@ -71,126 +52,37 @@ export interface ServerMeta extends Meta {
   node?: string
 
   /**
-   * Client IDs, which will not receive the action.
+   * All nodes with listed node IDs will receive the action.
    */
-  excludeClients?: string[]
+  nodes?: string[]
+
+  /**
+   * Node ID of the server received the action.
+   */
+  server: string
+
+  /**
+   * Action processing status
+   */
+  status?: 'error' | 'processed' | 'waiting'
+
+  /**
+   * All nodes with listed user ID will receive the action.
+   */
+  user?: string
+
+  /**
+   * All nodes with listed user IDs will receive the action.
+   */
+  users?: string[]
 }
 
 export interface BaseServerOptions {
-  /**
-   * Server current application subprotocol version in SemVer format.
-   */
-  subprotocol?: string
-
-  /**
-   * npm’s version requirements for client subprotocol version.
-   */
-  supports?: string
-
-  /**
-   * Application root to load files and show errors.
-   * Default is `process.cwd()`.
-   *
-   * ```js
-   * root: __dirname
-   * ```
-   */
-  root?: string
-
-  /**
-   * URL of main JS file in the root dir. Shortcut to set `root` in ES modules
-   * without `fileURLToPath`.
-   *
-   * ```
-   * fileUrl: import.meta.url
-   * ```
-   */
-  fileUrl?: string
-
-  /**
-   * Timeout in milliseconds to disconnect connection.
-   * Default is `70000`.
-   */
-  timeout?: number
-
-  /**
-   * Milliseconds since last message to test connection by sending ping.
-   * Default is `20000`.
-   */
-  ping?: number
-
   /**
    * URL to PHP, Ruby on Rails, or other backend to process actions and
    * authentication.
    */
   backend?: string
-
-  /**
-   * URL to Redis for Logux Server Pro scaling.
-   */
-  redis?: string
-
-  /**
-   * Secret to control the server.
-   */
-  controlSecret?: string
-
-  /**
-   * CIDR masks for IP address, where control requests could came from.
-   */
-  controlMask?: string
-
-  /**
-   * Store to save log. Will be {@link @logux/core:MemoryStore}, by default.
-   */
-  store?: LogStore
-
-  /**
-   * Test time to test server.
-   */
-  time?: TestTime
-
-  /**
-   * Custom random ID to be used in node ID.
-   */
-  id?: string
-
-  /**
-   * Development or production server mode. By default,
-   * it will be taken from `NODE_ENV` environment variable.
-   * On empty `NODE_ENV` it will be `'development'`.
-   */
-  env?: 'production' | 'development'
-
-  /**
-   * Process ID, to display in logs.
-   */
-  pid?: number
-
-  /**
-   * HTTP server to serve Logux’s WebSocket and HTTP requests.
-   *
-   * Logux will remove previous HTTP callbacks. Do not use it with Express.js
-   * or other HTTP servers with defined routes.
-   */
-  server?: HTTPServer
-
-  /**
-   * Port to bind server. It will create HTTP server manually to connect
-   * WebSocket server to it. Default is `31337`.
-   */
-  port?: number
-
-  /**
-   * IP-address to bind server. Default is `127.0.0.1`.
-   */
-  host?: string
-
-  /**
-   * SSL key or path to it. Path could be relative from server root.
-   * It is required in production mode, because WSS is highly recommended.
-   */
-  key?: string | { pem: string }
 
   /**
    * SSL certificate or path to it. Path could be relative from server
@@ -207,27 +99,136 @@ export interface BaseServerOptions {
   cleanFromLog?: RegExp
 
   /**
+   * CIDR masks for IP address, where control requests could came from.
+   */
+  controlMask?: string
+
+  /**
+   * Secret to control the server.
+   */
+  controlSecret?: string
+
+  /**
    * Disable health check endpoint, control HTTP API, {@link Server#http}.
    *
    * The server will process only WebSocket connection and ignore all other
    * HTTP request (so they can be processed by other HTTP server).
    */
   disableHttpServer?: boolean
+
+  /**
+   * Development or production server mode. By default,
+   * it will be taken from `NODE_ENV` environment variable.
+   * On empty `NODE_ENV` it will be `'development'`.
+   */
+  env?: 'development' | 'production'
+
+  /**
+   * URL of main JS file in the root dir. Shortcut to set `root` in ES modules
+   * without `fileURLToPath`.
+   *
+   * ```
+   * fileUrl: import.meta.url
+   * ```
+   */
+  fileUrl?: string
+
+  /**
+   * IP-address to bind server. Default is `127.0.0.1`.
+   */
+  host?: string
+
+  /**
+   * Custom random ID to be used in node ID.
+   */
+  id?: string
+
+  /**
+   * SSL key or path to it. Path could be relative from server root.
+   * It is required in production mode, because WSS is highly recommended.
+   */
+  key?: { pem: string } | string
+
+  /**
+   * Process ID, to display in logs.
+   */
+  pid?: number
+
+  /**
+   * Milliseconds since last message to test connection by sending ping.
+   * Default is `20000`.
+   */
+  ping?: number
+
+  /**
+   * Port to bind server. It will create HTTP server manually to connect
+   * WebSocket server to it. Default is `31337`.
+   */
+  port?: number
+
+  /**
+   * URL to Redis for Logux Server Pro scaling.
+   */
+  redis?: string
+
+  /**
+   * Application root to load files and show errors.
+   * Default is `process.cwd()`.
+   *
+   * ```js
+   * root: __dirname
+   * ```
+   */
+  root?: string
+
+  /**
+   * HTTP server to serve Logux’s WebSocket and HTTP requests.
+   *
+   * Logux will remove previous HTTP callbacks. Do not use it with Express.js
+   * or other HTTP servers with defined routes.
+   */
+  server?: HTTPServer
+
+  /**
+   * Store to save log. Will be {@link @logux/core:MemoryStore}, by default.
+   */
+  store?: LogStore
+
+  /**
+   * Server current application subprotocol version in SemVer format.
+   */
+  subprotocol?: string
+
+  /**
+   * npm’s version requirements for client subprotocol version.
+   */
+  supports?: string
+
+  /**
+   * Test time to test server.
+   */
+  time?: TestTime
+
+  /**
+   * Timeout in milliseconds to disconnect connection.
+   * Default is `70000`.
+   */
+  timeout?: number
 }
 
 export interface AuthenticatorOptions<Headers extends object> {
-  headers: Headers
   client: ServerClient
-  userId: string
   cookie: Record<string, string>
+  headers: Headers
   token: string
+  userId: string
 }
 
 export type SendBackActions =
-  | void
+  | [Action, Partial<Meta>][]
   | Action
   | Action[]
-  | [Action, Partial<Meta>][]
+  | void
 
 /**
  * The authentication callback.
@@ -278,7 +279,7 @@ interface Resender<
     ctx: Context<Data, Headers>,
     action: Readonly<TypeAction>,
     meta: Readonly<ServerMeta>
-  ): Resend | Promise<Resend>
+  ): Promise<Resend> | Resend
 }
 
 /**
@@ -298,7 +299,7 @@ interface Processor<
     ctx: Context<Data, Headers>,
     action: Readonly<TypeAction>,
     meta: Readonly<ServerMeta>
-  ): void | Promise<void>
+  ): Promise<void> | void
 }
 
 /**
@@ -376,7 +377,7 @@ interface FilterCreator<
     ctx: ChannelContext<Data, ChannelParams, Headers>,
     action: Readonly<SubscribeAction>,
     meta: Readonly<ServerMeta>
-  ): Promise<ChannelFilter<Headers>> | ChannelFilter<Headers> | void
+  ): ChannelFilter<Headers> | Promise<ChannelFilter<Headers>> | void
 }
 
 /**
@@ -397,7 +398,7 @@ interface ChannelLoader<
     ctx: ChannelContext<Data, ChannelParams, Headers>,
     action: Readonly<SubscribeAction>,
     meta: Readonly<ServerMeta>
-  ): SendBackActions | Promise<SendBackActions>
+  ): Promise<SendBackActions> | SendBackActions
 }
 
 /**
@@ -454,8 +455,8 @@ type ActionCallbacks<
       accessAndProcess: Processor<TypeAction, Data, Headers>
     }
 ) & {
-  resend?: Resender<TypeAction, Data, Headers>
   finally?: ActionFinally<TypeAction, Data, Headers>
+  resend?: Resender<TypeAction, Data, Headers>
 }
 
 type ChannelCallbacks<
@@ -498,67 +499,67 @@ interface CleanReporter {
 
 interface AuthenticationReporter {
   connectionId: string
-  subprotocol: string
   nodeId: string
+  subprotocol: string
 }
 
 interface ReportersArguments {
   add: ActionReporter
-  useless: ActionReporter
+  authenticated: AuthenticationReporter
   clean: CleanReporter
-  error: {
-    err: Error
-    fatal?: true
-    actionId?: ID
-    nodeId?: string
-    connectionId?: string
-  }
   clientError: {
+    connectionId?: string
     err: Error
     nodeId?: string
-    connectionId?: string
   }
   connect: {
     connectionId: string
     ipAddress: string
   }
-  disconnect: {
-    nodeId?: string
-    connectionId?: string
-  }
+  denied: CleanReporter
   destroy: void
-  unknownType: {
-    type: string
-    actionId: ID
+  disconnect: {
+    connectionId?: string
+    nodeId?: string
   }
-  wrongChannel: SubscriptionReporter
+  error: {
+    actionId?: ID
+    connectionId?: string
+    err: Error
+    fatal?: true
+    nodeId?: string
+  }
+  listen: {
+    backend: string
+    cert: boolean
+    controlMask: string
+    controlSecret: string
+    environment: 'development' | 'production'
+    host: string
+    loguxServer: string
+    nodeId: string
+    notes: object
+    port: string
+    redis: string
+    server: boolean
+    subprotocol: string
+    supports: string
+  }
   processed: {
     actionId: ID
     latency: number
   }
   subscribed: SubscriptionReporter
-  unsubscribed: SubscriptionReporter
-  denied: CleanReporter
-  authenticated: AuthenticationReporter
   unauthenticated: AuthenticationReporter
+  unknownType: {
+    actionId: ID
+    type: string
+  }
+  unsubscribed: SubscriptionReporter
+  useless: ActionReporter
+  wrongChannel: SubscriptionReporter
   zombie: {
     nodeId: string
-  }
-  listen: {
-    controlSecret: string
-    controlMask: string
-    loguxServer: string
-    environment: 'production' | 'development'
-    subprotocol: string
-    supports: string
-    backend: string
-    server: boolean
-    nodeId: string
-    redis: string
-    notes: object
-    cert: boolean
-    host: string
-    port: string
   }
 }
 
@@ -570,42 +571,42 @@ export interface Reporter {
 }
 
 export type Resend =
-  | string
-  | string[]
   | {
       channel?: string
       channels?: string[]
-      user?: string
-      users?: string[]
       client?: string
       clients?: string[]
+      excludeClients?: string[]
       node?: string
       nodes?: string[]
-      excludeClients?: string[]
+      user?: string
+      users?: string[]
     }
+  | string
+  | string[]
 
 export interface Logger {
-  info(details: object, message: string): void
-  warn(details: object, message: string): void
   error(details: object, message: string): void
   fatal(details: object, message: string): void
+  info(details: object, message: string): void
+  warn(details: object, message: string): void
 }
 
 interface Response {
+  body: string
   header?: {
     [name: string]: string
   }
-  body: string
 }
 
 interface GetProcessor {
+  request(request: object): Promise<Response> | Response
   safe?: boolean
-  request(request: object): Response | Promise<Response>
 }
 
 interface PostProcessor {
-  isValid(command: object): boolean
   command(command: object, request: object): Promise<void>
+  isValid(command: object): boolean
 }
 
 /**
@@ -633,47 +634,12 @@ export class BaseServer<
   ServerLog extends Log = Log<ServerMeta>
 > {
   /**
-   * @param opts Server options.
-   */
-  constructor(opts: BaseServerOptions)
-
-  /**
-   * Server options.
+   * Connected client by client ID.
    *
-   * ```js
-   * console.log('Server options', server.options.subprotocol)
-   * ```
+   * Do not rely on this data, when you have multiple Logux servers.
+   * Each server will have a different list.
    */
-  options: BaseServerOptions
-
-  /**
-   * Production or development mode.
-   *
-   * ```js
-   * if (server.env === 'development') {
-   *   logDebugData()
-   * }
-   * ```
-   */
-  env: 'production' | 'development'
-
-  /**
-   * Server unique ID.
-   *
-   * ```js
-   * console.log('Error was raised on ' + server.nodeId)
-   * ```
-   */
-  nodeId: string
-
-  /**
-   * Server actions log.
-   *
-   * ```js
-   * server.log.each(finder)
-   * ```
-   */
-  log: ServerLog
+  clientIds: Map<string, ServerClient>
 
   /**
    * Connected clients.
@@ -687,12 +653,60 @@ export class BaseServer<
   connected: Map<string, ServerClient>
 
   /**
-   * Connected client by client ID.
-   *
-   * Do not rely on this data, when you have multiple Logux servers.
-   * Each server will have a different list.
+   * Add callback to internal HTTP server.
    */
-  clientIds: Map<string, ServerClient>
+  controls: {
+    [path: string]: GetProcessor | PostProcessor
+  }
+
+  /**
+   * Production or development mode.
+   *
+   * ```js
+   * if (server.env === 'development') {
+   *   logDebugData()
+   * }
+   * ```
+   */
+  env: 'development' | 'production'
+
+  /**
+   * Server actions log.
+   *
+   * ```js
+   * server.log.each(finder)
+   * ```
+   */
+  log: ServerLog
+
+  /**
+   * Console for custom log records. It uses `pino` API.
+   *
+   * ```js
+   * server.on('connected', client => {
+   *   server.logger.info(
+   *     { domain: client.httpHeaders.domain },
+   *     'Client domain'
+   *   )
+   * })
+   * ```
+   */
+  logger: {
+    debug: LogFn
+    error: LogFn
+    fatal: LogFn
+    info: LogFn
+    warn: LogFn
+  }
+
+  /**
+   * Server unique ID.
+   *
+   * ```js
+   * console.log('Error was raised on ' + server.nodeId)
+   * ```
+   */
+  nodeId: string
 
   /**
    * Connected client by node ID.
@@ -703,12 +717,13 @@ export class BaseServer<
   nodeIds: Map<string, ServerClient>
 
   /**
-   * Connected client by user ID.
+   * Server options.
    *
-   * Do not rely on this data, when you have multiple Logux servers.
-   * Each server will have a different list.
+   * ```js
+   * console.log('Server options', server.options.subprotocol)
+   * ```
    */
-  userIds: Map<string, ServerClient[]>
+  options: BaseServerOptions
 
   /**
    * Clients subscribed to some channel.
@@ -726,31 +741,30 @@ export class BaseServer<
   }
 
   /**
-   * Add callback to internal HTTP server.
+   * Connected client by user ID.
+   *
+   * Do not rely on this data, when you have multiple Logux servers.
+   * Each server will have a different list.
    */
-  controls: {
-    [path: string]: GetProcessor | PostProcessor
-  }
+  userIds: Map<string, ServerClient[]>
 
   /**
-   * Console for custom log records. It uses `pino` API.
+   * @param opts Server options.
+   */
+  constructor(opts: BaseServerOptions)
+
+  /**
+   * Add new client for server. You should call this method manually
+   * mostly for test purposes.
    *
    * ```js
-   * server.on('connected', client => {
-   *   server.logger.info(
-   *     { domain: client.httpHeaders.domain },
-   *     'Client domain'
-   *   )
-   * })
+   * server.addClient(test.right)
    * ```
+   *
+   * @param connection Logux connection to client.
+   * @returns Client ID.
    */
-  logger: {
-    fatal: LogFn
-    error: LogFn
-    warn: LogFn
-    info: LogFn
-    debug: LogFn
-  }
+  addClient(connection: ServerConnection): number
 
   /**
    * Set authenticate function. It will receive client credentials
@@ -766,252 +780,6 @@ export class BaseServer<
    * @param authenticator The authentication callback.
    */
   auth(authenticator: Authenticator<Headers>): void
-
-  /**
-   * Start WebSocket server and listen for clients.
-   *
-   * @returns When the server has been bound.
-   */
-  listen(): Promise<void>
-
-  /**
-   * Add non-WebSocket HTTP request processor.
-   *
-   * ```js
-   * server.http((req, res) => {
-   *   if (req.url === '/auth') {
-   *     let token = signIn(req)
-   *     if (token) {
-   *       res.setHeader('Set-Cookie', `token=${token}; Secure; HttpOnly`)
-   *       res.end()
-   *     } else {
-   *       res.statusCode = 400
-   *       res.end('Wrong user or password')
-   *     }
-   *   }
-   * })
-   * ```
-   */
-  http(listener: (req: IncomingMessage, res: ServerResponse) => void): void
-
-  /**
-   * Subscribe for synchronization events. It implements nanoevents API.
-   * Supported events:
-   *
-   * * `error`: server error during action processing.
-   * * `fatal`: server error during loading.
-   * * `clientError`: wrong client behaviour.
-   * * `connected`: new client was connected.
-   * * `disconnected`: client was disconnected.
-   * * `authenticated`: client was authenticated.
-   * * `preadd`: action is going to be added to the log.
-   *   The best place to set `reasons`.
-   * * `add`: action was added to the log.
-   * * `clean`: action was cleaned from the log.
-   * * `processed`: action processing was finished.
-   * * `subscribed`: channel initial data was loaded.
-   * * `subscribing`: channel initial data started to be loaded.
-   * * `unsubscribed`: node was unsubscribed.
-   * * `subscriptionCancelled`: subscription was cancelled because the client
-   *    is not connected.
-   *
-   * ```js
-   * server.on('error', error => {
-   *   trackError(error)
-   * })
-   * ```
-   *
-   * @param event The event name.
-   * @param listener The listener function.
-   * @returns Unbind listener from event.
-   */
-  on(
-    event: 'fatal' | 'clientError',
-    listener: (err: Error) => void
-  ): Unsubscribe
-
-  /**
-   * @param event The event name.
-   * @param listener Error listener.
-   */
-  on(
-    event: 'error',
-    listener: (err: Error, action: Action, meta: Readonly<ServerMeta>) => void
-  ): Unsubscribe
-
-  /**
-   * @param event The event name.
-   * @param listener Client listener.
-   */
-  on(
-    event: 'connected' | 'disconnected',
-    listener: (client: ServerClient) => void
-  ): Unsubscribe
-
-  /**
-   * @param event The event name.
-   * @param listener Client listener.
-   */
-  on(
-    event: 'authenticated',
-    listener: (client: ServerClient, latencyMilliseconds: number) => void
-  ): Unsubscribe
-
-  /**
-   * @param event The event name.
-   * @param listener Action listener.
-   */
-  on(
-    event: 'add' | 'clean' | 'backendSent',
-    listener: (action: Action, meta: Readonly<ServerMeta>) => void
-  ): Unsubscribe
-
-  /**
-   * @param event The event name.
-   * @param listener Action listener.
-   */
-  on(
-    event: 'preadd',
-    listener: (action: Action, meta: ServerMeta) => void
-  ): Unsubscribe
-
-  /**
-   * @param event The event name.
-   * @param listener Processing listener.
-   */
-  on(
-    event: 'processed' | 'backendGranted' | 'backendProcessed',
-    listener: (
-      action: Action,
-      meta: Readonly<ServerMeta>,
-      latencyMilliseconds: number
-    ) => void
-  ): Unsubscribe
-
-  /**
-   * @param event The event name.
-   * @param listener Subscription listener.
-   */
-  on(
-    event: 'subscribed',
-    listener: (
-      action: LoguxSubscribeAction,
-      meta: Readonly<ServerMeta>,
-      latencyMilliseconds: number
-    ) => void
-  ): Unsubscribe
-
-  /**
-   * @param event The event name.
-   * @param listener Subscription listener.
-   */
-  on(
-    event: 'subscribing',
-    listener: (action: LoguxSubscribeAction, meta: Readonly<ServerMeta>) => void
-  ): Unsubscribe
-
-  /**
-   * @param event The event name.
-   * @param listener Subscription listener.
-   */
-  on(
-    event: 'unsubscribed',
-    listener: (
-      action: LoguxUnsubscribeAction,
-      meta: Readonly<ServerMeta>
-    ) => void
-  ): Unsubscribe
-
-  /**
-   * @param event The event name.
-   * @param listener Event listener.
-   */
-  on(event: 'subscriptionCancelled', listener: () => void): Unsubscribe
-
-  /**
-   * @param event The event name.
-   * @param listener Report listener.
-   */
-  on(event: 'report', listener: Reporter): Unsubscribe
-
-  /**
-   * Stop server and unbind all listeners.
-   *
-   * ```js
-   * afterEach(() => {
-   *   testServer.destroy()
-   * })
-   * ```
-   *
-   * @returns Promise when all listeners will be removed.
-   */
-  destroy(): Promise<void>
-
-  /**
-   * Define action type’s callbacks.
-   *
-   * ```js
-   * server.type('CHANGE_NAME', {
-   *   access (ctx, action, meta) {
-   *     return action.user === ctx.userId
-   *   },
-   *   resend (ctx, action) {
-   *     return `user/${ action.user }`
-   *   }
-   *   process (ctx, action, meta) {
-   *     if (isFirstOlder(lastNameChange(action.user), meta)) {
-   *       return db.changeUserName({ id: action.user, name: action.name })
-   *     }
-   *   }
-   * })
-   * ```
-   *
-   * @param name The action’s type or action’s type matching rule as RegExp..
-   * @param callbacks Callbacks for actions with this type.
-   */
-  type<TypeAction extends Action = AnyAction, Data extends object = {}>(
-    name: TypeAction['type'] | RegExp,
-    callbacks: ActionCallbacks<TypeAction, Data, Headers>
-  ): void
-
-  /**
-   * @param actionCreator Action creator function.
-   * @param callbacks Callbacks for action created by creator.
-   */
-  type<Creator extends AbstractActionCreator, Data extends object = {}>(
-    actionCreator: Creator,
-    callbacks: ActionCallbacks<ReturnType<Creator>, Data, Headers>
-  ): void
-
-  /**
-   * Define callbacks for actions, which type was not defined
-   * by any {@link Server#type}. Useful for proxy or some hacks.
-   *
-   * Without this settings, server will call {@link Server#unknownType}
-   * on unknown type.
-   *
-   * ```js
-   * server.otherType(
-   *   async access (ctx, action, meta) {
-   *     const response = await phpBackend.checkByHTTP(action, meta)
-   *     if (response.code === 404) {
-   *       this.unknownType(action, meta)
-   *       return false
-   *     } else {
-   *       return response.body === 'granted'
-   *     }
-   *   }
-   *   async process (ctx, action, meta) {
-   *     return await phpBackend.sendHTTP(action, meta)
-   *   }
-   * })
-   * ```
-   *
-   * @param callbacks Callbacks for actions with this type.
-   */
-  otherType<Data extends object = {}>(
-    callbacks: ActionCallbacks<Action, Data, Headers>
-  ): void
 
   /**
    * Define the channel.
@@ -1059,6 +827,199 @@ export class BaseServer<
   ): void
 
   /**
+   * Send runtime error stacktrace to all clients.
+   *
+   * ```js
+   * process.on('uncaughtException', e => {
+   *   server.debugError(e)
+   * })
+   * ```
+   *
+   * @param error Runtime error instance.
+   */
+  debugError(error: Error): void
+
+  /**
+   * Stop server and unbind all listeners.
+   *
+   * ```js
+   * afterEach(() => {
+   *   testServer.destroy()
+   * })
+   * ```
+   *
+   * @returns Promise when all listeners will be removed.
+   */
+  destroy(): Promise<void>
+
+  /**
+   * Add non-WebSocket HTTP request processor.
+   *
+   * ```js
+   * server.http((req, res) => {
+   *   if (req.url === '/auth') {
+   *     let token = signIn(req)
+   *     if (token) {
+   *       res.setHeader('Set-Cookie', `token=${token}; Secure; HttpOnly`)
+   *       res.end()
+   *     } else {
+   *       res.statusCode = 400
+   *       res.end('Wrong user or password')
+   *     }
+   *   }
+   * })
+   * ```
+   */
+  http(listener: (req: IncomingMessage, res: ServerResponse) => void): void
+
+  /**
+   * Start WebSocket server and listen for clients.
+   *
+   * @returns When the server has been bound.
+   */
+  listen(): Promise<void>
+
+  /**
+   * @param event The event name.
+   * @param listener Event listener.
+   */
+  on(event: 'subscriptionCancelled', listener: () => void): Unsubscribe
+
+  /**
+   * @param event The event name.
+   * @param listener Subscription listener.
+   */
+  on(
+    event: 'subscribing',
+    listener: (action: LoguxSubscribeAction, meta: Readonly<ServerMeta>) => void
+  ): Unsubscribe
+
+  /**
+   * @param event The event name.
+   * @param listener Processing listener.
+   */
+  on(
+    event: 'backendGranted' | 'backendProcessed' | 'processed',
+    listener: (
+      action: Action,
+      meta: Readonly<ServerMeta>,
+      latencyMilliseconds: number
+    ) => void
+  ): Unsubscribe
+
+  /**
+   * @param event The event name.
+   * @param listener Action listener.
+   */
+  on(
+    event: 'add' | 'backendSent' | 'clean',
+    listener: (action: Action, meta: Readonly<ServerMeta>) => void
+  ): Unsubscribe
+
+  /**
+   * @param event The event name.
+   * @param listener Client listener.
+   */
+  on(
+    event: 'connected' | 'disconnected',
+    listener: (client: ServerClient) => void
+  ): Unsubscribe
+
+  /**
+   * Subscribe for synchronization events. It implements nanoevents API.
+   * Supported events:
+   *
+   * * `error`: server error during action processing.
+   * * `fatal`: server error during loading.
+   * * `clientError`: wrong client behaviour.
+   * * `connected`: new client was connected.
+   * * `disconnected`: client was disconnected.
+   * * `authenticated`: client was authenticated.
+   * * `preadd`: action is going to be added to the log.
+   *   The best place to set `reasons`.
+   * * `add`: action was added to the log.
+   * * `clean`: action was cleaned from the log.
+   * * `processed`: action processing was finished.
+   * * `subscribed`: channel initial data was loaded.
+   * * `subscribing`: channel initial data started to be loaded.
+   * * `unsubscribed`: node was unsubscribed.
+   * * `subscriptionCancelled`: subscription was cancelled because the client
+   *    is not connected.
+   *
+   * ```js
+   * server.on('error', error => {
+   *   trackError(error)
+   * })
+   * ```
+   *
+   * @param event The event name.
+   * @param listener The listener function.
+   * @returns Unbind listener from event.
+   */
+  on(
+    event: 'clientError' | 'fatal',
+    listener: (err: Error) => void
+  ): Unsubscribe
+
+  /**
+   * @param event The event name.
+   * @param listener Error listener.
+   */
+  on(
+    event: 'error',
+    listener: (err: Error, action: Action, meta: Readonly<ServerMeta>) => void
+  ): Unsubscribe
+
+  /**
+   * @param event The event name.
+   * @param listener Client listener.
+   */
+  on(
+    event: 'authenticated',
+    listener: (client: ServerClient, latencyMilliseconds: number) => void
+  ): Unsubscribe
+
+  /**
+   * @param event The event name.
+   * @param listener Action listener.
+   */
+  on(
+    event: 'preadd',
+    listener: (action: Action, meta: ServerMeta) => void
+  ): Unsubscribe
+
+  /**
+   * @param event The event name.
+   * @param listener Subscription listener.
+   */
+  on(
+    event: 'subscribed',
+    listener: (
+      action: LoguxSubscribeAction,
+      meta: Readonly<ServerMeta>,
+      latencyMilliseconds: number
+    ) => void
+  ): Unsubscribe
+
+  /**
+   * @param event The event name.
+   * @param listener Subscription listener.
+   */
+  on(
+    event: 'unsubscribed',
+    listener: (
+      action: LoguxUnsubscribeAction,
+      meta: Readonly<ServerMeta>
+    ) => void
+  ): Unsubscribe
+
+  /**
+   * @param event The event name.
+   * @param listener Report listener.
+   */
+  on(event: 'report', listener: Reporter): Unsubscribe
+
+  /**
    * Set callbacks for unknown channel subscription.
    *
    *```js
@@ -1082,6 +1043,36 @@ export class BaseServer<
   ): void
 
   /**
+   * Define callbacks for actions, which type was not defined
+   * by any {@link Server#type}. Useful for proxy or some hacks.
+   *
+   * Without this settings, server will call {@link Server#unknownType}
+   * on unknown type.
+   *
+   * ```js
+   * server.otherType(
+   *   async access (ctx, action, meta) {
+   *     const response = await phpBackend.checkByHTTP(action, meta)
+   *     if (response.code === 404) {
+   *       this.unknownType(action, meta)
+   *       return false
+   *     } else {
+   *       return response.body === 'granted'
+   *     }
+   *   }
+   *   async process (ctx, action, meta) {
+   *     return await phpBackend.sendHTTP(action, meta)
+   *   }
+   * })
+   * ```
+   *
+   * @param callbacks Callbacks for actions with this type.
+   */
+  otherType<Data extends object = {}>(
+    callbacks: ActionCallbacks<Action, Data, Headers>
+  ): void
+
+  /**
    * Add new action to the server and return the Promise until it will be
    * resend to clients and processed.
    *
@@ -1093,6 +1084,74 @@ export class BaseServer<
     action: AnyAction,
     meta?: Partial<ServerMeta>
   ): Promise<Readonly<ServerMeta>>
+
+  /**
+   * Send action, received by other server, to all clients of current server.
+   * This method is for multi-server configuration only.
+   *
+   * ```js
+   * server.on('add', (action, meta) => {
+   *   if (meta.server === server.nodeId) {
+   *     sendToOtherServers(action, meta)
+   *   }
+   * })
+   * onReceivingFromOtherServer((action, meta) => {
+   *   server.sendAction(action, meta)
+   * })
+   * ```
+   *
+   * @param action New action.
+   * @param meta Action’s metadata.
+   */
+  sendAction(action: Action, meta: ServerMeta): Promise<void> | void
+
+  /**
+   * Send `logux/subscribed` if client was not already subscribed.
+   *
+   * ```js
+   * server.subscribe(ctx.nodeId, `users/${loaded}`)
+   * ```
+   *
+   * @param nodeId Node ID.
+   * @param channel Channel name.
+   */
+  subscribe(nodeId: string, channel: string): void
+
+  /**
+   * @param actionCreator Action creator function.
+   * @param callbacks Callbacks for action created by creator.
+   */
+  type<Creator extends AbstractActionCreator, Data extends object = {}>(
+    actionCreator: Creator,
+    callbacks: ActionCallbacks<ReturnType<Creator>, Data, Headers>
+  ): void
+
+  /**
+   * Define action type’s callbacks.
+   *
+   * ```js
+   * server.type('CHANGE_NAME', {
+   *   access (ctx, action, meta) {
+   *     return action.user === ctx.userId
+   *   },
+   *   resend (ctx, action) {
+   *     return `user/${ action.user }`
+   *   }
+   *   process (ctx, action, meta) {
+   *     if (isFirstOlder(lastNameChange(action.user), meta)) {
+   *       return db.changeUserName({ id: action.user, name: action.name })
+   *     }
+   *   }
+   * })
+   * ```
+   *
+   * @param name The action’s type or action’s type matching rule as RegExp..
+   * @param callbacks Callbacks for actions with this type.
+   */
+  type<TypeAction extends Action = AnyAction, Data extends object = {}>(
+    name: RegExp | TypeAction['type'],
+    callbacks: ActionCallbacks<TypeAction, Data, Headers>
+  ): void
 
   /**
    * Undo action from client.
@@ -1115,64 +1174,6 @@ export class BaseServer<
     reason?: string,
     extra?: object
   ): Promise<void>
-
-  /**
-   * Send runtime error stacktrace to all clients.
-   *
-   * ```js
-   * process.on('uncaughtException', e => {
-   *   server.debugError(e)
-   * })
-   * ```
-   *
-   * @param error Runtime error instance.
-   */
-  debugError(error: Error): void
-
-  /**
-   * Send action, received by other server, to all clients of current server.
-   * This method is for multi-server configuration only.
-   *
-   * ```js
-   * server.on('add', (action, meta) => {
-   *   if (meta.server === server.nodeId) {
-   *     sendToOtherServers(action, meta)
-   *   }
-   * })
-   * onReceivingFromOtherServer((action, meta) => {
-   *   server.sendAction(action, meta)
-   * })
-   * ```
-   *
-   * @param action New action.
-   * @param meta Action’s metadata.
-   */
-  sendAction(action: Action, meta: ServerMeta): void | Promise<void>
-
-  /**
-   * Send `logux/subscribed` if client was not already subscribed.
-   *
-   * ```js
-   * server.subscribe(ctx.nodeId, `users/${loaded}`)
-   * ```
-   *
-   * @param nodeId Node ID.
-   * @param channel Channel name.
-   */
-  subscribe(nodeId: string, channel: string): void
-
-  /**
-   * Add new client for server. You should call this method manually
-   * mostly for test purposes.
-   *
-   * ```js
-   * server.addClient(test.right)
-   * ```
-   *
-   * @param connection Logux connection to client.
-   * @returns Client ID.
-   */
-  addClient(connection: ServerConnection): number
 
   /**
    * If you receive action with unknown type, this method will mark this action

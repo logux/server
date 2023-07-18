@@ -1,6 +1,6 @@
 import { ClientNode, TestPair } from '@logux/core'
-import { delay } from 'nanodelay'
 import cookie from 'cookie'
+import { delay } from 'nanodelay'
 
 import { filterMeta } from '../filter-meta/index.js'
 
@@ -43,6 +43,18 @@ export class TestClient {
     })
   }
 
+  async collect(test) {
+    let added = []
+    let unbind = this.node.log.on('add', (action, meta) => {
+      if (!meta.id.includes(` ${this.nodeId} `)) {
+        added.push(action)
+      }
+    })
+    await test()
+    unbind()
+    return added
+  }
+
   connect() {
     return new Promise((resolve, reject) => {
       this.node.throwsError = false
@@ -67,18 +79,6 @@ export class TestClient {
   disconnect() {
     this.node.connection.disconnect()
     return this.pair.wait('right')
-  }
-
-  async collect(test) {
-    let added = []
-    let unbind = this.node.log.on('add', (action, meta) => {
-      if (!meta.id.includes(` ${this.nodeId} `)) {
-        added.push(action)
-      }
-    })
-    await test()
-    unbind()
-    return added
   }
 
   process(action, meta) {
@@ -133,10 +133,23 @@ export class TestClient {
     })
   }
 
+  async received(test) {
+    let actions = []
+    let unbind = this.log.on('add', (action, meta) => {
+      if (!meta.id.includes(` ${this.nodeId} `)) {
+        actions.push(action)
+      }
+    })
+    await test()
+    await delay(1)
+    unbind()
+    return actions
+  }
+
   async subscribe(channel, filter, since) {
     let action = channel
     if (typeof channel === 'string') {
-      action = { type: 'logux/subscribe', channel }
+      action = { channel, type: 'logux/subscribe' }
     }
     if (filter) {
       action.filter = filter
@@ -151,24 +164,11 @@ export class TestClient {
   unsubscribe(channel, filter) {
     let action = channel
     if (typeof channel === 'string') {
-      action = { type: 'logux/unsubscribe', channel }
+      action = { channel, type: 'logux/unsubscribe' }
     }
     if (filter) {
       action.filter = filter
     }
     return this.process(action)
-  }
-
-  async received(test) {
-    let actions = []
-    let unbind = this.log.on('add', (action, meta) => {
-      if (!meta.id.includes(` ${this.nodeId} `)) {
-        actions.push(action)
-      }
-    })
-    await test()
-    await delay(1)
-    unbind()
-    return actions
   }
 }

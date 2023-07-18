@@ -3,10 +3,10 @@
 import { Server } from '../../index.js'
 
 let app = new Server({
-  subprotocol: '1.0.0',
-  supports: '1.x',
+  logger: 'json',
   port: 2000,
-  logger: 'json'
+  subprotocol: '1.0.0',
+  supports: '1.x'
 })
 app.nodeId = 'server:FnXaqDxY'
 

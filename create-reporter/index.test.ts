@@ -1,10 +1,10 @@
-import { existsSync, statSync, readFileSync } from 'fs'
-import { it, expect, afterEach } from 'vitest'
 import { LoguxError } from '@logux/core'
+import { existsSync, readFileSync, statSync } from 'fs'
 import { nanoid } from 'nanoid'
+import os from 'os'
 import { join } from 'path'
 import pino from 'pino'
-import os from 'os'
+import { afterEach, expect, it } from 'vitest'
 
 import { createReporter, PATH_TO_PRETTIFYING_PINO_TRANSPORT } from './index.js'
 
@@ -78,11 +78,11 @@ async function check(type: string, details?: object): Promise<void> {
   let destination = join(os.tmpdir(), '_' + nanoid())
   let logger = pino(
     pino.transport({
-      target: PATH_TO_PRETTIFYING_PINO_TRANSPORT,
       options: {
         basepath: '/dev/app/',
         destination
-      }
+      },
+      target: PATH_TO_PRETTIFYING_PINO_TRANSPORT
     })
   )
   let humanReporter = createReporter({
@@ -166,51 +166,51 @@ it('uses environment variable to detect environment', () => {
 
 it('reports listen', async () => {
   await check('listen', {
-    controlSecret: 'RhBaK0kuOBtqJalq2C4df',
-    loguxServer: '0.0.0',
-    environment: 'development',
-    controlMask: '127.0.0.0/255',
-    subprotocol: '0.0.0',
-    supports: '0.x',
     backend: 'http://127.0.0.1:3000/logux',
-    nodeId: 'server:FnXaqDxY',
-    server: false,
-    notes: {},
-    redis: undefined,
     cert: false,
+    controlMask: '127.0.0.0/255',
+    controlSecret: 'RhBaK0kuOBtqJalq2C4df',
+    environment: 'development',
     host: '127.0.0.1',
-    port: 31337
+    loguxServer: '0.0.0',
+    nodeId: 'server:FnXaqDxY',
+    notes: {},
+    port: 31337,
+    redis: undefined,
+    server: false,
+    subprotocol: '0.0.0',
+    supports: '0.x'
   })
 })
 
 it('reports listen for production', async () => {
   await check('listen', {
-    controlSecret: 'RhBaK0kuOBtqJalq2C4df',
-    loguxServer: '0.0.0',
-    environment: 'production',
-    subprotocol: '0.0.0',
-    supports: '0.x',
-    nodeId: 'server:FnXaqDxY',
-    server: false,
-    notes: {},
-    redis: '//localhost',
     cert: true,
+    controlSecret: 'RhBaK0kuOBtqJalq2C4df',
+    environment: 'production',
     host: '127.0.0.1',
-    port: 31337
+    loguxServer: '0.0.0',
+    nodeId: 'server:FnXaqDxY',
+    notes: {},
+    port: 31337,
+    redis: '//localhost',
+    server: false,
+    subprotocol: '0.0.0',
+    supports: '0.x'
   })
 })
 
 it('reports listen for custom domain', async () => {
   await check('listen', {
-    loguxServer: '0.0.0',
     environment: 'development',
-    subprotocol: '0.0.0',
-    supports: '0.x',
+    loguxServer: '0.0.0',
     nodeId: 'server:FnXaqDxY',
-    server: true,
     notes: {
       prometheus: 'http://127.0.0.1:31338/prometheus'
-    }
+    },
+    server: true,
+    subprotocol: '0.0.0',
+    supports: '0.x'
   })
 })
 
@@ -221,44 +221,44 @@ it('reports connect', async () => {
 it('reports authenticated', async () => {
   await check('authenticated', {
     connectionId: '670',
-    subprotocol: '1.0.0',
-    nodeId: 'admin:100:uImkcF4z'
+    nodeId: 'admin:100:uImkcF4z',
+    subprotocol: '1.0.0'
   })
 })
 
 it('reports authenticated without user ID', async () => {
   await check('authenticated', {
     connectionId: '670',
-    subprotocol: '1.0.0',
-    nodeId: 'uImkcF4z'
+    nodeId: 'uImkcF4z',
+    subprotocol: '1.0.0'
   })
 })
 
 it('reports unauthenticated', async () => {
   await check('unauthenticated', {
     connectionId: '670',
-    subprotocol: '1.0.0',
-    nodeId: '100:uImkcF4z'
+    nodeId: '100:uImkcF4z',
+    subprotocol: '1.0.0'
   })
 })
 
 it('reports add', async () => {
   await check('add', {
     action: {
-      type: 'CHANGE_USER',
-      id: 100,
       data: {
+        array: [1, [2], { a: '1', b: { c: 2 }, d: [], e: null }, null],
         name: 'John',
-        role: null,
-        array: [1, [2], { a: '1', b: { c: 2 }, d: [], e: null }, null]
-      }
+        role: null
+      },
+      id: 100,
+      type: 'CHANGE_USER'
     },
     meta: {
       id: '1487805099387 100:uImkcF4z 0',
-      time: 1487805099387,
       reasons: ['lastValue', 'debug'],
       server: 'server:H1f8LAyzl',
-      subprotocol: '1.0.0'
+      subprotocol: '1.0.0',
+      time: 1487805099387
     }
   })
 })
@@ -266,20 +266,20 @@ it('reports add', async () => {
 it('reports add and clean', async () => {
   await check('addClean', {
     action: {
-      type: 'CHANGE_USER',
-      id: 100,
       data: {
+        array: [1, [2], { a: '1', b: { c: 2 }, d: [], e: null }, null],
         name: 'John',
-        role: null,
-        array: [1, [2], { a: '1', b: { c: 2 }, d: [], e: null }, null]
-      }
+        role: null
+      },
+      id: 100,
+      type: 'CHANGE_USER'
     },
     meta: {
       id: '1487805099387 100:uImkcF4z 0',
-      time: 1487805099387,
       reasons: ['lastValue', 'debug'],
       server: 'server:H1f8LAyzl',
-      subprotocol: '1.0.0'
+      subprotocol: '1.0.0',
+      time: 1487805099387
     }
   })
 })
@@ -291,13 +291,13 @@ it('throws on circulal reference', () => {
   b.a = a
   expect(() =>
     check('add', {
-      action: { type: 'CHANGE_USER', a },
+      action: { a, type: 'CHANGE_USER' },
       meta: {
         id: '1487805099387 100:uImkcF4z 0',
-        time: 1487805099387,
         reasons: ['lastValue', 'debug'],
         server: 'server:H1f8LAyzl',
-        subprotocol: '1.0.0'
+        subprotocol: '1.0.0',
+        time: 1487805099387
       }
     })
   ).rejects.toThrow('Circular reference in action')
@@ -317,15 +317,15 @@ it('reports denied', async () => {
 
 it('reports unknownType', async () => {
   await check('unknownType', {
-    type: 'CHANGE_SER',
-    actionId: '1487805099387 100:vAApgNT9 0'
+    actionId: '1487805099387 100:vAApgNT9 0',
+    type: 'CHANGE_SER'
   })
 })
 
 it('reports unknownType from server', async () => {
   await check('unknownType', {
-    type: 'CHANGE_SER',
-    actionId: '1650269021700 server:FnXaqDxY 0'
+    actionId: '1650269021700 server:FnXaqDxY 0',
+    type: 'CHANGE_SER'
   })
 })
 
@@ -338,22 +338,22 @@ it('reports wrongChannel', async () => {
 
 it('reports wrongChannel without name', async () => {
   await check('wrongChannel', {
-    channel: undefined,
-    actionId: '1650269056600 100:uImkcF4z 0'
+    actionId: '1650269056600 100:uImkcF4z 0',
+    channel: undefined
   })
 })
 
 it('reports subscribed', async () => {
   await check('subscribed', {
-    channel: 'user/100',
-    actionId: '1487805099387 100:uImkcF4z 0'
+    actionId: '1487805099387 100:uImkcF4z 0',
+    channel: 'user/100'
   })
 })
 
 it('reports unsubscribed', async () => {
   await check('unsubscribed', {
-    channel: 'user/100',
-    actionId: '1650271940900 100:uImkcF4z 0'
+    actionId: '1650271940900 100:uImkcF4z 0',
+    channel: 'user/100'
   })
 })
 
@@ -388,13 +388,13 @@ it('reports destroy', async () => {
 })
 
 it('reports EACCES error', async () => {
-  await check('error', { fatal: true, err: { code: 'EACCES', port: 80 } })
+  await check('error', { err: { code: 'EACCES', port: 80 }, fatal: true })
 })
 
 it('reports EADDRINUSE error', async () => {
   await check('error', {
-    fatal: true,
-    err: { code: 'EADDRINUSE', port: 31337 }
+    err: { code: 'EADDRINUSE', port: 31337 },
+    fatal: true
   })
 })
 
@@ -403,24 +403,24 @@ it('reports LOGUX_NO_CONTROL_SECRET error', async () => {
     code: 'LOGUX_NO_CONTROL_SECRET',
     message: '`backend` requires also `controlSecret` option'
   }
-  await check('error', { fatal: true, err })
+  await check('error', { err, fatal: true })
 })
 
 it('reports Logux error', async () => {
   let err = {
-    message: 'Unknown option `suprotocol` in server constructor',
     logux: true,
+    message: 'Unknown option `suprotocol` in server constructor',
     note:
       'Maybe there is a mistake in option name or this version ' +
       'of Logux Server doesn’t support this option'
   }
-  await check('error', { fatal: true, err })
+  await check('error', { err, fatal: true })
 })
 
 it('reports error', async () => {
   await check('error', {
-    fatal: true,
-    err: createError('Error', 'Some mistake')
+    err: createError('Error', 'Some mistake'),
+    fatal: true
   })
 })
 
@@ -450,22 +450,22 @@ it('reports error from client', async () => {
 
 it('reports error from node', async () => {
   let err = new LoguxError('timeout', 5000, false)
-  await check('clientError', { nodeId: '100:uImkcF4z', err })
+  await check('clientError', { err, nodeId: '100:uImkcF4z' })
 })
 
 it('reports useless actions', async () => {
   await check('useless', {
     action: {
-      type: 'ADD_USER',
       id: 100,
-      name: 'John'
+      name: 'John',
+      type: 'ADD_USER'
     },
     meta: {
       id: '1487805099387 100:uImkcF4z 0',
-      time: 1487805099387,
       reasons: [],
       server: 'server:H1f8LAyzl',
-      subprotocol: '1.0.0'
+      subprotocol: '1.0.0',
+      time: 1487805099387
     }
   })
 })
@@ -473,17 +473,17 @@ it('reports useless actions', async () => {
 it("reports actions with metadata containing 'clients' array", async () => {
   await check('add', {
     action: {
-      type: 'ADD_USER',
       id: 100,
-      name: 'John'
+      name: 'John',
+      type: 'ADD_USER'
     },
     meta: {
       clients: ['1:-lCr7e9s', '2:wv0r_O5C'],
       id: '1487805099387 100:uImkcF4z 0',
-      time: 1487805099387,
       reasons: [],
       server: 'server:H1f8LAyzl',
-      subprotocol: '1.0.0'
+      subprotocol: '1.0.0',
+      time: 1487805099387
     }
   })
 })
@@ -491,17 +491,17 @@ it("reports actions with metadata containing 'clients' array", async () => {
 it("reports actions with metadata containing 'excludeClients' array", async () => {
   await check('add', {
     action: {
-      type: 'ADD_USER',
       id: 100,
-      name: 'John'
+      name: 'John',
+      type: 'ADD_USER'
     },
     meta: {
       excludeClients: ['1:-lCr7e9s', '2:wv0r_O5C'],
       id: '1487805099387 100:uImkcF4z 0',
-      time: 1487805099387,
       reasons: [],
       server: 'server:H1f8LAyzl',
-      subprotocol: '1.0.0'
+      subprotocol: '1.0.0',
+      time: 1487805099387
     }
   })
 })

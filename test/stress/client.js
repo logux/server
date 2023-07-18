@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { ClientNode, WsConnection, Log, MemoryStore } from '@logux/core'
+import { ClientNode, Log, MemoryStore, WsConnection } from '@logux/core'
 import { delay } from 'nanodelay'
 import WebSocket from 'ws'
 
@@ -29,8 +29,8 @@ async function tick() {
   let connection = new WsConnection('ws://localhost:31337', WebSocket)
   let log = new Log({ nodeId, store: new MemoryStore() })
   let node = new ClientNode(nodeId, log, connection, {
-    subprotocol: '1.0.0',
     outMap: map,
+    subprotocol: '1.0.0',
     token: 'secret'
   })
 
@@ -45,9 +45,9 @@ async function tick() {
 
   node.connection.connect()
   await node.waitFor('synchronized')
-  node.log.add({ type: 'logux/subscribe', channel: 'projects/1' })
-  node.log.add({ type: 'logux/subscribe', channel: 'projects/2' })
-  node.log.add({ type: 'logux/subscribe', channel: 'projects/3' })
+  node.log.add({ channel: 'projects/1', type: 'logux/subscribe' })
+  node.log.add({ channel: 'projects/2', type: 'logux/subscribe' })
+  node.log.add({ channel: 'projects/3', type: 'logux/subscribe' })
   await randomDelay(5000)
 
   node.log.add({ type: 'project/name', value: 'B' })

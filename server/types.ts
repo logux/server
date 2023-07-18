@@ -1,20 +1,18 @@
-import type { LoguxSubscribeAction } from '@logux/actions'
-import { defineAction } from '@logux/actions'
-
-import type { Action } from '../index.js'
-import { Server } from '../index.js'
+import { defineAction, type LoguxSubscribeAction } from '@logux/actions'
 import pino from 'pino'
+
+import { type Action, Server } from '../index.js'
 
 let server = new Server<{ locale: string }>(
   Server.loadOptions(process, {
-    subprotocol: '1.0.0',
-    supports: '1.x',
     logger: pino({ name: 'logux' }),
-    root: ''
+    root: '',
+    subprotocol: '1.0.0',
+    supports: '1.x'
   })
 )
 
-server.auth(({ userId, token }) => {
+server.auth(({ token, userId }) => {
   return token === userId
 })
 
@@ -31,13 +29,13 @@ class User {
 }
 
 type UserRenameAction = Action & {
+  name: string
   type: 'user/rename'
   userId: string
-  name: string
 }
 
 type UserSubscribeAction = LoguxSubscribeAction & {
-  fields?: ('name' | 'email')[]
+  fields?: ('email' | 'name')[]
 }
 
 type UserData = {
@@ -55,15 +53,15 @@ server.type<UserRenameAction, UserData>('user/rename', {
     return ctx.data.user.id === ctx.userId
   },
 
+  async process(ctx, action) {
+    ctx.data.user.name = action.name
+    await ctx.data.user.save()
+  },
+
   resend(ctx, action) {
     return {
       channels: [`user/${action.userId}`, `spellcheck/${ctx.headers.locale}`]
     }
-  },
-
-  async process(ctx, action) {
-    ctx.data.user.name = action.name
-    await ctx.data.user.save()
   }
 })
 
@@ -87,9 +85,9 @@ server.channel<UserParams, UserData, UserSubscribeAction>('user/:id', {
   async load(ctx) {
     await ctx.sendBack(
       {
+        name: ctx.data.user.name,
         type: 'user/rename',
-        userId: ctx.data.user.id,
-        name: ctx.data.user.name
+        userId: ctx.data.user.id
       },
       {
         status: 'processed'

@@ -1,24 +1,26 @@
-import type { Logger, BaseServerOptions } from '../base-server/index.js'
-
-import { BaseServer } from '../base-server/index.js'
+import {
+  BaseServer,
+  type BaseServerOptions,
+  type Logger
+} from '../base-server/index.js'
 
 export interface LoggerOptions {
-  /**
-   * Logger message format.
-   */
-  type?: 'human' | 'json'
-
   /**
    * Stream to be used by logger to write log.
    */
   stream?: {
-    write(str: string): void
-
     /**
      * Used by pino to synchronously write log messages on application failure.
      */
     flushSync?(): void
+
+    write(str: string): void
   }
+
+  /**
+   * Logger message format.
+   */
+  type?: 'human' | 'json'
 }
 
 export interface ServerOptions extends BaseServerOptions {
@@ -76,6 +78,20 @@ export interface ServerOptions extends BaseServerOptions {
  */
 export class Server<Headers extends object = {}> extends BaseServer<Headers> {
   /**
+   * Server options.
+   *
+   * ```js
+   * console.log('Server options', server.options.subprotocol)
+   * ```
+   */
+  options: ServerOptions
+
+  /**
+   * @param opts Server options.
+   */
+  constructor(opts: ServerOptions)
+
+  /**
    * Load options from command-line arguments and/or environment.
    *
    * ```js
@@ -98,20 +114,6 @@ export class Server<Headers extends object = {}> extends BaseServer<Headers> {
   ): ServerOptions
 
   /**
-   * @param opts Server options.
-   */
-  constructor(opts: ServerOptions)
-
-  /**
-   * Server options.
-   *
-   * ```js
-   * console.log('Server options', server.options.subprotocol)
-   * ```
-   */
-  options: ServerOptions
-
-  /**
    * Load module creators and apply to the server. By default, it will load
    * files from `modules/*`.
    *
@@ -121,5 +123,5 @@ export class Server<Headers extends object = {}> extends BaseServer<Headers> {
    *
    * @param files Pattern for module files.
    */
-  autoloadModules(files?: string[] | string): Promise<void>
+  autoloadModules(files?: string | string[]): Promise<void>
 }

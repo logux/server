@@ -1,8 +1,8 @@
 import { LoguxError } from '@logux/core'
+import http from 'http'
+import https from 'https'
 import JSONStream from 'JSONStream'
 import { nanoid } from 'nanoid'
-import https from 'https'
-import http from 'http'
 
 const VERSION = 4
 
@@ -19,21 +19,21 @@ const RESEND_KEYS = [
 
 function send(backend, command, events) {
   let body = JSON.stringify({
-    version: VERSION,
     commands: [command],
-    secret: backend.secret
+    secret: backend.secret,
+    version: VERSION
   })
   let protocol = backend.protocol === 'https:' ? https : http
   let req = protocol.request(
     {
-      method: 'POST',
-      host: backend.hostname,
-      port: backend.port,
-      path: backend.pathname + backend.search,
       headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(body)
-      }
+        'Content-Length': Buffer.byteLength(body),
+        'Content-Type': 'application/json'
+      },
+      host: backend.hostname,
+      method: 'POST',
+      path: backend.pathname + backend.search,
+      port: backend.port
     },
     res => {
       if (res.statusCode < 200 || res.statusCode > 299) {
@@ -83,20 +83,20 @@ function send(backend, command, events) {
 export function bindBackendProxy(app) {
   if (app.options.controlSecret) {
     app.controls['POST /'] = {
-      isValid({ command, action, meta }) {
-        return (
-          command === 'action' &&
-          typeof action === 'object' &&
-          typeof action.type === 'string' &&
-          typeof meta === 'object'
-        )
-      },
       command({ action, meta }, req) {
         if (!app.types[action.type] && !app.getRegexProcessor(action.type)) {
           meta.status = 'processed'
         }
         meta.backend = req.connection.remoteAddress
         return app.log.add(action, meta)
+      },
+      isValid({ action, command, meta }) {
+        return (
+          command === 'action' &&
+          typeof action === 'object' &&
+          typeof action.type === 'string' &&
+          typeof meta === 'object'
+        )
       }
     }
   }
@@ -159,28 +159,8 @@ export function bindBackendProxy(app) {
     app.emitter.emit('backendSent', action, meta)
     send(
       backend,
-      { command: 'action', action, meta, headers },
+      { action, command: 'action', headers, meta },
       {
-        filter({ id }) {
-          return id === meta.id
-        },
-        resend(answer) {
-          if (checked) {
-            error = true
-            currentReject(new Error('Resend answer was sent after access'))
-          } else if (action.type === 'logux/subscribe') {
-            error = true
-            accessReject(new Error('Resend can be called on subscription'))
-          } else {
-            let resend = {}
-            for (let key of RESEND_KEYS) {
-              if (typeof answer[key] !== 'undefined') {
-                resend[key] = answer[key]
-              }
-            }
-            resendResolve(resend)
-          }
-        },
         action(data) {
           let promise = app.log.add(data.action, {
             status: 'processed',
@@ -197,6 +177,18 @@ export function bindBackendProxy(app) {
           app.emitter.emit('backendGranted', action, meta, Date.now() - start)
           checked = true
           accessResolve(true)
+        },
+        end() {
+          if (!error && (!checked || !processed)) {
+            currentReject(new Error('Back-end do not send required answers'))
+          }
+        },
+        error(e) {
+          error = true
+          currentReject(e)
+        },
+        filter({ id }) {
+          return id === meta.id
         },
         forbidden() {
           if (resendResolve) resendResolve()
@@ -219,6 +211,23 @@ export function bindBackendProxy(app) {
             processResolve()
           }
         },
+        resend(answer) {
+          if (checked) {
+            error = true
+            currentReject(new Error('Resend answer was sent after access'))
+          } else if (action.type === 'logux/subscribe') {
+            error = true
+            accessReject(new Error('Resend can be called on subscription'))
+          } else {
+            let resend = {}
+            for (let key of RESEND_KEYS) {
+              if (typeof answer[key] !== 'undefined') {
+                resend[key] = answer[key]
+              }
+            }
+            resendResolve(resend)
+          }
+        },
         unknownAction() {
           resendResolve()
           error = true
@@ -229,47 +238,27 @@ export function bindBackendProxy(app) {
           error = true
           app.wrongChannel(action, meta)
           accessResolve(false)
-        },
-        error(e) {
-          error = true
-          currentReject(e)
-        },
-        end() {
-          if (!error && (!checked || !processed)) {
-            currentReject(new Error('Back-end do not send required answers'))
-          }
         }
       }
     )
   }
 
   app.auth(
-    ({ userId, headers, cookie, token, client }) =>
+    ({ client, cookie, headers, token, userId }) =>
       new Promise((resolve, reject) => {
         let random = nanoid()
         send(
           backend,
           {
-            command: 'auth',
             authId: random,
-            userId,
-            token,
-            headers,
+            command: 'auth',
             cookie,
-            subprotocol: client.node.remoteSubprotocol
+            headers,
+            subprotocol: client.node.remoteSubprotocol,
+            token,
+            userId
           },
           {
-            filter({ authId }) {
-              return random === authId
-            },
-            wrongSubprotocol({ supported }) {
-              reject(
-                new LoguxError('wrong-subprotocol', {
-                  used: client.node.remoteSubprotocol,
-                  supported
-                })
-              )
-            },
             authenticated({ subprotocol }) {
               if (subprotocol) {
                 app.options.subprotocol = subprotocol
@@ -282,6 +271,17 @@ export function bindBackendProxy(app) {
             },
             error(e) {
               reject(e)
+            },
+            filter({ authId }) {
+              return random === authId
+            },
+            wrongSubprotocol({ supported }) {
+              reject(
+                new LoguxError('wrong-subprotocol', {
+                  supported,
+                  used: client.node.remoteSubprotocol
+                })
+              )
             }
           }
         )
@@ -292,20 +292,20 @@ export function bindBackendProxy(app) {
       sendAction(action, meta, ctx.headers)
       return accessing.get(meta.id)
     },
-    resend(ctx, action, meta) {
-      if (!resending.has(meta.id)) {
-        sendAction(action, meta, ctx.headers)
-      }
-      return resending.get(meta.id)
-    },
-    process(ctx, action, meta) {
-      return processing.get(meta.id)
-    },
     finally(ctx, action, meta) {
       actions.delete(meta.id)
       resending.delete(meta.id)
       accessing.delete(meta.id)
       processing.delete(meta.id)
+    },
+    process(ctx, action, meta) {
+      return processing.get(meta.id)
+    },
+    resend(ctx, action, meta) {
+      if (!resending.has(meta.id)) {
+        sendAction(action, meta, ctx.headers)
+      }
+      return resending.get(meta.id)
     }
   })
   app.otherChannel({
@@ -313,13 +313,13 @@ export function bindBackendProxy(app) {
       sendAction(action, meta, ctx.headers)
       return accessing.get(meta.id)
     },
-    load(ctx, action, meta) {
-      return processing.get(meta.id)
-    },
     finally(ctx, action, meta) {
       actions.delete(meta.id)
       accessing.delete(meta.id)
       processing.delete(meta.id)
+    },
+    load(ctx, action, meta) {
+      return processing.get(meta.id)
     }
   })
 }

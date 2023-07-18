@@ -1,7 +1,7 @@
-import { it, expect, describe } from 'vitest'
 import { resolve } from 'path'
+import { describe, expect, it } from 'vitest'
 
-import { loadOptions, oneOf, number } from './index.js'
+import { loadOptions, number, oneOf } from './index.js'
 
 function fakeProcess(argv, env = {}) {
   return { argv, env }
@@ -11,13 +11,13 @@ describe('loadOptions', () => {
   it('returns help', () => {
     let [help, options] = loadOptions(
       {
+        examples: ['$0'],
         options: {
           port: {
             description: 'port',
             parse: number
           }
-        },
-        examples: ['$0']
+        }
       },
       fakeProcess(['node', 'test/test.js', '--help'])
     )
@@ -44,13 +44,13 @@ describe('loadOptions', () => {
   it('uses env for options', () => {
     let [, options] = loadOptions(
       {
+        envPrefix: 'LOGUX',
         options: {
           port: {
             description: 'port',
             parse: number
           }
-        },
-        envPrefix: 'LOGUX'
+        }
       },
       fakeProcess([], {
         LOGUX_PORT: '31337'
@@ -64,13 +64,13 @@ describe('loadOptions', () => {
   it('uses dotenv file for options', () => {
     let [, options] = loadOptions(
       {
+        envPrefix: 'LOGUX',
         options: {
           port: {
             description: 'port',
             parse: number
           }
-        },
-        envPrefix: 'LOGUX'
+        }
       },
       fakeProcess([], {}),
       {
@@ -84,13 +84,13 @@ describe('loadOptions', () => {
   it('composes correct env and CLI names for argument with complex name', () => {
     let [, options] = loadOptions(
       {
+        envPrefix: 'LOGUX',
         options: {
           somePort: {
             description: 'port',
             parse: number
           }
-        },
-        envPrefix: 'LOGUX'
+        }
       },
       fakeProcess(['--some-port', '1'], {
         LOGUX_SOME_PORT: '1'
@@ -104,15 +104,15 @@ describe('loadOptions', () => {
   it('uses combined options', () => {
     let [, options] = loadOptions(
       {
+        envPrefix: 'LOGUX',
         options: {
-          key: {
-            description: 'port'
-          },
           cert: {
             description: 'cert'
+          },
+          key: {
+            description: 'port'
           }
-        },
-        envPrefix: 'LOGUX'
+        }
       },
       fakeProcess(['', '--key', './key.pem'], { LOGUX_CERT: './cert.pem' })
     )
@@ -123,19 +123,19 @@ describe('loadOptions', () => {
 
   it('uses arg and env in given priority', () => {
     let optionsSpec = {
+      envPrefix: 'LOGUX',
       options: {
-        port: {
-          description: 'port',
-          parse: number
+        cert: {
+          description: 'cert'
         },
         key: {
           description: 'key'
         },
-        cert: {
-          description: 'cert'
+        port: {
+          description: 'port',
+          parse: number
         }
-      },
-      envPrefix: 'LOGUX'
+      }
     }
 
     let [, options1] = loadOptions(
@@ -172,12 +172,12 @@ describe('loadOptions', () => {
     let [, options] = loadOptions(
       {
         options: {
+          key: {
+            description: 'key'
+          },
           port: {
             alias: 'p',
             description: 'port'
-          },
-          key: {
-            description: 'key'
           }
         }
       },

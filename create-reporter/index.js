@@ -1,7 +1,7 @@
-import pino from 'pino'
 import os from 'os'
 import { dirname, join, sep } from 'path'
 import pico from 'picocolors'
+import pino from 'pino'
 import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -11,30 +11,6 @@ export const PATH_TO_PRETTIFYING_PINO_TRANSPORT = join(
 )
 
 const ERROR_CODES = {
-  EADDRINUSE: e => {
-    let wayToFix = {
-      win32:
-        'Run `cmd.exe` as an administrator\n' +
-        'C:\\> netstat -a -b -n -o\n' +
-        'C:\\> taskkill /F /PID `<processid>`',
-      darwin: `$ sudo lsof -i ${e.port}\n` + '$ sudo kill -9 `<processid>`',
-      linux:
-        '$ su - root\n' +
-        `# netstat -nlp | grep ${e.port}\n` +
-        'Proto   Local Address   State    PID/Program name\n' +
-        `tcp     0.0.0.0:${e.port}    LISTEN   \`777\`/node\n` +
-        '# sudo kill -9 `777`'
-    }
-
-    return {
-      msg: `Port \`${e.port}\` already in use`,
-      note:
-        'Another Logux server or other app already running on this port. ' +
-        'Probably you haven’t stopped server from other project ' +
-        'or previous version of this server was not killed.\n\n' +
-        (wayToFix[os.platform()] || '')
-    }
-  },
   EACCES: (e, environment) => {
     let wayToFix = {
       development:
@@ -50,6 +26,30 @@ const ERROR_CODES = {
         (wayToFix[environment] || wayToFix.production)
     }
   },
+  EADDRINUSE: e => {
+    let wayToFix = {
+      darwin: `$ sudo lsof -i ${e.port}\n` + '$ sudo kill -9 `<processid>`',
+      linux:
+        '$ su - root\n' +
+        `# netstat -nlp | grep ${e.port}\n` +
+        'Proto   Local Address   State    PID/Program name\n' +
+        `tcp     0.0.0.0:${e.port}    LISTEN   \`777\`/node\n` +
+        '# sudo kill -9 `777`',
+      win32:
+        'Run `cmd.exe` as an administrator\n' +
+        'C:\\> netstat -a -b -n -o\n' +
+        'C:\\> taskkill /F /PID `<processid>`'
+    }
+
+    return {
+      msg: `Port \`${e.port}\` already in use`,
+      note:
+        'Another Logux server or other app already running on this port. ' +
+        'Probably you haven’t stopped server from other project ' +
+        'or previous version of this server was not killed.\n\n' +
+        (wayToFix[os.platform()] || '')
+    }
+  },
   LOGUX_NO_CONTROL_SECRET: e => ({
     msg: e.message,
     note:
@@ -59,10 +59,81 @@ const ERROR_CODES = {
 }
 
 const REPORTERS = {
+  add: () => ({ msg: 'Action was added' }),
+
+  addClean: () => ({ msg: 'Action was added and cleaned' }),
+
+  authenticated: () => ({ msg: 'User was authenticated' }),
+
+  clean: () => ({ msg: 'Action was cleaned' }),
+
+  clientError: record => {
+    let result = {
+      details: {},
+      level: 'warn'
+    }
+    if (record.err.received) {
+      result.msg = `Client error: ${record.err.description}`
+    } else {
+      result.msg = `Sync error: ${record.err.description}`
+    }
+    for (let i in record) {
+      if (i !== 'err') {
+        result.details[i] = record[i]
+      }
+    }
+    return result
+  },
+
+  connect: () => ({ msg: 'Client was connected' }),
+
+  denied: () => ({ level: 'warn', msg: 'Action was denied' }),
+
+  destroy: () => ({ msg: 'Shutting down Logux server' }),
+
+  disconnect: () => ({ msg: 'Client was disconnected' }),
+
+  error: record => {
+    let result = {
+      details: {
+        err: {
+          message: record.err.message,
+          name: record.err.name,
+          stack: record.err.stack
+        }
+      },
+      level: record.fatal ? 'fatal' : 'error',
+      msg: record.err.message
+    }
+
+    let helper = ERROR_CODES[record.err.code]
+    if (helper) {
+      let help = helper(record.err, record.environment)
+      result.msg = help.msg
+      result.details.note = help.note
+      delete result.details.err.stack
+    } else if (record.err.logux) {
+      result.details.note = record.err.note
+      delete result.details.err
+    }
+
+    if (record.err.name === 'LoguxError') {
+      delete result.details.err.stack
+    }
+
+    for (let i in record) {
+      if (i !== 'err' && i !== 'fatal') {
+        result.details[i] = record[i]
+      }
+    }
+
+    return result
+  },
+
   listen: r => {
     let details = {
-      loguxServer: r.loguxServer,
       environment: r.environment,
+      loguxServer: r.loguxServer,
       nodeId: r.nodeId,
       subprotocol: r.subprotocol,
       supports: r.supports
@@ -99,38 +170,25 @@ const REPORTERS = {
 
     for (let i in r.notes) details[i] = r.notes[i]
 
-    return { msg: 'Logux server is listening', details }
+    return { details, msg: 'Logux server is listening' }
   },
-
-  connect: () => ({ msg: 'Client was connected' }),
-
-  authenticated: () => ({ msg: 'User was authenticated' }),
-
-  disconnect: () => ({ msg: 'Client was disconnected' }),
-
-  destroy: () => ({ msg: 'Shutting down Logux server' }),
-
-  add: () => ({ msg: 'Action was added' }),
-
-  addClean: () => ({ msg: 'Action was added and cleaned' }),
-
-  clean: () => ({ msg: 'Action was cleaned' }),
 
   subscribed: () => ({ msg: 'Client was subscribed' }),
 
-  unsubscribed: () => ({ msg: 'Client was unsubscribed' }),
-
   unauthenticated: () => ({ level: 'warn', msg: 'Bad authentication' }),
+
+  unknownType: record => ({
+    level: /^ server(:| )/.test(record.actionId) ? 'error' : 'warn',
+    msg: 'Action with unknown type'
+  }),
+
+  unsubscribed: () => ({ msg: 'Client was unsubscribed' }),
 
   useless: () => ({ level: 'warn', msg: 'Useless action' }),
 
-  denied: () => ({ level: 'warn', msg: 'Action was denied' }),
-
-  zombie: () => ({ level: 'warn', msg: 'Zombie client was disconnected' }),
-
-  wrongControlSecret: () => ({
+  wrongChannel: () => ({
     level: 'warn',
-    msg: 'Wrong secret in control request'
+    msg: 'Wrong channel name'
   }),
 
   wrongControlIp: () => ({
@@ -138,70 +196,12 @@ const REPORTERS = {
     msg: 'IP address of control request do not pass the mask'
   }),
 
-  unknownType: record => ({
-    level: /^ server(:| )/.test(record.actionId) ? 'error' : 'warn',
-    msg: 'Action with unknown type'
-  }),
-
-  wrongChannel: () => ({
+  wrongControlSecret: () => ({
     level: 'warn',
-    msg: 'Wrong channel name'
+    msg: 'Wrong secret in control request'
   }),
 
-  clientError: record => {
-    let result = {
-      level: 'warn',
-      details: {}
-    }
-    if (record.err.received) {
-      result.msg = `Client error: ${record.err.description}`
-    } else {
-      result.msg = `Sync error: ${record.err.description}`
-    }
-    for (let i in record) {
-      if (i !== 'err') {
-        result.details[i] = record[i]
-      }
-    }
-    return result
-  },
-
-  error: record => {
-    let result = {
-      level: record.fatal ? 'fatal' : 'error',
-      msg: record.err.message,
-      details: {
-        err: {
-          message: record.err.message,
-          name: record.err.name,
-          stack: record.err.stack
-        }
-      }
-    }
-
-    let helper = ERROR_CODES[record.err.code]
-    if (helper) {
-      let help = helper(record.err, record.environment)
-      result.msg = help.msg
-      result.details.note = help.note
-      delete result.details.err.stack
-    } else if (record.err.logux) {
-      result.details.note = record.err.note
-      delete result.details.err
-    }
-
-    if (record.err.name === 'LoguxError') {
-      delete result.details.err.stack
-    }
-
-    for (let i in record) {
-      if (i !== 'err' && i !== 'fatal') {
-        result.details[i] = record[i]
-      }
-    }
-
-    return result
-  }
+  zombie: () => ({ level: 'warn', msg: 'Zombie client was disconnected' })
 }
 
 function createLogger(options) {
@@ -214,12 +214,12 @@ function createLogger(options) {
 
     let logger = pino(
       pino.transport({
-        target: PATH_TO_PRETTIFYING_PINO_TRANSPORT,
         options: {
           basepath,
           color,
           destination: options.logger.destination
-        }
+        },
+        target: PATH_TO_PRETTIFYING_PINO_TRANSPORT
       })
     )
 

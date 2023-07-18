@@ -1,20 +1,18 @@
-import type { BaseServerOptions } from '../index.js'
-
 import { ClientNode, Log, MemoryStore, WsConnection } from '@logux/core'
-import { it, expect, afterEach } from 'vitest'
-import { delay } from 'nanodelay'
-import WebSocket from 'ws'
 import http from 'http'
+import { delay } from 'nanodelay'
+import { afterEach, expect, it } from 'vitest'
+import WebSocket from 'ws'
 
-import { BaseServer } from '../index.js'
+import { BaseServer, type BaseServerOptions } from '../index.js'
 
 let lastPort = 10111
 function createServer(opts: Partial<BaseServerOptions> = {}): BaseServer {
   lastPort += 1
   let server = new BaseServer({
+    port: lastPort,
     subprotocol: '0.0.0',
     supports: '0.x',
-    port: lastPort,
     ...opts
   })
   server.auth(() => true)
@@ -43,9 +41,9 @@ afterEach(async () => {
 })
 
 function createReporter(opts: Partial<BaseServerOptions> = {}): {
+  app: BaseServer
   names: string[]
   reports: [string, object][]
-  app: BaseServer
 } {
   let names: string[] = []
   let reports: [string, object][] = []
@@ -55,17 +53,17 @@ function createReporter(opts: Partial<BaseServerOptions> = {}): {
     names.push(name)
     reports.push([name, details])
   })
-  return { names, reports, app }
+  return { app, names, reports }
 }
 
 function request(method: 'GET', path: string): Promise<Response> {
   return new Promise<Response>((resolve, reject) => {
     let req = http.request(
       {
-        method,
         host: '127.0.0.1',
-        port: app.options.port,
-        path
+        method,
+        path,
+        port: app.options.port
       },
       res => {
         let body = ''
@@ -113,10 +111,10 @@ it('disables HTTP on request', async () => {
   let response = false
   let req = http.request(
     {
-      method: 'GET',
       host: '127.0.0.1',
-      port: app.options.port,
-      path: '/health'
+      method: 'GET',
+      path: '/health',
+      port: app.options.port
     },
     () => {
       response = true
@@ -136,7 +134,7 @@ it('has health check', async () => {
 })
 
 it('has health check with control server', async () => {
-  app = createServer({ controlSecret: 'secret', backend: 'http://localhost/' })
+  app = createServer({ backend: 'http://localhost/', controlSecret: 'secret' })
   await app.listen()
   let response = await request('GET', '/health')
   expect(response.body).toContain('OK')
@@ -205,10 +203,10 @@ it('passes headers', async () => {
   app = createServer({ controlSecret: 'secret' })
   app.controls['GET /test'] = {
     request: () => ({
+      body: 'done',
       headers: {
         'Content-Type': 'text/plain'
-      },
-      body: 'done'
+      }
     })
   }
   await app.listen()
@@ -257,13 +255,13 @@ it('has bruteforce protection', async () => {
 
 it('does not break WebSocket', async () => {
   app = createServer({
-    controlSecret: 'secret',
-    controlMask: '128.0.0.1/8, 127.1.0.0/16'
+    controlMask: '128.0.0.1/8, 127.1.0.0/16',
+    controlSecret: 'secret'
   })
   await app.listen()
 
   let nodeId = '10:client:node'
-  let log = new Log({ store: new MemoryStore(), nodeId })
+  let log = new Log({ nodeId, store: new MemoryStore() })
   let con = new WsConnection(`ws://127.0.0.1:${app.options.port}`, WebSocket)
   let node = new ClientNode(nodeId, log, con)
 
@@ -311,7 +309,7 @@ it('does not allow to set custom HTTP processor on disabled HTTP', async () => {
 })
 
 it('does not allow to have control secret on disabled HTTP', async () => {
-  app = createServer({ disableHttpServer: true, controlSecret: 'x' })
+  app = createServer({ controlSecret: 'x', disableHttpServer: true })
   let err: Error | undefined
   try {
     await app.listen()

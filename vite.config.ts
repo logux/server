@@ -2,12 +2,12 @@ import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   test: {
-    environment: 'node',
-    exclude: ['node_modules', 'test/servers'],
     coverage: {
-      provider: 'c8',
+      exclude: ['node_modules', 'server/index.js', '*/*.test.*'],
       lines: 100,
-      exclude: ['node_modules', 'server/index.js', '*/*.test.*']
-    }
+      provider: 'v8'
+    },
+    environment: 'node',
+    exclude: ['node_modules', 'test/servers']
   }
 })

@@ -1,19 +1,16 @@
-import type { TestTime, TestLog } from '@logux/core'
-import type { TestClient, TestClientOptions } from '../test-client/index.js'
-import type {
-  BaseServerOptions,
-  ServerMeta,
-  Logger
-} from '../base-server/index.js'
-import type { LoggerOptions } from '../server/index.js'
+import type { TestLog, TestTime } from '@logux/core'
 
 import { BaseServer } from '../base-server/index.js'
+import type {
+  BaseServerOptions,
+  Logger,
+  ServerMeta
+} from '../base-server/index.js'
+import type { LoggerOptions } from '../server/index.js'
+import type { TestClient, TestClientOptions } from '../test-client/index.js'
 
 export interface TestServerOptions
   extends Omit<BaseServerOptions, 'subprotocol' | 'supports'> {
-  subprotocol?: string
-  supports?: string
-
   /**
    * Disable built-in auth.
    */
@@ -23,6 +20,10 @@ export interface TestServerOptions
    * Logger with custom settings.
    */
   logger?: Logger | LoggerOptions
+
+  subprotocol?: string
+
+  supports?: string
 }
 
 /**
@@ -48,16 +49,6 @@ export class TestServer<
   Headers extends object = {}
 > extends BaseServer<Headers> {
   /**
-   * @param opts The limit subset of server options.
-   */
-  constructor(opts?: TestServerOptions)
-
-  /**
-   * Time replacement without variable parts like current timestamp.
-   */
-  time: TestTime
-
-  /**
    * Server actions log, with methods to check actions inside.
    *
    * ```js
@@ -65,6 +56,16 @@ export class TestServer<
    * ```
    */
   log: TestLog<ServerMeta>
+
+  /**
+   * Time replacement without variable parts like current timestamp.
+   */
+  time: TestTime
+
+  /**
+   * @param opts The limit subset of server options.
+   */
+  constructor(opts?: TestServerOptions)
 
   /**
    * Create and connect client.
@@ -81,24 +82,6 @@ export class TestServer<
   connect(userId: string, opts?: TestClientOptions): Promise<TestClient>
 
   /**
-   * Try to connect client and throw an error is client didn’t received
-   * `Wrong Cregentials` message from the server.
-   *
-   * ```js
-   * server = new TestServer()
-   * await server.expectWrongCredentials('10')
-   * ```
-   *
-   * @param userId User ID.
-   * @param opts Other options.
-   * @returns Promise until check.
-   */
-  expectWrongCredentials(
-    userId: string,
-    opts?: TestClientOptions
-  ): Promise<void>
-
-  /**
    * Call callback and throw an error if there was no `Action was denied`
    * during callback.
    *
@@ -111,6 +94,18 @@ export class TestServer<
    * @param test Callback with subscripting or action sending.
    */
   expectDenied(test: () => any | Promise<any>): Promise<void>
+
+  /**
+   * Call callback and throw an error if there was no error during
+   * server processing.
+   *
+   * @param text RegExp or string of error message.
+   * @param test Callback with subscripting or action sending.
+   */
+  expectError(
+    text: RegExp | string,
+    test: () => any | Promise<any>
+  ): Promise<void>
 
   /**
    * Call callback and throw an error if there was no `logux/undo` in return
@@ -128,14 +123,20 @@ export class TestServer<
   expectUndo(reason: string, test: () => any | Promise<any>): Promise<void>
 
   /**
-   * Call callback and throw an error if there was no error during
-   * server processing.
+   * Try to connect client and throw an error is client didn’t received
+   * `Wrong Cregentials` message from the server.
    *
-   * @param text RegExp or string of error message.
-   * @param test Callback with subscripting or action sending.
+   * ```js
+   * server = new TestServer()
+   * await server.expectWrongCredentials('10')
+   * ```
+   *
+   * @param userId User ID.
+   * @param opts Other options.
+   * @returns Promise until check.
    */
-  expectError(
-    text: string | RegExp,
-    test: () => any | Promise<any>
+  expectWrongCredentials(
+    userId: string,
+    opts?: TestClientOptions
   ): Promise<void>
 }

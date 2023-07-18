@@ -1,80 +1,60 @@
+import glob from 'fast-glob'
 import { join, relative } from 'path'
 import pico from 'picocolors'
-import glob from 'fast-glob'
 
-import { createReporter } from '../create-reporter/index.js'
 import { BaseServer } from '../base-server/index.js'
-import { loadOptions, oneOf, number } from '../options-loader/index.js'
+import { createReporter } from '../create-reporter/index.js'
+import { loadOptions, number, oneOf } from '../options-loader/index.js'
 
 let cliOptionsSpec = {
+  envPrefix: 'LOGUX',
+  examples: [
+    '$0 --port 31337 --host 127.0.0.1',
+    'LOGUX_PORT=1337 LOGUX_HOST=127.0.0.1 $0'
+  ],
   options: {
-    host: {
-      alias: 'h',
-      description: 'Host to bind server'
-    },
-    port: {
-      alias: 'p',
-      description: 'Port to bind server',
-      parse: number
-    },
-    key: {
-      description: 'Path to SSL key'
+    backend: {
+      description: 'Backend to process actions'
     },
     cert: {
       description: 'Path to SSL certificate'
     },
-    supports: {
-      description: 'Range of supported client subprotocols'
+    controlMask: {
+      description: 'CIDR masks of control servers'
     },
-    subprotocol: {
-      description: 'Server subprotocol'
+    controlSecret: {
+      description: 'Secret to control Logux server'
+    },
+    host: {
+      alias: 'h',
+      description: 'Host to bind server'
+    },
+    key: {
+      description: 'Path to SSL key'
     },
     logger: {
       alias: 'l',
       description: 'Logger type',
       parse: value => oneOf(['human', 'json'], value)
     },
-    backend: {
-      description: 'Backend to process actions'
-    },
-    controlSecret: {
-      description: 'Secret to control Logux server'
-    },
-    controlMask: {
-      description: 'CIDR masks of control servers'
+    port: {
+      alias: 'p',
+      description: 'Port to bind server',
+      parse: number
     },
     redis: {
       description: 'Redis URL for Logux Server Pro scaling'
+    },
+    subprotocol: {
+      description: 'Server subprotocol'
+    },
+    supports: {
+      description: 'Range of supported client subprotocols'
     }
-  },
-  envPrefix: 'LOGUX',
-  examples: [
-    '$0 --port 31337 --host 127.0.0.1',
-    'LOGUX_PORT=1337 LOGUX_HOST=127.0.0.1 $0'
-  ]
+  }
 }
 
 export class Server extends BaseServer {
-  static loadOptions(process, defaults) {
-    let [help, options] = loadOptions(
-      cliOptionsSpec,
-      process,
-      defaults.root ? { path: join(defaults.root, '.env') } : undefined
-    )
-    if (help) {
-      process.stdout.write(help + '\n')
-      return process.exit(0)
-    }
-    try {
-      return Object.assign(defaults, options)
-    } catch (e) {
-      process.stderr.write(
-        `${pico.bgRed(pico.black(' FATAL '))} ${e.message}\n`
-      )
-      return process.exit(1)
-    }
-  }
-
   constructor(opts = {}) {
     if (!opts.logger) {
       opts.logger = 'human'
@@ -122,11 +102,22 @@ export class Server extends BaseServer {
     })
   }
 
-  async listen(...args) {
+  static loadOptions(process, defaults) {
+    let [help, options] = loadOptions(
+      cliOptionsSpec,
+      process,
+      defaults.root ? { path: join(defaults.root, '.env') } : undefined
+    )
+    if (help) {
+      process.stdout.write(help + '\n')
+      return process.exit(0)
+    }
     try {
-      return BaseServer.prototype.listen.apply(this, args)
-    } catch (err) {
-      this.emitter.emit('report', 'error', { err })
+      return Object.assign(defaults, options)
+    } catch (e) {
+      process.stderr.write(
+        `${pico.bgRed(pico.black(' FATAL '))} ${e.message}\n`
+      )
       return process.exit(1)
     }
   }
@@ -135,8 +126,8 @@ export class Server extends BaseServer {
     files = ['modules/*/index.js', 'modules/*.js', '!**/*.{test,spec}.js']
   ) {
     let matches = await glob(files, {
-      cwd: this.options.root,
       absolute: true,
+      cwd: this.options.root,
       onlyFiles: true
     })
 
@@ -157,5 +148,14 @@ export class Server extends BaseServer {
         }
       })
     )
+  }
+
+  async listen(...args) {
+    try {
+      return BaseServer.prototype.listen.apply(this, args)
+    } catch (err) {
+      this.emitter.emit('report', 'error', { err })
+      return process.exit(1)
+    }
   }
 }

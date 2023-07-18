@@ -99,9 +99,9 @@ function mapArgs(parsedCliArgs, argsSpec) {
 function composeHelp(spec, argv) {
   let options = Object.entries(spec.options).map(([name, option]) => ({
     alias: option.alias ? composeCliAliasName(option.alias) : '',
-    full: composeCliFullName(name),
+    description: option.description,
     env: spec.envPrefix ? composeEnvName(spec.envPrefix, name) : '',
-    description: option.description
+    full: composeCliFullName(name)
   }))
   let nameColumnLength = Math.max(...options.map(it => it.full.length))
   let envColumnLength = Math.max(...options.map(it => it.env.length))
