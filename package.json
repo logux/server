@@ -14,7 +14,9 @@
     "collaborative"
   ],
   "scripts": {
-    "test": "vitest run --coverage && eslint . && check-dts"
+    "test:lint": "eslint .",
+    "test:types": "check-dts",
+    "test": "vitest run --coverage && pnpm run /^test:/"
   },
   "author": "Andrey Sitnik <andrey@sitnik.ru>",
   "license": "MIT",
