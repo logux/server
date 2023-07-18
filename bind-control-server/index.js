@@ -20,7 +20,7 @@ export function bindControlServer(app, custom) {
   if (app.options.disableHttpServer) {
     if (app.options.controlSecret) {
       let err = new Error(
-        '`controlSecret` can be set together with `disableHttpServer` option'
+        '`controlSecret` can not be set together with `disableHttpServer` option'
       )
       err.logux = true
       throw err
