@@ -319,6 +319,6 @@ it('does not allow to have control secret on disabled HTTP', async () => {
     if (e instanceof Error) err = e
   }
   expect(err?.message).toBe(
-    '`controlSecret` can be set together with `disableHttpServer` option'
+    '`controlSecret` can not be set together with `disableHttpServer` option'
   )
 })
