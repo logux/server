@@ -726,56 +726,56 @@ it('ignores unknown action types', async () => {
   ])
 })
 
-// it('checks user access for action', async () => {
-//   let test = createReporter({ env: 'development' })
-//   type FooAction = {
-//     bar: boolean
-//     type: 'FOO'
-//   }
-//   test.app.type<FooAction>('FOO', {
-//     async access(ctx, action, meta) {
-//       expect(ctx.userId).toEqual('10')
-//       expect(ctx.subprotocol).toEqual('0.0.1')
-//       expect(meta.id).toBeDefined()
-//       return !!action.bar
-//     }
-//   })
+it('checks user access for action', async () => {
+  let test = createReporter({ env: 'development' })
+  type FooAction = {
+    bar: boolean
+    type: 'FOO'
+  }
+  test.app.type<FooAction>('FOO', {
+    async access(ctx, action, meta) {
+      expect(ctx.userId).toEqual('10')
+      expect(ctx.subprotocol).toEqual('0.0.1')
+      expect(meta.id).toBeDefined()
+      return !!action.bar
+    }
+  })
 
-//   let client = await connectClient(test.app)
-//   await sendTo(client, [
-//     'sync',
-//     2,
-//     { type: 'FOO' },
-//     { id: [1, '10:uuid', 0], time: 1 },
-//     { bar: true, type: 'FOO' },
-//     { id: [1, '10:uuid', 1], time: 1 }
-//   ])
-//   await delay(50)
-//   expect(test.app.log.actions()).toEqual([
-//     { bar: true, type: 'FOO' },
-//     {
-//       action: { type: 'FOO' },
-//       id: '1 10:uuid 0',
-//       reason: 'denied',
-//       type: 'logux/undo'
-//     },
-//     { id: '1 10:uuid 1', type: 'logux/processed' }
-//   ])
-//   expect(test.names).toEqual([
-//     'connect',
-//     'authenticated',
-//     'denied',
-//     'add',
-//     'add',
-//     'add'
-//   ])
-//   expect(test.reports[2][1].actionId).toEqual('1 10:uuid 0')
-//   expect(sent(client).find(i => i[0] === 'debug')).toEqual([
-//     'debug',
-//     'error',
-//     'Action "1 10:uuid 0" was denied'
-//   ])
-// })
+  let client = await connectClient(test.app)
+  await sendTo(client, [
+    'sync',
+    2,
+    { bar: true, type: 'FOO' },
+    { id: [1, '10:uuid', 0], time: 1 },
+    { type: 'FOO' },
+    { id: [1, '10:uuid', 1], time: 1 }
+  ])
+  await delay(50)
+  expect(test.app.log.actions()).toEqual([
+    { bar: true, type: 'FOO' },
+    { id: '1 10:uuid 0', type: 'logux/processed' },
+    {
+      action: { type: 'FOO' },
+      id: '1 10:uuid 1',
+      reason: 'denied',
+      type: 'logux/undo'
+    }
+  ])
+  expect(test.names).toEqual([
+    'connect',
+    'authenticated',
+    'add',
+    'add',
+    'denied',
+    'add'
+  ])
+  expect(test.reports[4][1].actionId).toEqual('1 10:uuid 1')
+  expect(sent(client).find(i => i[0] === 'debug')).toEqual([
+    'debug',
+    'error',
+    'Action "1 10:uuid 1" was denied'
+  ])
+})
 
 it('takes subprotocol from action meta', async () => {
   let app = createServer()
