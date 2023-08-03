@@ -594,42 +594,42 @@ it('checks action access', async () => {
   expect(finalled).toEqual(1)
 })
 
-// it('checks action creator', async () => {
-//   let test = createReporter()
-//   test.app.type('GOOD', { access: () => true })
-//   test.app.type('BAD', { access: () => true })
+it('checks action creator', async () => {
+  let test = createReporter()
+  test.app.type('GOOD', { access: () => true })
+  test.app.type('BAD', { access: () => true })
 
-//   let client = await connectClient(test.app)
-//   await sendTo(client, [
-//     'sync',
-//     2,
-//     { type: 'GOOD' },
-//     { id: [1, '10:uuid', 0], time: 1 },
-//     { type: 'BAD' },
-//     { id: [2, '1:uuid', 0], time: 2 }
-//   ])
+  let client = await connectClient(test.app)
+  await sendTo(client, [
+    'sync',
+    2,
+    { type: 'GOOD' },
+    { id: [1, '10:uuid', 0], time: 1 },
+    { type: 'BAD' },
+    { id: [2, '1:uuid', 0], time: 2 }
+  ])
 
-//   expect(test.names).toEqual([
-//     'connect',
-//     'authenticated',
-//     'add',
-//     'add',
-//     'denied',
-//     'add'
-//   ])
-//   expect(test.reports[4]).toEqual(['denied', { actionId: '2 1:uuid 0' }])
-//   expect(test.reports[2][1].meta.id).toEqual('1 10:uuid 0')
-//   expect(test.app.log.actions()).toEqual([
-//     { type: 'GOOD' },
-//     { id: '1 10:uuid 0', type: 'logux/processed' },
-//     {
-//       action: { type: 'BAD' },
-//       id: '2 1:uuid 0',
-//       reason: 'denied',
-//       type: 'logux/undo'
-//     }
-//   ])
-// })
+  expect(test.names).toEqual([
+    'connect',
+    'authenticated',
+    'denied',
+    'add',
+    'add',
+    'add'
+  ])
+  expect(test.reports[2]).toEqual(['denied', { actionId: '2 1:uuid 0' }])
+  expect(test.reports[4][1].meta.id).toEqual('1 10:uuid 0')
+  expect(test.app.log.actions()).toEqual([
+    { type: 'GOOD' },
+    {
+      action: { type: 'BAD' },
+      id: '2 1:uuid 0',
+      reason: 'denied',
+      type: 'logux/undo'
+    },
+    { id: '1 10:uuid 0', type: 'logux/processed' }
+  ])
+})
 
 it('allows subscribe and unsubscribe actions', async () => {
   let test = createReporter()

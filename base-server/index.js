@@ -87,7 +87,7 @@ function queueWorker(arg, cb) {
   })
 
   let unbindProcessed = server.on('processed', (processed, processedMeta) => {
-    // console.log('processed:', processed, action, meta, processedMeta)
+    console.log('processed:', processed, action, meta, processedMeta)
     if (processed.id === meta.id) {
       unbindProcessed()
       if (processed.type === 'logux/undo') {
@@ -689,7 +689,7 @@ export class BaseServer {
   }
 
   onActions(process, action, meta) {
-    // console.log('onActions', process, action, meta)
+    console.log('onActions', process, action, meta)
 
     let clientId = parseId(meta.id).clientId
     let queueName = ''
