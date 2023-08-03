@@ -653,49 +653,49 @@ it('allows subscribe and unsubscribe actions', async () => {
   expect(test.names).toContain('subscribed')
 })
 
-// it('checks action meta', async () => {
-//   let test = createReporter()
-//   test.app.type('GOOD', { access: () => true })
-//   test.app.type('BAD', { access: () => true })
+it('checks action meta', async () => {
+  let test = createReporter()
+  test.app.type('GOOD', { access: () => true }, { queue: '1' })
+  test.app.type('BAD', { access: () => true }, { queue: '2' })
 
-//   test.app.log.generateId()
-//   test.app.log.generateId()
+  test.app.log.generateId()
+  test.app.log.generateId()
 
-//   let client = await connectClient(test.app)
-//   await sendTo(client, [
-//     'sync',
-//     2,
-//     { type: 'BAD' },
-//     { id: [1, '10:uuid', 0], status: 'processed', time: 1 },
-//     { type: 'GOOD' },
-//     {
-//       id: [2, '10:uuid', 0],
-//       subprotocol: '1.0.0',
-//       time: 3
-//     }
-//   ])
+  let client = await connectClient(test.app)
+  await sendTo(client, [
+    'sync',
+    2,
+    { type: 'BAD' },
+    { id: [1, '10:uuid', 0], status: 'processed', time: 1 },
+    { type: 'GOOD' },
+    {
+      id: [2, '10:uuid', 0],
+      subprotocol: '1.0.0',
+      time: 3
+    }
+  ])
 
-//   expect(test.app.log.actions()).toEqual([
-//     { type: 'GOOD' },
-//     {
-//       action: { type: 'BAD' },
-//       id: '1 10:uuid 0',
-//       reason: 'denied',
-//       type: 'logux/undo'
-//     },
-//     { id: '2 10:uuid 0', type: 'logux/processed' }
-//   ])
-//   expect(test.names).toEqual([
-//     'connect',
-//     'authenticated',
-//     'denied',
-//     'add',
-//     'add',
-//     'add'
-//   ])
-//   expect(test.reports[2][1].actionId).toEqual('1 10:uuid 0')
-//   expect(test.reports[4][1].meta.id).toEqual('2 10:uuid 0')
-// })
+  expect(test.app.log.actions()).toEqual([
+    { type: 'GOOD' },
+    {
+      action: { type: 'BAD' },
+      id: '1 10:uuid 0',
+      reason: 'denied',
+      type: 'logux/undo'
+    },
+    { id: '2 10:uuid 0', type: 'logux/processed' }
+  ])
+  expect(test.names).toEqual([
+    'connect',
+    'authenticated',
+    'denied',
+    'add',
+    'add',
+    'add'
+  ])
+  expect(test.reports[2][1].actionId).toEqual('1 10:uuid 0')
+  expect(test.reports[4][1].meta.id).toEqual('2 10:uuid 0')
+})
 
 it('ignores unknown action types', async () => {
   let test = createReporter()
