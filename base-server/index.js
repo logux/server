@@ -1,5 +1,7 @@
+/* eslint-disable no-console */
 import { LoguxNotFoundError } from '@logux/actions'
 import { Log, MemoryStore, parseId, ServerConnection } from '@logux/core'
+import fastq from 'fastq'
 import { promises as fs } from 'fs'
 import { createNanoEvents } from 'nanoevents'
 import { nanoid } from 'nanoid'
@@ -62,6 +64,34 @@ function normalizeTypeCallbacks(name, callbacks) {
   if (!callbacks || !callbacks.access) {
     throw new Error(`${name} must have access callback`)
   }
+}
+
+function queueWorker(arg, cb) {
+  let { action, meta, process, queue, server } = arg
+
+  let unbindError = server.on('error', (e, errorAction) => {
+    console.log(errorAction, action, meta)
+    if (errorAction === action) {
+      unbindError()
+      unbindProcessed()
+      for (let task of queue.getQueue()) {
+        server.undo(task.action, task.meta, 'error')
+      }
+      queue.kill()
+      cb(e)
+    }
+  })
+
+  let unbindProcessed = server.on('processed', (processed, processedMeta) => {
+    console.log('processed:', processed, action, meta, processedMeta)
+    if (processed.id === meta.id && processed.type === 'logux/processed') {
+      unbindError()
+      unbindProcessed()
+      cb(null, processedMeta)
+    }
+  })
+
+  process(action, meta)
 }
 
 function normalizeChannelCallbacks(pattern, callbacks) {
@@ -333,6 +363,10 @@ export class BaseServer {
     this.timeouts = {}
     this.lastTimeout = 0
 
+    this.channelPatternToQueueName = new Map()
+    this.actionTypeToQueueName = new Map()
+    this.queues = new Map()
+
     this.controls = {
       'GET /': {
         async request() {
@@ -373,6 +407,16 @@ export class BaseServer {
           }
         })
     )
+    this.unbind.push(async () => {
+      let queues = [...this.queues.values()]
+      let promises = queues.map(
+        queue =>
+          new Promise(resolve => {
+            queue.drain = resolve
+          })
+      )
+      return await Promise.allSettled(promises)
+    })
   }
 
   addClient(connection) {
@@ -409,7 +453,7 @@ export class BaseServer {
     return [undoAction, undoMeta]
   }
 
-  channel(pattern, callbacks) {
+  channel(pattern, callbacks, options) {
     normalizeChannelCallbacks(`Channel ${pattern}`, callbacks)
     let channel = Object.assign({}, callbacks)
     if (typeof pattern === 'string') {
@@ -420,6 +464,10 @@ export class BaseServer {
       channel.regexp = pattern
     }
     this.channels.push(channel)
+
+    let queue = options?.queue || 'main'
+    let channelPattern = channel.regexp ? channel.regexp : channel.pattern.regex
+    this.channelPatternToQueueName.set(channelPattern, queue)
   }
 
   createContext(action, meta) {
@@ -617,6 +665,48 @@ export class BaseServer {
     }
   }
 
+  onActions(process, action, meta) {
+    console.log('onActions', process, action, meta)
+
+    let clientId = parseId(meta.id).clientId
+    let queueName = ''
+
+    if (
+      (action.type === 'logux/subscribe' ||
+        action.type === 'logux/unsubscribe') &&
+      action.channel
+    ) {
+      for (let i = 0; i < this.channels.length && !queueName; i++) {
+        let channel = this.channels[i]
+        let pattern = channel.regexp || channel.pattern.regex
+        if (action.channel.match(pattern)) {
+          queueName = this.channelPatternToQueueName.get(pattern)
+        }
+      }
+    } else {
+      queueName = this.actionTypeToQueueName.get(action.type)
+    }
+
+    queueName = queueName || 'main'
+
+    let queueKey = `${clientId}/${queueName}`
+    let queue = this.queues.get(queueKey)
+
+    if (!queue) {
+      let concurrency = 1
+      queue = fastq(queueWorker, concurrency)
+      this.queues.set(queueKey, queue)
+    }
+
+    queue.push({
+      action,
+      meta,
+      process,
+      queue,
+      server: this
+    })
+  }
+
   otherChannel(callbacks) {
     normalizeChannelCallbacks('Unknown channel', callbacks)
     if (this.otherSubscriber) {
@@ -785,9 +875,10 @@ export class BaseServer {
                 let ctx = this.createContext(action, meta)
                 let client = this.clientIds.get(clientId)
                 for (let filter of Object.values(subscriber.filters)) {
-                  filter = typeof filter === 'function'
-                    ? await filter(ctx, action, meta)
-                    : filter
+                  filter =
+                    typeof filter === 'function'
+                      ? await filter(ctx, action, meta)
+                      : filter
                   if (filter && client) {
                     ignoreClients.add(clientId)
                     client.node.onAdd(action, meta)
@@ -924,7 +1015,10 @@ export class BaseServer {
     if (!match) this.wrongChannel(action, meta)
   }
 
-  type(name, callbacks) {
+  type(name, callbacks, options) {
+    let queue = options?.queue || 'main'
+    this.actionTypeToQueueName.set(name, queue)
+
     if (typeof name === 'function') name = name.type
     normalizeTypeCallbacks(`Action type ${name}`, callbacks)
 
