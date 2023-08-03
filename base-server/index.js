@@ -76,21 +76,11 @@ function queueWorker(arg, cb) {
     queue.killAndDrain()
   }
 
-  // let unbindReport = server.on('report', async name => {
-  //   if (name === 'destroy') {
-  //     unbindReport()
-  //     unbindError()
-  //     unbindProcessed()
-  //     cb(null)
-  //   }
-  // })
-
   let unbindError = server.on('error', (e, errorAction) => {
     // console.log(errorAction, action, meta)
     if (errorAction === action) {
       unbindError()
       unbindProcessed()
-      // unbindReport()
       undoRemainingTasks()
       cb(e)
     }
@@ -100,7 +90,6 @@ function queueWorker(arg, cb) {
     // console.log('processed:', processed, action, meta, processedMeta)
     if (processed.id === meta.id) {
       unbindProcessed()
-      // unbindReport()
       if (processed.type === 'logux/undo') {
         undoRemainingTasks()
       } else {
