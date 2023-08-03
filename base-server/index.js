@@ -419,21 +419,10 @@ export class BaseServer {
     this.unbind.push(async () => {
       let queues = [...this.queues.values()]
       let promises = queues.map(
-        (queue, i) =>
+        queue =>
           new Promise(resolve => {
             if (queue.length()) {
-              // console.log(
-              //   `queue ${this.nodeId} ${i}:`,
-              //   queue.getQueue(),
-              //   queue.length()
-              // )
               queue.drain = resolve
-              // TODO
-              // this.setTimeout(() => {
-              //   console.log('FORCE RESOLVE', this.nodeId, i)
-              //   console.log(queue.getQueue())
-              //   resolve()
-              // }, 5000)
             } else {
               resolve()
             }
