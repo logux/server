@@ -13,6 +13,7 @@ import { bindControlServer } from '../bind-control-server/index.js'
 import { Context } from '../context/index.js'
 import { createHttpServer } from '../create-http-server/index.js'
 import { ServerClient } from '../server-client/index.js'
+import FastQueue from "fastq";
 
 const SKIP_PROCESS = Symbol('skipProcess')
 const RESEND_META = ['channels', 'users', 'clients', 'nodes']
@@ -241,8 +242,19 @@ export class BaseServer {
           this.internalUnkownType(action, meta)
           return
         }
+
         if (processor.process) {
-          this.processAction(processor, action, meta, start)
+          if (processor.queue && processor.queue()) {
+            let queue = this.queues.get(processor.queue())
+            if (!queue) {
+              queue = FastQueue(async ({ processor, action, meta, start }, cb) => {
+                await this.processAction(processor, action, meta, start)
+                cb(null)
+              }, 1)
+              this.queues.set(processor.queue(), queue)
+            }
+            queue.push({ processor, action, meta, start })
+          } else this.processAction(processor, action, meta, start)
         } else {
           this.emitter.emit('processed', action, meta, 0)
           this.finally(
@@ -317,6 +329,7 @@ export class BaseServer {
     this.nodeIds = new Map()
     this.clientIds = new Map()
     this.userIds = new Map()
+    this.queues = new Map()
     this.types = {}
     this.regexTypes = new Map()
     this.processing = 0
@@ -445,7 +458,7 @@ export class BaseServer {
       if (i.connection.connected) {
         try {
           i.connection.send(['debug', 'error', error.stack])
-        } catch {}
+        } catch { }
       }
     }
   }
@@ -684,9 +697,9 @@ export class BaseServer {
     })
   }
 
+
   async processAction(processor, action, meta, start) {
     let ctx = this.createContext(action, meta)
-
     let latency
     this.processing += 1
     try {
@@ -885,7 +898,7 @@ export class BaseServer {
             filters,
             unsubscribe: channel.unsubscribe
               ? (unsubscribeAction, unsubscribeMeta) =>
-                  channel.unsubscribe(ctx, unsubscribeAction, unsubscribeMeta)
+                channel.unsubscribe(ctx, unsubscribeAction, unsubscribeMeta)
               : undefined
           }
           subscribed = true

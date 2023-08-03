@@ -1,9 +1,5 @@
 lockfileVersion: '6.0'
 
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
-
 dependencies:
   '@logux/actions':
     specifier: ^0.3.0
@@ -23,6 +19,9 @@ dependencies:
   fast-glob:
     specifier: ^3.3.0
     version: 3.3.0
+  fastq:
+    specifier: ^1.15.0
+    version: 1.15.0
   ip:
     specifier: ^1.1.8
     version: 1.1.8
@@ -3119,3 +3118,7 @@ packages:
   /yyyy-mm-dd@1.0.2:
     resolution: {integrity: sha512-xHhOFKT1Y29Jc4/6To1hmIUswKhCKplPSbkCyIabAAZ5q/9GmZvlN3WNcafcq3zze3CzYU66XNeSBLCD8Oickw==}
     dev: false
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
