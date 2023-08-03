@@ -1330,92 +1330,92 @@ it('allows to use different node ID only with same client ID', async () => {
   expect(test.names).toEqual(['connect', 'authenticated', 'denied', 'add'])
 })
 
-// it('has finally callback', async () => {
-//   let app = createServer()
-//   let calls: string[] = []
-//   let errors: string[] = []
-//   app.on('error', e => {
-//     errors.push(e.message)
-//   })
-//   app.type(
-//     'A',
-//     {
-//       access: () => true,
-//       finally() {
-//         calls.push('A')
-//       }
-//     },
-//     { queue: 'A' }
-//   )
-//   app.type(
-//     'B',
-//     {
-//       access: () => true,
-//       finally() {
-//         calls.push('B')
-//       },
-//       process: () => {}
-//     },
-//     { queue: 'B' }
-//   )
-//   app.type(
-//     'C',
-//     {
-//       access: () => true,
-//       finally() {
-//         calls.push('C')
-//       },
-//       resend() {
-//         throw new Error('C')
-//       }
-//     },
-//     { queue: 'C' }
-//   )
-//   app.type(
-//     'D',
-//     {
-//       access() {
-//         throw new Error('D')
-//       },
-//       finally() {
-//         calls.push('D')
-//       }
-//     },
-//     { queue: 'D' }
-//   )
-//   app.type(
-//     'E',
-//     {
-//       access: () => true,
-//       finally() {
-//         calls.push('E')
-//         throw new Error('EE')
-//       },
-//       process() {
-//         throw new Error('E')
-//       }
-//     },
-//     { queue: 'E' }
-//   )
-//   let client = await connectClient(app, '10:client:uuid')
-//   await sendTo(client, [
-//     'sync',
-//     5,
-//     { type: 'A' },
-//     { id: [1, '10:client:other', 0], time: 1 },
-//     { type: 'B' },
-//     { id: [2, '10:client:other', 0], time: 1 },
-//     { type: 'C' },
-//     { id: [3, '10:client:other', 0], time: 1 },
-//     { type: 'D' },
-//     { id: [4, '10:client:other', 0], time: 1 },
-//     { type: 'E' },
-//     { id: [5, '10:client:other', 0], time: 1 }
-//   ])
+it('has finally callback', async () => {
+  let app = createServer()
+  let calls: string[] = []
+  let errors: string[] = []
+  app.on('error', e => {
+    errors.push(e.message)
+  })
+  app.type(
+    'A',
+    {
+      access: () => true,
+      finally() {
+        calls.push('A')
+      }
+    },
+    { queue: 'A' }
+  )
+  app.type(
+    'B',
+    {
+      access: () => true,
+      finally() {
+        calls.push('B')
+      },
+      process: () => {}
+    },
+    { queue: 'B' }
+  )
+  app.type(
+    'C',
+    {
+      access: () => true,
+      finally() {
+        calls.push('C')
+      },
+      resend() {
+        throw new Error('C')
+      }
+    },
+    { queue: 'C' }
+  )
+  app.type(
+    'D',
+    {
+      access() {
+        throw new Error('D')
+      },
+      finally() {
+        calls.push('D')
+      }
+    },
+    { queue: 'D' }
+  )
+  app.type(
+    'E',
+    {
+      access: () => true,
+      finally() {
+        calls.push('E')
+        throw new Error('EE')
+      },
+      process() {
+        throw new Error('E')
+      }
+    },
+    { queue: 'E' }
+  )
+  let client = await connectClient(app, '10:client:uuid')
+  await sendTo(client, [
+    'sync',
+    5,
+    { type: 'A' },
+    { id: [1, '10:client:other', 0], time: 1 },
+    { type: 'B' },
+    { id: [2, '10:client:other', 0], time: 1 },
+    { type: 'C' },
+    { id: [3, '10:client:other', 0], time: 1 },
+    { type: 'D' },
+    { id: [4, '10:client:other', 0], time: 1 },
+    { type: 'E' },
+    { id: [5, '10:client:other', 0], time: 1 }
+  ])
 
-//   expect(calls).toEqual(['A', 'B', 'C', 'D', 'E'])
-//   expect(errors).toEqual(['C', 'D', 'E', 'EE'])
-// })
+  expect(calls).toEqual(['D', 'A', 'C', 'E', 'B'])
+  expect(errors).toEqual(['D', 'C', 'E', 'EE'])
+})
 
 it('sends error to author', async () => {
   let app = createServer()

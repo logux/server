@@ -87,7 +87,8 @@ function queueWorker(arg, cb) {
   })
 
   let unbindProcessed = server.on('processed', (processed, processedMeta) => {
-    console.log('processed:', processed, action, meta, processedMeta)
+    // console.log('processed:', processed, action, meta, processedMeta)
+    console.log('processed:', processed)
     if (processed.id === meta.id) {
       unbindProcessed()
       if (processed.type === 'logux/undo') {
