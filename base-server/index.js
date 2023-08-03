@@ -223,7 +223,7 @@ export class BaseServer {
         this.emitter.emit('report', 'add', { action, meta })
       }
 
-      if (this.destroying) return // TODO: this is the reason of failing bind-backend-proxy tests ?
+      if (this.destroying) return
 
       if (action.type === 'logux/subscribe') {
         if (meta.server === this.nodeId) {
