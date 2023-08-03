@@ -448,15 +448,16 @@ type ActionCallbacks<
   Headers extends object
 > = (
   | {
-      access: Authorizer<TypeAction, Data, Headers>
-      process?: Processor<TypeAction, Data, Headers>
-    }
+    access: Authorizer<TypeAction, Data, Headers>
+    process?: Processor<TypeAction, Data, Headers>
+  }
   | {
-      accessAndProcess: Processor<TypeAction, Data, Headers>
-    }
+    accessAndProcess: Processor<TypeAction, Data, Headers>
+  }
 ) & {
   finally?: ActionFinally<TypeAction, Data, Headers>
   resend?: Resender<TypeAction, Data, Headers>
+  queue?: () => boolean
 }
 
 type ChannelCallbacks<
@@ -466,17 +467,17 @@ type ChannelCallbacks<
   Headers extends object
 > = (
   | {
-      access: ChannelAuthorizer<SubscribeAction, Data, ChannelParams, Headers>
-      load?: ChannelLoader<SubscribeAction, Data, ChannelParams, Headers>
-    }
+    access: ChannelAuthorizer<SubscribeAction, Data, ChannelParams, Headers>
+    load?: ChannelLoader<SubscribeAction, Data, ChannelParams, Headers>
+  }
   | {
-      accessAndLoad: ChannelLoader<
-        SubscribeAction,
-        Data,
-        ChannelParams,
-        Headers
-      >
-    }
+    accessAndLoad: ChannelLoader<
+      SubscribeAction,
+      Data,
+      ChannelParams,
+      Headers
+    >
+  }
 ) & {
   filter?: FilterCreator<SubscribeAction, Data, ChannelParams, Headers>
   finally?: ChannelFinally<SubscribeAction, Data, ChannelParams, Headers>
@@ -572,16 +573,16 @@ export interface Reporter {
 
 export type Resend =
   | {
-      channel?: string
-      channels?: string[]
-      client?: string
-      clients?: string[]
-      excludeClients?: string[]
-      node?: string
-      nodes?: string[]
-      user?: string
-      users?: string[]
-    }
+    channel?: string
+    channels?: string[]
+    client?: string
+    clients?: string[]
+    excludeClients?: string[]
+    node?: string
+    nodes?: string[]
+    user?: string
+    users?: string[]
+  }
   | string
   | string[]
 

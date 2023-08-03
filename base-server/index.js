@@ -13,6 +13,7 @@ import { bindControlServer } from '../bind-control-server/index.js'
 import { Context } from '../context/index.js'
 import { createHttpServer } from '../create-http-server/index.js'
 import { ServerClient } from '../server-client/index.js'
+import { promise as FastQueue } from "fastq";
 
 const SKIP_PROCESS = Symbol('skipProcess')
 const RESEND_META = ['channels', 'users', 'clients', 'nodes']
@@ -241,8 +242,16 @@ export class BaseServer {
           this.internalUnkownType(action, meta)
           return
         }
+
         if (processor.process) {
-          this.processAction(processor, action, meta, start)
+          if (processor.queue && processor.queue()) {
+            let queue = this.queues.get(action.type)
+            if (!queue) {
+              queue = FastQueue(this.processAction.bind(this), 1)
+              this.queues.set(action.type, queue)
+            }
+            queue.push(processor, action, meta, start)
+          } else this.processAction(processor, action, meta, start)
         } else {
           this.emitter.emit('processed', action, meta, 0)
           this.finally(
@@ -317,6 +326,7 @@ export class BaseServer {
     this.nodeIds = new Map()
     this.clientIds = new Map()
     this.userIds = new Map()
+    this.queues = new Map()
     this.types = {}
     this.regexTypes = new Map()
     this.processing = 0
@@ -445,7 +455,7 @@ export class BaseServer {
       if (i.connection.connected) {
         try {
           i.connection.send(['debug', 'error', error.stack])
-        } catch {}
+        } catch { }
       }
     }
   }
@@ -684,9 +694,11 @@ export class BaseServer {
     })
   }
 
-  async processAction(processor, action, meta, start) {
-    let ctx = this.createContext(action, meta)
 
+  async processAction(processor, action, meta, start) {
+    // TODO: WORK HERE
+    console.log("PROCESSING action type: -> ", action.type)
+    let ctx = this.createContext(action, meta)
     let latency
     this.processing += 1
     try {
@@ -736,6 +748,7 @@ export class BaseServer {
   }
 
   async sendAction(action, meta) {
+    // TODO: work here
     let from = parseId(meta.id).clientId
     let ignoreClients = new Set(meta.excludeClients || [])
     ignoreClients.add(from)
@@ -885,7 +898,7 @@ export class BaseServer {
             filters,
             unsubscribe: channel.unsubscribe
               ? (unsubscribeAction, unsubscribeMeta) =>
-                  channel.unsubscribe(ctx, unsubscribeAction, unsubscribeMeta)
+                channel.unsubscribe(ctx, unsubscribeAction, unsubscribeMeta)
               : undefined
           }
           subscribed = true
