@@ -457,7 +457,7 @@ type ActionCallbacks<
 ) & {
   finally?: ActionFinally<TypeAction, Data, Headers>
   resend?: Resender<TypeAction, Data, Headers>
-  queue?: () => boolean
+  queue?: () => string
 }
 
 type ChannelCallbacks<

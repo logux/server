@@ -13,7 +13,7 @@ import { bindControlServer } from '../bind-control-server/index.js'
 import { Context } from '../context/index.js'
 import { createHttpServer } from '../create-http-server/index.js'
 import { ServerClient } from '../server-client/index.js'
-import { promise as FastQueue } from "fastq";
+import FastQueue from "fastq";
 
 const SKIP_PROCESS = Symbol('skipProcess')
 const RESEND_META = ['channels', 'users', 'clients', 'nodes']
@@ -245,12 +245,15 @@ export class BaseServer {
 
         if (processor.process) {
           if (processor.queue && processor.queue()) {
-            let queue = this.queues.get(action.type)
+            let queue = this.queues.get(processor.queue())
             if (!queue) {
-              queue = FastQueue(this.processAction.bind(this), 1)
-              this.queues.set(action.type, queue)
+              queue = FastQueue(async ({ processor, action, meta, start }, cb) => {
+                await this.processAction(processor, action, meta, start)
+                cb(null)
+              }, 1)
+              this.queues.set(processor.queue(), queue)
             }
-            queue.push(processor, action, meta, start)
+            queue.push({ processor, action, meta, start })
           } else this.processAction(processor, action, meta, start)
         } else {
           this.emitter.emit('processed', action, meta, 0)
