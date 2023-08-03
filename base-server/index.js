@@ -69,24 +69,43 @@ function normalizeTypeCallbacks(name, callbacks) {
 function queueWorker(arg, cb) {
   let { action, meta, process, queue, server } = arg
 
+  let undoRemainingTasks = () => {
+    for (let task of queue.getQueue()) {
+      server.undo(task.action, task.meta, 'error')
+    }
+    queue.killAndDrain()
+  }
+
+  // let unbindReport = server.on('report', async name => {
+  //   if (name === 'destroy') {
+  //     unbindReport()
+  //     unbindError()
+  //     unbindProcessed()
+  //     cb(null)
+  //   }
+  // })
+
   let unbindError = server.on('error', (e, errorAction) => {
-    console.log(errorAction, action, meta)
+    // console.log(errorAction, action, meta)
     if (errorAction === action) {
       unbindError()
       unbindProcessed()
-      for (let task of queue.getQueue()) {
-        server.undo(task.action, task.meta, 'error')
-      }
-      queue.kill()
+      // unbindReport()
+      undoRemainingTasks()
       cb(e)
     }
   })
 
   let unbindProcessed = server.on('processed', (processed, processedMeta) => {
-    console.log('processed:', processed, action, meta, processedMeta)
-    if (processed.id === meta.id && processed.type === 'logux/processed') {
-      unbindError()
+    // console.log('processed:', processed, action, meta, processedMeta)
+    if (processed.id === meta.id) {
       unbindProcessed()
+      // unbindReport()
+      if (processed.type === 'logux/undo') {
+        undoRemainingTasks()
+      } else {
+        unbindError()
+      }
       cb(null, processedMeta)
     }
   })
@@ -215,7 +234,7 @@ export class BaseServer {
         this.emitter.emit('report', 'add', { action, meta })
       }
 
-      if (this.destroying) return
+      if (this.destroying) return // TODO: this is the reason of failing bind-backend-proxy tests ?
 
       if (action.type === 'logux/subscribe') {
         if (meta.server === this.nodeId) {
@@ -410,9 +429,24 @@ export class BaseServer {
     this.unbind.push(async () => {
       let queues = [...this.queues.values()]
       let promises = queues.map(
-        queue =>
+        (queue, i) =>
           new Promise(resolve => {
-            queue.drain = resolve
+            if (queue.length()) {
+              // console.log(
+              //   `queue ${this.nodeId} ${i}:`,
+              //   queue.getQueue(),
+              //   queue.length()
+              // )
+              queue.drain = resolve
+              // TODO
+              // this.setTimeout(() => {
+              //   console.log('FORCE RESOLVE', this.nodeId, i)
+              //   console.log(queue.getQueue())
+              //   resolve()
+              // }, 5000)
+            } else {
+              resolve()
+            }
           })
       )
       return await Promise.allSettled(promises)
@@ -666,7 +700,7 @@ export class BaseServer {
   }
 
   onActions(process, action, meta) {
-    console.log('onActions', process, action, meta)
+    // console.log('onActions', process, action, meta)
 
     let clientId = parseId(meta.id).clientId
     let queueName = ''
