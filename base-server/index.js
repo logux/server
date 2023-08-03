@@ -696,8 +696,6 @@ export class BaseServer {
 
 
   async processAction(processor, action, meta, start) {
-    // TODO: WORK HERE
-    console.log("PROCESSING action type: -> ", action.type)
     let ctx = this.createContext(action, meta)
     let latency
     this.processing += 1
@@ -748,7 +746,6 @@ export class BaseServer {
   }
 
   async sendAction(action, meta) {
-    // TODO: work here
     let from = parseId(meta.id).clientId
     let ignoreClients = new Set(meta.excludeClients || [])
     ignoreClients.add(from)
