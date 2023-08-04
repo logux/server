@@ -20,7 +20,7 @@
   },
   "author": "Andrey Sitnik <andrey@sitnik.ru>",
   "license": "MIT",
-  "homepage": "https://logux.io/",
+  "homepage": "https://logux.org/",
   "repository": "logux/server",
   "engines": {
     "node": "^14.0.0 || ^16.0.0 || >=18.0.0"
