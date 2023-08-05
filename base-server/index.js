@@ -234,7 +234,7 @@ export class BaseServer {
         this.emitter.emit('report', 'useless', { action, meta })
       }
 
-      this.sendAction(action, meta)
+      await this.sendAction(action, meta)
 
       if (meta.status === 'waiting') {
         if (!processor) {

@@ -1405,6 +1405,25 @@ it('has shortcuts for resend arrays', async () => {
         nodes: ['1:1:1'],
         reasons: ['test'],
         server: 'server:uuid',
+        status: 'waiting',
+        subprotocol: '0.0.0',
+        time: 1,
+        users: ['1']
+      }
+    ]
+  ])
+  await delay(10)
+  expect(test.app.log.entries()).toEqual([
+    [
+      { type: 'A' },
+      {
+        added: 1,
+        channels: ['a'],
+        clients: ['1:1'],
+        id: '1 server:uuid 0',
+        nodes: ['1:1:1'],
+        reasons: ['test'],
+        server: 'server:uuid',
         status: 'processed',
         subprotocol: '0.0.0',
         time: 1,
@@ -1504,12 +1523,12 @@ it('subscribes clients manually', async () => {
   expect(actions).toEqual([{ channel: 'users/10', type: 'logux/subscribed' }])
 })
 
-it('processes action with accessAndProcess callback', () => {
+it('processes action with accessAndProcess callback', async () => {
   let test = createReporter()
   let accessAndProcess = spy()
   test.app.type('A', {
     accessAndProcess
   })
-  test.app.process({ type: 'A' })
+  await test.app.process({ type: 'A' })
   expect(accessAndProcess.callCount).toEqual(1)
 })
