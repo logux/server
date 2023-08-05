@@ -1529,7 +1529,6 @@ it('processes action with accessAndProcess callback', async () => {
   test.app.type('A', {
     accessAndProcess
   })
-  test.app.process({ type: 'A' })
-  await delay(10)
+  await test.app.process({ type: 'A' })
   expect(accessAndProcess.callCount).toEqual(1)
 })
