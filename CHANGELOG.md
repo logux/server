@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.12.5
+* Fixed async action’s filter in channel (by Eduard Aksamitov).
+
 ## 0.12.4
 * Fixed docs.
 
