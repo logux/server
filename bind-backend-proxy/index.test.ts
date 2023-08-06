@@ -519,7 +519,7 @@ it('notifies about actions and subscriptions', async () => {
       }
     ]
   ])
-  await delay(110)
+  await delay(150)
 
   expect(app.log.actions()).toEqual([
     { type: 'A' },
