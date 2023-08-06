@@ -32,6 +32,22 @@ interface ActionsCallback {
   ): void
 }
 
+interface TypeOptions {
+  /**
+   * Name of the queue that will be used to process actions
+   * of the specified type. Default is 'main'
+   */
+  queue?: string
+}
+
+interface ChannelOptions {
+  /**
+   * Name of the queue that will be used to process channels
+   * with the specified name pattern. Default is 'main'
+   */
+  queue?: string
+}
+
 export interface ServerMeta extends Meta {
   /**
    * All nodes subscribed to channel will receive the action.
@@ -817,6 +833,7 @@ export class BaseServer<
    *
    * @param pattern Pattern for channel name.
    * @param callbacks Callback during subscription process.
+   * @param options Additional options
    */
   channel<
     ChannelParams extends object = {},
@@ -824,12 +841,14 @@ export class BaseServer<
     SubscribeAction extends LoguxSubscribeAction = LoguxSubscribeAction
   >(
     pattern: string,
-    callbacks: ChannelCallbacks<SubscribeAction, Data, ChannelParams, Headers>
+    callbacks: ChannelCallbacks<SubscribeAction, Data, ChannelParams, Headers>,
+    options?: ChannelOptions
   ): void
 
   /**
    * @param pattern Regular expression for channel name.
    * @param callbacks Callback during subscription process.
+   * @param options Additional options
    */
   channel<
     ChannelParams extends string[] = string[],
@@ -837,7 +856,8 @@ export class BaseServer<
     SubscribeAction extends LoguxSubscribeAction = LoguxSubscribeAction
   >(
     pattern: RegExp,
-    callbacks: ChannelCallbacks<SubscribeAction, Data, ChannelParams, Headers>
+    callbacks: ChannelCallbacks<SubscribeAction, Data, ChannelParams, Headers>,
+    options?: ChannelOptions
   ): void
 
   /**
@@ -1144,10 +1164,12 @@ export class BaseServer<
   /**
    * @param actionCreator Action creator function.
    * @param callbacks Callbacks for action created by creator.
+   * @param options Additional options
    */
   type<Creator extends AbstractActionCreator, Data extends object = {}>(
     actionCreator: Creator,
-    callbacks: ActionCallbacks<ReturnType<Creator>, Data, Headers>
+    callbacks: ActionCallbacks<ReturnType<Creator>, Data, Headers>,
+    options?: TypeOptions
   ): void
 
   /**
@@ -1171,10 +1193,12 @@ export class BaseServer<
    *
    * @param name The action’s type or action’s type matching rule as RegExp..
    * @param callbacks Callbacks for actions with this type.
+   * @param options Additional options
    */
   type<TypeAction extends Action = AnyAction, Data extends object = {}>(
     name: RegExp | TypeAction['type'],
-    callbacks: ActionCallbacks<TypeAction, Data, Headers>
+    callbacks: ActionCallbacks<TypeAction, Data, Headers>,
+    options?: TypeOptions
   ): void
 
   /**
