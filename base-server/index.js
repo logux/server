@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { LoguxNotFoundError } from '@logux/actions'
 import { Log, MemoryStore, parseId, ServerConnection } from '@logux/core'
 import fastq from 'fastq'
