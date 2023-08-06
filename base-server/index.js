@@ -77,8 +77,10 @@ function queueWorker(arg, cb) {
   }
 
   let unbindError = server.on('error', (e, errorAction) => {
-    // console.log(errorAction, action, meta)
+    console.log('POSSIBLE ERROR:', errorAction, action, meta)
+    console.log(action, meta, 'QUEUE LENGTH:', queue.length())
     if (errorAction === action) {
+      console.log('ERROR:', action, meta)
       unbindError()
       unbindProcessed()
       undoRemainingTasks()
@@ -94,7 +96,7 @@ function queueWorker(arg, cb) {
       if (processed.type === 'logux/undo') {
         undoRemainingTasks()
       } else {
-        unbindError()
+        // unbindError()
       }
       cb(null, processedMeta)
     }
@@ -903,6 +905,11 @@ export class BaseServer {
         }
       }
     }
+  }
+
+  setQueue(actionName, queue) {
+    queue = queue || 'main'
+    this.actionTypeToQueueName.set(actionName, queue)
   }
 
   setTimeout(callback, ms) {
