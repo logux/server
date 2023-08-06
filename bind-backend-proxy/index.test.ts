@@ -471,14 +471,13 @@ it('notifies about actions and subscriptions', async () => {
   let client = await app.connect('10', { headers: { lang: 'fr' } })
   client.log.add({ type: 'A' })
   client.log.add({ channel: 'a', type: 'logux/subscribe' })
-  await delay(135)
+  await delay(106)
 
   expect(app.log.actions()).toEqual([
     { type: 'A' },
-    { channel: 'a', type: 'logux/subscribe' },
-    { id: '1 10:1:1 0', type: 'logux/processed' }
+    { channel: 'a', type: 'logux/subscribe' }
   ])
-  expect(app.log.entries()[0][1].status).toEqual('processed')
+  expect(app.log.entries()[0][1].status).toEqual('waiting')
   expect(sent).toEqual([
     [
       'POST',
@@ -506,7 +505,7 @@ it('notifies about actions and subscriptions', async () => {
             command: 'action',
             headers: { lang: 'fr' },
             meta: {
-              added: 3,
+              added: 1,
               id: '2 10:1:1 0',
               reasons: ['test'],
               server: 'server:uuid',
@@ -520,7 +519,7 @@ it('notifies about actions and subscriptions', async () => {
       }
     ]
   ])
-  await delay(100)
+  await delay(110)
 
   expect(app.log.actions()).toEqual([
     { type: 'A' },
@@ -533,10 +532,10 @@ it('notifies about actions and subscriptions', async () => {
   expect(app.log.entries()[0][1].status).toEqual('processed')
   expect(events).toEqual([
     'backendSent',
-    'backendGranted',
-    'backendProcessed',
     'backendSent',
     'backendGranted',
+    'backendGranted',
+    'backendProcessed',
     'backendProcessed'
   ])
   expect(processed).toEqual(0)

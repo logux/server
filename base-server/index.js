@@ -77,10 +77,7 @@ function queueWorker(arg, cb) {
   }
 
   let unbindError = server.on('error', (e, errorAction) => {
-    console.log('POSSIBLE ERROR:', errorAction, action, meta)
-    console.log(action, meta, 'QUEUE LENGTH:', queue.length())
     if (errorAction === action) {
-      console.log('ERROR:', action, meta)
       unbindError()
       unbindProcessed()
       undoRemainingTasks()
@@ -89,14 +86,12 @@ function queueWorker(arg, cb) {
   })
 
   let unbindProcessed = server.on('processed', (processed, processedMeta) => {
-    // console.log('processed:', processed, action, meta, processedMeta)
-    console.log('processed:', processed)
     if (processed.id === meta.id) {
       unbindProcessed()
       if (processed.type === 'logux/undo') {
         undoRemainingTasks()
       } else {
-        // unbindError()
+        unbindError()
       }
       cb(null, processedMeta)
     }
@@ -275,7 +270,7 @@ export class BaseServer {
         this.emitter.emit('report', 'useless', { action, meta })
       }
 
-      this.sendAction(action, meta)
+      await this.sendAction(action, meta)
 
       if (meta.status === 'waiting') {
         if (!processor) {
@@ -681,8 +676,6 @@ export class BaseServer {
   }
 
   onActions(process, action, meta) {
-    console.log('onActions', process, action, meta)
-
     let clientId = parseId(meta.id).clientId
     let queueName = ''
 
