@@ -13,12 +13,24 @@ import type {
   ServerConnection,
   TestTime
 } from '@logux/core'
-import type { Server as HTTPServer, IncomingMessage, ServerResponse } from 'http'
+import type {
+  Server as HTTPServer,
+  IncomingMessage,
+  ServerResponse
+} from 'http'
 import type { Unsubscribe } from 'nanoevents'
 import type { LogFn } from 'pino'
 
 import type { ChannelContext, Context } from '../context/index.js'
 import type { ServerClient } from '../server-client/index.js'
+
+interface ActionsCallback {
+  (
+    process: (action: Action, meta: Meta) => Promise<void>,
+    action: Action,
+    meta: Meta
+  ): void
+}
 
 export interface ServerMeta extends Meta {
   /**
@@ -715,6 +727,8 @@ export class BaseServer<
    * Each server will have a different list.
    */
   nodeIds: Map<string, ServerClient>
+
+  onActions: ActionsCallback
 
   /**
    * Server options.
