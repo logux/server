@@ -745,35 +745,35 @@ it('checks user access for action', async () => {
   await sendTo(client, [
     'sync',
     2,
-    { bar: true, type: 'FOO' },
-    { id: [1, '10:uuid', 0], time: 1 },
     { type: 'FOO' },
+    { id: [1, '10:uuid', 0], time: 1 },
+    { bar: true, type: 'FOO' },
     { id: [1, '10:uuid', 1], time: 1 }
   ])
   await delay(50)
   expect(test.app.log.actions()).toEqual([
     { bar: true, type: 'FOO' },
-    { id: '1 10:uuid 0', type: 'logux/processed' },
     {
       action: { type: 'FOO' },
-      id: '1 10:uuid 1',
+      id: '1 10:uuid 0',
       reason: 'denied',
       type: 'logux/undo'
-    }
+    },
+    { id: '1 10:uuid 1', type: 'logux/processed' }
   ])
   expect(test.names).toEqual([
     'connect',
     'authenticated',
-    'add',
-    'add',
     'denied',
+    'add',
+    'add',
     'add'
   ])
-  expect(test.reports[4][1].actionId).toEqual('1 10:uuid 1')
+  expect(test.reports[2][1].actionId).toEqual('1 10:uuid 0')
   expect(sent(client).find(i => i[0] === 'debug')).toEqual([
     'debug',
     'error',
-    'Action "1 10:uuid 1" was denied'
+    'Action "1 10:uuid 0" was denied'
   ])
 })
 
