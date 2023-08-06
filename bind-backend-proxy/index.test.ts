@@ -629,7 +629,7 @@ it('reacts on wrong backend answer', async () => {
   client.log.add({ type: 'BROKEN6' })
   client.log.add({ type: 'BROKEN7' })
   client.log.add({ channel: 'resend', type: 'logux/subscribe' })
-  await delay(200)
+  await delay(100)
 
   expect(errors).toEqual([
     'Empty back-end answer',
