@@ -5,6 +5,7 @@ import type {
 } from '@logux/actions'
 import type {
   Action,
+  ActionsCallback,
   AnyAction,
   ID,
   Log,
@@ -23,14 +24,6 @@ import type { LogFn } from 'pino'
 
 import type { ChannelContext, Context } from '../context/index.js'
 import type { ServerClient } from '../server-client/index.js'
-
-interface ActionsCallback {
-  (
-    process: (action: Action, meta: Meta) => Promise<void>,
-    action: Action,
-    meta: Meta
-  ): void
-}
 
 interface TypeOptions {
   /**
