@@ -85,7 +85,7 @@ function queueWorker(arg, cb) {
   })
 
   let unbindProcessed = server.on('processed', (processed, processedMeta) => {
-    if (processed.id === meta.id) {
+    if (processed.id === meta.id || action === processed) {
       unbindProcessed()
       unbindError()
       if (processed.type === 'logux/undo') {
@@ -95,7 +95,7 @@ function queueWorker(arg, cb) {
     }
   })
 
-  process(action, meta)
+  process(action, meta, true)
 }
 
 function normalizeChannelCallbacks(pattern, callbacks) {
@@ -219,7 +219,9 @@ export class BaseServer {
         this.emitter.emit('report', 'add', { action, meta })
       }
 
-      if (this.destroying) return
+      if (this.destroying && !meta.ignoreDestroying) {
+        return
+      }
 
       if (action.type === 'logux/subscribe') {
         if (meta.server === this.nodeId) {
@@ -411,7 +413,7 @@ export class BaseServer {
           }
         })
     )
-    this.unbind.push(async () => {
+    this.unbind.push(() => {
       let queues = [...this.queues.values()]
       let promises = queues.map(
         queue =>
@@ -423,7 +425,7 @@ export class BaseServer {
             }
           })
       )
-      return await Promise.allSettled(promises)
+      return Promise.allSettled(promises)
     })
   }
 

@@ -2149,3 +2149,85 @@ it('calls access, resend and process in a queue', async () => {
     'BAR PROCESS'
   ])
 })
+
+it('all actions are processed before destroy', async () => {
+  let app = createServer()
+  let calls: string[] = []
+  app.type(
+    'task 1.1',
+    {
+      async access() {
+        return true
+      },
+      async process() {
+        await delay(30)
+        calls.push('task 1.1')
+      }
+    },
+    { queue: '1' }
+  )
+  app.type(
+    'task 2.1',
+    {
+      async access() {
+        return true
+      },
+      async process() {
+        await delay(30)
+        calls.push('task 2.1')
+      }
+    },
+    { queue: '1' }
+  )
+  app.type(
+    'task 1.2',
+    {
+      async access() {
+        await delay(50)
+        return true
+      },
+      async process() {
+        calls.push('task 1.2')
+      }
+    },
+    { queue: '2' }
+  )
+  app.type(
+    'task 2.2',
+    {
+      async access() {
+        return true
+      },
+      async process() {
+        calls.push('task 2.2')
+      }
+    },
+    { queue: '2' }
+  )
+  app.type('during destroy', {
+    async access() {
+      return true
+    },
+    async process() {
+      calls.push('during destroy')
+    }
+  })
+  let client = await connectClient(app, '10:client:uuid')
+
+  sendTo(client, [
+    'sync',
+    4,
+    { type: 'task 1.1' },
+    { id: [1, client.nodeId || '', 0], time: 1 },
+    { type: 'task 2.1' },
+    { id: [2, client.nodeId || '', 0], time: 1 },
+    { type: 'task 1.2' },
+    { id: [3, client.nodeId || '', 0], time: 1 },
+    { type: 'task 2.2' },
+    { id: [4, client.nodeId || '', 0], time: 1 }
+  ])
+  await delay(10)
+  await app.destroy()
+
+  expect(calls).toEqual(['task 1.1', 'task 1.2', 'task 2.2', 'task 2.1'])
+})
