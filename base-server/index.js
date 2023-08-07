@@ -87,10 +87,9 @@ function queueWorker(arg, cb) {
   let unbindProcessed = server.on('processed', (processed, processedMeta) => {
     if (processed.id === meta.id) {
       unbindProcessed()
+      unbindError()
       if (processed.type === 'logux/undo') {
         undoRemainingTasks()
-      } else {
-        unbindError()
       }
       cb(null, processedMeta)
     }
