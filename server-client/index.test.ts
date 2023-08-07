@@ -2097,3 +2097,55 @@ it('undoes all other actions in queue if error in one action occurs', async () =
   expect(errors).toEqual(['BAD'])
   expect(calls).toEqual(['GOOD 0', 'BAD'])
 })
+
+it('calls access, resend and process in a queue', async () => {
+  let app = createServer()
+  let calls: string[] = []
+  app.type('FOO', {
+    async access() {
+      await delay(50)
+      calls.push('FOO ACCESS')
+      return true
+    },
+    async process() {
+      await delay(50)
+      calls.push('FOO PROCESS')
+    },
+    async resend() {
+      await delay(50)
+      calls.push('FOO RESEND')
+      return ''
+    }
+  })
+  app.type('BAR', {
+    async access() {
+      calls.push('BAR ACCESS')
+      return true
+    },
+    async process() {
+      calls.push('BAR PROCESS')
+    },
+    async resend() {
+      calls.push('BAR RESEND')
+      return ''
+    }
+  })
+  let client = await connectClient(app, '10:client:uuid')
+  await sendTo(client, [
+    'sync',
+    2,
+    { type: 'FOO' },
+    { id: [1, '10:client:other', 0], time: 1 },
+    { type: 'BAR' },
+    { id: [2, '10:client:other', 0], time: 1 }
+  ])
+  await delay(200)
+  expect(calls).toEqual([
+    'FOO ACCESS',
+    'FOO RESEND',
+    'FOO PROCESS',
+    'BAR ACCESS',
+    'BAR RESEND',
+    'BAR PROCESS'
+  ])
+})
