@@ -612,22 +612,22 @@ it('checks action creator', async () => {
   expect(test.names).toEqual([
     'connect',
     'authenticated',
-    'add',
-    'add',
     'denied',
+    'add',
+    'add',
     'add'
   ])
-  expect(test.reports[4]).toEqual(['denied', { actionId: '2 1:uuid 0' }])
-  expect(test.reports[2][1].meta.id).toEqual('1 10:uuid 0')
+  expect(test.reports[2]).toEqual(['denied', { actionId: '2 1:uuid 0' }])
+  expect(test.reports[4][1].meta.id).toEqual('1 10:uuid 0')
   expect(test.app.log.actions()).toEqual([
     { type: 'GOOD' },
-    { id: '1 10:uuid 0', type: 'logux/processed' },
     {
       action: { type: 'BAD' },
       id: '2 1:uuid 0',
       reason: 'denied',
       type: 'logux/undo'
-    }
+    },
+    { id: '1 10:uuid 0', type: 'logux/processed' }
   ])
 })
 
@@ -745,35 +745,35 @@ it('checks user access for action', async () => {
   await sendTo(client, [
     'sync',
     2,
-    { type: 'FOO' },
-    { id: [1, '10:uuid', 0], time: 1 },
     { bar: true, type: 'FOO' },
+    { id: [1, '10:uuid', 0], time: 1 },
+    { type: 'FOO' },
     { id: [1, '10:uuid', 1], time: 1 }
   ])
   await delay(50)
   expect(test.app.log.actions()).toEqual([
     { bar: true, type: 'FOO' },
+    { id: '1 10:uuid 0', type: 'logux/processed' },
     {
       action: { type: 'FOO' },
-      id: '1 10:uuid 0',
+      id: '1 10:uuid 1',
       reason: 'denied',
       type: 'logux/undo'
-    },
-    { id: '1 10:uuid 1', type: 'logux/processed' }
+    }
   ])
   expect(test.names).toEqual([
     'connect',
     'authenticated',
+    'add',
+    'add',
     'denied',
-    'add',
-    'add',
     'add'
   ])
-  expect(test.reports[2][1].actionId).toEqual('1 10:uuid 0')
+  expect(test.reports[4][1].actionId).toEqual('1 10:uuid 1')
   expect(sent(client).find(i => i[0] === 'debug')).toEqual([
     'debug',
     'error',
-    'Action "1 10:uuid 0" was denied'
+    'Action "1 10:uuid 1" was denied'
   ])
 })
 
@@ -1413,8 +1413,8 @@ it('has finally callback', async () => {
     { id: [5, '10:client:other', 0], time: 1 }
   ])
 
-  expect(calls).toEqual(['A', 'B', 'C', 'D', 'E'])
-  expect(errors).toEqual(['C', 'D', 'E', 'EE'])
+  expect(calls).toEqual(['D', 'C', 'A', 'E', 'B'])
+  expect(errors).toEqual(['D', 'C', 'E', 'EE'])
 })
 
 it('sends error to author', async () => {
@@ -2030,4 +2030,70 @@ it('allows to throws LoguxNotFoundError', async () => {
       type: 'logux/undo'
     }
   ])
+})
+
+it('undoes all other actions in queue if error in one action occurs', async () => {
+  let app = createServer()
+  let calls: string[] = []
+  let errors: string[] = []
+  app.on('error', e => {
+    errors.push(e.message)
+  })
+  app.type(
+    'GOOD 0',
+    {
+      access: () => true,
+      process() {
+        calls.push('GOOD 0')
+      }
+    },
+    { queue: '1' }
+  )
+  app.type(
+    'BAD',
+    {
+      access: () => true,
+      process() {
+        calls.push('BAD')
+        throw new Error('BAD')
+      }
+    },
+    { queue: '1' }
+  )
+  app.type(
+    'GOOD 1',
+    {
+      access: () => true,
+      process() {
+        calls.push('GOOD 1')
+      }
+    },
+    { queue: '1' }
+  )
+  app.type(
+    'GOOD 2',
+    {
+      access: () => true,
+      process() {
+        calls.push('GOOD 2')
+      }
+    },
+    { queue: '1' }
+  )
+  let client = await connectClient(app, '10:client:uuid')
+  await sendTo(client, [
+    'sync',
+    5,
+    { type: 'GOOD 0' },
+    { id: [1, '10:client:other', 0], time: 1 },
+    { type: 'BAD' },
+    { id: [2, '10:client:other', 0], time: 1 },
+    { type: 'GOOD 1' },
+    { id: [3, '10:client:other', 0], time: 1 },
+    { type: 'GOOD 2' },
+    { id: [4, '10:client:other', 0], time: 1 }
+  ])
+
+  expect(errors).toEqual(['BAD'])
+  expect(calls).toEqual(['GOOD 0', 'BAD'])
 })
