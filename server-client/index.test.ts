@@ -2032,7 +2032,7 @@ it('allows to throws LoguxNotFoundError', async () => {
   ])
 })
 
-it('undoes all other actions in queue if error in one action occurs', async () => {
+it('undoes all other actions in a queue if error in one action occurs', async () => {
   let app = createServer()
   let calls: string[] = []
   let errors: string[] = []
@@ -2154,6 +2154,48 @@ it('does not undo actions in one queue if error occurs in another queue', async 
 
   expect(errors).toEqual(['BAD'])
   expect(calls).toEqual(['BAD', 'GOOD 1', 'GOOD 2'])
+})
+
+it('undoes all other actions in a queue if some action should be undone', async () => {
+  let test = createReporter()
+  test.app.type('FOO', {
+    access: () => false
+  })
+  test.app.type('BAR', {
+    access: () => true
+  })
+
+  let client = await connectClient(test.app)
+  await sendTo(client, [
+    'sync',
+    3,
+    { type: 'FOO' },
+    { id: [1, '10:uuid', 0], time: 1 },
+    { type: 'BAR' },
+    { id: [2, '10:uuid', 0], time: 1 }
+  ])
+
+  expect(test.names).toEqual([
+    'connect',
+    'authenticated',
+    'denied',
+    'add',
+    'add'
+  ])
+  expect(test.app.log.actions()).toEqual([
+    {
+      action: { type: 'FOO' },
+      id: '1 10:uuid 0',
+      reason: 'denied',
+      type: 'logux/undo'
+    },
+    {
+      action: { type: 'BAR' },
+      id: '2 10:uuid 0',
+      reason: 'error',
+      type: 'logux/undo'
+    }
+  ])
 })
 
 it('calls access, resend and process in a queue', async () => {
