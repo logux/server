@@ -2415,3 +2415,28 @@ it('sets the queue with setQueue', async () => {
 
   expect(calls).toEqual(['FAST', 'SLOW'])
 })
+
+it('removes empty queues', async () => {
+  let app = createServer()
+  app.type('FOO', {
+    access: () => delay(50, true)
+  })
+  app.type('BAR', {
+    access: () => true
+  })
+
+  let client = await connectClient(app, '10:client:uuid')
+  sendTo(client, [
+    'sync',
+    2,
+    { type: 'FOO' },
+    { id: [1, '10:client:uuid', 0], time: 1 },
+    { type: 'BAR' },
+    { id: [2, '10:client:uuid', 0], time: 1 }
+  ])
+
+  await delay(10)
+  expect(privateMethods(app).queues.size).toEqual(1)
+  await delay(50)
+  expect(privateMethods(app).queues.size).toEqual(0)
+})

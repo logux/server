@@ -66,7 +66,15 @@ function normalizeTypeCallbacks(name, callbacks) {
 }
 
 function queueWorker(arg, cb) {
-  let { action, meta, process, queue, server } = arg
+  let { action, meta, process, queueKey, server } = arg
+  let queue = server.queues.get(queueKey)
+
+  let end = (...args) => {
+    if (!queue.length()) {
+      server.queues.delete(queueKey)
+    }
+    cb(...args)
+  }
 
   let undoRemainingTasks = () => {
     for (let task of queue.getQueue()) {
@@ -80,7 +88,7 @@ function queueWorker(arg, cb) {
       unbindError()
       unbindProcessed()
       undoRemainingTasks()
-      cb(e)
+      end(e)
     }
   })
 
@@ -91,7 +99,7 @@ function queueWorker(arg, cb) {
       if (processed.type === 'logux/undo') {
         undoRemainingTasks()
       }
-      cb(null, processedMeta)
+      end(null, processedMeta)
     }
   })
 
@@ -418,11 +426,7 @@ export class BaseServer {
       let promises = queues.map(
         queue =>
           new Promise(resolve => {
-            if (queue.length()) {
-              queue.drain = resolve
-            } else {
-              resolve()
-            }
+            queue.drain = resolve
           })
       )
       return Promise.allSettled(promises)
@@ -711,7 +715,7 @@ export class BaseServer {
       action,
       meta,
       process,
-      queue,
+      queueKey,
       server: this
     })
   }
