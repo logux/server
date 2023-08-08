@@ -2099,6 +2099,63 @@ it('undoes all other actions in queue if error in one action occurs', async () =
   expect(calls).toEqual(['GOOD 0', 'BAD'])
 })
 
+it('does not undo actions in one queue if error occurs in another queue', async () => {
+  let app = createServer()
+  let calls: string[] = []
+  let errors: string[] = []
+  app.on('error', e => {
+    errors.push(e.message)
+  })
+  app.type(
+    'BAD',
+    {
+      access: () => true,
+      process() {
+        calls.push('BAD')
+        throw new Error('BAD')
+      }
+    },
+    { queue: '1' }
+  )
+  app.type(
+    'GOOD 1',
+    {
+      access: () => true,
+      async process() {
+        await delay(30)
+        calls.push('GOOD 1')
+      }
+    },
+    { queue: '2' }
+  )
+  app.type(
+    'GOOD 2',
+    {
+      access: () => true,
+      process() {
+        calls.push('GOOD 2')
+      }
+    },
+    { queue: '2' }
+  )
+
+  let client = await connectClient(app, '10:client:uuid')
+  await sendTo(client, [
+    'sync',
+    3,
+    { type: 'BAD' },
+    { id: [1, '10:client:other', 0], time: 1 },
+    { type: 'GOOD 1' },
+    { id: [2, '10:client:other', 0], time: 1 },
+    { type: 'GOOD 2' },
+    { id: [3, '10:client:other', 0], time: 1 }
+  ])
+  await delay(50)
+
+  expect(errors).toEqual(['BAD'])
+  expect(calls).toEqual(['BAD', 'GOOD 1', 'GOOD 2'])
+})
+
 it('calls access, resend and process in a queue', async () => {
   let app = createServer()
   let calls: string[] = []
