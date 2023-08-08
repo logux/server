@@ -2080,6 +2080,7 @@ it('undoes all other actions in queue if error in one action occurs', async () =
     },
     { queue: '1' }
   )
+
   let client = await connectClient(app, '10:client:uuid')
   await sendTo(client, [
     'sync',
@@ -2130,6 +2131,7 @@ it('calls access, resend and process in a queue', async () => {
       return ''
     }
   })
+
   let client = await connectClient(app, '10:client:uuid')
   await sendTo(client, [
     'sync',
@@ -2140,6 +2142,7 @@ it('calls access, resend and process in a queue', async () => {
     { id: [2, '10:client:other', 0], time: 1 }
   ])
   await delay(200)
+
   expect(calls).toEqual([
     'FOO ACCESS',
     'FOO RESEND',
@@ -2212,8 +2215,8 @@ it('all actions are processed before destroy', async () => {
       calls.push('during destroy')
     }
   })
-  let client = await connectClient(app, '10:client:uuid')
 
+  let client = await connectClient(app, '10:client:uuid')
   sendTo(client, [
     'sync',
     4,
@@ -2230,4 +2233,29 @@ it('all actions are processed before destroy', async () => {
   await app.destroy()
 
   expect(calls).toEqual(['task 1.1', 'task 1.2', 'task 2.2', 'task 2.1'])
+})
+
+it('recognizes channel regex', async () => {
+  let app = createServer()
+  let calls: string[] = []
+  app.channel(/ba./, {
+    access: () => true,
+    load: (_, action) => {
+      calls.push(action.channel)
+    }
+  })
+
+  let client = await connectClient(app, '10:client:uuid')
+  await sendTo(client, [
+    'sync',
+    3,
+    { channel: 'bar', type: 'logux/subscribe' },
+    { id: [1, client.nodeId || '', 0], time: 1 },
+    { channel: 'baz', type: 'logux/subscribe' },
+    { id: [2, client.nodeId || '', 0], time: 1 },
+    { channel: 'bom', type: 'logux/subscribe' },
+    { id: [3, client.nodeId || '', 0], time: 1 }
+  ])
+
+  expect(calls).toEqual(['bar', 'baz'])
 })
