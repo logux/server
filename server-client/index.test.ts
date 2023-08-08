@@ -2259,3 +2259,28 @@ it('recognizes channel regex', async () => {
 
   expect(calls).toEqual(['bar', 'baz'])
 })
+
+it('recognizes channel pattern', async () => {
+  let app = createServer()
+  let calls: string[] = []
+  app.channel('/api/users/:id', {
+    access: () => true,
+    load: (_, action) => {
+      calls.push(action.channel)
+    }
+  })
+
+  let client = await connectClient(app, '10:client:uuid')
+  await sendTo(client, [
+    'sync',
+    3,
+    { channel: '/api/users/5', type: 'logux/subscribe' },
+    { id: [1, client.nodeId || '', 0], time: 1 },
+    { channel: '/api/users/10', type: 'logux/subscribe' },
+    { id: [2, client.nodeId || '', 0], time: 1 },
+    { channel: '/api/users/10/9/8', type: 'logux/subscribe' },
+    { id: [3, client.nodeId || '', 0], time: 1 }
+  ])
+
+  expect(calls).toEqual(['/api/users/5', '/api/users/10'])
+})

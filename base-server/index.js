@@ -679,11 +679,12 @@ export class BaseServer {
     let clientId = parseId(meta.id).clientId
     let queueName = ''
 
-    if (
+    let isChannel =
       (action.type === 'logux/subscribe' ||
         action.type === 'logux/unsubscribe') &&
       action.channel
-    ) {
+
+    if (isChannel) {
       for (let i = 0; i < this.channels.length && !queueName; i++) {
         let channel = this.channels[i]
         let pattern = channel.regexp || channel.pattern.regex
