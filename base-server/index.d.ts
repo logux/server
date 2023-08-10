@@ -1010,8 +1010,9 @@ export class BaseServer<
     event: 'unsubscribed',
     listener: (
       action: LoguxUnsubscribeAction,
-      meta: Readonly<ServerMeta>
-    ) => void
+      meta: Readonly<ServerMeta>,
+      clientNodeId: string,
+    ) => void,
   ): Unsubscribe
 
   /**
