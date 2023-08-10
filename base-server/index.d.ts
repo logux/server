@@ -505,6 +505,7 @@ interface AuthenticationReporter {
 
 interface ReportersArguments {
   add: ActionReporter
+  addClean: ActionReporter
   authenticated: AuthenticationReporter
   clean: CleanReporter
   clientError: {
