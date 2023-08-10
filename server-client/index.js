@@ -164,9 +164,6 @@ export class ServerClient {
       }
     }
     if (this.clientId) {
-      this.app.clientIds.delete(this.clientId)
-      this.app.nodeIds.delete(this.nodeId)
-
       for (let channel in this.app.subscribers) {
         let subscriber = this.app.subscribers[channel][this.nodeId]
         if (subscriber) {
@@ -176,6 +173,8 @@ export class ServerClient {
           this.app.performUnsubscribe(this.nodeId, action, meta)
         }
       }
+      this.app.clientIds.delete(this.clientId)
+      this.app.nodeIds.delete(this.nodeId)
     }
     if (!this.app.destroying) {
       this.app.emitter.emit('disconnected', this)

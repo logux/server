@@ -257,9 +257,15 @@ it('removes itself on destroy', async () => {
       '10:client2': { filters: { '{}': true } }
     }
   }
+  let unsubscribedClientNodeIds: string[] = []
+  test.app.on('unsubscribed', (action, meta, clientNodeId) => {
+      unsubscribedClientNodeIds.push(clientNodeId)
+      expect(test.app.nodeIds.get(clientNodeId)).toBeDefined()
+  })
   client1.destroy()
   await delay(1)
 
+  expect(unsubscribedClientNodeIds).toEqual(['10:client1'])
   expect(Array.from(test.app.userIds.keys())).toEqual(['10'])
   expect(test.app.subscribers).toEqual({
     'user/10': { '10:client2': { filters: { '{}': true } } }
@@ -272,6 +278,8 @@ it('removes itself on destroy', async () => {
 
   client2.destroy()
   await delay(1)
+
+  expect(unsubscribedClientNodeIds).toEqual(['10:client1', '10:client2'])
   expect(pullNewReports()).toMatchObject([
     ['unsubscribed', { channel: 'user/10' }],
     ['disconnect', { nodeId: '10:client2' }]
