@@ -77,6 +77,7 @@ export class ServerClient {
     }
 
     if (nodeId === 'server' || userId === 'server') {
+      this.app.emitter.emit('unauthenticated', this, 0)
       this.app.emitter.emit('report', 'unauthenticated', reportDetails(this))
       return false
     }
@@ -133,6 +134,7 @@ export class ServerClient {
       this.app.emitter.emit('authenticated', this, Date.now() - start)
       this.app.emitter.emit('report', 'authenticated', reportDetails(this))
     } else {
+      this.app.emitter.emit('unauthenticated', this, Date.now() - start)
       this.app.emitter.emit('report', 'unauthenticated', reportDetails(this))
       this.app.rememberBadAuth(this.remoteAddress)
     }

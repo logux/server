@@ -976,7 +976,7 @@ export class BaseServer<
    * @param listener Client listener.
    */
   on(
-    event: 'authenticated',
+    event: 'authenticated' | 'unauthenticated',
     listener: (client: ServerClient, latencyMilliseconds: number) => void
   ): Unsubscribe
 
