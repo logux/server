@@ -259,8 +259,8 @@ it('removes itself on destroy', async () => {
   }
   let unsubscribedClientNodeIds: string[] = []
   test.app.on('unsubscribed', (action, meta, clientNodeId) => {
-      unsubscribedClientNodeIds.push(clientNodeId)
-      expect(test.app.nodeIds.get(clientNodeId)).toBeDefined()
+    unsubscribedClientNodeIds.push(clientNodeId)
+    expect(test.app.nodeIds.get(clientNodeId)).toBeDefined()
   })
   client1.destroy()
   await delay(1)
