@@ -1,8 +1,11 @@
 import type {
   LoguxSubscribeAction,
   SyncMapChangeAction,
+  SyncMapChangedAction,
   SyncMapCreateAction,
+  SyncMapCreatedAction,
   SyncMapDeleteAction,
+  SyncMapDeletedAction,
   SyncMapTypes,
   SyncMapValues
 } from '@logux/actions'
@@ -58,7 +61,10 @@ export function NoConflictResolution<
 interface SyncMapActionFilter<Value extends SyncMapValues> {
   (
     ctx: Context,
-    action: SyncMapCreateAction<Value> | SyncMapDeleteAction,
+    action:
+      | SyncMapChangedAction<Value>
+      | SyncMapCreatedAction<Value>
+      | SyncMapDeletedAction,
     meta: ServerMeta
   ): boolean | Promise<boolean>
 }
@@ -82,7 +88,7 @@ interface SyncMapOperations<Value extends SyncMapValues> {
     time: number,
     action: SyncMapChangeAction<Value>,
     meta: ServerMeta
-  ): boolean | Promise<boolean | void> | void 
+  ): boolean | Promise<boolean | void> | void
 
   create?(
     ctx: Context,
