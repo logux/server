@@ -657,7 +657,7 @@ export class BaseServer {
         }
       }
     }
-    this.emitter.emit('unsubscribed', action, meta)
+    this.emitter.emit('unsubscribed', action, meta, clientNodeId)
     this.emitter.emit('report', 'unsubscribed', {
       actionId: meta.id,
       channel: action.channel

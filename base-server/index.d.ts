@@ -505,6 +505,7 @@ interface AuthenticationReporter {
 
 interface ReportersArguments {
   add: ActionReporter
+  addClean: ActionReporter
   authenticated: AuthenticationReporter
   clean: CleanReporter
   clientError: {
@@ -975,7 +976,7 @@ export class BaseServer<
    * @param listener Client listener.
    */
   on(
-    event: 'authenticated',
+    event: 'authenticated' | 'unauthenticated',
     listener: (client: ServerClient, latencyMilliseconds: number) => void
   ): Unsubscribe
 
@@ -1009,8 +1010,9 @@ export class BaseServer<
     event: 'unsubscribed',
     listener: (
       action: LoguxUnsubscribeAction,
-      meta: Readonly<ServerMeta>
-    ) => void
+      meta: Readonly<ServerMeta>,
+      clientNodeId: string,
+    ) => void,
   ): Unsubscribe
 
   /**
