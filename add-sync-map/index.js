@@ -47,7 +47,7 @@ function buildFilter(filter) {
     if (action.type.endsWith('/changed')) {
       for (let key in filter) {
         if (
-          action.fields[key] &&
+          key in action.fields &&
           action.fields[key] !== filter[key]
         ) return false
       }
