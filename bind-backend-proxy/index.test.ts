@@ -508,7 +508,6 @@ it('notifies about actions and subscriptions', async () => {
             meta: {
               added: 3,
               id: '2 10:1:1 0',
-              ignoreDestroying: true,
               reasons: ['test'],
               server: 'server:uuid',
               subprotocol: '0.0.0',

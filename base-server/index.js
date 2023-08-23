@@ -70,6 +70,7 @@ function queueWorker(arg, cb) {
   let queue = server.queues.get(queueKey)
 
   let end = (...args) => {
+    server.actionsInQueue.delete(meta.id)
     if (!queue.length()) {
       server.queues.delete(queueKey)
     }
@@ -227,7 +228,7 @@ export class BaseServer {
         this.emitter.emit('report', 'add', { action, meta })
       }
 
-      if (this.destroying && !meta.ignoreDestroying) {
+      if (this.destroying && !this.actionsInQueue.has(meta.id)) {
         return
       }
 
@@ -380,6 +381,7 @@ export class BaseServer {
     this.channelPatternToQueueName = new Map()
     this.actionTypeToQueueName = new Map()
     this.queues = new Map()
+    this.actionsInQueue = new Set()
 
     this.controls = {
       'GET /': {
@@ -718,6 +720,7 @@ export class BaseServer {
       queueKey,
       server: this
     })
+    this.actionsInQueue.add(meta.id)
   }
 
   otherChannel(callbacks) {
