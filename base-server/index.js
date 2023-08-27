@@ -66,7 +66,7 @@ function normalizeTypeCallbacks(name, callbacks) {
 }
 
 function queueWorker(arg, cb) {
-  let { action, meta, process, queueKey, server } = arg
+  let { action, meta, queueKey, server } = arg
   let queue = server.queues.get(queueKey)
 
   let end = (...args) => {
@@ -104,7 +104,7 @@ function queueWorker(arg, cb) {
     }
   })
 
-  process(action, meta, true)
+  server.log.add(action, meta)
 }
 
 function normalizeChannelCallbacks(pattern, callbacks) {
@@ -681,7 +681,7 @@ export class BaseServer {
     }
   }
 
-  onActions(process, action, meta) {
+  onActions(action, meta) {
     let clientId = parseId(meta.id).clientId
     let queueName = ''
 
@@ -716,7 +716,6 @@ export class BaseServer {
     queue.push({
       action,
       meta,
-      process,
       queueKey,
       server: this
     })

@@ -471,12 +471,25 @@ it('notifies about actions and subscriptions', async () => {
   let client = await app.connect('10', { headers: { lang: 'fr' } })
   client.log.add({ type: 'A' })
   client.log.add({ channel: 'a', type: 'logux/subscribe' })
-  await delay(135)
+  await delay(130)
 
   expect(app.log.actions()).toEqual([
     { type: 'A' },
     { channel: 'a', type: 'logux/subscribe' },
-    { id: '1 10:1:1 0', type: 'logux/processed' }
+    {
+      type: 'a/load1'
+    },
+    {
+      type: 'a/load2'
+    },
+    {
+      id: '2 10:1:1 0',
+      type: 'logux/processed'
+    },
+    {
+      id: '1 10:1:1 0',
+      type: 'logux/processed'
+    }
   ])
   expect(app.log.entries()[0][1].status).toEqual('processed')
   expect(sent).toEqual([
@@ -506,7 +519,7 @@ it('notifies about actions and subscriptions', async () => {
             command: 'action',
             headers: { lang: 'fr' },
             meta: {
-              added: 3,
+              added: 1,
               id: '2 10:1:1 0',
               reasons: ['test'],
               server: 'server:uuid',
@@ -525,18 +538,18 @@ it('notifies about actions and subscriptions', async () => {
   expect(app.log.actions()).toEqual([
     { type: 'A' },
     { channel: 'a', type: 'logux/subscribe' },
-    { id: '1 10:1:1 0', type: 'logux/processed' },
     { type: 'a/load1' },
     { type: 'a/load2' },
-    { id: '2 10:1:1 0', type: 'logux/processed' }
+    { id: '2 10:1:1 0', type: 'logux/processed' },
+    { id: '1 10:1:1 0', type: 'logux/processed' }
   ])
   expect(app.log.entries()[0][1].status).toEqual('processed')
   expect(events).toEqual([
     'backendSent',
-    'backendGranted',
-    'backendProcessed',
     'backendSent',
     'backendGranted',
+    'backendGranted',
+    'backendProcessed',
     'backendProcessed'
   ])
   expect(processed).toEqual(0)

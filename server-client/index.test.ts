@@ -612,22 +612,22 @@ it('checks action creator', async () => {
   expect(test.names).toEqual([
     'connect',
     'authenticated',
-    'denied',
     'add',
+    'denied',
     'add',
     'add'
   ])
-  expect(test.reports[2]).toEqual(['denied', { actionId: '2 1:uuid 0' }])
-  expect(test.reports[4][1].meta.id).toEqual('1 10:uuid 0')
+  expect(test.reports[3]).toEqual(['denied', { actionId: '2 1:uuid 0' }])
+  expect(test.reports[2][1].meta.id).toEqual('1 10:uuid 0')
   expect(test.app.log.actions()).toEqual([
     { type: 'GOOD' },
+    { id: '1 10:uuid 0', type: 'logux/processed' },
     {
       action: { type: 'BAD' },
       id: '2 1:uuid 0',
       reason: 'denied',
       type: 'logux/undo'
-    },
-    { id: '1 10:uuid 0', type: 'logux/processed' }
+    }
   ])
 })
 
@@ -1413,8 +1413,8 @@ it('has finally callback', async () => {
     { id: [5, '10:client:other', 0], time: 1 }
   ])
 
-  expect(calls).toEqual(['D', 'C', 'A', 'E', 'B'])
-  expect(errors).toEqual(['D', 'C', 'E', 'EE'])
+  expect(calls).toEqual(['A', 'B', 'C', 'D', 'E'])
+  expect(errors).toEqual(['C', 'D', 'E', 'EE'])
 })
 
 it('sends error to author', async () => {
@@ -2053,7 +2053,8 @@ it('undoes all other actions in a queue if error in one action occurs', async ()
     'BAD',
     {
       access: () => true,
-      process() {
+      async process() {
+        await delay(50)
         calls.push('BAD')
         throw new Error('BAD')
       }
@@ -2084,7 +2085,7 @@ it('undoes all other actions in a queue if error in one action occurs', async ()
   let client = await connectClient(app, '10:client:uuid')
   await sendTo(client, [
     'sync',
-    5,
+    3,
     { type: 'GOOD 0' },
     { id: [1, '10:client:other', 0], time: 1 },
     { type: 'BAD' },
@@ -2094,6 +2095,7 @@ it('undoes all other actions in a queue if error in one action occurs', async ()
     { type: 'GOOD 2' },
     { id: [4, '10:client:other', 0], time: 1 }
   ])
+  await delay(50)
 
   expect(errors).toEqual(['BAD'])
   expect(calls).toEqual(['GOOD 0', 'BAD'])
@@ -2156,49 +2158,7 @@ it('does not undo actions in one queue if error occurs in another queue', async 
   expect(calls).toEqual(['BAD', 'GOOD 1', 'GOOD 2'])
 })
 
-it('undoes all other actions in a queue if some action should be undone', async () => {
-  let test = createReporter()
-  test.app.type('FOO', {
-    access: () => false
-  })
-  test.app.type('BAR', {
-    access: () => true
-  })
-
-  let client = await connectClient(test.app)
-  await sendTo(client, [
-    'sync',
-    3,
-    { type: 'FOO' },
-    { id: [1, '10:uuid', 0], time: 1 },
-    { type: 'BAR' },
-    { id: [2, '10:uuid', 0], time: 1 }
-  ])
-
-  expect(test.names).toEqual([
-    'connect',
-    'authenticated',
-    'denied',
-    'add',
-    'add'
-  ])
-  expect(test.app.log.actions()).toEqual([
-    {
-      action: { type: 'FOO' },
-      id: '1 10:uuid 0',
-      reason: 'denied',
-      type: 'logux/undo'
-    },
-    {
-      action: { type: 'BAR' },
-      id: '2 10:uuid 0',
-      reason: 'error',
-      type: 'logux/undo'
-    }
-  ])
-})
-
-it('calls access, resend and process in a queue', async () => {
+it('calls resend and process in a queue', async () => {
   let app = createServer()
   let calls: string[] = []
   app.type('FOO', {
@@ -2244,9 +2204,9 @@ it('calls access, resend and process in a queue', async () => {
 
   expect(calls).toEqual([
     'FOO ACCESS',
+    'BAR ACCESS',
     'FOO RESEND',
     'FOO PROCESS',
-    'BAR ACCESS',
     'BAR RESEND',
     'BAR PROCESS'
   ])
@@ -2394,8 +2354,9 @@ it('sets the queue with setQueue', async () => {
     }
   })
   app.type('SLOW', {
-    access: () => delay(30, true),
-    process: () => {
+    access: () => true,
+    process: async () => {
+      await delay(30)
       calls.push('SLOW')
     }
   })
@@ -2419,7 +2380,10 @@ it('sets the queue with setQueue', async () => {
 it('removes empty queues', async () => {
   let app = createServer()
   app.type('FOO', {
-    access: () => delay(50, true)
+    access: () => true,
+    process: async () => {
+      await delay(50)
+    }
   })
   app.type('BAR', {
     access: () => true
