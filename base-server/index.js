@@ -681,7 +681,7 @@ export class BaseServer {
     }
   }
 
-  onActions(action, meta) {
+  onSync(action, meta) {
     if (this.actionsInQueue.has(meta.id)) {
       return
     }

@@ -5,13 +5,13 @@ import type {
 } from '@logux/actions'
 import type {
   Action,
-  ActionsCallback,
   AnyAction,
   ID,
   Log,
   LogStore,
   Meta,
   ServerConnection,
+  SyncCallback,
   TestTime
 } from '@logux/core'
 import type {
@@ -737,7 +737,7 @@ export class BaseServer<
    */
   nodeIds: Map<string, ServerClient>
 
-  onActions: ActionsCallback
+  onSync: SyncCallback
 
   /**
    * Server options.
