@@ -682,6 +682,10 @@ export class BaseServer {
   }
 
   onActions(action, meta) {
+    if (this.actionsInQueue.has(meta.id)) {
+      return
+    }
+
     let clientId = parseId(meta.id).clientId
     let queueName = ''
 
