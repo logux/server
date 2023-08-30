@@ -371,16 +371,19 @@ export class BaseServer {
 
     let end = (meta, queue, queueKey, ...args) => {
       this.actionToQueue.delete(meta.id)
-      if (queue.length() === 0) {
+      if (queue?.length() === 0) {
         this.queues.delete(queueKey)
       }
-      queue.next(...args)
+      queue?.next(...args)
     }
     let undoRemainingTasks = queue => {
-      for (let task of queue.getQueue()) {
-        this.undo(task.action, task.meta, 'error')
+      let remainingTasks = queue?.getQueue()
+      if (remainingTasks) {
+        for (let task of remainingTasks) {
+          this.undo(task.action, task.meta, 'error')
+        }
       }
-      queue.killAndDrain()
+      queue?.killAndDrain()
     }
     this.on('error', (e, action, meta) => {
       let queueKey =
@@ -389,9 +392,6 @@ export class BaseServer {
         return
       }
       let queue = this.queues.get(queueKey)
-      if (!queue) {
-        return
-      }
       undoRemainingTasks(queue)
       end(meta, queue, queueKey, e)
     })
@@ -402,9 +402,6 @@ export class BaseServer {
         return
       }
       let queue = this.queues.get(queueKey)
-      if (!queue) {
-        return
-      }
       if (action.type === 'logux/undo') {
         undoRemainingTasks(queue)
       }
