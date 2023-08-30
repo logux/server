@@ -471,7 +471,7 @@ export class BaseServer {
     return [undoAction, undoMeta]
   }
 
-  channel(pattern, callbacks, options) {
+  channel(pattern, callbacks, options = {}) {
     normalizeChannelCallbacks(`Channel ${pattern}`, callbacks)
     let channel = Object.assign({}, callbacks)
     if (typeof pattern === 'string') {
