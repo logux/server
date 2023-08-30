@@ -369,7 +369,7 @@ export class BaseServer {
     this.listenNotes = {}
     bindBackendProxy(this)
 
-    let end = (meta, queue, queueKey, ...args) => {
+    function end (meta, queue, queueKey, ...args) {
       this.actionToQueue.delete(meta.id)
       if (queue?.length() === 0) {
         this.queues.delete(queueKey)
