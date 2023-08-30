@@ -1038,7 +1038,7 @@ export class BaseServer {
     if (!match) this.wrongChannel(action, meta)
   }
 
-  type(name, callbacks, options) {
+  type(name, callbacks, options = {}) {
     this.setQueue(name, options?.queue)
 
     if (typeof name === 'function') name = name.type
