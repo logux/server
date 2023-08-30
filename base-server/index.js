@@ -369,7 +369,7 @@ export class BaseServer {
     this.listenNotes = {}
     bindBackendProxy(this)
 
-    function end (meta, queue, queueKey, ...args) {
+    function end(meta, queue, queueKey, ...args) {
       this.actionToQueue.delete(meta.id)
       if (queue?.length() === 0) {
         this.queues.delete(queueKey)
@@ -482,7 +482,7 @@ export class BaseServer {
       channel.regexp = pattern
     }
 
-    channel.queueName = options?.queue || 'main'
+    channel.queueName = options.queue || 'main'
     this.channels.push(channel)
   }
 
@@ -1039,7 +1039,7 @@ export class BaseServer {
   }
 
   type(name, callbacks, options = {}) {
-    this.setQueue(name, options?.queue)
+    this.setQueue(name, options.queue)
 
     if (typeof name === 'function') name = name.type
     normalizeTypeCallbacks(`Action type ${name}`, callbacks)
