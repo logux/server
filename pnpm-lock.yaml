@@ -9,8 +9,8 @@ dependencies:
     specifier: ^0.3.1
     version: 0.3.1(@logux/core@0.8.4)
   '@logux/core':
-    specifier: ^0.8.4
-    version: 0.8.4
+    specifier: VladBrok/core#feat/54
+    version: github.com/VladBrok/core/75b5057d78557a4c6976c33311ce6b860b8a6a89
   JSONStream:
     specifier: ^1.3.5
     version: 1.3.5
@@ -463,14 +463,7 @@ packages:
     peerDependencies:
       '@logux/core': ^0.8.0
     dependencies:
-      '@logux/core': 0.8.4
-    dev: false
-
-  /@logux/core@0.8.4:
-    resolution: {integrity: sha512-dw/Wq+6iBLN1lalKf98WOsiksO1WtN0kH3SN8LcpWGF+wGP6x+N8jpqP8ZPKFOyduvb3r1T50gvk3xyr2mDLuQ==}
-    engines: {node: ^14.0.0 || ^16.0.0 || >=18.0.0}
-    dependencies:
-      nanoevents: 7.0.1
+      '@logux/core': github.com/VladBrok/core/75b5057d78557a4c6976c33311ce6b860b8a6a89
     dev: false
 
   /@logux/eslint-config@51.0.1(eslint-config-standard@17.1.0)(eslint-plugin-import@2.28.0)(eslint-plugin-n@16.0.1)(eslint-plugin-perfectionist@1.5.1)(eslint-plugin-prefer-let@3.0.1)(eslint-plugin-promise@6.1.1)(eslint@8.46.0):
@@ -3153,4 +3146,13 @@ packages:
 
   /yyyy-mm-dd@1.0.2:
     resolution: {integrity: sha512-xHhOFKT1Y29Jc4/6To1hmIUswKhCKplPSbkCyIabAAZ5q/9GmZvlN3WNcafcq3zze3CzYU66XNeSBLCD8Oickw==}
+    dev: false
+
+  github.com/VladBrok/core/75b5057d78557a4c6976c33311ce6b860b8a6a89:
+    resolution: {tarball: https://codeload.github.com/VladBrok/core/tar.gz/75b5057d78557a4c6976c33311ce6b860b8a6a89}
+    name: '@logux/core'
+    version: 0.8.4
+    engines: {node: ^14.0.0 || ^16.0.0 || >=18.0.0}
+    dependencies:
+      nanoevents: 7.0.1
     dev: false

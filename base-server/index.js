@@ -65,21 +65,21 @@ function normalizeTypeCallbacks(name, callbacks) {
   }
 }
 
-function queueWorker(arg, cb) {
-  let { action, meta, queueKey, server } = arg
+function queueWorker(task, next) {
+  let { action, meta, queueKey, server } = task
   let queue = server.queues.get(queueKey)
 
   let end = (...args) => {
     server.actionsInQueue.delete(meta.id)
-    if (!queue.length()) {
+    if (queue.length() === 0) {
       server.queues.delete(queueKey)
     }
-    cb(...args)
+    next(...args)
   }
 
   let undoRemainingTasks = () => {
-    for (let task of queue.getQueue()) {
-      server.undo(task.action, task.meta, 'error')
+    for (let remainingTask of queue.getQueue()) {
+      server.undo(remainingTask.action, remainingTask.meta, 'error')
     }
     queue.killAndDrain()
   }
@@ -378,8 +378,7 @@ export class BaseServer {
     this.timeouts = {}
     this.lastTimeout = 0
 
-    this.channelPatternToQueueName = new Map()
-    this.actionTypeToQueueName = new Map()
+    this.typeToQueue = new Map()
     this.queues = new Map()
     this.actionsInQueue = new Set()
 
@@ -424,14 +423,13 @@ export class BaseServer {
         })
     )
     this.unbind.push(() => {
-      let queues = [...this.queues.values()]
-      let promises = queues.map(
-        queue =>
-          new Promise(resolve => {
+      return Promise.allSettled(
+        [...this.queues.values()].map(queue => {
+          return new Promise(resolve => {
             queue.drain = resolve
           })
+        })
       )
-      return Promise.allSettled(promises)
     })
   }
 
@@ -479,11 +477,9 @@ export class BaseServer {
     } else {
       channel.regexp = pattern
     }
-    this.channels.push(channel)
 
-    let queue = options?.queue || 'main'
-    let channelPattern = channel.regexp ? channel.regexp : channel.pattern.regex
-    this.channelPatternToQueueName.set(channelPattern, queue)
+    channel.queueName = options?.queue || 'main'
+    this.channels.push(channel)
   }
 
   createContext(action, meta) {
@@ -699,11 +695,11 @@ export class BaseServer {
         let channel = this.channels[i]
         let pattern = channel.regexp || channel.pattern.regex
         if (action.channel.match(pattern)) {
-          queueName = this.channelPatternToQueueName.get(pattern)
+          queueName = channel.queue
         }
       }
     } else {
-      queueName = this.actionTypeToQueueName.get(action.type)
+      queueName = this.typeToQueue.get(action.type)
     }
 
     queueName = queueName || 'main'
@@ -712,8 +708,7 @@ export class BaseServer {
     let queue = this.queues.get(queueKey)
 
     if (!queue) {
-      let concurrency = 1
-      queue = fastq(queueWorker, concurrency)
+      queue = fastq(queueWorker, 1)
       this.queues.set(queueKey, queue)
     }
 
@@ -913,7 +908,7 @@ export class BaseServer {
 
   setQueue(actionType, queue) {
     queue = queue || 'main'
-    this.actionTypeToQueueName.set(actionType, queue)
+    this.typeToQueue.set(actionType, queue)
   }
 
   setTimeout(callback, ms) {
