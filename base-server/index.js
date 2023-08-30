@@ -68,42 +68,7 @@ function normalizeTypeCallbacks(name, callbacks) {
 function queueWorker(task, next) {
   let { action, meta, queueKey, server } = task
   let queue = server.queues.get(queueKey)
-
-  let end = (...args) => {
-    server.actionsInQueue.delete(meta.id)
-    if (queue.length() === 0) {
-      server.queues.delete(queueKey)
-    }
-    next(...args)
-  }
-
-  let undoRemainingTasks = () => {
-    for (let remainingTask of queue.getQueue()) {
-      server.undo(remainingTask.action, remainingTask.meta, 'error')
-    }
-    queue.killAndDrain()
-  }
-
-  let unbindError = server.on('error', (e, errorAction) => {
-    if (errorAction === action) {
-      unbindError()
-      unbindProcessed()
-      undoRemainingTasks()
-      end(e)
-    }
-  })
-
-  let unbindProcessed = server.on('processed', (processed, processedMeta) => {
-    if (processed.id === meta.id || action === processed) {
-      unbindProcessed()
-      unbindError()
-      if (processed.type === 'logux/undo') {
-        undoRemainingTasks()
-      }
-      end(null, processedMeta)
-    }
-  })
-
+  queue.next = next
   server.log.add(action, meta)
 }
 
@@ -228,7 +193,7 @@ export class BaseServer {
         this.emitter.emit('report', 'add', { action, meta })
       }
 
-      if (this.destroying && !this.actionsInQueue.has(meta.id)) {
+      if (this.destroying && !this.actionToQueue.has(meta.id)) {
         return
       }
 
@@ -380,7 +345,7 @@ export class BaseServer {
 
     this.typeToQueue = new Map()
     this.queues = new Map()
-    this.actionsInQueue = new Set()
+    this.actionToQueue = new Map()
 
     this.controls = {
       'GET /': {
@@ -403,6 +368,48 @@ export class BaseServer {
 
     this.listenNotes = {}
     bindBackendProxy(this)
+
+    let end = (meta, queue, queueKey, ...args) => {
+      this.actionToQueue.delete(meta.id)
+      if (queue.length() === 0) {
+        this.queues.delete(queueKey)
+      }
+      queue.next(...args)
+    }
+    let undoRemainingTasks = queue => {
+      for (let task of queue.getQueue()) {
+        this.undo(task.action, task.meta, 'error')
+      }
+      queue.killAndDrain()
+    }
+    this.on('error', (e, action, meta) => {
+      let queueKey =
+        this.actionToQueue.get(meta?.id) || this.actionToQueue.get(action?.id)
+      if (!queueKey) {
+        return
+      }
+      let queue = this.queues.get(queueKey)
+      if (!queue) {
+        return
+      }
+      undoRemainingTasks(queue)
+      end(meta, queue, queueKey, e)
+    })
+    this.on('processed', (action, meta) => {
+      let queueKey =
+        this.actionToQueue.get(meta?.id) || this.actionToQueue.get(action?.id)
+      if (!queueKey) {
+        return
+      }
+      let queue = this.queues.get(queueKey)
+      if (!queue) {
+        return
+      }
+      if (action.type === 'logux/undo') {
+        undoRemainingTasks(queue)
+      }
+      end(meta, queue, queueKey, null, meta)
+    })
 
     this.unbind.push(() => {
       for (let i of this.connected.values()) i.destroy()
@@ -678,7 +685,7 @@ export class BaseServer {
   }
 
   onSync(action, meta) {
-    if (this.actionsInQueue.has(meta.id)) {
+    if (this.actionToQueue.has(meta.id)) {
       return
     }
 
@@ -718,7 +725,7 @@ export class BaseServer {
       queueKey,
       server: this
     })
-    this.actionsInQueue.add(meta.id)
+    this.actionToQueue.set(meta.id, queueKey)
   }
 
   otherChannel(callbacks) {
