@@ -2101,6 +2101,72 @@ it('undoes all other actions in a queue if error in one action occurs', async ()
   expect(calls).toEqual(['GOOD 0', 'BAD'])
 })
 
+it('does not add action with same ID to the queue', async () => {
+  let app = createServer()
+  let errors: string[] = []
+  let calls: string[] = []
+  app.on('error', e => {
+    errors.push(e.message)
+  })
+  app.type(
+    'FOO',
+    {
+      access: () => true,
+      process: () => {
+        calls.push('FOO')
+      }
+    },
+    { queue: '1' }
+  )
+  app.type(
+    'BAR',
+    {
+      access: () => true,
+      process: () => {
+        calls.push('BAR')
+      }
+    },
+    { queue: '1' }
+  )
+  app.type(
+    'BAZ',
+    {
+      access: () => true,
+      process: () => {
+        calls.push('BAZ')
+      }
+    },
+    { queue: '2' }
+  )
+  app.type(
+    'BOM',
+    {
+      access: () => true,
+      process: () => {
+        calls.push('BOM')
+      }
+    },
+    { queue: '2' }
+  )
+
+  let client = await connectClient(app, '10:client:uuid')
+  await sendTo(client, [
+    'sync',
+    4,
+    { type: 'FOO' },
+    { id: [1, '10:client:other', 0], time: 1 },
+    { type: 'BAR' },
+    { id: [1, '10:client:other', 0], time: 1 },
+    { type: 'BAZ' },
+    { id: [1, '10:client:other', 0], time: 1 },
+    { type: 'BOM' },
+    { id: [2, '10:client:other', 0], time: 1 }
+  ])
+
+  expect(errors).toEqual([])
+  expect(calls).toEqual(['FOO', 'BOM'])
+})
+
 it('does not undo actions in one queue if error occurs in another queue', async () => {
   let app = createServer()
   let calls: string[] = []
