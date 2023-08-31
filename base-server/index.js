@@ -65,11 +65,10 @@ function normalizeTypeCallbacks(name, callbacks) {
   }
 }
 
-function queueWorker(task, next) {
-  let { action, meta, queueKey, server } = task
-  let queue = server.queues.get(queueKey)
+async function queueWorker(task, next) {
+  let { action, meta, processAction, queue } = task
   queue.next = next
-  server.log.add(action, meta)
+  await processAction(action, meta)
 }
 
 function normalizeChannelCallbacks(pattern, callbacks) {
@@ -682,7 +681,7 @@ export class BaseServer {
     }
   }
 
-  onSync(action, meta) {
+  onSync(processAction, action, meta) {
     if (this.actionToQueue.has(meta.id)) {
       return
     }
@@ -708,7 +707,6 @@ export class BaseServer {
     }
 
     queueName = queueName || 'main'
-
     let queueKey = `${clientId}/${queueName}`
     let queue = this.queues.get(queueKey)
 
@@ -720,8 +718,8 @@ export class BaseServer {
     queue.push({
       action,
       meta,
-      queueKey,
-      server: this
+      processAction,
+      queue
     })
     this.actionToQueue.set(meta.id, queueKey)
   }

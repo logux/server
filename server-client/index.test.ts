@@ -612,22 +612,22 @@ it('checks action creator', async () => {
   expect(test.names).toEqual([
     'connect',
     'authenticated',
-    'add',
     'denied',
+    'add',
     'add',
     'add'
   ])
-  expect(test.reports[3]).toEqual(['denied', { actionId: '2 1:uuid 0' }])
-  expect(test.reports[2][1].meta.id).toEqual('1 10:uuid 0')
+  expect(test.reports[2]).toEqual(['denied', { actionId: '2 1:uuid 0' }])
+  expect(test.reports[4][1].meta.id).toEqual('1 10:uuid 0')
   expect(test.app.log.actions()).toEqual([
     { type: 'GOOD' },
-    { id: '1 10:uuid 0', type: 'logux/processed' },
     {
       action: { type: 'BAD' },
       id: '2 1:uuid 0',
       reason: 'denied',
       type: 'logux/undo'
-    }
+    },
+    { id: '1 10:uuid 0', type: 'logux/processed' }
   ])
 })
 
@@ -1413,8 +1413,8 @@ it('has finally callback', async () => {
     { id: [5, '10:client:other', 0], time: 1 }
   ])
 
-  expect(calls).toEqual(['A', 'B', 'C', 'D', 'E'])
-  expect(errors).toEqual(['C', 'D', 'E', 'EE'])
+  expect(calls).toEqual(['D', 'C', 'A', 'E', 'B'])
+  expect(errors).toEqual(['D', 'C', 'E', 'EE'])
 })
 
 it('sends error to author', async () => {
@@ -2224,7 +2224,7 @@ it('does not undo actions in one queue if error occurs in another queue', async 
   expect(calls).toEqual(['BAD', 'GOOD 1', 'GOOD 2'])
 })
 
-it('calls resend and process in a queue', async () => {
+it('calls access, resend and process in a queue', async () => {
   let app = createServer()
   let calls: string[] = []
   app.type('FOO', {
@@ -2270,11 +2270,53 @@ it('calls resend and process in a queue', async () => {
 
   expect(calls).toEqual([
     'FOO ACCESS',
-    'BAR ACCESS',
     'FOO RESEND',
     'FOO PROCESS',
+    'BAR ACCESS',
     'BAR RESEND',
     'BAR PROCESS'
+  ])
+})
+
+it('undoes all other actions in a queue if some action should be undone', async () => {
+  let test = createReporter()
+  test.app.type('FOO', {
+    access: () => false
+  })
+  test.app.type('BAR', {
+    access: () => true
+  })
+
+  let client = await connectClient(test.app)
+  await sendTo(client, [
+    'sync',
+    3,
+    { type: 'FOO' },
+    { id: [1, '10:uuid', 0], time: 1 },
+    { type: 'BAR' },
+    { id: [2, '10:uuid', 0], time: 1 }
+  ])
+
+  expect(test.names).toEqual([
+    'connect',
+    'authenticated',
+    'denied',
+    'add',
+    'add'
+  ])
+  expect(test.app.log.actions()).toEqual([
+    {
+      action: { type: 'FOO' },
+      id: '1 10:uuid 0',
+      reason: 'denied',
+      type: 'logux/undo'
+    },
+    {
+      action: { type: 'BAR' },
+      id: '2 10:uuid 0',
+      reason: 'error',
+      type: 'logux/undo'
+    }
   ])
 })
 
