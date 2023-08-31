@@ -369,35 +369,36 @@ export class BaseServer {
     this.listenNotes = {}
     bindBackendProxy(this)
 
-    let end = (meta, queue, queueKey, ...args) => {
-      this.actionToQueue.delete(meta.id)
-      if (queue?.length() === 0) {
+    let end = (actionId, queue, queueKey, ...args) => {
+      this.actionToQueue.delete(actionId)
+      if (queue.length() === 0) {
         this.queues.delete(queueKey)
       }
-      queue?.next(...args)
+      queue.next(...args)
     }
     let undoRemainingTasks = queue => {
-      let remainingTasks = queue?.getQueue()
+      let remainingTasks = queue.getQueue()
       if (remainingTasks) {
         for (let task of remainingTasks) {
           this.undo(task.action, task.meta, 'error')
+          this.actionToQueue.delete(task.meta.id)
         }
       }
-      queue?.killAndDrain()
+      queue.killAndDrain()
     }
     this.on('error', (e, action, meta) => {
-      let queueKey =
-        this.actionToQueue.get(meta?.id) || this.actionToQueue.get(action?.id)
+      let queueKey = this.actionToQueue.get(meta?.id)
       if (!queueKey) {
         return
       }
       let queue = this.queues.get(queueKey)
       undoRemainingTasks(queue)
-      end(meta, queue, queueKey, e)
+      end(meta.id, queue, queueKey, e)
     })
     this.on('processed', (action, meta) => {
       let queueKey =
         this.actionToQueue.get(meta?.id) || this.actionToQueue.get(action?.id)
+      let actionId = this.actionToQueue.get(meta?.id) ? meta?.id : action?.id
       if (!queueKey) {
         return
       }
@@ -405,7 +406,7 @@ export class BaseServer {
       if (action.type === 'logux/undo') {
         undoRemainingTasks(queue)
       }
-      end(meta, queue, queueKey, null, meta)
+      end(actionId, queue, queueKey, null, meta)
     })
 
     this.unbind.push(() => {
