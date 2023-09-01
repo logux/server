@@ -1133,16 +1133,6 @@ export class BaseServer<
   sendAction(action: Action, meta: ServerMeta): Promise<void> | void
 
   /**
-   * Sets the name of the queue that will be used to process actions of this type.
-   * Can be used for actions which type was not defined
-   * by any {@link Server#type}.
-   *
-   * @param actionType the action type
-   * @param queue the queue name
-   */
-  setQueue(actionType: string, queue: string): void
-
-  /**
    * Send `logux/subscribed` if client was not already subscribed.
    *
    * ```js

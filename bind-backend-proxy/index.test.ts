@@ -624,26 +624,26 @@ it('reacts on wrong backend answer', async () => {
     errors.push(e.message)
   })
 
-  app.setQueue('EMPTY', '1')
-  app.setQueue('BROKEN1', '2')
-  app.setQueue('BROKEN2', '3')
-  app.setQueue('BROKEN3', '4')
-  app.setQueue('BROKEN4', '5')
-  app.setQueue('BROKEN5', '6')
-  app.setQueue('BROKEN6', '7')
-  app.setQueue('BROKEN7', '8')
-
   let client = await app.connect('10')
+
   client.log.add({ type: 'EMPTY' })
+  await delay(20)
   client.log.add({ type: 'BROKEN1' })
+  await delay(20)
   client.log.add({ type: 'BROKEN2' })
+  await delay(20)
   client.log.add({ type: 'BROKEN3' })
+  await delay(20)
   client.log.add({ type: 'BROKEN4' })
+  await delay(20)
   client.log.add({ type: 'BROKEN5' })
+  await delay(20)
   client.log.add({ type: 'BROKEN6' })
+  await delay(20)
   client.log.add({ type: 'BROKEN7' })
+  await delay(20)
   client.log.add({ channel: 'resend', type: 'logux/subscribe' })
-  await delay(100)
+  await delay(20)
 
   expect(errors).toEqual([
     'Empty back-end answer',
@@ -657,61 +657,61 @@ it('reacts on wrong backend answer', async () => {
     'Resend can be called on subscription'
   ])
   expect(app.log.actions()).toEqual([
-    { type: 'BROKEN1' },
-    { type: 'BROKEN2' },
-    { type: 'BROKEN6' },
-    { channel: 'resend', type: 'logux/subscribe' },
     {
       action: { type: 'EMPTY' },
       id: '1 10:1:1 0',
       reason: 'error',
       type: 'logux/undo'
     },
+    { type: 'BROKEN1' },
     {
       action: { type: 'BROKEN1' },
-      id: '2 10:1:1 0',
-      reason: 'error',
-      type: 'logux/undo'
-    },
-    {
-      action: { type: 'BROKEN2' },
       id: '3 10:1:1 0',
       reason: 'error',
       type: 'logux/undo'
     },
+    { type: 'BROKEN2' },
     {
-      action: { type: 'BROKEN3' },
-      id: '4 10:1:1 0',
-      reason: 'error',
-      type: 'logux/undo'
-    },
-    {
-      action: { type: 'BROKEN4' },
+      action: { type: 'BROKEN2' },
       id: '5 10:1:1 0',
       reason: 'error',
       type: 'logux/undo'
     },
     {
-      action: { type: 'BROKEN5' },
-      id: '6 10:1:1 0',
-      reason: 'error',
-      type: 'logux/undo'
-    },
-    {
-      action: { type: 'BROKEN6' },
+      action: { type: 'BROKEN3' },
       id: '7 10:1:1 0',
       reason: 'error',
       type: 'logux/undo'
     },
     {
-      action: { type: 'BROKEN7' },
-      id: '8 10:1:1 0',
+      action: { type: 'BROKEN4' },
+      id: '9 10:1:1 0',
       reason: 'error',
       type: 'logux/undo'
     },
     {
+      action: { type: 'BROKEN5' },
+      id: '11 10:1:1 0',
+      reason: 'error',
+      type: 'logux/undo'
+    },
+    { type: 'BROKEN6' },
+    {
+      action: { type: 'BROKEN6' },
+      id: '13 10:1:1 0',
+      reason: 'error',
+      type: 'logux/undo'
+    },
+    {
+      action: { type: 'BROKEN7' },
+      id: '15 10:1:1 0',
+      reason: 'error',
+      type: 'logux/undo'
+    },
+    { channel: 'resend', type: 'logux/subscribe' },
+    {
       action: { channel: 'resend', type: 'logux/subscribe' },
-      id: '9 10:1:1 0',
+      id: '17 10:1:1 0',
       reason: 'error',
       type: 'logux/undo'
     }
@@ -726,27 +726,26 @@ it('reacts on backend error', async () => {
     expect(e.stack).toEqual('stack')
   })
   let client = await app.connect('10')
-  app.setQueue('AERROR', '1')
-  app.setQueue('PERROR', '2')
   client.log.add({ type: 'AERROR' })
+  await delay(150)
   client.log.add({ type: 'PERROR' })
-  await delay(220)
+  await delay(150)
 
   expect(errors).toEqual([
     'Error on back-end server',
     'Error on back-end server'
   ])
   expect(app.log.actions()).toEqual([
-    { type: 'PERROR' },
     {
       action: { type: 'AERROR' },
       id: '1 10:1:1 0',
       reason: 'error',
       type: 'logux/undo'
     },
+    { type: 'PERROR' },
     {
       action: { type: 'PERROR' },
-      id: '2 10:1:1 0',
+      id: '3 10:1:1 0',
       reason: 'error',
       type: 'logux/undo'
     }

@@ -912,11 +912,6 @@ export class BaseServer {
     }
   }
 
-  setQueue(actionType, queue) {
-    queue = queue || 'main'
-    this.typeToQueue.set(actionType, queue)
-  }
-
   setTimeout(callback, ms) {
     this.lastTimeout += 1
     let id = this.lastTimeout
@@ -1041,7 +1036,8 @@ export class BaseServer {
   }
 
   type(name, callbacks, options = {}) {
-    this.setQueue(name, options.queue)
+    let queue = options.queue || 'main'
+    this.typeToQueue.set(name, queue)
 
     if (typeof name === 'function') name = name.type
     normalizeTypeCallbacks(`Action type ${name}`, callbacks)

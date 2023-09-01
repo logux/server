@@ -2452,39 +2452,6 @@ it('recognizes channel pattern', async () => {
   expect(calls).toEqual(['/api/users/5', '/api/users/10'])
 })
 
-it('sets the queue with setQueue', async () => {
-  let app = createServer()
-  let calls: string[] = []
-  app.type('FAST', {
-    access: () => true,
-    process: () => {
-      calls.push('FAST')
-    }
-  })
-  app.type('SLOW', {
-    access: () => true,
-    process: async () => {
-      await delay(30)
-      calls.push('SLOW')
-    }
-  })
-  app.setQueue('FAST', '1')
-  app.setQueue('SLOW', '2')
-
-  let client = await connectClient(app, '10:client:uuid')
-  await sendTo(client, [
-    'sync',
-    2,
-    { type: 'SLOW' },
-    { id: [1, '10:client:uuid', 0], time: 1 },
-    { type: 'FAST' },
-    { id: [2, '10:client:uuid', 0], time: 1 }
-  ])
-  await delay(50)
-
-  expect(calls).toEqual(['FAST', 'SLOW'])
-})
-
 it('removes empty queues', async () => {
   let app = createServer()
   app.type('FOO', {
