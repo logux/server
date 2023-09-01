@@ -192,11 +192,7 @@ export class BaseServer {
         this.emitter.emit('report', 'add', { action, meta })
       }
 
-      if (
-        this.destroying &&
-        !this.actionToQueue.has(meta.id) &&
-        !this.actionToQueue.has(action.id)
-      ) {
+      if (this.destroying && !this.actionToQueue.has(meta.id)) {
         return
       }
 
@@ -391,19 +387,28 @@ export class BaseServer {
     }
     this.on('error', (e, action, meta) => {
       let queueKey = this.actionToQueue.get(meta?.id)
+
       if (!queueKey) {
         return
       }
+
       let queue = this.queues.get(queueKey)
       undoRemainingTasks(queue)
       end(meta.id, queue, queueKey, e)
     })
     this.on('processed', (action, meta) => {
-      let queueKey = this.actionToQueue.get(action?.id)
-      let actionId = action?.id
+      let queueKeyByActionId =
+        (action?.type === 'logux/undo' || action?.type === 'logux/processed') &&
+        this.actionToQueue.get(action?.id)
+      let queueKeyByMetaId = this.actionToQueue.get(meta?.id)
+
+      let queueKey = queueKeyByMetaId || queueKeyByActionId
+      let actionId = queueKeyByMetaId ? meta?.id : action?.id
+
       if (!queueKey) {
         return
       }
+
       let queue = this.queues.get(queueKey)
       if (action.type === 'logux/undo') {
         undoRemainingTasks(queue)
