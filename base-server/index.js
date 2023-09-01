@@ -689,7 +689,7 @@ export class BaseServer {
     }
   }
 
-  onSync(processAction, action, meta) {
+  onReceive(processAction, action, meta) {
     if (this.actionToQueue.has(meta.id)) {
       return
     }

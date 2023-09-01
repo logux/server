@@ -10,8 +10,8 @@ import type {
   Log,
   LogStore,
   Meta,
+  ReceiveCallback,
   ServerConnection,
-  SyncCallback,
   TestTime
 } from '@logux/core'
 import type {
@@ -737,7 +737,7 @@ export class BaseServer<
    */
   nodeIds: Map<string, ServerClient>
 
-  onSync: SyncCallback
+  onReceive: ReceiveCallback
 
   /**
    * Server options.
