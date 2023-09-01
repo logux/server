@@ -192,7 +192,11 @@ export class BaseServer {
         this.emitter.emit('report', 'add', { action, meta })
       }
 
-      if (this.destroying && !this.actionToQueue.has(meta.id)) {
+      if (
+        this.destroying &&
+        !this.actionToQueue.has(meta.id) &&
+        !this.actionToQueue.has(action.id)
+      ) {
         return
       }
 
@@ -395,9 +399,8 @@ export class BaseServer {
       end(meta.id, queue, queueKey, e)
     })
     this.on('processed', (action, meta) => {
-      let queueKey =
-        this.actionToQueue.get(meta?.id) || this.actionToQueue.get(action?.id)
-      let actionId = this.actionToQueue.get(meta?.id) ? meta?.id : action?.id
+      let queueKey = this.actionToQueue.get(action?.id)
+      let actionId = action?.id
       if (!queueKey) {
         return
       }
