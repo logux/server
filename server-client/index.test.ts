@@ -620,22 +620,22 @@ it('checks action creator', async () => {
   expect(test.names).toEqual([
     'connect',
     'authenticated',
-    'add',
-    'add',
     'denied',
+    'add',
+    'add',
     'add'
   ])
-  expect(test.reports[4]).toEqual(['denied', { actionId: '2 1:uuid 0' }])
-  expect(test.reports[2][1].meta.id).toEqual('1 10:uuid 0')
+  expect(test.reports[2]).toEqual(['denied', { actionId: '2 1:uuid 0' }])
+  expect(test.reports[4][1].meta.id).toEqual('1 10:uuid 0')
   expect(test.app.log.actions()).toEqual([
     { type: 'GOOD' },
-    { id: '1 10:uuid 0', type: 'logux/processed' },
     {
       action: { type: 'BAD' },
       id: '2 1:uuid 0',
       reason: 'denied',
       type: 'logux/undo'
-    }
+    },
+    { id: '1 10:uuid 0', type: 'logux/processed' }
   ])
 })
 
@@ -663,8 +663,8 @@ it('allows subscribe and unsubscribe actions', async () => {
 
 it('checks action meta', async () => {
   let test = createReporter()
-  test.app.type('GOOD', { access: () => true })
-  test.app.type('BAD', { access: () => true })
+  test.app.type('GOOD', { access: () => true }, { queue: '1' })
+  test.app.type('BAD', { access: () => true }, { queue: '2' })
 
   test.app.log.generateId()
   test.app.log.generateId()
@@ -753,35 +753,35 @@ it('checks user access for action', async () => {
   await sendTo(client, [
     'sync',
     2,
-    { type: 'FOO' },
-    { id: [1, '10:uuid', 0], time: 1 },
     { bar: true, type: 'FOO' },
+    { id: [1, '10:uuid', 0], time: 1 },
+    { type: 'FOO' },
     { id: [1, '10:uuid', 1], time: 1 }
   ])
   await delay(50)
   expect(test.app.log.actions()).toEqual([
     { bar: true, type: 'FOO' },
+    { id: '1 10:uuid 0', type: 'logux/processed' },
     {
       action: { type: 'FOO' },
-      id: '1 10:uuid 0',
+      id: '1 10:uuid 1',
       reason: 'denied',
       type: 'logux/undo'
-    },
-    { id: '1 10:uuid 1', type: 'logux/processed' }
+    }
   ])
   expect(test.names).toEqual([
     'connect',
     'authenticated',
+    'add',
+    'add',
     'denied',
-    'add',
-    'add',
     'add'
   ])
-  expect(test.reports[2][1].actionId).toEqual('1 10:uuid 0')
+  expect(test.reports[4][1].actionId).toEqual('1 10:uuid 1')
   expect(sent(client).find(i => i[0] === 'debug')).toEqual([
     'debug',
     'error',
-    'Action "1 10:uuid 0" was denied'
+    'Action "1 10:uuid 1" was denied'
   ])
 })
 
@@ -1345,46 +1345,66 @@ it('has finally callback', async () => {
   app.on('error', e => {
     errors.push(e.message)
   })
-  app.type('A', {
-    access: () => true,
-    finally() {
-      calls.push('A')
-    }
-  })
-  app.type('B', {
-    access: () => true,
-    finally() {
-      calls.push('B')
+  app.type(
+    'A',
+    {
+      access: () => true,
+      finally() {
+        calls.push('A')
+      }
     },
-    process: () => {}
-  })
-  app.type('C', {
-    access: () => true,
-    finally() {
-      calls.push('C')
+    { queue: 'A' }
+  )
+  app.type(
+    'B',
+    {
+      access: () => true,
+      finally() {
+        calls.push('B')
+      },
+      process: () => {}
     },
-    resend() {
-      throw new Error('C')
-    }
-  })
-  app.type('D', {
-    access() {
-      throw new Error('D')
+    { queue: 'B' }
+  )
+  app.type(
+    'C',
+    {
+      access: () => true,
+      finally() {
+        calls.push('C')
+      },
+      resend() {
+        throw new Error('C')
+      }
     },
-    finally() {
-      calls.push('D')
-    }
-  })
-  app.type('E', {
-    access: () => true,
-    finally() {
-      calls.push('E')
-      throw new Error('EE')
+    { queue: 'C' }
+  )
+  app.type(
+    'D',
+    {
+      access() {
+        throw new Error('D')
+      },
+      finally() {
+        calls.push('D')
+      }
     },
-    process() {
-      throw new Error('E')
-    }
-  })
+    { queue: 'D' }
+  )
+  app.type(
+    'E',
+    {
+      access: () => true,
+      finally() {
+        calls.push('E')
+        throw new Error('EE')
+      },
+      process() {
+        throw new Error('E')
+      }
+    },
+    { queue: 'E' }
+  )
   let client = await connectClient(app, '10:client:uuid')
   await sendTo(client, [
     'sync',
@@ -1401,8 +1421,8 @@ it('has finally callback', async () => {
     { id: [5, '10:client:other', 0], time: 1 }
   ])
 
-  expect(calls).toEqual(['A', 'B', 'C', 'D', 'E'])
-  expect(errors).toEqual(['C', 'D', 'E', 'EE'])
+  expect(calls).toEqual(['D', 'C', 'A', 'E', 'B'])
+  expect(errors).toEqual(['D', 'C', 'E', 'EE'])
 })
 
 it('sends error to author', async () => {
@@ -2018,4 +2038,452 @@ it('allows to throws LoguxNotFoundError', async () => {
       type: 'logux/undo'
     }
   ])
+})
+
+it('undoes all other actions in a queue if error in one action occurs', async () => {
+  let app = createServer()
+  let calls: string[] = []
+  let errors: string[] = []
+  app.on('error', e => {
+    errors.push(e.message)
+  })
+  app.type(
+    'GOOD 0',
+    {
+      access: () => true,
+      process() {
+        calls.push('GOOD 0')
+      }
+    },
+    { queue: '1' }
+  )
+  app.type(
+    'BAD',
+    {
+      access: () => true,
+      async process() {
+        await delay(50)
+        calls.push('BAD')
+        throw new Error('BAD')
+      }
+    },
+    { queue: '1' }
+  )
+  app.type(
+    'GOOD 1',
+    {
+      access: () => true,
+      process() {
+        calls.push('GOOD 1')
+      }
+    },
+    { queue: '1' }
+  )
+  app.type(
+    'GOOD 2',
+    {
+      access: () => true,
+      process() {
+        calls.push('GOOD 2')
+      }
+    },
+    { queue: '1' }
+  )
+
+  let client = await connectClient(app, '10:client:uuid')
+  await sendTo(client, [
+    'sync',
+    3,
+    { type: 'GOOD 0' },
+    { id: [1, '10:client:other', 0], time: 1 },
+    { type: 'BAD' },
+    { id: [2, '10:client:other', 0], time: 1 },
+    { type: 'GOOD 1' },
+    { id: [3, '10:client:other', 0], time: 1 },
+    { type: 'GOOD 2' },
+    { id: [4, '10:client:other', 0], time: 1 }
+  ])
+  await delay(50)
+
+  expect(errors).toEqual(['BAD'])
+  expect(calls).toEqual(['GOOD 0', 'BAD'])
+})
+
+it('does not add action with same ID to the queue', async () => {
+  let app = createServer()
+  let errors: string[] = []
+  let calls: string[] = []
+  app.on('error', e => {
+    errors.push(e.message)
+  })
+  app.type(
+    'FOO',
+    {
+      access: () => true,
+      process: () => {
+        calls.push('FOO')
+      }
+    },
+    { queue: '1' }
+  )
+  app.type(
+    'BAR',
+    {
+      access: () => true,
+      process: () => {
+        calls.push('BAR')
+      }
+    },
+    { queue: '1' }
+  )
+  app.type(
+    'BAZ',
+    {
+      access: () => true,
+      process: () => {
+        calls.push('BAZ')
+      }
+    },
+    { queue: '2' }
+  )
+  app.type(
+    'BOM',
+    {
+      access: () => true,
+      process: () => {
+        calls.push('BOM')
+      }
+    },
+    { queue: '2' }
+  )
+
+  let client = await connectClient(app, '10:client:uuid')
+  await sendTo(client, [
+    'sync',
+    4,
+    { type: 'FOO' },
+    { id: [1, '10:client:other', 0], time: 1 },
+    { type: 'BAR' },
+    { id: [1, '10:client:other', 0], time: 1 },
+    { type: 'BAZ' },
+    { id: [1, '10:client:other', 0], time: 1 },
+    { type: 'BOM' },
+    { id: [2, '10:client:other', 0], time: 1 }
+  ])
+
+  expect(errors).toEqual([])
+  expect(calls).toEqual(['FOO', 'BOM'])
+})
+
+it('does not undo actions in one queue if error occurs in another queue', async () => {
+  let app = createServer()
+  let calls: string[] = []
+  let errors: string[] = []
+  app.on('error', e => {
+    errors.push(e.message)
+  })
+  app.type(
+    'BAD',
+    {
+      access: () => true,
+      process() {
+        calls.push('BAD')
+        throw new Error('BAD')
+      }
+    },
+    { queue: '1' }
+  )
+  app.type(
+    'GOOD 1',
+    {
+      access: () => true,
+      async process() {
+        await delay(30)
+        calls.push('GOOD 1')
+      }
+    },
+    { queue: '2' }
+  )
+  app.type(
+    'GOOD 2',
+    {
+      access: () => true,
+      process() {
+        calls.push('GOOD 2')
+      }
+    },
+    { queue: '2' }
+  )
+
+  let client = await connectClient(app, '10:client:uuid')
+  await sendTo(client, [
+    'sync',
+    3,
+    { type: 'BAD' },
+    { id: [1, '10:client:other', 0], time: 1 },
+    { type: 'GOOD 1' },
+    { id: [2, '10:client:other', 0], time: 1 },
+    { type: 'GOOD 2' },
+    { id: [3, '10:client:other', 0], time: 1 }
+  ])
+  await delay(50)
+
+  expect(errors).toEqual(['BAD'])
+  expect(calls).toEqual(['BAD', 'GOOD 1', 'GOOD 2'])
+})
+
+it('calls access, resend and process in a queue', async () => {
+  let app = createServer()
+  let calls: string[] = []
+  app.type('FOO', {
+    async access() {
+      await delay(50)
+      calls.push('FOO ACCESS')
+      return true
+    },
+    async process() {
+      await delay(50)
+      calls.push('FOO PROCESS')
+    },
+    async resend() {
+      await delay(50)
+      calls.push('FOO RESEND')
+      return ''
+    }
+  })
+  app.type('BAR', {
+    async access() {
+      calls.push('BAR ACCESS')
+      return true
+    },
+    async process() {
+      calls.push('BAR PROCESS')
+    },
+    async resend() {
+      calls.push('BAR RESEND')
+      return ''
+    }
+  })
+
+  let client = await connectClient(app, '10:client:uuid')
+  await sendTo(client, [
+    'sync',
+    2,
+    { type: 'FOO' },
+    { id: [1, '10:client:other', 0], time: 1 },
+    { type: 'BAR' },
+    { id: [2, '10:client:other', 0], time: 1 }
+  ])
+  await delay(200)
+
+  expect(calls).toEqual([
+    'FOO ACCESS',
+    'FOO RESEND',
+    'FOO PROCESS',
+    'BAR ACCESS',
+    'BAR RESEND',
+    'BAR PROCESS'
+  ])
+})
+
+it('undoes all other actions in a queue if some action should be undone', async () => {
+  let test = createReporter()
+  test.app.type('FOO', {
+    access: () => false
+  })
+  test.app.type('BAR', {
+    access: () => true
+  })
+
+  let client = await connectClient(test.app)
+  await sendTo(client, [
+    'sync',
+    3,
+    { type: 'FOO' },
+    { id: [1, '10:uuid', 0], time: 1 },
+    { type: 'BAR' },
+    { id: [2, '10:uuid', 0], time: 1 }
+  ])
+
+  expect(test.names).toEqual([
+    'connect',
+    'authenticated',
+    'denied',
+    'add',
+    'add'
+  ])
+  expect(test.app.log.actions()).toEqual([
+    {
+      action: { type: 'FOO' },
+      id: '1 10:uuid 0',
+      reason: 'denied',
+      type: 'logux/undo'
+    },
+    {
+      action: { type: 'BAR' },
+      id: '2 10:uuid 0',
+      reason: 'error',
+      type: 'logux/undo'
+    }
+  ])
+})
+
+it('all actions are processed before destroy', async () => {
+  let app = createServer()
+  let calls: string[] = []
+  app.type(
+    'task 1.1',
+    {
+      async access() {
+        return true
+      },
+      async process() {
+        await delay(30)
+        calls.push('task 1.1')
+      }
+    },
+    { queue: '1' }
+  )
+  app.type(
+    'task 2.1',
+    {
+      async access() {
+        return true
+      },
+      async process() {
+        await delay(30)
+        calls.push('task 2.1')
+      }
+    },
+    { queue: '1' }
+  )
+  app.type(
+    'task 1.2',
+    {
+      async access() {
+        await delay(50)
+        return true
+      },
+      async process() {
+        calls.push('task 1.2')
+      }
+    },
+    { queue: '2' }
+  )
+  app.type(
+    'task 2.2',
+    {
+      async access() {
+        return true
+      },
+      async process() {
+        calls.push('task 2.2')
+      }
+    },
+    { queue: '2' }
+  )
+  app.type('during destroy', {
+    async access() {
+      return true
+    },
+    async process() {
+      calls.push('during destroy')
+    }
+  })
+
+  let client = await connectClient(app, '10:client:uuid')
+  sendTo(client, [
+    'sync',
+    4,
+    { type: 'task 1.1' },
+    { id: [1, client.nodeId || '', 0], time: 1 },
+    { type: 'task 2.1' },
+    { id: [2, client.nodeId || '', 0], time: 1 },
+    { type: 'task 1.2' },
+    { id: [3, client.nodeId || '', 0], time: 1 },
+    { type: 'task 2.2' },
+    { id: [4, client.nodeId || '', 0], time: 1 }
+  ])
+  await delay(10)
+  await app.destroy()
+
+  expect(calls).toEqual(['task 1.1', 'task 1.2', 'task 2.2', 'task 2.1'])
+})
+
+it('recognizes channel regex', async () => {
+  let app = createServer()
+  let calls: string[] = []
+  app.channel(/ba./, {
+    access: () => true,
+    load: (_, action) => {
+      calls.push(action.channel)
+    }
+  })
+
+  let client = await connectClient(app, '10:client:uuid')
+  await sendTo(client, [
+    'sync',
+    3,
+    { channel: 'bar', type: 'logux/subscribe' },
+    { id: [1, client.nodeId || '', 0], time: 1 },
+    { channel: 'baz', type: 'logux/subscribe' },
+    { id: [2, client.nodeId || '', 0], time: 1 },
+    { channel: 'bom', type: 'logux/subscribe' },
+    { id: [3, client.nodeId || '', 0], time: 1 }
+  ])
+
+  expect(calls).toEqual(['bar', 'baz'])
+})
+
+it('recognizes channel pattern', async () => {
+  let app = createServer()
+  let calls: string[] = []
+  app.channel('/api/users/:id', {
+    access: () => true,
+    load: (_, action) => {
+      calls.push(action.channel)
+    }
+  })
+
+  let client = await connectClient(app, '10:client:uuid')
+  await sendTo(client, [
+    'sync',
+    3,
+    { channel: '/api/users/5', type: 'logux/subscribe' },
+    { id: [1, client.nodeId || '', 0], time: 1 },
+    { channel: '/api/users/10', type: 'logux/subscribe' },
+    { id: [2, client.nodeId || '', 0], time: 1 },
+    { channel: '/api/users/10/9/8', type: 'logux/subscribe' },
+    { id: [3, client.nodeId || '', 0], time: 1 }
+  ])
+
+  expect(calls).toEqual(['/api/users/5', '/api/users/10'])
+})
+
+it('removes empty queues', async () => {
+  let app = createServer()
+  app.type('FOO', {
+    access: () => true,
+    process: async () => {
+      await delay(50)
+    }
+  })
+  app.type('BAR', {
+    access: () => true
+  })
+
+  let client = await connectClient(app, '10:client:uuid')
+  sendTo(client, [
+    'sync',
+    2,
+    { type: 'FOO' },
+    { id: [1, '10:client:uuid', 0], time: 1 },
+    { type: 'BAR' },
+    { id: [2, '10:client:uuid', 0], time: 1 }
+  ])
+
+  await delay(10)
+  expect(privateMethods(app).queues.size).toEqual(1)
+  await delay(50)
+  expect(privateMethods(app).queues.size).toEqual(0)
 })

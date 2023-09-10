@@ -35,6 +35,7 @@ export class ServerClient {
       auth: this.auth.bind(this),
       inFilter: this.filter.bind(this),
       inMap: this.inMap.bind(this),
+      onReceive: app.onReceive.bind(app),
       outMap: this.outMap.bind(this),
       ping: app.options.ping,
       subprotocol: app.options.subprotocol,

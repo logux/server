@@ -1,5 +1,6 @@
 import { LoguxNotFoundError } from '@logux/actions'
 import { Log, MemoryStore, parseId, ServerConnection } from '@logux/core'
+import fastq from 'fastq'
 import { promises as fs } from 'fs'
 import { createNanoEvents } from 'nanoevents'
 import { nanoid } from 'nanoid'
@@ -62,6 +63,12 @@ function normalizeTypeCallbacks(name, callbacks) {
   if (!callbacks || !callbacks.access) {
     throw new Error(`${name} must have access callback`)
   }
+}
+
+async function queueWorker(task, next) {
+  let { action, meta, processAction, queue } = task
+  queue.next = next
+  await processAction(action, meta)
 }
 
 function normalizeChannelCallbacks(pattern, callbacks) {
@@ -185,7 +192,9 @@ export class BaseServer {
         this.emitter.emit('report', 'add', { action, meta })
       }
 
-      if (this.destroying) return
+      if (this.destroying && !this.actionToQueue.has(meta.id)) {
+        return
+      }
 
       if (action.type === 'logux/subscribe') {
         if (meta.server === this.nodeId) {
@@ -333,6 +342,10 @@ export class BaseServer {
     this.timeouts = {}
     this.lastTimeout = 0
 
+    this.typeToQueue = new Map()
+    this.queues = new Map()
+    this.actionToQueue = new Map()
+
     this.controls = {
       'GET /': {
         async request() {
@@ -355,6 +368,54 @@ export class BaseServer {
     this.listenNotes = {}
     bindBackendProxy(this)
 
+    let end = (actionId, queue, queueKey, ...args) => {
+      this.actionToQueue.delete(actionId)
+      if (queue.length() === 0) {
+        this.queues.delete(queueKey)
+      }
+      queue.next(...args)
+    }
+    let undoRemainingTasks = queue => {
+      let remainingTasks = queue.getQueue()
+      if (remainingTasks) {
+        for (let task of remainingTasks) {
+          this.undo(task.action, task.meta, 'error')
+          this.actionToQueue.delete(task.meta.id)
+        }
+      }
+      queue.killAndDrain()
+    }
+    this.on('error', (e, action, meta) => {
+      let queueKey = this.actionToQueue.get(meta?.id)
+
+      if (!queueKey) {
+        return
+      }
+
+      let queue = this.queues.get(queueKey)
+      undoRemainingTasks(queue)
+      end(meta.id, queue, queueKey, e)
+    })
+    this.on('processed', (action, meta) => {
+      let queueKeyByActionId =
+        (action?.type === 'logux/undo' || action?.type === 'logux/processed') &&
+        this.actionToQueue.get(action?.id)
+      let queueKeyByMetaId = this.actionToQueue.get(meta?.id)
+
+      let queueKey = queueKeyByMetaId || queueKeyByActionId
+      let actionId = queueKeyByMetaId ? meta?.id : action?.id
+
+      if (!queueKey) {
+        return
+      }
+
+      let queue = this.queues.get(queueKey)
+      if (action.type === 'logux/undo') {
+        undoRemainingTasks(queue)
+      }
+      end(actionId, queue, queueKey, null, meta)
+    })
+
     this.unbind.push(() => {
       for (let i of this.connected.values()) i.destroy()
       for (let i in this.timeouts) {
@@ -373,6 +434,15 @@ export class BaseServer {
           }
         })
     )
+    this.unbind.push(() => {
+      return Promise.allSettled(
+        [...this.queues.values()].map(queue => {
+          return new Promise(resolve => {
+            queue.drain = resolve
+          })
+        })
+      )
+    })
   }
 
   addClient(connection) {
@@ -409,7 +479,7 @@ export class BaseServer {
     return [undoAction, undoMeta]
   }
 
-  channel(pattern, callbacks) {
+  channel(pattern, callbacks, options = {}) {
     normalizeChannelCallbacks(`Channel ${pattern}`, callbacks)
     let channel = Object.assign({}, callbacks)
     if (typeof pattern === 'string') {
@@ -419,6 +489,8 @@ export class BaseServer {
     } else {
       channel.regexp = pattern
     }
+
+    channel.queueName = options.queue || 'main'
     this.channels.push(channel)
   }
 
@@ -617,6 +689,49 @@ export class BaseServer {
     }
   }
 
+  onReceive(processAction, action, meta) {
+    if (this.actionToQueue.has(meta.id)) {
+      return
+    }
+
+    let clientId = parseId(meta.id).clientId
+    let queueName = ''
+
+    let isChannel =
+      (action.type === 'logux/subscribe' ||
+        action.type === 'logux/unsubscribe') &&
+      action.channel
+
+    if (isChannel) {
+      for (let i = 0; i < this.channels.length && !queueName; i++) {
+        let channel = this.channels[i]
+        let pattern = channel.regexp || channel.pattern.regex
+        if (action.channel.match(pattern)) {
+          queueName = channel.queue
+        }
+      }
+    } else {
+      queueName = this.typeToQueue.get(action.type)
+    }
+
+    queueName = queueName || 'main'
+    let queueKey = `${clientId}/${queueName}`
+    let queue = this.queues.get(queueKey)
+
+    if (!queue) {
+      queue = fastq(queueWorker, 1)
+      this.queues.set(queueKey, queue)
+    }
+
+    queue.push({
+      action,
+      meta,
+      processAction,
+      queue
+    })
+    this.actionToQueue.set(meta.id, queueKey)
+  }
+
   otherChannel(callbacks) {
     normalizeChannelCallbacks('Unknown channel', callbacks)
     if (this.otherSubscriber) {
@@ -785,9 +900,10 @@ export class BaseServer {
                 let ctx = this.createContext(action, meta)
                 let client = this.clientIds.get(clientId)
                 for (let filter of Object.values(subscriber.filters)) {
-                  filter = typeof filter === 'function'
-                    ? await filter(ctx, action, meta)
-                    : filter
+                  filter =
+                    typeof filter === 'function'
+                      ? await filter(ctx, action, meta)
+                      : filter
                   if (filter && client) {
                     ignoreClients.add(clientId)
                     client.node.onAdd(action, meta)
@@ -924,7 +1040,10 @@ export class BaseServer {
     if (!match) this.wrongChannel(action, meta)
   }
 
-  type(name, callbacks) {
+  type(name, callbacks, options = {}) {
+    let queue = options.queue || 'main'
+    this.typeToQueue.set(name, queue)
+
     if (typeof name === 'function') name = name.type
     normalizeTypeCallbacks(`Action type ${name}`, callbacks)
 
