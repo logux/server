@@ -387,33 +387,33 @@ export class BaseServer {
     }
     this.on('error', (e, action, meta) => {
       let queueKey = this.actionToQueue.get(meta?.id)
-
-      if (!queueKey) {
-        return
+      if (queueKey) {
+        let queue = this.queues.get(queueKey)
+        undoRemainingTasks(queue)
+        end(meta.id, queue, queueKey, e)
       }
-
-      let queue = this.queues.get(queueKey)
-      undoRemainingTasks(queue)
-      end(meta.id, queue, queueKey, e)
     })
     this.on('processed', (action, meta) => {
-      let queueKeyByActionId =
-        (action?.type === 'logux/undo' || action?.type === 'logux/processed') &&
-        this.actionToQueue.get(action?.id)
-      let queueKeyByMetaId = this.actionToQueue.get(meta?.id)
-
-      let queueKey = queueKeyByMetaId || queueKeyByActionId
-      let actionId = queueKeyByMetaId ? meta?.id : action?.id
-
-      if (!queueKey) {
-        return
+      if (action.type === 'logux/processed') {
+        let queueKey = this.actionToQueue.get(action.id)
+        if (queueKey) {
+          let queue = this.queues.get(queueKey)
+          undoRemainingTasks(queue)
+          end(action.id, queue, queueKey, null, meta)
+        }
+      } else if (action.type === 'logux/undo') {
+        let queueKey = this.actionToQueue.get(action.id)
+        if (queueKey) {
+          let queue = this.queues.get(queueKey)
+          end(action.id, queue, queueKey, null, meta)
+        }
+      } else {
+        let queueKey = this.actionToQueue.get(meta.id)
+        if (queueKey) {
+          let queue = this.queues.get(queueKey)
+          end(meta.id, queue, queueKey, null, meta)
+        }
       }
-
-      let queue = this.queues.get(queueKey)
-      if (action.type === 'logux/undo') {
-        undoRemainingTasks(queue)
-      }
-      end(actionId, queue, queueKey, null, meta)
     })
 
     this.unbind.push(() => {

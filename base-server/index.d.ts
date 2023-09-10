@@ -10,7 +10,6 @@ import type {
   Log,
   LogStore,
   Meta,
-  ReceiveCallback,
   ServerConnection,
   TestTime
 } from '@logux/core'
@@ -738,8 +737,6 @@ export class BaseServer<
    */
   nodeIds: Map<string, ServerClient>
 
-  onReceive: ReceiveCallback
-
   /**
    * Server options.
    *
@@ -1038,8 +1035,8 @@ export class BaseServer<
     listener: (
       action: LoguxUnsubscribeAction,
       meta: Readonly<ServerMeta>,
-      clientNodeId: string,
-    ) => void,
+      clientNodeId: string
+    ) => void
   ): Unsubscribe
 
   /**
