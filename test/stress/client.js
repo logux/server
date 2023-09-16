@@ -9,7 +9,7 @@ import { ALLOWED_META } from '../../index.js'
 let index = 0
 let stop = false
 
-function map(action, meta) {
+function onSend(action, meta) {
   let filtered = {}
   for (let i in meta) {
     if (ALLOWED_META.includes(i)) filtered[i] = meta[i]
@@ -29,7 +29,7 @@ async function tick() {
   let connection = new WsConnection('ws://localhost:31337', WebSocket)
   let log = new Log({ nodeId, store: new MemoryStore() })
   let node = new ClientNode(nodeId, log, connection, {
-    outMap: map,
+    onSend,
     subprotocol: '1.0.0',
     token: 'secret'
   })

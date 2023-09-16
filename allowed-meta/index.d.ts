@@ -3,7 +3,7 @@
  *
  *```js
  * import { ALLOWED_META } from '@logux/server'
- * async function outMap (action, meta) {
+ * async function onSend (action, meta) {
  *   const filtered = { }
  *   for (const i in meta) {
  *     if (ALLOWED_META.includes(i)) {

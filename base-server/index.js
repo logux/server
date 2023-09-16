@@ -1,6 +1,5 @@
 import { LoguxNotFoundError } from '@logux/actions'
 import { Log, MemoryStore, parseId, ServerConnection } from '@logux/core'
-import fastq from 'fastq'
 import { promises as fs } from 'fs'
 import { createNanoEvents } from 'nanoevents'
 import { nanoid } from 'nanoid'
@@ -63,12 +62,6 @@ function normalizeTypeCallbacks(name, callbacks) {
   if (!callbacks || !callbacks.access) {
     throw new Error(`${name} must have access callback`)
   }
-}
-
-async function queueWorker(task, next) {
-  let { action, meta, processAction, queue } = task
-  queue.next = next
-  await processAction(action, meta)
 }
 
 function normalizeChannelCallbacks(pattern, callbacks) {
@@ -247,7 +240,7 @@ export class BaseServer {
 
       if (meta.status === 'waiting') {
         if (!processor) {
-          this.internalUnkownType(action, meta)
+          this.internalUnknownType(action, meta)
           return
         }
         if (processor.process) {
@@ -394,20 +387,23 @@ export class BaseServer {
       }
     })
     this.on('processed', (action, meta) => {
-      if (action.type === 'logux/processed') {
+      if (action.type === 'logux/undo') {
         let queueKey = this.actionToQueue.get(action.id)
         if (queueKey) {
           let queue = this.queues.get(queueKey)
           undoRemainingTasks(queue)
           end(action.id, queue, queueKey, null, meta)
         }
-      } else if (action.type === 'logux/undo') {
+      } else if (action.type === 'logux/processed') {
         let queueKey = this.actionToQueue.get(action.id)
         if (queueKey) {
           let queue = this.queues.get(queueKey)
           end(action.id, queue, queueKey, null, meta)
         }
-      } else {
+      } else if (
+        action.type !== 'logux/subscribed' &&
+        action.type !== 'logux/unsubscribed'
+      ) {
         let queueKey = this.actionToQueue.get(meta.id)
         if (queueKey) {
           let queue = this.queues.get(queueKey)
@@ -422,18 +418,17 @@ export class BaseServer {
         clearTimeout(this.timeouts[i])
       }
     })
-    this.unbind.push(
-      () =>
-        new Promise(resolve => {
-          if (this.processing === 0) {
-            resolve()
-          } else {
-            this.on('processed', () => {
-              if (this.processing === 0) resolve()
-            })
-          }
-        })
-    )
+    this.unbind.push(() => {
+      return new Promise(resolve => {
+        if (this.processing === 0) {
+          resolve()
+        } else {
+          this.on('processed', () => {
+            if (this.processing === 0) resolve()
+          })
+        }
+      })
+    })
     this.unbind.push(() => {
       return Promise.allSettled(
         [...this.queues.values()].map(queue => {
@@ -569,7 +564,7 @@ export class BaseServer {
     this.httpListener = listener
   }
 
-  internalUnkownType(action, meta) {
+  internalUnknownType(action, meta) {
     this.contexts.delete(action)
     this.log.changeMeta(meta.id, { status: 'error' })
     this.emitter.emit('report', 'unknownType', {
@@ -687,49 +682,6 @@ export class BaseServer {
     } else {
       return this.emitter.on(event, listener)
     }
-  }
-
-  onReceive(processAction, action, meta) {
-    if (this.actionToQueue.has(meta.id)) {
-      return
-    }
-
-    let clientId = parseId(meta.id).clientId
-    let queueName = ''
-
-    let isChannel =
-      (action.type === 'logux/subscribe' ||
-        action.type === 'logux/unsubscribe') &&
-      action.channel
-
-    if (isChannel) {
-      for (let i = 0; i < this.channels.length && !queueName; i++) {
-        let channel = this.channels[i]
-        let pattern = channel.regexp || channel.pattern.regex
-        if (action.channel.match(pattern)) {
-          queueName = channel.queue
-        }
-      }
-    } else {
-      queueName = this.typeToQueue.get(action.type)
-    }
-
-    queueName = queueName || 'main'
-    let queueKey = `${clientId}/${queueName}`
-    let queue = this.queues.get(queueKey)
-
-    if (!queue) {
-      queue = fastq(queueWorker, 1)
-      this.queues.set(queueKey, queue)
-    }
-
-    queue.push({
-      action,
-      meta,
-      processAction,
-      queue
-    })
-    this.actionToQueue.set(meta.id, queueKey)
   }
 
   otherChannel(callbacks) {
@@ -1065,7 +1017,7 @@ export class BaseServer {
   }
 
   unknownType(action, meta) {
-    this.internalUnkownType(action, meta)
+    this.internalUnknownType(action, meta)
     this.unknownTypes[meta.id] = true
   }
 

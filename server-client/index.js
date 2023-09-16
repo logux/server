@@ -1,16 +1,66 @@
 import { LoguxError, parseId } from '@logux/core'
 import cookie from 'cookie'
+import fastq from 'fastq'
 import semver from 'semver'
 
 import { ALLOWED_META } from '../allowed-meta/index.js'
 import { filterMeta } from '../filter-meta/index.js'
 import { FilteredNode } from '../filtered-node/index.js'
 
+async function onSend(action, meta) {
+  return [action, filterMeta(meta)]
+}
+
 function reportDetails(client) {
   return {
     connectionId: client.key,
     nodeId: client.nodeId,
     subprotocol: client.node.remoteSubprotocol
+  }
+}
+
+function denyBack(app, clientId, action, meta) {
+  app.emitter.emit('report', 'denied', { actionId: meta.id })
+  let [undoAction, undoMeta] = app.buildUndo(action, meta, 'denied')
+  undoMeta.clients = (undoMeta.clients || []).concat([clientId])
+  app.log.add(undoAction, undoMeta)
+  app.debugActionError(meta, `Action "${meta.id}" was denied`)
+}
+
+async function queueWorker(task, next) {
+  let { action, app, clientId, meta, onReceiveResolve, queue } = task
+  queue.next = next
+
+  let type = action.type
+  if (type === 'logux/subscribe' || type === 'logux/unsubscribe') {
+    return onReceiveResolve([action, meta])
+  }
+
+  let processor = app.getProcessor(type)
+  if (!processor) {
+    app.internalUnknownType(action, meta)
+    return onReceiveResolve(false)
+  }
+
+  let ctx = app.createContext(action, meta)
+  try {
+    let result = await processor.access(ctx, action, meta)
+    if (app.unknownTypes[meta.id]) {
+      delete app.unknownTypes[meta.id]
+      app.finally(processor, ctx, action, meta)
+      return false
+    } else if (!result) {
+      app.finally(processor, ctx, action, meta)
+      denyBack(app, clientId, action, meta)
+      return onReceiveResolve(false)
+    } else {
+      return onReceiveResolve([action, meta])
+    }
+  } catch (e) {
+    app.undo(action, meta, 'error')
+    app.emitter.emit('error', e, action, meta)
+    app.finally(processor, ctx, action, meta)
+    return onReceiveResolve(false)
   }
 }
 
@@ -33,10 +83,8 @@ export class ServerClient {
 
     this.node = new FilteredNode(this, app.nodeId, app.log, connection, {
       auth: this.auth.bind(this),
-      inFilter: this.filter.bind(this),
-      inMap: this.inMap.bind(this),
-      onReceive: app.onReceive.bind(app),
-      outMap: this.outMap.bind(this),
+      onReceive: this.onReceive.bind(this),
+      onSend,
       ping: app.options.ping,
       subprotocol: app.options.subprotocol,
       timeout: app.options.timeout
@@ -142,14 +190,6 @@ export class ServerClient {
     return result
   }
 
-  denyBack(action, meta) {
-    this.app.emitter.emit('report', 'denied', { actionId: meta.id })
-    let [undoAction, undoMeta] = this.app.buildUndo(action, meta, 'denied')
-    undoMeta.clients = (undoMeta.clients || []).concat([this.clientId])
-    this.app.log.add(undoAction, undoMeta)
-    this.app.debugActionError(meta, `Action "${meta.id}" was denied`)
-  }
-
   destroy() {
     this.destroyed = true
     this.node.destroy()
@@ -183,61 +223,68 @@ export class ServerClient {
     this.app.connected.delete(this.key)
   }
 
-  async filter(action, meta) {
-    let ctx = this.app.createContext(action, meta)
-
-    let wrongUser = !this.clientId || this.clientId !== ctx.clientId
-    let wrongMeta = Object.keys(meta).some(i => !ALLOWED_META.includes(i))
-    if (wrongUser || wrongMeta) {
-      this.app.contexts.delete(action)
-      this.denyBack(action, meta)
-      return false
-    }
-
-    let type = action.type
-    if (type === 'logux/subscribe' || type === 'logux/unsubscribe') {
-      return true
-    }
-
-    let processor = this.app.getProcessor(type)
-    if (!processor) {
-      this.app.internalUnkownType(action, meta)
-      return false
-    }
-
-    try {
-      let result = await processor.access(ctx, action, meta)
-      if (this.app.unknownTypes[meta.id]) {
-        delete this.app.unknownTypes[meta.id]
-        this.app.finally(processor, ctx, action, meta)
-        return false
-      } else if (!result) {
-        this.app.finally(processor, ctx, action, meta)
-        this.denyBack(action, meta)
-        return false
-      } else {
-        return true
-      }
-    } catch (e) {
-      this.app.undo(action, meta, 'error')
-      this.app.emitter.emit('error', e, action, meta)
-      this.app.finally(processor, ctx, action, meta)
-      return false
-    }
-  }
-
-  async inMap(action, meta) {
-    if (!meta.subprotocol) {
-      meta.subprotocol = this.node.remoteSubprotocol
-    }
-    return [action, meta]
-  }
-
   isSubprotocol(range) {
     return semver.satisfies(this.node.remoteSubprotocol, range)
   }
 
-  async outMap(action, meta) {
-    return [action, filterMeta(meta)]
+  onReceive(action, meta) {
+    if (this.app.actionToQueue.has(meta.id)) {
+      return Promise.resolve(false)
+    }
+
+    let actionClientId = parseId(meta.id).clientId
+    let wrongUser = !this.clientId || this.clientId !== actionClientId
+    let wrongMeta = Object.keys(meta).some(i => !ALLOWED_META.includes(i))
+    if (wrongUser || wrongMeta) {
+      denyBack(this.app, this.clientId, action, meta)
+      return Promise.resolve(false)
+    }
+
+    return new Promise(resolve => {
+      let clientId = parseId(meta.id).clientId
+      let queueName = ''
+
+      let isChannel =
+        (action.type === 'logux/subscribe' ||
+          action.type === 'logux/unsubscribe') &&
+        action.channel
+
+      if (isChannel) {
+        for (let channel of this.app.channels) {
+          let pattern = channel.regexp || channel.pattern.regex
+          if (action.channel.match(pattern)) {
+            queueName = channel.queue
+            break
+          }
+        }
+      } else {
+        queueName = this.app.typeToQueue.get(action.type)
+      }
+
+      queueName = queueName || 'main'
+      let queueKey = `${clientId}/${queueName}`
+      let queue = this.app.queues.get(queueKey)
+
+      if (!queue) {
+        queue = fastq(queueWorker, 1)
+        this.app.queues.set(queueKey, queue)
+      }
+
+      if (!meta.subprotocol) {
+        meta.subprotocol = this.node.remoteSubprotocol
+      }
+
+      this.app.actionToQueue.set(meta.id, queueKey)
+      queue.push({
+        action,
+        app: this.app,
+        clientId,
+        meta,
+        onReceiveResolve: result => {
+          resolve(result)
+        },
+        queue
+      })
+    })
   }
 }

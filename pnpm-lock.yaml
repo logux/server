@@ -9,8 +9,8 @@ dependencies:
     specifier: ^0.3.1
     version: 0.3.1(@logux/core@0.8.4)
   '@logux/core':
-    specifier: VladBrok/core#feat/54
-    version: github.com/VladBrok/core/bf66502c715ff0e2dc72e894cbdc960d85408cc8
+    specifier: github:logux/core#next
+    version: github.com/logux/core/32c94cae7ca790ab5be50e2b63ba7ffb7fe044b7
   JSONStream:
     specifier: ^1.3.5
     version: 1.3.5
@@ -459,7 +459,7 @@ packages:
     peerDependencies:
       '@logux/core': ^0.8.0
     dependencies:
-      '@logux/core': github.com/VladBrok/core/bf66502c715ff0e2dc72e894cbdc960d85408cc8
+      '@logux/core': github.com/logux/core/32c94cae7ca790ab5be50e2b63ba7ffb7fe044b7
     dev: false
 
   /@logux/eslint-config@51.0.1(eslint-config-standard@17.1.0)(eslint-plugin-import@2.28.0)(eslint-plugin-n@16.0.1)(eslint-plugin-perfectionist@1.5.1)(eslint-plugin-prefer-let@3.0.1)(eslint-plugin-promise@6.1.1)(eslint@8.47.0):
@@ -1084,7 +1084,7 @@ packages:
       normalize-path: 3.0.0
       readdirp: 3.6.0
     optionalDependencies:
-      fsevents: 2.3.2
+      fsevents: 2.3.3
     dev: true
 
   /clean-publish@4.2.0:
@@ -1690,8 +1690,8 @@ packages:
     resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==}
     dev: true
 
-  /fsevents@2.3.2:
-    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
+  /fsevents@2.3.3:
+    resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
     requiresBuild: true
@@ -2201,11 +2201,6 @@ packages:
     engines: {node: ^12.0.0 || ^14.0.0 || >=16.0.0}
     dev: false
 
-  /nanoevents@7.0.1:
-    resolution: {integrity: sha512-o6lpKiCxLeijK4hgsqfR6CNToPyRU3keKyyI6uwuHRvpRTbZ0wXw51WRgyldVugZqoJfkGFrjrIenYH3bfEO3Q==}
-    engines: {node: ^14.0.0 || ^16.0.0 || >=18.0.0}
-    dev: false
-
   /nanoevents@8.0.0:
     resolution: {integrity: sha512-bYYwNCdNc5ea6/Lwh1uioU1/7aaKa3EPmNQ2weTm8PWSpbWrsaWHePe0Zq4SF+D3F3JX3cn+QdktOPCf1meOqw==}
     engines: {node: ^16.0.0 || ^18.0.0 || >=20.0.0}
@@ -2568,7 +2563,7 @@ packages:
     engines: {node: '>=14.18.0', npm: '>=8.0.0'}
     hasBin: true
     optionalDependencies:
-      fsevents: 2.3.2
+      fsevents: 2.3.3
     dev: true
 
   /run-parallel@1.2.0:
@@ -2999,7 +2994,7 @@ packages:
       postcss: 8.4.31
       rollup: 3.28.0
     optionalDependencies:
-      fsevents: 2.3.2
+      fsevents: 2.3.3
     dev: true
 
   /vitest@0.34.1:
@@ -3144,11 +3139,11 @@ packages:
     resolution: {integrity: sha512-xHhOFKT1Y29Jc4/6To1hmIUswKhCKplPSbkCyIabAAZ5q/9GmZvlN3WNcafcq3zze3CzYU66XNeSBLCD8Oickw==}
     dev: false
 
-  github.com/VladBrok/core/bf66502c715ff0e2dc72e894cbdc960d85408cc8:
-    resolution: {tarball: https://codeload.github.com/VladBrok/core/tar.gz/bf66502c715ff0e2dc72e894cbdc960d85408cc8}
+  github.com/logux/core/32c94cae7ca790ab5be50e2b63ba7ffb7fe044b7:
+    resolution: {tarball: https://codeload.github.com/logux/core/tar.gz/32c94cae7ca790ab5be50e2b63ba7ffb7fe044b7}
     name: '@logux/core'
-    version: 0.8.4
-    engines: {node: ^14.0.0 || ^16.0.0 || >=18.0.0}
+    version: 0.8.5
+    engines: {node: ^18.0.0 || >=20.0.0}
     dependencies:
-      nanoevents: 7.0.1
+      nanoevents: 8.0.0
     dev: false

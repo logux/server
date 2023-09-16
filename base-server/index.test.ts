@@ -651,10 +651,10 @@ it('has full events API', () => {
     events += 1
   })
 
-  emit(app, 'processed')
-  emit(app, 'processed')
+  emit(app, 'processed', { type: 'FOO' }, { id: '1 1:1 0' })
+  emit(app, 'processed', { type: 'FOO' }, { id: '1 1:1 0' })
   unbind()
-  emit(app, 'processed')
+  emit(app, 'processed', { type: 'FOO' }, { id: '1 1:1 0' })
 
   expect(events).toEqual(2)
 })

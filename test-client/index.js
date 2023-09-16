@@ -18,7 +18,7 @@ export class TestClient {
     this.node = new ClientNode(this.nodeId, this.log, this.pair.left, {
       ...opts,
       fixTime: false,
-      outMap: (action, meta) => {
+      onSend(action, meta) {
         return [action, filterMeta(meta)]
       }
     })

@@ -773,11 +773,13 @@ it('checks user access for action', async () => {
     'connect',
     'authenticated',
     'add',
-    'add',
     'denied',
+    'add',
     'add'
   ])
-  expect(test.reports[4][1].actionId).toEqual('1 10:uuid 1')
+  expect(test.reports.find(i => i[0] === 'denied')![1].actionId).toEqual(
+    '1 10:uuid 1'
+  )
   expect(sent(client).find(i => i[0] === 'debug')).toEqual([
     'debug',
     'error',
@@ -1027,7 +1029,7 @@ it('sends new actions by client ID', async () => {
   ])
 })
 
-it('does not send old action on client exluding', async () => {
+it('does not send old action on client excluding', async () => {
   let app = createServer()
   app.type('A', { access: () => true })
 
@@ -2332,52 +2334,52 @@ it('all actions are processed before destroy', async () => {
   let app = createServer()
   let calls: string[] = []
   app.type(
-    'task 1.1',
+    'queue 1 task 1',
     {
       async access() {
         return true
       },
       async process() {
         await delay(30)
-        calls.push('task 1.1')
+        calls.push('queue 1 task 1')
       }
     },
     { queue: '1' }
   )
   app.type(
-    'task 2.1',
+    'queue 1 task 2',
     {
       async access() {
         return true
       },
       async process() {
         await delay(30)
-        calls.push('task 2.1')
+        calls.push('queue 1 task 2')
       }
     },
     { queue: '1' }
   )
   app.type(
-    'task 1.2',
+    'queue 2 task 1',
     {
       async access() {
         await delay(50)
         return true
       },
       async process() {
-        calls.push('task 1.2')
+        calls.push('queue 2 task 1')
       }
     },
     { queue: '2' }
   )
   app.type(
-    'task 2.2',
+    'queue 2 task 2',
     {
       async access() {
         return true
       },
       async process() {
-        calls.push('task 2.2')
+        calls.push('queue 2 task 2')
       }
     },
     { queue: '2' }
@@ -2395,19 +2397,24 @@ it('all actions are processed before destroy', async () => {
   sendTo(client, [
     'sync',
     4,
-    { type: 'task 1.1' },
-    { id: [1, client.nodeId || '', 0], time: 1 },
-    { type: 'task 2.1' },
-    { id: [2, client.nodeId || '', 0], time: 1 },
-    { type: 'task 1.2' },
-    { id: [3, client.nodeId || '', 0], time: 1 },
-    { type: 'task 2.2' },
-    { id: [4, client.nodeId || '', 0], time: 1 }
+    { type: 'queue 1 task 1' },
+    { id: [1, client.nodeId!, 0], time: 1 },
+    { type: 'queue 1 task 2' },
+    { id: [2, client.nodeId!, 0], time: 1 },
+    { type: 'queue 2 task 1' },
+    { id: [3, client.nodeId!, 0], time: 1 },
+    { type: 'queue 2 task 2' },
+    { id: [4, client.nodeId!, 0], time: 1 }
   ])
   await delay(10)
   await app.destroy()
 
-  expect(calls).toEqual(['task 1.1', 'task 1.2', 'task 2.2', 'task 2.1'])
+  expect(calls).toEqual([
+    'queue 1 task 1',
+    'queue 2 task 1',
+    'queue 2 task 2',
+    'queue 1 task 2'
+  ])
 })
 
 it('recognizes channel regex', async () => {
