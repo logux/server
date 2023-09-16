@@ -1,7 +1,7 @@
-import { promises as fs } from 'fs'
-import http from 'http'
-import https from 'https'
-import { isAbsolute, join } from 'path'
+import { promises as fs } from 'node:fs'
+import http from 'node:http'
+import https from 'node:https'
+import { isAbsolute, join } from 'node:path'
 
 const PEM_PREAMBLE = '-----BEGIN'
 

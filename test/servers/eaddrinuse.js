@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import os from 'os'
+import os from 'node:os'
 
 import { Server } from '../../index.js'
 

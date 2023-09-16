@@ -1,8 +1,8 @@
 import { LoguxError } from '@logux/core'
-import { existsSync, readFileSync, statSync } from 'fs'
 import { nanoid } from 'nanoid'
-import os from 'os'
-import { join } from 'path'
+import { existsSync, readFileSync, statSync } from 'node:fs'
+import os from 'node:os'
+import { join } from 'node:path'
 import pino from 'pino'
 import { afterEach, expect, it } from 'vitest'
 

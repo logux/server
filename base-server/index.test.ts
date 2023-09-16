@@ -6,13 +6,13 @@ import {
   type TestLog,
   TestTime
 } from '@logux/core'
-import { readFileSync } from 'fs'
-import http from 'http'
-import https from 'https'
 import { delay } from 'nanodelay'
 import { restoreAll, spy, type Spy, spyOn } from 'nanospy'
-import { join } from 'path'
-import { fileURLToPath } from 'url'
+import { readFileSync } from 'node:fs'
+import http from 'node:http'
+import https from 'node:https'
+import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { afterEach, expect, it } from 'vitest'
 import WebSocket from 'ws'
 

@@ -13,12 +13,12 @@ import type {
   ServerConnection,
   TestTime
 } from '@logux/core'
+import type { Unsubscribe } from 'nanoevents'
 import type {
   Server as HTTPServer,
   IncomingMessage,
   ServerResponse
-} from 'http'
-import type { Unsubscribe } from 'nanoevents'
+} from 'node:http'
 import type { LogFn } from 'pino'
 
 import type { ChannelContext, Context } from '../context/index.js'

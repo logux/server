@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import http from 'http'
 import { delay } from 'nanodelay'
+import http from 'node:http'
 import pico from 'picocolors'
 
 function send(action, meta) {

@@ -1,5 +1,5 @@
-import http from 'http'
 import { delay } from 'nanodelay'
+import http from 'node:http'
 import { afterAll, afterEach, beforeAll, beforeEach, expect, it } from 'vitest'
 
 import { BaseServer, TestServer, type TestServerOptions } from '../index.js'

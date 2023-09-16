@@ -1,9 +1,9 @@
-import { once } from 'events'
-import os from 'os'
+import { once } from 'node:events'
+import os from 'node:os'
+import { Transform } from 'node:stream'
 import pico from 'picocolors'
 import pino from 'pino'
 import abstractTransport from 'pino-abstract-transport'
-import { Transform } from 'stream'
 import stripAnsi from 'strip-ansi'
 import yyyymmdd from 'yyyy-mm-dd'
 

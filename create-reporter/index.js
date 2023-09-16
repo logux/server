@@ -1,8 +1,8 @@
-import os from 'os'
-import { dirname, join, sep } from 'path'
+import os from 'node:os'
+import { dirname, join, sep } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import pico from 'picocolors'
 import pino from 'pino'
-import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 export const PATH_TO_PRETTIFYING_PINO_TRANSPORT = join(

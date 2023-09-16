@@ -1,10 +1,10 @@
 import { LoguxNotFoundError } from '@logux/actions'
 import { Log, MemoryStore, parseId, ServerConnection } from '@logux/core'
-import { promises as fs } from 'fs'
 import { createNanoEvents } from 'nanoevents'
 import { nanoid } from 'nanoid'
-import { dirname, join } from 'path'
-import { fileURLToPath } from 'url'
+import { promises as fs } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import UrlPattern from 'url-pattern'
 import { WebSocketServer } from 'ws'
 

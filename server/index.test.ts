@@ -1,7 +1,7 @@
-import type { ChildProcess, SpawnOptions } from 'child_process'
 import spawn from 'cross-spawn'
-import { join } from 'path'
-import { fileURLToPath } from 'url'
+import type { ChildProcess, SpawnOptions } from 'node:child_process'
+import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { afterEach, expect, it } from 'vitest'
 
 import { Server } from '../index.js'

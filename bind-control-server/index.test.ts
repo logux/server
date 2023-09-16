@@ -1,6 +1,6 @@
 import { ClientNode, Log, MemoryStore, WsConnection } from '@logux/core'
-import http from 'http'
 import { delay } from 'nanodelay'
+import http from 'node:http'
 import { afterEach, expect, it } from 'vitest'
 import WebSocket from 'ws'
 

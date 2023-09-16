@@ -1,5 +1,5 @@
 import glob from 'fast-glob'
-import { join, relative } from 'path'
+import { join, relative } from 'node:path'
 import pico from 'picocolors'
 
 import { BaseServer } from '../base-server/index.js'
