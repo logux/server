@@ -210,19 +210,19 @@ exports[`uses autoload wrong export 1`] = `
 `;
 
 exports[`uses environment variables for config 1`] = `
-"{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"logux-server\\",\\"environment\\":\\"test\\",\\"loguxServer\\":\\"0.0.0\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"listen\\":\\"ws://127.0.0.1:31337/\\",\\"healthCheck\\":\\"http://127.0.0.1:31337/health\\",\\"msg\\":\\"Logux server is listening\\"}
-{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"logux-server\\",\\"msg\\":\\"Shutting down Logux server\\"}
+"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"logux-server","environment":"test","loguxServer":"0.0.0","nodeId":"server:FnXaqDxY","subprotocol":"1.0.0","supports":"1.x","listen":"ws://127.0.0.1:31337/","healthCheck":"http://127.0.0.1:31337/health","msg":"Logux server is listening"}
+{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"logux-server","msg":"Shutting down Logux server"}
 "
 `;
 
 exports[`uses logger param 1`] = `
-"{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"logux-server\\",\\"environment\\":\\"test\\",\\"loguxServer\\":\\"0.0.0\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"listen\\":\\"ws://127.0.0.1:31337/\\",\\"healthCheck\\":\\"http://127.0.0.1:31337/health\\",\\"msg\\":\\"Logux server is listening\\"}
-{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"logux-server\\",\\"msg\\":\\"Shutting down Logux server\\"}
+"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"logux-server","environment":"test","loguxServer":"0.0.0","nodeId":"server:FnXaqDxY","subprotocol":"1.0.0","supports":"1.x","listen":"ws://127.0.0.1:31337/","healthCheck":"http://127.0.0.1:31337/health","msg":"Logux server is listening"}
+{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"logux-server","msg":"Shutting down Logux server"}
 "
 `;
 
 exports[`uses logger param for constructor errors 1`] = `
-"{\\"level\\":60,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"logux-server\\",\\"note\\":\\"Check server constructor and Logux Server documentation\\",\\"msg\\":\\"Missed \`supports\` option in server constructor\\"}
+"{"level":60,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"logux-server","note":"Check server constructor and Logux Server documentation","msg":"Missed \`supports\` option in server constructor"}
 "
 `;
 
@@ -233,13 +233,13 @@ exports[`writes about unbind 1`] = `
 `;
 
 exports[`writes to custom pino log 1`] = `
-"{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"logux-server-custom\\",\\"customProp\\":\\"42\\",\\"environment\\":\\"test\\",\\"loguxServer\\":\\"0.0.0\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"listen\\":\\"ws://127.0.0.1:2000/\\",\\"healthCheck\\":\\"http://127.0.0.1:2000/health\\",\\"msg\\":\\"Logux server is listening\\"}
-{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"logux-server-custom\\",\\"customProp\\":\\"42\\",\\"msg\\":\\"Shutting down Logux server\\"}
+"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"logux-server-custom","customProp":"42","environment":"test","loguxServer":"0.0.0","nodeId":"server:FnXaqDxY","subprotocol":"1.0.0","supports":"1.x","listen":"ws://127.0.0.1:2000/","healthCheck":"http://127.0.0.1:2000/health","msg":"Logux server is listening"}
+{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"logux-server-custom","customProp":"42","msg":"Shutting down Logux server"}
 "
 `;
 
 exports[`writes to pino log 1`] = `
-"{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"logux-server\\",\\"environment\\":\\"test\\",\\"loguxServer\\":\\"0.0.0\\",\\"nodeId\\":\\"server:FnXaqDxY\\",\\"subprotocol\\":\\"1.0.0\\",\\"supports\\":\\"1.x\\",\\"listen\\":\\"ws://127.0.0.1:2000/\\",\\"healthCheck\\":\\"http://127.0.0.1:2000/health\\",\\"msg\\":\\"Logux server is listening\\"}
-{\\"level\\":30,\\"time\\":\\"1970-01-01T00:00:00.000Z\\",\\"pid\\":21384,\\"hostname\\":\\"localhost\\",\\"name\\":\\"logux-server\\",\\"msg\\":\\"Shutting down Logux server\\"}
+"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"logux-server","environment":"test","loguxServer":"0.0.0","nodeId":"server:FnXaqDxY","subprotocol":"1.0.0","supports":"1.x","listen":"ws://127.0.0.1:2000/","healthCheck":"http://127.0.0.1:2000/health","msg":"Logux server is listening"}
+{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"logux-server","msg":"Shutting down Logux server"}
 "
 `;
