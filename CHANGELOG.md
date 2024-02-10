@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.12.7
+* Moved `ip` to `2.x` to fix vulnerability.
+
 ## 0.12.6
 * Fixed `x/changed` filter in `addSyncMap` (by Eduard Aksamitov).
 
