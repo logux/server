@@ -1,4 +1,4 @@
-import ip from 'ip'
+import { Netmask } from 'netmask'
 
 const MAX_VERSION = 4
 const MIN_VERSION = 4
@@ -28,7 +28,7 @@ export function bindControlServer(app, custom) {
     return
   }
 
-  let masks = app.options.controlMask.split(/,\s*/).map(i => ip.cidrSubnet(i))
+  let masks = app.options.controlMask.split(/,\s*/).map(i => new Netmask(i))
   app.httpServer.on('request', async (req, res) => {
     let urlString = req.url
     if (/^\/\w+%3F/.test(urlString)) urlString = decodeURIComponent(urlString)
