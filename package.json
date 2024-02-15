@@ -40,7 +40,7 @@
     "fast-glob": "^3.3.2",
     "nanodelay": "^2.0.2",
     "nanoevents": "^9.0.0",
-    "nanoid": "^5.0.5",
+    "nanoid": "^4.0.2",
     "netmask": "^2.0.2",
     "node-fetch": "^3.3.2",
     "picocolors": "^1.0.0",

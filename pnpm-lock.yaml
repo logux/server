@@ -30,8 +30,8 @@ dependencies:
     specifier: ^9.0.0
     version: 9.0.0
   nanoid:
-    specifier: ^5.0.5
-    version: 5.0.5
+    specifier: ^4.0.2
+    version: 4.0.2
   netmask:
     specifier: ^2.0.2
     version: 2.0.2
@@ -2221,9 +2221,9 @@ packages:
     hasBin: true
     dev: true
 
-  /nanoid@5.0.5:
-    resolution: {integrity: sha512-/Veqm+QKsyMY3kqi4faWplnY1u+VuKO3dD2binyPIybP31DRO29bPF+1mszgLnrR2KqSLceFLBNw0zmvDzN1QQ==}
-    engines: {node: ^18 || >=20}
+  /nanoid@4.0.2:
+    resolution: {integrity: sha512-7ZtY5KTCNheRGfEFxnedV5zFiORN1+Y1N6zvPTnHQd8ENUvfaDBeuJDZb2bN/oXwXxu3qkTXDzy57W5vAmDTBw==}
+    engines: {node: ^14 || ^16 || >=18}
     hasBin: true
     dev: false
 
