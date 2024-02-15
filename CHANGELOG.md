@@ -1,6 +1,10 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.12.8
+* Replaced `ip` to fix vulnerability.
+* Updated dependencies.
+
 ## 0.12.7
 * Moved `ip` to `2.x` to fix vulnerability.
 
