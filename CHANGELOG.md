@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.12.10
+* Fixed another Node.js 14 regression.
+
 ## 0.12.9
 * Fixed Node.js 14 regression.
 
