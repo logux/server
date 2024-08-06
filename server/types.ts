@@ -28,15 +28,15 @@ class User {
   async save(): Promise<void> {}
 }
 
-type UserRenameAction = Action & {
+type UserRenameAction = {
   name: string
   type: 'user/rename'
   userId: string
-}
+} & Action
 
-type UserSubscribeAction = LoguxSubscribeAction & {
+type UserSubscribeAction = {
   fields?: ('email' | 'name')[]
-}
+} & LoguxSubscribeAction
 
 type UserData = {
   user: User

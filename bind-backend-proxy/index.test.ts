@@ -67,15 +67,15 @@ type RequestOptions = {
   path?: string
 }
 
-type DataRequest = RequestOptions & {
+type DataRequest = {
   data: object
   string?: undefined
-}
+} & RequestOptions
 
-type StringRequest = RequestOptions & {
+type StringRequest = {
   data?: undefined
   string: string
-}
+} & RequestOptions
 
 function request({
   data,

@@ -27,9 +27,9 @@ export type WithoutTime<Value extends SyncMapTypes | SyncMapTypes[]> = {
   [WITH_TIME]: false
 }
 
-export type SyncMapData<Value extends SyncMapValues> = { id: string } & {
+export type SyncMapData<Value extends SyncMapValues> = {
   [Key in keyof Value]: WithoutTime<Value[Key]> | WithTime<Value[Key]>
-}
+} & { id: string }
 
 /**
  * Add last changed time to value to use in conflict resolution.

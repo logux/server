@@ -22,10 +22,10 @@ type TaskValue = {
   text: string
 }
 
-type TaskRecord = TaskValue & {
+type TaskRecord = {
   finishedChanged: number
   textChanged: number
-}
+} & TaskValue
 
 let [
   createTask,
