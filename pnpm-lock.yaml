@@ -65,9 +65,6 @@ importers:
       ws:
         specifier: ^8.18.0
         version: 8.18.0
-      yyyy-mm-dd:
-        specifier: ^1.0.2
-        version: 1.0.2
     devDependencies:
       '@logux/eslint-config':
         specifier: ^53.3.0
@@ -1951,10 +1948,6 @@ packages:
   yocto-queue@0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
-
-  yyyy-mm-dd@1.0.2:
-    resolution: {integrity: sha512-xHhOFKT1Y29Jc4/6To1hmIUswKhCKplPSbkCyIabAAZ5q/9GmZvlN3WNcafcq3zze3CzYU66XNeSBLCD8Oickw==}
-    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
 
 snapshots:
 
@@ -3867,5 +3860,3 @@ snapshots:
   ws@8.18.0: {}
 
   yocto-queue@0.1.0: {}
-
-  yyyy-mm-dd@1.0.2: {}

@@ -50,8 +50,7 @@
     "semver": "^7.6.3",
     "strip-ansi": "^7.1.0",
     "url-pattern": "^1.0.3",
-    "ws": "^8.18.0",
-    "yyyy-mm-dd": "^1.0.2"
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "@logux/eslint-config": "^53.3.0",
