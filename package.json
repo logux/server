@@ -45,7 +45,7 @@
     "netmask": "^2.0.2",
     "node-fetch": "^3.3.2",
     "picocolors": "^1.0.1",
-    "pino": "8.16.2",
+    "pino": "9.3.2",
     "pino-abstract-transport": "^1.2.0",
     "semver": "^7.6.3",
     "strip-ansi": "^7.1.0",
