@@ -258,7 +258,7 @@ export type SendBackActions =
  * @param client Client object.
  * @returns `true` if credentials was correct
  */
-interface Authenticator<Headers extends object> {
+interface ServerAuthenticator<Headers extends object> {
   (user: AuthenticatorOptions<Headers>): boolean | Promise<boolean>
 }
 
@@ -800,7 +800,7 @@ export class BaseServer<
    *
    * @param authenticator The authentication callback.
    */
-  auth(authenticator: Authenticator<Headers>): void
+  auth(authenticator: ServerAuthenticator<Headers>): void
 
   /**
    * Define the channel.
