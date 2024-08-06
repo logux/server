@@ -1,6 +1,12 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.13 “Seven Red Suns”
+* Removed Node.js 14 and Node.js 16 support.
+* Moved to Logux Core 0.9.
+* Added action processing queues (by @VladBrok).
+* Added `unauthenticated` event (by @erictheswift).
+
 ## 0.12.10
 * Fixed another Node.js 14 regression.
 
