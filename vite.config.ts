@@ -8,8 +8,10 @@ export default defineConfig({
         'server/index.js',
         'test/*',
         '**/*.d.ts',
+        '**/*.test.ts',
         '*/errors.ts',
         '*/types.ts',
+        '*.config.*',
         'human-formatter'
       ],
       provider: 'v8',
