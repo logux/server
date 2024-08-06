@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       '@logux/actions':
-        specifier: ^0.3.1
-        version: 0.3.1(@logux/core@https://codeload.github.com/logux/core/tar.gz/3c826785ac5ac42c6921b8c63b1d763b2c63e078)
+        specifier: ^0.4.0
+        version: 0.4.0(@logux/core@0.9.0)
       '@logux/core':
-        specifier: github:logux/core#next
-        version: https://codeload.github.com/logux/core/tar.gz/3c826785ac5ac42c6921b8c63b1d763b2c63e078
+        specifier: ^0.9.0
+        version: 0.9.0
       JSONStream:
         specifier: ^1.3.5
         version: 1.3.5
@@ -345,16 +345,14 @@ packages:
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
 
-  '@logux/actions@0.3.1':
-    resolution: {integrity: sha512-9NU+3he2DaOYXlQjaZWornrnMsbw+8mvgUHtTyKcBotvpS5me5VVxVo9y02G7k2byz4FXtvafq9KPVStyag3oA==}
-    version: 0.3.1
-    engines: {node: ^14.0.0 || ^16.0.0 || >=18.0.0}
+  '@logux/actions@0.4.0':
+    resolution: {integrity: sha512-hBIoapgt19VFodvqCaKBMy1lNE55nj2fWfqDEZHnZbLtqjbae+2RHMU/0Bb0fzQR7nAl+k8rxAnwjSD74PlD2Q==}
+    engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
     peerDependencies:
-      '@logux/core': ^0.8.0
+      '@logux/core': ^0.9.0
 
-  '@logux/core@https://codeload.github.com/logux/core/tar.gz/3c826785ac5ac42c6921b8c63b1d763b2c63e078':
-    resolution: {tarball: https://codeload.github.com/logux/core/tar.gz/3c826785ac5ac42c6921b8c63b1d763b2c63e078}
-    version: 0.8.5
+  '@logux/core@0.9.0':
+    resolution: {integrity: sha512-UJjfEHZkDLlbgBJF6Z/KRu7L0ZbgxBVf2vFGjQe6rwZpC39aef+qJGPVkov8bJijCgQTsEF1kcd94wHseQMkaA==}
     engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
 
   '@logux/eslint-config@53.3.0':
@@ -2115,11 +2113,11 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
-  '@logux/actions@0.3.1(@logux/core@https://codeload.github.com/logux/core/tar.gz/3c826785ac5ac42c6921b8c63b1d763b2c63e078)':
+  '@logux/actions@0.4.0(@logux/core@0.9.0)':
     dependencies:
-      '@logux/core': https://codeload.github.com/logux/core/tar.gz/3c826785ac5ac42c6921b8c63b1d763b2c63e078
+      '@logux/core': 0.9.0
 
-  '@logux/core@https://codeload.github.com/logux/core/tar.gz/3c826785ac5ac42c6921b8c63b1d763b2c63e078':
+  '@logux/core@0.9.0':
     dependencies:
       nanoevents: 9.0.0
 
