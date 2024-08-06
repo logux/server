@@ -126,7 +126,7 @@ export function bindBackendProxy(app) {
         })
       )
     }
-    let accessResolve, accessReject
+    let accessReject, accessResolve
     accessing.set(
       meta.id,
       new Promise((resolve, reject) => {
@@ -134,7 +134,7 @@ export function bindBackendProxy(app) {
         accessReject = reject
       })
     )
-    let processResolve, processReject
+    let processReject, processResolve
     processing.set(
       meta.id,
       new Promise((resolve, reject) => {

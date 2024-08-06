@@ -54,25 +54,18 @@
     "yyyy-mm-dd": "^1.0.2"
   },
   "devDependencies": {
-    "@logux/eslint-config": "^52.0.2",
+    "@logux/eslint-config": "^53.3.0",
     "@types/cross-spawn": "^6.0.6",
     "@types/node": "^22.1.0",
     "@types/node-fetch": "^2.6.11",
     "@types/ws": "^8.5.12",
-    "@typescript-eslint/eslint-plugin": "^6.21.0",
-    "@typescript-eslint/parser": "^6.21.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.1",
+    "@typescript-eslint/parser": "^8.0.1",
     "@vitest/coverage-v8": "^2.0.5",
     "check-dts": "^0.8.0",
     "clean-publish": "^5.0.0",
     "cross-spawn": "^7.0.3",
-    "eslint": "^8.57.0",
-    "eslint-config-standard": "^17.1.0",
-    "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-n": "^16.6.2",
-    "eslint-plugin-node-import": "^1.0.4",
-    "eslint-plugin-perfectionist": "^2.11.0",
-    "eslint-plugin-prefer-let": "^3.0.1",
-    "eslint-plugin-promise": "^6.6.0",
+    "eslint": "^9.8.0",
     "nanospy": "^1.0.0",
     "print-snapshots": "^0.4.2",
     "typescript": "^5.5.4",
@@ -86,63 +79,5 @@
     "semi": false,
     "singleQuote": true,
     "trailingComma": "none"
-  },
-  "eslintConfig": {
-    "extends": "@logux/eslint-config/ts",
-    "rules": {
-      "@typescript-eslint/no-explicit-any": "off"
-    },
-    "overrides": [
-      {
-        "files": [
-          "human-formatter/index.js"
-        ],
-        "rules": {
-          "no-invalid-this": "off"
-        }
-      },
-      {
-        "files": [
-          "server/index.js"
-        ],
-        "rules": {
-          "n/global-require": "off"
-        }
-      },
-      {
-        "files": [
-          "create-reporter/index.test.ts",
-          "server/types.ts"
-        ],
-        "rules": {
-          "import/order": "off"
-        }
-      },
-      {
-        "files": [
-          "test/**/*",
-          "*/*.test.ts"
-        ],
-        "rules": {
-          "no-console": "off"
-        }
-      },
-      {
-        "files": [
-          "*/*.test.*"
-        ],
-        "globals": {
-          "describe": "readonly",
-          "expect": "readonly",
-          "it": "readonly"
-        }
-      }
-    ],
-    "globals": {
-      "NodeJS": false
-    }
-  },
-  "eslintIgnore": [
-    "**/errors.ts"
-  ]
+  }
 }
