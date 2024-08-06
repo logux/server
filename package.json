@@ -23,7 +23,7 @@
   "homepage": "https://logux.org/",
   "repository": "logux/server",
   "engines": {
-    "node": "^18.0.0 || >=20.0.0"
+    "node": "^18.0.0 || ^18.0.0 || >=22.0.0"
   },
   "type": "module",
   "types": "./index.d.ts",
