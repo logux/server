@@ -149,6 +149,7 @@ export class ServerClient {
       })
     } catch (e) {
       if (e.name === 'LoguxError') {
+        /* c8 ignore next 1 */
         throw e
       } else {
         e.nodeId = nodeId

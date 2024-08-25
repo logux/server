@@ -13,17 +13,8 @@ let cliOptionsSpec = {
     'LOGUX_PORT=1337 LOGUX_HOST=127.0.0.1 $0'
   ],
   options: {
-    backend: {
-      description: 'Backend to process actions'
-    },
     cert: {
       description: 'Path to SSL certificate'
-    },
-    controlMask: {
-      description: 'CIDR masks of control servers'
-    },
-    controlSecret: {
-      description: 'Secret to control Logux server'
     },
     host: {
       alias: 'h',

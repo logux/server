@@ -114,11 +114,7 @@ it('uses CLI args for options', () => {
       '--logger',
       'json',
       '--redis',
-      '//localhost',
-      '--backend',
-      'http://localhost:8080/logux',
-      '--control-secret',
-      'secret'
+      '//localhost'
     ]),
     {
       subprotocol: '1.0.0',
@@ -132,15 +128,11 @@ it('uses CLI args for options', () => {
   expect(options.cert).toBeUndefined()
   expect(options.key).toBeUndefined()
   expect(options.redis).toEqual('//localhost')
-  expect(options.backend).toEqual('http://localhost:8080/logux')
-  expect(options.controlSecret).toEqual('secret')
 })
 
 it('uses env for options', () => {
   let options = Server.loadOptions(
     fakeProcess([], {
-      LOGUX_BACKEND: 'http://localhost:8080/logux',
-      LOGUX_CONTROL_SECRET: 'secret',
       LOGUX_HOST: '127.0.1.1',
       LOGUX_LOGGER: 'json',
       LOGUX_PORT: '31337',
@@ -156,8 +148,6 @@ it('uses env for options', () => {
   expect(options.port).toEqual(31337)
   expect(options.logger).toEqual('json')
   expect(options.redis).toEqual('//localhost')
-  expect(options.backend).toEqual('http://localhost:8080/logux')
-  expect(options.controlSecret).toEqual('secret')
 })
 
 it('uses combined options', () => {
@@ -257,8 +247,6 @@ it('shows help about privileged port', () => checkError('eacces.js'))
 it('shows help about unknown option', () => checkError('unknown.js'))
 
 it('shows help about missed option', () => checkError('missed.js'))
-
-it('shows help about missed secret', () => checkError('no-secret.js'))
 
 it('disables colors for constructor errors', () => {
   return checkError('missed.js', [], {

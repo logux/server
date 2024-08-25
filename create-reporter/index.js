@@ -27,13 +27,14 @@ const ERROR_CODES = {
     }
   },
   EADDRINUSE: e => {
+    let port = String(e.port)
     let wayToFix = {
       darwin: `$ sudo lsof -i ${e.port}\n` + '$ sudo kill -9 `<processid>`',
       linux:
         '$ su - root\n' +
         `# netstat -nlp | grep ${e.port}\n` +
         'Proto   Local Address   State    PID/Program name\n' +
-        `tcp     0.0.0.0:${e.port}    LISTEN   \`777\`/node\n` +
+        `tcp     0.0.0.0:${port.padEnd(8)}LISTEN   \`777\`/node\n` +
         '# sudo kill -9 `777`',
       win32:
         'Run `cmd.exe` as an administrator\n' +
@@ -49,13 +50,7 @@ const ERROR_CODES = {
         'or previous version of this server was not killed.\n\n' +
         (wayToFix[os.platform()] || '')
     }
-  },
-  LOGUX_NO_CONTROL_SECRET: e => ({
-    msg: e.message,
-    note:
-      'Call `npx nanoid` and set result as `controlSecret` ' +
-      'or `LOGUX_CONTROL_SECRET` environment variable'
-  })
+  }
 }
 
 const REPORTERS = {
@@ -155,15 +150,6 @@ const REPORTERS = {
       details.healthCheck = `${httpProtocol}${r.host}:${r.port}/health`
     }
 
-    if (r.controlSecret) {
-      details.controlListen = `http://${r.host}:${r.port}/`
-      details.controlMask = r.controlMask
-    }
-
-    if (r.backend) {
-      details.backendSend = r.backend
-    }
-
     if (r.redis) {
       details.redis = r.redis
     }
@@ -189,16 +175,6 @@ const REPORTERS = {
   wrongChannel: () => ({
     level: 'warn',
     msg: 'Wrong channel name'
-  }),
-
-  wrongControlIp: () => ({
-    level: 'warn',
-    msg: 'IP address of control request do not pass the mask'
-  }),
-
-  wrongControlSecret: () => ({
-    level: 'warn',
-    msg: 'Wrong secret in control request'
   }),
 
   zombie: () => ({ level: 'warn', msg: 'Zombie client was disconnected' })

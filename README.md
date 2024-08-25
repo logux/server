@@ -27,25 +27,6 @@ This repository contains Logux server with:
 [cult]: http://cultofmartians.com/done.html
 
 
-### Logux Server as Proxy
-
-```js
-import { fileURLToPath } from 'url'
-
-const server = new Server(
-  Server.loadOptions(process, {
-    controlSecret: 'secret',
-    subprotocol: '1.0.0',
-    supports: '0.6.2',
-    backend: 'http://localhost:3000/logux',
-    fileUrl: import.meta.url
-  })
-)
-
-server.listen()
-```
-
-
 ### Logux Server as Framework
 
 ```js

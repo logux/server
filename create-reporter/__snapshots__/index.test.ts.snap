@@ -28,7 +28,7 @@ exports[`reports EACCES error 2`] = `
 `;
 
 exports[`reports EADDRINUSE error 1`] = `
-"{"level":60,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","err":{},"note":"Another Logux server or other app already running on this port. Probably you haven’t stopped server from other project or previous version of this server was not killed.\\n\\n$ su - root\\n# netstat -nlp | grep 31337\\nProto   Local Address   State    PID/Program name\\ntcp     0.0.0.0:31337    LISTEN   \`777\`/node\\n# sudo kill -9 \`777\`","msg":"Port \`31337\` already in use"}
+"{"level":60,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","err":{},"note":"Another Logux server or other app already running on this port. Probably you haven’t stopped server from other project or previous version of this server was not killed.\\n\\n$ su - root\\n# netstat -nlp | grep 31337\\nProto   Local Address   State    PID/Program name\\ntcp     0.0.0.0:31337   LISTEN   \`777\`/node\\n# sudo kill -9 \`777\`","msg":"Port \`31337\` already in use"}
 "
 `;
 
@@ -41,21 +41,8 @@ exports[`reports EADDRINUSE error 2`] = `
         [90m$ su - root[39m
         [90m# netstat -nlp | grep 31337[39m
         [90mProto   Local Address   State    PID/Program name[39m
-        [90mtcp     0.0.0.0:31337    LISTEN   [1m777[22m/node[39m
+        [90mtcp     0.0.0.0:31337   LISTEN   [1m777[22m/node[39m
         [90m# sudo kill -9 [1m777[22m[39m
-
-"
-`;
-
-exports[`reports LOGUX_NO_CONTROL_SECRET error 1`] = `
-"{"level":60,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","err":{"type":"Object","message":"\`backend\` requires also \`controlSecret\` option","stack":""},"note":"Call \`npx nanoid\` and set result as \`controlSecret\` or \`LOGUX_CONTROL_SECRET\` environment variable","msg":"\`backend\` requires also \`controlSecret\` option"}
-"
-`;
-
-exports[`reports LOGUX_NO_CONTROL_SECRET error 2`] = `
-"[41m[37m FATAL [39m[49m [1m[31m[33mbackend[31m requires also [33mcontrolSecret[31m option[39m[22m [2mat 1970-01-01 00:00:00[22m
-        [90mCall [1mnpx nanoid[22m and set result as [1mcontrolSecret[22m or[39m
-        [90m[1mLOGUX_CONTROL_SECRET[22m environment variable[39m
 
 "
 `;
@@ -337,23 +324,20 @@ exports[`reports error with token 2`] = `
 `;
 
 exports[`reports listen 1`] = `
-"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","environment":"development","loguxServer":"0.0.0","nodeId":"server:FnXaqDxY","subprotocol":"0.0.0","supports":"0.x","note":["Server was started in non-secure development mode","Press Ctrl-C to shutdown server"],"listen":"ws://127.0.0.1:31337/","healthCheck":"http://127.0.0.1:31337/health","controlListen":"http://127.0.0.1:31337/","controlMask":"127.0.0.0/255","backendSend":"http://127.0.0.1:3000/logux","msg":"Logux server is listening"}
+"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","environment":"development","loguxServer":"0.0.0","nodeId":"server:FnXaqDxY","subprotocol":"0.0.0","supports":"0.x","note":["Server was started in non-secure development mode","Press Ctrl-C to shutdown server"],"listen":"ws://127.0.0.1:31337/","healthCheck":"http://127.0.0.1:31337/health","msg":"Logux server is listening"}
 "
 `;
 
 exports[`reports listen 2`] = `
 "[42m[30m INFO [39m[49m  [1m[32mLogux server is listening[39m[22m [2mat 1970-01-01 00:00:00[22m
-        PID:            [1m21384[22m
-        Environment:    [1mdevelopment[22m
-        Logux server:   [1m0.0.0[22m
-        Node ID:        [1mserver[22m:[31mFnX[39m[35maqD[39m[34mxY[39m
-        Subprotocol:    [1m0.0.0[22m
-        Supports:       [1m0.x[22m
-        Health check:   [1mhttp://127.0.0.1:31337/health[22m
-        Control listen: [1mhttp://127.0.0.1:31337/[22m
-        Control mask:   [1m127.0.0.0/255[22m
-        Backend send:   [1mhttp://127.0.0.1:3000/logux[22m
-        Listen:         [1mws://127.0.0.1:31337/[22m
+        PID:          [1m21384[22m
+        Environment:  [1mdevelopment[22m
+        Logux server: [1m0.0.0[22m
+        Node ID:      [1mserver[22m:[31mFnX[39m[35maqD[39m[34mxY[39m
+        Subprotocol:  [1m0.0.0[22m
+        Supports:     [1m0.x[22m
+        Health check: [1mhttp://127.0.0.1:31337/health[22m
+        Listen:       [1mws://127.0.0.1:31337/[22m
         [90mServer was started in non-secure development mode[39m
         [90mPress Ctrl-C to shutdown server[39m
 
@@ -382,22 +366,21 @@ exports[`reports listen for custom domain 2`] = `
 `;
 
 exports[`reports listen for production 1`] = `
-"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","environment":"production","loguxServer":"0.0.0","nodeId":"server:FnXaqDxY","subprotocol":"0.0.0","supports":"0.x","listen":"wss://127.0.0.1:31337/","healthCheck":"https://127.0.0.1:31337/health","controlListen":"http://127.0.0.1:31337/","redis":"//localhost","msg":"Logux server is listening"}
+"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","environment":"production","loguxServer":"0.0.0","nodeId":"server:FnXaqDxY","subprotocol":"0.0.0","supports":"0.x","listen":"wss://127.0.0.1:31337/","healthCheck":"https://127.0.0.1:31337/health","redis":"//localhost","msg":"Logux server is listening"}
 "
 `;
 
 exports[`reports listen for production 2`] = `
 "[42m[30m INFO [39m[49m  [1m[32mLogux server is listening[39m[22m [2mat 1970-01-01 00:00:00[22m
-        PID:            [1m21384[22m
-        Environment:    [1mproduction[22m
-        Logux server:   [1m0.0.0[22m
-        Node ID:        [1mserver[22m:[31mFnX[39m[35maqD[39m[34mxY[39m
-        Subprotocol:    [1m0.0.0[22m
-        Supports:       [1m0.x[22m
-        Health check:   [1mhttps://127.0.0.1:31337/health[22m
-        Control listen: [1mhttp://127.0.0.1:31337/[22m
-        Redis:          [1m//localhost[22m
-        Listen:         [1mwss://127.0.0.1:31337/[22m
+        PID:          [1m21384[22m
+        Environment:  [1mproduction[22m
+        Logux server: [1m0.0.0[22m
+        Node ID:      [1mserver[22m:[31mFnX[39m[35maqD[39m[34mxY[39m
+        Subprotocol:  [1m0.0.0[22m
+        Supports:     [1m0.x[22m
+        Health check: [1mhttps://127.0.0.1:31337/health[22m
+        Redis:        [1m//localhost[22m
+        Listen:       [1mwss://127.0.0.1:31337/[22m
 
 "
 `;
@@ -522,32 +505,6 @@ exports[`reports wrongChannel without name 1`] = `
 exports[`reports wrongChannel without name 2`] = `
 "[43m[30m WARN [39m[49m  [1m[33mWrong channel name[39m[22m [2mat 1970-01-01 00:00:00[22m
         Action ID: [1m[36m1650[39m[31m2690[39m[34m5660[39m[34m0[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
-
-"
-`;
-
-exports[`reports wrongControlIp 1`] = `
-"{"level":40,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","ipAddress":"6.0.0.1","mask":"127.0.0.1/8","msg":"IP address of control request do not pass the mask"}
-"
-`;
-
-exports[`reports wrongControlIp 2`] = `
-"[43m[30m WARN [39m[49m  [1m[33mIP address of control request do not pass the mask[39m[22m [2mat 1970-01-01 00:00:00[22m
-        IP address: [1m6.0.0.1[22m
-        Mask:       [1m127.0.0.1/8[22m
-
-"
-`;
-
-exports[`reports wrongControlSecret 1`] = `
-"{"level":40,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","ipAddress":"6.0.0.1","wrongSecret":"ArgDCPc1IxfU97V1ukeN6","msg":"Wrong secret in control request"}
-"
-`;
-
-exports[`reports wrongControlSecret 2`] = `
-"[43m[30m WARN [39m[49m  [1m[33mWrong secret in control request[39m[22m [2mat 1970-01-01 00:00:00[22m
-        IP address:   [1m6.0.0.1[22m
-        Wrong secret: [1mArgDCPc1IxfU97V1ukeN6[22m
 
 "
 `;

@@ -1,8 +1,6 @@
-import { ClientNode, Log, MemoryStore, WsConnection } from '@logux/core'
 import http from 'node:http'
 import { setTimeout } from 'node:timers/promises'
 import { afterEach, expect, it } from 'vitest'
-import WebSocket from 'ws'
 
 import { BaseServer, type BaseServerOptions } from '../index.js'
 
@@ -133,20 +131,6 @@ it('has health check', async () => {
   expect(response.body).toContain('OK')
 })
 
-it('has health check with control server', async () => {
-  app = createServer({ backend: 'http://localhost/', controlSecret: 'secret' })
-  await app.listen()
-  let response = await request('GET', '/health')
-  expect(response.body).toContain('OK')
-})
-
-it('does not apply control mask to health check', async () => {
-  app = createServer({ controlMask: '8.8.8.8/32' })
-  await app.listen()
-  let response = await request('GET', '/health')
-  expect(response.body).toContain('OK')
-})
-
 it('responses 404', async () => {
   app = createServer()
   await app.listen()
@@ -155,30 +139,19 @@ it('responses 404', async () => {
   expect(err.message).toEqual('Wrong path')
 })
 
-it('checks secret', async () => {
-  let test = createReporter({ controlSecret: 'secret' })
-  test.app.controls['GET /test'] = {
-    request() {
-      return { body: 'done' }
-    }
+it('responses 405', async () => {
+  app = createServer()
+  app.controls['POST /test'] = {
+    request: () => ({ body: 'done' })
   }
-  await test.app.listen()
-
-  let response = await request('GET', '/test%3Fsecret')
-  expect(response.body).toContain('done')
-
-  let err = await requestError('GET', '/test?wrong')
-  expect(err.statusCode).toEqual(403)
-  expect(err.message).toEqual('Wrong secret')
-
-  expect(test.reports[1]).toEqual([
-    'wrongControlSecret',
-    { ipAddress: '127.0.0.1', wrongSecret: 'wrong' }
-  ])
+  await app.listen()
+  let err = await requestError('GET', '/test')
+  expect(err.statusCode).toEqual(405)
+  expect(err.message).toEqual('Wrong method')
 })
 
 it('supports wrong URL encoding', async () => {
-  app = createServer({ controlSecret: 'secret' })
+  app = createServer()
   app.controls['GET /test'] = {
     request: () => ({ body: 'done' })
   }
@@ -188,19 +161,8 @@ it('supports wrong URL encoding', async () => {
   expect(response.body).toContain('done')
 })
 
-it('shows error on missed secret', async () => {
-  app = createServer({ controlSecret: undefined })
-  app.controls['GET /test'] = {
-    request: () => ({ body: 'done' })
-  }
-  await app.listen()
-  let err = await requestError('GET', '/test?secret')
-  expect(err.statusCode).toEqual(500)
-  expect(err.message).toContain('LOGUX_CONTROL_SECRET')
-})
-
 it('passes headers', async () => {
-  app = createServer({ controlSecret: 'secret' })
+  app = createServer()
   app.controls['GET /test'] = {
     request: () => ({
       body: 'done',
@@ -216,7 +178,7 @@ it('passes headers', async () => {
 })
 
 it('supports promise', async () => {
-  app = createServer({ controlSecret: 'secret' })
+  app = createServer()
   app.controls['GET /test'] = {
     async request() {
       return { body: 'done' }
@@ -226,39 +188,6 @@ it('supports promise', async () => {
   let response = await request('GET', '/test%3Fsecret')
 
   expect(response.body).toContain('done')
-})
-
-it('does not break WebSocket', async () => {
-  app = createServer({
-    controlMask: '128.0.0.1/8, 127.1.0.0/16',
-    controlSecret: 'secret'
-  })
-  await app.listen()
-
-  let nodeId = '10:client:node'
-  let log = new Log({ nodeId, store: new MemoryStore() })
-  let con = new WsConnection(`ws://127.0.0.1:${app.options.port}`, WebSocket)
-  let node = new ClientNode(nodeId, log, con)
-
-  node.connection.connect()
-  await node.waitFor('synchronized')
-})
-
-it('checks incoming IP address', async () => {
-  let controlMask = '128.0.0.1/8, 127.1.0.0/16'
-  let test = createReporter({ controlMask })
-  test.app.controls['GET /test'] = {
-    request: () => ({ body: 'done' })
-  }
-  await test.app.listen()
-  let err = await requestError('GET', '/test')
-
-  expect(err.statusCode).toEqual(403)
-  expect(err.message).toContain('LOGUX_CONTROL_MASK')
-  expect(test.reports[1]).toEqual([
-    'wrongControlIp',
-    { ipAddress: '127.0.0.1', mask: controlMask }
-  ])
 })
 
 it('allows to set custom HTTP processor', async () => {
@@ -281,42 +210,4 @@ it('does not allow to set custom HTTP processor on disabled HTTP', async () => {
       res.end(`test ${req.url}`)
     })
   }).toThrow(/can not be called when `disableHttpServer` enabled/)
-})
-
-it('does not allow to have control secret on disabled HTTP', async () => {
-  app = createServer({ controlSecret: 'x', disableHttpServer: true })
-  let err: Error | undefined
-  try {
-    await app.listen()
-  } catch (e) {
-    if (e instanceof Error) err = e
-  }
-  expect(err?.message).toBe(
-    '`controlSecret` can not be set together with `disableHttpServer` option'
-  )
-})
-
-it('has bruteforce protection', async () => {
-  app = createServer({ controlSecret: 'secret' })
-  app.controls['GET /test'] = {
-    request: () => ({ body: 'done' })
-  }
-  await app.listen()
-
-  let err1 = await requestError('GET', '/test?wrong')
-  expect(err1.statusCode).toEqual(403)
-
-  let err2 = await requestError('GET', '/test?wrong')
-  expect(err2.statusCode).toEqual(403)
-
-  let err3 = await requestError('GET', '/test?wrong')
-  expect(err3.statusCode).toEqual(403)
-
-  let err4 = await requestError('GET', '/test?wrong')
-  expect(err4.statusCode).toEqual(429)
-
-  await setTimeout(3050)
-
-  let err5 = await requestError('GET', '/test?wrong')
-  expect(err5.statusCode).toEqual(403)
 })
