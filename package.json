@@ -39,7 +39,6 @@
     "dotenv": "^16.4.5",
     "fast-glob": "^3.3.2",
     "fastq": "^1.17.1",
-    "nanodelay": "^2.0.2",
     "nanoevents": "^9.0.0",
     "nanoid": "^5.0.7",
     "netmask": "^2.0.2",

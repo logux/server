@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { ClientNode, Log, MemoryStore, WsConnection } from '@logux/core'
-import { delay } from 'nanodelay'
+import { setTimeout } from 'node:timers/promises'
 import WebSocket from 'ws'
 
 import { ALLOWED_META } from '../../index.js'
@@ -19,7 +19,7 @@ function onSend(action, meta) {
 
 function randomDelay(ms) {
   let random = ms / 3
-  return delay(ms + Math.random() * random)
+  return setTimeout(ms + Math.random() * random)
 }
 
 async function tick() {
@@ -65,7 +65,7 @@ async function tick() {
 }
 
 for (let i = 0; i < 100; i++) {
-  delay(Math.random() * 10000).then(() => {
+  setTimeout(Math.random() * 10000).then(() => {
     tick()
   })
 }

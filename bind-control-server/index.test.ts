@@ -1,6 +1,6 @@
 import { ClientNode, Log, MemoryStore, WsConnection } from '@logux/core'
-import { delay } from 'nanodelay'
 import http from 'node:http'
+import { setTimeout } from 'node:timers/promises'
 import { afterEach, expect, it } from 'vitest'
 import WebSocket from 'ws'
 
@@ -121,7 +121,7 @@ it('disables HTTP on request', async () => {
     }
   )
   req.on('error', () => {})
-  await delay(100)
+  await setTimeout(100)
   expect(response).toBe(false)
   req.destroy()
 })
@@ -315,7 +315,7 @@ it('has bruteforce protection', async () => {
   let err4 = await requestError('GET', '/test?wrong')
   expect(err4.statusCode).toEqual(429)
 
-  await delay(3050)
+  await setTimeout(3050)
 
   let err5 = await requestError('GET', '/test?wrong')
   expect(err5.statusCode).toEqual(403)

@@ -1,6 +1,6 @@
-import { delay } from 'nanodelay'
+import { setTimeout } from 'node:timers/promises'
 
 export default async server => {
-  await delay(100)
+  await setTimeout(100)
   console.log(`Child path module: ${server.options.subprotocol}`)
 }

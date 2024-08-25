@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { delay } from 'nanodelay'
+import { setTimeout } from 'node:timers/promises'
 
 import { Server } from '../../index.js'
 
@@ -14,7 +14,7 @@ app.nodeId = 'server:FnXaqDxY'
 app.auth(async () => true)
 
 app.unbind.push(async () => {
-  await delay(10)
+  await setTimeout(10)
   app.logger.info('Custom destroy task finished')
 })
 

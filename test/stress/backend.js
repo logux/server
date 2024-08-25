@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import { delay } from 'nanodelay'
 import http from 'node:http'
+import { setTimeout } from 'node:timers/promises'
 import pico from 'picocolors'
 
 function send(action, meta) {
@@ -45,16 +45,16 @@ let server = http.createServer((req, res) => {
       let data = JSON.parse(body)
       let [type, action, meta] = data.commands[0]
       let nodes = [meta.id.split(' ')[1]]
-      await delay(500)
+      await setTimeout(500)
       res.write(`[["approved","${meta.id}"]`)
       if (type === 'action' && action.type === 'logux/subscribe') {
-        await delay(300)
+        await setTimeout(300)
         await send({ type: 'project/name', value: 'A' }, { nodes })
         await send({ type: 'project/status', value: 'ok' }, { nodes })
         await send({ type: 'project/payment', value: 'paid' }, { nodes })
         process.stdout.write(pico.green('S'))
       } else if (type === 'action' && action.type === 'project/name') {
-        await delay(500)
+        await setTimeout(500)
         process.stdout.write(pico.yellow('A'))
       }
       res.write(`,["processed","${meta.id}"]]`)

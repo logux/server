@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { delay } from 'nanodelay'
+import { setTimeout } from 'node:timers/promises'
 
 import { Server } from '../../index.js'
 
@@ -12,7 +12,7 @@ let app = new Server({
 })
 
 app.auth(async ({ token, user }) => {
-  await delay(400)
+  await setTimeout(400)
   return user === '1' && token === 'secret'
 })
 

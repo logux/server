@@ -1,6 +1,6 @@
 import { ClientNode, TestPair } from '@logux/core'
 import cookie from 'cookie'
-import { delay } from 'nanodelay'
+import { setTimeout } from 'node:timers/promises'
 
 import { filterMeta } from '../filter-meta/index.js'
 
@@ -141,7 +141,7 @@ export class TestClient {
       }
     })
     await test()
-    await delay(1)
+    await setTimeout(1)
     unbind()
     return actions
   }

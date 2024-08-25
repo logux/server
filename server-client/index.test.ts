@@ -8,8 +8,8 @@ import {
   TestPair,
   TestTime
 } from '@logux/core'
-import { delay } from 'nanodelay'
 import { restoreAll, type Spy, spyOn } from 'nanospy'
+import { setTimeout } from 'node:timers/promises'
 import { afterEach, expect, it } from 'vitest'
 
 import {
@@ -243,7 +243,7 @@ it('removes itself on destroy', async () => {
   client2.node.remoteSubprotocol = '0.0.1'
   privateMethods(client1).auth('10:client1', {})
   privateMethods(client2).auth('10:client2', {})
-  await delay(1)
+  await setTimeout(1)
   expect(pullNewReports()).toMatchObject([
     ['connect', { connectionId: '1' }],
     ['connect', { connectionId: '2' }],
@@ -263,7 +263,7 @@ it('removes itself on destroy', async () => {
     expect(test.app.nodeIds.get(clientNodeId)).toBeDefined()
   })
   client1.destroy()
-  await delay(1)
+  await setTimeout(1)
 
   expect(unsubscribedClientNodeIds).toEqual(['10:client1'])
   expect(Array.from(test.app.userIds.keys())).toEqual(['10'])
@@ -277,7 +277,7 @@ it('removes itself on destroy', async () => {
   ])
 
   client2.destroy()
-  await delay(1)
+  await setTimeout(1)
 
   expect(unsubscribedClientNodeIds).toEqual(['10:client1', '10:client2'])
   expect(pullNewReports()).toMatchObject([
@@ -390,7 +390,7 @@ it('blocks authentication bruteforce', async () => {
       expect(report[1].err.type).toEqual('bruteforce')
       expect(report[1].nodeId).toMatch(/(4|5):uuid/)
     })
-  await delay(3050)
+  await setTimeout(3050)
 
   await connectNext(6)
 
@@ -559,7 +559,7 @@ it('disconnects zombie', async () => {
   await client2.connection.connect()
   client2.node.remoteSubprotocol = '0.0.1'
   privateMethods(client2).auth('10:client:b', {})
-  await delay(0)
+  await setTimeout(0)
 
   expect(Array.from(test.app.connected.keys())).toEqual([client2.key])
   expect(test.names).toEqual([
@@ -758,7 +758,7 @@ it('checks user access for action', async () => {
     { type: 'FOO' },
     { id: [1, '10:uuid', 1], time: 1 }
   ])
-  await delay(50)
+  await setTimeout(50)
   expect(test.app.log.actions()).toEqual([
     { bar: true, type: 'FOO' },
     { id: '1 10:uuid 0', type: 'logux/processed' },
@@ -802,7 +802,7 @@ it('takes subprotocol from action meta', async () => {
     { type: 'FOO' },
     { id: `1 ${client.nodeId} 0`, subprotocol: '1.0.0' }
   )
-  await delay(1)
+  await setTimeout(1)
 
   expect(subprotocols).toEqual(['1.0.0'])
 })
@@ -974,7 +974,7 @@ it('sends new actions by node ID', async () => {
   await app.log.add({ type: 'A' }, { id: '1 server:x 0' })
   await app.log.add({ type: 'A' }, { id: '2 server:x 0', nodes: ['10:uuid'] })
   sendTo(client, ['synced', 2])
-  await delay(10)
+  await setTimeout(10)
 
   expect(sentNames(client)).toEqual(['connected', 'sync'])
   expect(sent(client)[1]).toEqual([
@@ -1018,7 +1018,7 @@ it('sends new actions by client ID', async () => {
     { clients: ['10:client'], id: '2 server:x 0' }
   )
   sendTo(client, ['synced', 2])
-  await delay(1)
+  await setTimeout(1)
 
   expect(sentNames(client)).toEqual(['connected', 'sync'])
   expect(sent(client)[1]).toEqual([
@@ -1072,7 +1072,7 @@ it('sends new actions by user', async () => {
   await app.log.add({ type: 'A' }, { id: '1 server:x 0' })
   await app.log.add({ type: 'A' }, { id: '2 server:x 0', users: ['10'] })
   sendTo(client, ['synced', 2])
-  await delay(10)
+  await setTimeout(10)
 
   expect(sentNames(client)).toEqual(['connected', 'sync'])
   expect(sent(client)[1]).toEqual([
@@ -1116,7 +1116,7 @@ it('sends new actions by channel', async () => {
   sendTo(client, ['synced', 2])
   sendTo(client, ['synced', 4])
   await client.node.waitFor('synchronized')
-  await delay(1)
+  await setTimeout(1)
 
   expect(sentNames(client)).toEqual(['connected', 'sync', 'sync'])
   expect(sent(client)[1]).toEqual([
@@ -1147,7 +1147,7 @@ it('excludes client from channel', async () => {
     { type: 'FOO' },
     { channels: ['foo'], excludeClients: ['10:1'], id: '2 server:x 0' }
   )
-  await delay(10)
+  await setTimeout(10)
 
   expect(sentNames(client1)).toEqual(['connected'])
   expect(sentNames(client2)).toEqual(['connected', 'sync'])
@@ -1171,7 +1171,7 @@ it('works with channel according client ID', async () => {
   }
   await app.log.add({ type: 'FOO' }, { channels: ['foo'], id: '2 server:x 0' })
   sendTo(client, ['synced', 1])
-  await delay(10)
+  await setTimeout(10)
 
   expect(sentNames(client)).toEqual(['connected', 'sync'])
   expect(sent(client)[1]).toEqual([
@@ -1439,7 +1439,7 @@ it('sends error to author', async () => {
     { type: 'A' },
     { id: [1, '10:1:uuid', 0], time: 1 }
   ])
-  await delay(1)
+  await setTimeout(1)
 
   expect(sent(client1)).toHaveLength(1)
   expect(sent(client2)).toHaveLength(3)
@@ -1482,7 +1482,7 @@ it('does not resend actions back', async () => {
     { type: 'B' },
     { id: [3, '10:1:uuid', 0], time: 3 }
   ])
-  await delay(10)
+  await setTimeout(10)
 
   expect(actions(client1)).toEqual([])
   expect(actions(client2)).toEqual([{ type: 'A' }, { type: 'B' }])
@@ -1510,7 +1510,7 @@ it('keeps context', async () => {
     { type: 'A' },
     { id: [1, '10:1:uuid', 0], time: 1 }
   ])
-  await delay(1)
+  await setTimeout(1)
 
   expect(sent(client)[2][2].type).toEqual('logux/processed')
 })
@@ -1531,15 +1531,15 @@ it('uses resend for own actions', async () => {
     { channel: 'foo', type: 'logux/subscribe' },
     { id: [1, '10:1:uuid', 0], time: 1 }
   ])
-  await delay(10)
+  await setTimeout(10)
 
   app.log.add({ type: 'FOO' })
-  await delay(10)
+  await setTimeout(10)
   expect(app.log.entries()[2][1].channels).toEqual(['foo'])
   expect(sent(client)[3][2]).toEqual({ type: 'FOO' })
 
   app.log.add({ type: 'FOO' }, { status: 'processed' })
-  await delay(10)
+  await setTimeout(10)
   expect(app.log.entries()[3][1].channels).not.toBeDefined()
 })
 
@@ -1562,7 +1562,7 @@ it('does not duplicate channel load actions', async () => {
     { channel: 'foo', type: 'logux/subscribe' },
     { id: [1, '10:1:uuid', 0], time: 1 }
   ])
-  await delay(10)
+  await setTimeout(10)
 
   function meta(time: number): object {
     return { id: time, subprotocol: '0.0.1', time }
@@ -1614,7 +1614,7 @@ it('allows to return actions', async () => {
     { channel: 'c', type: 'logux/subscribe' },
     { id: [3, '10:1:uuid', 0], time: 3 }
   ])
-  await delay(50)
+  await setTimeout(50)
 
   function meta(time: number): object {
     return { id: time, subprotocol: '0.0.1', time }
@@ -1669,7 +1669,7 @@ it('does not process send-back actions', async () => {
     { channel: 'a', type: 'logux/subscribe' },
     { id: [2, '10:1:uuid', 0], time: 2 }
   ])
-  await delay(10)
+  await setTimeout(10)
 
   expect(resended).toEqual(['server', 'client'])
   expect(processed).toEqual(['server', 'client'])
@@ -1709,7 +1709,7 @@ it('restores actions with old ID from history', async () => {
     { channel: 'a', type: 'logux/subscribe' },
     { id: [2, '10:1:uuid', 0], time: 2 }
   ])
-  await delay(10)
+  await setTimeout(10)
   expect(actions(client2)).toEqual([{ type: 'A' }])
 })
 
@@ -1755,28 +1755,28 @@ it('has shortcut to access and process in one callback', async () => {
     { type: 'FOO' },
     { id: [1, '10:1:uuid', 0], time: 1 }
   ])
-  await delay(100)
+  await setTimeout(100)
   await sendTo(client, [
     'sync',
     2,
     { type: 'BAR' },
     { id: [2, '10:1:uuid', 0], time: 1 }
   ])
-  await delay(100)
+  await setTimeout(100)
   await sendTo(client, [
     'sync',
     3,
     { channel: 'foo', type: 'logux/subscribe' },
     { id: [3, '10:1:uuid', 0], time: 1 }
   ])
-  await delay(100)
+  await setTimeout(100)
   await sendTo(client, [
     'sync',
     4,
     { channel: 'bar', type: 'logux/subscribe' },
     { id: [4, '10:1:uuid', 0], time: 1 }
   ])
-  await delay(100)
+  await setTimeout(100)
 
   expect(app.log.actions()).toEqual([
     { type: 'FOO' },
@@ -1818,14 +1818,14 @@ it('process action exactly once with accessAndProcess callback', async () => {
     { type: 'FOO' },
     { id: [1, '10:1:uuid', 0], time: 1 }
   ])
-  await delay(100)
+  await setTimeout(100)
   await sendTo(client, [
     'sync',
     2,
     { type: 'BAR' },
     { id: [2, '10:1:uuid', 0], time: 1 }
   ])
-  await delay(100)
+  await setTimeout(100)
 
   expect(app.log.actions()).toEqual([
     { type: 'FOO' },
@@ -1873,21 +1873,21 @@ it('denies access on 403 error', async () => {
     { type: 'E404' },
     { id: [1, '10:1:uuid', 0], time: 1 }
   ])
-  await delay(100)
+  await setTimeout(100)
   await sendTo(client, [
     'sync',
     2,
     { type: 'E403' },
     { id: [2, '10:1:uuid', 0], time: 1 }
   ])
-  await delay(100)
+  await setTimeout(100)
   await sendTo(client, [
     'sync',
     2,
     { type: 'ERROR' },
     { id: [3, '10:1:uuid', 0], time: 1 }
   ])
-  await delay(100)
+  await setTimeout(100)
   expect(app.log.actions()).toEqual([
     {
       action: { type: 'E404' },
@@ -1953,28 +1953,28 @@ it('undoes action with notFound on 404 error', async () => {
     { channel: 'e500', type: 'logux/subscribe' },
     { id: [1, '10:1:uuid', 0], time: 1 }
   ])
-  await delay(100)
+  await setTimeout(100)
   await sendTo(client, [
     'sync',
     2,
     { channel: 'e404', type: 'logux/subscribe' },
     { id: [2, '10:1:uuid', 0], time: 1 }
   ])
-  await delay(100)
+  await setTimeout(100)
   await sendTo(client, [
     'sync',
     2,
     { channel: 'e403', type: 'logux/subscribe' },
     { id: [3, '10:1:uuid', 0], time: 1 }
   ])
-  await delay(100)
+  await setTimeout(100)
   await sendTo(client, [
     'sync',
     2,
     { channel: 'error', type: 'logux/subscribe' },
     { id: [4, '10:1:uuid', 0], time: 1 }
   ])
-  await delay(100)
+  await setTimeout(100)
   expect(app.log.actions()).toEqual([
     { channel: 'e500', type: 'logux/subscribe' },
     { channel: 'e404', type: 'logux/subscribe' },
@@ -2030,7 +2030,7 @@ it('allows to throws LoguxNotFoundError', async () => {
     { channel: 'notFound', type: 'logux/subscribe' },
     { id: [2, '10:1:uuid', 0], time: 1 }
   ])
-  await delay(100)
+  await setTimeout(100)
   expect(app.log.actions()).toEqual([
     { channel: 'notFound', type: 'logux/subscribe' },
     {
@@ -2064,7 +2064,7 @@ it('undoes all other actions in a queue if error in one action occurs', async ()
     {
       access: () => true,
       async process() {
-        await delay(50)
+        await setTimeout(50)
         calls.push('BAD')
         throw new Error('BAD')
       }
@@ -2105,7 +2105,7 @@ it('undoes all other actions in a queue if error in one action occurs', async ()
     { type: 'GOOD 2' },
     { id: [4, '10:client:other', 0], time: 1 }
   ])
-  await delay(50)
+  await setTimeout(50)
 
   expect(errors).toEqual(['BAD'])
   expect(calls).toEqual(['GOOD 0', 'BAD'])
@@ -2200,7 +2200,7 @@ it('does not undo actions in one queue if error occurs in another queue', async 
     {
       access: () => true,
       async process() {
-        await delay(30)
+        await setTimeout(30)
         calls.push('GOOD 1')
       }
     },
@@ -2228,7 +2228,7 @@ it('does not undo actions in one queue if error occurs in another queue', async 
     { type: 'GOOD 2' },
     { id: [3, '10:client:other', 0], time: 1 }
   ])
-  await delay(50)
+  await setTimeout(50)
 
   expect(errors).toEqual(['BAD'])
   expect(calls).toEqual(['BAD', 'GOOD 1', 'GOOD 2'])
@@ -2239,16 +2239,16 @@ it('calls access, resend and process in a queue', async () => {
   let calls: string[] = []
   app.type('FOO', {
     async access() {
-      await delay(50)
+      await setTimeout(50)
       calls.push('FOO ACCESS')
       return true
     },
     async process() {
-      await delay(50)
+      await setTimeout(50)
       calls.push('FOO PROCESS')
     },
     async resend() {
-      await delay(50)
+      await setTimeout(50)
       calls.push('FOO RESEND')
       return ''
     }
@@ -2276,7 +2276,7 @@ it('calls access, resend and process in a queue', async () => {
     { type: 'BAR' },
     { id: [2, '10:client:other', 0], time: 1 }
   ])
-  await delay(200)
+  await setTimeout(200)
 
   expect(calls).toEqual([
     'FOO ACCESS',
@@ -2340,7 +2340,7 @@ it('all actions are processed before destroy', async () => {
         return true
       },
       async process() {
-        await delay(30)
+        await setTimeout(30)
         calls.push('queue 1 task 1')
       }
     },
@@ -2353,7 +2353,7 @@ it('all actions are processed before destroy', async () => {
         return true
       },
       async process() {
-        await delay(30)
+        await setTimeout(30)
         calls.push('queue 1 task 2')
       }
     },
@@ -2363,7 +2363,7 @@ it('all actions are processed before destroy', async () => {
     'queue 2 task 1',
     {
       async access() {
-        await delay(50)
+        await setTimeout(50)
         return true
       },
       async process() {
@@ -2406,7 +2406,7 @@ it('all actions are processed before destroy', async () => {
     { type: 'queue 2 task 2' },
     { id: [4, client.nodeId!, 0], time: 1 }
   ])
-  await delay(10)
+  await setTimeout(10)
   await app.destroy()
 
   expect(calls).toEqual([
@@ -2472,7 +2472,7 @@ it('removes empty queues', async () => {
   app.type('FOO', {
     access: () => true,
     process: async () => {
-      await delay(50)
+      await setTimeout(50)
     }
   })
   app.type('BAR', {
@@ -2489,8 +2489,8 @@ it('removes empty queues', async () => {
     { id: [2, '10:client:uuid', 0], time: 1 }
   ])
 
-  await delay(10)
+  await setTimeout(10)
   expect(privateMethods(app).queues.size).toEqual(1)
-  await delay(50)
+  await setTimeout(50)
   expect(privateMethods(app).queues.size).toEqual(0)
 })

@@ -1,5 +1,5 @@
-import { delay } from 'nanodelay'
 import http from 'node:http'
+import { setTimeout } from 'node:timers/promises'
 import { afterAll, afterEach, beforeAll, beforeEach, expect, it } from 'vitest'
 
 import { BaseServer, TestServer, type TestServerOptions } from '../index.js'
@@ -135,7 +135,7 @@ let httpServer = http.createServer((req, res) => {
       let id = `"authId":"${command.authId}"`
       if (command.userId === '10' && command.token === 'good') {
         res.write('[{"answer":"authent')
-        await delay(100)
+        await setTimeout(100)
         res.end(`icated",${id},"subprotocol":"1.0.0"}]`)
       } else if (command.userId === '30' && command.cookie.token === 'good') {
         res.end(`[{"answer":"authenticated",${id},"subprotocol":"1.0.0"}]`)
@@ -163,7 +163,7 @@ let httpServer = http.createServer((req, res) => {
         res.end(`[{"answer":"error",${id},"details":"stack"}]`)
       } else if (command.action.type === 'PERROR') {
         res.write(`[{"answer":"approved",${id}}`)
-        await delay(100)
+        await setTimeout(100)
         res.end(`,{"answer":"error",${id},"details":"stack"}]`)
       } else if (command.action.type === 'BROKEN1') {
         res.end(`[{"answer":"approved",${id}}`)
@@ -191,9 +191,9 @@ let httpServer = http.createServer((req, res) => {
         ]`)
       } else if (command.action.channel === 'a') {
         res.write('[{"answer":"appro')
-        await delay(1)
+        await setTimeout(1)
         res.write(`ved",${id}}`)
-        await delay(100)
+        await setTimeout(100)
         res.write(
           `,{"answer":"action",${id},` +
             '"action":{"type":"a/load1"},"meta":{"user":10}}'
@@ -205,9 +205,9 @@ let httpServer = http.createServer((req, res) => {
         res.end(`,{"answer":"processed",${id}}]`)
       } else {
         res.write('[{"answer":"appro')
-        await delay(1)
+        await setTimeout(1)
         res.write(`ved",${id}}`)
-        await delay(100)
+        await setTimeout(100)
         res.end(`,{"answer":"processed",${id}}]`)
       }
     }
@@ -299,7 +299,7 @@ it('reports about network errors', async () => {
   })
   let client = await app.connect('10')
   client.log.add({ type: 'A' })
-  await delay(100)
+  await setTimeout(100)
 
   expect(errors).toEqual(['connect ECONNREFUSED 127.0.0.1:7111'])
   expect(app.log.actions()).toEqual([
@@ -320,7 +320,7 @@ it('reports bad HTTP answers', async () => {
   })
   let client = await app.connect('10')
   client.log.add({ type: 'NO' })
-  await delay(100)
+  await setTimeout(100)
 
   expect(errors).toEqual(['Backend responded with 404 code'])
   expect(app.log.actions()).toEqual([
@@ -471,7 +471,7 @@ it('notifies about actions and subscriptions', async () => {
   let client = await app.connect('10', { headers: { lang: 'fr' } })
   client.log.add({ type: 'A' })
   client.log.add({ channel: 'a', type: 'logux/subscribe' })
-  await delay(280)
+  await setTimeout(400)
 
   expect(app.log.actions()).toEqual([
     { type: 'A' },
@@ -533,7 +533,7 @@ it('notifies about actions and subscriptions', async () => {
       }
     ]
   ])
-  await delay(150)
+  await setTimeout(150)
 
   expect(app.log.actions()).toEqual([
     { type: 'A' },
@@ -562,7 +562,7 @@ it('asks about action access', async () => {
   })
   let client = await app.connect('10')
   client.log.add({ type: 'BAD' })
-  await delay(50)
+  await setTimeout(50)
 
   expect(app.log.actions()).toEqual([
     {
@@ -582,7 +582,7 @@ it('reacts on unknown action', async () => {
   })
   let client = await app.connect('10')
   client.log.add({ type: 'UNKNOWN' })
-  await delay(100)
+  await setTimeout(100)
   expect(app.log.actions()).toEqual([
     {
       action: { type: 'UNKNOWN' },
@@ -603,7 +603,7 @@ it('reacts on unknown channel', async () => {
   })
   let client = await app.connect('10')
   client.log.add({ channel: 'unknown', type: 'logux/subscribe' })
-  await delay(100)
+  await setTimeout(100)
   expect(app.log.actions()).toEqual([
     { channel: 'unknown', type: 'logux/subscribe' },
     {
@@ -627,23 +627,23 @@ it('reacts on wrong backend answer', async () => {
   let client = await app.connect('10')
 
   client.log.add({ type: 'EMPTY' })
-  await delay(20)
+  await setTimeout(20)
   client.log.add({ type: 'BROKEN1' })
-  await delay(20)
+  await setTimeout(20)
   client.log.add({ type: 'BROKEN2' })
-  await delay(20)
+  await setTimeout(20)
   client.log.add({ type: 'BROKEN3' })
-  await delay(20)
+  await setTimeout(20)
   client.log.add({ type: 'BROKEN4' })
-  await delay(20)
+  await setTimeout(20)
   client.log.add({ type: 'BROKEN5' })
-  await delay(20)
+  await setTimeout(20)
   client.log.add({ type: 'BROKEN6' })
-  await delay(20)
+  await setTimeout(20)
   client.log.add({ type: 'BROKEN7' })
-  await delay(20)
+  await setTimeout(20)
   client.log.add({ channel: 'resend', type: 'logux/subscribe' })
-  await delay(20)
+  await setTimeout(20)
 
   expect(errors).toEqual([
     'Empty back-end answer',
@@ -727,9 +727,9 @@ it('reacts on backend error', async () => {
   })
   let client = await app.connect('10')
   client.log.add({ type: 'AERROR' })
-  await delay(150)
+  await setTimeout(150)
   client.log.add({ type: 'PERROR' })
-  await delay(150)
+  await setTimeout(150)
 
   expect(errors).toEqual([
     'Error on back-end server',
@@ -767,7 +767,7 @@ it('has bruteforce protection', async () => {
   code = await send({ commands: [], secret: 'wrong', version: 4 })
 
   expect(code).toEqual(429)
-  await delay(3050)
+  await setTimeout(3050)
 
   code = await send({ commands: [], secret: 'wrong', version: 4 })
 
@@ -781,7 +781,7 @@ it('sets meta to resend', async () => {
   })
   let client = await app.connect('10')
   client.log.add({ type: 'RESEND' })
-  await delay(50)
+  await setTimeout(50)
   expect(app.log.actions()).toEqual([
     { type: 'RESEND' },
     { id: '1 10:1:1 0', type: 'logux/processed' }
@@ -804,7 +804,7 @@ it('processes server actions', async () => {
     throw e
   })
   app.log.add({ type: 'RESEND' })
-  await delay(50)
+  await setTimeout(50)
   expect(app.log.actions()).toEqual([{ type: 'RESEND' }])
   expect(app.log.entries()[0][1].status).toEqual('processed')
 })

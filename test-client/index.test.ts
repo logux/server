@@ -1,7 +1,7 @@
 import type { LoguxSubscribeAction } from '@logux/actions'
 import { TestTime } from '@logux/core'
-import { delay } from 'nanodelay'
 import { restoreAll, type Spy, spyOn } from 'nanospy'
+import { setTimeout } from 'node:timers/promises'
 import { afterEach, expect, it } from 'vitest'
 
 import { type LoguxActionError, TestClient, TestServer } from '../index.js'
@@ -60,9 +60,9 @@ it('sends and collect actions', async () => {
   client1.log.keepActions()
   let received = await client1.collect(async () => {
     await client1.log.add({ type: 'FOO' })
-    await delay(10)
+    await setTimeout(10)
     await client2.log.add({ type: 'RESEND' })
-    await delay(10)
+    await setTimeout(10)
   })
   expect(received).toEqual([
     { type: 'BAR' },

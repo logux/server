@@ -6,12 +6,12 @@ import {
   type TestLog,
   TestTime
 } from '@logux/core'
-import { delay } from 'nanodelay'
 import { restoreAll, spy, type Spy, spyOn } from 'nanospy'
 import { readFileSync } from 'node:fs'
 import http from 'node:http'
 import https from 'node:https'
 import { join } from 'node:path'
+import { setTimeout } from 'node:timers/promises'
 import { fileURLToPath } from 'node:url'
 import { afterEach, expect, it } from 'vitest'
 import WebSocket from 'ws'
@@ -595,7 +595,7 @@ it('processes actions', async () => {
     async process(ctx, action, meta) {
       expect(meta.added).toEqual(1)
       expect(ctx.isServer).toBe(true)
-      await delay(25)
+      await setTimeout(25)
       processed.push(action)
     }
   })
@@ -608,7 +608,7 @@ it('processes actions', async () => {
   await test.app.log.add({ type: 'FOO' }, { reasons: ['test'] })
   expect(fired).toEqual([])
   expect(test.app.log.entries()[0][1].status).toEqual('waiting')
-  await delay(30)
+  await setTimeout(30)
   expect(test.app.log.entries()[0][1].status).toEqual('processed')
   expect(processed).toEqual([{ type: 'FOO' }])
   expect(fired).toEqual([{ type: 'FOO' }])
@@ -624,7 +624,7 @@ it('processes regex matching action', async () => {
     async process(ctx, action, meta) {
       expect(meta.added).toEqual(1)
       expect(ctx.isServer).toBe(true)
-      await delay(25)
+      await setTimeout(25)
       processed.push(action)
     }
   })
@@ -637,7 +637,7 @@ it('processes regex matching action', async () => {
   await test.app.log.add({ type: 'ADD_TODO' }, { reasons: ['test'] })
   expect(fired).toEqual([])
   expect(test.app.log.entries()[0][1].status).toEqual('waiting')
-  await delay(30)
+  await setTimeout(30)
   expect(test.app.log.entries()[0][1].status).toEqual('processed')
   expect(processed).toEqual([{ type: 'ADD_TODO' }])
   expect(fired).toEqual([{ type: 'ADD_TODO' }])
@@ -680,7 +680,7 @@ it('waits for last processing before destroy', async () => {
   app.destroy().then(() => {
     destroyed = true
   })
-  await delay(1)
+  await setTimeout(1)
 
   expect(destroyed).toBe(false)
   expect(privateMethods(app).processing).toEqual(1)
@@ -689,7 +689,7 @@ it('waits for last processing before destroy', async () => {
   expect(started).toEqual(1)
   if (typeof process === 'undefined') throw new Error('process is not set')
   process()
-  await delay(1)
+  await setTimeout(1)
 
   expect(destroyed).toBe(true)
 })
@@ -706,7 +706,7 @@ it('reports about error during action processing', async () => {
   })
 
   await test.app.log.add({ type: 'FOO' }, { reasons: ['test'] })
-  await delay(1)
+  await setTimeout(1)
 
   expect(test.names).toEqual(['add', 'error', 'add'])
   expect(test.reports[1]).toEqual([
@@ -920,7 +920,7 @@ it('checks channel access', async () => {
     { channel: 'user/10', type: 'logux/subscribe' },
     { id: '1 10:uuid 0' }
   )
-  await delay(1)
+  await setTimeout(1)
 
   expect(test.names).toEqual(['addClean', 'denied', 'addClean'])
   expect(test.reports[1][1]).toEqual({ actionId: '1 10:uuid 0' })
@@ -1009,7 +1009,7 @@ it('subscribes clients', async () => {
     { channel: 'user/10', type: 'logux/subscribe' },
     { id: '1 10:a:uuid 0' }
   )
-  await delay(1)
+  await setTimeout(1)
   expect(events).toEqual(1)
   expect(userSubsriptions).toEqual(1)
   expect(test.names).toEqual(['addClean', 'subscribed', 'addClean'])
@@ -1032,7 +1032,7 @@ it('subscribes clients', async () => {
     { channel: 'posts', type: 'logux/subscribe' },
     { id: '2 10:a:uuid 0' }
   )
-  await delay(1)
+  await setTimeout(1)
 
   expect(events).toEqual(2)
   expect(test.app.subscribers).toEqual({
@@ -1104,7 +1104,7 @@ it('subscribes clients with multiple filters', async () => {
     { channel: 'posts', filter: { category: 'b' }, type: 'logux/subscribe' },
     { id: '1 10:a:uuid 0' }
   )
-  await delay(1)
+  await setTimeout(1)
   expect(test.app.subscribers).toEqual({
     posts: {
       '10:a:uuid': {
@@ -1125,7 +1125,7 @@ it('subscribes clients with multiple filters', async () => {
     { channel: 'posts', filter: { category: 'b' }, type: 'logux/unsubscribe' },
     { id: '2 10:a:uuid 0' }
   )
-  await delay(1)
+  await setTimeout(1)
   expect(test.app.subscribers).toEqual({
     posts: {
       '10:a:uuid': {
@@ -1166,7 +1166,7 @@ it('cancels subscriptions on disconnect', async () => {
     { channel: 'test', type: 'logux/subscribe' },
     { id: '1 10:uuid 0' }
   )
-  await delay(10)
+  await setTimeout(10)
 
   expect(cancels).toEqual(1)
 })
@@ -1191,7 +1191,7 @@ it('reports about errors during channel initialization', async () => {
     { channel: 'user/10', type: 'logux/subscribe' },
     { id: '1 10:uuid 0' }
   )
-  await delay(1)
+  await setTimeout(1)
 
   expect(test.names).toEqual([
     'addClean',
@@ -1242,7 +1242,7 @@ it('loads initial actions during subscription', async () => {
     { channel: 'user/10', type: 'logux/subscribe' },
     { id: '1 10:uuid 0' }
   )
-  await delay(1)
+  await setTimeout(1)
   expect(userLoaded).toEqual(1)
   expect(test.app.subscribers).toEqual({
     'user/10': {
@@ -1256,7 +1256,7 @@ it('loads initial actions during subscription', async () => {
     throw new Error('callback is not set')
   }
   initializating()
-  await delay(1)
+  await setTimeout(1)
 
   expect(test.app.log.actions()).toEqual([
     { channel: 'user/10', type: 'logux/subscribe' },
@@ -1412,7 +1412,7 @@ it('has shortcuts for resend arrays', async () => {
       }
     ]
   ])
-  await delay(10)
+  await setTimeout(10)
   expect(test.app.log.entries()).toEqual([
     [
       { type: 'A' },
@@ -1510,7 +1510,7 @@ it('subscribes clients manually', async () => {
   })
 
   app.subscribe('test:1:1', 'users/10')
-  await delay(10)
+  await setTimeout(10)
   expect(app.subscribers).toEqual({
     'users/10': {
       'test:1:1': { filters: { '{}': true } }
@@ -1519,7 +1519,7 @@ it('subscribes clients manually', async () => {
   expect(actions).toEqual([{ channel: 'users/10', type: 'logux/subscribed' }])
 
   app.subscribe('test:1:1', 'users/10')
-  await delay(10)
+  await setTimeout(10)
   expect(actions).toEqual([{ channel: 'users/10', type: 'logux/subscribed' }])
 })
 
