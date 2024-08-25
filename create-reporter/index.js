@@ -27,13 +27,14 @@ const ERROR_CODES = {
     }
   },
   EADDRINUSE: e => {
+    let port = String(e.port)
     let wayToFix = {
       darwin: `$ sudo lsof -i ${e.port}\n` + '$ sudo kill -9 `<processid>`',
       linux:
         '$ su - root\n' +
         `# netstat -nlp | grep ${e.port}\n` +
         'Proto   Local Address   State    PID/Program name\n' +
-        `tcp     0.0.0.0:${e.port}   LISTEN   \`777\`/node\n` +
+        `tcp     0.0.0.0:${port.padEnd(8)}LISTEN   \`777\`/node\n` +
         '# sudo kill -9 `777`',
       win32:
         'Run `cmd.exe` as an administrator\n' +
