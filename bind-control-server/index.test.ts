@@ -139,6 +139,17 @@ it('responses 404', async () => {
   expect(err.message).toEqual('Wrong path')
 })
 
+it('responses 405', async () => {
+  app = createServer()
+  app.controls['POST /test'] = {
+    request: () => ({ body: 'done' })
+  }
+  await app.listen()
+  let err = await requestError('GET', '/test')
+  expect(err.statusCode).toEqual(405)
+  expect(err.message).toEqual('Wrong method')
+})
+
 it('supports wrong URL encoding', async () => {
   app = createServer()
   app.controls['GET /test'] = {
