@@ -64,7 +64,7 @@
     "check-dts": "^0.8.2",
     "clean-publish": "^5.0.0",
     "cross-spawn": "^7.0.3",
-    "eslint": "^9.9.0",
+    "eslint": "^9.9.1",
     "nanospy": "^1.0.0",
     "print-snapshots": "^0.4.2",
     "typescript": "^5.5.4",
