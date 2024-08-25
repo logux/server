@@ -471,7 +471,7 @@ it('notifies about actions and subscriptions', async () => {
   let client = await app.connect('10', { headers: { lang: 'fr' } })
   client.log.add({ type: 'A' })
   client.log.add({ channel: 'a', type: 'logux/subscribe' })
-  await setTimeout(600)
+  await setTimeout(800)
 
   expect(app.log.actions()).toEqual([
     { type: 'A' },
