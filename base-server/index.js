@@ -8,7 +8,6 @@ import { fileURLToPath } from 'node:url'
 import UrlPattern from 'url-pattern'
 import { WebSocketServer } from 'ws'
 
-import { bindControlServer } from '../bind-control-server/index.js'
 import { Context } from '../context/index.js'
 import { createHttpServer } from '../create-http-server/index.js'
 import { ServerClient } from '../server-client/index.js'
@@ -330,21 +329,17 @@ export class BaseServer {
     this.queues = new Map()
     this.actionToQueue = new Map()
 
-    this.controls = {
-      'GET /': {
-        async request() {
-          return {
-            body: await readHello(),
-            headers: { 'Content-Type': 'text/html' }
-          }
-        }
-      },
-      'GET /health': {
-        request: () => ({
-          body: 'Logux Server: OK\n',
-          headers: { 'Content-Type': 'text/plain' }
-        })
-      }
+    this.httpListeners = {}
+    if (!this.options.disableHttpServer) {
+      this.http('GET', '/', async (req, res) => {
+        let hello = await readHello()
+        res.writeHead(200, { 'Content-Type': 'text/plain' })
+        res.end(hello)
+      })
+      this.http('GET', '/health', (req, res) => {
+        res.writeHead(200, { 'Content-Type': 'text/plain' })
+        res.end('Logux Server: OK\n')
+      })
     }
 
     this.listenNotes = {}
@@ -543,13 +538,17 @@ export class BaseServer {
     return undefined
   }
 
-  http(listener) {
+  http(method, url, listener) {
     if (this.options.disableHttpServer) {
       throw new Error(
         '`server.http()` can not be called when `disableHttpServer` enabled'
       )
     }
-    this.httpListener = listener
+    if (!url) {
+      this.httpListeners[`*`] = method
+    } else {
+      this.httpListeners[`${method} ${url}`] = listener
+    }
   }
 
   internalUnknownType(action, meta) {
@@ -606,7 +605,31 @@ export class BaseServer {
         this.httpServer.listen(this.options.port, this.options.host, resolve)
       })
     }
-    bindControlServer(this, this.httpListener)
+    if (!this.options.disableHttpServer) {
+      this.httpServer.on('request', async (req, res) => {
+        let urlString = req.url
+        if (/^\/\w+%3F/.test(urlString)) {
+          urlString = decodeURIComponent(urlString)
+        }
+        let reqUrl = new URL(urlString, 'http://localhost')
+        let rule =
+          this.httpListeners[req.method + ' ' + reqUrl.pathname] ||
+          this.httpListeners['*']
+
+        if (!rule) {
+          let accepts = Object.keys(this.httpListeners)
+          if (accepts.some(i => i.endsWith(' ' + reqUrl.pathname))) {
+            res.writeHead(405, { 'Content-Type': 'text/plain' })
+            res.end('Wrong method')
+          } else {
+            res.writeHead(404, { 'Content-Type': 'text/plain' })
+            res.end('Wrong path')
+          }
+        } else {
+          rule(req, res)
+        }
+      })
+    }
 
     this.unbind.push(
       () =>

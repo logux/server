@@ -601,16 +601,6 @@ interface Response {
   }
 }
 
-interface GetProcessor {
-  request(request: object): Promise<Response> | Response
-  safe?: boolean
-}
-
-interface PostProcessor {
-  command(command: object, request: object): Promise<void>
-  isValid(command: object): boolean
-}
-
 /**
  * Return `false` if `cb()` got response error with 403.
  *
@@ -653,13 +643,6 @@ export class BaseServer<
    * ```
    */
   connected: Map<string, ServerClient>
-
-  /**
-   * Add callback to internal HTTP server.
-   */
-  controls: {
-    [path: string]: GetProcessor | PostProcessor
-  }
 
   /**
    * Production or development mode.
@@ -862,20 +845,23 @@ export class BaseServer<
    * Add non-WebSocket HTTP request processor.
    *
    * ```js
-   * server.http((req, res) => {
-   *   if (req.url === '/auth') {
-   *     let token = signIn(req)
-   *     if (token) {
-   *       res.setHeader('Set-Cookie', `token=${token}; Secure; HttpOnly`)
-   *       res.end()
-   *     } else {
-   *       res.statusCode = 400
-   *       res.end('Wrong user or password')
-   *     }
+   * server.http('GET', '/auth', (req, res) => {
+   *   let token = signIn(req)
+   *   if (token) {
+   *     res.setHeader('Set-Cookie', `token=${token}; Secure; HttpOnly`)
+   *     res.end()
+   *   } else {
+   *     res.statusCode = 400
+   *     res.end('Wrong user or password')
    *   }
    * })
    * ```
    */
+  http(
+    method: string,
+    url: string,
+    listener: (req: IncomingMessage, res: ServerResponse) => void
+  ): void
   http(listener: (req: IncomingMessage, res: ServerResponse) => void): void
 
   /**

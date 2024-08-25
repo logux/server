@@ -110,6 +110,67 @@ function callCount(fn: Function | undefined): number {
   return (fn as any as Spy).callCount
 }
 
+class RequestError extends Error {
+  statusCode: number | undefined
+
+  constructor(statusCode: number | undefined, body: string) {
+    super(body)
+    this.name = 'RequestError'
+    this.statusCode = statusCode
+  }
+}
+
+interface HttpResponse {
+  body: string
+  headers: http.IncomingHttpHeaders
+}
+
+function request(
+  server: BaseServer,
+  method: string,
+  path: string
+): Promise<HttpResponse> {
+  return new Promise<HttpResponse>((resolve, reject) => {
+    let req = http.request(
+      {
+        host: '127.0.0.1',
+        method,
+        path,
+        port: server.options.port
+      },
+      res => {
+        let body = ''
+        res.on('data', chunk => {
+          body += chunk
+        })
+        res.on('end', () => {
+          if (res.statusCode === 200) {
+            resolve({ body, headers: res.headers })
+          } else {
+            let error = new RequestError(res.statusCode, body)
+            reject(error)
+          }
+        })
+      }
+    )
+    req.on('error', reject)
+    req.end()
+  })
+}
+
+async function requestError(
+  server: BaseServer,
+  method: string,
+  path: string
+): Promise<RequestError> {
+  try {
+    await request(server, method, path)
+  } catch (e) {
+    if (e instanceof RequestError) return e
+  }
+  throw new Error('Error was not found')
+}
+
 afterEach(async () => {
   restoreAll()
   process.env.NODE_ENV = originEnv
@@ -1526,4 +1587,80 @@ it('processes action with accessAndProcess callback', async () => {
   })
   await test.app.process({ type: 'A' })
   expect(accessAndProcess.callCount).toEqual(1)
+})
+
+it('has hello page', async () => {
+  let app = createServer({})
+  await app.listen()
+  let response = await request(app, 'GET', '/')
+  expect(response.body).toContain('Logux Server')
+  expect(response.body).toContain('<svg ')
+})
+
+it('disables HTTP on request', async () => {
+  let app = createServer({ disableHttpServer: true })
+  await app.listen()
+  let response = false
+  let req = http.request(
+    {
+      host: '127.0.0.1',
+      method: 'GET',
+      path: '/health',
+      port: app.options.port
+    },
+    () => {
+      response = true
+    }
+  )
+  req.on('error', () => {})
+  await setTimeout(100)
+  expect(response).toBe(false)
+  req.destroy()
+})
+
+it('has health check', async () => {
+  let app = createServer()
+  await app.listen()
+  let response = await request(app, 'GET', '/health')
+  expect(response.body).toContain('OK')
+})
+
+it('responses 404', async () => {
+  let app = createServer()
+  await app.listen()
+  let err = await requestError(app, 'GET', '/unknown')
+  expect(err.statusCode).toEqual(404)
+  expect(err.message).toEqual('Wrong path')
+})
+
+it('responses 405', async () => {
+  let app = createServer()
+  app.http('POST', '/test', (req, res) => {
+    res.end('OK')
+  })
+  await app.listen()
+  let err = await requestError(app, 'GET', '/test')
+  expect(err.statusCode).toEqual(405)
+  expect(err.message).toEqual('Wrong method')
+})
+
+it('has custom HTTP processor', async () => {
+  let app = createServer()
+  app.http('POST', '/a', (req, res) => {
+    res.end('POST a')
+  })
+  app.http('GET', '/a', (req, res) => {
+    res.end('GET a')
+  })
+  app.http('GET', '/b', (req, res) => {
+    res.end('GET b')
+  })
+  app.http((res, req) => {
+    req.end('other')
+  })
+  await app.listen()
+  expect((await request(app, 'GET', '/a')).body).toContain('GET a')
+  expect((await request(app, 'GET', '/b')).body).toContain('GET b')
+  expect((await request(app, 'POST', '/a')).body).toContain('POST a')
+  expect((await request(app, 'GET', '/c')).body).toContain('other')
 })
