@@ -228,31 +228,6 @@ it('supports promise', async () => {
   expect(response.body).toContain('done')
 })
 
-it('has bruteforce protection', async () => {
-  app = createServer({ controlSecret: 'secret' })
-  app.controls['GET /test'] = {
-    request: () => ({ body: 'done' })
-  }
-  await app.listen()
-
-  let err1 = await requestError('GET', '/test?wrong')
-  expect(err1.statusCode).toEqual(403)
-
-  let err2 = await requestError('GET', '/test?wrong')
-  expect(err2.statusCode).toEqual(403)
-
-  let err3 = await requestError('GET', '/test?wrong')
-  expect(err3.statusCode).toEqual(403)
-
-  let err4 = await requestError('GET', '/test?wrong')
-  expect(err4.statusCode).toEqual(429)
-
-  await delay(3050)
-
-  let err5 = await requestError('GET', '/test?wrong')
-  expect(err5.statusCode).toEqual(403)
-})
-
 it('does not break WebSocket', async () => {
   app = createServer({
     controlMask: '128.0.0.1/8, 127.1.0.0/16',
@@ -319,4 +294,29 @@ it('does not allow to have control secret on disabled HTTP', async () => {
   expect(err?.message).toBe(
     '`controlSecret` can not be set together with `disableHttpServer` option'
   )
+})
+
+it('has bruteforce protection', async () => {
+  app = createServer({ controlSecret: 'secret' })
+  app.controls['GET /test'] = {
+    request: () => ({ body: 'done' })
+  }
+  await app.listen()
+
+  let err1 = await requestError('GET', '/test?wrong')
+  expect(err1.statusCode).toEqual(403)
+
+  let err2 = await requestError('GET', '/test?wrong')
+  expect(err2.statusCode).toEqual(403)
+
+  let err3 = await requestError('GET', '/test?wrong')
+  expect(err3.statusCode).toEqual(403)
+
+  let err4 = await requestError('GET', '/test?wrong')
+  expect(err4.statusCode).toEqual(429)
+
+  await delay(3050)
+
+  let err5 = await requestError('GET', '/test?wrong')
+  expect(err5.statusCode).toEqual(403)
 })
