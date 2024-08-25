@@ -1841,8 +1841,8 @@ it('denies access on 403 error', async () => {
   let app = createServer()
   app.log.keepActions()
 
-  let error404 = new ResponseError(404, '/a', {}, '404')
-  let error403 = new ResponseError(403, '/a', {}, '403')
+  let error404 = new ResponseError(404, '/a')
+  let error403 = new ResponseError(403, '/a')
   let error = new Error('test')
 
   let catched: Error[] = []
@@ -1915,9 +1915,9 @@ it('undoes action with notFound on 404 error', async () => {
   let app = createServer()
   app.log.keepActions()
 
-  let error500 = new ResponseError(500, '/a', {}, '500')
-  let error404 = new ResponseError(404, '/a', {}, '404')
-  let error403 = new ResponseError(403, '/a', {}, '403')
+  let error500 = new ResponseError(500, '/a')
+  let error404 = new ResponseError(404, '/a')
+  let error403 = new ResponseError(403, '/a')
   let error = new Error('test')
 
   let catched: Error[] = []
