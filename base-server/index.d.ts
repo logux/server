@@ -113,7 +113,7 @@ export interface BaseServerOptions {
   cleanFromLog?: RegExp
 
   /**
-   * Disable health check endpoint, control HTTP API, {@link Server#http}.
+   * Disable health check endpoint, {@link Server#http}.
    *
    * The server will process only WebSocket connection and ignore all other
    * HTTP request (so they can be processed by other HTTP server).

@@ -1660,7 +1660,15 @@ it('has custom HTTP processor', async () => {
   })
   await app.listen()
   expect((await request(app, 'GET', '/a')).body).toContain('GET a')
+  expect((await request(app, 'GET', '/a%3Fsecret')).body).toContain('GET a')
   expect((await request(app, 'GET', '/b')).body).toContain('GET b')
   expect((await request(app, 'POST', '/a')).body).toContain('POST a')
   expect((await request(app, 'GET', '/c')).body).toContain('other')
+})
+
+it('warns that HTTP is disables', async () => {
+  let app = createServer({ disableHttpServer: true })
+  expect(() => {
+    app.http(() => {})
+  }).toThrow(/when `disableHttpServer` enabled/)
 })
