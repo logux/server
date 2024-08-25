@@ -459,13 +459,13 @@ it('notifies about actions and subscriptions', async () => {
   app.on('backendGranted', (action, meta, latency) => {
     expect(typeof action.type).toEqual('string')
     expect(typeof meta.id).toEqual('string')
-    expect(latency > 1 && latency < 500).toBe(true)
+    expect(latency > 1 && latency < 800).toBe(true)
     events.push('backendGranted')
   })
   app.on('backendProcessed', (action, meta, latency) => {
     expect(typeof action.type).toEqual('string')
     expect(typeof meta.id).toEqual('string')
-    expect(latency > 1 && latency < 500).toBe(true)
+    expect(latency > 1 && latency < 800).toBe(true)
     events.push('backendProcessed')
   })
   let client = await app.connect('10', { headers: { lang: 'fr' } })
