@@ -8,7 +8,6 @@ import { fileURLToPath } from 'node:url'
 import UrlPattern from 'url-pattern'
 import { WebSocketServer } from 'ws'
 
-import { bindBackendProxy } from '../bind-backend-proxy/index.js'
 import { bindControlServer } from '../bind-control-server/index.js'
 import { Context } from '../context/index.js'
 import { createHttpServer } from '../create-http-server/index.js'
@@ -103,16 +102,10 @@ export class BaseServer {
     this.options = opts
     this.env = this.options.env || process.env.NODE_ENV || 'development'
 
-    if (
-      typeof this.options.subprotocol === 'undefined' &&
-      typeof this.options.backend === 'undefined'
-    ) {
+    if (typeof this.options.subprotocol === 'undefined') {
       throw optionError('Missed `subprotocol` option in server constructor')
     }
-    if (
-      typeof this.options.supports === 'undefined' &&
-      typeof this.options.backend === 'undefined'
-    ) {
+    if (typeof this.options.supports === 'undefined') {
       throw optionError('Missed `supports` option in server constructor')
     }
 
@@ -135,7 +128,6 @@ export class BaseServer {
     }
 
     this.options.root = this.options.root || process.cwd()
-    this.options.controlMask = this.options.controlMask || '127.0.0.1/8'
 
     let store = this.options.store || new MemoryStore()
 
@@ -167,7 +159,6 @@ export class BaseServer {
         }
         if (
           !isLogux &&
-          !this.options.backend &&
           !this.types[action.type] &&
           !this.getRegexProcessor(action.type)
         ) {
@@ -346,20 +337,17 @@ export class BaseServer {
             body: await readHello(),
             headers: { 'Content-Type': 'text/html' }
           }
-        },
-        safe: true
+        }
       },
       'GET /health': {
         request: () => ({
           body: 'Logux Server: OK\n',
           headers: { 'Content-Type': 'text/plain' }
-        }),
-        safe: true
+        })
       }
     }
 
     this.listenNotes = {}
-    bindBackendProxy(this)
 
     let end = (actionId, queue, queueKey, ...args) => {
       this.actionToQueue.delete(actionId)
@@ -648,10 +636,7 @@ export class BaseServer {
       this.addClient(new ServerConnection(ws))
     })
     this.emitter.emit('report', 'listen', {
-      backend: this.options.backend,
       cert: !!this.options.cert,
-      controlMask: this.options.controlMask,
-      controlSecret: this.options.controlSecret,
       environment: this.env,
       host: this.options.host,
       loguxServer: pkg.version,

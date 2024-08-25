@@ -166,10 +166,7 @@ it('uses environment variable to detect environment', () => {
 
 it('reports listen', async () => {
   await check('listen', {
-    backend: 'http://127.0.0.1:3000/logux',
     cert: false,
-    controlMask: '127.0.0.0/255',
-    controlSecret: 'RhBaK0kuOBtqJalq2C4df',
     environment: 'development',
     host: '127.0.0.1',
     loguxServer: '0.0.0',
@@ -186,7 +183,6 @@ it('reports listen', async () => {
 it('reports listen for production', async () => {
   await check('listen', {
     cert: true,
-    controlSecret: 'RhBaK0kuOBtqJalq2C4df',
     environment: 'production',
     host: '127.0.0.1',
     loguxServer: '0.0.0',
@@ -369,20 +365,6 @@ it('reports zombie', async () => {
   await check('zombie', { nodeId: '100:uImkcF4z' })
 })
 
-it('reports wrongControlIp', async () => {
-  await check('wrongControlIp', {
-    ipAddress: '6.0.0.1',
-    mask: '127.0.0.1/8'
-  })
-})
-
-it('reports wrongControlSecret', async () => {
-  await check('wrongControlSecret', {
-    ipAddress: '6.0.0.1',
-    wrongSecret: 'ArgDCPc1IxfU97V1ukeN6'
-  })
-})
-
 it('reports destroy', async () => {
   await check('destroy')
 })
@@ -396,14 +378,6 @@ it('reports EADDRINUSE error', async () => {
     err: { code: 'EADDRINUSE', port: 31337 },
     fatal: true
   })
-})
-
-it('reports LOGUX_NO_CONTROL_SECRET error', async () => {
-  let err = {
-    code: 'LOGUX_NO_CONTROL_SECRET',
-    message: '`backend` requires also `controlSecret` option'
-  }
-  await check('error', { err, fatal: true })
 })
 
 it('reports Logux error', async () => {

@@ -287,8 +287,6 @@ it('supports object in SSL key', async () => {
 
 it('reporters on start listening', async () => {
   let test = createReporter({
-    backend: 'http://127.0.0.1:3000/logux',
-    controlSecret: 'secret',
     redis: '//localhost'
   })
   let pkgFile = readFileSync(join(ROOT, 'package.json'))
@@ -305,10 +303,7 @@ it('reporters on start listening', async () => {
     [
       'listen',
       {
-        backend: 'http://127.0.0.1:3000/logux',
         cert: false,
-        controlMask: '127.0.0.1/8',
-        controlSecret: 'secret',
         environment: 'test',
         host: '127.0.0.1',
         loguxServer: pkg.version,

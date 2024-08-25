@@ -99,12 +99,6 @@ export interface ServerMeta extends Meta {
 
 export interface BaseServerOptions {
   /**
-   * URL to PHP, Ruby on Rails, or other backend to process actions and
-   * authentication.
-   */
-  backend?: string
-
-  /**
    * SSL certificate or path to it. Path could be relative from server
    * root. It is required in production mode, because WSS is highly
    * recommended.
@@ -117,16 +111,6 @@ export interface BaseServerOptions {
    * By default it cleans `Bearer [^\s"]+`.
    */
   cleanFromLog?: RegExp
-
-  /**
-   * CIDR masks for IP address, where control requests could came from.
-   */
-  controlMask?: string
-
-  /**
-   * Secret to control the server.
-   */
-  controlSecret?: string
 
   /**
    * Disable health check endpoint, control HTTP API, {@link Server#http}.
@@ -551,10 +535,7 @@ interface ReportersArguments {
     nodeId?: string
   }
   listen: {
-    backend: string
     cert: boolean
-    controlMask: string
-    controlSecret: string
     environment: 'development' | 'production'
     host: string
     loguxServer: string
@@ -924,7 +905,7 @@ export class BaseServer<
    * @param listener Processing listener.
    */
   on(
-    event: 'backendGranted' | 'backendProcessed' | 'processed',
+    event: 'processed',
     listener: (
       action: Action,
       meta: Readonly<ServerMeta>,
@@ -937,7 +918,7 @@ export class BaseServer<
    * @param listener Action listener.
    */
   on(
-    event: 'add' | 'backendSent' | 'clean',
+    event: 'add' | 'clean',
     listener: (action: Action, meta: Readonly<ServerMeta>) => void
   ): Unsubscribe
 

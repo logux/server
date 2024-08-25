@@ -48,17 +48,14 @@ exports[`shows help 1`] = `
 "Start Logux Server
 
 Options:
---backend         LOGUX_BACKEND         Backend to process actions
---cert            LOGUX_CERT            Path to SSL certificate
---control-mask    LOGUX_CONTROL_MASK    CIDR masks of control servers
---control-secret  LOGUX_CONTROL_SECRET  Secret to control Logux server
---host            LOGUX_HOST            Host to bind server
---key             LOGUX_KEY             Path to SSL key
---logger          LOGUX_LOGGER          Logger type
---port            LOGUX_PORT            Port to bind server
---redis           LOGUX_REDIS           Redis URL for Logux Server Pro scaling
---subprotocol     LOGUX_SUBPROTOCOL     Server subprotocol
---supports        LOGUX_SUPPORTS        Range of supported client subprotocols
+--cert         LOGUX_CERT         Path to SSL certificate
+--host         LOGUX_HOST         Host to bind server
+--key          LOGUX_KEY          Path to SSL key
+--logger       LOGUX_LOGGER       Logger type
+--port         LOGUX_PORT         Port to bind server
+--redis        LOGUX_REDIS        Redis URL for Logux Server Pro scaling
+--subprotocol  LOGUX_SUBPROTOCOL  Server subprotocol
+--supports     LOGUX_SUPPORTS     Range of supported client subprotocols
 
 Examples:
 options.js --port 31337 --host 127.0.0.1
@@ -73,24 +70,16 @@ exports[`shows help about missed option 1`] = `
 "
 `;
 
-exports[`shows help about missed secret 1`] = `
-" FATAL  backend requires controlSecret option at 1970-01-01 00:00:00
-        Call npx nanoid and set result as controlSecret or LOGUX_CONTROL_SECRET
-        environment variable
-
-"
-`;
-
 exports[`shows help about port in use 1`] = `
 " FATAL  Port 2001 already in use at 1970-01-01 00:00:00
         Another Logux server or other app already running on this port.
         Probably you haven’t stopped server from other project or previous
         version of this server was not killed.
-        
+
         $ su - root
         # netstat -nlp | grep 2001
         Proto   Local Address   State    PID/Program name
-        tcp     0.0.0.0:2001    LISTEN   777/node
+        tcp     0.0.0.0:2001   LISTEN   777/node
         # sudo kill -9 777
 
  INFO   Shutting down Logux server at 1970-01-01 00:00:00
@@ -102,7 +91,7 @@ exports[`shows help about privileged port 1`] = `
 " FATAL  You are not allowed to run server on port 1000 at 1970-01-01 00:00:00
         Non-privileged users can't start a listening socket on ports below 1024.
         Try to change user or take another port.
-        
+
         $ su - <username>
         $ npm start -p 1000
 

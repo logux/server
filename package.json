@@ -1,7 +1,7 @@
 {
   "name": "@logux/server",
   "version": "0.13.0",
-  "description": "Build own Logux server or make proxy between WebSocket and HTTP backend on any language",
+  "description": "Build own Logux server",
   "keywords": [
     "logux",
     "server",
@@ -34,14 +34,12 @@
   "dependencies": {
     "@logux/actions": "^0.4.0",
     "@logux/core": "^0.9.0",
-    "JSONStream": "^1.3.5",
     "cookie": "^0.6.0",
     "dotenv": "^16.4.5",
     "fast-glob": "^3.3.2",
     "fastq": "^1.17.1",
     "nanoevents": "^9.0.0",
     "nanoid": "^5.0.7",
-    "netmask": "^2.0.2",
     "picocolors": "^1.0.1",
     "pino": "9.3.2",
     "pino-abstract-transport": "^1.2.0",
