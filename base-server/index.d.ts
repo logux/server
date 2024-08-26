@@ -594,13 +594,6 @@ export interface Logger {
   warn(details: object, message: string): void
 }
 
-interface Response {
-  body: string
-  header?: {
-    [name: string]: string
-  }
-}
-
 /**
  * Return `false` if `cb()` got response error with 403.
  *
