@@ -1630,22 +1630,13 @@ it('responses 404', async () => {
   await app.listen()
   let err = await requestError(app, 'GET', '/unknown')
   expect(err.statusCode).toEqual(404)
-  expect(err.message).toEqual('Wrong path')
-})
-
-it('responses 405', async () => {
-  let app = createServer()
-  app.http('POST', '/test', (req, res) => {
-    res.end('OK')
-  })
-  await app.listen()
-  let err = await requestError(app, 'GET', '/test')
-  expect(err.statusCode).toEqual(405)
-  expect(err.message).toEqual('Wrong method')
+  expect(err.message).toEqual('Not found')
 })
 
 it('has custom HTTP processor', async () => {
   let app = createServer()
+  let unknownGet = 0
+  let unknownRest = 0
   app.http('POST', '/a', (req, res) => {
     res.end('POST a')
   })
@@ -1655,20 +1646,77 @@ it('has custom HTTP processor', async () => {
   app.http('GET', '/b', (req, res) => {
     res.end('GET b')
   })
-  app.http((res, req) => {
-    req.end('other')
+  app.http((req, res) => {
+    if (req.method === 'GET') {
+      res.end('GET unknown')
+      unknownGet += 1
+      return true
+    } else {
+      return false
+    }
+  })
+  app.http((req, res) => {
+    if (req.url !== '/404') {
+      res.end('unknown')
+      unknownRest += 1
+      return true
+    } else {
+      return false
+    }
   })
   await app.listen()
   expect((await request(app, 'GET', '/a')).body).toContain('GET a')
   expect((await request(app, 'GET', '/a%3Fsecret')).body).toContain('GET a')
   expect((await request(app, 'GET', '/b')).body).toContain('GET b')
   expect((await request(app, 'POST', '/a')).body).toContain('POST a')
-  expect((await request(app, 'GET', '/c')).body).toContain('other')
+  expect((await request(app, 'GET', '/c')).body).toContain('GET unknown')
+  expect((await request(app, 'GET', '/d')).body).toContain('GET unknown')
+  expect((await request(app, 'POST', '/e')).body).toContain('unknown')
+  expect((await requestError(app, 'POST', '/404')).statusCode).toEqual(404)
+  expect(unknownGet).toEqual(2)
+  expect(unknownRest).toEqual(1)
 })
 
 it('warns that HTTP is disables', async () => {
   let app = createServer({ disableHttpServer: true })
   expect(() => {
-    app.http(() => {})
+    app.http(() => true)
   }).toThrow(/when `disableHttpServer` enabled/)
+})
+
+it('waits until all HTTP processing ends', async () => {
+  let app = createServer()
+  let resolveA: (() => void) | undefined
+  app.http('GET', '/a', () => {
+    return new Promise(resolve => {
+      resolveA = resolve
+    })
+  })
+  let resolveResult: ((processed: boolean) => void) | undefined
+  app.http(() => {
+    return new Promise(resolve => {
+      resolveResult = resolve
+    })
+  })
+  await app.listen()
+
+  request(app, 'GET', '/a')
+  request(app, 'GET', '/other')
+  await setTimeout(10)
+
+  let destroyed = false
+  app.destroy().then(() => {
+    destroyed = true
+  })
+
+  await setTimeout(100)
+  expect(destroyed).toBe(false)
+
+  resolveA!()
+  await setTimeout(100)
+  expect(destroyed).toBe(false)
+
+  resolveResult!(true)
+  await setTimeout(100)
+  expect(destroyed).toBe(true)
 })

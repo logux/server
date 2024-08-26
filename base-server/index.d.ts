@@ -853,9 +853,17 @@ export class BaseServer<
   http(
     method: string,
     url: string,
-    listener: (req: IncomingMessage, res: ServerResponse) => void
+    listener: (
+      req: IncomingMessage,
+      res: ServerResponse
+    ) => Promise<void> | void
   ): void
-  http(listener: (req: IncomingMessage, res: ServerResponse) => void): void
+  http(
+    listener: (
+      req: IncomingMessage,
+      res: ServerResponse
+    ) => boolean | Promise<boolean>
+  ): void
 
   /**
    * Start WebSocket server and listen for clients.

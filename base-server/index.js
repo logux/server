@@ -330,6 +330,7 @@ export class BaseServer {
     this.actionToQueue = new Map()
 
     this.httpListeners = {}
+    this.httpAllListeners = []
     if (!this.options.disableHttpServer) {
       this.http('GET', '/', async (req, res) => {
         let hello = await readHello()
@@ -545,7 +546,7 @@ export class BaseServer {
       )
     }
     if (!url) {
-      this.httpListeners[`*`] = method
+      this.httpAllListeners.push(method)
     } else {
       this.httpListeners[`${method} ${url}`] = listener
     }
@@ -605,47 +606,56 @@ export class BaseServer {
         this.httpServer.listen(this.options.port, this.options.host, resolve)
       })
     }
+
+    let processing = 0
+    let waiting
+    this.unbind.push(() => {
+      return new Promise(resolve => {
+        let end = () => {
+          this.ws.close(resolve)
+        }
+        if (processing === 0) {
+          end()
+        } else {
+          waiting = end
+        }
+      })
+    })
+
     if (!this.options.disableHttpServer) {
       this.httpServer.on('request', async (req, res) => {
+        if (this.destroying) {
+          res.writeHead(503, { 'Content-Type': 'text/plain' })
+          res.end('The server is shutting down\n')
+        }
+
         let urlString = req.url
         if (/^\/\w+%3F/.test(urlString)) {
           urlString = decodeURIComponent(urlString)
         }
         let reqUrl = new URL(urlString, 'http://localhost')
-        let rule =
-          this.httpListeners[req.method + ' ' + reqUrl.pathname] ||
-          this.httpListeners['*']
+        let rule = this.httpListeners[req.method + ' ' + reqUrl.pathname]
 
+        processing += 1
         if (!rule) {
-          let accepts = Object.keys(this.httpListeners)
-          if (accepts.some(i => i.endsWith(' ' + reqUrl.pathname))) {
-            res.writeHead(405, { 'Content-Type': 'text/plain' })
-            res.end('Wrong method')
-          } else {
+          let processed = false
+          for (let listener of this.httpAllListeners) {
+            let result = await listener(req, res)
+            if (result === true) {
+              processed = true
+              break
+            }
+          }
+          if (!processed) {
             res.writeHead(404, { 'Content-Type': 'text/plain' })
-            res.end('Wrong path')
+            res.end('Not found')
           }
         } else {
-          rule(req, res)
+          await rule(req, res)
         }
+        processing -= 1
+        if (processing === 0 && waiting) waiting()
       })
-    }
-
-    this.unbind.push(
-      () =>
-        new Promise(resolve => {
-          this.ws.on('close', resolve)
-          this.ws.close()
-        })
-    )
-    if (this.httpServer) {
-      this.unbind.push(
-        () =>
-          new Promise(resolve => {
-            this.httpServer.on('close', resolve)
-            this.httpServer.close()
-          })
-      )
     }
 
     let pkg = JSON.parse(
