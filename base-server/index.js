@@ -613,7 +613,7 @@ export class BaseServer {
       return new Promise(resolve => {
         let end = () => {
           this.ws.close(resolve)
-          this.http.close()
+          this.httpServer.close()
         }
         if (processing === 0) {
           end()
