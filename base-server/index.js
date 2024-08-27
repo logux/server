@@ -628,6 +628,7 @@ export class BaseServer {
         if (this.destroying) {
           res.writeHead(503, { 'Content-Type': 'text/plain' })
           res.end('The server is shutting down\n')
+          return
         }
 
         let urlString = req.url

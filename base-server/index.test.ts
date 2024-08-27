@@ -1712,6 +1712,10 @@ it('waits until all HTTP processing ends', async () => {
   await setTimeout(100)
   expect(destroyed).toBe(false)
 
+  expect((await requestError(app, 'POST', '/a')).message).toEqual(
+    'The server is shutting down\n'
+  )
+
   resolveA!()
   await setTimeout(100)
   expect(destroyed).toBe(false)
