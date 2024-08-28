@@ -630,31 +630,8 @@ export class BaseServer {
           res.end('The server is shutting down\n')
           return
         }
-
-        let urlString = req.url
-        if (/^\/\w+%3F/.test(urlString)) {
-          urlString = decodeURIComponent(urlString)
-        }
-        let reqUrl = new URL(urlString, 'http://localhost')
-        let rule = this.httpListeners[req.method + ' ' + reqUrl.pathname]
-
         processing += 1
-        if (!rule) {
-          let processed = false
-          for (let listener of this.httpAllListeners) {
-            let result = await listener(req, res)
-            if (result === true) {
-              processed = true
-              break
-            }
-          }
-          if (!processed) {
-            res.writeHead(404, { 'Content-Type': 'text/plain' })
-            res.end('Not found')
-          }
-        } else {
-          await rule(req, res)
-        }
+        await this.processHttp(req, res)
         processing -= 1
         if (processing === 0 && waiting) waiting()
       })
@@ -790,6 +767,32 @@ export class BaseServer {
     if (typeof latency === 'undefined') latency = Date.now() - start
     this.processing -= 1
     this.emitter.emit('processed', action, meta, latency)
+  }
+
+  async processHttp(req, res) {
+    let urlString = req.url
+    if (/^\/\w+%3F/.test(urlString)) {
+      urlString = decodeURIComponent(urlString)
+    }
+    let reqUrl = new URL(urlString, 'http://localhost')
+    let rule = this.httpListeners[req.method + ' ' + reqUrl.pathname]
+
+    if (!rule) {
+      let processed = false
+      for (let listener of this.httpAllListeners) {
+        let result = await listener(req, res)
+        if (result === true) {
+          processed = true
+          break
+        }
+      }
+      if (!processed) {
+        res.writeHead(404, { 'Content-Type': 'text/plain' })
+        res.end('Not found')
+      }
+    } else {
+      await rule(req, res)
+    }
   }
 
   rememberBadAuth(ip) {

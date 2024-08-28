@@ -49,6 +49,19 @@ export class TestServer<
   Headers extends object = {}
 > extends BaseServer<Headers> {
   /**
+   * fetch() compatible API to test HTTP endpoints.
+   *
+   * ```js
+   * server.http('GET', '/version', (req, res) => {
+   *   res.end('1.0.0')
+   * })
+   * let res = await server.fetch()
+   * expect(await res.text()).toEqual('1.0.0')
+   * ```
+   */
+  fetch: typeof fetch
+
+  /**
    * Server actions log, with methods to check actions inside.
    *
    * ```js

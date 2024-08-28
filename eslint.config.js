@@ -8,7 +8,13 @@ export default [
   ...loguxTsConfig,
   {
     rules: {
-      '@typescript-eslint/no-explicit-any': 'off'
+      '@typescript-eslint/no-explicit-any': 'off',
+      'n/no-unsupported-features/node-builtins': [
+        'error',
+        {
+          ignores: ['fetch']
+        }
+      ]
     }
   },
   {

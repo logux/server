@@ -1,4 +1,5 @@
 import { TestTime } from '@logux/core'
+import { createServer } from 'node:http'
 
 import { BaseServer } from '../base-server/index.js'
 import { createReporter } from '../create-reporter/index.js'
@@ -30,6 +31,8 @@ export class TestServer extends BaseServer {
     }
     if (opts.auth !== false) this.auth(() => true)
     this.testUsers = {}
+
+    this.fetch = this.fetch.bind(this)
 
     this.on('fatal', () => {
       this.destroy()
@@ -87,5 +90,17 @@ export class TestServer extends BaseServer {
         throw e
       }
     }
+  }
+
+  async fetch(path, init) {
+    let server = createServer(async (req, res) => {
+      await this.processHttp(req, res)
+      server.close()
+    })
+    await new Promise(resolve => {
+      server.listen(0, resolve)
+    })
+    let { port } = server.address()
+    return fetch(`http://localhost:${port}${path}`, init)
   }
 }

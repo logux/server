@@ -334,6 +334,27 @@ it('collects received actions', async () => {
   ])
 })
 
+it('receives HTTP requests', async () => {
+  server = new TestServer()
+  server.http('GET', '/a', (req, res) => {
+    res.writeHead(200, { 'Content-Type': 'text/plain' })
+    res.end(String(req.headers['x-test'] ?? 'empty'))
+  })
+
+  let response1 = await server.fetch('/a')
+  expect(response1.headers.get('Content-Type')).toEqual('text/plain')
+  expect(await response1.text()).toEqual('empty')
+
+  let response2 = await server.fetch('/a', { headers: [['X-Test', '1']] })
+  expect(await response2.text()).toEqual('1')
+
+  let response3 = await server.fetch('/b')
+  expect(response3.status).toEqual(404)
+
+  let response4 = await server.fetch('/a', { method: 'POST' })
+  expect(response4.status).toEqual(404)
+})
+
 it('destroys on fatal', () => {
   server = new TestServer()
   // @ts-expect-error
