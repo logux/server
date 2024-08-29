@@ -355,6 +355,19 @@ it('receives HTTP requests', async () => {
   expect(response4.status).toEqual(404)
 })
 
+it('does not block login because of bruteforce', async () => {
+  server = new TestServer()
+  server.auth(({ userId }) => {
+    return userId === 'good'
+  })
+  await server.expectWrongCredentials('bad1')
+  await server.expectWrongCredentials('bad2')
+  await server.expectWrongCredentials('bad3')
+  await server.expectWrongCredentials('bad4')
+  await server.expectWrongCredentials('bad5')
+  await server.connect('good')
+})
+
 it('destroys on fatal', () => {
   server = new TestServer()
   // @ts-expect-error

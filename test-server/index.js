@@ -103,4 +103,8 @@ export class TestServer extends BaseServer {
     let { port } = server.address()
     return fetch(`http://localhost:${port}${path}`, init)
   }
+
+  isBruteforce() {
+    return false
+  }
 }
