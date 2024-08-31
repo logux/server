@@ -40,6 +40,8 @@ interface ChannelOptions {
   queue?: string
 }
 
+type ServerNodeConstructor = new (...args: any[]) => ServerNode
+
 export interface ServerMeta extends Meta {
   /**
    * All nodes subscribed to channel will receive the action.
@@ -152,6 +154,11 @@ export interface BaseServerOptions {
    * It is required in production mode, because WSS is highly recommended.
    */
   key?: { pem: string } | string
+
+  /**
+   * Replace class for ServerNode.
+   */
+  Node?: ServerNodeConstructor
 
   /**
    * Process ID, to display in logs.

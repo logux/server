@@ -3,6 +3,7 @@ import {
   type Action,
   LoguxError,
   type Message,
+  type Meta,
   type ServerConnection,
   type TestLog,
   TestPair,
@@ -12,6 +13,7 @@ import { restoreAll, type Spy, spyOn } from 'nanospy'
 import { setTimeout } from 'node:timers/promises'
 import { afterEach, expect, it } from 'vitest'
 
+import { FilteredNode } from '../filtered-node/index.js'
 import {
   BaseServer,
   type BaseServerOptions,
@@ -2493,4 +2495,27 @@ it('removes empty queues', async () => {
   expect(privateMethods(app).queues.size).toEqual(1)
   await setTimeout(50)
   expect(privateMethods(app).queues.size).toEqual(0)
+})
+
+it('replaces Node class if necessary', async () => {
+  class OtherNode extends FilteredNode {
+    syncSinceQuery(): { added: number; entries: [Action, Meta][] } {
+      return {
+        added: 0,
+        entries: [
+          [
+            { type: 'FOO' },
+            { added: 0, id: '1 server:uuid 0', reasons: [], time: 1 }
+          ]
+        ]
+      }
+    }
+  }
+  let app = createServer({
+    Node: OtherNode
+  })
+
+  let client = await connectClient(app, '10:client:uuid')
+  await setTimeout(10)
+  expect(actions(client)).toEqual([{ type: 'FOO' }])
 })

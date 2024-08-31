@@ -81,7 +81,9 @@ export class ServerClient {
       this.httpHeaders = {}
     }
 
-    this.node = new FilteredNode(this, app.nodeId, app.log, connection, {
+    let Node = app.options.Node || FilteredNode
+
+    this.node = new Node(this, app.nodeId, app.log, connection, {
       auth: this.auth.bind(this),
       onReceive: this.onReceive.bind(this),
       onSend,
