@@ -2,12 +2,13 @@ import { LoguxNotFoundError } from '@logux/actions'
 import { Log, MemoryStore, parseId, ServerConnection } from '@logux/core'
 import { createNanoEvents } from 'nanoevents'
 import { nanoid } from 'nanoid'
-import { promises as fs } from 'node:fs'
+import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import UrlPattern from 'url-pattern'
 import { WebSocketServer } from 'ws'
 
+import { addHttpPages } from '../add-http-pages/index.js'
 import { Context } from '../context/index.js'
 import { createHttpServer } from '../create-http-server/index.js'
 import { ServerClient } from '../server-client/index.js'
@@ -20,17 +21,6 @@ function optionError(msg) {
   error.logux = true
   error.note = 'Check server constructor and Logux Server documentation'
   throw error
-}
-
-let helloCache
-async function readHello() {
-  if (!helloCache) {
-    let hello = await fs.readFile(
-      join(fileURLToPath(import.meta.url), '..', 'hello.html')
-    )
-    helloCache = hello.toString()
-  }
-  return helloCache
 }
 
 export async function wasNot403(cb) {
@@ -331,17 +321,7 @@ export class BaseServer {
 
     this.httpListeners = {}
     this.httpAllListeners = []
-    if (!this.options.disableHttpServer) {
-      this.http('GET', '/', async (req, res) => {
-        let hello = await readHello()
-        res.writeHead(200, { 'Content-Type': 'text/plain' })
-        res.end(hello)
-      })
-      this.http('GET', '/health', (req, res) => {
-        res.writeHead(200, { 'Content-Type': 'text/plain' })
-        res.end('Logux Server: OK\n')
-      })
-    }
+    addHttpPages(this)
 
     this.listenNotes = {}
 
@@ -638,7 +618,7 @@ export class BaseServer {
     }
 
     let pkg = JSON.parse(
-      await fs.readFile(
+      await readFile(
         join(fileURLToPath(import.meta.url), '..', '..', 'package.json')
       )
     )
