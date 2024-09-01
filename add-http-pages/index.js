@@ -4,7 +4,7 @@ import { join } from 'node:path'
 let hello
 async function readHello() {
   if (!hello) {
-    hello = await readFile(join(import.meta.dirname, '..', 'hello.html'))
+    hello = await readFile(join(import.meta.dirname, 'hello.html'))
   }
   return hello
 }
