@@ -2519,3 +2519,25 @@ it('replaces Node class if necessary', async () => {
   await setTimeout(10)
   expect(actions(client)).toEqual([{ type: 'FOO' }])
 })
+
+it('allows to change how server loads initial actions', async () => {
+  let app = createServer({})
+  app.sendOnConnect(async (ctx, lastSync) => {
+    expect(ctx.clientId).toEqual('10:client')
+    expect(ctx.subprotocol).toEqual('0.0.1')
+    expect(lastSync).toEqual(0)
+    return [
+      [
+        { type: 'FOO' },
+        { added: 0, id: '1 server:uuid 0', reasons: [], server: '', time: 2 }
+      ],
+      [
+        { type: 'BAR' },
+        { added: 0, id: '1 server:uuid 0', reasons: [], server: '', time: 1 }
+      ]
+    ]
+  })
+  let client = await connectClient(app, '10:client:uuid')
+  await setTimeout(10)
+  expect(actions(client)).toEqual([{ type: 'BAR' }, { type: 'FOO' }])
+})

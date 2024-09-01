@@ -1,20 +1,10 @@
 import type { AnyAction } from '@logux/core'
 
 import type { ServerMeta } from '../base-server/index.js'
+import type { ServerClient } from '../server-client/index.js'
 import type { Server } from '../server/index.js'
 
-/**
- * Action context.
- *
- * ```js
- * server.type('FOO', {
- *   access (ctx, action, meta) {
- *     return ctx.isSubprotocol('3.x') ? check3(action) : check4(action)
- *   }
- * })
- * ```
- */
-export class Context<Data extends object = {}, Headers extends object = {}> {
+export class ConnectContext<Headers extends object = {}> {
   /**
    * Unique persistence client ID.
    *
@@ -23,23 +13,6 @@ export class Context<Data extends object = {}, Headers extends object = {}> {
    * ```
    */
   clientId: string
-
-  /**
-   * Open structure to save some data between different steps of processing.
-   *
-   * ```js
-   * server.type('RENAME', {
-   *   access (ctx, action, meta) {
-   *     ctx.data.user = findUser(ctx.userId)
-   *     return ctx.data.user.hasAccess(action.projectId)
-   *   }
-   *   process (ctx, action, meta) {
-   *     return ctx.data.user.rename(action.projectId, action.name)
-   *   }
-   * })
-   * ```
-   */
-  data: Data
 
   /**
    * Client’s headers.
@@ -52,15 +25,6 @@ export class Context<Data extends object = {}, Headers extends object = {}> {
    * ```
    */
   headers: Headers
-
-  /**
-   * Was action created by Logux server.
-   *
-   * ```js
-   * access: (ctx, action, meta) => ctx.isServer
-   * ```
-   */
-  isServer: boolean
 
   /**
    * Unique node ID.
@@ -92,17 +56,9 @@ export class Context<Data extends object = {}, Headers extends object = {}> {
    * }
    * ```
    */
-  userId: 'server' | string
+  userId: string
 
-  /**
-   * @param nodeId Unique node ID.
-   * @param clientId Unique persistence client ID.
-   * @param userId User ID taken node ID.
-   * @param subprotocol Action creator application subprotocol version
-   *                    in SemVer format.
-   * @param server Logux server
-   */
-  constructor(server: Server, meta: ServerMeta)
+  constructor(server: Server, client: ServerClient)
 
   /**
    * Check creator subprotocol version. It uses `semver` npm package
@@ -133,6 +89,50 @@ export class Context<Data extends object = {}, Headers extends object = {}> {
    * @returns Promise until action was added to the server log.
    */
   sendBack(action: AnyAction, meta?: Partial<ServerMeta>): Promise<void>
+}
+
+/**
+ * Action context.
+ *
+ * ```js
+ * server.type('FOO', {
+ *   access (ctx, action, meta) {
+ *     return ctx.isSubprotocol('3.x') ? check3(action) : check4(action)
+ *   }
+ * })
+ * ```
+ */
+export class Context<
+  Data extends object = {},
+  Headers extends object = {}
+> extends ConnectContext<Headers> {
+  /**
+   * Open structure to save some data between different steps of processing.
+   *
+   * ```js
+   * server.type('RENAME', {
+   *   access (ctx, action, meta) {
+   *     ctx.data.user = findUser(ctx.userId)
+   *     return ctx.data.user.hasAccess(action.projectId)
+   *   }
+   *   process (ctx, action, meta) {
+   *     return ctx.data.user.rename(action.projectId, action.name)
+   *   }
+   * })
+   * ```
+   */
+  data: Data
+
+  /**
+   * Was action created by Logux server.
+   *
+   * ```js
+   * access: (ctx, action, meta) => ctx.isServer
+   * ```
+   */
+  isServer: boolean
+
+  constructor(server: Server, meta: ServerMeta)
 }
 
 /**

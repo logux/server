@@ -4,6 +4,7 @@ import fastq from 'fastq'
 import semver from 'semver'
 
 import { ALLOWED_META } from '../allowed-meta/index.js'
+import { Context } from '../context/index.js'
 import { filterMeta } from '../filter-meta/index.js'
 import { FilteredNode } from '../filtered-node/index.js'
 
@@ -93,6 +94,19 @@ export class ServerClient {
     })
     if (this.app.env === 'development') {
       this.node.setLocalHeaders({ env: 'development' })
+    }
+
+    if (app.connectLoader) {
+      this.node.syncSinceQuery = async lastSynced => {
+        let context = new Context(app, this)
+        let entries = await app.connectLoader(context, lastSynced)
+        let added = entries.reduce((max, entry) => {
+          let meta = filterMeta(entry[1])
+          entry[1] = meta
+          return meta.added > max ? meta.added : max
+        }, 0)
+        return { added, entries }
+      }
     }
 
     this.node.catch(err => {

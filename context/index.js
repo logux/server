@@ -6,18 +6,25 @@ export class Context {
     this.server = server
     this.data = {}
 
-    let parsed = parseId(meta.id)
-    this.nodeId = parsed.nodeId
-    this.userId = parsed.userId
-    this.clientId = parsed.clientId
-    this.isServer = this.userId === 'server'
-
-    let client = server.clientIds.get(this.clientId)
-
-    if (meta.subprotocol) {
-      this.subprotocol = meta.subprotocol
-    } else if (client) {
+    let client
+    if (meta.node) {
+      client = meta
+      this.nodeId = client.nodeId
+      this.userId = client.userId
+      this.clientId = client.clientId
       this.subprotocol = client.node.remoteSubprotocol
+    } else {
+      let parsed = parseId(meta.id)
+      this.nodeId = parsed.nodeId
+      this.userId = parsed.userId
+      this.clientId = parsed.clientId
+      this.isServer = this.userId === 'server'
+      client = server.clientIds.get(this.clientId)
+      if (meta.subprotocol) {
+        this.subprotocol = meta.subprotocol
+      } else if (client) {
+        this.subprotocol = client.node.remoteSubprotocol
+      }
     }
 
     if (client) {

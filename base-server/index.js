@@ -892,6 +892,10 @@ export class BaseServer {
     }
   }
 
+  sendOnConnect(loader) {
+    this.connectLoader = loader
+  }
+
   setTimeout(callback, ms) {
     this.lastTimeout += 1
     let id = this.lastTimeout

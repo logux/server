@@ -21,7 +21,11 @@ import type {
 } from 'node:http'
 import type { LogFn } from 'pino'
 
-import type { ChannelContext, Context } from '../context/index.js'
+import type {
+  ChannelContext,
+  ConnectContext,
+  Context
+} from '../context/index.js'
 import type { ServerClient } from '../server-client/index.js'
 
 interface TypeOptions {
@@ -38,6 +42,12 @@ interface ChannelOptions {
    * with the specified name pattern. Default is 'main'
    */
   queue?: string
+}
+
+interface ConnectLoader<Headers extends object = {}> {
+  (ctx: ConnectContext<Headers>, lastSynced: number):
+    | [Action, ServerMeta][]
+    | Promise<[Action, ServerMeta][]>
 }
 
 type ServerNodeConstructor = new (...args: any[]) => ServerNode
@@ -1105,6 +1115,19 @@ export class BaseServer<
    * @param meta Action’s metadata.
    */
   sendAction(action: Action, meta: ServerMeta): Promise<void> | void
+
+  /**
+   * Change a way how server loads actions history for the client.
+   *
+   * ```js
+   * server.sendOnConnect(async (ctx, lastSynced) => {
+   *   return db.loadActions({ user: ctx.userId, after: lastSynced })
+   * })
+   * ```
+   *
+   * @param loader Callback which loads list of actions and meta.
+   */
+  sendOnConnect(loader: ConnectLoader<Headers>)
 
   /**
    * Send `logux/subscribed` if client was not already subscribed.
