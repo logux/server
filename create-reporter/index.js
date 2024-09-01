@@ -7,7 +7,7 @@ import pino from 'pino'
 const root = join(fileURLToPath(import.meta.url), '..', '..')
 export const PATH_TO_PRETTIFYING_PINO_TRANSPORT = join(
   root,
-  '../human-formatter/index.js'
+  'human-formatter/index.js'
 )
 
 const ERROR_CODES = {
