@@ -30,7 +30,6 @@ This repository contains Logux server with:
 ### Logux Server as Framework
 
 ```js
-import { fileURLToPath } from 'url'
 import { isFirstOlder } from '@logux/core'
 import { dirname } from 'path'
 import { Server } from '@logux/server'
@@ -39,7 +38,7 @@ const server = new Server(
   Server.loadOptions(process, {
     subprotocol: '1.0.0',
     supports: '1.x',
-    fileUrl: import.meta.url
+    root: import.meta.dirname
   })
 )
 

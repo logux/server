@@ -140,8 +140,7 @@ export interface BaseServerOptions {
   env?: 'development' | 'production'
 
   /**
-   * URL of main JS file in the root dir. Shortcut to set `root` in ES modules
-   * without `fileURLToPath`.
+   * URL of main JS file in the root dir.
    *
    * ```
    * fileUrl: import.meta.url
@@ -197,7 +196,7 @@ export interface BaseServerOptions {
    * Default is `process.cwd()`.
    *
    * ```js
-   * root: __dirname
+   * root: import.meta.dirname
    * ```
    */
   root?: string
