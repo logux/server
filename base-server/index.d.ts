@@ -47,7 +47,13 @@ interface ChannelOptions {
 interface ConnectLoader<Headers extends object = {}> {
   (ctx: ConnectContext<Headers>, lastSynced: number):
     | [Action, ServerMeta][]
-    | Promise<[Action, ServerMeta][]>
+    | Promise<
+        [
+          Action,
+          Partial<Pick<ServerMeta, 'subprotocol'>> &
+            Pick<ServerMeta, 'id' | 'time'>
+        ][]
+      >
 }
 
 type ServerNodeConstructor = new (...args: any[]) => ServerNode
