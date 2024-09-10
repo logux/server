@@ -190,7 +190,7 @@ export interface BaseServerOptions {
    * Port to bind server. It will create HTTP server manually to connect
    * WebSocket server to it. Default is `31337`.
    */
-  port?: number
+  port?: number | string
 
   /**
    * URL to Redis for Logux Server Pro scaling.

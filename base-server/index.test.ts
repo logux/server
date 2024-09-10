@@ -174,6 +174,11 @@ it('uses cwd as default root', () => {
   expect(app.options.root).toEqual(process.cwd())
 })
 
+it('supports string as port', () => {
+  let app = new BaseServer({ ...DEFAULT_OPTIONS, port: '8080' })
+  expect(app.options.port).toEqual(8080)
+})
+
 it('uses user root', () => {
   let app = new BaseServer({
     root: '/a',

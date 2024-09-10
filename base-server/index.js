@@ -117,6 +117,9 @@ export class BaseServer {
     }
 
     this.options.root = this.options.root || process.cwd()
+    if (typeof this.options.port === 'string') {
+      this.options.port = parseInt(this.options.port, 10)
+    }
 
     let store = this.options.store || new MemoryStore()
 
