@@ -1,6 +1,6 @@
-import glob from 'fast-glob'
 import { join, relative } from 'node:path'
 import pico from 'picocolors'
+import { glob } from 'tinyglobby'
 
 import { BaseServer } from '../base-server/index.js'
 import { createReporter } from '../create-reporter/index.js'
