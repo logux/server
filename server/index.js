@@ -116,6 +116,7 @@ export class Server extends BaseServer {
   async autoloadModules(
     files = ['modules/*/index.js', 'modules/*.js', '!**/*.{test,spec}.js']
   ) {
+    if (!Array.isArray(files)) files = [files]
     let matches = await glob(files, {
       absolute: true,
       cwd: this.options.root,
