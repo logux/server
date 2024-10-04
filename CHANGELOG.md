@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.13.1
+* Fixed vulnerability audit by moving to `cookie` 0.7.
+
 ## 0.13 “Seven Red Suns”
 * Removed Node.js 14 and Node.js 16 support.
 * Moved to Logux Core 0.9.
