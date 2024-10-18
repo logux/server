@@ -44,7 +44,7 @@ interface ChannelOptions {
   queue?: string
 }
 
-interface ConnectLoader<Headers extends object = {}> {
+interface ConnectLoader<Headers extends object = unknown> {
   (ctx: ConnectContext<Headers>, lastSynced: number):
     | [Action, ServerMeta][]
     | Promise<
@@ -358,7 +358,7 @@ interface ActionFinally<
  */
 interface ChannelFilter<Headers extends object> {
   (
-    ctx: Context<{}, Headers>,
+    ctx: Context<unknown, Headers>,
     action: Readonly<Action>,
     meta: Readonly<ServerMeta>
   ): boolean | Promise<boolean>
@@ -637,7 +637,7 @@ export function wasNot403(cb: () => Promise<void>): Promise<boolean>
  * Base server class to extend.
  */
 export class BaseServer<
-  Headers extends object = {},
+  Headers extends object = unknown,
   ServerLog extends Log = Log<ServerMeta>
 > {
   /**
@@ -734,7 +734,7 @@ export class BaseServer<
   subscribers: {
     [channel: string]: {
       [nodeId: string]: {
-        filters: Record<string, ChannelFilter<{}> | true>
+        filters: Record<string, ChannelFilter<unknown> | true>
         unsubscribe?: (action: LoguxUnsubscribeAction, meta: ServerMeta) => void
       }
     }
@@ -806,8 +806,8 @@ export class BaseServer<
    * @param options Additional options
    */
   channel<
-    ChannelParams extends object = {},
-    Data extends object = {},
+    ChannelParams extends object = unknown,
+    Data extends object = unknown,
     SubscribeAction extends LoguxSubscribeAction = LoguxSubscribeAction
   >(
     pattern: string,
@@ -822,7 +822,7 @@ export class BaseServer<
    */
   channel<
     ChannelParams extends string[] = string[],
-    Data extends object = {},
+    Data extends object = unknown,
     SubscribeAction extends LoguxSubscribeAction = LoguxSubscribeAction
   >(
     pattern: RegExp,
@@ -1054,7 +1054,7 @@ export class BaseServer<
    *
    * @param callbacks Callback during subscription process.
    */
-  otherChannel<Data extends object = {}>(
+  otherChannel<Data extends object = unknown>(
     callbacks: ChannelCallbacks<LoguxSubscribeAction, Data, [string], Headers>
   ): void
 
@@ -1084,7 +1084,7 @@ export class BaseServer<
    *
    * @param callbacks Callbacks for actions with this type.
    */
-  otherType<Data extends object = {}>(
+  otherType<Data extends object = unknown>(
     callbacks: ActionCallbacks<Action, Data, Headers>
   ): void
 
@@ -1151,7 +1151,7 @@ export class BaseServer<
    * @param callbacks Callbacks for action created by creator.
    * @param options Additional options
    */
-  type<Creator extends AbstractActionCreator, Data extends object = {}>(
+  type<Creator extends AbstractActionCreator, Data extends object = unknown>(
     actionCreator: Creator,
     callbacks: ActionCallbacks<ReturnType<Creator>, Data, Headers>,
     options?: TypeOptions
@@ -1180,7 +1180,7 @@ export class BaseServer<
    * @param callbacks Callbacks for actions with this type.
    * @param options Additional options
    */
-  type<TypeAction extends Action = AnyAction, Data extends object = {}>(
+  type<TypeAction extends Action = AnyAction, Data extends object = unknown>(
     name: RegExp | TypeAction['type'],
     callbacks: ActionCallbacks<TypeAction, Data, Headers>,
     options?: TypeOptions

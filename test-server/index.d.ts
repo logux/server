@@ -46,7 +46,7 @@ export interface TestServerOptions
  * ```
  */
 export class TestServer<
-  Headers extends object = {}
+  Headers extends object = unknown
 > extends BaseServer<Headers> {
   /**
    * fetch() compatible API to test HTTP endpoints.

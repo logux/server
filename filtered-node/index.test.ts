@@ -4,7 +4,7 @@ import { afterEach, expect, it } from 'vitest'
 import { FilteredNode } from '../filtered-node/index.js'
 
 type Test = {
-  client: ClientNode<{}, TestLog>
+  client: ClientNode<object, TestLog>
   server: FilteredNode
 }
 

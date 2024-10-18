@@ -4,7 +4,7 @@ import type { ServerMeta } from '../base-server/index.js'
 import type { ServerClient } from '../server-client/index.js'
 import type { Server } from '../server/index.js'
 
-export class ConnectContext<Headers extends object = {}> {
+export class ConnectContext<Headers extends object = unknown> {
   /**
    * Unique persistence client ID.
    *
@@ -103,8 +103,8 @@ export class ConnectContext<Headers extends object = {}> {
  * ```
  */
 export class Context<
-  Data extends object = {},
-  Headers extends object = {}
+  Data extends object = unknown,
+  Headers extends object = unknown
 > extends ConnectContext<Headers> {
   /**
    * Open structure to save some data between different steps of processing.

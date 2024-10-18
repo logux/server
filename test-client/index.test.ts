@@ -196,7 +196,7 @@ it('detects action ID duplicate', async () => {
 
 it('tracks subscriptions', async () => {
   server = new TestServer()
-  server.channel<{}, {}, LoguxSubscribeAction>('foo', {
+  server.channel<object, object, LoguxSubscribeAction>('foo', {
     access: () => true,
     load(ctx, action) {
       ctx.sendBack({ a: action.filter?.a, since: action.since, type: 'FOO' })

@@ -18,7 +18,7 @@ let lastPort = 9111
 
 function createServer(
   options: Partial<BaseServerOptions> = {}
-): BaseServer<{}, TestLog<ServerMeta>> {
+): BaseServer<object, TestLog<ServerMeta>> {
   let opts = {
     ...DEFAULT_OPTIONS,
     ...options
@@ -32,7 +32,7 @@ function createServer(
     opts.port = lastPort
   }
 
-  let created = new BaseServer<{}, TestLog<ServerMeta>>(opts)
+  let created = new BaseServer<object, TestLog<ServerMeta>>(opts)
   created.auth(() => true)
 
   destroyable = created

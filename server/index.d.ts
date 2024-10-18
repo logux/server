@@ -76,7 +76,9 @@ export interface ServerOptions extends BaseServerOptions {
  * server.listen()
  * ```
  */
-export class Server<Headers extends object = {}> extends BaseServer<Headers> {
+export class Server<
+  Headers extends object = unknown
+> extends BaseServer<Headers> {
   /**
    * Server options.
    *
