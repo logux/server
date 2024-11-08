@@ -1,10 +1,10 @@
 import { once } from 'node:events'
 import os from 'node:os'
 import { Transform } from 'node:stream'
+import { stripVTControlCharacters } from 'node:util'
 import pico from 'picocolors'
 import pino from 'pino'
 import abstractTransport from 'pino-abstract-transport'
-import stripAnsi from 'strip-ansi'
 
 import { mulberry32, onceXmur3 } from './utils.js'
 
@@ -50,7 +50,7 @@ function formatNow() {
 }
 
 function rightPag(str, length) {
-  let add = length - stripAnsi(str).length
+  let add = length - stripVTControlCharacters(str).length
   for (let i = 0; i < add; i++) str += ' '
   return str
 }
