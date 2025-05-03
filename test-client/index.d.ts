@@ -1,5 +1,14 @@
-import type { LoguxSubscribeAction, LoguxUnsubscribeAction } from '@logux/actions'
-import type { Action, AnyAction, TestLog, TestPair } from '@logux/core'
+import type {
+  LoguxSubscribeAction,
+  LoguxUnsubscribeAction
+} from '@logux/actions'
+import type {
+  Action,
+  AnyAction,
+  TestLog,
+  TestPair,
+  ClientNode
+} from '@logux/core'
 
 import type { ServerMeta } from '../base-server/index.js'
 import type { TestServer } from '../test-server/index.js'
@@ -95,6 +104,11 @@ export class TestClient {
    * ```
    */
   pair: TestPair
+
+  /**
+   * Logux node.
+   */
+  node: ClientNode<object, TestLog<ServerMeta>>
 
   /**
    * User ID.
