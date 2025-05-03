@@ -5,9 +5,9 @@ import type {
 import type {
   Action,
   AnyAction,
+  ClientNode,
   TestLog,
-  TestPair,
-  ClientNode
+  TestPair
 } from '@logux/core'
 
 import type { ServerMeta } from '../base-server/index.js'
@@ -87,6 +87,11 @@ export class TestClient {
   log: TestLog
 
   /**
+   * Logux node.
+   */
+  node: ClientNode<object, TestLog<ServerMeta>>
+
+  /**
    * Client’s node ID.
    *
    * ```js
@@ -104,11 +109,6 @@ export class TestClient {
    * ```
    */
   pair: TestPair
-
-  /**
-   * Logux node.
-   */
-  node: ClientNode<object, TestLog<ServerMeta>>
 
   /**
    * User ID.
