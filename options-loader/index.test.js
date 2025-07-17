@@ -73,9 +73,7 @@ describe('loadOptions', () => {
         }
       },
       fakeProcess([], {}),
-      {
-        path: resolve(process.cwd(), 'options-loader/test.env')
-      }
+      resolve(process.cwd(), 'options-loader/test.env')
     )
 
     expect(options.port).toEqual(31337)
