@@ -92,6 +92,7 @@ function loadEnv(file) {
   try {
     lines = readFileSync(file, 'utf8').split('\n')
   } catch (error) {
+    /* c8 ignore next 2 */
     return undefined
   }
   for (let line of lines) {
