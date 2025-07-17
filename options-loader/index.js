@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from 'fs'
+import { join } from 'path'
 import pico from 'picocolors'
 
 export function loadOptions(spec, process, env) {
@@ -82,11 +83,14 @@ function parseValues(spec, args) {
 }
 
 function loadEnv(file) {
-  if (!file || !existsSync(file)) return undefined
+  if (!file || !existsSync(file)) {
+    file = join(process.cwd(), '.env')
+    if (!existsSync(file)) return undefined
+  }
   let result = {}
   let lines
   try {
-    let lines = readFileSync(filePath, 'utf8').split('\n')
+    lines = readFileSync(file, 'utf8').split('\n')
   } catch (error) {
     return undefined
   }
