@@ -1,5 +1,5 @@
-import { existsSync, readFileSync } from 'fs'
-import { join } from 'path'
+import { existsSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import pico from 'picocolors'
 
 export function loadOptions(spec, process, env) {
@@ -91,7 +91,7 @@ function loadEnv(file) {
   let lines
   try {
     lines = readFileSync(file, 'utf8').split('\n')
-  } catch (error) {
+  } catch {
     /* c8 ignore next 2 */
     return undefined
   }
