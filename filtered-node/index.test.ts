@@ -28,7 +28,7 @@ function createTest(): Test {
 }
 
 let test: Test
-afterEach(async () => {
+afterEach(() => {
   test.client.destroy()
   test.server.destroy()
 })

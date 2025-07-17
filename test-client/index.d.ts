@@ -195,10 +195,10 @@ export class TestClient {
    * @param test Function, where do you expect action will be received
    * @returns Promise with all received actions
    */
-  received(test: () => any | Promise<any>): Promise<Action[]>
+  received(test: () => unknown): Promise<Action[]>
 
   /**
-   * Subscribe to the channel and collect all actions dunring the subscription.
+   * Subscribe to the channel and collect all actions during the subscription.
    *
    * ```js
    * let posts = await client.subscribe('posts')

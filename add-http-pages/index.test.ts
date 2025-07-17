@@ -198,7 +198,7 @@ it('has custom HTTP processor', async () => {
   expect(unknownRest).toEqual(1)
 })
 
-it('warns that HTTP is disables', async () => {
+it('warns that HTTP is disables', () => {
   let app = createServer({ disableHttpServer: true })
   expect(() => {
     app.http(() => true)

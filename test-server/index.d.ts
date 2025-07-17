@@ -106,7 +106,7 @@ export class TestServer<
    *
    * @param test Callback with subscripting or action sending.
    */
-  expectDenied(test: () => any | Promise<any>): Promise<void>
+  expectDenied(test: () => unknown): Promise<void>
 
   /**
    * Call callback and throw an error if there was no error during
@@ -115,10 +115,7 @@ export class TestServer<
    * @param text RegExp or string of error message.
    * @param test Callback with subscripting or action sending.
    */
-  expectError(
-    text: RegExp | string,
-    test: () => any | Promise<any>
-  ): Promise<void>
+  expectError(text: RegExp | string, test: () => unknown): Promise<void>
 
   /**
    * Call callback and throw an error if there was no `logux/undo` in return
@@ -133,7 +130,7 @@ export class TestServer<
    * @param reason The reason in undo action.
    * @param test Callback with subscripting or action sending.
    */
-  expectUndo(reason: string, test: () => any | Promise<any>): Promise<void>
+  expectUndo(reason: string, test: () => unknown): Promise<void>
 
   /**
    * Try to connect client and throw an error is client didn’t received

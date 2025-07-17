@@ -747,7 +747,7 @@ it('checks user access for action', async () => {
       expect(ctx.userId).toEqual('10')
       expect(ctx.subprotocol).toEqual('0.0.1')
       expect(meta.id).toBeDefined()
-      return !!action.bar
+      return action.bar
     }
   })
 

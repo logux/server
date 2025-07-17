@@ -1,4 +1,3 @@
-import type { LoguxSubscribeAction } from '@logux/actions'
 import { TestTime } from '@logux/core'
 import { restoreAll, type Spy, spyOn } from 'nanospy'
 import { setTimeout } from 'node:timers/promises'
@@ -196,7 +195,7 @@ it('detects action ID duplicate', async () => {
 
 it('tracks subscriptions', async () => {
   server = new TestServer()
-  server.channel<object, object, LoguxSubscribeAction>('foo', {
+  server.channel<object, object>('foo', {
     access: () => true,
     load(ctx, action) {
       ctx.sendBack({ a: action.filter?.a, since: action.since, type: 'FOO' })
@@ -287,7 +286,7 @@ it('tests authentication', async () => {
   expect(notWrong.message).toEqual('Credentials passed')
 })
 
-it('disables build-in auth', async () => {
+it('disables build-in auth', () => {
   server = new TestServer({ auth: false })
   expect(privateMethods(server).authenticator).not.toBeDefined()
 })

@@ -814,7 +814,6 @@ export class BaseServer<
     callbacks: ChannelCallbacks<SubscribeAction, Data, ChannelParams, Headers>,
     options?: ChannelOptions
   ): void
-
   /**
    * @param pattern Regular expression for channel name.
    * @param callbacks Callback during subscription process.
@@ -899,7 +898,6 @@ export class BaseServer<
    * @param listener Event listener.
    */
   on(event: 'subscriptionCancelled', listener: () => void): Unsubscribe
-
   /**
    * @param event The event name.
    * @param listener Subscription listener.
@@ -908,7 +906,6 @@ export class BaseServer<
     event: 'subscribing',
     listener: (action: LoguxSubscribeAction, meta: Readonly<ServerMeta>) => void
   ): Unsubscribe
-
   /**
    * @param event The event name.
    * @param listener Processing listener.
@@ -921,7 +918,6 @@ export class BaseServer<
       latencyMilliseconds: number
     ) => void
   ): Unsubscribe
-
   /**
    * @param event The event name.
    * @param listener Action listener.
@@ -930,7 +926,6 @@ export class BaseServer<
     event: 'add' | 'clean',
     listener: (action: Action, meta: Readonly<ServerMeta>) => void
   ): Unsubscribe
-
   /**
    * @param event The event name.
    * @param listener Client listener.
@@ -939,7 +934,6 @@ export class BaseServer<
     event: 'connected' | 'disconnected',
     listener: (client: ServerClient) => void
   ): Unsubscribe
-
   /**
    * Subscribe for synchronization events. It implements nanoevents API.
    * Supported events:
@@ -975,7 +969,6 @@ export class BaseServer<
     event: 'clientError' | 'fatal',
     listener: (err: Error) => void
   ): Unsubscribe
-
   /**
    * @param event The event name.
    * @param listener Error listener.
@@ -984,7 +977,6 @@ export class BaseServer<
     event: 'error',
     listener: (err: Error, action: Action, meta: Readonly<ServerMeta>) => void
   ): Unsubscribe
-
   /**
    * @param event The event name.
    * @param listener Client listener.
@@ -993,7 +985,6 @@ export class BaseServer<
     event: 'authenticated' | 'unauthenticated',
     listener: (client: ServerClient, latencyMilliseconds: number) => void
   ): Unsubscribe
-
   /**
    * @param event The event name.
    * @param listener Action listener.
@@ -1002,7 +993,6 @@ export class BaseServer<
     event: 'preadd',
     listener: (action: Action, meta: ServerMeta) => void
   ): Unsubscribe
-
   /**
    * @param event The event name.
    * @param listener Subscription listener.
@@ -1015,7 +1005,6 @@ export class BaseServer<
       latencyMilliseconds: number
     ) => void
   ): Unsubscribe
-
   /**
    * @param event The event name.
    * @param listener Subscription listener.
@@ -1028,7 +1017,6 @@ export class BaseServer<
       clientNodeId: string
     ) => void
   ): Unsubscribe
-
   /**
    * @param event The event name.
    * @param listener Report listener.
@@ -1156,7 +1144,6 @@ export class BaseServer<
     callbacks: ActionCallbacks<ReturnType<Creator>, Data, Headers>,
     options?: TypeOptions
   ): void
-
   /**
    * Define action type’s callbacks.
    *

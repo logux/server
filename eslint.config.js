@@ -12,7 +12,7 @@ export default [
       'n/no-unsupported-features/node-builtins': [
         'error',
         {
-          ignores: ['fetch']
+          ignores: ['fetch', 'import.meta.dirname']
         }
       ]
     }
@@ -39,6 +39,8 @@ export default [
   {
     files: ['test/**/*', '*/*.test.ts'],
     rules: {
+      '@typescript-eslint/no-unsafe-function-type': 'off',
+      '@typescript-eslint/require-await': 'off',
       'no-console': 'off'
     }
   }

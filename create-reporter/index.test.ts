@@ -127,7 +127,7 @@ it('creates JSON reporter', () => {
 it('creates human reporter', async () => {
   let destination = join(
     os.tmpdir(),
-    '_' + Math.random().toString(36).substr(2, 9)
+    '_' + Math.random().toString(36).substring(2, 11)
   )
 
   let reporter = createReporter({
