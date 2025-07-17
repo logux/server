@@ -151,7 +151,7 @@ it('responses 404', async () => {
   await app.listen()
   let err = await requestError(app, 'GET', '/unknown')
   expect(err.statusCode).toEqual(404)
-  expect(err.message).toEqual('Not found')
+  expect(err.message).toEqual('Not found\n')
 })
 
 it('has custom HTTP processor', async () => {

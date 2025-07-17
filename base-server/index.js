@@ -771,7 +771,7 @@ export class BaseServer {
       }
       if (!processed) {
         res.writeHead(404, { 'Content-Type': 'text/plain' })
-        res.end('Not found')
+        res.end('Not found\n')
       }
     } else {
       await rule(req, res)
