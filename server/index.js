@@ -97,7 +97,7 @@ export class Server extends BaseServer {
     let [help, options] = loadOptions(
       cliOptionsSpec,
       process,
-      defaults.root ? { path: join(defaults.root, '.env') } : undefined
+      defaults.root ? join(defaults.root, '.env') : undefined
     )
     if (help) {
       process.stdout.write(help + '\n')

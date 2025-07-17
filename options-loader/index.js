@@ -1,4 +1,4 @@
-import dotenv from 'dotenv'
+import { existsSync, readFileSync } from 'fs'
 import pico from 'picocolors'
 
 export function loadOptions(spec, process, env) {
@@ -18,7 +18,7 @@ export function loadOptions(spec, process, env) {
   }
 
   let cliArgs = parseValues(spec, mapArgs(rawCliArgs, namesMap))
-  let dotenvArgs = parseEnvArgs(env)
+  let dotenvArgs = loadEnv(env)
   if (dotenvArgs) {
     dotenvArgs = Object.fromEntries(
       Object.entries(dotenvArgs).filter(([key]) =>
@@ -81,8 +81,26 @@ function parseValues(spec, args) {
   return parsed
 }
 
-function parseEnvArgs(file) {
-  return dotenv.config(file).parsed
+function loadEnv(file) {
+  if (!file || !existsSync(file)) return undefined
+  let result = {}
+  let lines
+  try {
+    let lines = readFileSync(filePath, 'utf8').split('\n')
+  } catch (error) {
+    return undefined
+  }
+  for (let line of lines) {
+    if (line.trim().startsWith('#') || !line.includes('=')) {
+      continue
+    }
+    let [key, ...valueParts] = line.split('=')
+    result[key] = valueParts
+      .join('=')
+      .trim()
+      .replace(/(^"|"$|^'|'$)/g, '')
+  }
+  return result
 }
 
 function mapArgs(parsedCliArgs, argsSpec) {
