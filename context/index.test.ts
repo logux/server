@@ -9,7 +9,7 @@ const FAKE_SERVER: any = {
   clientIds: new Map([
     [
       '20:client',
-      { node: { remoteHeaders: { locale: 'fr' }, remoteSubprotocol: '2.0.0' } }
+      { node: { remoteHeaders: { locale: 'fr' }, remoteSubprotocol: 2 } }
     ]
   ]),
 
@@ -26,7 +26,7 @@ beforeEach(() => {
 })
 
 function createContext(
-  meta: Partial<ServerMeta> = { id: '1 10:client:uuid 0', subprotocol: '1.0.0' }
+  meta: Partial<ServerMeta> = { id: '1 10:client:uuid 0', subprotocol: 1 }
 ): Context {
   return new Context(FAKE_SERVER, meta as ServerMeta)
 }
@@ -41,7 +41,7 @@ it('parses meta', () => {
   expect(ctx.nodeId).toEqual('10:client:uuid')
   expect(ctx.clientId).toEqual('10:client')
   expect(ctx.userId).toEqual('10')
-  expect(ctx.subprotocol).toEqual('1.0.0')
+  expect(ctx.subprotocol).toEqual(1)
 })
 
 it('detects servers', () => {
@@ -51,15 +51,9 @@ it('detects servers', () => {
   expect(server.isServer).toBe(true)
 })
 
-it('checks subprotocol', () => {
-  let ctx = createContext()
-  expect(ctx.isSubprotocol('^1.0')).toBe(true)
-  expect(ctx.isSubprotocol('>1.5')).toBe(false)
-})
-
 it('takes subprotocol from client', () => {
   let ctx = createContext({ id: '1 20:client:uuid 0' })
-  expect(ctx.subprotocol).toEqual('2.0.0')
+  expect(ctx.subprotocol).toEqual(2)
 })
 
 it('works on missed subprotocol', () => {

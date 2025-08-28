@@ -17,8 +17,8 @@ it('filters meta', () => {
     id: '1 test 0',
     reasons: [],
     server: '',
-    subprotocol: '1.1.0',
+    subprotocol: 1,
     time: 0
   }
-  expect(filterMeta(meta2).subprotocol).toEqual('1.1.0')
+  expect(filterMeta(meta2).subprotocol).toEqual(1)
 })

@@ -41,21 +41,17 @@ async function sendTo(client: ServerClient, msg: Message): Promise<void> {
 async function connect(
   client: ServerClient,
   nodeId: string = '10:uuid',
-  details: object | undefined = undefined
+  details: object = {}
 ): Promise<void> {
   await client.connection.connect()
   let protocol = client.node.localProtocol
-  if (typeof details !== 'undefined') {
-    await sendTo(client, ['connect', protocol, nodeId, 0, details])
-  } else {
-    await sendTo(client, [
-      'connect',
-      protocol,
-      nodeId,
-      0,
-      { subprotocol: '0.0.1' }
-    ])
-  }
+  await sendTo(client, [
+    'connect',
+    protocol,
+    nodeId,
+    0,
+    { subprotocol: 1, ...details }
+  ])
 }
 
 function createConnection(): ServerConnection {
@@ -74,14 +70,14 @@ function createConnection(): ServerConnection {
 function createServer(
   opts: Partial<BaseServerOptions> = {}
 ): BaseServer<{ locale: string }, TestLog<ServerMeta>> {
-  opts.subprotocol = '0.0.1'
-  opts.supports = '0.x'
+  opts.subprotocol = 1
+  opts.minSubprotocol = 1
   opts.time = new TestTime()
 
   let server = new BaseServer<{ locale: string }, TestLog<ServerMeta>>({
     ...opts,
-    subprotocol: '0.0.1',
-    supports: '0.x',
+    minSubprotocol: 1,
+    subprotocol: 1,
     time: new TestTime()
   })
   server.auth(() => true)
@@ -161,15 +157,15 @@ afterEach(() => {
 
 it('uses server options', () => {
   let app = createServer({
+    minSubprotocol: 1,
     ping: 8000,
-    subprotocol: '0.0.1',
-    supports: '0.x',
+    subprotocol: 1,
     timeout: 16000
   })
   app.nodeId = 'server:x'
   let client = new ServerClient(app, createConnection(), 1)
 
-  expect(client.node.options.subprotocol).toEqual('0.0.1')
+  expect(client.node.options.subprotocol).toEqual(1)
   expect(client.node.options.timeout).toEqual(16000)
   expect(client.node.options.ping).toEqual(8000)
   expect(client.node.localNodeId).toEqual('server:x')
@@ -241,8 +237,8 @@ it('removes itself on destroy', async () => {
 
   await client1.connection.connect()
   await client2.connection.connect()
-  client1.node.remoteSubprotocol = '0.0.1'
-  client2.node.remoteSubprotocol = '0.0.1'
+  client1.node.remoteSubprotocol = 1
+  client2.node.remoteSubprotocol = 1
   privateMethods(client1).auth('10:client1', {})
   privateMethods(client2).auth('10:client2', {})
   await setTimeout(1)
@@ -339,7 +335,7 @@ it('reports on wrong authentication', async () => {
     {
       connectionId: '1',
       nodeId: '10:uuid',
-      subprotocol: '0.0.1'
+      subprotocol: 1
     }
   ])
 })
@@ -413,7 +409,7 @@ it('reports on server in user name', async () => {
     {
       connectionId: '1',
       nodeId: 'server:x',
-      subprotocol: '0.0.1'
+      subprotocol: 1
     }
   ])
 })
@@ -451,7 +447,7 @@ it('authenticates user', async () => {
     {
       connectionId: '1',
       nodeId: 'a:b:uuid',
-      subprotocol: '0.0.0'
+      subprotocol: 1
     }
   ])
   expect(authenticated).toHaveLength(1)
@@ -507,24 +503,16 @@ it('reports about synchronization errors', async () => {
 it('checks subprotocol', async () => {
   let test = createReporter()
   let client = createClient(test.app)
-  await connect(client, '10:uuid', { subprotocol: '1.0.0' })
+  await connect(client, '10:uuid', { subprotocol: 0 })
 
   expect(test.names).toEqual(['connect', 'clientError', 'disconnect'])
   let err = new LoguxError('wrong-subprotocol', {
-    supported: '0.x',
-    used: '1.0.0'
+    supported: 1,
+    used: 0
   })
   // @ts-expect-error Unofficial object extend for internal needs
   err.connectionId = '1'
   expect(test.reports[1]).toEqual(['clientError', { connectionId: '1', err }])
-})
-
-it('has method to check client subprotocol', () => {
-  let app = createServer()
-  let client = createClient(app)
-  client.node.remoteSubprotocol = '1.0.1'
-  expect(client.isSubprotocol('>= 1.0.0')).toBe(true)
-  expect(client.isSubprotocol('< 1.0.0')).toBe(false)
 })
 
 it('sends server environment in development', async () => {
@@ -539,7 +527,7 @@ it('does not send server environment in production', async () => {
   app.auth(async () => true)
 
   let client = await connectClient(app)
-  expect(sent(client)[0][4]).toEqual({ subprotocol: '0.0.1' })
+  expect(sent(client)[0][4]).toEqual({ subprotocol: 1 })
 })
 
 it('disconnects zombie', async () => {
@@ -549,11 +537,11 @@ it('disconnects zombie', async () => {
   let client2 = createClient(test.app)
 
   await client1.connection.connect()
-  client1.node.remoteSubprotocol = '0.0.1'
+  client1.node.remoteSubprotocol = 1
   privateMethods(client1).auth('10:client:a', {})
 
   await client2.connection.connect()
-  client2.node.remoteSubprotocol = '0.0.1'
+  client2.node.remoteSubprotocol = 1
   privateMethods(client2).auth('10:client:b', {})
   await setTimeout(0)
 
@@ -674,7 +662,7 @@ it('checks action meta', async () => {
     { type: 'GOOD' },
     {
       id: [2, '10:uuid', 0],
-      subprotocol: '1.0.0',
+      subprotocol: 1,
       time: 3
     }
   ])
@@ -739,7 +727,7 @@ it('checks user access for action', async () => {
   test.app.type<FooAction>('FOO', {
     async access(ctx, action, meta) {
       expect(ctx.userId).toEqual('10')
-      expect(ctx.subprotocol).toEqual('0.0.1')
+      expect(ctx.subprotocol).toEqual(1)
       expect(meta.id).toBeDefined()
       return action.bar
     }
@@ -785,7 +773,7 @@ it('checks user access for action', async () => {
 
 it('takes subprotocol from action meta', async () => {
   let app = createServer()
-  let subprotocols: string[] = []
+  let subprotocols: number[] = []
   app.type('FOO', {
     access: () => true,
     process(ctx) {
@@ -794,13 +782,10 @@ it('takes subprotocol from action meta', async () => {
   })
 
   let client = await connectClient(app)
-  app.log.add(
-    { type: 'FOO' },
-    { id: `1 ${client.nodeId} 0`, subprotocol: '1.0.0' }
-  )
+  app.log.add({ type: 'FOO' }, { id: `1 ${client.nodeId} 0`, subprotocol: 1 })
   await setTimeout(1)
 
-  expect(subprotocols).toEqual(['1.0.0'])
+  expect(subprotocols).toEqual([1])
 })
 
 it('reports about errors in access callback', async () => {
@@ -1243,11 +1228,11 @@ it('decompress subprotocol', async () => {
     { type: 'A' },
     { id: [1, '10:uuid', 0], time: 1 },
     { type: 'A' },
-    { id: [2, '10:uuid', 0], subprotocol: '2.0.0', time: 2 }
+    { id: [2, '10:uuid', 0], subprotocol: 2, time: 2 }
   ])
 
-  expect(app.log.entries()[0][1].subprotocol).toEqual('0.0.1')
-  expect(app.log.entries()[1][1].subprotocol).toEqual('2.0.0')
+  expect(app.log.entries()[0][1].subprotocol).toEqual(1)
+  expect(app.log.entries()[1][1].subprotocol).toEqual(2)
 })
 
 it('has custom processor for unknown type', async () => {
@@ -1561,7 +1546,7 @@ it('does not duplicate channel load actions', async () => {
   await setTimeout(10)
 
   function meta(time: number): object {
-    return { id: time, subprotocol: '0.0.1', time }
+    return { id: time, subprotocol: 1, time }
   }
 
   expect(sent(client).slice(1)).toEqual([
@@ -1613,7 +1598,7 @@ it('allows to return actions', async () => {
   await setTimeout(50)
 
   function meta(time: number): object {
-    return { id: time, subprotocol: '0.0.1', time }
+    return { id: time, subprotocol: 1, time }
   }
 
   expect(sent(client).slice(1)).toEqual([
@@ -2518,7 +2503,7 @@ it('allows to change how server loads initial actions', async () => {
   let app = createServer({})
   app.sendOnConnect(async (ctx, lastSync) => {
     expect(ctx.clientId).toEqual('10:client')
-    expect(ctx.subprotocol).toEqual('0.0.1')
+    expect(ctx.subprotocol).toEqual(1)
     expect(lastSync).toEqual(0)
     return [
       [

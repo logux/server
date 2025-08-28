@@ -41,10 +41,9 @@ export class ConnectContext<Headers extends object = unknown> {
   server: Server
 
   /**
-   * Action creator application subprotocol version in SemVer format.
-   * Use {@link Context#isSubprotocol} to check it.
+   * Action creator application subprotocol version.
    */
-  subprotocol: string
+  subprotocol: number
 
   /**
    * User ID taken node ID.
@@ -59,21 +58,6 @@ export class ConnectContext<Headers extends object = unknown> {
   userId: string
 
   constructor(server: Server, client: ServerClient)
-
-  /**
-   * Check creator subprotocol version. It uses `semver` npm package
-   * to parse requirements.
-   *
-   * ```js
-   * if (ctx.isSubprotocol('2.x')) {
-   *   useOldAPI()
-   * }
-   * ```
-   *
-   * @param range npm’s version requirements.
-   * @returns Is version satisfies requirements.
-   */
-  isSubprotocol(range: string): boolean
 
   /**
    * Send action back to the client.
@@ -93,13 +77,6 @@ export class ConnectContext<Headers extends object = unknown> {
 
 /**
  * Action context.
- *
- * ```js
- * server.type('FOO', {
- *   access (ctx, action, meta) {
- *     return ctx.isSubprotocol('3.x') ? check3(action) : check4(action)
- *   }
- * })
  * ```
  */
 export class Context<

@@ -3,9 +3,9 @@
 import { Server } from '../../index.js'
 
 let app = new Server({
+  minSubprotocol: 1,
   port: 1000,
-  subprotocol: '1.0.0',
-  supports: '1.x'
+  subprotocol: 1
 })
 app.nodeId = 'server:FnXaqDxY'
 

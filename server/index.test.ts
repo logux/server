@@ -1,12 +1,11 @@
 import spawn from 'cross-spawn'
 import type { ChildProcess, SpawnOptions } from 'node:child_process'
 import { join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { afterEach, expect, it } from 'vitest'
 
 import { Server } from '../index.js'
 
-const ROOT = join(fileURLToPath(import.meta.url), '..', '..')
+const ROOT = join(import.meta.dirname, '..')
 const DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
 
 let started: ChildProcess | undefined
@@ -117,8 +116,8 @@ it('uses CLI args for options', () => {
       '//localhost'
     ]),
     {
-      subprotocol: '1.0.0',
-      supports: '1.0.0'
+      minSubprotocol: 1,
+      subprotocol: 1
     }
   )
 
@@ -139,8 +138,8 @@ it('uses env for options', () => {
       LOGUX_REDIS: '//localhost'
     }),
     {
-      subprotocol: '1.0.0',
-      supports: '1.0.0'
+      minSubprotocol: 1,
+      subprotocol: 1
     }
   )
 
@@ -153,7 +152,7 @@ it('uses env for options', () => {
 it('uses combined options', () => {
   let options = Server.loadOptions(
     fakeProcess(['', '--key', './key.pem'], { LOGUX_CERT: './cert.pem' }),
-    { port: 31337, subprotocol: '1.0.0', supports: '1.0.0' }
+    { minSubprotocol: 1, port: 31337, subprotocol: 1 }
   )
 
   expect(options.port).toEqual(31337)
@@ -165,20 +164,20 @@ it('uses arg, env, options in given priority', () => {
   let options1 = Server.loadOptions(
     fakeProcess(['', '--port', '31337'], { LOGUX_PORT: 21337 }),
     {
+      minSubprotocol: 1,
       port: 11337,
-      subprotocol: '1.0.0',
-      supports: '1.0.0'
+      subprotocol: 1
     }
   )
   let options2 = Server.loadOptions(fakeProcess([], { LOGUX_PORT: 21337 }), {
+    minSubprotocol: 1,
     port: 11337,
-    subprotocol: '1.0.0',
-    supports: '1.0.0'
+    subprotocol: 1
   })
   let options3 = Server.loadOptions(fakeProcess(), {
+    minSubprotocol: 1,
     port: 11337,
-    subprotocol: '1.0.0',
-    supports: '1.0.0'
+    subprotocol: 1
   })
 
   expect(options1.port).toEqual(31337)

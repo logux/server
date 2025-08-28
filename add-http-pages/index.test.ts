@@ -10,8 +10,8 @@ import {
 } from '../index.js'
 
 const DEFAULT_OPTIONS = {
-  subprotocol: '0.0.0',
-  supports: '0.x'
+  minSubprotocol: 0,
+  subprotocol: 0
 }
 
 let lastPort = 9111

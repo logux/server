@@ -258,30 +258,25 @@ it('prints server log', async () => {
 
 it('tests authentication', async () => {
   server = new TestServer()
-  server.options.supports = '0.0.0'
+  server.options.minSubprotocol = 1
   server.auth(({ token, userId }) => userId === '10' && token === 'good')
 
   let wrong = await catchError(async () => {
-    await server.connect('10', { token: 'bad' })
+    await server.connect('10', { subprotocol: 1, token: 'bad' })
   })
   expect(wrong.message).toEqual('Wrong credentials')
 
-  await server.expectWrongCredentials('10', { token: 'bad' })
+  await server.expectWrongCredentials('10', { subprotocol: 1, token: 'bad' })
 
   let error1 = await catchError(async () => {
-    await server.connect('10', { subprotocol: '1.0.0' })
+    await server.connect('10', { subprotocol: 0 })
   })
   expect(error1.message).toContain('wrong-subprotocol')
 
-  let error2 = await catchError(async () => {
-    await server.expectWrongCredentials('10', { subprotocol: '1.0.0' })
-  })
-  expect(error2.message).toContain('wrong-subprotocol')
-
-  await server.connect('10', { token: 'good' })
+  await server.connect('10', { subprotocol: 1, token: 'good' })
 
   let notWrong = await catchError(async () => {
-    await server.expectWrongCredentials('10', { token: 'good' })
+    await server.expectWrongCredentials('10', { subprotocol: 1, token: 'good' })
   })
   expect(notWrong.message).toEqual('Credentials passed')
 })

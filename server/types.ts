@@ -6,9 +6,9 @@ import { type Action, Server } from '../index.js'
 let server = new Server<{ locale: string }>(
   Server.loadOptions(process, {
     logger: pino({ name: 'logux' }),
+    minSubprotocol: 1,
     root: '',
-    subprotocol: '1.0.0',
-    supports: '1.x'
+    subprotocol: 1
   })
 )
 

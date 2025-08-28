@@ -61,7 +61,7 @@ exports[`reports Logux error 2`] = `
 `;
 
 exports[`reports actions with metadata containing 'clients' array 1`] = `
-"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","action":{"id":100,"name":"John","type":"ADD_USER"},"meta":{"clients":["1:-lCr7e9s","2:wv0r_O5C"],"id":"1487805099387 100:uImkcF4z 0","reasons":[],"server":"server:H1f8LAyzl","subprotocol":"1.0.0","time":1487805099387},"msg":"Action was added"}
+"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","action":{"id":100,"name":"John","type":"ADD_USER"},"meta":{"clients":["1:-lCr7e9s","2:wv0r_O5C"],"id":"1487805099387 100:uImkcF4z 0","reasons":[],"server":"server:H1f8LAyzl","subprotocol":1,"time":1487805099387},"msg":"Action was added"}
 "
 `;
 
@@ -76,14 +76,14 @@ exports[`reports actions with metadata containing 'clients' array 2`] = `
           id:          [1m[32m1487[39m[35m8050[39m[33m9938[39m[33m7[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
           reasons:     []
           server:      [1mserver[22m:[34mH1f[39m[35m8LA[39m[36myzl[39m
-          subprotocol: "[1m1.0.0[22m"
+          subprotocol: [1m1[22m
           time:        [1m1487805099387[22m
 
 "
 `;
 
 exports[`reports actions with metadata containing 'excludeClients' array 1`] = `
-"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","action":{"id":100,"name":"John","type":"ADD_USER"},"meta":{"excludeClients":["1:-lCr7e9s","2:wv0r_O5C"],"id":"1487805099387 100:uImkcF4z 0","reasons":[],"server":"server:H1f8LAyzl","subprotocol":"1.0.0","time":1487805099387},"msg":"Action was added"}
+"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","action":{"id":100,"name":"John","type":"ADD_USER"},"meta":{"excludeClients":["1:-lCr7e9s","2:wv0r_O5C"],"id":"1487805099387 100:uImkcF4z 0","reasons":[],"server":"server:H1f8LAyzl","subprotocol":1,"time":1487805099387},"msg":"Action was added"}
 "
 `;
 
@@ -98,14 +98,14 @@ exports[`reports actions with metadata containing 'excludeClients' array 2`] = `
           id:             [1m[32m1487[39m[35m8050[39m[33m9938[39m[33m7[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
           reasons:        []
           server:         [1mserver[22m:[34mH1f[39m[35m8LA[39m[36myzl[39m
-          subprotocol:    "[1m1.0.0[22m"
+          subprotocol:    [1m1[22m
           time:           [1m1487805099387[22m
 
 "
 `;
 
 exports[`reports add 1`] = `
-"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","action":{"data":{"array":[1,[2],{"a":"1","b":{"c":2},"d":[],"e":null},null],"name":"John","role":null},"id":100,"type":"CHANGE_USER"},"meta":{"id":"1487805099387 100:uImkcF4z 0","reasons":["lastValue","debug"],"server":"server:H1f8LAyzl","subprotocol":"1.0.0","time":1487805099387},"msg":"Action was added"}
+"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","action":{"data":{"array":[1,[2],{"a":"1","b":{"c":2},"d":[],"e":null},null],"name":"John","role":null},"id":100,"type":"CHANGE_USER"},"meta":{"id":"1487805099387 100:uImkcF4z 0","reasons":["lastValue","debug"],"server":"server:H1f8LAyzl","subprotocol":1,"time":1487805099387},"msg":"Action was added"}
 "
 `;
 
@@ -122,14 +122,14 @@ exports[`reports add 2`] = `
           id:          [1m[32m1487[39m[35m8050[39m[33m9938[39m[33m7[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
           reasons:     ["[1mlastValue[22m", "[1mdebug[22m"]
           server:      [1mserver[22m:[34mH1f[39m[35m8LA[39m[36myzl[39m
-          subprotocol: "[1m1.0.0[22m"
+          subprotocol: [1m1[22m
           time:        [1m1487805099387[22m
 
 "
 `;
 
 exports[`reports add and clean 1`] = `
-"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","action":{"data":{"array":[1,[2],{"a":"1","b":{"c":2},"d":[],"e":null},null],"name":"John","role":null},"id":100,"type":"CHANGE_USER"},"meta":{"id":"1487805099387 100:uImkcF4z 0","reasons":["lastValue","debug"],"server":"server:H1f8LAyzl","subprotocol":"1.0.0","time":1487805099387},"msg":"Action was added and cleaned"}
+"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","action":{"data":{"array":[1,[2],{"a":"1","b":{"c":2},"d":[],"e":null},null],"name":"John","role":null},"id":100,"type":"CHANGE_USER"},"meta":{"id":"1487805099387 100:uImkcF4z 0","reasons":["lastValue","debug"],"server":"server:H1f8LAyzl","subprotocol":1,"time":1487805099387},"msg":"Action was added and cleaned"}
 "
 `;
 
@@ -146,14 +146,14 @@ exports[`reports add and clean 2`] = `
           id:          [1m[32m1487[39m[35m8050[39m[33m9938[39m[33m7[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
           reasons:     ["[1mlastValue[22m", "[1mdebug[22m"]
           server:      [1mserver[22m:[34mH1f[39m[35m8LA[39m[36myzl[39m
-          subprotocol: "[1m1.0.0[22m"
+          subprotocol: [1m1[22m
           time:        [1m1487805099387[22m
 
 "
 `;
 
 exports[`reports authenticated 1`] = `
-"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","connectionId":"670","nodeId":"admin:100:uImkcF4z","subprotocol":"1.0.0","msg":"User was authenticated"}
+"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","connectionId":"670","nodeId":"admin:100:uImkcF4z","subprotocol":1,"msg":"User was authenticated"}
 "
 `;
 
@@ -161,13 +161,13 @@ exports[`reports authenticated 2`] = `
 "[42m[30m INFO [39m[49m  [1m[32mUser was authenticated[39m[22m [2mat 1970-01-01 00:00:00[22m
         Connection ID: [1m670[22m
         Node ID:       [1madmin[22m:[31m100[39m
-        Subprotocol:   [1m1.0.0[22m
+        Subprotocol:   [1m1[22m
 
 "
 `;
 
 exports[`reports authenticated without user ID 1`] = `
-"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","connectionId":"670","nodeId":"uImkcF4z","subprotocol":"1.0.0","msg":"User was authenticated"}
+"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","connectionId":"670","nodeId":"uImkcF4z","subprotocol":1,"msg":"User was authenticated"}
 "
 `;
 
@@ -175,7 +175,7 @@ exports[`reports authenticated without user ID 2`] = `
 "[42m[30m INFO [39m[49m  [1m[32mUser was authenticated[39m[22m [2mat 1970-01-01 00:00:00[22m
         Connection ID: [1m670[22m
         Node ID:       uImkcF4z
-        Subprotocol:   [1m1.0.0[22m
+        Subprotocol:   [1m1[22m
 
 "
 `;
@@ -324,20 +324,20 @@ exports[`reports error with token 2`] = `
 `;
 
 exports[`reports listen 1`] = `
-"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","environment":"development","loguxServer":"0.0.0","nodeId":"server:FnXaqDxY","subprotocol":"0.0.0","supports":"0.x","note":["Server was started in non-secure development mode","Press Ctrl-C to shutdown server"],"listen":"ws://127.0.0.1:31337/","healthCheck":"http://127.0.0.1:31337/health","msg":"Logux server is listening"}
+"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","environment":"development","loguxServer":"0.0.0","minSubprotocol":0,"nodeId":"server:FnXaqDxY","subprotocol":0,"note":["Server was started in non-secure development mode","Press Ctrl-C to shutdown server"],"listen":"ws://127.0.0.1:31337/","healthCheck":"http://127.0.0.1:31337/health","msg":"Logux server is listening"}
 "
 `;
 
 exports[`reports listen 2`] = `
 "[42m[30m INFO [39m[49m  [1m[32mLogux server is listening[39m[22m [2mat 1970-01-01 00:00:00[22m
-        PID:          [1m21384[22m
-        Environment:  [1mdevelopment[22m
-        Logux server: [1m0.0.0[22m
-        Node ID:      [1mserver[22m:[31mFnX[39m[35maqD[39m[34mxY[39m
-        Subprotocol:  [1m0.0.0[22m
-        Supports:     [1m0.x[22m
-        Health check: [1mhttp://127.0.0.1:31337/health[22m
-        Listen:       [1mws://127.0.0.1:31337/[22m
+        PID:             [1m21384[22m
+        Environment:     [1mdevelopment[22m
+        Logux server:    [1m0.0.0[22m
+        Min subprotocol: [1m0[22m
+        Node ID:         [1mserver[22m:[31mFnX[39m[35maqD[39m[34mxY[39m
+        Subprotocol:     [1m0[22m
+        Health check:    [1mhttp://127.0.0.1:31337/health[22m
+        Listen:          [1mws://127.0.0.1:31337/[22m
         [90mServer was started in non-secure development mode[39m
         [90mPress Ctrl-C to shutdown server[39m
 
@@ -345,20 +345,20 @@ exports[`reports listen 2`] = `
 `;
 
 exports[`reports listen for custom domain 1`] = `
-"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","environment":"development","loguxServer":"0.0.0","nodeId":"server:FnXaqDxY","subprotocol":"0.0.0","supports":"0.x","note":["Server was started in non-secure development mode","Press Ctrl-C to shutdown server"],"server":true,"prometheus":"http://127.0.0.1:31338/prometheus","msg":"Logux server is listening"}
+"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","environment":"development","loguxServer":"0.0.0","minSubprotocol":0,"nodeId":"server:FnXaqDxY","subprotocol":0,"note":["Server was started in non-secure development mode","Press Ctrl-C to shutdown server"],"server":true,"prometheus":"http://127.0.0.1:31338/prometheus","msg":"Logux server is listening"}
 "
 `;
 
 exports[`reports listen for custom domain 2`] = `
 "[42m[30m INFO [39m[49m  [1m[32mLogux server is listening[39m[22m [2mat 1970-01-01 00:00:00[22m
-        PID:          [1m21384[22m
-        Environment:  [1mdevelopment[22m
-        Logux server: [1m0.0.0[22m
-        Node ID:      [1mserver[22m:[31mFnX[39m[35maqD[39m[34mxY[39m
-        Subprotocol:  [1m0.0.0[22m
-        Supports:     [1m0.x[22m
-        Prometheus:   [1mhttp://127.0.0.1:31338/prometheus[22m
-        Listen:       [1mCustom HTTP server[22m
+        PID:             [1m21384[22m
+        Environment:     [1mdevelopment[22m
+        Logux server:    [1m0.0.0[22m
+        Min subprotocol: [1m0[22m
+        Node ID:         [1mserver[22m:[31mFnX[39m[35maqD[39m[34mxY[39m
+        Subprotocol:     [1m0[22m
+        Prometheus:      [1mhttp://127.0.0.1:31338/prometheus[22m
+        Listen:          [1mCustom HTTP server[22m
         [90mServer was started in non-secure development mode[39m
         [90mPress Ctrl-C to shutdown server[39m
 
@@ -366,21 +366,21 @@ exports[`reports listen for custom domain 2`] = `
 `;
 
 exports[`reports listen for production 1`] = `
-"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","environment":"production","loguxServer":"0.0.0","nodeId":"server:FnXaqDxY","subprotocol":"0.0.0","supports":"0.x","listen":"wss://127.0.0.1:31337/","healthCheck":"https://127.0.0.1:31337/health","redis":"//localhost","msg":"Logux server is listening"}
+"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","environment":"production","loguxServer":"0.0.0","minSubprotocol":0,"nodeId":"server:FnXaqDxY","subprotocol":0,"listen":"wss://127.0.0.1:31337/","healthCheck":"https://127.0.0.1:31337/health","redis":"//localhost","msg":"Logux server is listening"}
 "
 `;
 
 exports[`reports listen for production 2`] = `
 "[42m[30m INFO [39m[49m  [1m[32mLogux server is listening[39m[22m [2mat 1970-01-01 00:00:00[22m
-        PID:          [1m21384[22m
-        Environment:  [1mproduction[22m
-        Logux server: [1m0.0.0[22m
-        Node ID:      [1mserver[22m:[31mFnX[39m[35maqD[39m[34mxY[39m
-        Subprotocol:  [1m0.0.0[22m
-        Supports:     [1m0.x[22m
-        Health check: [1mhttps://127.0.0.1:31337/health[22m
-        Redis:        [1m//localhost[22m
-        Listen:       [1mwss://127.0.0.1:31337/[22m
+        PID:             [1m21384[22m
+        Environment:     [1mproduction[22m
+        Logux server:    [1m0.0.0[22m
+        Min subprotocol: [1m0[22m
+        Node ID:         [1mserver[22m:[31mFnX[39m[35maqD[39m[34mxY[39m
+        Subprotocol:     [1m0[22m
+        Health check:    [1mhttps://127.0.0.1:31337/health[22m
+        Redis:           [1m//localhost[22m
+        Listen:          [1mwss://127.0.0.1:31337/[22m
 
 "
 `;
@@ -411,7 +411,7 @@ exports[`reports sync error 2`] = `
 `;
 
 exports[`reports unauthenticated 1`] = `
-"{"level":40,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","connectionId":"670","nodeId":"100:uImkcF4z","subprotocol":"1.0.0","msg":"Bad authentication"}
+"{"level":40,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","connectionId":"670","nodeId":"100:uImkcF4z","subprotocol":1,"msg":"Bad authentication"}
 "
 `;
 
@@ -419,7 +419,7 @@ exports[`reports unauthenticated 2`] = `
 "[43m[30m WARN [39m[49m  [1m[33mBad authentication[39m[22m [2mat 1970-01-01 00:00:00[22m
         Connection ID: [1m670[22m
         Node ID:       [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m
-        Subprotocol:   [1m1.0.0[22m
+        Subprotocol:   [1m1[22m
 
 "
 `;
@@ -464,7 +464,7 @@ exports[`reports unsubscribed 2`] = `
 `;
 
 exports[`reports useless actions 1`] = `
-"{"level":40,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","action":{"id":100,"name":"John","type":"ADD_USER"},"meta":{"id":"1487805099387 100:uImkcF4z 0","reasons":[],"server":"server:H1f8LAyzl","subprotocol":"1.0.0","time":1487805099387},"msg":"Useless action"}
+"{"level":40,"time":"1970-01-01T00:00:00.000Z","pid":21384,"hostname":"localhost","name":"test","action":{"id":100,"name":"John","type":"ADD_USER"},"meta":{"id":"1487805099387 100:uImkcF4z 0","reasons":[],"server":"server:H1f8LAyzl","subprotocol":1,"time":1487805099387},"msg":"Useless action"}
 "
 `;
 
@@ -478,7 +478,7 @@ exports[`reports useless actions 2`] = `
           id:          [1m[32m1487[39m[35m8050[39m[33m9938[39m[33m7[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
           reasons:     []
           server:      [1mserver[22m:[34mH1f[39m[35m8LA[39m[36myzl[39m
-          subprotocol: "[1m1.0.0[22m"
+          subprotocol: [1m1[22m
           time:        [1m1487805099387[22m
 
 "

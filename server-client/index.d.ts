@@ -100,19 +100,4 @@ export class ServerClient {
    * Disconnect client.
    */
   destroy(): void
-
-  /**
-   * Check client subprotocol version. It uses `semver` npm package
-   * to parse requirements.
-   *
-   * ```js
-   * if (client.isSubprotocol('4.x')) {
-   *   useOldAPI()
-   * }
-   * ```
-   *
-   * @param range npm’s version requirements.
-   * @returns Is version satisfies requirements.
-   */
-  isSubprotocol(range: string): boolean
 }

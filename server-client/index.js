@@ -1,7 +1,6 @@
 import { LoguxError, parseId } from '@logux/core'
 import cookie from 'cookie'
 import fastq from 'fastq'
-import semver from 'semver'
 
 import { ALLOWED_META } from '../allowed-meta/index.js'
 import { Context } from '../context/index.js'
@@ -132,10 +131,10 @@ export class ServerClient {
     this.clientId = clientId
     this.userId = userId
 
-    if (this.app.options.supports) {
-      if (!this.isSubprotocol(this.app.options.supports)) {
+    if (this.app.options.minSubprotocol) {
+      if (this.node.remoteSubprotocol < this.app.options.minSubprotocol) {
         throw new LoguxError('wrong-subprotocol', {
-          supported: this.app.options.supports,
+          supported: this.app.options.minSubprotocol,
           used: this.node.remoteSubprotocol
         })
       }
@@ -238,10 +237,6 @@ export class ServerClient {
       this.app.emitter.emit('disconnected', this)
     }
     this.app.connected.delete(this.key)
-  }
-
-  isSubprotocol(range) {
-    return semver.satisfies(this.node.remoteSubprotocol, range)
   }
 
   onReceive(action, meta) {

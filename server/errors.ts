@@ -4,8 +4,8 @@ import { Server, Action } from '../index.js'
 
 let server = new Server<{ locale: string }>(
   Server.loadOptions(process, {
-    subprotocol: '1.0.0',
-    supports: '1.x',
+    minSubprotocol: 1,
+    subprotocol: 1,
     root: ''
   })
 )
@@ -127,8 +127,9 @@ server.channel<BadParams>('posts', {
   }
 })
 
-let addUser =
-  defineAction<{ type: 'user/remove'; userId: string }>('user/remove')
+let addUser = defineAction<{ type: 'user/remove'; userId: string }>(
+  'user/remove'
+)
 
 server.type(addUser, {
   access(ctx, action) {

@@ -1,10 +1,9 @@
 import os from 'node:os'
 import { join, sep } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import pico from 'picocolors'
 import pino from 'pino'
 
-const root = join(fileURLToPath(import.meta.url), '..', '..')
+const root = join(import.meta.dirname, '..')
 export const PATH_TO_PRETTIFYING_PINO_TRANSPORT = join(
   root,
   'human-formatter/index.js'
@@ -129,9 +128,9 @@ const REPORTERS = {
     let details = {
       environment: r.environment,
       loguxServer: r.loguxServer,
+      minSubprotocol: r.minSubprotocol,
       nodeId: r.nodeId,
-      subprotocol: r.subprotocol,
-      supports: r.supports
+      subprotocol: r.subprotocol
     }
 
     if (r.environment === 'development') {

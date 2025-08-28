@@ -10,7 +10,7 @@ import type { LoggerOptions } from '../server/index.js'
 import type { TestClient, TestClientOptions } from '../test-client/index.js'
 
 export interface TestServerOptions
-  extends Omit<BaseServerOptions, 'subprotocol' | 'supports'> {
+  extends Omit<BaseServerOptions, 'minSubprotocol' | 'subprotocol'> {
   /**
    * Disable built-in auth.
    */
@@ -21,9 +21,9 @@ export interface TestServerOptions
    */
   logger?: Logger | LoggerOptions
 
-  subprotocol?: string
+  minSubprotocol?: number
 
-  supports?: string
+  subprotocol?: number
 }
 
 /**

@@ -33,8 +33,8 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@logux/actions": "^0.4.0",
-    "@logux/core": "^0.9.0",
+    "@logux/actions": "github:logux/actions#next",
+    "@logux/core": "github:logux/core#next",
     "cookie": "^1.0.2",
     "fastq": "^1.19.1",
     "nanoevents": "^9.1.0",
@@ -42,7 +42,6 @@
     "picocolors": "^1.1.1",
     "pino": "9.9.0",
     "pino-abstract-transport": "^2.0.0",
-    "semver": "^7.7.2",
     "tinyglobby": "^0.2.14",
     "url-pattern": "^1.0.3",
     "ws": "^8.18.3"

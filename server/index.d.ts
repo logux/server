@@ -68,9 +68,9 @@ export interface ServerOptions extends BaseServerOptions {
  * }
  *
  * const server = new Server(Object.assign({
- *   subprotocol: '1.0.0',
- *   supports: '1.x || 0.x',
- *   fileUrl: import.meta.url
+ *   subprotocol: 1,
+ *   minSubprotocol: 1,
+ *   root: import.meta.dirname
  * }, envOptions))
  *
  * server.listen()
@@ -98,9 +98,9 @@ export class Server<
    *
    * ```js
    * const server = new Server(Server.loadOptions(process, {
-   *   subprotocol: '1.0.0',
-   *   supports: '1.x',
-   *   fileUrl: import.meta.url,
+   *   minSubprotocol: 1,
+   *   subprotocol: 1,
+   *   root: import.meta.dirname,
    *   port: 31337
    * }))
    * ```

@@ -172,13 +172,13 @@ it('reports listen', async () => {
     environment: 'development',
     host: '127.0.0.1',
     loguxServer: '0.0.0',
+    minSubprotocol: 0,
     nodeId: 'server:FnXaqDxY',
     notes: {},
     port: 31337,
     redis: undefined,
     server: false,
-    subprotocol: '0.0.0',
-    supports: '0.x'
+    subprotocol: 0
   })
 })
 
@@ -188,13 +188,13 @@ it('reports listen for production', async () => {
     environment: 'production',
     host: '127.0.0.1',
     loguxServer: '0.0.0',
+    minSubprotocol: 0,
     nodeId: 'server:FnXaqDxY',
     notes: {},
     port: 31337,
     redis: '//localhost',
     server: false,
-    subprotocol: '0.0.0',
-    supports: '0.x'
+    subprotocol: 0
   })
 })
 
@@ -202,13 +202,13 @@ it('reports listen for custom domain', async () => {
   await check('listen', {
     environment: 'development',
     loguxServer: '0.0.0',
+    minSubprotocol: 0,
     nodeId: 'server:FnXaqDxY',
     notes: {
       prometheus: 'http://127.0.0.1:31338/prometheus'
     },
     server: true,
-    subprotocol: '0.0.0',
-    supports: '0.x'
+    subprotocol: 0
   })
 })
 
@@ -220,7 +220,7 @@ it('reports authenticated', async () => {
   await check('authenticated', {
     connectionId: '670',
     nodeId: 'admin:100:uImkcF4z',
-    subprotocol: '1.0.0'
+    subprotocol: 1
   })
 })
 
@@ -228,7 +228,7 @@ it('reports authenticated without user ID', async () => {
   await check('authenticated', {
     connectionId: '670',
     nodeId: 'uImkcF4z',
-    subprotocol: '1.0.0'
+    subprotocol: 1
   })
 })
 
@@ -236,7 +236,7 @@ it('reports unauthenticated', async () => {
   await check('unauthenticated', {
     connectionId: '670',
     nodeId: '100:uImkcF4z',
-    subprotocol: '1.0.0'
+    subprotocol: 1
   })
 })
 
@@ -255,7 +255,7 @@ it('reports add', async () => {
       id: '1487805099387 100:uImkcF4z 0',
       reasons: ['lastValue', 'debug'],
       server: 'server:H1f8LAyzl',
-      subprotocol: '1.0.0',
+      subprotocol: 1,
       time: 1487805099387
     }
   })
@@ -276,7 +276,7 @@ it('reports add and clean', async () => {
       id: '1487805099387 100:uImkcF4z 0',
       reasons: ['lastValue', 'debug'],
       server: 'server:H1f8LAyzl',
-      subprotocol: '1.0.0',
+      subprotocol: 1,
       time: 1487805099387
     }
   })
@@ -294,7 +294,7 @@ it('throws on circuital reference', async () => {
         id: '1487805099387 100:uImkcF4z 0',
         reasons: ['lastValue', 'debug'],
         server: 'server:H1f8LAyzl',
-        subprotocol: '1.0.0',
+        subprotocol: 1,
         time: 1487805099387
       }
     })
@@ -440,7 +440,7 @@ it('reports useless actions', async () => {
       id: '1487805099387 100:uImkcF4z 0',
       reasons: [],
       server: 'server:H1f8LAyzl',
-      subprotocol: '1.0.0',
+      subprotocol: 1,
       time: 1487805099387
     }
   })
@@ -458,7 +458,7 @@ it("reports actions with metadata containing 'clients' array", async () => {
       id: '1487805099387 100:uImkcF4z 0',
       reasons: [],
       server: 'server:H1f8LAyzl',
-      subprotocol: '1.0.0',
+      subprotocol: 1,
       time: 1487805099387
     }
   })
@@ -476,7 +476,7 @@ it("reports actions with metadata containing 'excludeClients' array", async () =
       id: '1487805099387 100:uImkcF4z 0',
       reasons: [],
       server: 'server:H1f8LAyzl',
-      subprotocol: '1.0.0',
+      subprotocol: 1,
       time: 1487805099387
     }
   })

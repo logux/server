@@ -21,7 +21,7 @@ export interface TestClientOptions {
   cookie?: object
   headers?: object
   httpHeaders?: { [key: string]: string }
-  subprotocol?: string
+  subprotocol?: number
   token?: string
 }
 

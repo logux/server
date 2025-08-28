@@ -45,7 +45,10 @@ interface ChannelOptions {
 }
 
 interface ConnectLoader<Headers extends object = unknown> {
-  (ctx: ConnectContext<Headers>, lastSynced: number):
+  (
+    ctx: ConnectContext<Headers>,
+    lastSynced: number
+  ):
     | [Action, ServerMeta][]
     | Promise<
         [
@@ -146,7 +149,8 @@ export interface BaseServerOptions {
   env?: 'development' | 'production'
 
   /**
-   * URL of main JS file in the root dir.
+   * URL of main JS file in the root dir for the cases where you can’t use
+   * `import.meta.dirname`.
    *
    * ```
    * fileUrl: import.meta.url
@@ -169,6 +173,11 @@ export interface BaseServerOptions {
    * It is required in production mode, because WSS is highly recommended.
    */
   key?: { pem: string } | string
+
+  /**
+   * The version requirements for client subprotocol version.
+   */
+  minSubprotocol?: number
 
   /**
    * Replace class for ServerNode.
@@ -221,14 +230,9 @@ export interface BaseServerOptions {
   store?: LogStore
 
   /**
-   * Server current application subprotocol version in SemVer format.
+   * Server current application subprotocol version.
    */
-  subprotocol?: string
-
-  /**
-   * npm’s version requirements for client subprotocol version.
-   */
-  supports?: string
+  subprotocol?: number
 
   /**
    * Test time to test server.
@@ -561,13 +565,13 @@ interface ReportersArguments {
     environment: 'development' | 'production'
     host: string
     loguxServer: string
+    minSubprotocol: number
     nodeId: string
     notes: object
     port: string
     redis: string
     server: boolean
-    subprotocol: string
-    supports: string
+    subprotocol: number
   }
   processed: {
     actionId: ID

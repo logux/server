@@ -94,8 +94,8 @@ export class BaseServer {
     if (typeof this.options.subprotocol === 'undefined') {
       throw optionError('Missed `subprotocol` option in server constructor')
     }
-    if (typeof this.options.supports === 'undefined') {
-      throw optionError('Missed `supports` option in server constructor')
+    if (typeof this.options.minSubprotocol === 'undefined') {
+      throw optionError('Missed `minSubprotocol` option in server constructor')
     }
 
     if (this.options.key && !this.options.cert) {
@@ -621,9 +621,7 @@ export class BaseServer {
     }
 
     let pkg = JSON.parse(
-      await readFile(
-        join(fileURLToPath(import.meta.url), '..', '..', 'package.json')
-      )
+      await readFile(join(import.meta.dirname, '..', 'package.json'))
     )
 
     this.ws.on('connection', (ws, req) => {
@@ -635,13 +633,13 @@ export class BaseServer {
       environment: this.env,
       host: this.options.host,
       loguxServer: pkg.version,
+      minSubprotocol: this.options.minSubprotocol,
       nodeId: this.nodeId,
       notes: this.listenNotes,
       port: this.options.port,
       redis: this.options.redis,
       server: !!this.options.server,
-      subprotocol: this.options.subprotocol,
-      supports: this.options.supports
+      subprotocol: this.options.subprotocol
     })
   }
 

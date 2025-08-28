@@ -12,7 +12,6 @@ import http from 'node:http'
 import https from 'node:https'
 import { join } from 'node:path'
 import { setTimeout } from 'node:timers/promises'
-import { fileURLToPath } from 'node:url'
 import { afterEach, expect, it } from 'vitest'
 import WebSocket from 'ws'
 
@@ -22,11 +21,11 @@ import {
   type ServerMeta
 } from '../index.js'
 
-const ROOT = join(fileURLToPath(import.meta.url), '..', '..')
+const ROOT = join(import.meta.dirname, '..')
 
 const DEFAULT_OPTIONS = {
-  subprotocol: '0.0.0',
-  supports: '0.x'
+  minSubprotocol: 0,
+  subprotocol: 0
 }
 const CERT = join(ROOT, 'test/fixtures/cert.pem')
 const KEY = join(ROOT, 'test/fixtures/key.pem')
@@ -122,16 +121,16 @@ afterEach(async () => {
 
 it('saves server options', () => {
   let app = new BaseServer({
-    subprotocol: '0.0.0',
-    supports: '0.x'
+    minSubprotocol: 1,
+    subprotocol: 1
   })
-  expect(app.options.supports).toEqual('0.x')
+  expect(app.options.minSubprotocol).toEqual(1)
 })
 
 it('generates node ID', () => {
   let app = new BaseServer({
-    subprotocol: '0.0.0',
-    supports: '0.x'
+    minSubprotocol: 1,
+    subprotocol: 1
   })
   expect(app.nodeId).toMatch(/^server:[\w-]+$/)
 })
@@ -144,8 +143,8 @@ it('throws on missed subprotocol', () => {
 
 it('throws on missed supported subprotocols', () => {
   expect(() => {
-    new BaseServer({ subprotocol: '0.0.0' })
-  }).toThrow(/Missed `supports` option/)
+    new BaseServer({ subprotocol: 0 })
+  }).toThrow(/Missed `minSubprotocol` option/)
 })
 
 it('sets development environment by default', () => {
@@ -163,8 +162,8 @@ it('takes environment from NODE_ENV', () => {
 it('sets environment from user', () => {
   let app = new BaseServer({
     env: 'production',
-    subprotocol: '0.0.0',
-    supports: '0.x'
+    minSubprotocol: 0,
+    subprotocol: 0
   })
   expect(app.env).toEqual('production')
 })
@@ -181,9 +180,9 @@ it('supports string as port', () => {
 
 it('uses user root', () => {
   let app = new BaseServer({
+    minSubprotocol: 0,
     root: '/a',
-    subprotocol: '0.0.0',
-    supports: '0.x'
+    subprotocol: 0
   })
   expect(app.options.root).toEqual('/a')
 })
@@ -197,9 +196,9 @@ it('creates log with default store', () => {
 it('creates log with custom store', () => {
   let store = new MemoryStore()
   let app = new BaseServer({
+    minSubprotocol: 0,
     store,
-    subprotocol: '0.0.0',
-    supports: '0.x'
+    subprotocol: 0
   })
   expect(app.log.store).toBe(store)
 })
@@ -208,9 +207,9 @@ it('uses test time and ID', () => {
   let store = new MemoryStore()
   let app = new BaseServer({
     id: 'uuid',
+    minSubprotocol: 0,
     store,
-    subprotocol: '0.0.0',
-    supports: '0.x',
+    subprotocol: 0,
     time: new TestTime()
   })
   expect(app.log.store).toEqual(store)
@@ -312,6 +311,7 @@ it('reporters on start listening', async () => {
         environment: 'test',
         host: '127.0.0.1',
         loguxServer: pkg.version,
+        minSubprotocol: 0,
         nodeId: 'server:uuid',
         notes: {
           prometheus: 'http://127.0.0.1:31338/prometheus'
@@ -319,8 +319,7 @@ it('reporters on start listening', async () => {
         port: test.app.options.port,
         redis: '//localhost',
         server: false,
-        subprotocol: '0.0.0',
-        supports: '0.x'
+        subprotocol: 0
       }
     ]
   ])
@@ -346,7 +345,7 @@ it('reporters on log events', async () => {
           reasons: ['some'],
           server: 'server:uuid',
           status: 'waiting',
-          subprotocol: '0.0.0',
+          subprotocol: 0,
           time: 1
         }
       }
@@ -362,7 +361,7 @@ it('reporters on log events', async () => {
           reasons: [],
           server: 'server:uuid',
           status: 'waiting',
-          subprotocol: '0.0.0',
+          subprotocol: 0,
           time: 2
         }
       }
@@ -767,7 +766,7 @@ it('undoes actions on client', async () => {
         reasons: ['user/1/lastValue'],
         server: 'server:uuid',
         status: 'processed',
-        subprotocol: '0.0.0',
+        subprotocol: 0,
         time: 1,
         users: ['3']
       }
@@ -776,24 +775,24 @@ it('undoes actions on client', async () => {
 })
 
 it('adds current subprotocol to meta', async () => {
-  let app = createServer({ subprotocol: '1.0.0' })
+  let app = createServer({ subprotocol: 1 })
   app.type('A', { access: () => true })
   await app.log.add({ type: 'A' }, { reasons: ['test'] })
-  expect(app.log.entries()[0][1].subprotocol).toEqual('1.0.0')
+  expect(app.log.entries()[0][1].subprotocol).toEqual(1)
 })
 
 it('adds current subprotocol only to own actions', async () => {
-  let app = createServer({ subprotocol: '1.0.0' })
+  let app = createServer({ subprotocol: 1 })
   app.type('A', { access: () => true })
   await app.log.add({ type: 'A' }, { id: '1 0:other 0', reasons: ['test'] })
   expect(app.log.entries()[0][1].subprotocol).toBeUndefined()
 })
 
 it('allows to override subprotocol in meta', async () => {
-  let app = createServer({ subprotocol: '1.0.0' })
+  let app = createServer({ subprotocol: 2 })
   app.type('A', { access: () => true })
-  await app.log.add({ type: 'A' }, { reasons: ['test'], subprotocol: '0.1.0' })
-  expect(app.log.entries()[0][1].subprotocol).toEqual('0.1.0')
+  await app.log.add({ type: 'A' }, { reasons: ['test'], subprotocol: 1 })
+  expect(app.log.entries()[0][1].subprotocol).toEqual(1)
 })
 
 it('checks channel definition', () => {
@@ -899,7 +898,7 @@ it('ignores subscription for other servers', async () => {
 it('checks channel access', async () => {
   let test = createReporter()
   let client: any = {
-    node: { onAdd: () => false, remoteSubprotocol: '0.0.0' }
+    node: { onAdd: () => false, remoteSubprotocol: 0 }
   }
   test.app.nodeIds.set('10:uuid', client)
   test.app.clientIds.set('10:uuid', client)
@@ -937,7 +936,7 @@ it('checks channel access', async () => {
 it('reports about errors during channel authorization', async () => {
   let test = createReporter()
   let client: any = {
-    node: { onAdd: () => false, remoteSubprotocol: '0.0.0' }
+    node: { onAdd: () => false, remoteSubprotocol: 0 }
   }
   test.app.nodeIds.set('10:uuid', client)
   test.app.clientIds.set('10:uuid', client)
@@ -970,7 +969,7 @@ it('reports about errors during channel authorization', async () => {
 it('subscribes clients', async () => {
   let test = createReporter()
   let client: any = {
-    node: { onAdd: () => false, remoteSubprotocol: '0.0.0' }
+    node: { onAdd: () => false, remoteSubprotocol: 0 }
   }
   test.app.nodeIds.set('10:a:uuid', client)
   test.app.clientIds.set('10:a', client)
@@ -1077,7 +1076,7 @@ it('subscribes clients', async () => {
 it('subscribes clients with multiple filters', async () => {
   let test = createReporter()
   let client: any = {
-    node: { onAdd: () => false, remoteSubprotocol: '0.0.0' }
+    node: { onAdd: () => false, remoteSubprotocol: 0 }
   }
   test.app.nodeIds.set('10:a:uuid', client)
   test.app.clientIds.set('10:a', client)
@@ -1138,7 +1137,7 @@ it('subscribes clients with multiple filters', async () => {
 it('cancels subscriptions on disconnect', async () => {
   let app = createServer()
   let client: any = {
-    node: { onAdd: () => false, remoteSubprotocol: '0.0.0' }
+    node: { onAdd: () => false, remoteSubprotocol: 0 }
   }
   app.nodeIds.set('10:uuid', client)
   app.clientIds.set('10:uuid', client)
@@ -1174,7 +1173,7 @@ it('cancels subscriptions on disconnect', async () => {
 it('reports about errors during channel initialization', async () => {
   let test = createReporter()
   let client: any = {
-    node: { onAdd: () => false, remoteSubprotocol: '0.0.0' }
+    node: { onAdd: () => false, remoteSubprotocol: 0 }
   }
   test.app.nodeIds.set('10:uuid', client)
   test.app.clientIds.set('10:uuid', client)
@@ -1213,7 +1212,7 @@ it('reports about errors during channel initialization', async () => {
 it('loads initial actions during subscription', async () => {
   let test = createReporter({ time: new TestTime() })
   let client: any = {
-    node: { onAdd: () => false, remoteSubprotocol: '0.0.0' }
+    node: { onAdd: () => false, remoteSubprotocol: 0 }
   }
   test.app.nodeIds.set('10:uuid', client)
   test.app.clientIds.set('10:uuid', client)
@@ -1270,7 +1269,7 @@ it('calls unsubscribe() channel callback with logux/unsubscribe', async () => {
     node: {
       onAdd: () => false,
       remoteHeaders: { preservedHeaders: true },
-      remoteSubprotocol: '0.0.0'
+      remoteSubprotocol: 0
     }
   }
   let nodeId = '10:uuid'
@@ -1316,7 +1315,7 @@ it('calls unsubscribe() channel callback with logux/unsubscribe', async () => {
         headers: { preservedHeaders: true },
         nodeId,
         params: { id: '10' },
-        subprotocol: '0.0.0',
+        subprotocol: 0,
         userId
       }),
       expect.objectContaining({
@@ -1406,7 +1405,7 @@ it('has shortcuts for resend arrays', async () => {
         reasons: ['test'],
         server: 'server:uuid',
         status: 'waiting',
-        subprotocol: '0.0.0',
+        subprotocol: 0,
         time: 1,
         users: ['1']
       }
@@ -1425,7 +1424,7 @@ it('has shortcuts for resend arrays', async () => {
         reasons: ['test'],
         server: 'server:uuid',
         status: 'processed',
-        subprotocol: '0.0.0',
+        subprotocol: 0,
         time: 1,
         users: ['1']
       }
@@ -1480,17 +1479,17 @@ it('has shortcut API for action creators', async () => {
 it('has alias to root from file URL', () => {
   let app = new BaseServer({
     fileUrl: import.meta.url,
-    subprotocol: '1.0.0',
-    supports: '1.0.0'
+    minSubprotocol: 1,
+    subprotocol: 1
   })
-  expect(app.options.root).toEqual(join(fileURLToPath(import.meta.url), '..'))
+  expect(app.options.root).toEqual(import.meta.dirname)
 })
 
 it('has custom logger', () => {
   let app = new BaseServer({
-    fileUrl: import.meta.url,
-    subprotocol: '1.0.0',
-    supports: '1.0.0'
+    minSubprotocol: 1,
+    root: import.meta.dirname,
+    subprotocol: 1
   })
   spyOn(console, 'warn', () => {})
   app.logger.warn({ test: 1 }, 'test')
@@ -1499,9 +1498,9 @@ it('has custom logger', () => {
 
 it('subscribes clients manually', async () => {
   let app = new BaseServer({
-    fileUrl: import.meta.url,
-    subprotocol: '1.0.0',
-    supports: '1.0.0'
+    minSubprotocol: 1,
+    root: import.meta.dirname,
+    subprotocol: 1
   })
   let actions: Action[] = []
   app.log.on('add', (action, meta) => {

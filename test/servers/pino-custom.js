@@ -14,9 +14,9 @@ let logger = pino({
 
 let app = new Server({
   logger,
+  minSubprotocol: 1,
   port: 2000,
-  subprotocol: '1.0.0',
-  supports: '1.x'
+  subprotocol: 1
 })
 app.nodeId = 'server:FnXaqDxY'
 

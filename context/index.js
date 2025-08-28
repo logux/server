@@ -1,5 +1,4 @@
 import { parseId } from '@logux/core'
-import semver from 'semver'
 
 export class Context {
   constructor(server, meta) {
@@ -32,10 +31,6 @@ export class Context {
     } else {
       this.headers = {}
     }
-  }
-
-  isSubprotocol(range) {
-    return semver.satisfies(this.subprotocol, range)
   }
 
   sendBack(action, meta = {}) {

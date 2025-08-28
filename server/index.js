@@ -28,6 +28,9 @@ let cliOptionsSpec = {
       description: 'Logger type',
       parse: value => oneOf(['human', 'json'], value)
     },
+    minSubprotocol: {
+      description: 'Check supported client subprotocols'
+    },
     port: {
       alias: 'p',
       description: 'Port to bind server',
@@ -38,9 +41,6 @@ let cliOptionsSpec = {
     },
     subprotocol: {
       description: 'Server subprotocol'
-    },
-    supports: {
-      description: 'Range of supported client subprotocols'
     }
   }
 }

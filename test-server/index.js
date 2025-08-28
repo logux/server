@@ -14,8 +14,8 @@ export class TestServer extends BaseServer {
     opts.time.lastId += 1
     super({
       id: `${opts.time.lastId}`,
-      subprotocol: '0.0.0',
-      supports: '0.0.0',
+      minSubprotocol: 0,
+      subprotocol: 0,
       ...opts
     })
     if (opts.logger) {
