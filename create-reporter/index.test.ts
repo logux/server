@@ -282,12 +282,12 @@ it('reports add and clean', async () => {
   })
 })
 
-it('throws on circulal reference', () => {
+it('throws on circuital reference', async () => {
   let a: { b: any } = { b: undefined }
   let b: { a: any } = { a: undefined }
   a.b = b
   b.a = a
-  expect(() =>
+  await expect(() =>
     check('add', {
       action: { a, type: 'CHANGE_USER' },
       meta: {

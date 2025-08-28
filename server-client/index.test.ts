@@ -498,13 +498,10 @@ it('reports about synchronization errors', async () => {
   await getPair(client).wait()
 
   expect(test.names).toEqual(['connect', 'error'])
-  expect(test.reports[1]).toEqual([
-    'error',
-    {
-      connectionId: '1',
-      err: new LoguxError('wrong-format', undefined, true)
-    }
-  ])
+  let err = new LoguxError('wrong-format', undefined, true)
+  // @ts-expect-error Unofficial object extend for internal needs
+  err.connectionId = '1'
+  expect(test.reports[1]).toEqual(['error', { connectionId: '1', err }])
 })
 
 it('checks subprotocol', async () => {
@@ -513,16 +510,13 @@ it('checks subprotocol', async () => {
   await connect(client, '10:uuid', { subprotocol: '1.0.0' })
 
   expect(test.names).toEqual(['connect', 'clientError', 'disconnect'])
-  expect(test.reports[1]).toEqual([
-    'clientError',
-    {
-      connectionId: '1',
-      err: new LoguxError('wrong-subprotocol', {
-        supported: '0.x',
-        used: '1.0.0'
-      })
-    }
-  ])
+  let err = new LoguxError('wrong-subprotocol', {
+    supported: '0.x',
+    used: '1.0.0'
+  })
+  // @ts-expect-error Unofficial object extend for internal needs
+  err.connectionId = '1'
+  expect(test.reports[1]).toEqual(['clientError', { connectionId: '1', err }])
 })
 
 it('has method to check client subprotocol', () => {
