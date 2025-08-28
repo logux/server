@@ -16,7 +16,8 @@
   "scripts": {
     "test:lint": "eslint .",
     "test:types": "check-dts",
-    "test": "vitest run --coverage && pnpm run /^test:/"
+    "test:coverage": "vitest run --coverage",
+    "test": "pnpm run /^test:/"
   },
   "author": "Andrey Sitnik <andrey@sitnik.ru>",
   "license": "MIT",
