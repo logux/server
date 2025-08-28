@@ -1,3 +1,5 @@
+import '../test/force-colors.js'
+
 import { LoguxError } from '@logux/core'
 import { nanoid } from 'nanoid'
 import { existsSync, readFileSync, statSync } from 'node:fs'
