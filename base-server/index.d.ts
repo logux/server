@@ -19,7 +19,6 @@ import type {
   IncomingMessage,
   ServerResponse
 } from 'node:http'
-import type { LogFn } from 'pino'
 
 import type {
   ChannelContext,
@@ -27,6 +26,10 @@ import type {
   Context
 } from '../context/index.js'
 import type { ServerClient } from '../server-client/index.js'
+
+interface LogFn {
+  (...objs: unknown[]): void
+}
 
 interface TypeOptions {
   /**
@@ -614,6 +617,7 @@ export type Resend =
   | string[]
 
 export interface Logger {
+  debug(details: object, message: string): void
   error(details: object, message: string): void
   fatal(details: object, message: string): void
   info(details: object, message: string): void

@@ -14,5 +14,6 @@ app.nodeId = 'server:FnXaqDxY'
 app.auth(async () => true)
 
 app.logger.info({ field: 1 }, 'Hi from custom logger')
+app.logger.debug('Debug message')
 
 app.listen()

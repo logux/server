@@ -4,18 +4,25 @@ import {
   type Logger
 } from '../base-server/index.js'
 
+export interface LogStream {
+  /**
+   * Used to synchronously write log messages on application failure.
+   */
+  flushSync?(): void
+
+  write(str: string): void
+}
+
 export interface LoggerOptions {
+  /**
+   * Use color for human output.
+   */
+  color?: boolean
+
   /**
    * Stream to be used by logger to write log.
    */
-  stream?: {
-    /**
-     * Used by pino to synchronously write log messages on application failure.
-     */
-    flushSync?(): void
-
-    write(str: string): void
-  }
+  stream?: LogStream
 
   /**
    * Logger message format.
@@ -28,28 +35,6 @@ export interface ServerOptions extends BaseServerOptions {
    * Logger with custom settings.
    *
    * You can either configure built-in logger or provide your own.
-   * Custom logger example: pino logger that streams logs to
-   * elasticsearch
-   *
-   * ```js
-   * import pino from 'pino'
-   * import pinoElastic from 'pino-elasticsearch'
-   *
-   * const streamToElastic = pinoElastic({
-   *   consistency: 'one',
-   *   node: 'http://localhost:9200',
-   *   ecs: true
-   * })
-   *
-   * const server = new Server(
-   *   Server.loadOptions(process, {
-   *     …,
-   *     logger: pino({ level: 'info' }, streamToElastic)
-   *   })
-   * )
-   * ```
-   *
-   * Other logger examples can be found here http://getpino.io/#/docs/ecosystem
    */
   logger?: Logger | LoggerOptions
 }

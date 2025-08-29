@@ -40,8 +40,6 @@
     "nanoevents": "^9.1.0",
     "nanoid": "^5.1.5",
     "picocolors": "^1.1.1",
-    "pino": "9.9.0",
-    "pino-abstract-transport": "^2.0.0",
     "tinyglobby": "^0.2.14",
     "url-pattern": "^1.0.3",
     "ws": "^8.18.3"

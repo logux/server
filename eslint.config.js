@@ -25,6 +25,12 @@ export default [
     }
   },
   {
+    files: ['create-reporter/index.js'],
+    rules: {
+      'perfectionist/sort-objects': 'off'
+    }
+  },
+  {
     files: ['server/index.js'],
     rules: {
       'n/global-require': 'off'

@@ -1,11 +1,9 @@
 import { defineAction, type LoguxSubscribeAction } from '@logux/actions'
-import pino from 'pino'
 
 import { type Action, Server } from '../index.js'
 
 let server = new Server<{ locale: string }>(
   Server.loadOptions(process, {
-    logger: pino({ name: 'logux' }),
     minSubprotocol: 1,
     root: '',
     subprotocol: 1

@@ -1,10 +1,6 @@
-import { once } from 'node:events'
 import os from 'node:os'
-import { Transform } from 'node:stream'
 import { stripVTControlCharacters } from 'node:util'
 import pico from 'picocolors'
-import pino from 'pino'
-import abstractTransport from 'pino-abstract-transport'
 
 import { mulberry32, onceXmur3 } from './utils.js'
 
@@ -30,6 +26,7 @@ const PARAMS_BLACKLIST = {
 }
 
 const LABELS = {
+  20: (c, str) => label(c, ' DEBUG ', 'white', 'bgWhite', 'black', str),
   30: (c, str) => label(c, ' INFO ', 'green', 'bgGreen', 'black', str),
   40: (c, str) => label(c, ' WARN ', 'yellow', 'bgYellow', 'black', str),
   50: (c, str) => label(c, ' ERROR ', 'red', 'bgRed', 'white', str),
@@ -232,7 +229,7 @@ function prettyStackTrace(c, stack, basepath) {
     .join(NEXT_LINE)
 }
 
-function humanFormatter(options) {
+export default function humanFormatter(options) {
   let c = pico.createColors(options.color)
   let basepath = options.basepath
 
@@ -272,33 +269,4 @@ function humanFormatter(options) {
 
     return message.filter(i => i !== '').join(NEXT_LINE) + SEPARATOR
   }
-}
-
-export default async function (options) {
-  let format = humanFormatter(options)
-  let destination = pino.destination({
-    dest: options.destination || 1,
-    sync: options.sync || false
-  })
-  await once(destination, 'ready')
-  let transform = new Transform({
-    autoDestroy: true,
-    objectMode: true,
-    transform(chunk, encoding, callback) {
-      callback(null, format(chunk))
-    }
-  })
-
-  return abstractTransport(
-    source => {
-      source.pipe(transform)
-      transform.pipe(destination)
-    },
-    {
-      close(err, cb) {
-        transform.end()
-        transform.on('close', cb.bind(null, err))
-      }
-    }
-  )
 }

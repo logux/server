@@ -1,13 +1,8 @@
 import os from 'node:os'
-import { join, sep } from 'node:path'
+import { sep } from 'node:path'
 import pico from 'picocolors'
-import pino from 'pino'
 
-const root = join(import.meta.dirname, '..')
-export const PATH_TO_PRETTIFYING_PINO_TRANSPORT = join(
-  root,
-  'human-formatter/index.js'
-)
+import humanFormatter from '../human-formatter/index.js'
 
 const ERROR_CODES = {
   EACCES: (e, environment) => {
@@ -179,40 +174,6 @@ const REPORTERS = {
   zombie: () => ({ level: 'warn', msg: 'Zombie client was disconnected' })
 }
 
-function createLogger(options) {
-  if (options.logger === 'human' || options.logger.type === 'human') {
-    let env = options.env || process.env.NODE_ENV || 'development'
-    let color =
-      env !== 'development' ? false : pico.createColors().isColorSupported
-    let basepath = options.root || process.cwd()
-    if (basepath.slice(-1) !== sep) basepath += sep
-
-    let logger = pino(
-      pino.transport({
-        options: {
-          basepath,
-          color,
-          destination: options.logger.destination
-        },
-        target: PATH_TO_PRETTIFYING_PINO_TRANSPORT
-      })
-    )
-
-    // NOTE: needed only for tests
-    logger._basepath = basepath
-    logger._color = color
-
-    return logger
-  }
-  return pino(
-    {
-      name: 'logux-server',
-      timestamp: pino.stdTimeFunctions.isoTime
-    },
-    options.logger.stream || pino.destination()
-  )
-}
-
 function cleanFromKeys(obj, regexp, seen) {
   let result = {}
   for (let key in obj) {
@@ -245,12 +206,65 @@ export function createReporter(options) {
     )
   }
 
-  let customLoggerProvided =
-    typeof options.logger !== 'string' && 'info' in options.logger
-  if (customLoggerProvided) {
+  if (typeof options.logger !== 'string' && 'info' in options.logger) {
     reporter.logger = options.logger
   } else {
-    reporter.logger = createLogger(options)
+    let format
+    if (options.logger === 'human' || options.logger.type === 'human') {
+      let basepath = options.root || process.cwd()
+      if (basepath.slice(-1) !== sep) basepath += sep
+      let env = options.env || process.env.NODE_ENV || 'development'
+      let color = false
+      /* c8 ignore next 3 */
+      if (env === 'development') {
+        color = pico.createColors().isColorSupported
+      }
+      if (typeof options.logger === 'object' && options.logger.color) {
+        color = true
+      }
+      format = humanFormatter({ basepath, color })
+    } else {
+      format = record => JSON.stringify(record) + '\n'
+    }
+    let stream = options.logger?.stream ?? process.stderr
+
+    function createRecord(level, details, msg) {
+      /* c8 ignore next 4 */
+      if (typeof details === 'string') {
+        msg = details
+        details = {}
+      }
+      return {
+        level,
+        time: new Date().toISOString(),
+        pid: process.pid,
+        ...details,
+        msg
+      }
+    }
+
+    reporter.logger = {
+      /* c8 ignore next 3 */
+      debug(details, msg) {
+        stream.write(format(createRecord(20, details, msg)))
+      },
+      info(details, msg) {
+        stream.write(format(createRecord(30, details, msg)))
+      },
+      warn(details, msg) {
+        stream.write(format(createRecord(40, details, msg)))
+      },
+      error(details, msg) {
+        stream.write(format(createRecord(50, details, msg)))
+      },
+      fatal(details, msg) {
+        if (stream.flushSync) {
+          stream.flushSync(format(createRecord(60, details, msg)))
+        } else {
+          stream.write(format(createRecord(60, details, msg)))
+        }
+      }
+    }
   }
   return reporter
 }

@@ -1,50 +1,20 @@
-import '../test/force-colors.js'
-
 import { LoguxError } from '@logux/core'
-import { nanoid } from 'nanoid'
-import { existsSync, readFileSync, statSync } from 'node:fs'
-import os from 'node:os'
-import { join } from 'node:path'
-import pino from 'pino'
-import { afterEach, expect, it } from 'vitest'
+import { expect, it } from 'vitest'
 
-import { createReporter, PATH_TO_PRETTIFYING_PINO_TRANSPORT } from './index.js'
-
-// Source: https://github.com/pinojs/pino/blob/03dac4d1b7e567f4a70f5fb448acc0ea8b75b2a6/test/helper.js#L55
-export function watchFileCreated(filename: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    let TIMEOUT = Number(process.env.PINO_TEST_WAIT_WATCHFILE_TIMEOUT) || 4000
-    let INTERVAL = 100
-    let threshold = TIMEOUT / INTERVAL
-    let counter = 0
-    let interval = setInterval(() => {
-      let exists = existsSync(filename)
-      // On some CI runs file is created but not filled
-      if (exists && statSync(filename).size !== 0) {
-        clearInterval(interval)
-        resolve()
-      } else if (counter <= threshold) {
-        counter++
-      } else {
-        clearInterval(interval)
-        reject(
-          new Error(
-            `${filename} hasn't been created within ${TIMEOUT} ms. ` +
-              (exists
-                ? 'File exist, but still empty.'
-                : 'File not yet created.')
-          )
-        )
-      }
-    }, INTERVAL)
-  })
-}
+import { createReporter } from './index.js'
 
 class MemoryStream {
+  flushSync: ((chunk: string) => void) | undefined
+
   string: string
 
-  constructor() {
+  constructor(flushSync: boolean) {
     this.string = ''
+    if (flushSync) {
+      this.flushSync = chunk => {
+        this.string += chunk + 'FLUSH'
+      }
+    }
   }
 
   write(chunk: string): void {
@@ -62,38 +32,27 @@ function clean(str: string): string {
     .replace(/PID:(\s+.*m)\d+(.*m)/, 'PID:$121384$2')
 }
 
-async function check(type: string, details?: object): Promise<void> {
-  let json = new MemoryStream()
+function check(type: string, details?: object): void {
+  let json = new MemoryStream(true)
   let jsonReporter = createReporter({
-    logger: pino(
-      {
-        name: 'test',
-        timestamp: pino.stdTimeFunctions.isoTime
-      },
-      json
-    )
+    logger: {
+      stream: json,
+      type: 'json'
+    }
   })
-
   jsonReporter(type, details)
   expect(clean(json.string)).toMatchSnapshot()
 
-  let destination = join(os.tmpdir(), '_' + nanoid())
-  let logger = pino(
-    pino.transport({
-      options: {
-        basepath: '/dev/app/',
-        destination
-      },
-      target: PATH_TO_PRETTIFYING_PINO_TRANSPORT
-    })
-  )
+  let human = new MemoryStream(false)
   let humanReporter = createReporter({
-    logger
+    logger: {
+      color: true,
+      stream: human,
+      type: 'human'
+    }
   })
-
   humanReporter(type, details)
-  await watchFileCreated(destination)
-  expect(clean(readFileSync(destination).toString())).toMatchSnapshot()
+  expect(clean(human.string)).toMatchSnapshot()
 }
 
 function createError(name: string, message: string): Error {
@@ -108,66 +67,8 @@ function createError(name: string, message: string): Error {
   return err
 }
 
-let originEnv = process.env.NODE_ENV
-afterEach(() => {
-  process.env.NODE_ENV = originEnv
-})
-
-it('uses passed logger instance', () => {
-  let logger = pino({ name: 'test' })
-  let reporter = createReporter({ logger })
-  expect(reporter.logger).toEqual(logger)
-})
-
-it('creates JSON reporter', () => {
-  let reporterStream = new MemoryStream()
-  let reporter = createReporter({ logger: { stream: reporterStream } })
-  reporter('unknownType', {})
-  expect(clean(reporterStream.string)).toMatchSnapshot()
-})
-
-it('creates human reporter', async () => {
-  let destination = join(
-    os.tmpdir(),
-    '_' + Math.random().toString(36).substring(2, 11)
-  )
-
-  let reporter = createReporter({
-    logger: {
-      destination,
-      type: 'human'
-    },
-    root: '/dir/'
-  })
-  reporter('unknownType', {})
-  await watchFileCreated(destination)
-  expect(clean(readFileSync(destination).toString())).toMatchSnapshot()
-})
-
-it('adds trailing slash to path', () => {
-  let reporter = createReporter({ logger: 'human', root: '/dir' })
-  expect(reporter.logger._basepath).toEqual('/dir/')
-})
-
-it('uses colors by default', () => {
-  delete process.env.NODE_ENV
-  let reporter = createReporter({ logger: 'human' })
-  expect(reporter.logger._color).toBe(true)
-})
-
-it('uses color in development', () => {
-  let reporter = createReporter({ env: 'development', logger: 'human' })
-  expect(reporter.logger._color).toBe(true)
-})
-
-it('uses environment variable to detect environment', () => {
-  process.env.NODE_ENV = 'production'
-  let reporter = createReporter({ logger: 'human' })
-  expect(reporter.logger._color).toBe(false)
-})
-
-it('reports listen', async () => {
-  await check('listen', {
+it('reports listen', () => {
+  check('listen', {
     cert: false,
     environment: 'development',
     host: '127.0.0.1',
@@ -182,8 +83,8 @@ it('reports listen', async () => {
   })
 })
 
-it('reports listen for production', async () => {
-  await check('listen', {
+it('reports listen for production', () => {
+  check('listen', {
     cert: true,
     environment: 'production',
     host: '127.0.0.1',
@@ -198,8 +99,8 @@ it('reports listen for production', async () => {
   })
 })
 
-it('reports listen for custom domain', async () => {
-  await check('listen', {
+it('reports listen for custom domain', () => {
+  check('listen', {
     environment: 'development',
     loguxServer: '0.0.0',
     minSubprotocol: 0,
@@ -212,36 +113,36 @@ it('reports listen for custom domain', async () => {
   })
 })
 
-it('reports connect', async () => {
-  await check('connect', { connectionId: '670', ipAddress: '10.110.6.56' })
+it('reports connect', () => {
+  check('connect', { connectionId: '670', ipAddress: '10.110.6.56' })
 })
 
-it('reports authenticated', async () => {
-  await check('authenticated', {
+it('reports authenticated', () => {
+  check('authenticated', {
     connectionId: '670',
     nodeId: 'admin:100:uImkcF4z',
     subprotocol: 1
   })
 })
 
-it('reports authenticated without user ID', async () => {
-  await check('authenticated', {
+it('reports authenticated without user ID', () => {
+  check('authenticated', {
     connectionId: '670',
     nodeId: 'uImkcF4z',
     subprotocol: 1
   })
 })
 
-it('reports unauthenticated', async () => {
-  await check('unauthenticated', {
+it('reports unauthenticated', () => {
+  check('unauthenticated', {
     connectionId: '670',
     nodeId: '100:uImkcF4z',
     subprotocol: 1
   })
 })
 
-it('reports add', async () => {
-  await check('add', {
+it('reports add', () => {
+  check('add', {
     action: {
       data: {
         array: [1, [2], { a: '1', b: { c: 2 }, d: [], e: null }, null],
@@ -261,8 +162,8 @@ it('reports add', async () => {
   })
 })
 
-it('reports add and clean', async () => {
-  await check('addClean', {
+it('reports add and clean', () => {
+  check('addClean', {
     action: {
       data: {
         array: [1, [2], { a: '1', b: { c: 2 }, d: [], e: null }, null],
@@ -282,12 +183,12 @@ it('reports add and clean', async () => {
   })
 })
 
-it('throws on circuital reference', async () => {
+it('throws on circuital reference', () => {
   let a: { b: any } = { b: undefined }
   let b: { a: any } = { a: undefined }
   a.b = b
   b.a = a
-  await expect(() =>
+  expect(() => {
     check('add', {
       action: { a, type: 'CHANGE_USER' },
       meta: {
@@ -298,91 +199,91 @@ it('throws on circuital reference', async () => {
         time: 1487805099387
       }
     })
-  ).rejects.toThrow('Circular reference in action')
+  }).toThrow('Circular reference in action')
 })
 
-it('reports clean', async () => {
-  await check('clean', {
+it('reports clean', () => {
+  check('clean', {
     actionId: '1487805099387 100:uImkcF4z 0'
   })
 })
 
-it('reports denied', async () => {
-  await check('denied', {
+it('reports denied', () => {
+  check('denied', {
     actionId: '1487805099387 100:uImkcF4z 0'
   })
 })
 
-it('reports unknownType', async () => {
-  await check('unknownType', {
+it('reports unknownType', () => {
+  check('unknownType', {
     actionId: '1487805099387 100:vAApgNT9 0',
     type: 'CHANGE_SER'
   })
 })
 
-it('reports unknownType from server', async () => {
-  await check('unknownType', {
+it('reports unknownType from server', () => {
+  check('unknownType', {
     actionId: '1650269021700 server:FnXaqDxY 0',
     type: 'CHANGE_SER'
   })
 })
 
-it('reports wrongChannel', async () => {
-  await check('wrongChannel', {
+it('reports wrongChannel', () => {
+  check('wrongChannel', {
     actionId: '1650269045800 100:IsvVzqWx 0',
     channel: 'ser/100'
   })
 })
 
-it('reports wrongChannel without name', async () => {
-  await check('wrongChannel', {
+it('reports wrongChannel without name', () => {
+  check('wrongChannel', {
     actionId: '1650269056600 100:uImkcF4z 0',
     channel: undefined
   })
 })
 
-it('reports subscribed', async () => {
-  await check('subscribed', {
+it('reports subscribed', () => {
+  check('subscribed', {
     actionId: '1487805099387 100:uImkcF4z 0',
     channel: 'user/100'
   })
 })
 
-it('reports unsubscribed', async () => {
-  await check('unsubscribed', {
+it('reports unsubscribed', () => {
+  check('unsubscribed', {
     actionId: '1650271940900 100:uImkcF4z 0',
     channel: 'user/100'
   })
 })
 
-it('reports disconnect', async () => {
-  await check('disconnect', { nodeId: '100:uImkcF4z' })
+it('reports disconnect', () => {
+  check('disconnect', { nodeId: '100:uImkcF4z' })
 })
 
-it('reports disconnect from unauthenticated user', async () => {
-  await check('disconnect', { connectionId: '670' })
+it('reports disconnect from unauthenticated user', () => {
+  check('disconnect', { connectionId: '670' })
 })
 
-it('reports zombie', async () => {
-  await check('zombie', { nodeId: '100:uImkcF4z' })
+it('reports zombie', () => {
+  check('zombie', { nodeId: '100:uImkcF4z' })
 })
 
-it('reports destroy', async () => {
-  await check('destroy')
+it('reports destroy', () => {
+  check('destroy')
 })
 
-it('reports EACCES error', async () => {
-  await check('error', { err: { code: 'EACCES', port: 80 }, fatal: true })
+it('reports EACCES error', () => {
+  check('error', { err: { code: 'EACCES', port: 80 }, fatal: true })
 })
 
-it('reports EADDRINUSE error', async () => {
-  await check('error', {
+it('reports EADDRINUSE error', () => {
+  check('error', {
     err: { code: 'EADDRINUSE', port: 31337 },
     fatal: true
   })
 })
 
-it('reports Logux error', async () => {
+it('reports Logux error', () => {
   let err = {
     logux: true,
     message: 'Unknown option `suprotocol` in server constructor',
@@ -390,47 +291,47 @@ it('reports Logux error', async () => {
       'Maybe there is a mistake in option name or this version ' +
       'of Logux Server doesn’t support this option'
   }
-  await check('error', { err, fatal: true })
+  check('error', { err, fatal: true })
 })
 
-it('reports error', async () => {
-  await check('error', {
+it('reports error', () => {
+  check('error', {
     err: createError('Error', 'Some mistake'),
     fatal: true
   })
 })
 
-it('reports error from action', async () => {
-  await check('error', {
+it('reports error from action', () => {
+  check('error', {
     actionId: '1487805099387 100:uImkcF4z 0',
     err: createError('Error', 'Some mistake')
   })
 })
 
-it('reports error with token', async () => {
-  await check('error', {
+it('reports error with token', () => {
+  check('error', {
     actionId: '1487805099387 100:uImkcF4z 0',
     err: createError('Error', '{"Authorization":"Bearer secret"}')
   })
 })
 
-it('reports sync error', async () => {
+it('reports sync error', () => {
   let err = new LoguxError('unknown-message', 'bad', true)
-  await check('error', { connectionId: '670', err })
+  check('error', { connectionId: '670', err })
 })
 
-it('reports error from client', async () => {
+it('reports error from client', () => {
   let err = new LoguxError('timeout', 5000, true)
-  await check('clientError', { connectionId: '670', err })
+  check('clientError', { connectionId: '670', err })
 })
 
-it('reports error from node', async () => {
+it('reports error from node', () => {
   let err = new LoguxError('timeout', 5000, false)
-  await check('clientError', { err, nodeId: '100:uImkcF4z' })
+  check('clientError', { err, nodeId: '100:uImkcF4z' })
 })
 
-it('reports useless actions', async () => {
-  await check('useless', {
+it('reports useless actions', () => {
+  check('useless', {
     action: {
       id: 100,
       name: 'John',
@@ -446,8 +347,8 @@ it('reports useless actions', async () => {
   })
 })
 
-it("reports actions with metadata containing 'clients' array", async () => {
-  await check('add', {
+it("reports actions with metadata containing 'clients' array", () => {
+  check('add', {
     action: {
       id: 100,
       name: 'John',
@@ -464,8 +365,8 @@ it("reports actions with metadata containing 'clients' array", async () => {
   })
 })
 
-it("reports actions with metadata containing 'excludeClients' array", async () => {
-  await check('add', {
+it('reports actions with excludeClients metadata', () => {
+  check('add', {
     action: {
       id: 100,
       name: 'John',
@@ -480,4 +381,17 @@ it("reports actions with metadata containing 'excludeClients' array", async () =
       time: 1487805099387
     }
   })
+})
+
+it('allows custom loggers', () => {
+  let text = new MemoryStream(false)
+  let jsonReporter = createReporter({
+    logger: {
+      info(details: object, msg: string) {
+        text.write(JSON.stringify({ details, msg }))
+      }
+    }
+  })
+  jsonReporter('connect', { connectionId: '670', ipAddress: '10.110.6.56' })
+  expect(clean(text.string)).toMatchSnapshot()
 })
