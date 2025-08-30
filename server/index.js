@@ -1,5 +1,5 @@
 import { join, relative } from 'node:path'
-import pico from 'picocolors'
+import { styleText } from 'node:util'
 import { glob } from 'tinyglobby'
 
 import { BaseServer } from '../base-server/index.js'
@@ -107,7 +107,10 @@ export class Server extends BaseServer {
       return Object.assign(defaults, options)
     } catch (e) {
       process.stderr.write(
-        `${pico.bgRed(pico.black(' FATAL '))} ${e.message}\n`
+        styleText(
+          'red',
+          styleText('bgRed', styleText('black', ' FATAL ')) + `${e.message}\n`
+        )
       )
       return process.exit(1)
     }

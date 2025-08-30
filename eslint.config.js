@@ -12,7 +12,7 @@ export default [
       'n/no-unsupported-features/node-builtins': [
         'error',
         {
-          ignores: ['fetch', 'import.meta.dirname']
+          ignores: ['fetch', 'import.meta.dirname', 'util.styleText']
         }
       ]
     }

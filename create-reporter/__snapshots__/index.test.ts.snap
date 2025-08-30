@@ -8,7 +8,7 @@ FLUSH"
 `;
 
 exports[`reports EACCES error 2`] = `
-"[41m[37m FATAL [39m[49m [1m[31mYou are not allowed to run server on port [33m80[31m[39m[22m [2mat 1970-01-01 00:00:00[22m
+"[41m[37m FATAL [39m[49m [1m[31mYou are not allowed to run server on port [33m80[39m[39m[22m [2mat 1970-01-01 00:00:00[22m
         [90mNon-privileged users can't start a listening socket on ports below 1024.[39m
         [90mTry to change user or take another port.[39m
         [90m[39m

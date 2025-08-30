@@ -39,7 +39,6 @@
     "fastq": "^1.19.1",
     "nanoevents": "^9.1.0",
     "nanoid": "^5.1.5",
-    "picocolors": "^1.1.1",
     "tinyglobby": "^0.2.14",
     "url-pattern": "^1.0.3",
     "ws": "^8.18.3"

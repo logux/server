@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import pico from 'picocolors'
+import { styleText } from 'node:util'
 
 export function loadOptions(spec, process, env) {
   let rawCliArgs = gatherCliArgs(process.argv)
@@ -73,9 +73,8 @@ function parseValues(spec, args) {
       parsed[key] = parsingResult[1]
     } else {
       throw Error(
-        `Failed to parse ${pico.bold(key)} argument value. \n${
+        `Failed to parse ${styleText('bold', key)} argument value. \n` +
           parsingResult[0]
-        }`
       )
     }
   }
@@ -129,8 +128,9 @@ function composeHelp(spec, argv) {
   let nameColumnLength = Math.max(...options.map(it => it.full.length))
   let envColumnLength = Math.max(...options.map(it => it.env.length))
 
-  let composeName = name => pico.yellow(name.padEnd(nameColumnLength + 2))
-  let composeEnv = env => pico.cyan(env.padEnd(envColumnLength + 2))
+  let composeName = name =>
+    styleText('yellow', name.padEnd(nameColumnLength + 2))
+  let composeEnv = env => styleText('cyan', env.padEnd(envColumnLength + 2))
   let composeOptionHelp = option => {
     return (
       composeName(option.full) + composeEnv(option.env) + option.description
@@ -143,7 +143,7 @@ function composeHelp(spec, argv) {
     let lastPart = pathParts[pathParts.length - 1]
     examples = [
       '',
-      pico.bold('Examples:'),
+      styleText('bold', 'Examples:'),
       ...spec.examples.map(i => i.replace('$0', lastPart))
     ]
   }
@@ -151,7 +151,7 @@ function composeHelp(spec, argv) {
   return [
     'Start Logux Server',
     '',
-    pico.bold('Options:'),
+    styleText('bold', 'Options:'),
     ...options.map(option => composeOptionHelp(option)),
     ...examples
   ].join('\n')
@@ -180,7 +180,8 @@ export function oneOf(options, rawValue) {
   if (!options.includes(rawValue)) {
     let opt = JSON.stringify(options)
     return [
-      `Expected ${pico.green('one of ' + opt)}, got ${pico.red(rawValue)}`,
+      `Expected ${styleText('green', 'one of ' + opt)}, ` +
+        `got ${styleText('red', `${rawValue}`)}`,
       null
     ]
   } else {
@@ -191,7 +192,11 @@ export function oneOf(options, rawValue) {
 export function number(rawValue) {
   let parsed = Number.parseInt(rawValue, 10)
   if (Number.isNaN(parsed)) {
-    return [`Expected ${pico.green('number')}, got ${pico.red(rawValue)}`, null]
+    return [
+      `Expected ${styleText('green', 'number')}, ` +
+        `got ${styleText('red', `${rawValue}`)}`,
+      null
+    ]
   } else {
     return [null, parsed]
   }
@@ -199,7 +204,11 @@ export function number(rawValue) {
 
 export function string(rawValue) {
   if (typeof rawValue !== 'string') {
-    return [`Expected ${pico.green('string')}, got ${pico.red(rawValue)}`, null]
+    return [
+      `Expected ${styleText('green', 'string')}, ` +
+        `got ${styleText('red', `${rawValue}`)}`,
+      null
+    ]
   } else {
     return [null, rawValue]
   }

@@ -1,6 +1,5 @@
 import os from 'node:os'
 import { sep } from 'node:path'
-import pico from 'picocolors'
 
 import humanFormatter from '../human-formatter/index.js'
 
@@ -213,16 +212,7 @@ export function createReporter(options) {
     if (options.logger === 'human' || options.logger.type === 'human') {
       let basepath = options.root || process.cwd()
       if (basepath.slice(-1) !== sep) basepath += sep
-      let env = options.env || process.env.NODE_ENV || 'development'
-      let color = false
-      /* c8 ignore next 3 */
-      if (env === 'development') {
-        color = pico.createColors().isColorSupported
-      }
-      if (typeof options.logger === 'object' && options.logger.color) {
-        color = true
-      }
-      format = humanFormatter({ basepath, color })
+      format = humanFormatter({ basepath })
     } else {
       format = record => JSON.stringify(record) + '\n'
     }

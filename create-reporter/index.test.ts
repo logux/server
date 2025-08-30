@@ -1,3 +1,5 @@
+import '../test/force-colors.js'
+
 import { LoguxError } from '@logux/core'
 import { expect, it } from 'vitest'
 
@@ -35,21 +37,14 @@ function clean(str: string): string {
 function check(type: string, details?: object): void {
   let json = new MemoryStream(true)
   let jsonReporter = createReporter({
-    logger: {
-      stream: json,
-      type: 'json'
-    }
+    logger: { stream: json, type: 'json' }
   })
   jsonReporter(type, details)
   expect(clean(json.string)).toMatchSnapshot()
 
   let human = new MemoryStream(false)
   let humanReporter = createReporter({
-    logger: {
-      color: true,
-      stream: human,
-      type: 'human'
-    }
+    logger: { stream: human, type: 'human' }
   })
   humanReporter(type, details)
   expect(clean(human.string)).toMatchSnapshot()

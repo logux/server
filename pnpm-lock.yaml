@@ -26,9 +26,6 @@ importers:
       nanoid:
         specifier: ^5.1.5
         version: 5.1.5
-      picocolors:
-        specifier: ^1.1.1
-        version: 1.1.1
       tinyglobby:
         specifier: ^0.2.14
         version: 0.2.14
