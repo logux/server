@@ -25,13 +25,18 @@ class MemoryStream {
 }
 
 function clean(str: string): string {
-  return str
+  let cleaned = str
     .replace(/\r\v/g, '\n')
     .replace(/\d{4}-\d\d-\d\d \d\d:\d\d:\d\d/g, '1970-01-01 00:00:00')
     .replace(/"time":"[^"]+"/g, '"time":"1970-01-01T00:00:00.000Z"')
     .replace(/"hostname":"[^"]+"/g, '"hostname":"localhost"')
     .replace(/"pid":\d+/g, '"pid":21384')
     .replace(/PID:(\s+.*m)\d+(.*m)/, 'PID:$121384$2')
+  if (process.version.startsWith('v20.')) {
+    // Node.js 20 has different color formatter
+    cleaned = cleaned.replace(/1m/g, '9m')
+  }
+  return cleaned
 }
 
 function check(type: string, details?: object): void {
