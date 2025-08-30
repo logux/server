@@ -272,8 +272,11 @@ it('reports EACCES error', () => {
   check('error', { err: { code: 'EACCES', port: 80 }, fatal: true })
 })
 
-// Node.js 20 color formatter is different
-if (!process.version.startsWith('v20.')) {
+// Old Node.js color formatter is different
+if (
+  !process.version.startsWith('v20.') &&
+  !process.version.startsWith('v22.')
+) {
   it('reports EADDRINUSE error', () => {
     check('error', {
       err: { code: 'EADDRINUSE', port: 31337 },
