@@ -1,7 +1,7 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## 0.14.0 “Sliver of Straw”
+## 0.14 “Sliver of Straw”
 * Removed Node.js 18 support.
 * Removed backend control.
 * Moved to number as subprotocol and remove `Context#isSubprotocol()`.
