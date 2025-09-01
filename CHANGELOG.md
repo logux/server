@@ -1,6 +1,18 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.14.0 “Sliver of Straw”
+* Removed Node.js 18 support.
+* Removed backend control.
+* Moved to number as subprotocol and remove `Context#isSubprotocol()`.
+* Moved to Logux Core 0.10 and Logux Protocol 5.
+* Changed custom HTTP listener API.
+* Added API to use custom Logux server node class.
+* Added `Server#sendOnConnect()`.
+* Reduced dependencies.
+* Changed color auto-detection algorithm to `util.styleText`.
+* Fixed brute-force lock issue during tests.
+
 ## 0.13.1
 * Fixed vulnerability audit by moving to `cookie` 0.7.
 
