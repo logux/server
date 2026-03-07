@@ -21,7 +21,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@d7a11313b581b306c961b506cfc8971208bb03f6 # v4.4.0
         with:
-          node-version: 24
+          node-version: 25
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --ignore-scripts
@@ -32,6 +32,7 @@ jobs:
     strategy:
       matrix:
         node-version:
+          - 24
           - 22
           - 20
     name: Node.js ${{ matrix.node-version }} Quick
