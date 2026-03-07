@@ -18,39 +18,6 @@ exports[`reports EACCES error 2`] = `
 "
 `;
 
-exports[`reports EADDRINUSE error 1`] = `
-"{"level":60,"time":"1970-01-01T00:00:00.000Z","pid":21384,"err":{},"note":"Another Logux server or other app already running on this port. Probably you haven’t stopped server from other project or previous version of this server was not killed.\\n\\n$ su - root\\n# netstat -nlp | grep 31337\\nProto   Local Address   State    PID/Program name\\ntcp     0.0.0.0:31337   LISTEN   \`777\`/node\\n# sudo kill -9 \`777\`","msg":"Port \`31337\` already in use"}
-FLUSH"
-`;
-
-exports[`reports EADDRINUSE error 2`] = `
-"[41m[37m FATAL [39m[49m [1m[31mPort [33m31337[31m already in use[39m[22m [2mat 1970-01-01 00:00:00[22m
-        [90mAnother Logux server or other app already running on this port.[39m
-        [90mProbably you haven’t stopped server from other project or previous[39m
-        [90mversion of this server was not killed.[39m
-        [90m[39m
-        [90m$ su - root[39m
-        [90m# netstat -nlp | grep 31337[39m
-        [90mProto   Local Address   State    PID/Program name[39m
-        [90mtcp     0.0.0.0:31337   LISTEN   [1m777[22m/node[39m
-        [90m# sudo kill -9 [1m777[22m[39m
-
-"
-`;
-
-exports[`reports Logux error 1`] = `
-"{"level":60,"time":"1970-01-01T00:00:00.000Z","pid":21384,"note":"Maybe there is a mistake in option name or this version of Logux Server doesn’t support this option","msg":"Unknown option \`suprotocol\` in server constructor"}
-FLUSH"
-`;
-
-exports[`reports Logux error 2`] = `
-"[41m[37m FATAL [39m[49m [1m[31mUnknown option [33msuprotocol[31m in server constructor[39m[22m [2mat 1970-01-01 00:00:00[22m
-        [90mMaybe there is a mistake in option name or this version of Logux Server[39m
-        [90mdoesn’t support this option[39m
-
-"
-`;
-
 exports[`reports actions with excludeClients metadata 1`] = `
 "{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"action":{"id":100,"name":"John","type":"ADD_USER"},"meta":{"excludeClients":["1:-lCr7e9s","2:wv0r_O5C"],"id":"1487805099387 100:uImkcF4z 0","reasons":[],"server":"server:H1f8LAyzl","subprotocol":1,"time":1487805099387},"msg":"Action was added"}
 "
@@ -389,18 +356,6 @@ exports[`reports subscribed 2`] = `
 "
 `;
 
-exports[`reports sync error 1`] = `
-"{"level":50,"time":"1970-01-01T00:00:00.000Z","pid":21384,"err":{"message":"Logux received unknown-message error (Unknown message \`bad\` type)","name":"LoguxError"},"connectionId":"670","msg":"Logux received unknown-message error (Unknown message \`bad\` type)"}
-"
-`;
-
-exports[`reports sync error 2`] = `
-"[41m[37m ERROR [39m[49m [1m[31mLogux received unknown-message error (Unknown message [33mbad[31m type)[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Connection ID: [1m670[22m
-
-"
-`;
-
 exports[`reports unauthenticated 1`] = `
 "{"level":40,"time":"1970-01-01T00:00:00.000Z","pid":21384,"connectionId":"670","nodeId":"100:uImkcF4z","subprotocol":1,"msg":"Bad authentication"}
 "
@@ -509,6 +464,51 @@ exports[`reports zombie 1`] = `
 exports[`reports zombie 2`] = `
 "[43m[30m WARN [39m[49m  [1m[33mZombie client was disconnected[39m[22m [2mat 1970-01-01 00:00:00[22m
         Node ID: [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m
+
+"
+`;
+
+exports[`stacktrace > reports EADDRINUSE error 1`] = `
+"{"level":60,"time":"1970-01-01T00:00:00.000Z","pid":21384,"err":{},"note":"Another Logux server or other app already running on this port. Probably you haven’t stopped server from other project or previous version of this server was not killed.\\n\\n$ su - root\\n# netstat -nlp | grep 31337\\nProto   Local Address   State    PID/Program name\\ntcp     0.0.0.0:31337   LISTEN   \`777\`/node\\n# sudo kill -9 \`777\`","msg":"Port \`31337\` already in use"}
+FLUSH"
+`;
+
+exports[`stacktrace > reports EADDRINUSE error 2`] = `
+"[41m[37m FATAL [39m[49m [1m[31mPort [33m31337[31m already in use[39m[22m [2mat 1970-01-01 00:00:00[22m
+        [90mAnother Logux server or other app already running on this port.[39m
+        [90mProbably you haven’t stopped server from other project or previous[39m
+        [90mversion of this server was not killed.[39m
+        [90m[39m
+        [90m$ su - root[39m
+        [90m# netstat -nlp | grep 31337[39m
+        [90mProto   Local Address   State    PID/Program name[39m
+        [90mtcp     0.0.0.0:31337   LISTEN   [1m777[22m/node[39m
+        [90m# sudo kill -9 [1m777[22m[39m
+
+"
+`;
+
+exports[`stacktrace > reports Logux error 1`] = `
+"{"level":60,"time":"1970-01-01T00:00:00.000Z","pid":21384,"note":"Maybe there is a mistake in option name or this version of Logux Server doesn’t support this option","msg":"Unknown option \`suprotocol\` in server constructor"}
+FLUSH"
+`;
+
+exports[`stacktrace > reports Logux error 2`] = `
+"[41m[37m FATAL [39m[49m [1m[31mUnknown option [33msuprotocol[31m in server constructor[39m[22m [2mat 1970-01-01 00:00:00[22m
+        [90mMaybe there is a mistake in option name or this version of Logux Server[39m
+        [90mdoesn’t support this option[39m
+
+"
+`;
+
+exports[`stacktrace > reports sync error 1`] = `
+"{"level":50,"time":"1970-01-01T00:00:00.000Z","pid":21384,"err":{"message":"Logux received unknown-message error (Unknown message \`bad\` type)","name":"LoguxError"},"connectionId":"670","msg":"Logux received unknown-message error (Unknown message \`bad\` type)"}
+"
+`;
+
+exports[`stacktrace > reports sync error 2`] = `
+"[41m[37m ERROR [39m[49m [1m[31mLogux received unknown-message error (Unknown message [33mbad[31m type)[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Connection ID: [1m670[22m
 
 "
 `;

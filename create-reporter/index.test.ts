@@ -1,7 +1,7 @@
 import '../test/force-colors.js'
 
 import { LoguxError } from '@logux/core'
-import { expect, it } from 'vitest'
+import { expect, it, describe } from 'vitest'
 
 import { createReporter } from './index.js'
 
@@ -273,10 +273,9 @@ it('reports EACCES error', () => {
 })
 
 // Old Node.js color formatter is different
-if (
-  !process.version.startsWith('v20.') &&
-  !process.version.startsWith('v22.')
-) {
+describe.runIf(
+  !process.version.startsWith('v20.') && !process.version.startsWith('v22.')
+)('stacktrace', () => {
   it('reports EADDRINUSE error', () => {
     check('error', {
       err: { code: 'EADDRINUSE', port: 31337 },
@@ -299,7 +298,7 @@ if (
     let err = new LoguxError('unknown-message', 'bad', true)
     check('error', { connectionId: '670', err })
   })
-}
+})
 
 it('reports error', () => {
   check('error', {
