@@ -480,10 +480,7 @@ type ActionCallbacks<
   TypeAction extends Action,
   Data extends object,
   Headers extends object
-> = {
-  finally?: ActionFinally<TypeAction, Data, Headers>
-  resend?: Resender<TypeAction, Data, Headers>
-} & (
+> = (
   | {
       access: Authorizer<TypeAction, Data, Headers>
       process?: Processor<TypeAction, Data, Headers>
@@ -491,18 +488,17 @@ type ActionCallbacks<
   | {
       accessAndProcess: Processor<TypeAction, Data, Headers>
     }
-)
+) & {
+  finally?: ActionFinally<TypeAction, Data, Headers>
+  resend?: Resender<TypeAction, Data, Headers>
+}
 
 type ChannelCallbacks<
   SubscribeAction extends Action,
   Data extends object,
   ChannelParams extends object | string[],
   Headers extends object
-> = {
-  filter?: FilterCreator<SubscribeAction, Data, ChannelParams, Headers>
-  finally?: ChannelFinally<SubscribeAction, Data, ChannelParams, Headers>
-  unsubscribe?: ChannelUnsubscribe<Data, ChannelParams, Headers>
-} & (
+> = (
   | {
       access: ChannelAuthorizer<SubscribeAction, Data, ChannelParams, Headers>
       load?: ChannelLoader<SubscribeAction, Data, ChannelParams, Headers>
@@ -515,7 +511,11 @@ type ChannelCallbacks<
         Headers
       >
     }
-)
+) & {
+  filter?: FilterCreator<SubscribeAction, Data, ChannelParams, Headers>
+  finally?: ChannelFinally<SubscribeAction, Data, ChannelParams, Headers>
+  unsubscribe?: ChannelUnsubscribe<Data, ChannelParams, Headers>
+}
 
 interface ActionReporter {
   action: Readonly<Action>

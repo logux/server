@@ -72,7 +72,8 @@ export class TestServer extends BaseServer {
       if (e.message === 'Server undid action') {
         if (e.action.reason !== reason) {
           throw new Error(
-            `Undo was with ${e.action.reason} reason, not ${reason}`
+            `Undo was with ${e.action.reason} reason, not ${reason}`,
+            { cause: e }
           )
         }
       } else {
