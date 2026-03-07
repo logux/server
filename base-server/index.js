@@ -522,6 +522,11 @@ export class BaseServer {
     return undefined
   }
 
+  handleClient(ws, req) {
+    ws.upgradeReq = req
+    this.addClient(new ServerConnection(ws))
+  }
+
   http(method, url, listener) {
     if (this.options.disableHttpServer) {
       throw new Error(
@@ -624,10 +629,9 @@ export class BaseServer {
       await readFile(join(import.meta.dirname, '..', 'package.json'))
     )
 
-    this.ws.on('connection', (ws, req) => {
-      ws.upgradeReq = req
-      this.addClient(new ServerConnection(ws))
-    })
+    this.ws.on('connection', (ws, req) =>
+      this.handleClient(ws, req)
+    )
     this.emitter.emit('report', 'listen', {
       cert: !!this.options.cert,
       environment: this.env,

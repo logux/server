@@ -19,6 +19,7 @@ import type {
   IncomingMessage,
   ServerResponse
 } from 'node:http'
+import type { WebSocket } from 'ws'
 
 import type {
   ChannelContext,
@@ -862,6 +863,19 @@ export class BaseServer<
    * @returns Promise when all listeners will be removed.
    */
   destroy(): Promise<void>
+
+  /**
+   * Handle WebSocket connection explicitly
+   *
+   * This is a low-level method allowing to integrate Logux server with an existing server
+   *
+   * ```js
+   * fastify.get('/', { websocket: true }, (socket, req) => {
+   *   loguxServer.handleClient(socket, req)
+   * })
+   * ```
+   */
+  handleClient(ws: WebSocket, req: IncomingMessage): void
 
   /**
    * Add non-WebSocket HTTP request processor.
