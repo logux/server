@@ -687,6 +687,7 @@ export class BaseServer {
   }
 
   performUnsubscribe(clientNodeId, action, meta) {
+    if (action.channel === '__proto__' || clientNodeId === '__proto__') return
     if (this.subscribers[action.channel]) {
       let subscriber = this.subscribers[action.channel][clientNodeId]
       if (subscriber) {
