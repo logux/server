@@ -629,9 +629,7 @@ export class BaseServer {
       await readFile(join(import.meta.dirname, '..', 'package.json'))
     )
 
-    this.ws.on('connection', (ws, req) =>
-      this.handleClient(ws, req)
-    )
+    this.ws.on('connection', (ws, req) => this.handleClient(ws, req))
     this.emitter.emit('report', 'listen', {
       cert: !!this.options.cert,
       environment: this.env,
@@ -901,7 +899,7 @@ export class BaseServer {
   }
 
   async subscribeAction(action, meta, start) {
-    if (typeof action.channel !== 'string') {
+    if (typeof action.channel !== 'string' || action.channel === '__proto__') {
       this.wrongChannel(action, meta)
       return
     }
@@ -922,6 +920,7 @@ export class BaseServer {
       let subscribed = false
       if (match) {
         let ctx = this.createContext(action, meta)
+        if (ctx.nodeId === '__proto__') return
         ctx.params = match
         try {
           let access = await channel.access(ctx, action, meta)

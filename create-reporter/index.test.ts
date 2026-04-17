@@ -1,7 +1,7 @@
 import '../test/force-colors.js'
 
 import { LoguxError } from '@logux/core'
-import { expect, it, describe } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import { createReporter } from './index.js'
 
