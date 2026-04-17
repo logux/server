@@ -34,8 +34,8 @@ export class TestServer extends BaseServer {
 
     this.fetch = this.fetch.bind(this)
 
-    this.on('fatal', () => {
-      this.destroy()
+    this.on('fatal', async () => {
+      await this.destroy()
     })
   }
 

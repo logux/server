@@ -3,34 +3,31 @@
   "version": "0.14.0",
   "description": "Build own Logux server",
   "keywords": [
-    "logux",
-    "server",
-    "framework",
-    "websocket",
-    "proxy",
+    "collaborative",
     "crdt",
-    "event sourcing",
     "distributed systems",
-    "collaborative"
+    "event sourcing",
+    "framework",
+    "logux",
+    "proxy",
+    "server",
+    "websocket"
   ],
-  "scripts": {
-    "test:lint": "eslint .",
-    "test:types": "check-dts",
-    "test:coverage": "vitest run --coverage",
-    "test": "pnpm run /^test:/"
-  },
-  "author": "Andrey Sitnik <andrey@sitnik.es>",
-  "license": "MIT",
   "homepage": "https://logux.org/",
+  "license": "MIT",
+  "author": "Andrey Sitnik <andrey@sitnik.es>",
   "repository": "logux/server",
-  "engines": {
-    "node": "^22.0.0 || >=24.0.0"
-  },
   "type": "module",
   "types": "./index.d.ts",
   "exports": {
     ".": "./index.js",
     "./package.json": "./package.json"
+  },
+  "scripts": {
+    "test:lint": "oxlint",
+    "test:types": "check-dts",
+    "test:coverage": "vitest run --coverage",
+    "test": "pnpm run /^test:/"
   },
   "dependencies": {
     "@logux/actions": "^0.5.0",
@@ -44,30 +41,25 @@
     "ws": "^8.20.0"
   },
   "devDependencies": {
-    "@logux/eslint-config": "^57.1.0",
+    "@logux/oxc-configs": "^0.3.4",
     "@types/cross-spawn": "^6.0.6",
     "@types/node": "^25.6.0",
     "@types/ws": "^8.18.1",
-    "@typescript-eslint/eslint-plugin": "^8.58.2",
-    "@typescript-eslint/parser": "^8.58.2",
     "@vitest/coverage-v8": "^4.1.4",
     "actions-up": "^1.14.0",
     "check-dts": "^1.0.0",
     "clean-publish": "^6.0.5",
     "cross-spawn": "^7.0.6",
-    "eslint": "^10.2.0",
+    "eslint-plugin-prefer-let": "^4.2.2",
     "nanospy": "^1.0.0",
+    "oxlint": "^1.60.0",
+    "oxlint-tsgolint": "^0.21.1",
     "print-snapshots": "^0.4.2",
     "typescript": "^6.0.2",
     "vite": "^8.0.8",
     "vitest": "^4.1.4"
   },
-  "prettier": {
-    "arrowParens": "avoid",
-    "jsxSingleQuote": false,
-    "quoteProps": "consistent",
-    "semi": false,
-    "singleQuote": true,
-    "trailingComma": "none"
+  "engines": {
+    "node": "^22.0.0 || >=24.0.0"
   }
 }

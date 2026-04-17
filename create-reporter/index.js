@@ -6,9 +6,8 @@ import humanFormatter from '../human-formatter/index.js'
 const ERROR_CODES = {
   EACCES: (e, environment) => {
     let wayToFix = {
-      development:
-        'In dev mode it can be done with sudo:\n' + '$ sudo npm start',
-      production: '$ su - `<username>`\n' + `$ npm start -p ${e.port}`
+      development: 'In dev mode it can be done with sudo:\n$ sudo npm start',
+      production: `$ su - \`<username>\`\n$ npm start -p ${e.port}`
     }
 
     return {
@@ -22,7 +21,7 @@ const ERROR_CODES = {
   EADDRINUSE: e => {
     let port = String(e.port)
     let wayToFix = {
-      darwin: `$ sudo lsof -i ${e.port}\n` + '$ sudo kill -9 `<processid>`',
+      darwin: `$ sudo lsof -i ${e.port}\n$ sudo kill -9 \`<processid>\``,
       linux:
         '$ su - root\n' +
         `# netstat -nlp | grep ${e.port}\n` +
@@ -193,6 +192,21 @@ function cleanFromKeys(obj, regexp, seen) {
   return result
 }
 
+function createRecord(level, details, msg) {
+  /* c8 ignore next 4 */
+  if (typeof details === 'string') {
+    msg = details
+    details = {}
+  }
+  return {
+    level,
+    time: new Date().toISOString(),
+    pid: process.pid,
+    ...details,
+    msg
+  }
+}
+
 export function createReporter(options) {
   let cleanFromLog = options.cleanFromLog || /Bearer [^\s"]+/g
   function reporter(type, details) {
@@ -217,21 +231,6 @@ export function createReporter(options) {
       format = record => JSON.stringify(record) + '\n'
     }
     let stream = options.logger?.stream ?? process.stderr
-
-    function createRecord(level, details, msg) {
-      /* c8 ignore next 4 */
-      if (typeof details === 'string') {
-        msg = details
-        details = {}
-      }
-      return {
-        level,
-        time: new Date().toISOString(),
-        pid: process.pid,
-        ...details,
-        msg
-      }
-    }
 
     reporter.logger = {
       /* c8 ignore next 3 */

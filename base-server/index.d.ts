@@ -63,7 +63,7 @@ interface ConnectLoader<Headers extends object = unknown> {
       >
 }
 
-type ServerNodeConstructor = new (...args: any[]) => ServerNode
+type ServerNodeConstructor = new (...args: unknown[]) => ServerNode
 
 export interface ServerMeta extends Meta {
   /**
@@ -1142,7 +1142,7 @@ export class BaseServer<
    *
    * @param loader Callback which loads list of actions and meta.
    */
-  sendOnConnect(loader: ConnectLoader<Headers>)
+  sendOnConnect(loader: ConnectLoader<Headers>): void
 
   /**
    * Send `logux/subscribed` if client was not already subscribed.

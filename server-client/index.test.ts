@@ -851,10 +851,8 @@ it('adds resend keys', async () => {
       }
     }
   })
-  // @ts-expect-error
   test.app.type('EMPTY', {
-    access: () => true,
-    resend() {}
+    access: () => true
   })
 
   test.app.log.generateId()

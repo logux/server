@@ -174,7 +174,7 @@ export class BaseServer {
 
       if (action.type === 'logux/subscribe') {
         if (meta.server === this.nodeId) {
-          this.subscribeAction(action, meta, start)
+          void this.subscribeAction(action, meta, start)
         }
         return
       }
@@ -227,7 +227,7 @@ export class BaseServer {
           return
         }
         if (processor.process) {
-          this.processAction(processor, action, meta, start)
+          void this.processAction(processor, action, meta, start)
         } else {
           this.emitter.emit('processed', action, meta, 0)
           this.finally(

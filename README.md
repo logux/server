@@ -7,16 +7,16 @@ Logux is a new way to connect client and server. Instead of sending
 HTTP requests (e.g., AJAX and GraphQL) it synchronizes log of operations
 between client, server, and other clients.
 
-* **[Guide, recipes, and API](https://logux.org/)**
-* **[Issues](https://github.com/logux/logux/issues)**
+- **[Guide, recipes, and API](https://logux.org/)**
+- **[Issues](https://github.com/logux/logux/issues)**
   and **[roadmap](https://github.com/orgs/logux/projects/1)**
-* **[Projects](https://logux.org/guide/architecture/parts/)**
+- **[Projects](https://logux.org/guide/architecture/parts/)**
   inside Logux ecosystem
 
 This repository contains Logux server with:
 
-* Framework to write own server.
-* Proxy between WebSocket and HTTP server on any other language.
+- Framework to write own server.
+- Proxy between WebSocket and HTTP server on any other language.
 
 <a href="https://evilmartians.com/?utm_source=logux-server">
   <img src="https://evilmartians.com/badges/sponsored-by-evil-martians.svg"
@@ -25,7 +25,6 @@ This repository contains Logux server with:
 
 [cult-img]: http://cultofmartians.com/assets/badges/badge.svg
 [cult]: http://cultofmartians.com/done.html
-
 
 ### Logux Server as Framework
 
@@ -48,23 +47,23 @@ server.auth(async ({ userId, token }) => {
 })
 
 server.channel('user/:id', {
-  access (ctx, action, meta) {
+  access(ctx, action, meta) {
     return ctx.params.id === ctx.userId
   },
-  async load (ctx, action, meta) {
+  async load(ctx, action, meta) {
     const user = await db.loadUser(ctx.params.id)
     return { type: 'USER_NAME', name: user.name }
   }
 })
 
 server.type('CHANGE_NAME', {
-  access (ctx, action, meta) {
+  access(ctx, action, meta) {
     return action.user === ctx.userId
   },
-  resend (ctx, action, meta) {
-    return { channel: `user/${ ctx.userId }` }
+  resend(ctx, action, meta) {
+    return { channel: `user/${ctx.userId}` }
   },
-  async process (ctx, action, meta) {
+  async process(ctx, action, meta) {
     if (isFirstOlder(lastNameChange(action.user), meta)) {
       await db.changeUserName({ id: action.user, name: action.name })
     }

@@ -444,7 +444,7 @@ it('sends debug message to clients on runtimeError', () => {
 
   app.debugError(error)
   expect(calls(app.connected.get('1')?.connection.send)).toEqual([
-    [['debug', 'error', 'Error: Test Error\n' + 'fake stacktrace']]
+    [['debug', 'error', 'Error: Test Error\nfake stacktrace']]
   ])
   expect(called(app.connected.get('2')?.connection.send)).toBe(false)
 })

@@ -18,11 +18,11 @@ app.unbind.push(async () => {
   app.logger.info('Custom destroy task finished')
 })
 
-app.listen()
+await app.listen()
 
-process.on('message', msg => {
+process.on('message', async msg => {
   if (msg === 'close') {
     console.error('close')
-    app.destroy()
+    await app.destroy()
   }
 })

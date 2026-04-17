@@ -141,7 +141,7 @@ export class TestClient {
    * @param test Function, where do you expect action will be received
    * @returns Promise with all received actions
    */
-  collect(test: () => Promise<any>): Promise<Action[]>
+  collect(test: () => Promise<unknown>): Promise<Action[]>
 
   /**
    * Connect to test server.

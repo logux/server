@@ -46,10 +46,9 @@ function buildFilter(filter) {
     }
     if (action.type.endsWith('/changed')) {
       for (let key in filter) {
-        if (
-          key in action.fields &&
-          action.fields[key] !== filter[key]
-        ) return false
+        if (key in action.fields && action.fields[key] !== filter[key]) {
+          return false
+        }
       }
     }
     return true
@@ -112,12 +111,7 @@ export function addSyncMap(server, plural, operations) {
           meta
         )
         if (data !== false) {
-          await sendMap(
-            server,
-            changedType,
-            data,
-            since
-          )
+          await sendMap(server, changedType, data, since)
         }
       }
     })

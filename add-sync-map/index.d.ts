@@ -54,9 +54,7 @@ export function ChangedAt<Value extends SyncMapTypes | SyncMapTypes[]>(
  */
 export function NoConflictResolution<
   Value extends SyncMapTypes | SyncMapTypes[]
->(
-  value: Value
-): WithTime<Value>
+>(value: Value): WithTime<Value>
 
 interface SyncMapActionFilter<Value extends SyncMapValues> {
   (

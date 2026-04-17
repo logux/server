@@ -8,6 +8,6 @@ let app = new Server({
 })
 app.nodeId = 'server:FnXaqDxY'
 
-app.destroy()
+await app.destroy()
 
 setTimeout(() => {}, 10000)

@@ -11,6 +11,6 @@ app.nodeId = 'server:FnXaqDxY'
 
 app.auth(async () => true)
 
-app.listen().then(() => {
-  app.autoloadModules('error-modules/*/index.js')
+await app.listen().then(async () => {
+  await app.autoloadModules('error-modules/*/index.js')
 })

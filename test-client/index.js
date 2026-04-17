@@ -67,8 +67,8 @@ export class TestClient {
       })
 
       this.server.addClient(this.pair.right)
-      this.node.connection.connect()
-      this.node.waitFor('synchronized').then(() => {
+      void this.node.connection.connect()
+      void this.node.waitFor('synchronized').then(() => {
         this.node.throwsError = true
         unbind()
         resolve()

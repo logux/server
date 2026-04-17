@@ -16,4 +16,4 @@ app.nodeId = 'server:FnXaqDxY'
 
 app.auth(async () => true)
 
-app.listen()
+await app.listen()
