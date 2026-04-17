@@ -889,6 +889,7 @@ export class BaseServer {
   }
 
   subscribe(nodeId, channel) {
+    if (channel === '__proto__' || nodeId === '__proto__') return
     if (!this.subscribers[channel] || !this.subscribers[channel][nodeId]) {
       if (!this.subscribers[channel]) {
         this.subscribers[channel] = {}
