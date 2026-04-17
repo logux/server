@@ -19,7 +19,7 @@
     "test:coverage": "vitest run --coverage",
     "test": "pnpm run /^test:/"
   },
-  "author": "Andrey Sitnik <andrey@sitnik.ru>",
+  "author": "Andrey Sitnik <andrey@sitnik.es>",
   "license": "MIT",
   "homepage": "https://logux.org/",
   "repository": "logux/server",
