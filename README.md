@@ -1,4 +1,4 @@
-# Logux Server [![Cult Of Martians][cult-img]][cult]
+# Logux Server
 
 <img align="right" width="95" height="148" title="Logux logotype"
      src="https://logux.org/branding/logotype.svg">
@@ -18,13 +18,11 @@ This repository contains Logux server with:
 - Framework to write own server.
 - Proxy between WebSocket and HTTP server on any other language.
 
-<a href="https://evilmartians.com/?utm_source=logux-server">
-  <img src="https://evilmartians.com/badges/sponsored-by-evil-martians.svg"
-       alt="Sponsored by Evil Martians" width="236" height="54">
-</a>
+---
 
-[cult-img]: http://cultofmartians.com/assets/badges/badge.svg
-[cult]: http://cultofmartians.com/done.html
+<img src="https://cdn.evilmartians.com/badges/logo-no-label.svg" alt="" width="22" height="16" />  Logux Server is built by <b><a href="https://evilmartians.com/">Evil Martians</a></b>, an American design and engineering consultancy for <b>developer tools, AI, and cybersecurity startups</b>.
+
+---
 
 ### Logux Server as Framework
 
