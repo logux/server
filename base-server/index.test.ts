@@ -606,9 +606,9 @@ it('processes actions', async () => {
 
   await test.app.log.add({ type: 'FOO' }, { reasons: ['test'] })
   expect(fired).toEqual([])
-  expect(test.app.log.entries()[0][1].status).toEqual('waiting')
+  expect(test.app.log.entries()[0]![1].status).toEqual('waiting')
   await setTimeout(30)
-  expect(test.app.log.entries()[0][1].status).toEqual('processed')
+  expect(test.app.log.entries()[0]![1].status).toEqual('processed')
   expect(processed).toEqual([{ type: 'FOO' }])
   expect(fired).toEqual([{ type: 'FOO' }])
 })
@@ -635,9 +635,9 @@ it('processes regex matching action', async () => {
 
   await test.app.log.add({ type: 'ADD_TODO' }, { reasons: ['test'] })
   expect(fired).toEqual([])
-  expect(test.app.log.entries()[0][1].status).toEqual('waiting')
+  expect(test.app.log.entries()[0]![1].status).toEqual('waiting')
   await setTimeout(30)
-  expect(test.app.log.entries()[0][1].status).toEqual('processed')
+  expect(test.app.log.entries()[0]![1].status).toEqual('processed')
   expect(processed).toEqual([{ type: 'ADD_TODO' }])
   expect(fired).toEqual([{ type: 'ADD_TODO' }])
 })
@@ -715,7 +715,7 @@ it('reports about error during action processing', async () => {
       err
     }
   ])
-  expect(test.reports[2][1].action).toEqual({
+  expect(test.reports[2]![1].action).toEqual({
     action: { type: 'FOO' },
     id: '1 server:uuid 0',
     reason: 'error',
@@ -778,21 +778,21 @@ it('adds current subprotocol to meta', async () => {
   let app = createServer({ subprotocol: 1 })
   app.type('A', { access: () => true })
   await app.log.add({ type: 'A' }, { reasons: ['test'] })
-  expect(app.log.entries()[0][1].subprotocol).toEqual(1)
+  expect(app.log.entries()[0]![1].subprotocol).toEqual(1)
 })
 
 it('adds current subprotocol only to own actions', async () => {
   let app = createServer({ subprotocol: 1 })
   app.type('A', { access: () => true })
   await app.log.add({ type: 'A' }, { id: '1 0:other 0', reasons: ['test'] })
-  expect(app.log.entries()[0][1].subprotocol).toBeUndefined()
+  expect(app.log.entries()[0]![1].subprotocol).toBeUndefined()
 })
 
 it('allows to override subprotocol in meta', async () => {
   let app = createServer({ subprotocol: 2 })
   app.type('A', { access: () => true })
   await app.log.add({ type: 'A' }, { reasons: ['test'], subprotocol: 1 })
-  expect(app.log.entries()[0][1].subprotocol).toEqual(1)
+  expect(app.log.entries()[0]![1].subprotocol).toEqual(1)
 })
 
 it('checks channel definition', () => {
@@ -820,11 +820,11 @@ it('reports about wrong channel name', async () => {
   test.app.clientIds.set('10:uuid', client)
   await test.app.log.add({ type: 'logux/subscribe' }, { id: '1 10:uuid 0' })
   expect(test.names).toEqual(['addClean', 'wrongChannel', 'addClean'])
-  expect(test.reports[1][1]).toEqual({
+  expect(test.reports[1]![1]).toEqual({
     actionId: '1 10:uuid 0',
     channel: undefined
   })
-  expect(test.reports[2][1].action).toEqual({
+  expect(test.reports[2]![1].action).toEqual({
     action: { type: 'logux/subscribe' },
     id: '1 10:uuid 0',
     reason: 'wrongChannel',
@@ -922,8 +922,8 @@ it('checks channel access', async () => {
   await setTimeout(1)
 
   expect(test.names).toEqual(['addClean', 'denied', 'addClean'])
-  expect(test.reports[1][1]).toEqual({ actionId: '1 10:uuid 0' })
-  expect(test.reports[2][1].action).toEqual({
+  expect(test.reports[1]![1]).toEqual({ actionId: '1 10:uuid 0' })
+  expect(test.reports[2]![1].action).toEqual({
     action: { channel: 'user/10', type: 'logux/subscribe' },
     id: '1 10:uuid 0',
     reason: 'denied',
@@ -956,8 +956,8 @@ it('reports about errors during channel authorization', async () => {
   await Promise.resolve()
 
   expect(test.names).toEqual(['addClean', 'error', 'addClean'])
-  expect(test.reports[1][1]).toEqual({ actionId: '1 10:uuid 0', err })
-  expect(test.reports[2][1].action).toEqual({
+  expect(test.reports[1]![1]).toEqual({ actionId: '1 10:uuid 0', err })
+  expect(test.reports[2]![1].action).toEqual({
     action: { channel: 'user/10', type: 'logux/subscribe' },
     id: '1 10:uuid 0',
     reason: 'error',
@@ -1012,16 +1012,16 @@ it('subscribes clients', async () => {
   expect(events).toEqual(1)
   expect(userSubsriptions).toEqual(1)
   expect(test.names).toEqual(['addClean', 'subscribed', 'addClean'])
-  expect(test.reports[1][1]).toEqual({
+  expect(test.reports[1]![1]).toEqual({
     actionId: '1 10:a:uuid 0',
     channel: 'user/10'
   })
-  expect(test.reports[2][1].action).toEqual({
+  expect(test.reports[2]![1].action).toEqual({
     id: '1 10:a:uuid 0',
     type: 'logux/processed'
   })
-  expect(test.reports[2][1].meta.clients).toEqual(['10:a'])
-  expect(test.reports[2][1].meta.status).toEqual('processed')
+  expect(test.reports[2]![1].meta.clients).toEqual(['10:a'])
+  expect(test.reports[2]![1].meta.status).toEqual('processed')
   expect(test.app.subscribers).toEqual({
     'user/10': {
       '10:a:uuid': { filters: { '{}': true } }
@@ -1058,11 +1058,11 @@ it('subscribes clients', async () => {
     'unsubscribed',
     'addClean'
   ])
-  expect(test.reports[7][1]).toEqual({
+  expect(test.reports[7]![1]).toEqual({
     actionId: '3 10:a:uuid 0',
     channel: 'user/10'
   })
-  expect(test.reports[8][1].action).toEqual({
+  expect(test.reports[8]![1].action).toEqual({
     id: '3 10:a:uuid 0',
     type: 'logux/processed'
   })
@@ -1199,8 +1199,8 @@ it('reports about errors during channel initialization', async () => {
     'addClean',
     'unsubscribed'
   ])
-  expect(test.reports[2][1]).toEqual({ actionId: '1 10:uuid 0', err })
-  expect(test.reports[3][1].action).toEqual({
+  expect(test.reports[2]![1]).toEqual({ actionId: '1 10:uuid 0', err })
+  expect(test.reports[3]![1].action).toEqual({
     action: { channel: 'user/10', type: 'logux/subscribe' },
     id: '1 10:uuid 0',
     reason: 'error',
@@ -1333,8 +1333,8 @@ it('does not need type definition for own actions', async () => {
   let test = createReporter()
   await test.app.log.add({ type: 'unknown' }, { users: ['10'] })
   expect(test.names).toEqual(['addClean'])
-  expect(test.reports[0][1].action.type).toEqual('unknown')
-  expect(test.reports[0][1].meta.status).toEqual('processed')
+  expect(test.reports[0]![1].action.type).toEqual('unknown')
+  expect(test.reports[0]![1].meta.status).toEqual('processed')
 })
 
 it('checks callbacks in unknown type handler', () => {

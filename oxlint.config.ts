@@ -9,7 +9,8 @@ export default defineConfig({
     'typescript/no-unnecessary-type-arguments': 'off',
     'unicorn/prefer-add-event-listener': 'off',
     'node/handle-callback-err': 'off',
-    'import/no-named-as-default': 'off'
+    'import/no-named-as-default': 'off',
+    'no-underscore-dangle': 'off'
   },
   overrides: [
     {

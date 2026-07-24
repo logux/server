@@ -1,5 +1,5 @@
 import { LoguxError, parseId } from '@logux/core'
-import cookie from 'cookie'
+import { parseCookie } from 'cookie'
 import fastq from 'fastq'
 
 import { ALLOWED_META } from '../allowed-meta/index.js'
@@ -157,7 +157,7 @@ export class ServerClient {
     try {
       result = await this.app.authenticator({
         client: this,
-        cookie: cookie.parse(headers.cookie || ''),
+        cookie: parseCookie(headers.cookie || ''),
         headers: this.node.remoteHeaders,
         token,
         userId: this.userId

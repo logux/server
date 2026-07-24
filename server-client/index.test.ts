@@ -451,8 +451,8 @@ it('authenticates user', async () => {
     }
   ])
   expect(authenticated).toHaveLength(1)
-  expect(authenticated[0][0]).toBe(testClient)
-  expect(typeof authenticated[0][1]).toEqual('number')
+  expect(authenticated[0]![0]).toBe(testClient)
+  expect(typeof authenticated[0]![1]).toEqual('number')
 })
 
 it('supports non-promise authenticator', async () => {
@@ -527,7 +527,7 @@ it('does not send server environment in production', async () => {
   app.auth(async () => true)
 
   let client = await connectClient(app)
-  expect(sent(client)[0][4]).toEqual({ subprotocol: 1 })
+  expect(sent(client)[0]![4]).toEqual({ subprotocol: 1 })
 })
 
 it('disconnects zombie', async () => {
@@ -610,7 +610,7 @@ it('checks action creator', async () => {
     'add'
   ])
   expect(test.reports[2]).toEqual(['denied', { actionId: '2 1:uuid 0' }])
-  expect(test.reports[4][1].meta.id).toEqual('1 10:uuid 0')
+  expect(test.reports[4]![1].meta.id).toEqual('1 10:uuid 0')
   expect(test.app.log.actions()).toEqual([
     { type: 'GOOD' },
     {
@@ -640,7 +640,7 @@ it('allows subscribe and unsubscribe actions', async () => {
   ])
 
   expect(test.names[8]).toEqual('unknownType')
-  expect(test.reports[8][1].actionId).toEqual('3 10:uuid 0')
+  expect(test.reports[8]![1].actionId).toEqual('3 10:uuid 0')
   expect(test.names).toContain('unsubscribed')
   expect(test.names).toContain('subscribed')
 })
@@ -685,8 +685,8 @@ it('checks action meta', async () => {
     'add',
     'add'
   ])
-  expect(test.reports[2][1].actionId).toEqual('1 10:uuid 0')
-  expect(test.reports[4][1].meta.id).toEqual('2 10:uuid 0')
+  expect(test.reports[2]![1].actionId).toEqual('1 10:uuid 0')
+  expect(test.reports[4]![1].meta.id).toEqual('2 10:uuid 0')
 })
 
 it('ignores unknown action types', async () => {
@@ -882,13 +882,13 @@ it('adds resend keys', async () => {
     'add',
     'add'
   ])
-  expect(test.reports[2][1].action.type).toEqual('FOO')
-  expect(test.reports[2][1].meta.nodes).toEqual(['1:client:other'])
-  expect(test.reports[2][1].meta.clients).toEqual(['1:client'])
-  expect(test.reports[2][1].meta.channels).toEqual(['a'])
-  expect(test.reports[2][1].meta.users).toEqual(['1'])
-  expect(test.reports[4][1].action.type).toEqual('EMPTY')
-  expect(test.reports[4][1].meta.users).not.toBeDefined()
+  expect(test.reports[2]![1].action.type).toEqual('FOO')
+  expect(test.reports[2]![1].meta.nodes).toEqual(['1:client:other'])
+  expect(test.reports[2]![1].meta.clients).toEqual(['1:client'])
+  expect(test.reports[2]![1].meta.channels).toEqual(['a'])
+  expect(test.reports[2]![1].meta.users).toEqual(['1'])
+  expect(test.reports[4]![1].action.type).toEqual('EMPTY')
+  expect(test.reports[4]![1].meta.users).not.toBeDefined()
 })
 
 it('has channel resend shortcut', async () => {
@@ -922,8 +922,8 @@ it('has channel resend shortcut', async () => {
     { type: 'FOOS' },
     { id: '2 10:uuid 0', type: 'logux/processed' }
   ])
-  expect(app.log.entries()[0][1].channels).toEqual(['bar'])
-  expect(app.log.entries()[2][1].channels).toEqual(['bar1', 'bar2'])
+  expect(app.log.entries()[0]![1].channels).toEqual(['bar'])
+  expect(app.log.entries()[2]![1].channels).toEqual(['bar1', 'bar2'])
 })
 
 it('sends old actions by node ID', async () => {
@@ -1229,8 +1229,8 @@ it('decompress subprotocol', async () => {
     { id: [2, '10:uuid', 0], subprotocol: 2, time: 2 }
   ])
 
-  expect(app.log.entries()[0][1].subprotocol).toEqual(1)
-  expect(app.log.entries()[1][1].subprotocol).toEqual(2)
+  expect(app.log.entries()[0]![1].subprotocol).toEqual(1)
+  expect(app.log.entries()[1]![1].subprotocol).toEqual(2)
 })
 
 it('has custom processor for unknown type', async () => {
@@ -1302,8 +1302,8 @@ it('allows to use different node ID', async () => {
   ])
 
   expect(calls).toEqual(1)
-  expect(app.log.entries()[1][0].type).toEqual('logux/processed')
-  expect(app.log.entries()[1][1].clients).toEqual(['10:client'])
+  expect(app.log.entries()[1]![0].type).toEqual('logux/processed')
+  expect(app.log.entries()[1]![1].clients).toEqual(['10:client'])
 })
 
 it('allows to use different node ID only with same client ID', async () => {
@@ -1491,7 +1491,7 @@ it('keeps context', async () => {
   ])
   await setTimeout(1)
 
-  expect(sent(client)[2][2].type).toEqual('logux/processed')
+  expect(sent(client)[2]![2].type).toEqual('logux/processed')
 })
 
 it('uses resend for own actions', async () => {
@@ -1514,12 +1514,12 @@ it('uses resend for own actions', async () => {
 
   app.log.add({ type: 'FOO' })
   await setTimeout(10)
-  expect(app.log.entries()[2][1].channels).toEqual(['foo'])
-  expect(sent(client)[3][2]).toEqual({ type: 'FOO' })
+  expect(app.log.entries()[2]![1].channels).toEqual(['foo'])
+  expect(sent(client)[3]![2]).toEqual({ type: 'FOO' })
 
   app.log.add({ type: 'FOO' }, { status: 'processed' })
   await setTimeout(10)
-  expect(app.log.entries()[3][1].channels).not.toBeDefined()
+  expect(app.log.entries()[3]![1].channels).not.toBeDefined()
 })
 
 it('does not duplicate channel load actions', async () => {

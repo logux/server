@@ -1,7 +1,7 @@
-import {
+import type {
   BaseServer,
-  type BaseServerOptions,
-  type Logger
+  BaseServerOptions,
+  Logger
 } from '../base-server/index.js'
 
 export interface LogStream {

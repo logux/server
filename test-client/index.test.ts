@@ -295,7 +295,9 @@ it('sets client headers', async () => {
 
 it('sets client cookie', async () => {
   server = new TestServer()
-  server.auth(({ cookie }) => cookie.token === 'good')
+  server.auth(({ cookie }) => {
+    return cookie.token === 'good'
+  })
   await server.connect('10', { cookie: { token: 'good' } })
   await server.expectWrongCredentials('10', { cookie: { token: 'bad' } })
 })

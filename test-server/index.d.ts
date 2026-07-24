@@ -1,7 +1,7 @@
 import type { TestLog, TestTime } from '@logux/core'
 
-import { BaseServer } from '../base-server/index.js'
 import type {
+  BaseServer,
   BaseServerOptions,
   Logger,
   ServerMeta

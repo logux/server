@@ -32,34 +32,34 @@
   "dependencies": {
     "@logux/actions": "^0.5.0",
     "@logux/core": "^0.10.0",
-    "cookie": "^1.1.1",
+    "cookie": "^2.0.1",
     "fastq": "^1.20.1",
-    "nanoevents": "^9.1.0",
-    "nanoid": "^5.1.9",
-    "tinyglobby": "^0.2.16",
+    "nanoevents": "^10.0.0",
+    "nanoid": "^6.0.0",
+    "tinyglobby": "^0.2.17",
     "url-pattern": "^1.0.3",
-    "ws": "^8.20.0"
+    "ws": "^8.21.1"
   },
   "devDependencies": {
-    "@logux/oxc-configs": "^0.3.4",
+    "@logux/oxc-configs": "^1.0.0",
     "@types/cross-spawn": "^6.0.6",
-    "@types/node": "^25.6.0",
+    "@types/node": "^26.1.1",
     "@types/ws": "^8.18.1",
-    "@vitest/coverage-v8": "^4.1.4",
-    "actions-up": "^1.14.0",
-    "check-dts": "^1.0.0",
+    "@vitest/coverage-v8": "^4.1.10",
+    "actions-up": "^1.16.0",
+    "check-dts": "^2.0.0",
     "clean-publish": "^6.0.5",
     "cross-spawn": "^7.0.6",
     "eslint-plugin-prefer-let": "^4.2.2",
-    "nanospy": "^1.0.0",
-    "oxlint": "^1.60.0",
-    "oxlint-tsgolint": "^0.21.1",
+    "nanospy": "^2.0.2",
+    "oxlint": "^1.75.0",
+    "oxlint-tsgolint": "^7.0.2001",
     "print-snapshots": "^0.4.2",
-    "typescript": "^6.0.2",
-    "vite": "^8.0.8",
-    "vitest": "^4.1.4"
+    "typescript": "^7.0.2",
+    "vite": "^8.1.5",
+    "vitest": "^4.1.10"
   },
   "engines": {
-    "node": "^22.0.0 || >=24.0.0"
+    "node": "^22.0.0 || ^24.0.0 || >=26.0.0"
   }
 }

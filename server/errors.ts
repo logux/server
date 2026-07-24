@@ -80,7 +80,7 @@ server.type('user/changeId', {
   }
 })
 
-// THROWS "bad"' is not assignable to parameter of type 'RegExp | "user/rename"'
+// THROWS "bad"' is not assignable to parameter of type '"user/rename" | RegExp'
 server.type<UserRenameAction>('bad', {
   access() {
     return true
@@ -104,7 +104,7 @@ server.channel<UserParams, UserData, UserSubscribeAction>('user/:id', {
     }
   },
   async load(ctx) {
-    // THROWS is not assignable to parameter of type 'AnyAction'
+    // THROWS but required in type 'AnyAction'
     await ctx.sendBack({
       userId: ctx.data.user.id,
       name: ctx.data.user.name

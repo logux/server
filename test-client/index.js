@@ -1,5 +1,5 @@
 import { ClientNode, TestPair } from '@logux/core'
-import cookie from 'cookie'
+import { stringifyCookie } from 'cookie'
 import { setTimeout } from 'node:timers/promises'
 
 import { filterMeta } from '../filter-meta/index.js'
@@ -34,9 +34,9 @@ export class TestClient {
       this.node.setLocalHeaders(opts.headers)
     }
     if (opts.cookie) {
-      this.pair.right.ws.upgradeReq.headers.cookie = Object.keys(opts.cookie)
-        .map(i => cookie.serialize(i, opts.cookie[i]))
-        .join('; ')
+      this.pair.right.ws.upgradeReq.headers.cookie = stringifyCookie(
+        opts.cookie
+      )
     }
     server.unbind.push(() => {
       this.node.destroy()
