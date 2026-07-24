@@ -180,7 +180,10 @@ export class TestClient {
    * @param meta Optional action’s meta.
    * @returns Promise until `logux/processed` answer.
    */
-  process(action: AnyAction, meta?: Partial<ServerMeta>): Promise<Action[]>
+  process<TypeAction extends Action = AnyAction>(
+    action: TypeAction,
+    meta?: Partial<ServerMeta>
+  ): Promise<Action[]>
 
   /**
    * Collect actions received from server during the `test` call.

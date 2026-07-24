@@ -1106,8 +1106,8 @@ export class BaseServer<
    * @param meta Action’s meta.
    * @returns Promise until new action will be resend to clients and processed.
    */
-  process(
-    action: AnyAction,
+  process<TypeAction extends Action = AnyAction>(
+    action: TypeAction,
     meta?: Partial<ServerMeta>
   ): Promise<Readonly<ServerMeta>>
 

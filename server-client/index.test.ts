@@ -1491,7 +1491,8 @@ it('keeps context', async () => {
   ])
   await setTimeout(1)
 
-  expect(sent(client)[2]![2].type).toEqual('logux/processed')
+  expect(sentNames(client)[2]).toEqual('sync')
+  expect((sent(client)[2]![2] as Action).type).toEqual('logux/processed')
 })
 
 it('uses resend for own actions', async () => {
@@ -1621,9 +1622,14 @@ it('does not process send-back actions', async () => {
     }
   })
 
+  type DataAction = {
+    data: string
+    type: 'A'
+  }
+
   let processed: string[] = []
   let resended: string[] = []
-  app.type('A', {
+  app.type<DataAction>('A', {
     access: () => true,
     process(ctx, action) {
       processed.push(action.data)

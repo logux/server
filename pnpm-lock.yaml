@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       '@logux/actions':
-        specifier: ^0.5.0
-        version: 0.5.0(@logux/core@0.10.0)
+        specifier: github:logux/actions#next
+        version: git+ssh://git@github.com/logux/actions.git#da758a1d6a5b5e2e01ab3a2f24f2ca95c73f457d(@logux/core@git+ssh://git@github.com/logux/core.git#a18927bd8cece5459f88ed80549824454936a63a)
       '@logux/core':
-        specifier: ^0.10.0
-        version: 0.10.0
+        specifier: github:logux/core#next
+        version: git+ssh://git@github.com/logux/core.git#a18927bd8cece5459f88ed80549824454936a63a
       cookie:
         specifier: ^2.0.1
         version: 2.0.1
@@ -280,15 +280,17 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@logux/actions@0.5.0':
-    resolution: {integrity: sha512-65sgfkuFUzxHqDWSBn2CfNwHrijkoMbFS/LBMeRNtcdMxGRJ4X4mwwwDDdQ/Tci+TNQnfJTAiKCKBIsdiS3VCg==}
-    engines: {node: ^20.0.0 || >=22.0.0}
+  '@logux/actions@git+ssh://git@github.com/logux/actions.git#da758a1d6a5b5e2e01ab3a2f24f2ca95c73f457d':
+    resolution: {commit: da758a1d6a5b5e2e01ab3a2f24f2ca95c73f457d, repo: git@github.com:logux/actions.git, type: git}
+    version: 0.5.0
+    engines: {node: ^22.0.0 || ^24.0.0 || >=26.0.0}
     peerDependencies:
       '@logux/core': ^0.10.0
 
-  '@logux/core@0.10.0':
-    resolution: {integrity: sha512-VbgVkEloAe2ym5w0cjyRI16Eeyk2R0BgJa9pMYT1FcJEhFnzrB23E0ExIEhrok0iD48bFh7goledwmDLmgWaiw==}
-    engines: {node: ^20.0.0 || >=22.0.0}
+  '@logux/core@git+ssh://git@github.com/logux/core.git#a18927bd8cece5459f88ed80549824454936a63a':
+    resolution: {commit: a18927bd8cece5459f88ed80549824454936a63a, repo: git@github.com:logux/core.git, type: git}
+    version: 0.10.0
+    engines: {node: ^22.0.0 || ^24.0.0 || >=26.0.0}
 
   '@logux/oxc-configs@1.0.0':
     resolution: {integrity: sha512-BHn8L2r2HT/Kp508jiTX+gTC3Rij2Sua7rjLOjweNzkWkQjzAbJdXwtRYI4DeBkrvdF7PmI8A6EvcCqHtDFNEQ==}
@@ -1011,10 +1013,6 @@ packages:
     resolution: {integrity: sha512-PmIJ3BNxOzgVgnS1r/Pvyj6eZx/xUV2JCPogh0brD6smDIwjRlr1KBl9yoRX323PlfaNrBDDnfCgC9SL00OjSg==}
     engines: {node: ^22.0.0 || ^24.0.0 || >=26.0.0}
 
-  nanoevents@9.1.0:
-    resolution: {integrity: sha512-Jd0fILWG44a9luj8v5kED4WI+zfkkgwKyRQKItTtlPfEsh7Lznfi1kr8/iZ+XAIss4Qq5GqRB0qtWbaz9ceO/A==}
-    engines: {node: ^18.0.0 || >=20.0.0}
-
   nanoid@3.3.16:
     resolution: {integrity: sha512-bzlKTyNJ7+LdGIIwy8ijFpIqEQIvafahV7eYykJ8Cvh42EdJeODoJ6gUJXpQJvej1BddH8OqTXZNE/KfbWAu8Q==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
@@ -1074,10 +1072,6 @@ packages:
   picomatch@2.3.2:
     resolution: {integrity: sha512-V7+vQEJ06Z+c5tSye8S+nHUfI51xoXIXjHQ99cQtKUkQqqO1kO/KCJUfZXuB47h/YBlDhah2H3hdUGXn8ie0oA==}
     engines: {node: '>=8.6'}
-
-  picomatch@4.0.4:
-    resolution: {integrity: sha512-QP88BAKvMam/3NxH6vj2o21R6MjxZUAd6nlwAS/pnGvN9IVLocLHxGYIzFhg6fUQ+5th6P4dv4eW9jX3DSIj7A==}
-    engines: {node: '>=12'}
 
   picomatch@4.0.5:
     resolution: {integrity: sha512-RvwwcruNjI1ncT5xRakeyS9Lf8lcItv34KD+aif+VH9kduAyfYBipGh12274xtenIPZ119/R9BdTBa8gAwSh0A==}
@@ -1151,10 +1145,6 @@ packages:
 
   tinybench@2.9.0:
     resolution: {integrity: sha512-0+DUvqWMValLmha6lr4kD8iAMK1HzV0/aKnCtWb9v9641TnP/MFb7Pc2bxoxQjTXAErryXVgUOfv2YqNllqGeg==}
-
-  tinyexec@1.1.1:
-    resolution: {integrity: sha512-VKS/ZaQhhkKFMANmAOhhXVoIfBXblQxGX1myCQ2faQrfmobMftXeJPcZGp0gS07ocvGJWDLZGyOZDadDBqYIJg==}
-    engines: {node: '>=18'}
 
   tinyexec@1.2.4:
     resolution: {integrity: sha512-SHf/r48b7vOrjve9PxJo3MN5v5yuyjHvdUcrQffT3WXMUfnGmHDVbC4k3sHJaJTgZCwpUplIaAo5ANtMyp3YHg==}
@@ -1414,13 +1404,13 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@logux/actions@0.5.0(@logux/core@0.10.0)':
+  '@logux/actions@git+ssh://git@github.com/logux/actions.git#da758a1d6a5b5e2e01ab3a2f24f2ca95c73f457d(@logux/core@git+ssh://git@github.com/logux/core.git#a18927bd8cece5459f88ed80549824454936a63a)':
     dependencies:
-      '@logux/core': 0.10.0
+      '@logux/core': git+ssh://git@github.com/logux/core.git#a18927bd8cece5459f88ed80549824454936a63a
 
-  '@logux/core@0.10.0':
+  '@logux/core@git+ssh://git@github.com/logux/core.git#a18927bd8cece5459f88ed80549824454936a63a':
     dependencies:
-      nanoevents: 9.1.0
+      nanoevents: 10.0.0
 
   '@logux/oxc-configs@1.0.0(oxlint-tsgolint@7.0.2001)(oxlint@1.75.0(oxlint-tsgolint@7.0.2001))(typescript@7.0.2)':
     dependencies:
@@ -1773,8 +1763,8 @@ snapshots:
   clean-publish@6.0.5:
     dependencies:
       lilconfig: 3.1.3
-      picomatch: 4.0.4
-      tinyexec: 1.1.1
+      picomatch: 4.0.5
+      tinyexec: 1.2.4
       tinyglobby: 0.2.17
 
   convert-source-map@2.0.0: {}
@@ -1970,8 +1960,6 @@ snapshots:
 
   nanoevents@10.0.0: {}
 
-  nanoevents@9.1.0: {}
-
   nanoid@3.3.16: {}
 
   nanoid@6.0.0: {}
@@ -2027,8 +2015,6 @@ snapshots:
   picocolors@1.1.1: {}
 
   picomatch@2.3.2: {}
-
-  picomatch@4.0.4: {}
 
   picomatch@4.0.5: {}
 
@@ -2105,8 +2091,6 @@ snapshots:
       has-flag: 4.0.0
 
   tinybench@2.9.0: {}
-
-  tinyexec@1.1.1: {}
 
   tinyexec@1.2.4: {}
 

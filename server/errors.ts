@@ -74,7 +74,9 @@ server.type<UserRenameAction, UserData>('user/rename', {
 // THROWS No overload matches this call.
 server.type('user/changeId', {
   async process(_, action) {
+    // THROWS Argument of type 'unknown' is not assignable to parameter
     let user = new User(action.userId)
+    // THROWS Type 'unknown' is not assignable to type 'string'.
     user.id = action.newId
     await user.save()
   }
@@ -104,8 +106,8 @@ server.channel<UserParams, UserData, UserSubscribeAction>('user/:id', {
     }
   },
   async load(ctx) {
-    // THROWS but required in type 'AnyAction'
     await ctx.sendBack({
+      // THROWS 'userId' does not exist in type 'Action'
       userId: ctx.data.user.id,
       name: ctx.data.user.name
     })

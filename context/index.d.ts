@@ -1,4 +1,4 @@
-import type { AnyAction } from '@logux/core'
+import type { Action, AnyAction } from '@logux/core'
 
 import type { ServerMeta } from '../base-server/index.js'
 import type { ServerClient } from '../server-client/index.js'
@@ -72,7 +72,10 @@ export class ConnectContext<Headers extends object = unknown> {
    * @param meta Action’s meta.
    * @returns Promise until action was added to the server log.
    */
-  sendBack(action: AnyAction, meta?: Partial<ServerMeta>): Promise<void>
+  sendBack<TypeAction extends Action = AnyAction>(
+    action: TypeAction,
+    meta?: Partial<ServerMeta>
+  ): Promise<void>
 }
 
 /**
