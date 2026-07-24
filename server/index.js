@@ -1,6 +1,6 @@
-import { join, relative } from 'node:path'
+import { glob } from 'node:fs/promises'
+import { join, matchesGlob, relative } from 'node:path'
 import { styleText } from 'node:util'
-import { glob } from 'tinyglobby'
 
 import { BaseServer } from '../base-server/index.js'
 import { createReporter } from '../create-reporter/index.js'
@@ -120,14 +120,23 @@ export class Server extends BaseServer {
     files = ['modules/*/index.js', 'modules/*.js', '!**/*.{test,spec}.js']
   ) {
     if (!Array.isArray(files)) files = [files]
-    let matches = await glob(files, {
-      absolute: true,
+    let ignore = files.filter(i => i.startsWith('!')).map(i => i.slice(1))
+    let patterns = files.filter(i => !i.startsWith('!'))
+
+    let matches = new Set()
+    for await (let entry of glob(patterns, {
       cwd: this.options.root,
-      onlyFiles: true
-    })
+      withFileTypes: true
+    })) {
+      if (!entry.isFile()) continue
+      let file = join(entry.parentPath, entry.name)
+      let path = relative(this.options.root, file)
+      if (ignore.some(i => matchesGlob(path, i))) continue
+      matches.add(file)
+    }
 
     await Promise.all(
-      matches.map(async file => {
+      [...matches].map(async file => {
         let serverModule = (await import(file)).default
         if (typeof serverModule === 'function') {
           await serverModule(this)
