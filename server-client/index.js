@@ -263,8 +263,10 @@ export class ServerClient {
 
       if (isChannel) {
         for (let channel of this.app.channels) {
-          let pattern = channel.regexp || channel.pattern.regex
-          if (action.channel.match(pattern)) {
+          let match = channel.regexp
+            ? action.channel.match(channel.regexp)
+            : channel.pattern(action.channel)
+          if (match) {
             queueName = channel.queue
             break
           }

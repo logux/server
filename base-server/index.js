@@ -5,13 +5,13 @@ import { nanoid } from 'nanoid'
 import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import UrlPattern from 'url-pattern'
 import { WebSocketServer } from 'ws'
 
 import { addHttpPages } from '../add-http-pages/index.js'
 import { Context } from '../context/index.js'
 import { createHttpServer } from '../create-http-server/index.js'
 import { ServerClient } from '../server-client/index.js'
+import { createPattern } from '../url-pattern/index.js'
 
 const SKIP_PROCESS = Symbol('skipProcess')
 const RESEND_META = ['channels', 'users', 'clients', 'nodes']
@@ -445,9 +445,7 @@ export class BaseServer {
     normalizeChannelCallbacks(`Channel ${pattern}`, callbacks)
     let channel = Object.assign({}, callbacks)
     if (typeof pattern === 'string') {
-      channel.pattern = new UrlPattern(pattern, {
-        segmentValueCharset: '^/'
-      })
+      channel.pattern = createPattern(pattern)
     } else {
       channel.regexp = pattern
     }
@@ -670,11 +668,7 @@ export class BaseServer {
       throw new Error('Callbacks for unknown channel are already defined')
     }
     let channel = Object.assign({}, callbacks)
-    channel.pattern = {
-      match(name) {
-        return [name]
-      }
-    }
+    channel.pattern = name => [name]
     this.otherSubscriber = channel
   }
 
@@ -914,7 +908,7 @@ export class BaseServer {
     let match
     for (let channel of channels) {
       if (channel.pattern) {
-        match = channel.pattern.match(action.channel)
+        match = channel.pattern(action.channel)
       } else {
         match = action.channel.match(channel.regexp)
       }
