@@ -138,6 +138,29 @@ exports[`reports authenticated without user ID 2`] = `
 "
 `;
 
+exports[`reports binary actions 1`] = `
+"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"action":{"chunks":["[binary]"],"file":"[binary]","preview":"[binary]","raw":"[binary]","type":"ADD_FILE"},"meta":{"id":"1487805099387 100:uImkcF4z 0","reasons":[],"server":"server:H1f8LAyzl","subprotocol":1,"time":1487805099387},"msg":"Action was added"}
+"
+`;
+
+exports[`reports binary actions 2`] = `
+"[42m[30m INFO [39m[49m  [1m[32mAction was added[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Action: 
+          chunks:  [[1m[binary][22m]
+          file:    [1m[binary][22m
+          preview: [1m[binary][22m
+          raw:     [1m[binary][22m
+          type:    "[1mADD_FILE[22m"
+        Meta:   
+          id:          [1m[32m1487[39m[35m8050[39m[33m9938[39m[33m7[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
+          reasons:     []
+          server:      [1mserver[22m:[34mH1f[39m[35m8LA[39m[36myzl[39m
+          subprotocol: [1m1[22m
+          time:        [1m1487805099387[22m
+
+"
+`;
+
 exports[`reports clean 1`] = `
 "{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"actionId":"1487805099387 100:uImkcF4z 0","msg":"Action was cleaned"}
 "

@@ -179,6 +179,25 @@ it('reports add and clean', () => {
   })
 })
 
+it('reports binary actions', () => {
+  check('add', {
+    action: {
+      chunks: [new Uint8Array([1, 2, 3])],
+      file: new Uint8Array([1, 2, 3]),
+      preview: Buffer.from([1, 2, 3]),
+      raw: new ArrayBuffer(3),
+      type: 'ADD_FILE'
+    },
+    meta: {
+      id: '1487805099387 100:uImkcF4z 0',
+      reasons: [],
+      server: 'server:H1f8LAyzl',
+      subprotocol: 1,
+      time: 1487805099387
+    }
+  })
+})
+
 it('throws on circuital reference', () => {
   let a: { b: any } = { b: undefined }
   let b: { a: any } = { a: undefined }

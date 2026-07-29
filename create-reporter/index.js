@@ -2,6 +2,7 @@ import os from 'node:os'
 import { sep } from 'node:path'
 
 import humanFormatter from '../human-formatter/index.js'
+import { BINARY, isBinary } from '../human-formatter/utils.js'
 
 const ERROR_CODES = {
   EACCES: (e, environment) => {
@@ -175,21 +176,29 @@ const REPORTERS = {
 function cleanFromKeys(obj, regexp, seen) {
   let result = {}
   for (let key in obj) {
-    let v = obj[key]
-    if (typeof v === 'string') {
-      result[key] = v.replace(regexp, '[SECRET]')
-    } else if (typeof v === 'object' && !Array.isArray(v) && v !== null) {
-      if (seen.includes(v)) {
-        throw new Error('Circular reference in action')
-      }
-      seen.push(v)
-      result[key] = cleanFromKeys(v, regexp, seen)
-      seen.pop()
-    } else {
-      result[key] = v
-    }
+    result[key] = cleanValue(obj[key], regexp, seen)
   }
   return result
+}
+
+function cleanValue(value, regexp, seen) {
+  if (typeof value === 'string') {
+    return value.replace(regexp, '[SECRET]')
+  } else if (isBinary(value)) {
+    return BINARY
+  } else if (typeof value === 'object' && value !== null) {
+    if (seen.includes(value)) {
+      throw new Error('Circular reference in action')
+    }
+    seen.push(value)
+    let cleaned = Array.isArray(value)
+      ? value.map(i => cleanValue(i, regexp, seen))
+      : cleanFromKeys(value, regexp, seen)
+    seen.pop()
+    return cleaned
+  } else {
+    return value
+  }
 }
 
 function createRecord(level, details, msg) {

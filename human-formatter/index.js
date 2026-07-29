@@ -1,8 +1,9 @@
 import os from 'node:os'
 import { stripVTControlCharacters, styleText } from 'node:util'
 
-import { mulberry32, onceXmur3 } from './utils.js'
+import { isBinary, mulberry32, onceXmur3 } from './utils.js'
 
+const BINARY_MARK = '[binary]'
 const INDENT = '  '
 const PADDING = '        '
 const SEPARATOR = os.EOL + os.EOL
@@ -119,7 +120,9 @@ function formatNodeId(nodeId) {
 }
 
 function formatValue(value) {
-  if (typeof value === 'string') {
+  if (isBinary(value)) {
+    return styleText('bold', BINARY_MARK)
+  } else if (typeof value === 'string') {
     return '"' + styleText('bold', value) + '"'
   } else if (Array.isArray(value)) {
     return formatArray(value)
@@ -164,7 +167,12 @@ function formatParams(params, parent) {
 
       let start = PADDING + rightPag(`${name}: `, maxName + 2)
 
-      if (name === 'Node ID' || (parent === 'Meta' && name === 'server')) {
+      if (isBinary(value)) {
+        return start + styleText('bold', BINARY_MARK)
+      } else if (
+        name === 'Node ID' ||
+        (parent === 'Meta' && name === 'server')
+      ) {
         return start + formatNodeId(value)
       } else if (
         parent === 'Meta' &&

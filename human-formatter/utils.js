@@ -1,3 +1,17 @@
+export const BINARY = {
+  toJSON() {
+    return '[binary]'
+  }
+}
+
+export function isBinary(value) {
+  return (
+    value === BINARY ||
+    ArrayBuffer.isView(value) ||
+    value instanceof ArrayBuffer
+  )
+}
+
 export function onceXmur3(str) {
   let h = 1779033703 ^ str.length
   for (let i = 0; i < str.length; i++) {
