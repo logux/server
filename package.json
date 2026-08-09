@@ -51,7 +51,6 @@
     "nanospy": "^2.0.2",
     "oxlint": "^1.77.0",
     "oxlint-tsgolint": "^7.0.2001",
-    "print-snapshots": "^0.4.2",
     "typescript": "^7.0.2",
     "vite": "^8.2.1",
     "vitest": "^4.1.10"
