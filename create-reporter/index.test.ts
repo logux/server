@@ -149,11 +149,11 @@ it('reports add', () => {
       type: 'CHANGE_USER'
     },
     meta: {
-      id: '1487805099387 100:uImkcF4z 0',
+      id: '5o-8K2 100:uImkcF4z',
       reasons: ['lastValue', 'debug'],
       server: 'server:H1f8LAyzl',
       subprotocol: 1,
-      time: 1487805099387
+      time: 1786567299387
     }
   })
 })
@@ -170,11 +170,11 @@ it('reports add and clean', () => {
       type: 'CHANGE_USER'
     },
     meta: {
-      id: '1487805099387 100:uImkcF4z 0',
+      id: '5o-8K2 100:uImkcF4z',
       reasons: ['lastValue', 'debug'],
       server: 'server:H1f8LAyzl',
       subprotocol: 1,
-      time: 1487805099387
+      time: 1786567299387
     }
   })
 })
@@ -189,11 +189,11 @@ it('reports binary actions', () => {
       type: 'ADD_FILE'
     },
     meta: {
-      id: '1487805099387 100:uImkcF4z 0',
+      id: '5o-8K2 100:uImkcF4z',
       reasons: [],
       server: 'server:H1f8LAyzl',
       subprotocol: 1,
-      time: 1487805099387
+      time: 1786567299387
     }
   })
 })
@@ -207,11 +207,11 @@ it('throws on circuital reference', () => {
     check('add', {
       action: { a, type: 'CHANGE_USER' },
       meta: {
-        id: '1487805099387 100:uImkcF4z 0',
+        id: '5o-8K2 100:uImkcF4z',
         reasons: ['lastValue', 'debug'],
         server: 'server:H1f8LAyzl',
         subprotocol: 1,
-        time: 1487805099387
+        time: 1786567299387
       }
     })
   }).toThrow('Circular reference in action')
@@ -219,54 +219,54 @@ it('throws on circuital reference', () => {
 
 it('reports clean', () => {
   check('clean', {
-    actionId: '1487805099387 100:uImkcF4z 0'
+    actionId: '5o-8K2 100:uImkcF4z'
   })
 })
 
 it('reports denied', () => {
   check('denied', {
-    actionId: '1487805099387 100:uImkcF4z 0'
+    actionId: '5o-8K2 100:uImkcF4z'
   })
 })
 
 it('reports unknownType', () => {
   check('unknownType', {
-    actionId: '1487805099387 100:vAApgNT9 0',
+    actionId: '5o-8K2 100:vAApgNT9',
     type: 'CHANGE_SER'
   })
 })
 
 it('reports unknownType from server', () => {
   check('unknownType', {
-    actionId: '1650269021700 server:FnXaqDxY 0',
+    actionId: '5o-8K2 server:FnXaqDxY',
     type: 'CHANGE_SER'
   })
 })
 
 it('reports wrongChannel', () => {
   check('wrongChannel', {
-    actionId: '1650269045800 100:IsvVzqWx 0',
+    actionId: '5o-ECb 100:IsvVzqWx',
     channel: 'ser/100'
   })
 })
 
 it('reports wrongChannel without name', () => {
   check('wrongChannel', {
-    actionId: '1650269056600 100:uImkcF4z 0',
+    actionId: '5o-GqM 100:uImkcF4z',
     channel: undefined
   })
 })
 
 it('reports subscribed', () => {
   check('subscribed', {
-    actionId: '1487805099387 100:uImkcF4z 0',
+    actionId: '5o-8K2 100:uImkcF4z',
     channel: 'user/100'
   })
 })
 
 it('reports unsubscribed', () => {
   check('unsubscribed', {
-    actionId: '1650271940900 100:uImkcF4z 0',
+    actionId: '5oAH0Y 100:uImkcF4z',
     channel: 'user/100'
   })
 })
@@ -328,14 +328,14 @@ it('reports error', () => {
 
 it('reports error from action', () => {
   check('error', {
-    actionId: '1487805099387 100:uImkcF4z 0',
+    actionId: '5o-8K2 100:uImkcF4z',
     err: createError('Error', 'Some mistake')
   })
 })
 
 it('reports error with token', () => {
   check('error', {
-    actionId: '1487805099387 100:uImkcF4z 0',
+    actionId: '5o-8K2 100:uImkcF4z',
     err: createError('Error', '{"Authorization":"Bearer secret"}')
   })
 })
@@ -358,11 +358,11 @@ it('reports useless actions', () => {
       type: 'ADD_USER'
     },
     meta: {
-      id: '1487805099387 100:uImkcF4z 0',
+      id: '5o-8K2 100:uImkcF4z',
       reasons: [],
       server: 'server:H1f8LAyzl',
       subprotocol: 1,
-      time: 1487805099387
+      time: 1786567299387
     }
   })
 })
@@ -376,11 +376,11 @@ it("reports actions with metadata containing 'clients' array", () => {
     },
     meta: {
       clients: ['1:-lCr7e9s', '2:wv0r_O5C'],
-      id: '1487805099387 100:uImkcF4z 0',
+      id: '5o-8K2 100:uImkcF4z',
       reasons: [],
       server: 'server:H1f8LAyzl',
       subprotocol: 1,
-      time: 1487805099387
+      time: 1786567299387
     }
   })
 })
@@ -394,11 +394,11 @@ it('reports actions with excludeClients metadata', () => {
     },
     meta: {
       excludeClients: ['1:-lCr7e9s', '2:wv0r_O5C'],
-      id: '1487805099387 100:uImkcF4z 0',
+      id: '5o-8K2 100:uImkcF4z',
       reasons: [],
       server: 'server:H1f8LAyzl',
       subprotocol: 1,
-      time: 1487805099387
+      time: 1786567299387
     }
   })
 })

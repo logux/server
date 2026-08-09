@@ -65,13 +65,13 @@ it('sends and collect actions', async () => {
   })
   expect(received).toEqual([
     { type: 'BAR' },
-    { id: '1 10:1:1 0', type: 'logux/processed' },
+    { id: '4 10:1:1', type: 'logux/processed' },
     { type: 'RESEND' }
   ])
   expect(client1.log.actions()).toEqual([
     { type: 'FOO' },
     { type: 'BAR' },
-    { id: '1 10:1:1 0', type: 'logux/processed' },
+    { id: '4 10:1:1', type: 'logux/processed' },
     { type: 'RESEND' }
   ])
 })
@@ -108,7 +108,7 @@ it('tracks action processing', async () => {
   let client = await server.connect('10')
 
   let processed = await client.process({ type: 'FOO' })
-  expect(processed).toEqual([{ id: '1 10:1:1 0', type: 'logux/processed' }])
+  expect(processed).toEqual([{ id: '2 10:1:1', type: 'logux/processed' }])
 
   let notDenied = await catchError(async () => {
     await server.expectDenied(() => client.process({ type: 'FOO' }))
@@ -119,7 +119,7 @@ it('tracks action processing', async () => {
   expect(serverError.message).toEqual('test')
   expect(serverError.action).toEqual({
     action: { type: 'ERR' },
-    id: '5 10:1:1 0',
+    id: '6 10:1:1',
     reason: 'error',
     type: 'logux/undo'
   })
@@ -184,13 +184,13 @@ it('detects action ID duplicate', async () => {
   let client = await server.connect('10')
   client.log.keepActions()
 
-  let processed = await client.process({ type: 'FOO' }, { id: '1 10:1:1 0' })
-  expect(processed).toEqual([{ id: '1 10:1:1 0', type: 'logux/processed' }])
+  let processed = await client.process({ type: 'FOO' }, { id: '1 10:1:1' })
+  expect(processed).toEqual([{ id: '1 10:1:1', type: 'logux/processed' }])
 
   let err = await catchError(async () => {
-    await client.process({ type: 'FOO' }, { id: '1 10:1:1 0' })
+    await client.process({ type: 'FOO' }, { id: '1 10:1:1' })
   })
-  expect(err.message).toEqual('Action 1 10:1:1 0 was already in log')
+  expect(err.message).toEqual('Action 1 10:1:1 was already in log')
 })
 
 it('tracks subscriptions', async () => {
@@ -326,7 +326,7 @@ it('collects received actions', async () => {
   })
   expect(actions).toEqual([
     { type: 'bar' },
-    { id: '1 10:1:1 0', type: 'logux/processed' }
+    { id: '2 10:1:1', type: 'logux/processed' }
   ])
 })
 

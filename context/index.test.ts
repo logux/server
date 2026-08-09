@@ -26,7 +26,7 @@ beforeEach(() => {
 })
 
 function createContext(
-  meta: Partial<ServerMeta> = { id: '1 10:client:uuid 0', subprotocol: 1 }
+  meta: Partial<ServerMeta> = { id: '1 10:client:uuid', subprotocol: 1 }
 ): Context {
   return new Context(FAKE_SERVER, meta as ServerMeta)
 }
@@ -45,29 +45,29 @@ it('parses meta', () => {
 })
 
 it('detects servers', () => {
-  let user = createContext({ id: '1 10:uuid 0' })
+  let user = createContext({ id: '1 10:uuid' })
   expect(user.isServer).toBe(false)
-  let server = createContext({ id: '1 server:uuid 0' })
+  let server = createContext({ id: '1 server:uuid' })
   expect(server.isServer).toBe(true)
 })
 
 it('takes subprotocol from client', () => {
-  let ctx = createContext({ id: '1 20:client:uuid 0' })
+  let ctx = createContext({ id: '1 20:client:uuid' })
   expect(ctx.subprotocol).toEqual(2)
 })
 
 it('works on missed subprotocol', () => {
-  let ctx = createContext({ id: '1 10:client:uuid 0' })
+  let ctx = createContext({ id: '1 10:client:uuid' })
   expect(ctx.subprotocol).toBeUndefined()
 })
 
 it('takes headers from client', () => {
-  let ctx = createContext({ id: '1 20:client:uuid 0' })
+  let ctx = createContext({ id: '1 20:client:uuid' })
   expect(ctx.headers).toEqual({ locale: 'fr' })
 })
 
 it('works on missed headers', () => {
-  let ctx = createContext({ id: '1 10:client:uuid 0' })
+  let ctx = createContext({ id: '1 10:client:uuid' })
   expect(ctx.headers).toEqual({})
 })
 

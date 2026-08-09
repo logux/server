@@ -10,10 +10,10 @@ importers:
     dependencies:
       '@logux/actions':
         specifier: github:logux/actions#next
-        version: git+ssh://git@github.com/logux/actions.git#179788d5528e061fde2cb4c35842acb40fc102d1(@logux/core@git+ssh://git@github.com/logux/core.git#2e67b2e7273643ab4a0b28401d91e04cf29e68bd)
+        version: git+ssh://git@github.com/logux/actions.git#179788d5528e061fde2cb4c35842acb40fc102d1(@logux/core@git+ssh://git@github.com/logux/core.git#573f28b54a99540135304140b69bdb9d6cf68a69)
       '@logux/core':
         specifier: github:logux/core#next
-        version: git+ssh://git@github.com/logux/core.git#2e67b2e7273643ab4a0b28401d91e04cf29e68bd
+        version: git+ssh://git@github.com/logux/core.git#573f28b54a99540135304140b69bdb9d6cf68a69
       cookie:
         specifier: ^2.0.1
         version: 2.0.1
@@ -275,8 +275,8 @@ packages:
     peerDependencies:
       '@logux/core': ^0.10.0
 
-  '@logux/core@git+ssh://git@github.com/logux/core.git#2e67b2e7273643ab4a0b28401d91e04cf29e68bd':
-    resolution: {commit: 2e67b2e7273643ab4a0b28401d91e04cf29e68bd, repo: git@github.com:logux/core.git, type: git}
+  '@logux/core@git+ssh://git@github.com/logux/core.git#573f28b54a99540135304140b69bdb9d6cf68a69':
+    resolution: {commit: 573f28b54a99540135304140b69bdb9d6cf68a69, repo: git@github.com:logux/core.git, type: git}
     version: 0.10.0
     engines: {node: ^22.0.0 || ^24.0.0 || >=26.0.0}
 
@@ -1350,11 +1350,11 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@logux/actions@git+ssh://git@github.com/logux/actions.git#179788d5528e061fde2cb4c35842acb40fc102d1(@logux/core@git+ssh://git@github.com/logux/core.git#2e67b2e7273643ab4a0b28401d91e04cf29e68bd)':
+  '@logux/actions@git+ssh://git@github.com/logux/actions.git#179788d5528e061fde2cb4c35842acb40fc102d1(@logux/core@git+ssh://git@github.com/logux/core.git#573f28b54a99540135304140b69bdb9d6cf68a69)':
     dependencies:
-      '@logux/core': git+ssh://git@github.com/logux/core.git#2e67b2e7273643ab4a0b28401d91e04cf29e68bd
+      '@logux/core': git+ssh://git@github.com/logux/core.git#573f28b54a99540135304140b69bdb9d6cf68a69
 
-  '@logux/core@git+ssh://git@github.com/logux/core.git#2e67b2e7273643ab4a0b28401d91e04cf29e68bd':
+  '@logux/core@git+ssh://git@github.com/logux/core.git#573f28b54a99540135304140b69bdb9d6cf68a69':
     dependencies:
       nanoevents: 10.0.0
 

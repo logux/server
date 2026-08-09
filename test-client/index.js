@@ -46,7 +46,7 @@ export class TestClient {
   async collect(test) {
     let added = []
     let unbind = this.node.log.on('add', (action, meta) => {
-      if (!meta.id.includes(` ${this.nodeId} `)) {
+      if (meta.id.split(' ')[1] !== this.nodeId) {
         added.push(action)
       }
     })
@@ -136,7 +136,7 @@ export class TestClient {
   async received(test) {
     let actions = []
     let unbind = this.log.on('add', (action, meta) => {
-      if (!meta.id.includes(` ${this.nodeId} `)) {
+      if (meta.id.split(' ')[1] !== this.nodeId) {
         actions.push(action)
       }
     })

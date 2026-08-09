@@ -148,10 +148,7 @@ function formatActionId(id) {
   if (p.length === 1) {
     return p
   }
-  return (
-    `${styleText('bold', splitAndColorize(4, p[0]))} ` +
-    `${formatNodeId(p[1])} ${styleText('bold', p[2])}`
-  )
+  return `${styleText('bold', splitAndColorize(4, p[0]))} ${formatNodeId(p[1])}`
 }
 
 function formatParams(params, parent) {

@@ -571,14 +571,14 @@ it('checks action access', async () => {
     'sync',
     2,
     { type: 'FOO' },
-    { id: [1, '10:uuid', 0], time: 1 }
+    { id: '1 10:uuid', time: 1 }
   ])
 
   expect(test.names).toEqual(['connect', 'authenticated', 'denied', 'add'])
   expect(test.app.log.actions()).toEqual([
     {
       action: { type: 'FOO' },
-      id: '1 10:uuid 0',
+      id: '1 10:uuid',
       reason: 'denied',
       type: 'logux/undo'
     }
@@ -596,9 +596,9 @@ it('checks action creator', async () => {
     'sync',
     2,
     { type: 'GOOD' },
-    { id: [1, '10:uuid', 0], time: 1 },
+    { id: '1 10:uuid', time: 1 },
     { type: 'BAD' },
-    { id: [2, '1:uuid', 0], time: 2 }
+    { id: '2 1:uuid', time: 2 }
   ])
 
   expect(test.names).toEqual([
@@ -609,17 +609,17 @@ it('checks action creator', async () => {
     'add',
     'add'
   ])
-  expect(test.reports[2]).toEqual(['denied', { actionId: '2 1:uuid 0' }])
-  expect(test.reports[4]![1].meta.id).toEqual('1 10:uuid 0')
+  expect(test.reports[2]).toEqual(['denied', { actionId: '2 1:uuid' }])
+  expect(test.reports[4]![1].meta.id).toEqual('1 10:uuid')
   expect(test.app.log.actions()).toEqual([
     { type: 'GOOD' },
     {
       action: { type: 'BAD' },
-      id: '2 1:uuid 0',
+      id: '2 1:uuid',
       reason: 'denied',
       type: 'logux/undo'
     },
-    { id: '1 10:uuid 0', type: 'logux/processed' }
+    { id: '1 10:uuid', type: 'logux/processed' }
   ])
 })
 
@@ -632,15 +632,15 @@ it('allows subscribe and unsubscribe actions', async () => {
     'sync',
     3,
     { channel: 'a', type: 'logux/subscribe' },
-    { id: [1, '10:uuid', 0], time: 1 },
+    { id: '1 10:uuid', time: 1 },
     { channel: 'b', type: 'logux/unsubscribe' },
-    { id: [2, '10:uuid', 0], time: 2 },
+    { id: '2 10:uuid', time: 2 },
     { type: 'logux/undo' },
-    { id: [3, '10:uuid', 0], time: 3 }
+    { id: '3 10:uuid', time: 3 }
   ])
 
   expect(test.names[8]).toEqual('unknownType')
-  expect(test.reports[8]![1].actionId).toEqual('3 10:uuid 0')
+  expect(test.reports[8]![1].actionId).toEqual('3 10:uuid')
   expect(test.names).toContain('unsubscribed')
   expect(test.names).toContain('subscribed')
 })
@@ -658,24 +658,24 @@ it('checks action meta', async () => {
     'sync',
     2,
     { type: 'BAD' },
-    { id: [1, '10:uuid', 0], status: 'processed', time: 1 },
+    { id: '1 10:uuid', status: 'processed', time: 1 },
     { type: 'GOOD' },
     {
-      id: [2, '10:uuid', 0],
+      id: '2 10:uuid',
       subprotocol: 1,
       time: 3
     }
   ])
 
   expect(test.app.log.actions()).toEqual([
-    { type: 'GOOD' },
     {
       action: { type: 'BAD' },
-      id: '1 10:uuid 0',
+      id: '1 10:uuid',
       reason: 'denied',
       type: 'logux/undo'
     },
-    { id: '2 10:uuid 0', type: 'logux/processed' }
+    { id: '2 10:uuid', type: 'logux/processed' },
+    { type: 'GOOD' }
   ])
   expect(test.names).toEqual([
     'connect',
@@ -685,8 +685,8 @@ it('checks action meta', async () => {
     'add',
     'add'
   ])
-  expect(test.reports[2]![1].actionId).toEqual('1 10:uuid 0')
-  expect(test.reports[4]![1].meta.id).toEqual('2 10:uuid 0')
+  expect(test.reports[2]![1].actionId).toEqual('1 10:uuid')
+  expect(test.reports[4]![1].meta.id).toEqual('2 10:uuid')
 })
 
 it('ignores unknown action types', async () => {
@@ -697,13 +697,13 @@ it('ignores unknown action types', async () => {
     'sync',
     2,
     { type: 'UNKNOWN' },
-    { id: [1, '10:uuid', 0], time: 1 }
+    { id: '1 10:uuid', time: 1 }
   ])
 
   expect(test.app.log.actions()).toEqual([
     {
       action: { type: 'UNKNOWN' },
-      id: '1 10:uuid 0',
+      id: '1 10:uuid',
       reason: 'unknownType',
       type: 'logux/undo'
     }
@@ -712,7 +712,7 @@ it('ignores unknown action types', async () => {
   expect(test.reports[2]).toEqual([
     'unknownType',
     {
-      actionId: '1 10:uuid 0',
+      actionId: '1 10:uuid',
       type: 'UNKNOWN'
     }
   ])
@@ -738,17 +738,17 @@ it('checks user access for action', async () => {
     'sync',
     2,
     { bar: true, type: 'FOO' },
-    { id: [1, '10:uuid', 0], time: 1 },
+    { id: '1 10:uuid', time: 1 },
     { type: 'FOO' },
-    { id: [1, '10:uuid', 1], time: 1 }
+    { id: '2 10:uuid', time: 2 }
   ])
   await setTimeout(50)
   expect(test.app.log.actions()).toEqual([
     { bar: true, type: 'FOO' },
-    { id: '1 10:uuid 0', type: 'logux/processed' },
+    { id: '1 10:uuid', type: 'logux/processed' },
     {
       action: { type: 'FOO' },
-      id: '1 10:uuid 1',
+      id: '2 10:uuid',
       reason: 'denied',
       type: 'logux/undo'
     }
@@ -762,12 +762,12 @@ it('checks user access for action', async () => {
     'add'
   ])
   expect(test.reports.find(i => i[0] === 'denied')![1].actionId).toEqual(
-    '1 10:uuid 1'
+    '2 10:uuid'
   )
   expect(sent(client).find(i => i[0] === 'debug')).toEqual([
     'debug',
     'error',
-    'Action "1 10:uuid 1" was denied'
+    'Action "2 10:uuid" was denied'
   ])
 })
 
@@ -782,7 +782,7 @@ it('takes subprotocol from action meta', async () => {
   })
 
   let client = await connectClient(app)
-  app.log.add({ type: 'FOO' }, { id: `1 ${client.nodeId} 0`, subprotocol: 1 })
+  app.log.add({ type: 'FOO' }, { id: `1 ${client.nodeId}`, subprotocol: 1 })
   await setTimeout(1)
 
   expect(subprotocols).toEqual([1])
@@ -812,13 +812,13 @@ it('reports about errors in access callback', async () => {
     'sync',
     2,
     { bar: true, type: 'FOO' },
-    { id: [1, '10:uuid', 0], time: 1 }
+    { id: '1 10:uuid', time: 1 }
   ])
 
   expect(test.app.log.actions()).toEqual([
     {
       action: { bar: true, type: 'FOO' },
-      id: '1 10:uuid 0',
+      id: '1 10:uuid',
       reason: 'error',
       type: 'logux/undo'
     }
@@ -827,7 +827,7 @@ it('reports about errors in access callback', async () => {
   expect(test.reports[2]).toEqual([
     'error',
     {
-      actionId: '1 10:uuid 0',
+      actionId: '1 10:uuid',
       err
     }
   ])
@@ -842,7 +842,7 @@ it('adds resend keys', async () => {
     resend(ctx, action, meta) {
       expect(ctx.nodeId).toEqual('10:uuid')
       expect(action.type).toEqual('FOO')
-      expect(meta.id).toEqual('1 10:uuid 0')
+      expect(meta.id).toEqual('1 10:uuid')
       return {
         channels: ['a'],
         clients: ['1:client'],
@@ -863,16 +863,16 @@ it('adds resend keys', async () => {
     'sync',
     2,
     { type: 'FOO' },
-    { id: [1, '10:uuid', 0], time: 1 },
+    { id: '1 10:uuid', time: 1 },
     { type: 'EMPTY' },
-    { id: [2, '10:uuid', 0], time: 2 }
+    { id: '2 10:uuid', time: 2 }
   ])
 
   expect(test.app.log.actions()).toEqual([
     { type: 'FOO' },
+    { id: '1 10:uuid', type: 'logux/processed' },
     { type: 'EMPTY' },
-    { id: '1 10:uuid 0', type: 'logux/processed' },
-    { id: '2 10:uuid 0', type: 'logux/processed' }
+    { id: '2 10:uuid', type: 'logux/processed' }
   ])
   expect(test.names).toEqual([
     'connect',
@@ -911,16 +911,16 @@ it('has channel resend shortcut', async () => {
     'sync',
     2,
     { type: 'FOO' },
-    { id: [1, '10:uuid', 0], time: 1 },
+    { id: '1 10:uuid', time: 1 },
     { type: 'FOOS' },
-    { id: [2, '10:uuid', 0], time: 2 }
+    { id: '2 10:uuid', time: 2 }
   ])
 
   expect(app.log.actions()).toEqual([
     { type: 'FOO' },
-    { id: '1 10:uuid 0', type: 'logux/processed' },
+    { id: '1 10:uuid', type: 'logux/processed' },
     { type: 'FOOS' },
-    { id: '2 10:uuid 0', type: 'logux/processed' }
+    { id: '2 10:uuid', type: 'logux/processed' }
   ])
   expect(app.log.entries()[0]![1].channels).toEqual(['bar'])
   expect(app.log.entries()[2]![1].channels).toEqual(['bar1', 'bar2'])
@@ -930,8 +930,8 @@ it('sends old actions by node ID', async () => {
   let app = createServer()
   app.type('A', { access: () => true })
 
-  await app.log.add({ type: 'A' }, { id: '1 server:x 0' })
-  await app.log.add({ type: 'A' }, { id: '2 server:x 0', nodes: ['10:uuid'] })
+  await app.log.add({ type: 'A' }, { id: '1 server:x' })
+  await app.log.add({ type: 'A' }, { id: '2 server:x', nodes: ['10:uuid'] })
   let client = await connectClient(app)
 
   sendTo(client, ['synced', 2])
@@ -941,7 +941,7 @@ it('sends old actions by node ID', async () => {
     'sync',
     2,
     { type: 'A' },
-    { id: [2, 'server:x', 0], time: 2 }
+    { id: '2 server:x', time: -2 }
   ])
 })
 
@@ -950,8 +950,8 @@ it('sends new actions by node ID', async () => {
   app.type('A', { access: () => true })
 
   let client = await connectClient(app)
-  await app.log.add({ type: 'A' }, { id: '1 server:x 0' })
-  await app.log.add({ type: 'A' }, { id: '2 server:x 0', nodes: ['10:uuid'] })
+  await app.log.add({ type: 'A' }, { id: '1 server:x' })
+  await app.log.add({ type: 'A' }, { id: '2 server:x', nodes: ['10:uuid'] })
   sendTo(client, ['synced', 2])
   await setTimeout(10)
 
@@ -960,7 +960,7 @@ it('sends new actions by node ID', async () => {
     'sync',
     2,
     { type: 'A' },
-    { id: [2, 'server:x', 0], time: 2 }
+    { id: '2 server:x', time: 2 }
   ])
 })
 
@@ -968,10 +968,10 @@ it('sends old actions by client ID', async () => {
   let app = createServer()
   app.type('A', { access: () => true })
 
-  await app.log.add({ type: 'A' }, { id: '1 server:x 0' })
+  await app.log.add({ type: 'A' }, { id: '1 server:x' })
   await app.log.add(
     { type: 'A' },
-    { clients: ['10:client'], id: '2 server:x 0' }
+    { clients: ['10:client'], id: '2 server:x' }
   )
   let client = await connectClient(app, '10:client:uuid')
 
@@ -982,7 +982,7 @@ it('sends old actions by client ID', async () => {
     'sync',
     2,
     { type: 'A' },
-    { id: [2, 'server:x', 0], time: 2 }
+    { id: '2 server:x', time: -2 }
   ])
 })
 
@@ -991,10 +991,10 @@ it('sends new actions by client ID', async () => {
   app.type('A', { access: () => true })
 
   let client = await connectClient(app, '10:client:uuid')
-  await app.log.add({ type: 'A' }, { id: '1 server:x 0' })
+  await app.log.add({ type: 'A' }, { id: '1 server:x' })
   await app.log.add(
     { type: 'A' },
-    { clients: ['10:client'], id: '2 server:x 0' }
+    { clients: ['10:client'], id: '2 server:x' }
   )
   sendTo(client, ['synced', 2])
   await setTimeout(1)
@@ -1004,7 +1004,7 @@ it('sends new actions by client ID', async () => {
     'sync',
     2,
     { type: 'A' },
-    { id: [2, 'server:x', 0], time: 2 }
+    { id: '2 server:x', time: 2 }
   ])
 })
 
@@ -1012,10 +1012,10 @@ it('does not send old action on client excluding', async () => {
   let app = createServer()
   app.type('A', { access: () => true })
 
-  await app.log.add({ type: 'A' }, { id: '1 server:x 0' })
+  await app.log.add({ type: 'A' }, { id: '1 server:x' })
   await app.log.add(
     { type: 'A' },
-    { excludeClients: ['10:client'], id: '2 server:x 0', users: ['10'] }
+    { excludeClients: ['10:client'], id: '2 server:x', users: ['10'] }
   )
   let client = await connectClient(app, '10:client:uuid')
 
@@ -1028,8 +1028,8 @@ it('sends old actions by user', async () => {
   let app = createServer()
   app.type('A', { access: () => true })
 
-  await app.log.add({ type: 'A' }, { id: '1 server:x 0' })
-  await app.log.add({ type: 'A' }, { id: '2 server:x 0', users: ['10'] })
+  await app.log.add({ type: 'A' }, { id: '1 server:x' })
+  await app.log.add({ type: 'A' }, { id: '2 server:x', users: ['10'] })
   let client = await connectClient(app)
 
   sendTo(client, ['synced', 2])
@@ -1039,7 +1039,7 @@ it('sends old actions by user', async () => {
     'sync',
     2,
     { type: 'A' },
-    { id: [2, 'server:x', 0], time: 2 }
+    { id: '2 server:x', time: -2 }
   ])
 })
 
@@ -1048,8 +1048,8 @@ it('sends new actions by user', async () => {
   app.type('A', { access: () => true })
 
   let client = await connectClient(app)
-  await app.log.add({ type: 'A' }, { id: '1 server:x 0' })
-  await app.log.add({ type: 'A' }, { id: '2 server:x 0', users: ['10'] })
+  await app.log.add({ type: 'A' }, { id: '1 server:x' })
+  await app.log.add({ type: 'A' }, { id: '2 server:x', users: ['10'] })
   sendTo(client, ['synced', 2])
   await setTimeout(10)
 
@@ -1058,7 +1058,7 @@ it('sends new actions by user', async () => {
     'sync',
     2,
     { type: 'A' },
-    { id: [2, 'server:x', 0], time: 2 }
+    { id: '2 server:x', time: 2 }
   ])
 })
 
@@ -1075,23 +1075,23 @@ it('sends new actions by channel', async () => {
     '10:uuid': {
       filters: {
         '{}': (ctx, action, meta) => {
-          expect(meta.id).toContain(' server:x ')
+          expect(meta.id).toContain(' server:x')
           expect(ctx.isServer).toBe(true)
           return privateMethods(action).secret !== true
         }
       }
     }
   }
-  await app.log.add({ type: 'FOO' }, { id: '1 server:x 0' })
-  await app.log.add({ type: 'FOO' }, { channels: ['foo'], id: '2 server:x 0' })
+  await app.log.add({ type: 'FOO' }, { id: '1 server:x' })
+  await app.log.add({ type: 'FOO' }, { channels: ['foo'], id: '2 server:x' })
   await app.log.add(
     { secret: true, type: 'BAR' },
     {
       channels: ['bar'],
-      id: '3 server:x 0'
+      id: '3 server:x'
     }
   )
-  await app.log.add({ type: 'BAR' }, { channels: ['bar'], id: '4 server:x 0' })
+  await app.log.add({ type: 'BAR' }, { channels: ['bar'], id: '4 server:x' })
   sendTo(client, ['synced', 2])
   sendTo(client, ['synced', 4])
   await client.node.waitFor('synchronized')
@@ -1102,13 +1102,13 @@ it('sends new actions by channel', async () => {
     'sync',
     2,
     { type: 'FOO' },
-    { id: [2, 'server:x', 0], time: 2 }
+    { id: '2 server:x', time: 2 }
   ])
   expect(sent(client)[2]).toEqual([
     'sync',
     4,
     { type: 'BAR' },
-    { id: [4, 'server:x', 0], time: 4 }
+    { id: '4 server:x', time: 4 }
   ])
 })
 
@@ -1124,7 +1124,7 @@ it('excludes client from channel', async () => {
   }
   await app.log.add(
     { type: 'FOO' },
-    { channels: ['foo'], excludeClients: ['10:1'], id: '2 server:x 0' }
+    { channels: ['foo'], excludeClients: ['10:1'], id: '2 server:x' }
   )
   await setTimeout(10)
 
@@ -1134,7 +1134,7 @@ it('excludes client from channel', async () => {
     'sync',
     1,
     { type: 'FOO' },
-    { id: [2, 'server:x', 0], time: 2 }
+    { id: '2 server:x', time: 1 }
   ])
 })
 
@@ -1148,7 +1148,7 @@ it('works with channel according client ID', async () => {
     '10:uuid:b': { filters: { '{}': true } },
     '10:uuid:c': { filters: { '{}': true } }
   }
-  await app.log.add({ type: 'FOO' }, { channels: ['foo'], id: '2 server:x 0' })
+  await app.log.add({ type: 'FOO' }, { channels: ['foo'], id: '2 server:x' })
   sendTo(client, ['synced', 1])
   await setTimeout(10)
 
@@ -1157,7 +1157,7 @@ it('works with channel according client ID', async () => {
     'sync',
     1,
     { type: 'FOO' },
-    { id: [2, 'server:x', 0], time: 2 }
+    { id: '2 server:x', time: 1 }
   ])
 })
 
@@ -1169,7 +1169,7 @@ it('sends old action only once', async () => {
     { type: 'FOO' },
     {
       clients: ['10:uuid', '10:uuid'],
-      id: '1 server:x 0',
+      id: '1 server:x',
       nodes: ['10:uuid', '10:uuid'],
       users: ['10', '10']
     }
@@ -1183,7 +1183,7 @@ it('sends old action only once', async () => {
     'sync',
     1,
     { type: 'FOO' },
-    { id: [1, 'server:x', 0], time: 1 }
+    { id: '1 server:x', time: -2 }
   ])
 })
 
@@ -1191,8 +1191,8 @@ it('sends debug back on unknown type', async () => {
   let app = createServer({ env: 'development' })
   let client1 = await connectClient(app)
   let client2 = await connectClient(app, '20:uuid')
-  app.log.add({ type: 'UNKNOWN' }, { id: '1 server:x 0' })
-  app.log.add({ type: 'UNKNOWN' }, { id: '2 10:uuid 0' })
+  app.log.add({ type: 'UNKNOWN' }, { id: '1 server:x' })
+  app.log.add({ type: 'UNKNOWN' }, { id: '2 10:uuid' })
   await getPair(client1).wait('right')
 
   expect(sent(client1).find(i => i[0] === 'debug')).toEqual([
@@ -1206,7 +1206,7 @@ it('sends debug back on unknown type', async () => {
 it('does not send debug back on unknown type in production', async () => {
   let app = createServer({ env: 'production' })
   let client = await connectClient(app)
-  await app.log.add({ type: 'U' }, { id: '1 10:uuid 0' })
+  await app.log.add({ type: 'U' }, { id: '1 10:uuid' })
   await getPair(client).wait('right')
 
   expect(sentNames(client)).toEqual(['connected', 'sync'])
@@ -1224,13 +1224,14 @@ it('decompress subprotocol', async () => {
     'sync',
     2,
     { type: 'A' },
-    { id: [1, '10:uuid', 0], time: 1 },
+    { id: '1 10:uuid', time: 1 },
     { type: 'A' },
-    { id: [2, '10:uuid', 0], subprotocol: 2, time: 2 }
+    { id: '2 10:uuid', subprotocol: 2, time: 2 }
   ])
 
-  expect(app.log.entries()[0]![1].subprotocol).toEqual(1)
-  expect(app.log.entries()[1]![1].subprotocol).toEqual(2)
+  let entries = app.log.entries()
+  expect(entries.find(i => i[1].id === '1 10:uuid')![1].subprotocol).toEqual(1)
+  expect(entries.find(i => i[1].id === '2 10:uuid')![1].subprotocol).toEqual(2)
 })
 
 it('has custom processor for unknown type', async () => {
@@ -1250,7 +1251,7 @@ it('has custom processor for unknown type', async () => {
     'sync',
     1,
     { type: 'UNKOWN' },
-    { id: [1, '10:uuid', 0], time: 1 }
+    { id: '1 10:uuid', time: 1 }
   ])
 
   expect(test.names).toEqual(['connect', 'authenticated', 'add', 'add'])
@@ -1275,7 +1276,7 @@ it('allows to reports about unknown type in custom processor', async () => {
     'sync',
     1,
     { type: 'UNKOWN' },
-    { id: [1, '10:uuid', 0], time: 1 }
+    { id: '1 10:uuid', time: 1 }
   ])
 
   expect(test.names).toEqual(['connect', 'authenticated', 'unknownType', 'add'])
@@ -1288,7 +1289,7 @@ it('allows to use different node ID', async () => {
   app.type('A', {
     access(ctx, action, meta) {
       expect(ctx.nodeId).toEqual('10:client:other')
-      expect(meta.id).toEqual('1 10:client:other 0')
+      expect(meta.id).toEqual('1 10:client:other')
       calls += 1
       return true
     }
@@ -1298,7 +1299,7 @@ it('allows to use different node ID', async () => {
     'sync',
     1,
     { type: 'A' },
-    { id: [1, '10:client:other', 0], time: 1 }
+    { id: '1 10:client:other', time: 1 }
   ])
 
   expect(calls).toEqual(1)
@@ -1313,7 +1314,7 @@ it('allows to use different node ID only with same client ID', async () => {
     'sync',
     1,
     { type: 'A' },
-    { id: [1, '10:clnt:uuid', 0], time: 1 }
+    { id: '1 10:clnt:uuid', time: 1 }
   ])
 
   expect(test.names).toEqual(['connect', 'authenticated', 'denied', 'add'])
@@ -1391,15 +1392,15 @@ it('has finally callback', async () => {
     'sync',
     5,
     { type: 'A' },
-    { id: [1, '10:client:other', 0], time: 1 },
+    { id: '1 10:client:other', time: 1 },
     { type: 'B' },
-    { id: [2, '10:client:other', 0], time: 1 },
+    { id: '2 10:client:other', time: 1 },
     { type: 'C' },
-    { id: [3, '10:client:other', 0], time: 1 },
+    { id: '3 10:client:other', time: 1 },
     { type: 'D' },
-    { id: [4, '10:client:other', 0], time: 1 },
+    { id: '4 10:client:other', time: 1 },
     { type: 'E' },
-    { id: [5, '10:client:other', 0], time: 1 }
+    { id: '5 10:client:other', time: 1 }
   ])
 
   expect(calls).toEqual(['D', 'C', 'A', 'E', 'B'])
@@ -1416,7 +1417,7 @@ it('sends error to author', async () => {
     'sync',
     1,
     { type: 'A' },
-    { id: [1, '10:1:uuid', 0], time: 1 }
+    { id: '1 10:1:uuid', time: 1 }
   ])
   await setTimeout(1)
 
@@ -1444,22 +1445,22 @@ it('does not resend actions back', async () => {
     'sync',
     1,
     { channel: 'all', type: 'logux/subscribe' },
-    { id: [1, '10:1:uuid', 0], time: 1 }
+    { id: '1 10:1:uuid', time: 1 }
   ])
   await sendTo(client2, [
     'sync',
     1,
     { channel: 'all', type: 'logux/subscribe' },
-    { id: [1, '10:2:uuid', 0], time: 1 }
+    { id: '1 10:2:uuid', time: 1 }
   ])
 
   await sendTo(client1, [
     'sync',
     4,
     { type: 'A' },
-    { id: [2, '10:1:uuid', 0], time: 2 },
+    { id: '2 10:1:uuid', time: 2 },
     { type: 'B' },
-    { id: [3, '10:1:uuid', 0], time: 3 }
+    { id: '3 10:1:uuid', time: 3 }
   ])
   await setTimeout(10)
 
@@ -1487,7 +1488,7 @@ it('keeps context', async () => {
     'sync',
     1,
     { type: 'A' },
-    { id: [1, '10:1:uuid', 0], time: 1 }
+    { id: '1 10:1:uuid', time: 1 }
   ])
   await setTimeout(1)
 
@@ -1509,7 +1510,7 @@ it('uses resend for own actions', async () => {
     'sync',
     1,
     { channel: 'foo', type: 'logux/subscribe' },
-    { id: [1, '10:1:uuid', 0], time: 1 }
+    { id: '1 10:1:uuid', time: 1 }
   ])
   await setTimeout(10)
 
@@ -1540,18 +1541,18 @@ it('does not duplicate channel load actions', async () => {
     'sync',
     1,
     { channel: 'foo', type: 'logux/subscribe' },
-    { id: [1, '10:1:uuid', 0], time: 1 }
+    { id: '1 10:1:uuid', time: 1 }
   ])
   await setTimeout(10)
 
-  function meta(time: number): object {
-    return { id: time, subprotocol: 1, time }
+  function meta(id: string, time: number): object {
+    return { id, subprotocol: 1, time }
   }
 
   expect(sent(client).slice(1)).toEqual([
     ['synced', 1],
-    ['sync', 2, { type: 'FOO' }, meta(1)],
-    ['sync', 3, { id: '1 10:1:uuid 0', type: 'logux/processed' }, meta(2)]
+    ['sync', 2, { type: 'FOO' }, meta('2', 1)],
+    ['sync', 3, { id: '1 10:1:uuid', type: 'logux/processed' }, meta('3', 2)]
   ])
 })
 
@@ -1580,36 +1581,36 @@ it('allows to return actions', async () => {
     'sync',
     1,
     { channel: 'a', type: 'logux/subscribe' },
-    { id: [1, '10:1:uuid', 0], time: 1 }
+    { id: '1 10:1:uuid', time: 1 }
   ])
   await sendTo(client, [
     'sync',
     2,
     { channel: 'b', type: 'logux/subscribe' },
-    { id: [2, '10:1:uuid', 0], time: 2 }
+    { id: '2 10:1:uuid', time: 2 }
   ])
   await sendTo(client, [
     'sync',
     3,
     { channel: 'c', type: 'logux/subscribe' },
-    { id: [3, '10:1:uuid', 0], time: 3 }
+    { id: '3 10:1:uuid', time: 3 }
   ])
   await setTimeout(50)
 
-  function meta(time: number): object {
-    return { id: time, subprotocol: 1, time }
+  function meta(id: string, time: number): object {
+    return { id, subprotocol: 1, time }
   }
 
   expect(sent(client).slice(1)).toEqual([
     ['synced', 1],
-    ['sync', 2, { type: 'A' }, meta(1)],
-    ['sync', 3, { id: '1 10:1:uuid 0', type: 'logux/processed' }, meta(2)],
+    ['sync', 2, { type: 'A' }, meta('2', 1)],
+    ['sync', 3, { id: '1 10:1:uuid', type: 'logux/processed' }, meta('3', 2)],
     ['synced', 2],
-    ['sync', 5, { type: 'B' }, meta(3)],
-    ['sync', 6, { id: '2 10:1:uuid 0', type: 'logux/processed' }, meta(4)],
+    ['sync', 5, { type: 'B' }, meta('4', 3)],
+    ['sync', 6, { id: '2 10:1:uuid', type: 'logux/processed' }, meta('5', 4)],
     ['synced', 3],
-    ['sync', 8, { type: 'C' }, { ...meta(5), time: 100 }],
-    ['sync', 9, { id: '3 10:1:uuid 0', type: 'logux/processed' }, meta(6)]
+    ['sync', 8, { type: 'C' }, { ...meta('6', 5), time: 98 }],
+    ['sync', 9, { id: '3 10:1:uuid', type: 'logux/processed' }, meta('7', 6)]
   ])
 })
 
@@ -1646,13 +1647,13 @@ it('does not process send-back actions', async () => {
     'sync',
     1,
     { data: 'client', type: 'A' },
-    { id: [1, '10:1:uuid', 0], time: 1 }
+    { id: '1 10:1:uuid', time: 1 }
   ])
   await sendTo(client, [
     'sync',
     2,
     { channel: 'a', type: 'logux/subscribe' },
-    { id: [2, '10:1:uuid', 0], time: 2 }
+    { id: '2 10:1:uuid', time: 2 }
   ])
   await setTimeout(10)
 
@@ -1684,7 +1685,7 @@ it('restores actions with old ID from history', async () => {
     'sync',
     1,
     { type: 'A' },
-    { id: [1, '10:1:uuid', 0], time: 1 }
+    { id: '1 10:1:uuid', time: 1 }
   ])
 
   let client2 = await connectClient(app, '10:1:other')
@@ -1692,7 +1693,7 @@ it('restores actions with old ID from history', async () => {
     'sync',
     2,
     { channel: 'a', type: 'logux/subscribe' },
-    { id: [2, '10:1:uuid', 0], time: 2 }
+    { id: '2 10:1:uuid', time: 2 }
   ])
   await setTimeout(10)
   expect(actions(client2)).toEqual([{ type: 'A' }])
@@ -1738,28 +1739,28 @@ it('has shortcut to access and process in one callback', async () => {
     'sync',
     1,
     { type: 'FOO' },
-    { id: [1, '10:1:uuid', 0], time: 1 }
+    { id: '1 10:1:uuid', time: 1 }
   ])
   await setTimeout(100)
   await sendTo(client, [
     'sync',
     2,
     { type: 'BAR' },
-    { id: [2, '10:1:uuid', 0], time: 1 }
+    { id: '2 10:1:uuid', time: 1 }
   ])
   await setTimeout(100)
   await sendTo(client, [
     'sync',
     3,
     { channel: 'foo', type: 'logux/subscribe' },
-    { id: [3, '10:1:uuid', 0], time: 1 }
+    { id: '3 10:1:uuid', time: 1 }
   ])
   await setTimeout(100)
   await sendTo(client, [
     'sync',
     4,
     { channel: 'bar', type: 'logux/subscribe' },
-    { id: [4, '10:1:uuid', 0], time: 1 }
+    { id: '4 10:1:uuid', time: 1 }
   ])
   await setTimeout(100)
 
@@ -1769,13 +1770,13 @@ it('has shortcut to access and process in one callback', async () => {
     { channel: 'foo', type: 'logux/subscribe' },
     { channel: 'bar', type: 'logux/subscribe' },
     { type: 'REFOO' },
-    { id: '1 10:1:uuid 0', type: 'logux/processed' },
+    { id: '1 10:1:uuid', type: 'logux/processed' },
     { type: 'REBAR' },
-    { id: '2 10:1:uuid 0', type: 'logux/processed' },
+    { id: '2 10:1:uuid', type: 'logux/processed' },
     { type: 'FOO:load' },
-    { id: '3 10:1:uuid 0', type: 'logux/processed' },
+    { id: '3 10:1:uuid', type: 'logux/processed' },
     { type: 'OTHER:load' },
-    { id: '4 10:1:uuid 0', type: 'logux/processed' }
+    { id: '4 10:1:uuid', type: 'logux/processed' }
   ])
 })
 
@@ -1801,14 +1802,14 @@ it('process action exactly once with accessAndProcess callback', async () => {
     'sync',
     1,
     { type: 'FOO' },
-    { id: [1, '10:1:uuid', 0], time: 1 }
+    { id: '1 10:1:uuid', time: 1 }
   ])
   await setTimeout(100)
   await sendTo(client, [
     'sync',
     2,
     { type: 'BAR' },
-    { id: [2, '10:1:uuid', 0], time: 1 }
+    { id: '2 10:1:uuid', time: 1 }
   ])
   await setTimeout(100)
 
@@ -1816,9 +1817,9 @@ it('process action exactly once with accessAndProcess callback', async () => {
     { type: 'FOO' },
     { type: 'BAR' },
     { type: 'REFOO' },
-    { id: '1 10:1:uuid 0', type: 'logux/processed' },
+    { id: '1 10:1:uuid', type: 'logux/processed' },
     { type: 'REBAR' },
-    { id: '2 10:1:uuid 0', type: 'logux/processed' }
+    { id: '2 10:1:uuid', type: 'logux/processed' }
   ])
 })
 
@@ -1856,39 +1857,39 @@ it('denies access on 403 error', async () => {
     'sync',
     2,
     { type: 'E404' },
-    { id: [1, '10:1:uuid', 0], time: 1 }
+    { id: '1 10:1:uuid', time: 1 }
   ])
   await setTimeout(100)
   await sendTo(client, [
     'sync',
     2,
     { type: 'E403' },
-    { id: [2, '10:1:uuid', 0], time: 1 }
+    { id: '2 10:1:uuid', time: 1 }
   ])
   await setTimeout(100)
   await sendTo(client, [
     'sync',
     2,
     { type: 'ERROR' },
-    { id: [3, '10:1:uuid', 0], time: 1 }
+    { id: '3 10:1:uuid', time: 1 }
   ])
   await setTimeout(100)
   expect(app.log.actions()).toEqual([
     {
       action: { type: 'E404' },
-      id: '1 10:1:uuid 0',
+      id: '1 10:1:uuid',
       reason: 'error',
       type: 'logux/undo'
     },
     {
       action: { type: 'E403' },
-      id: '2 10:1:uuid 0',
+      id: '2 10:1:uuid',
       reason: 'denied',
       type: 'logux/undo'
     },
     {
       action: { type: 'ERROR' },
-      id: '3 10:1:uuid 0',
+      id: '3 10:1:uuid',
       reason: 'error',
       type: 'logux/undo'
     }
@@ -1936,28 +1937,28 @@ it('undoes action with notFound on 404 error', async () => {
     'sync',
     2,
     { channel: 'e500', type: 'logux/subscribe' },
-    { id: [1, '10:1:uuid', 0], time: 1 }
+    { id: '1 10:1:uuid', time: 1 }
   ])
   await setTimeout(100)
   await sendTo(client, [
     'sync',
     2,
     { channel: 'e404', type: 'logux/subscribe' },
-    { id: [2, '10:1:uuid', 0], time: 1 }
+    { id: '2 10:1:uuid', time: 1 }
   ])
   await setTimeout(100)
   await sendTo(client, [
     'sync',
     2,
     { channel: 'e403', type: 'logux/subscribe' },
-    { id: [3, '10:1:uuid', 0], time: 1 }
+    { id: '3 10:1:uuid', time: 1 }
   ])
   await setTimeout(100)
   await sendTo(client, [
     'sync',
     2,
     { channel: 'error', type: 'logux/subscribe' },
-    { id: [4, '10:1:uuid', 0], time: 1 }
+    { id: '4 10:1:uuid', time: 1 }
   ])
   await setTimeout(100)
   expect(app.log.actions()).toEqual([
@@ -1967,25 +1968,25 @@ it('undoes action with notFound on 404 error', async () => {
     { channel: 'error', type: 'logux/subscribe' },
     {
       action: { channel: 'e500', type: 'logux/subscribe' },
-      id: '1 10:1:uuid 0',
+      id: '1 10:1:uuid',
       reason: 'error',
       type: 'logux/undo'
     },
     {
       action: { channel: 'e404', type: 'logux/subscribe' },
-      id: '2 10:1:uuid 0',
+      id: '2 10:1:uuid',
       reason: 'notFound',
       type: 'logux/undo'
     },
     {
       action: { channel: 'e403', type: 'logux/subscribe' },
-      id: '3 10:1:uuid 0',
+      id: '3 10:1:uuid',
       reason: 'denied',
       type: 'logux/undo'
     },
     {
       action: { channel: 'error', type: 'logux/subscribe' },
-      id: '4 10:1:uuid 0',
+      id: '4 10:1:uuid',
       reason: 'error',
       type: 'logux/undo'
     }
@@ -2013,14 +2014,14 @@ it('allows to throws LoguxNotFoundError', async () => {
     'sync',
     2,
     { channel: 'notFound', type: 'logux/subscribe' },
-    { id: [2, '10:1:uuid', 0], time: 1 }
+    { id: '2 10:1:uuid', time: 1 }
   ])
   await setTimeout(100)
   expect(app.log.actions()).toEqual([
     { channel: 'notFound', type: 'logux/subscribe' },
     {
       action: { channel: 'notFound', type: 'logux/subscribe' },
-      id: '2 10:1:uuid 0',
+      id: '2 10:1:uuid',
       reason: 'notFound',
       type: 'logux/undo'
     }
@@ -2082,13 +2083,13 @@ it('undoes all other actions in a queue if error in one action occurs', async ()
     'sync',
     3,
     { type: 'GOOD 0' },
-    { id: [1, '10:client:other', 0], time: 1 },
+    { id: '1 10:client:other', time: 1 },
     { type: 'BAD' },
-    { id: [2, '10:client:other', 0], time: 1 },
+    { id: '2 10:client:other', time: 1 },
     { type: 'GOOD 1' },
-    { id: [3, '10:client:other', 0], time: 1 },
+    { id: '3 10:client:other', time: 1 },
     { type: 'GOOD 2' },
-    { id: [4, '10:client:other', 0], time: 1 }
+    { id: '4 10:client:other', time: 1 }
   ])
   await setTimeout(50)
 
@@ -2149,13 +2150,13 @@ it('does not add action with same ID to the queue', async () => {
     'sync',
     4,
     { type: 'FOO' },
-    { id: [1, '10:client:other', 0], time: 1 },
+    { id: '1 10:client:other', time: 1 },
     { type: 'BAR' },
-    { id: [1, '10:client:other', 0], time: 1 },
+    { id: '1 10:client:other', time: 1 },
     { type: 'BAZ' },
-    { id: [1, '10:client:other', 0], time: 1 },
+    { id: '1 10:client:other', time: 1 },
     { type: 'BOM' },
-    { id: [2, '10:client:other', 0], time: 1 }
+    { id: '2 10:client:other', time: 1 }
   ])
 
   expect(errors).toEqual([])
@@ -2207,11 +2208,11 @@ it('does not undo actions in one queue if error occurs in another queue', async 
     'sync',
     3,
     { type: 'BAD' },
-    { id: [1, '10:client:other', 0], time: 1 },
+    { id: '1 10:client:other', time: 1 },
     { type: 'GOOD 1' },
-    { id: [2, '10:client:other', 0], time: 1 },
+    { id: '2 10:client:other', time: 1 },
     { type: 'GOOD 2' },
-    { id: [3, '10:client:other', 0], time: 1 }
+    { id: '3 10:client:other', time: 1 }
   ])
   await setTimeout(50)
 
@@ -2257,9 +2258,9 @@ it('calls access, resend and process in a queue', async () => {
     'sync',
     2,
     { type: 'FOO' },
-    { id: [1, '10:client:other', 0], time: 1 },
+    { id: '1 10:client:other', time: 1 },
     { type: 'BAR' },
-    { id: [2, '10:client:other', 0], time: 1 }
+    { id: '2 10:client:other', time: 1 }
   ])
   await setTimeout(200)
 
@@ -2287,9 +2288,9 @@ it('undoes all other actions in a queue if some action should be undone', async 
     'sync',
     3,
     { type: 'FOO' },
-    { id: [1, '10:uuid', 0], time: 1 },
+    { id: '1 10:uuid', time: 1 },
     { type: 'BAR' },
-    { id: [2, '10:uuid', 0], time: 1 }
+    { id: '2 10:uuid', time: 1 }
   ])
 
   expect(test.names).toEqual([
@@ -2302,13 +2303,13 @@ it('undoes all other actions in a queue if some action should be undone', async 
   expect(test.app.log.actions()).toEqual([
     {
       action: { type: 'FOO' },
-      id: '1 10:uuid 0',
+      id: '1 10:uuid',
       reason: 'denied',
       type: 'logux/undo'
     },
     {
       action: { type: 'BAR' },
-      id: '2 10:uuid 0',
+      id: '2 10:uuid',
       reason: 'error',
       type: 'logux/undo'
     }
@@ -2383,13 +2384,13 @@ it('all actions are processed before destroy', async () => {
     'sync',
     4,
     { type: 'queue 1 task 1' },
-    { id: [1, client.nodeId!, 0], time: 1 },
+    { id: `1 ${client.nodeId!}`, time: 1 },
     { type: 'queue 1 task 2' },
-    { id: [2, client.nodeId!, 0], time: 1 },
+    { id: `2 ${client.nodeId!}`, time: 1 },
     { type: 'queue 2 task 1' },
-    { id: [3, client.nodeId!, 0], time: 1 },
+    { id: `3 ${client.nodeId!}`, time: 1 },
     { type: 'queue 2 task 2' },
-    { id: [4, client.nodeId!, 0], time: 1 }
+    { id: `4 ${client.nodeId!}`, time: 1 }
   ])
   await setTimeout(10)
   await app.destroy()
@@ -2417,11 +2418,11 @@ it('recognizes channel regex', async () => {
     'sync',
     3,
     { channel: 'bar', type: 'logux/subscribe' },
-    { id: [1, client.nodeId || '', 0], time: 1 },
+    { id: `1 ${client.nodeId || ''}`, time: 1 },
     { channel: 'baz', type: 'logux/subscribe' },
-    { id: [2, client.nodeId || '', 0], time: 1 },
+    { id: `2 ${client.nodeId || ''}`, time: 1 },
     { channel: 'bom', type: 'logux/subscribe' },
-    { id: [3, client.nodeId || '', 0], time: 1 }
+    { id: `3 ${client.nodeId || ''}`, time: 1 }
   ])
 
   expect(calls).toEqual(['bar', 'baz'])
@@ -2442,11 +2443,11 @@ it('recognizes channel pattern', async () => {
     'sync',
     3,
     { channel: '/api/users/5', type: 'logux/subscribe' },
-    { id: [1, client.nodeId || '', 0], time: 1 },
+    { id: `1 ${client.nodeId || ''}`, time: 1 },
     { channel: '/api/users/10', type: 'logux/subscribe' },
-    { id: [2, client.nodeId || '', 0], time: 1 },
+    { id: `2 ${client.nodeId || ''}`, time: 1 },
     { channel: '/api/users/10/9/8', type: 'logux/subscribe' },
-    { id: [3, client.nodeId || '', 0], time: 1 }
+    { id: `3 ${client.nodeId || ''}`, time: 1 }
   ])
 
   expect(calls).toEqual(['/api/users/5', '/api/users/10'])
@@ -2469,9 +2470,9 @@ it('removes empty queues', async () => {
     'sync',
     2,
     { type: 'FOO' },
-    { id: [1, '10:client:uuid', 0], time: 1 },
+    { id: '1 10:client:uuid', time: 1 },
     { type: 'BAR' },
-    { id: [2, '10:client:uuid', 0], time: 1 }
+    { id: '2 10:client:uuid', time: 1 }
   ])
 
   await setTimeout(10)
@@ -2488,7 +2489,7 @@ it('replaces Node class if necessary', async () => {
         entries: [
           [
             { type: 'FOO' },
-            { added: 0, id: '1 server:uuid 0', reasons: [], time: 1 }
+            { added: 0, id: '1 server:uuid', reasons: [], time: 1 }
           ]
         ]
       }
@@ -2512,11 +2513,11 @@ it('allows to change how server loads initial actions', async () => {
     return [
       [
         { type: 'FOO' },
-        { added: 0, id: '1 server:uuid 0', reasons: [], server: '', time: 2 }
+        { added: 0, id: '1 server:uuid', reasons: [], server: '', time: 2 }
       ],
       [
         { type: 'BAR' },
-        { added: 0, id: '1 server:uuid 0', reasons: [], server: '', time: 1 }
+        { added: 0, id: '1 server:uuid', reasons: [], server: '', time: 1 }
       ]
     ]
   })

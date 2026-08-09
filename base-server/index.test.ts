@@ -213,7 +213,7 @@ it('uses test time and ID', () => {
     time: new TestTime()
   })
   expect(app.log.store).toEqual(store)
-  expect(app.log.generateId()).toEqual('1 server:uuid 0')
+  expect(app.log.generateId()).toEqual('0 server:uuid')
 })
 
 it('destroys application without runned server', async () => {
@@ -341,7 +341,7 @@ it('reporters on log events', async () => {
         },
         meta: {
           added: 1,
-          id: '1 server:uuid 0',
+          id: '0 server:uuid',
           reasons: ['some'],
           server: 'server:uuid',
           status: 'waiting',
@@ -357,7 +357,7 @@ it('reporters on log events', async () => {
           type: 'B'
         },
         meta: {
-          id: '2 server:uuid 0',
+          id: '1 server:uuid',
           reasons: [],
           server: 'server:uuid',
           status: 'waiting',
@@ -369,7 +369,7 @@ it('reporters on log events', async () => {
     [
       'clean',
       {
-        actionId: '1 server:uuid 0'
+        actionId: '0 server:uuid'
       }
     ]
   ])
@@ -527,12 +527,12 @@ it('requires access callback for type', () => {
 
 it('reports about unknown action type', async () => {
   let test = createReporter()
-  await test.app.log.add({ type: 'UNKNOWN' }, { id: '1 10:uuid 0' })
+  await test.app.log.add({ type: 'UNKNOWN' }, { id: '1 10:uuid' })
   expect(test.names).toEqual(['addClean', 'unknownType', 'addClean'])
   expect(test.reports[1]).toEqual([
     'unknownType',
     {
-      actionId: '1 10:uuid 0',
+      actionId: '1 10:uuid',
       type: 'UNKNOWN'
     }
   ])
@@ -650,10 +650,10 @@ it('has full events API', () => {
     events += 1
   })
 
-  emit(app, 'processed', { type: 'FOO' }, { id: '1 1:1 0' })
-  emit(app, 'processed', { type: 'FOO' }, { id: '1 1:1 0' })
+  emit(app, 'processed', { type: 'FOO' }, { id: '1 1:1' })
+  emit(app, 'processed', { type: 'FOO' }, { id: '1 1:1' })
   unbind()
-  emit(app, 'processed', { type: 'FOO' }, { id: '1 1:1 0' })
+  emit(app, 'processed', { type: 'FOO' }, { id: '1 1:1' })
 
   expect(events).toEqual(2)
 })
@@ -711,13 +711,13 @@ it('reports about error during action processing', async () => {
   expect(test.reports[1]).toEqual([
     'error',
     {
-      actionId: '1 server:uuid 0',
+      actionId: '0 server:uuid',
       err
     }
   ])
   expect(test.reports[2]![1].action).toEqual({
     action: { type: 'FOO' },
-    id: '1 server:uuid 0',
+    id: '0 server:uuid',
     reason: 'error',
     type: 'logux/undo'
   })
@@ -732,7 +732,7 @@ it('undoes actions on client', async () => {
       channels: ['user/1'],
       clients: ['2:client'],
       excludeClients: ['3:client'],
-      id: '1 1:client:uuid 0',
+      id: '1 1:client:uuid',
       nodes: ['2:client:uuid'],
       reasons: ['user/1/lastValue'],
       server: 'server:uuid',
@@ -751,7 +751,7 @@ it('undoes actions on client', async () => {
         action: {
           type: 'FOO'
         },
-        id: '1 1:client:uuid 0',
+        id: '1 1:client:uuid',
         one: 1,
         reason: 'magic',
         type: 'logux/undo'
@@ -761,7 +761,7 @@ it('undoes actions on client', async () => {
         channels: ['user/1'],
         clients: ['2:client', '1:client'],
         excludeClients: ['3:client'],
-        id: '1 server:uuid 0',
+        id: '0 server:uuid',
         nodes: ['2:client:uuid'],
         reasons: ['user/1/lastValue'],
         server: 'server:uuid',
@@ -784,7 +784,7 @@ it('adds current subprotocol to meta', async () => {
 it('adds current subprotocol only to own actions', async () => {
   let app = createServer({ subprotocol: 1 })
   app.type('A', { access: () => true })
-  await app.log.add({ type: 'A' }, { id: '1 0:other 0', reasons: ['test'] })
+  await app.log.add({ type: 'A' }, { id: '1 0:other', reasons: ['test'] })
   expect(app.log.entries()[0]![1].subprotocol).toBeUndefined()
 })
 
@@ -818,15 +818,15 @@ it('reports about wrong channel name', async () => {
   }
   test.app.nodeIds.set('10:uuid', client)
   test.app.clientIds.set('10:uuid', client)
-  await test.app.log.add({ type: 'logux/subscribe' }, { id: '1 10:uuid 0' })
+  await test.app.log.add({ type: 'logux/subscribe' }, { id: '1 10:uuid' })
   expect(test.names).toEqual(['addClean', 'wrongChannel', 'addClean'])
   expect(test.reports[1]![1]).toEqual({
-    actionId: '1 10:uuid 0',
+    actionId: '1 10:uuid',
     channel: undefined
   })
   expect(test.reports[2]![1].action).toEqual({
     action: { type: 'logux/subscribe' },
-    id: '1 10:uuid 0',
+    id: '1 10:uuid',
     reason: 'wrongChannel',
     type: 'logux/undo'
   })
@@ -838,7 +838,7 @@ it('reports about wrong channel name', async () => {
   expect(test.reports[4]).toEqual([
     'wrongChannel',
     {
-      actionId: '2 server:uuid 0',
+      actionId: '2 server:uuid',
       channel: undefined
     }
   ])
@@ -847,7 +847,7 @@ it('reports about wrong channel name', async () => {
   expect(test.reports[7]).toEqual([
     'wrongChannel',
     {
-      actionId: '4 server:uuid 0',
+      actionId: '4 server:uuid',
       channel: 'unknown'
     }
   ])
@@ -917,15 +917,15 @@ it('checks channel access', async () => {
 
   await test.app.log.add(
     { channel: 'user/10', type: 'logux/subscribe' },
-    { id: '1 10:uuid 0' }
+    { id: '1 10:uuid' }
   )
   await setTimeout(1)
 
   expect(test.names).toEqual(['addClean', 'denied', 'addClean'])
-  expect(test.reports[1]![1]).toEqual({ actionId: '1 10:uuid 0' })
+  expect(test.reports[1]![1]).toEqual({ actionId: '1 10:uuid' })
   expect(test.reports[2]![1].action).toEqual({
     action: { channel: 'user/10', type: 'logux/subscribe' },
-    id: '1 10:uuid 0',
+    id: '1 10:uuid',
     reason: 'denied',
     type: 'logux/undo'
   })
@@ -950,16 +950,16 @@ it('reports about errors during channel authorization', async () => {
 
   await test.app.log.add(
     { channel: 'user/10', type: 'logux/subscribe' },
-    { id: '1 10:uuid 0' }
+    { id: '1 10:uuid' }
   )
   await Promise.resolve()
   await Promise.resolve()
 
   expect(test.names).toEqual(['addClean', 'error', 'addClean'])
-  expect(test.reports[1]![1]).toEqual({ actionId: '1 10:uuid 0', err })
+  expect(test.reports[1]![1]).toEqual({ actionId: '1 10:uuid', err })
   expect(test.reports[2]![1].action).toEqual({
     action: { channel: 'user/10', type: 'logux/subscribe' },
-    id: '1 10:uuid 0',
+    id: '1 10:uuid',
     reason: 'error',
     type: 'logux/undo'
   })
@@ -979,7 +979,7 @@ it('subscribes clients', async () => {
     access(ctx, action, meta) {
       expect(ctx.params.id).toEqual('10')
       expect(action.channel).toEqual('user/10')
-      expect(meta.id).toEqual('1 10:a:uuid 0')
+      expect(meta.id).toEqual('1 10:a:uuid')
       expect(ctx.nodeId).toEqual('10:a:uuid')
       userSubsriptions += 1
       return true
@@ -1006,18 +1006,18 @@ it('subscribes clients', async () => {
 
   await test.app.log.add(
     { channel: 'user/10', type: 'logux/subscribe' },
-    { id: '1 10:a:uuid 0' }
+    { id: '1 10:a:uuid' }
   )
   await setTimeout(1)
   expect(events).toEqual(1)
   expect(userSubsriptions).toEqual(1)
   expect(test.names).toEqual(['addClean', 'subscribed', 'addClean'])
   expect(test.reports[1]![1]).toEqual({
-    actionId: '1 10:a:uuid 0',
+    actionId: '1 10:a:uuid',
     channel: 'user/10'
   })
   expect(test.reports[2]![1].action).toEqual({
-    id: '1 10:a:uuid 0',
+    id: '1 10:a:uuid',
     type: 'logux/processed'
   })
   expect(test.reports[2]![1].meta.clients).toEqual(['10:a'])
@@ -1029,7 +1029,7 @@ it('subscribes clients', async () => {
   })
   await test.app.log.add(
     { channel: 'posts', type: 'logux/subscribe' },
-    { id: '2 10:a:uuid 0' }
+    { id: '2 10:a:uuid' }
   )
   await setTimeout(1)
 
@@ -1044,7 +1044,7 @@ it('subscribes clients', async () => {
   })
   await test.app.log.add(
     { channel: 'user/10', type: 'logux/unsubscribe' },
-    { id: '3 10:a:uuid 0' }
+    { id: '3 10:a:uuid' }
   )
 
   expect(test.names).toEqual([
@@ -1059,11 +1059,11 @@ it('subscribes clients', async () => {
     'addClean'
   ])
   expect(test.reports[7]![1]).toEqual({
-    actionId: '3 10:a:uuid 0',
+    actionId: '3 10:a:uuid',
     channel: 'user/10'
   })
   expect(test.reports[8]![1].action).toEqual({
-    id: '3 10:a:uuid 0',
+    id: '3 10:a:uuid',
     type: 'logux/processed'
   })
   expect(test.app.subscribers).toEqual({
@@ -1093,15 +1093,15 @@ it('subscribes clients with multiple filters', async () => {
 
   await test.app.log.add(
     { channel: 'posts', type: 'logux/subscribe' },
-    { id: '1 10:a:uuid 0' }
+    { id: '1 10:a:uuid' }
   )
   await test.app.log.add(
     { channel: 'posts', filter: { category: 'a' }, type: 'logux/subscribe' },
-    { id: '1 10:a:uuid 0' }
+    { id: '1 10:a:uuid' }
   )
   await test.app.log.add(
     { channel: 'posts', filter: { category: 'b' }, type: 'logux/subscribe' },
-    { id: '1 10:a:uuid 0' }
+    { id: '1 10:a:uuid' }
   )
   await setTimeout(1)
   expect(test.app.subscribers).toEqual({
@@ -1118,11 +1118,11 @@ it('subscribes clients with multiple filters', async () => {
 
   await test.app.log.add(
     { channel: 'posts', type: 'logux/unsubscribe' },
-    { id: '2 10:a:uuid 0' }
+    { id: '2 10:a:uuid' }
   )
   await test.app.log.add(
     { channel: 'posts', filter: { category: 'b' }, type: 'logux/unsubscribe' },
-    { id: '2 10:a:uuid 0' }
+    { id: '2 10:a:uuid' }
   )
   await setTimeout(1)
   expect(test.app.subscribers).toEqual({
@@ -1163,7 +1163,7 @@ it('cancels subscriptions on disconnect', async () => {
 
   await app.log.add(
     { channel: 'test', type: 'logux/subscribe' },
-    { id: '1 10:uuid 0' }
+    { id: '1 10:uuid' }
   )
   await setTimeout(10)
 
@@ -1188,7 +1188,7 @@ it('reports about errors during channel initialization', async () => {
 
   await test.app.log.add(
     { channel: 'user/10', type: 'logux/subscribe' },
-    { id: '1 10:uuid 0' }
+    { id: '1 10:uuid' }
   )
   await setTimeout(1)
 
@@ -1199,10 +1199,10 @@ it('reports about errors during channel initialization', async () => {
     'addClean',
     'unsubscribed'
   ])
-  expect(test.reports[2]![1]).toEqual({ actionId: '1 10:uuid 0', err })
+  expect(test.reports[2]![1]).toEqual({ actionId: '1 10:uuid', err })
   expect(test.reports[3]![1].action).toEqual({
     action: { channel: 'user/10', type: 'logux/subscribe' },
-    id: '1 10:uuid 0',
+    id: '1 10:uuid',
     reason: 'error',
     type: 'logux/undo'
   })
@@ -1228,7 +1228,7 @@ it('loads initial actions during subscription', async () => {
     load(ctx, action, meta) {
       expect(ctx.params.id).toEqual('10')
       expect(action.channel).toEqual('user/10')
-      expect(meta.id).toEqual('1 10:uuid 0')
+      expect(meta.id).toEqual('1 10:uuid')
       expect(ctx.nodeId).toEqual('10:uuid')
       userLoaded += 1
       return new Promise(resolve => {
@@ -1239,7 +1239,7 @@ it('loads initial actions during subscription', async () => {
 
   await test.app.log.add(
     { channel: 'user/10', type: 'logux/subscribe' },
-    { id: '1 10:uuid 0' }
+    { id: '1 10:uuid' }
   )
   await setTimeout(1)
   expect(userLoaded).toEqual(1)
@@ -1259,7 +1259,7 @@ it('loads initial actions during subscription', async () => {
 
   expect(test.app.log.actions()).toEqual([
     { channel: 'user/10', type: 'logux/subscribe' },
-    { id: '1 10:uuid 0', type: 'logux/processed' }
+    { id: '1 10:uuid', type: 'logux/processed' }
   ])
 })
 
@@ -1400,7 +1400,7 @@ it('has shortcuts for resend arrays', async () => {
         added: 1,
         channels: ['a'],
         clients: ['1:1'],
-        id: '1 server:uuid 0',
+        id: '0 server:uuid',
         nodes: ['1:1:1'],
         reasons: ['test'],
         server: 'server:uuid',
@@ -1419,7 +1419,7 @@ it('has shortcuts for resend arrays', async () => {
         added: 1,
         channels: ['a'],
         clients: ['1:1'],
-        id: '1 server:uuid 0',
+        id: '0 server:uuid',
         nodes: ['1:1:1'],
         reasons: ['test'],
         server: 'server:uuid',

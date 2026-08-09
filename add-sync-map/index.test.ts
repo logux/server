@@ -192,13 +192,18 @@ it('supports SyncMap', async () => {
     createTask({ fields: { finished: false, text: 'One' }, id: '10' })
   )
   expect(Object.fromEntries(tasks)).toEqual({
-    10: { finished: false, finishedChanged: 1, text: 'One', textChanged: 1 }
+    10: {
+      finished: false,
+      finishedChanged: 5,
+      text: 'One',
+      textChanged: 5
+    }
   })
 
   expect(await client1.subscribe('tasks/10')).toEqual([
     changedTask({ fields: { finished: false, text: 'One' }, id: '10' })
   ])
-  expect(getTime(client1, changedTask)).toEqual([1])
+  expect(getTime(client1, changedTask)).toEqual([5])
   await client2.subscribe('tasks/10')
 
   expect(
@@ -207,31 +212,47 @@ it('supports SyncMap', async () => {
     )
   ).toEqual([changedTask({ fields: { text: 'One1' }, id: '10' })])
   expect(Object.fromEntries(tasks)).toEqual({
-    10: { finished: false, finishedChanged: 1, text: 'One1', textChanged: 10 }
+    10: {
+      finished: false,
+      finishedChanged: 5,
+      text: 'One1',
+      textChanged: 14
+    }
   })
-  expect(getTime(client2, changedTask)).toEqual([1, 10])
+  expect(getTime(client2, changedTask)).toEqual([5, 14])
 
   expect(
     await client1.collect(async () => {
       await client1.process(changeTask({ fields: { text: 'One2' }, id: '10' }))
     })
-  ).toEqual([loguxProcessed({ id: '13 1:1:1 0' })])
+  ).toEqual([loguxProcessed({ id: 'G 1:1:1' })])
 
   await client1.process(changeTask({ fields: { text: 'One0' }, id: '10' }), {
-    time: 12
+    time: 16
   })
   expect(Object.fromEntries(tasks)).toEqual({
-    10: { finished: false, finishedChanged: 1, text: 'One2', textChanged: 13 }
+    10: {
+      finished: false,
+      finishedChanged: 5,
+      text: 'One2',
+      textChanged: 17
+    }
   })
 
   let client3 = await server.connect('3')
   expect(
-    await client3.subscribe('tasks/10', undefined, { id: '', time: 12 })
+    await client3.subscribe('tasks/10', undefined, {
+      id: '',
+      time: 16
+    })
   ).toEqual([changedTask({ fields: { text: 'One2' }, id: '10' })])
 
   let client4 = await server.connect('3')
   expect(
-    await client4.subscribe('tasks/10', undefined, { id: '', time: 20 })
+    await client4.subscribe('tasks/10', undefined, {
+      id: '',
+      time: 24
+    })
   ).toEqual([])
 })
 
@@ -246,7 +267,7 @@ it('supports SyncMap filters', async () => {
     await client1.process(
       createTask({ fields: { finished: false, text: 'One' }, id: '1' })
     )
-  ).toEqual([loguxProcessed({ id: '3 1:1:1 0' })])
+  ).toEqual([loguxProcessed({ id: '6 1:1:1' })])
   await client1.process(
     createTask({ fields: { finished: true, text: 'Two' }, id: '2' })
   )
@@ -273,8 +294,18 @@ it('supports SyncMap filters', async () => {
     })
   ).toEqual([deletedTask({ id: '3' })])
   expect(Object.fromEntries(tasks)).toEqual({
-    1: { finished: false, finishedChanged: 3, text: 'One1', textChanged: 18 },
-    2: { finished: true, finishedChanged: 6, text: 'Two', textChanged: 6 }
+    1: {
+      finished: false,
+      finishedChanged: 7,
+      text: 'One1',
+      textChanged: 22
+    },
+    2: {
+      finished: true,
+      finishedChanged: 10,
+      text: 'Two',
+      textChanged: 10
+    }
   })
 
   expect(
@@ -305,7 +336,10 @@ it('supports SyncMap filters', async () => {
 
   let client3 = await server.connect('3')
   expect(
-    await client3.subscribe('tasks', undefined, { id: '', time: 15 })
+    await client3.subscribe('tasks', undefined, {
+      id: '',
+      time: 15
+    })
   ).toEqual([
     loguxSubscribed({ channel: 'tasks/1' }),
     loguxSubscribed({ channel: 'tasks/2' }),

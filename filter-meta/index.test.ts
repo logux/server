@@ -5,16 +5,16 @@ import { filterMeta, type ServerMeta } from '../index.js'
 it('filters meta', () => {
   let meta1: ServerMeta = {
     added: 0,
-    id: '1 test 0',
+    id: '1 test',
     reasons: [],
     server: '',
     status: 'processed',
     time: 0
   }
-  expect(filterMeta(meta1)).toEqual({ id: '1 test 0', time: 0 })
+  expect(filterMeta(meta1)).toEqual({ id: '1 test', time: 0 })
   let meta2: ServerMeta = {
     added: 0,
-    id: '1 test 0',
+    id: '1 test',
     reasons: [],
     server: '',
     subprotocol: 1,

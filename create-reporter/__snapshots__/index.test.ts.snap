@@ -19,7 +19,7 @@ exports[`reports EACCES error 2`] = `
 `;
 
 exports[`reports actions with excludeClients metadata 1`] = `
-"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"action":{"id":100,"name":"John","type":"ADD_USER"},"meta":{"excludeClients":["1:-lCr7e9s","2:wv0r_O5C"],"id":"1487805099387 100:uImkcF4z 0","reasons":[],"server":"server:H1f8LAyzl","subprotocol":1,"time":1487805099387},"msg":"Action was added"}
+"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"action":{"id":100,"name":"John","type":"ADD_USER"},"meta":{"excludeClients":["1:-lCr7e9s","2:wv0r_O5C"],"id":"5o-8K2 100:uImkcF4z","reasons":[],"server":"server:H1f8LAyzl","subprotocol":1,"time":1786567299387},"msg":"Action was added"}
 "
 `;
 
@@ -31,17 +31,17 @@ exports[`reports actions with excludeClients metadata 2`] = `
           type: "[1mADD_USER[22m"
         Meta:   
           excludeClients: ["[1m1[22m:[33m-lC[39m[35mr7e[39m[31m9s[39m","[1m2[22m:[33mwv0[39m[31mr_O[39m[34m5C[39m"]
-          id:             [1m[32m1487[39m[35m8050[39m[33m9938[39m[33m7[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
+          id:             [1m[31m5o-8[39m[34mK2[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m
           reasons:        []
           server:         [1mserver[22m:[34mH1f[39m[35m8LA[39m[36myzl[39m
           subprotocol:    [1m1[22m
-          time:           [1m1487805099387[22m
+          time:           [1m1786567299387[22m
 
 "
 `;
 
 exports[`reports actions with metadata containing 'clients' array 1`] = `
-"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"action":{"id":100,"name":"John","type":"ADD_USER"},"meta":{"clients":["1:-lCr7e9s","2:wv0r_O5C"],"id":"1487805099387 100:uImkcF4z 0","reasons":[],"server":"server:H1f8LAyzl","subprotocol":1,"time":1487805099387},"msg":"Action was added"}
+"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"action":{"id":100,"name":"John","type":"ADD_USER"},"meta":{"clients":["1:-lCr7e9s","2:wv0r_O5C"],"id":"5o-8K2 100:uImkcF4z","reasons":[],"server":"server:H1f8LAyzl","subprotocol":1,"time":1786567299387},"msg":"Action was added"}
 "
 `;
 
@@ -53,17 +53,17 @@ exports[`reports actions with metadata containing 'clients' array 2`] = `
           type: "[1mADD_USER[22m"
         Meta:   
           clients:     ["[1m1[22m:[33m-lC[39m[35mr7e[39m[31m9s[39m","[1m2[22m:[33mwv0[39m[31mr_O[39m[34m5C[39m"]
-          id:          [1m[32m1487[39m[35m8050[39m[33m9938[39m[33m7[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
+          id:          [1m[31m5o-8[39m[34mK2[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m
           reasons:     []
           server:      [1mserver[22m:[34mH1f[39m[35m8LA[39m[36myzl[39m
           subprotocol: [1m1[22m
-          time:        [1m1487805099387[22m
+          time:        [1m1786567299387[22m
 
 "
 `;
 
 exports[`reports add 1`] = `
-"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"action":{"data":{"array":[1,[2],{"a":"1","b":{"c":2},"d":[],"e":null},null],"name":"John","role":null},"id":100,"type":"CHANGE_USER"},"meta":{"id":"1487805099387 100:uImkcF4z 0","reasons":["lastValue","debug"],"server":"server:H1f8LAyzl","subprotocol":1,"time":1487805099387},"msg":"Action was added"}
+"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"action":{"data":{"array":[1,[2],{"a":"1","b":{"c":2},"d":[],"e":null},null],"name":"John","role":null},"id":100,"type":"CHANGE_USER"},"meta":{"id":"5o-8K2 100:uImkcF4z","reasons":["lastValue","debug"],"server":"server:H1f8LAyzl","subprotocol":1,"time":1786567299387},"msg":"Action was added"}
 "
 `;
 
@@ -77,17 +77,17 @@ exports[`reports add 2`] = `
           id:   [1m100[22m
           type: "[1mCHANGE_USER[22m"
         Meta:   
-          id:          [1m[32m1487[39m[35m8050[39m[33m9938[39m[33m7[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
+          id:          [1m[31m5o-8[39m[34mK2[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m
           reasons:     ["[1mlastValue[22m", "[1mdebug[22m"]
           server:      [1mserver[22m:[34mH1f[39m[35m8LA[39m[36myzl[39m
           subprotocol: [1m1[22m
-          time:        [1m1487805099387[22m
+          time:        [1m1786567299387[22m
 
 "
 `;
 
 exports[`reports add and clean 1`] = `
-"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"action":{"data":{"array":[1,[2],{"a":"1","b":{"c":2},"d":[],"e":null},null],"name":"John","role":null},"id":100,"type":"CHANGE_USER"},"meta":{"id":"1487805099387 100:uImkcF4z 0","reasons":["lastValue","debug"],"server":"server:H1f8LAyzl","subprotocol":1,"time":1487805099387},"msg":"Action was added and cleaned"}
+"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"action":{"data":{"array":[1,[2],{"a":"1","b":{"c":2},"d":[],"e":null},null],"name":"John","role":null},"id":100,"type":"CHANGE_USER"},"meta":{"id":"5o-8K2 100:uImkcF4z","reasons":["lastValue","debug"],"server":"server:H1f8LAyzl","subprotocol":1,"time":1786567299387},"msg":"Action was added and cleaned"}
 "
 `;
 
@@ -101,11 +101,11 @@ exports[`reports add and clean 2`] = `
           id:   [1m100[22m
           type: "[1mCHANGE_USER[22m"
         Meta:   
-          id:          [1m[32m1487[39m[35m8050[39m[33m9938[39m[33m7[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
+          id:          [1m[31m5o-8[39m[34mK2[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m
           reasons:     ["[1mlastValue[22m", "[1mdebug[22m"]
           server:      [1mserver[22m:[34mH1f[39m[35m8LA[39m[36myzl[39m
           subprotocol: [1m1[22m
-          time:        [1m1487805099387[22m
+          time:        [1m1786567299387[22m
 
 "
 `;
@@ -139,7 +139,7 @@ exports[`reports authenticated without user ID 2`] = `
 `;
 
 exports[`reports binary actions 1`] = `
-"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"action":{"chunks":["[binary]"],"file":"[binary]","preview":"[binary]","raw":"[binary]","type":"ADD_FILE"},"meta":{"id":"1487805099387 100:uImkcF4z 0","reasons":[],"server":"server:H1f8LAyzl","subprotocol":1,"time":1487805099387},"msg":"Action was added"}
+"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"action":{"chunks":["[binary]"],"file":"[binary]","preview":"[binary]","raw":"[binary]","type":"ADD_FILE"},"meta":{"id":"5o-8K2 100:uImkcF4z","reasons":[],"server":"server:H1f8LAyzl","subprotocol":1,"time":1786567299387},"msg":"Action was added"}
 "
 `;
 
@@ -152,23 +152,23 @@ exports[`reports binary actions 2`] = `
           raw:     [1m[binary][22m
           type:    "[1mADD_FILE[22m"
         Meta:   
-          id:          [1m[32m1487[39m[35m8050[39m[33m9938[39m[33m7[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
+          id:          [1m[31m5o-8[39m[34mK2[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m
           reasons:     []
           server:      [1mserver[22m:[34mH1f[39m[35m8LA[39m[36myzl[39m
           subprotocol: [1m1[22m
-          time:        [1m1487805099387[22m
+          time:        [1m1786567299387[22m
 
 "
 `;
 
 exports[`reports clean 1`] = `
-"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"actionId":"1487805099387 100:uImkcF4z 0","msg":"Action was cleaned"}
+"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"actionId":"5o-8K2 100:uImkcF4z","msg":"Action was cleaned"}
 "
 `;
 
 exports[`reports clean 2`] = `
 "[42m[30m INFO [39m[49m  [1m[32mAction was cleaned[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Action ID: [1m[32m1487[39m[35m8050[39m[33m9938[39m[33m7[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
+        Action ID: [1m[31m5o-8[39m[34mK2[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m
 
 "
 `;
@@ -187,13 +187,13 @@ exports[`reports connect 2`] = `
 `;
 
 exports[`reports denied 1`] = `
-"{"level":40,"time":"1970-01-01T00:00:00.000Z","pid":21384,"actionId":"1487805099387 100:uImkcF4z 0","msg":"Action was denied"}
+"{"level":40,"time":"1970-01-01T00:00:00.000Z","pid":21384,"actionId":"5o-8K2 100:uImkcF4z","msg":"Action was denied"}
 "
 `;
 
 exports[`reports denied 2`] = `
 "[43m[30m WARN [39m[49m  [1m[33mAction was denied[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Action ID: [1m[32m1487[39m[35m8050[39m[33m9938[39m[33m7[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
+        Action ID: [1m[31m5o-8[39m[34mK2[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m
 
 "
 `;
@@ -249,7 +249,7 @@ exports[`reports error 2`] = `
 `;
 
 exports[`reports error from action 1`] = `
-"{"level":50,"time":"1970-01-01T00:00:00.000Z","pid":21384,"err":{"message":"Some mistake","name":"Error","stack":"Error: Some mistake\\n    at Object.<anonymous> (/dev/app/index.js:28:13)\\n    at Module._compile (module.js:573:32)\\n    at at runTest (/dev/app/node_modules/jest/index.js:50:10)\\n    at process._tickCallback (internal/process/next_tick.js:103:7)"},"actionId":"1487805099387 100:uImkcF4z 0","msg":"Some mistake"}
+"{"level":50,"time":"1970-01-01T00:00:00.000Z","pid":21384,"err":{"message":"Some mistake","name":"Error","stack":"Error: Some mistake\\n    at Object.<anonymous> (/dev/app/index.js:28:13)\\n    at Module._compile (module.js:573:32)\\n    at at runTest (/dev/app/node_modules/jest/index.js:50:10)\\n    at process._tickCallback (internal/process/next_tick.js:103:7)"},"actionId":"5o-8K2 100:uImkcF4z","msg":"Some mistake"}
 "
 `;
 
@@ -259,7 +259,7 @@ exports[`reports error from action 2`] = `
 [90m        at Module._compile (module.js:573:32)[39m
 [90m        at at runTest (/dev/app/node_modules/jest/index.js:50:10)[39m
 [90m        at process._tickCallback (internal/process/next_tick.js:103:7)[39m
-        Action ID: [1m[32m1487[39m[35m8050[39m[33m9938[39m[33m7[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
+        Action ID: [1m[31m5o-8[39m[34mK2[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m
 
 "
 `;
@@ -289,7 +289,7 @@ exports[`reports error from node 2`] = `
 `;
 
 exports[`reports error with token 1`] = `
-"{"level":50,"time":"1970-01-01T00:00:00.000Z","pid":21384,"err":{"message":"{\\"Authorization\\":\\"[SECRET]\\"}","name":"Error","stack":"Error: {\\"Authorization\\":\\"[SECRET]\\"}\\n    at Object.<anonymous> (/dev/app/index.js:28:13)\\n    at Module._compile (module.js:573:32)\\n    at at runTest (/dev/app/node_modules/jest/index.js:50:10)\\n    at process._tickCallback (internal/process/next_tick.js:103:7)"},"actionId":"1487805099387 100:uImkcF4z 0","msg":"{\\"Authorization\\":\\"[SECRET]\\"}"}
+"{"level":50,"time":"1970-01-01T00:00:00.000Z","pid":21384,"err":{"message":"{\\"Authorization\\":\\"[SECRET]\\"}","name":"Error","stack":"Error: {\\"Authorization\\":\\"[SECRET]\\"}\\n    at Object.<anonymous> (/dev/app/index.js:28:13)\\n    at Module._compile (module.js:573:32)\\n    at at runTest (/dev/app/node_modules/jest/index.js:50:10)\\n    at process._tickCallback (internal/process/next_tick.js:103:7)"},"actionId":"5o-8K2 100:uImkcF4z","msg":"{\\"Authorization\\":\\"[SECRET]\\"}"}
 "
 `;
 
@@ -299,7 +299,7 @@ exports[`reports error with token 2`] = `
 [90m        at Module._compile (module.js:573:32)[39m
 [90m        at at runTest (/dev/app/node_modules/jest/index.js:50:10)[39m
 [90m        at process._tickCallback (internal/process/next_tick.js:103:7)[39m
-        Action ID: [1m[32m1487[39m[35m8050[39m[33m9938[39m[33m7[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
+        Action ID: [1m[31m5o-8[39m[34mK2[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m
 
 "
 `;
@@ -367,13 +367,13 @@ exports[`reports listen for production 2`] = `
 `;
 
 exports[`reports subscribed 1`] = `
-"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"actionId":"1487805099387 100:uImkcF4z 0","channel":"user/100","msg":"Client was subscribed"}
+"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"actionId":"5o-8K2 100:uImkcF4z","channel":"user/100","msg":"Client was subscribed"}
 "
 `;
 
 exports[`reports subscribed 2`] = `
 "[42m[30m INFO [39m[49m  [1m[32mClient was subscribed[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Action ID: [1m[32m1487[39m[35m8050[39m[33m9938[39m[33m7[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
+        Action ID: [1m[31m5o-8[39m[34mK2[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m
         Channel:   [1muser/100[22m
 
 "
@@ -394,46 +394,46 @@ exports[`reports unauthenticated 2`] = `
 `;
 
 exports[`reports unknownType 1`] = `
-"{"level":40,"time":"1970-01-01T00:00:00.000Z","pid":21384,"actionId":"1487805099387 100:vAApgNT9 0","type":"CHANGE_SER","msg":"Action with unknown type"}
+"{"level":40,"time":"1970-01-01T00:00:00.000Z","pid":21384,"actionId":"5o-8K2 100:vAApgNT9","type":"CHANGE_SER","msg":"Action with unknown type"}
 "
 `;
 
 exports[`reports unknownType 2`] = `
 "[43m[30m WARN [39m[49m  [1m[33mAction with unknown type[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Action ID: [1m[32m1487[39m[35m8050[39m[33m9938[39m[33m7[39m[22m [1m100[22m:[34mvAA[39m[32mpgN[39m[31mT9[39m [1m0[22m
+        Action ID: [1m[31m5o-8[39m[34mK2[39m[22m [1m100[22m:[34mvAA[39m[32mpgN[39m[31mT9[39m
         Type:      [1mCHANGE_SER[22m
 
 "
 `;
 
 exports[`reports unknownType from server 1`] = `
-"{"level":40,"time":"1970-01-01T00:00:00.000Z","pid":21384,"actionId":"1650269021700 server:FnXaqDxY 0","type":"CHANGE_SER","msg":"Action with unknown type"}
+"{"level":40,"time":"1970-01-01T00:00:00.000Z","pid":21384,"actionId":"5o-8K2 server:FnXaqDxY","type":"CHANGE_SER","msg":"Action with unknown type"}
 "
 `;
 
 exports[`reports unknownType from server 2`] = `
 "[43m[30m WARN [39m[49m  [1m[33mAction with unknown type[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Action ID: [1m[34m1650[39m[35m2690[39m[31m2170[39m[31m0[39m[22m [1mserver[22m:[31mFnX[39m[35maqD[39m[34mxY[39m [1m0[22m
+        Action ID: [1m[31m5o-8[39m[34mK2[39m[22m [1mserver[22m:[31mFnX[39m[35maqD[39m[34mxY[39m
         Type:      [1mCHANGE_SER[22m
 
 "
 `;
 
 exports[`reports unsubscribed 1`] = `
-"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"actionId":"1650271940900 100:uImkcF4z 0","channel":"user/100","msg":"Client was unsubscribed"}
+"{"level":30,"time":"1970-01-01T00:00:00.000Z","pid":21384,"actionId":"5oAH0Y 100:uImkcF4z","channel":"user/100","msg":"Client was unsubscribed"}
 "
 `;
 
 exports[`reports unsubscribed 2`] = `
 "[42m[30m INFO [39m[49m  [1m[32mClient was unsubscribed[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Action ID: [1m[36m1650[39m[34m2719[39m[35m4090[39m[35m0[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
+        Action ID: [1m[35m5oAH[39m[33m0Y[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m
         Channel:   [1muser/100[22m
 
 "
 `;
 
 exports[`reports useless actions 1`] = `
-"{"level":40,"time":"1970-01-01T00:00:00.000Z","pid":21384,"action":{"id":100,"name":"John","type":"ADD_USER"},"meta":{"id":"1487805099387 100:uImkcF4z 0","reasons":[],"server":"server:H1f8LAyzl","subprotocol":1,"time":1487805099387},"msg":"Useless action"}
+"{"level":40,"time":"1970-01-01T00:00:00.000Z","pid":21384,"action":{"id":100,"name":"John","type":"ADD_USER"},"meta":{"id":"5o-8K2 100:uImkcF4z","reasons":[],"server":"server:H1f8LAyzl","subprotocol":1,"time":1786567299387},"msg":"Useless action"}
 "
 `;
 
@@ -444,36 +444,36 @@ exports[`reports useless actions 2`] = `
           name: "[1mJohn[22m"
           type: "[1mADD_USER[22m"
         Meta:   
-          id:          [1m[32m1487[39m[35m8050[39m[33m9938[39m[33m7[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
+          id:          [1m[31m5o-8[39m[34mK2[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m
           reasons:     []
           server:      [1mserver[22m:[34mH1f[39m[35m8LA[39m[36myzl[39m
           subprotocol: [1m1[22m
-          time:        [1m1487805099387[22m
+          time:        [1m1786567299387[22m
 
 "
 `;
 
 exports[`reports wrongChannel 1`] = `
-"{"level":40,"time":"1970-01-01T00:00:00.000Z","pid":21384,"actionId":"1650269045800 100:IsvVzqWx 0","channel":"ser/100","msg":"Wrong channel name"}
+"{"level":40,"time":"1970-01-01T00:00:00.000Z","pid":21384,"actionId":"5o-ECb 100:IsvVzqWx","channel":"ser/100","msg":"Wrong channel name"}
 "
 `;
 
 exports[`reports wrongChannel 2`] = `
 "[43m[30m WARN [39m[49m  [1m[33mWrong channel name[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Action ID: [1m[32m1650[39m[34m2690[39m[33m4580[39m[33m0[39m[22m [1m100[22m:[31mIsv[39m[33mVzq[39m[34mWx[39m [1m0[22m
+        Action ID: [1m[33m5o-E[39m[36mCb[39m[22m [1m100[22m:[31mIsv[39m[33mVzq[39m[34mWx[39m
         Channel:   [1mser/100[22m
 
 "
 `;
 
 exports[`reports wrongChannel without name 1`] = `
-"{"level":40,"time":"1970-01-01T00:00:00.000Z","pid":21384,"actionId":"1650269056600 100:uImkcF4z 0","msg":"Wrong channel name"}
+"{"level":40,"time":"1970-01-01T00:00:00.000Z","pid":21384,"actionId":"5o-GqM 100:uImkcF4z","msg":"Wrong channel name"}
 "
 `;
 
 exports[`reports wrongChannel without name 2`] = `
 "[43m[30m WARN [39m[49m  [1m[33mWrong channel name[39m[22m [2mat 1970-01-01 00:00:00[22m
-        Action ID: [1m[36m1650[39m[31m2690[39m[34m5660[39m[34m0[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m [1m0[22m
+        Action ID: [1m[33m5o-G[39m[34mqM[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m
         Channel:   [1mundefined[22m
 
 "
