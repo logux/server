@@ -2,7 +2,7 @@
 
 // Print test snapshots to check CLI output of the server’s reporter.
 //
-//   node scripts/print-snapshots.js [filter]
+//   test/print-snapshots.js [filter]
 
 import { readdir, readFile } from 'node:fs/promises'
 import { join, sep } from 'node:path'
@@ -10,11 +10,6 @@ import { styleText } from 'node:util'
 
 const ROOT = join(import.meta.dirname, '..')
 const IGNORE = ['coverage', 'node_modules']
-
-// Do not crash on `pnpm print-snapshots | head`
-process.stdout.on('error', () => {
-  process.exit(0)
-})
 
 function print(text) {
   process.stdout.write(text + '\n')
