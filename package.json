@@ -35,25 +35,25 @@
     "cookie": "^2.0.1",
     "fastq": "^1.20.1",
     "nanoevents": "^10.0.0",
-    "nanoid": "^6.0.0",
-    "ws": "^8.21.1"
+    "nanoid": "^6.0.1",
+    "ws": "^8.21.3"
   },
   "devDependencies": {
-    "@logux/oxc-configs": "^1.0.0",
+    "@logux/oxc-configs": "^1.1.0",
     "@types/cross-spawn": "^6.0.6",
-    "@types/node": "^26.1.2",
+    "@types/node": "^26.2.0",
     "@types/ws": "^8.18.1",
     "@vitest/coverage-v8": "^4.1.10",
-    "actions-up": "^1.16.0",
-    "check-dts": "^2.0.0",
+    "actions-up": "^1.17.0",
+    "check-dts": "^2.0.1",
     "cross-spawn": "^7.0.6",
     "eslint-plugin-prefer-let": "^4.2.2",
     "nanospy": "^2.0.2",
-    "oxlint": "^1.76.0",
+    "oxlint": "^1.77.0",
     "oxlint-tsgolint": "^7.0.2001",
     "print-snapshots": "^0.4.2",
     "typescript": "^7.0.2",
-    "vite": "^8.1.5",
+    "vite": "^8.2.1",
     "vitest": "^4.1.10"
   },
   "engines": {
