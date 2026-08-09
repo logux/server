@@ -110,7 +110,7 @@ export class BaseServer {
       if (!this.options.host) this.options.host = '127.0.0.1'
     }
 
-    this.nodeId = `server:${this.options.id || nanoid(8)}`
+    this.nodeId = `server:${this.options.id || nanoid(6)}`
 
     if (this.options.fileUrl) {
       this.options.root = dirname(fileURLToPath(this.options.fileUrl))
