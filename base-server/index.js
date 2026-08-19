@@ -151,8 +151,6 @@ export class BaseServer {
     this.contexts = new WeakMap()
     this.log = log
 
-    this.batched = new Map()
-
     let cleaned = {}
 
     this.on('preadd', (action, meta) => {
@@ -177,122 +175,64 @@ export class BaseServer {
       }
       this.replaceResendShortcuts(meta)
     })
-    this.on('add', async (action, meta) => {
-      let start = Date.now()
+    // Reports are per action, `clean` for a reason-less action is emitted
+    // by the log before `batch` event
+    this.on('add', (action, meta) => {
       if (meta.reasons.length === 0) {
         cleaned[meta.id] = true
         this.emitter.emit('report', 'addClean', { action, meta })
       } else {
         this.emitter.emit('report', 'add', { action, meta })
       }
-
-      if (this.destroying && !this.actionToQueue.has(meta.id)) {
-        return
-      }
-
-      if (action.type === 'logux/subscribe') {
-        if (meta.server === this.nodeId) {
-          void this.subscribeAction(action, meta, start)
-        }
-        return
-      }
-
-      if (action.type === 'logux/unsubscribe') {
-        if (meta.server === this.nodeId) {
-          this.unsubscribeAction(action, meta)
-        }
-        return
-      }
-
-      let processor = this.getProcessor(action.type)
-      let alone = false
-      if (processor && processor.resend && meta.status === 'waiting') {
-        // Resending is asynchronous, so the action will miss `batch` event
-        alone = true
-        let ctx = this.createContext(action, meta)
-        let resend
-        try {
-          resend = await processor.resend(ctx, action, meta)
-        } catch (e) {
-          this.undo(action, meta, 'error')
-          this.emitter.emit('error', e, action, meta)
-          this.finally(processor, ctx, action, meta)
-          return
-        }
-        if (resend) {
-          if (typeof resend === 'string') {
-            resend = { channels: [resend] }
-          } else if (Array.isArray(resend)) {
-            resend = { channels: resend }
-          } else {
-            this.replaceResendShortcuts(resend)
-          }
-          let diff = {}
-          for (let i of RESEND_META) {
-            if (resend[i]) diff[i] = resend[i]
-          }
-          await this.log.changeMeta(meta.id, diff)
-          meta = { ...meta, ...diff }
-        }
-      }
-
-      if (this.isUseless(action, meta)) {
-        this.emitter.emit('report', 'useless', { action, meta })
-      }
-
-      if (alone) {
-        await this.sendAction(action, meta)
-      } else {
-        await this.waitBatch(meta)
-      }
-
-      if (meta.status === 'waiting') {
-        if (!processor) {
-          this.internalUnknownType(action, meta)
-          return
-        }
-        if (processor.process) {
-          void this.processAction(processor, action, meta, start)
-        } else {
-          this.emitter.emit('processed', action, meta, 0)
-          this.finally(
-            processor,
-            this.createContext(action, meta),
-            action,
-            meta
-          )
-          this.markAsProcessed(meta)
-        }
-      } else {
-        this.emitter.emit('processed', action, meta, 0)
-        this.finally(processor, this.createContext(action, meta), action, meta)
-      }
     })
     this.on('batch', entries => {
-      let sending = []
-      let waiting = []
-      for (let entry of entries) {
-        let resolve = this.batched.get(entry[1])
-        if (resolve) {
-          this.batched.delete(entry[1])
-          sending.push(entry)
-          waiting.push(resolve)
+      let start = Date.now()
+      let ready = []
+
+      for (let [action, meta] of entries) {
+        if (this.destroying && !this.actionToQueue.has(meta.id)) {
+          continue
+        }
+
+        if (action.type === 'logux/subscribe') {
+          if (meta.server === this.nodeId) {
+            void this.subscribeAction(action, meta, start)
+          }
+          continue
+        }
+
+        if (action.type === 'logux/unsubscribe') {
+          if (meta.server === this.nodeId) {
+            this.unsubscribeAction(action, meta)
+          }
+          continue
+        }
+
+        let processor = this.getProcessor(action.type)
+        if (processor && processor.resend && meta.status === 'waiting') {
+          // Resending is asynchronous, so the action can’t wait for others
+          void this.resendAction(action, meta, processor, start)
+          continue
+        }
+
+        if (this.isUseless(action, meta)) {
+          this.emitter.emit('report', 'useless', { action, meta })
+        }
+        ready.push([action, meta, processor])
+      }
+
+      if (ready.length === 0) return
+      let runProcessors = () => {
+        for (let [action, meta, processor] of ready) {
+          this.runProcessor(action, meta, processor, start)
         }
       }
-      if (sending.length === 0) return
-      let done = () => {
-        for (let resolve of waiting) resolve()
-      }
-      let sent = this.sendBatch(sending)
-      if (sent) {
-        void sent.then(done, error => {
-          // Do not stop action processing on a broken channel filter
-          done()
-          throw error
-        })
-      } else {
-        done()
-      }
+      // Actions are processed only after they were sent to the clients
+      void Promise.resolve(this.sendBatch(ready)).then(runProcessors, error => {
+        // Do not stop action processing on a broken channel filter
+        runProcessors()
+        throw error
+      })
     })
     this.on('clean', (action, meta) => {
       if (cleaned[meta.id]) {
@@ -542,8 +482,6 @@ export class BaseServer {
   destroy() {
     this.destroying = true
     this.emitter.emit('report', 'destroy')
-    for (let resolve of this.batched.values()) resolve()
-    this.batched.clear()
     return Promise.all(this.unbind.map(i => i()))
   }
 
@@ -867,6 +805,41 @@ export class BaseServer {
     }
   }
 
+  async resendAction(action, meta, processor, start) {
+    let ctx = this.createContext(action, meta)
+    let resend
+    try {
+      resend = await processor.resend(ctx, action, meta)
+    } catch (e) {
+      this.undo(action, meta, 'error')
+      this.emitter.emit('error', e, action, meta)
+      this.finally(processor, ctx, action, meta)
+      return
+    }
+    if (resend) {
+      if (typeof resend === 'string') {
+        resend = { channels: [resend] }
+      } else if (Array.isArray(resend)) {
+        resend = { channels: resend }
+      } else {
+        this.replaceResendShortcuts(resend)
+      }
+      let diff = {}
+      for (let i of RESEND_META) {
+        if (resend[i]) diff[i] = resend[i]
+      }
+      await this.log.changeMeta(meta.id, diff)
+      meta = { ...meta, ...diff }
+    }
+
+    if (this.isUseless(action, meta)) {
+      this.emitter.emit('report', 'useless', { action, meta })
+    }
+
+    await this.sendAction(action, meta)
+    this.runProcessor(action, meta, processor, start)
+  }
+
   resolveTargets(action, meta, targets) {
     let from = parseId(meta.id).clientId
     let ignoreClients = new Set(meta.excludeClients || [])
@@ -939,6 +912,25 @@ export class BaseServer {
       }
     }
     return waiting.length > 0 ? Promise.all(waiting) : undefined
+  }
+
+  runProcessor(action, meta, processor, start) {
+    if (meta.status === 'waiting') {
+      if (!processor) {
+        this.internalUnknownType(action, meta)
+        return
+      }
+      if (processor.process) {
+        void this.processAction(processor, action, meta, start)
+      } else {
+        this.emitter.emit('processed', action, meta, 0)
+        this.finally(processor, this.createContext(action, meta), action, meta)
+        this.markAsProcessed(meta)
+      }
+    } else {
+      this.emitter.emit('processed', action, meta, 0)
+      this.finally(processor, this.createContext(action, meta), action, meta)
+    }
   }
 
   async sendAction(action, meta) {
@@ -1130,12 +1122,6 @@ export class BaseServer {
 
     this.markAsProcessed(meta)
     this.contexts.delete(action)
-  }
-
-  waitBatch(meta) {
-    return new Promise(resolve => {
-      this.batched.set(meta, resolve)
-    })
   }
 
   wrongChannel(action, meta) {
