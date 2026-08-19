@@ -100,4 +100,11 @@ export class ServerClient {
    * Disconnect client.
    */
   destroy(): void
+
+  /**
+   * Wait until the client will confirm all sent actions.
+   *
+   * @returns Promise with `false` if the client was disconnected.
+   */
+  drain(): Promise<boolean>
 }

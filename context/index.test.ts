@@ -4,6 +4,8 @@ import { beforeEach, expect, it } from 'vitest'
 import { Context, type ServerMeta } from '../index.js'
 
 let added: [Action, ServerMeta][] = []
+let batches: [Action, ServerMeta][][] = []
+let drained: string[] = []
 
 const FAKE_SERVER: any = {
   clientIds: new Map([
@@ -13,9 +15,18 @@ const FAKE_SERVER: any = {
     ]
   ]),
 
+  drain(clientId: string) {
+    drained.push(clientId)
+    return Promise.resolve(true)
+  },
+
   log: {
-    add(action: Action, meta: ServerMeta) {
-      added.push([action, meta])
+    add(input: [Action, ServerMeta][] | Action, meta: ServerMeta) {
+      if (Array.isArray(input)) {
+        batches.push(input)
+      } else {
+        added.push([input, meta])
+      }
       return Promise.resolve()
     }
   }
@@ -23,6 +34,8 @@ const FAKE_SERVER: any = {
 
 beforeEach(() => {
   added = []
+  batches = []
+  drained = []
 })
 
 function createContext(
@@ -79,4 +92,29 @@ it('sends action back', () => {
     [{ type: 'A' }, { clients: ['10:client'], status: 'processed' }],
     [{ type: 'B' }, { clients: [], reasons: ['1'], status: 'processed' }]
   ])
+})
+
+it('sends actions back in one batch', async () => {
+  let ctx = createContext()
+  await ctx.sendBack([{ type: 'A' }, { type: 'B' }], { reasons: ['1'] })
+  expect(added).toEqual([])
+  expect(batches).toEqual([
+    [
+      [
+        { type: 'A' },
+        { clients: ['10:client'], reasons: ['1'], status: 'processed' }
+      ],
+      [
+        { type: 'B' },
+        { clients: ['10:client'], reasons: ['1'], status: 'processed' }
+      ]
+    ]
+  ])
+  expect(batches[0]![0]![1]).not.toBe(batches[0]![1]![1])
+})
+
+it('waits for the client', async () => {
+  let ctx = createContext()
+  expect(await ctx.drain()).toBe(true)
+  expect(drained).toEqual(['10:client'])
 })

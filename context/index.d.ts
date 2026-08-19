@@ -60,20 +60,49 @@ export class ConnectContext<Headers extends object = unknown> {
   constructor(server: Server, client: ServerClient)
 
   /**
+   * Wait until the client will confirm all actions, which were sent to it.
+   *
+   * Use it to send a long history without loading it all into the memory:
+   * the client’s speed will limit how fast you read the database.
+   *
+   * ```js
+   * while (await ctx.drain()) {
+   *   let page = await cursor.next(100)
+   *   if (!page.length) break
+   *   ctx.sendBack(page.map(i => i.action))
+   * }
+   * ```
+   *
+   * @returns Promise with `false` if the client was disconnected.
+   */
+  drain(): Promise<boolean>
+
+  /**
    * Send action back to the client.
    *
    * ```js
    * ctx.sendBack({ type: 'login/success', token })
    * ```
    *
+   * An array of actions will be sent in a single message. Use it to send
+   * a big history page by page instead of a message per action.
+   *
+   * ```js
+   * ctx.sendBack(page.map(i => i.action))
+   * ```
+   *
+   * Every action in the array can have own meta as `[action, meta]`.
+   *
    * Action will not be processed by server’s callbacks from `Server#type`.
    *
-   * @param action The action.
+   * @param action The action or the array of actions.
    * @param meta Action’s meta.
    * @returns Promise until action was added to the server log.
    */
   sendBack<TypeAction extends Action = AnyAction>(
-    action: TypeAction,
+    action:
+      | (TypeAction | [TypeAction, Partial<ServerMeta>])[]
+      | TypeAction,
     meta?: Partial<ServerMeta>
   ): Promise<void>
 }

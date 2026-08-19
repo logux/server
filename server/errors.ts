@@ -107,7 +107,7 @@ server.channel<UserParams, UserData, UserSubscribeAction>('user/:id', {
   },
   async load(ctx) {
     await ctx.sendBack({
-      // THROWS 'userId' does not exist in type 'Action'
+      // THROWS 'userId' does not exist in type 'Action | (Action | [Action, P
       userId: ctx.data.user.id,
       name: ctx.data.user.name
     })

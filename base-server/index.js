@@ -16,6 +16,22 @@ import { createPattern } from '../url-pattern/index.js'
 const SKIP_PROCESS = Symbol('skipProcess')
 const RESEND_META = ['channels', 'users', 'clients', 'nodes']
 
+function addTarget(targets, client, action, meta) {
+  let entries = targets.get(client)
+  if (entries) {
+    entries.push([action, meta])
+  } else {
+    targets.set(client, [[action, meta]])
+  }
+}
+
+function sendTargets(targets) {
+  for (let [client, entries] of targets) {
+    client.track(client.node.onAdd(entries))
+  }
+  targets.clear()
+}
+
 function optionError(msg) {
   let error = new Error(msg)
   error.logux = true
@@ -135,6 +151,8 @@ export class BaseServer {
     this.contexts = new WeakMap()
     this.log = log
 
+    this.batched = new Map()
+
     let cleaned = {}
 
     this.on('preadd', (action, meta) => {
@@ -187,7 +205,10 @@ export class BaseServer {
       }
 
       let processor = this.getProcessor(action.type)
+      let alone = false
       if (processor && processor.resend && meta.status === 'waiting') {
+        // Resending is asynchronous, so the action will miss `batch` event
+        alone = true
         let ctx = this.createContext(action, meta)
         let resend
         try {
@@ -219,7 +240,11 @@ export class BaseServer {
         this.emitter.emit('report', 'useless', { action, meta })
       }
 
-      await this.sendAction(action, meta)
+      if (alone) {
+        await this.sendAction(action, meta)
+      } else {
+        await this.waitBatch(meta)
+      }
 
       if (meta.status === 'waiting') {
         if (!processor) {
@@ -241,6 +266,32 @@ export class BaseServer {
       } else {
         this.emitter.emit('processed', action, meta, 0)
         this.finally(processor, this.createContext(action, meta), action, meta)
+      }
+    })
+    this.on('batch', entries => {
+      let sending = []
+      let waiting = []
+      for (let entry of entries) {
+        let resolve = this.batched.get(entry[1])
+        if (resolve) {
+          this.batched.delete(entry[1])
+          sending.push(entry)
+          waiting.push(resolve)
+        }
+      }
+      if (sending.length === 0) return
+      let done = () => {
+        for (let resolve of waiting) resolve()
+      }
+      let sent = this.sendBatch(sending)
+      if (sent) {
+        void sent.then(done, error => {
+          // Do not stop action processing on a broken channel filter
+          done()
+          throw error
+        })
+      } else {
+        done()
       }
     })
     this.on('clean', (action, meta) => {
@@ -491,7 +542,15 @@ export class BaseServer {
   destroy() {
     this.destroying = true
     this.emitter.emit('report', 'destroy')
+    for (let resolve of this.batched.values()) resolve()
+    this.batched.clear()
     return Promise.all(this.unbind.map(i => i()))
+  }
+
+  drain(clientId) {
+    let client = this.clientIds.get(clientId)
+    if (!client) return Promise.resolve(false)
+    return client.drain()
   }
 
   finally(processor, ctx, action, meta) {
@@ -655,7 +714,12 @@ export class BaseServer {
   }
 
   on(event, listener) {
-    if (event === 'preadd' || event === 'add' || event === 'clean') {
+    if (
+      event === 'preadd' ||
+      event === 'add' ||
+      event === 'batch' ||
+      event === 'clean'
+    ) {
       return this.log.emitter.on(event, listener)
     } else {
       return this.emitter.on(event, listener)
@@ -803,7 +867,7 @@ export class BaseServer {
     }
   }
 
-  async sendAction(action, meta) {
+  resolveTargets(action, meta, targets) {
     let from = parseId(meta.id).clientId
     let ignoreClients = new Set(meta.excludeClients || [])
     ignoreClients.add(from)
@@ -813,7 +877,7 @@ export class BaseServer {
         let client = this.nodeIds.get(id)
         if (client) {
           ignoreClients.add(client.clientId)
-          client.node.onAdd(action, meta)
+          addTarget(targets, client, action, meta)
         }
       }
     }
@@ -823,7 +887,7 @@ export class BaseServer {
         if (this.clientIds.has(id)) {
           let client = this.clientIds.get(id)
           ignoreClients.add(client.clientId)
-          client.node.onAdd(action, meta)
+          addTarget(targets, client, action, meta)
         }
       }
     }
@@ -835,32 +899,38 @@ export class BaseServer {
           for (let client of users) {
             if (!ignoreClients.has(client.clientId)) {
               ignoreClients.add(client.clientId)
-              client.node.onAdd(action, meta)
+              addTarget(targets, client, action, meta)
             }
           }
         }
       }
     }
 
-    if (meta.channels) {
-      for (let channel of meta.channels) {
-        if (this.subscribers[channel]) {
-          for (let nodeId in this.subscribers[channel]) {
-            let clientId = parseId(nodeId).clientId
-            if (!ignoreClients.has(clientId)) {
-              let subscriber = this.subscribers[channel][nodeId]
-              if (subscriber) {
-                let ctx = this.createContext(action, meta)
-                let client = this.clientIds.get(clientId)
-                for (let filter of Object.values(subscriber.filters)) {
-                  filter =
-                    typeof filter === 'function'
-                      ? await filter(ctx, action, meta)
-                      : filter
-                  if (filter && client) {
-                    ignoreClients.add(clientId)
-                    client.node.onAdd(action, meta)
-                  }
+    if (!meta.channels) return undefined
+
+    let waiting = []
+    for (let channel of meta.channels) {
+      if (this.subscribers[channel]) {
+        for (let nodeId in this.subscribers[channel]) {
+          let clientId = parseId(nodeId).clientId
+          if (!ignoreClients.has(clientId)) {
+            let subscriber = this.subscribers[channel][nodeId]
+            if (subscriber) {
+              let ctx = this.createContext(action, meta)
+              let client = this.clientIds.get(clientId)
+              for (let filter of Object.values(subscriber.filters)) {
+                if (typeof filter === 'function') {
+                  waiting.push(
+                    Promise.resolve(filter(ctx, action, meta)).then(result => {
+                      if (result && client && !ignoreClients.has(clientId)) {
+                        ignoreClients.add(clientId)
+                        addTarget(targets, client, action, meta)
+                      }
+                    })
+                  )
+                } else if (filter && client) {
+                  ignoreClients.add(clientId)
+                  addTarget(targets, client, action, meta)
                 }
               }
             }
@@ -868,6 +938,30 @@ export class BaseServer {
         }
       }
     }
+    return waiting.length > 0 ? Promise.all(waiting) : undefined
+  }
+
+  async sendAction(action, meta) {
+    let targets = new Map()
+    let waiting = this.resolveTargets(action, meta, targets)
+    if (waiting) await waiting
+    sendTargets(targets)
+  }
+
+  sendBatch(entries) {
+    let targets = new Map()
+    let waiting = []
+    for (let [action, meta] of entries) {
+      let promise = this.resolveTargets(action, meta, targets)
+      if (promise) waiting.push(promise)
+    }
+    if (waiting.length === 0) {
+      sendTargets(targets)
+      return undefined
+    }
+    return Promise.all(waiting).then(() => {
+      sendTargets(targets)
+    })
   }
 
   sendOnConnect(loader) {
@@ -966,16 +1060,9 @@ export class BaseServer {
           subscribed = true
 
           if (channel.load) {
+            // Actions from a single `load()` are sent in a single message
             let sendBack = await channel.load(ctx, action, meta)
-            if (Array.isArray(sendBack)) {
-              await Promise.all(
-                sendBack.map(i => {
-                  return Array.isArray(i) ? ctx.sendBack(...i) : ctx.sendBack(i)
-                })
-              )
-            } else if (sendBack) {
-              await ctx.sendBack(sendBack)
-            }
+            if (sendBack) await ctx.sendBack(sendBack)
           }
           this.emitter.emit('subscribed', action, meta, Date.now() - start)
           this.markAsProcessed(meta)
@@ -1043,6 +1130,12 @@ export class BaseServer {
 
     this.markAsProcessed(meta)
     this.contexts.delete(action)
+  }
+
+  waitBatch(meta) {
+    return new Promise(resolve => {
+      this.batched.set(meta, resolve)
+    })
   }
 
   wrongChannel(action, meta) {

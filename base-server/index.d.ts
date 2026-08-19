@@ -57,7 +57,7 @@ interface ConnectLoader<Headers extends object = unknown> {
     | Promise<
         [
           Action,
-          Partial<Pick<ServerMeta, 'subprotocol'>> &
+          Partial<Pick<ServerMeta, 'added' | 'subprotocol'>> &
             Pick<ServerMeta, 'id' | 'time'>
         ][]
       >
@@ -239,6 +239,14 @@ export interface BaseServerOptions {
   subprotocol?: number
 
   /**
+   * How many actions could be sent in a single message. `100` by default.
+   *
+   * Actions from a single `Server#log.add()` call (or from `ctx.sendBack()`
+   * with an array) are sent together and will be split by this limit.
+   */
+  syncBatch?: number
+
+  /**
    * Test time to test server.
    */
   time?: TestTime
@@ -259,9 +267,8 @@ export interface AuthenticatorOptions<Headers extends object> {
 }
 
 export type SendBackActions =
-  | [Action, Partial<Meta>][]
+  | (Action | [Action, Partial<Meta>])[]
   | Action
-  | Action[]
   | void
 
 /**
@@ -865,6 +872,25 @@ export class BaseServer<
   destroy(): Promise<void>
 
   /**
+   * Wait until the client will confirm all actions, which were sent to it.
+   *
+   * Use it to send a long history without loading it all into the memory:
+   * the client’s speed will limit how fast you read the database.
+   *
+   * ```js
+   * while (await server.drain(clientId)) {
+   *   let page = await cursor.next(100)
+   *   if (!page.length) break
+   *   server.log.add(page.map(i => [i.action, { clients: [clientId] }]))
+   * }
+   * ```
+   *
+   * @param clientId Client ID.
+   * @returns Promise with `false` if the client was disconnected.
+   */
+  drain(clientId: string): Promise<boolean>
+
+  /**
    * Handle WebSocket connection explicitly
    *
    * This is a low-level method allowing to integrate Logux server with an existing server
@@ -1139,6 +1165,14 @@ export class BaseServer<
    *   return db.loadActions({ user: ctx.userId, after: lastSynced })
    * })
    * ```
+   *
+   * Actions should be returned from the newest one to the oldest one.
+   * The list will be split into messages by the `syncBatch` option, but it
+   * is loaded into the memory as a whole. For a big history send it by
+   * pages with `Context#sendBack()` and `Context#drain()` instead.
+   *
+   * Set `meta.added` to let the client ask only for newer actions after
+   * the reconnect: the biggest `added` will be sent as the sync position.
    *
    * @param loader Callback which loads list of actions and meta.
    */

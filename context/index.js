@@ -33,11 +33,22 @@ export class Context {
     }
   }
 
-  sendBack(action, meta = {}) {
-    return this.server.log.add(action, {
-      clients: [this.clientId],
-      status: 'processed',
-      ...meta
-    })
+  drain() {
+    return this.server.drain(this.clientId)
+  }
+
+  sendBack(actions, meta = {}) {
+    let common = { clients: [this.clientId], status: 'processed', ...meta }
+    if (Array.isArray(actions)) {
+      return this.server.log.add(
+        actions.map(item => {
+          // Every action can have own meta as `[action, meta]`
+          return Array.isArray(item)
+            ? [item[0], { ...common, ...item[1] }]
+            : [item, { ...common }]
+        })
+      )
+    }
+    return this.server.log.add(actions, common)
   }
 }

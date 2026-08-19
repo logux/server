@@ -371,3 +371,73 @@ it('destroys on fatal', () => {
   // @ts-expect-error
   expect(server.destroying).toBe(true)
 })
+
+it('sends a long history page by page', async () => {
+  let pages = 0
+  server = new TestServer()
+  server.type('replay/request', {
+    access: () => true,
+    async process(ctx) {
+      let sent = 0
+      ctx.sendBack({ total: 250, type: 'replay/start' })
+      while (sent < 250 && (await ctx.drain())) {
+        let page = []
+        for (let i = 0; i < 100 && sent < 250; i++) {
+          page.push({ index: sent++, type: 'replay/action' })
+        }
+        pages += 1
+        ctx.sendBack(page)
+      }
+      ctx.sendBack({ last: sent, type: 'replay/end' })
+    }
+  })
+
+  let client = await server.connect('10')
+  let received = (
+    await client.collect(async () => {
+      await client.process({ type: 'replay/request' })
+    })
+  ).filter(i => !i.type.startsWith('logux/'))
+
+  expect(pages).toEqual(3)
+  expect(received[0]).toEqual({ total: 250, type: 'replay/start' })
+  expect(received.at(-1)).toEqual({ last: 250, type: 'replay/end' })
+  expect(
+    received
+      .filter(i => i.type === 'replay/action')
+      .map(i => privateMethods(i).index)
+  ).toEqual(Array.from({ length: 250 }, (i, index) => index))
+
+  let syncs = privateMethods(client)
+    .pair.rightSent.filter((i: any[]) => i[0] === 'sync')
+    .map((i: any[]) => (i.length - 2) / 2)
+  expect(syncs.filter((i: number) => i > 1).length).toBeGreaterThan(0)
+  expect(Math.max(...syncs)).toEqual(100)
+})
+
+it('stops sending history to disconnected client', async () => {
+  let pages = 0
+  let finished = false
+  server = new TestServer()
+  server.type('replay/request', {
+    access: () => true,
+    async process(ctx) {
+      ctx.sendBack([{ index: 0, type: 'replay/action' }])
+      while (await ctx.drain()) {
+        pages += 1
+        if (pages > 100) break
+        ctx.sendBack([{ index: pages, type: 'replay/action' }])
+      }
+      finished = true
+    }
+  })
+
+  let client = await server.connect('10')
+  void client.process({ type: 'replay/request' })
+  await setTimeout(10)
+  await client.disconnect()
+  await setTimeout(10)
+
+  expect(finished).toBe(true)
+  expect(pages).toBeLessThan(100)
+})

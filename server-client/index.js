@@ -11,6 +11,8 @@ async function onSend(action, meta) {
   return [action, filterMeta(meta)]
 }
 
+function ignore() {}
+
 function reportDetails(client) {
   return {
     connectionId: client.key,
@@ -71,6 +73,7 @@ export class ServerClient {
     this.clientId = undefined
     this.nodeId = undefined
     this.processing = false
+    this.sending = new Set()
     this.connection = connection
     this.key = key.toString()
     if (connection.ws) {
@@ -89,6 +92,7 @@ export class ServerClient {
       onSend,
       ping: app.options.ping,
       subprotocol: app.options.subprotocol,
+      syncBatch: app.options.syncBatch,
       timeout: app.options.timeout
     })
     if (this.app.env === 'development') {
@@ -99,11 +103,12 @@ export class ServerClient {
       this.node.syncSinceQuery = async lastSynced => {
         let context = new Context(app, this)
         let entries = await app.connectLoader(context, lastSynced)
-        let added = entries.reduce((max, entry) => {
-          let meta = filterMeta(entry[1])
-          entry[1] = meta
-          return meta.added > max ? meta.added : max
-        }, 0)
+        let added = 0
+        for (let entry of entries) {
+          // `added` should be taken before `filterMeta()` removes it
+          if (entry[1].added > added) added = entry[1].added
+          entry[1] = filterMeta(entry[1])
+        }
         return { added, entries }
       }
     }
@@ -239,6 +244,23 @@ export class ServerClient {
     this.app.connected.delete(this.key)
   }
 
+  async drain() {
+    if (this.sending.size > 0) await Promise.all(this.sending)
+    if (this.destroyed || !this.node.connected) return false
+    if (this.node.syncing === 0) return true
+    return new Promise(resolve => {
+      let unbind = this.node.on('state', () => {
+        if (this.node.state === 'synchronized') {
+          unbind()
+          resolve(true)
+        } else if (!this.node.connected) {
+          unbind()
+          resolve(false)
+        }
+      })
+    })
+  }
+
   onReceive(action, meta) {
     if (this.app.actionToQueue.has(meta.id)) {
       return Promise.resolve(false)
@@ -299,6 +321,15 @@ export class ServerClient {
         },
         queue
       })
+    })
+  }
+
+  track(sending) {
+    if (!sending || typeof sending.then !== 'function') return
+    let done = sending.then(ignore, ignore)
+    this.sending.add(done)
+    void done.then(() => {
+      this.sending.delete(done)
     })
   }
 }

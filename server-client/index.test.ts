@@ -997,7 +997,7 @@ it('sends new actions by client ID', async () => {
     { clients: ['10:client'], id: '2 server:x' }
   )
   sendTo(client, ['synced', 2])
-  await setTimeout(1)
+  await setTimeout(10)
 
   expect(sentNames(client)).toEqual(['connected', 'sync'])
   expect(sent(client)[1]).toEqual([
@@ -1060,6 +1060,90 @@ it('sends new actions by user', async () => {
     { type: 'A' },
     { id: '2 server:x', time: 2 }
   ])
+})
+
+it('sends actions from a single `Log#add()` in one message', async () => {
+  let app = createServer()
+  app.type('A', { access: () => true })
+
+  let client = await connectClient(app, '10:client:uuid')
+  await app.log.add([
+    [{ type: 'A' }, { clients: ['10:client'], id: '1 server:x' }],
+    [{ type: 'A' }, { clients: ['10:client'], id: '2 server:x' }],
+    [{ type: 'A' }, { clients: ['10:client'], id: '3 server:x' }]
+  ])
+  sendTo(client, ['synced', 3])
+  await setTimeout(10)
+
+  expect(sentNames(client)).toEqual(['connected', 'sync'])
+  expect(sent(client)[1]).toEqual([
+    'sync',
+    3,
+    { type: 'A' },
+    { id: '1 server:x', time: 1 },
+    { type: 'A' },
+    { id: '2 server:x', time: 2 },
+    { type: 'A' },
+    { id: '3 server:x', time: 3 }
+  ])
+})
+
+it('sends a batch to every client separately', async () => {
+  let app = createServer()
+  app.type('A', { access: () => true })
+
+  let client1 = await connectClient(app, '10:client:uuid')
+  let client2 = await connectClient(app, '20:client:uuid')
+  await app.log.add([
+    [{ type: 'A' }, { clients: ['10:client'], id: '1 server:x' }],
+    [{ type: 'A' }, { clients: ['20:client'], id: '2 server:x' }],
+    [{ type: 'A' }, { clients: ['10:client'], id: '3 server:x' }]
+  ])
+  await setTimeout(10)
+
+  expect(sentNames(client1)).toEqual(['connected', 'sync'])
+  expect(actions(client1)).toEqual([{ type: 'A' }, { type: 'A' }])
+  expect(sentNames(client2)).toEqual(['connected', 'sync'])
+  expect(actions(client2)).toEqual([{ type: 'A' }])
+})
+
+it('waits for client confirmation', async () => {
+  let app = createServer()
+  app.type('A', { access: () => true })
+
+  let client = await connectClient(app, '10:client:uuid')
+  expect(await app.drain('10:client')).toBe(true)
+  expect(await app.drain('10:unknown')).toBe(false)
+
+  await app.log.add([
+    [{ type: 'A' }, { clients: ['10:client'], id: '1 server:x' }]
+  ])
+  let drained: boolean | undefined
+  let draining = app.drain('10:client').then(result => {
+    drained = result
+  })
+  await setTimeout(10)
+  expect(drained).toBeUndefined()
+
+  sendTo(client, ['synced', 1])
+  await draining
+  expect(drained).toBe(true)
+})
+
+it('stops waiting for confirmation on disconnect', async () => {
+  let app = createServer()
+  app.type('A', { access: () => true })
+
+  let client = await connectClient(app, '10:client:uuid')
+  await app.log.add([
+    [{ type: 'A' }, { clients: ['10:client'], id: '1 server:x' }]
+  ])
+  let draining = app.drain('10:client')
+  await setTimeout(10)
+
+  client.destroy()
+  expect(await draining).toBe(false)
+  expect(await app.drain('10:client')).toBe(false)
 })
 
 it('sends new actions by channel', async () => {
@@ -1611,6 +1695,35 @@ it('allows to return actions', async () => {
     ['synced', 3],
     ['sync', 8, { type: 'C' }, { ...meta('6', 5), time: 98 }],
     ['sync', 9, { id: '3 10:1:uuid', type: 'logux/processed' }, meta('7', 6)]
+  ])
+})
+
+it('sends actions from `load()` in a single message', async () => {
+  let app = createServer()
+  app.channel('a', {
+    access: () => true,
+    load() {
+      return [{ type: 'A' }, [{ type: 'B' }, { time: 100 }], { type: 'C' }]
+    }
+  })
+  let client = await connectClient(app, '10:1:uuid')
+  await sendTo(client, [
+    'sync',
+    1,
+    { channel: 'a', type: 'logux/subscribe' },
+    { id: '1 10:1:uuid', time: 1 }
+  ])
+  await setTimeout(10)
+
+  let syncs = sent(client).filter(i => i[0] === 'sync')
+  expect(syncs.length).toEqual(2)
+  expect(syncs[0]!.filter((i, index) => index > 1 && index % 2 === 0)).toEqual([
+    { type: 'A' },
+    { type: 'B' },
+    { type: 'C' }
+  ])
+  expect(syncs[1]!.slice(2, 3)).toEqual([
+    { id: '1 10:1:uuid', type: 'logux/processed' }
   ])
 })
 
@@ -2502,6 +2615,27 @@ it('replaces Node class if necessary', async () => {
   let client = await connectClient(app, '10:client:uuid')
   await setTimeout(10)
   expect(actions(client)).toEqual([{ type: 'FOO' }])
+})
+
+it('splits initial actions into messages', async () => {
+  let app = createServer({ syncBatch: 60 })
+  app.sendOnConnect(async () => {
+    let entries: [Action, ServerMeta][] = []
+    for (let i = 250; i > 0; i--) {
+      entries.push([
+        { type: 'OLD' },
+        { added: i, id: `${i} server:x`, reasons: [], server: '', time: i }
+      ])
+    }
+    return entries
+  })
+
+  let client = await connectClient(app, '10:client:uuid')
+  await setTimeout(10)
+
+  let syncs = sent(client).filter(i => i[0] === 'sync')
+  expect(syncs.map(i => (i.length - 2) / 2)).toEqual([60, 60, 60, 60, 10])
+  expect(syncs.map(i => i[1])).toEqual([250, 250, 250, 250, 250])
 })
 
 it('allows to change how server loads initial actions', async () => {
