@@ -44,7 +44,6 @@
     "@types/node": "^26.2.0",
     "@types/ws": "^8.18.1",
     "@vitest/coverage-v8": "^4.1.10",
-    "actions-up": "^1.17.1",
     "check-dts": "^2.0.1",
     "cross-spawn": "^7.0.6",
     "eslint-plugin-prefer-let": "^4.2.2",
