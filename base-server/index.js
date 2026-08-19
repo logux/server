@@ -27,7 +27,9 @@ function addTarget(targets, client, action, meta) {
 
 function sendTargets(targets) {
   for (let [client, entries] of targets) {
-    client.track(client.node.onAdd(entries))
+    let sending = client.node.onAdd(entries)
+    // Only `ServerClient` tracks sending for `Server#drain()`
+    if (client.track) client.track(sending)
   }
   targets.clear()
 }

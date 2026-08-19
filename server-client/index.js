@@ -325,8 +325,7 @@ export class ServerClient {
   }
 
   track(sending) {
-    if (!sending || typeof sending.then !== 'function') return
-    let done = sending.then(ignore, ignore)
+    let done = Promise.resolve(sending).then(ignore, ignore)
     this.sending.add(done)
     void done.then(() => {
       this.sending.delete(done)
