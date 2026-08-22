@@ -6,7 +6,7 @@ export {
 } from './add-sync-map/index.js'
 export { ALLOWED_META } from './allowed-meta/index.js'
 export { BaseServer, wasNot403 } from './base-server/index.js'
-export { Context } from './context/index.js'
+export { Context, ConnectContext, ChannelContext } from './context/index.js'
 export { filterMeta } from './filter-meta/index.js'
 export { ResponseError } from './request/index.js'
 export { Server } from './server/index.js'

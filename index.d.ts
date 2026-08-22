@@ -16,7 +16,7 @@ export {
   ServerMeta,
   wasNot403
 } from './base-server/index.js'
-export { ChannelContext, Context } from './context/index.js'
+export { Context, ConnectContext, ChannelContext } from './context/index.js'
 export { filterMeta } from './filter-meta/index.js'
 export {
   del,
