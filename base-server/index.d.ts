@@ -258,8 +258,11 @@ export interface BaseServerOptions {
   timeout?: number
 }
 
-export interface AuthenticatorOptions<Headers extends object> {
-  client: ServerClient
+export interface AuthenticatorOptions<
+  Headers extends object,
+  ClientData extends object
+> {
+  client: ServerClient<ClientData>
   cookie: Record<string, string>
   headers: Headers
   token: string
@@ -279,8 +282,11 @@ export type SendBackActions =
  * @param client Client object.
  * @returns `true` if credentials was correct
  */
-interface ServerAuthenticator<Headers extends object> {
-  (user: AuthenticatorOptions<Headers>): boolean | Promise<boolean>
+interface ServerAuthenticator<
+  Headers extends object,
+  ClientData extends object
+> {
+  (user: AuthenticatorOptions<Headers, ClientData>): boolean | Promise<boolean>
 }
 
 /**
@@ -654,7 +660,8 @@ export function wasNot403(cb: () => Promise<void>): Promise<boolean>
  */
 export class BaseServer<
   Headers extends object = unknown,
-  ServerLog extends Log = Log<ServerMeta>
+  ServerLog extends Log = Log<ServerMeta>,
+  ClientData extends object = unknown
 > {
   /**
    * Connected client by client ID.
@@ -662,7 +669,7 @@ export class BaseServer<
    * Do not rely on this data, when you have multiple Logux servers.
    * Each server will have a different list.
    */
-  clientIds: Map<string, ServerClient>
+  clientIds: Map<string, ServerClient<ClientData>>
 
   /**
    * Connected clients.
@@ -673,7 +680,7 @@ export class BaseServer<
    * }
    * ```
    */
-  connected: Map<string, ServerClient>
+  connected: Map<string, ServerClient<ClientData>>
 
   /**
    * Production or development mode.
@@ -730,7 +737,7 @@ export class BaseServer<
    * Do not rely on this data, when you have multiple Logux servers.
    * Each server will have a different list.
    */
-  nodeIds: Map<string, ServerClient>
+  nodeIds: Map<string, ServerClient<ClientData>>
 
   /**
    * Server options.
@@ -762,7 +769,7 @@ export class BaseServer<
    * Do not rely on this data, when you have multiple Logux servers.
    * Each server will have a different list.
    */
-  userIds: Map<string, ServerClient[]>
+  userIds: Map<string, ServerClient<ClientData>[]>
 
   /**
    * @param opts Server options.
@@ -795,7 +802,7 @@ export class BaseServer<
    *
    * @param authenticator The authentication callback.
    */
-  auth(authenticator: ServerAuthenticator<Headers>): void
+  auth(authenticator: ServerAuthenticator<Headers, ClientData>): void
 
   /**
    * Define the channel.
@@ -980,7 +987,7 @@ export class BaseServer<
    */
   on(
     event: 'connected' | 'disconnected',
-    listener: (client: ServerClient) => void
+    listener: (client: ServerClient<ClientData>) => void
   ): Unsubscribe
   /**
    * Subscribe for synchronization events. It implements nanoevents API.
@@ -1031,7 +1038,10 @@ export class BaseServer<
    */
   on(
     event: 'authenticated' | 'unauthenticated',
-    listener: (client: ServerClient, latencyMilliseconds: number) => void
+    listener: (
+      client: ServerClient<ClientData>,
+      latencyMilliseconds: number
+    ) => void
   ): Unsubscribe
   /**
    * @param event The event name.

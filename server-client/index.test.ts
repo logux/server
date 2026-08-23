@@ -67,14 +67,18 @@ function createConnection(): ServerConnection {
   return pair.left as any
 }
 
-function createServer(
+function createServer<ClientData extends object = object>(
   opts: Partial<BaseServerOptions> = {}
-): BaseServer<{ locale: string }, TestLog<ServerMeta>> {
+): BaseServer<{ locale: string }, TestLog<ServerMeta>, ClientData> {
   opts.subprotocol = 1
   opts.minSubprotocol = 1
   opts.time = new TestTime()
 
-  let server = new BaseServer<{ locale: string }, TestLog<ServerMeta>>({
+  let server = new BaseServer<
+    { locale: string },
+    TestLog<ServerMeta>,
+    ClientData
+  >({
     ...opts,
     minSubprotocol: 1,
     subprotocol: 1,
@@ -191,6 +195,27 @@ it('has remote address shortcut', () => {
 it('has HTTP headers shortcut', () => {
   let client = new ServerClient(createServer(), createConnection(), 1)
   expect(client.httpHeaders['user-agent']).toEqual('browser')
+})
+
+it('has data for the whole connection', async () => {
+  let app = createServer<{ session?: number }>()
+  app.auth(({ client }) => {
+    client.data.session = 1
+    return true
+  })
+  let sessions: (number | undefined)[] = []
+  app.on('disconnected', client => {
+    sessions.push(client.data.session)
+  })
+
+  let client = createClient(app)
+  expect(client.data).toEqual({})
+
+  await connect(client, '10:uuid')
+  expect(app.clientIds.get(client.clientId!)!.data).toEqual({ session: 1 })
+
+  client.destroy()
+  expect(sessions).toEqual([1])
 })
 
 it('has default remote address if ws param does not set', () => {
@@ -969,10 +994,7 @@ it('sends old actions by client ID', async () => {
   app.type('A', { access: () => true })
 
   await app.log.add({ type: 'A' }, { id: '1 server:x' })
-  await app.log.add(
-    { type: 'A' },
-    { clients: ['10:client'], id: '2 server:x' }
-  )
+  await app.log.add({ type: 'A' }, { clients: ['10:client'], id: '2 server:x' })
   let client = await connectClient(app, '10:client:uuid')
 
   sendTo(client, ['synced', 2])
@@ -992,10 +1014,7 @@ it('sends new actions by client ID', async () => {
 
   let client = await connectClient(app, '10:client:uuid')
   await app.log.add({ type: 'A' }, { id: '1 server:x' })
-  await app.log.add(
-    { type: 'A' },
-    { clients: ['10:client'], id: '2 server:x' }
-  )
+  await app.log.add({ type: 'A' }, { clients: ['10:client'], id: '2 server:x' })
   sendTo(client, ['synced', 2])
   await setTimeout(10)
 

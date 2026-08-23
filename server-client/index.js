@@ -72,6 +72,7 @@ export class ServerClient {
     this.userId = undefined
     this.clientId = undefined
     this.nodeId = undefined
+    this.data = {}
     this.processing = false
     this.sending = new Set()
     this.connection = connection

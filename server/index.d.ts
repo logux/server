@@ -1,7 +1,10 @@
+import type { Log } from '@logux/core'
+
 import type {
   BaseServer,
   BaseServerOptions,
-  Logger
+  Logger,
+  ServerMeta
 } from '../base-server/index.js'
 
 export interface LogStream {
@@ -62,8 +65,9 @@ export interface ServerOptions extends BaseServerOptions {
  * ```
  */
 export class Server<
-  Headers extends object = unknown
-> extends BaseServer<Headers> {
+  Headers extends object = unknown,
+  ClientData extends object = unknown
+> extends BaseServer<Headers, Log<ServerMeta>, ClientData> {
   /**
    * Server options.
    *

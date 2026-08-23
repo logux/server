@@ -9,7 +9,7 @@ import type { BaseServer } from '../base-server/index.js'
  * const client = server.connected.get(0)
  * ```
  */
-export class ServerClient {
+export class ServerClient<ClientData extends object = unknown> {
   /**
    * Server, which received client.
    */
@@ -29,6 +29,23 @@ export class ServerClient {
    * ```
    */
   connection: ServerConnection
+
+  /**
+   * Open structure to save data for the whole connection.
+   *
+   * ```js
+   * server.auth(async ({ client, userId, token }) => {
+   *   let session = await findSession(token)
+   *   if (!session) return false
+   *   client.data.sessionId = session.id
+   *   return true
+   * })
+   * server.on('disconnected', client => {
+   *   touchSession(client.data.sessionId)
+   * })
+   * ```
+   */
+  data: ClientData
 
   /**
    * HTTP headers of WS connection.

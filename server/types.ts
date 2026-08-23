@@ -2,7 +2,7 @@ import { defineAction, type LoguxSubscribeAction } from '@logux/actions'
 
 import { type Action, Server } from '../index.js'
 
-let server = new Server<{ locale: string }>(
+let server = new Server<{ locale: string }, { sessionId: string }>(
   Server.loadOptions(process, {
     minSubprotocol: 1,
     root: '',
@@ -10,7 +10,8 @@ let server = new Server<{ locale: string }>(
   })
 )
 
-server.auth(({ token, userId }) => {
+server.auth(({ client, token, userId }) => {
+  client.data.sessionId = token
   return token === userId
 })
 
@@ -103,6 +104,10 @@ server.channel(/admin:\d/, {
 
 server.on('connected', client => {
   console.log(client.remoteAddress)
+})
+
+server.on('disconnected', client => {
+  console.log(client.data.sessionId)
 })
 
 let addUser = defineAction<{ type: 'user/remove'; userId: string }>(

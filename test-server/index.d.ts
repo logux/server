@@ -1,4 +1,4 @@
-import type { TestLog, TestTime } from '@logux/core'
+import type { Log, TestLog, TestTime } from '@logux/core'
 
 import type {
   BaseServer,
@@ -48,8 +48,9 @@ export interface TestServerOptions extends Omit<
  * ```
  */
 export class TestServer<
-  Headers extends object = unknown
-> extends BaseServer<Headers> {
+  Headers extends object = unknown,
+  ClientData extends object = unknown
+> extends BaseServer<Headers, Log<ServerMeta>, ClientData> {
   /**
    * fetch() compatible API to test HTTP endpoints.
    *
