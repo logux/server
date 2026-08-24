@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       '@logux/actions':
-        specifier: github:logux/actions#next
-        version: git+https://github.com/logux/actions.git#eaf920ba94c93526a35f74b86b4f8079cefd170b(@logux/core@git+https://github.com/logux/core.git#888d3e33ad4bbec760be38f4c0a298a95c18561f)
+        specifier: ^0.6.0
+        version: 0.6.0(@logux/core@0.11.0)
       '@logux/core':
-        specifier: github:logux/core#next
-        version: git+https://github.com/logux/core.git#888d3e33ad4bbec760be38f4c0a298a95c18561f
+        specifier: ^0.11.0
+        version: 0.11.0
       cookie:
         specifier: ^2.0.1
         version: 2.0.1
@@ -106,16 +106,14 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@logux/actions@git+https://github.com/logux/actions.git#eaf920ba94c93526a35f74b86b4f8079cefd170b':
-    resolution: {commit: eaf920ba94c93526a35f74b86b4f8079cefd170b, repo: https://github.com/logux/actions.git, type: git}
-    version: 0.5.0
+  '@logux/actions@0.6.0':
+    resolution: {integrity: sha512-06BB0Ixpp6PwYttJlj9IWWTwjy65QgtzpVeRLY6dnUcXwmw3Z1FcdqtBzl8IWSeGjPCLBJPfGIxN2hjPmb/p2g==}
     engines: {node: ^22.0.0 || ^24.0.0 || >=26.0.0}
     peerDependencies:
-      '@logux/core': ^0.10.0
+      '@logux/core': ^0.11.0
 
-  '@logux/core@git+https://github.com/logux/core.git#888d3e33ad4bbec760be38f4c0a298a95c18561f':
-    resolution: {commit: 888d3e33ad4bbec760be38f4c0a298a95c18561f, repo: https://github.com/logux/core.git, type: git}
-    version: 0.10.0
+  '@logux/core@0.11.0':
+    resolution: {integrity: sha512-MCI7NP6djTrt1xcybiGMwJFCq68VCGUtHdGu/Fq70u7f5sHLQ+385g/c91lueqy5yL7R7HiVGkywmA2n+H7Ltg==}
     engines: {node: ^22.0.0 || ^24.0.0 || >=26.0.0}
 
   '@logux/oxc-configs@1.1.0':
@@ -990,11 +988,11 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@logux/actions@git+https://github.com/logux/actions.git#eaf920ba94c93526a35f74b86b4f8079cefd170b(@logux/core@git+https://github.com/logux/core.git#888d3e33ad4bbec760be38f4c0a298a95c18561f)':
+  '@logux/actions@0.6.0(@logux/core@0.11.0)':
     dependencies:
-      '@logux/core': git+https://github.com/logux/core.git#888d3e33ad4bbec760be38f4c0a298a95c18561f
+      '@logux/core': 0.11.0
 
-  '@logux/core@git+https://github.com/logux/core.git#888d3e33ad4bbec760be38f4c0a298a95c18561f':
+  '@logux/core@0.11.0':
     dependencies:
       nanoevents: 10.0.0
 
