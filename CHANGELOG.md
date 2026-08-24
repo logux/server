@@ -2,6 +2,24 @@
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.15 “Unparalleled Innocence”
+
+- Added Protocol 6 with binary messages support.
+- Removed Node.js 20 support.
+- Moved to Logux Core 0.11.
+- Added actions batching with `syncBatch` option.
+- Added array support to `Context#sendBack()`.
+- Added `Server#drain()` and `ConnectContext#drain()`.
+- Added `meta.added` support to `Server#sendOnConnect()`.
+- Added `ServerClient#data` to keep custom data during the connection.
+- Added `Server#handleClient()` for custom WebSocket server (by @kinday).
+- Made server’s node ID shorter.
+- Added `ConnectContext` type export.
+- Reduced dependencies.
+- Fixed prototype polluting in subscriptions.
+- Fixed log output for actions with binary data.
+- Fixed types.
+
 ## 0.14 “Sliver of Straw”
 
 - Removed Node.js 18 support.
