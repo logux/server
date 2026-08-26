@@ -41,7 +41,8 @@ async function sendTo(client: ServerClient, msg: Message): Promise<void> {
 async function connect(
   client: ServerClient,
   nodeId: string = '10:uuid',
-  details: object = {}
+  details: object = {},
+  synced: number = 0
 ): Promise<void> {
   await client.connection.connect()
   let protocol = client.node.localProtocol
@@ -49,7 +50,7 @@ async function connect(
     'connect',
     protocol,
     nodeId,
-    0,
+    synced,
     { subprotocol: 1, ...details }
   ])
 }
@@ -120,11 +121,12 @@ function createClient(app: BaseServer): ServerClient {
 
 async function connectClient(
   server: BaseServer,
-  nodeId = '10:uuid'
+  nodeId = '10:uuid',
+  synced = 0
 ): Promise<ServerClient> {
   let client = createClient(server)
   privateMethods(client.node).now = () => 0
-  await connect(client, nodeId)
+  await connect(client, nodeId, {}, synced)
   return client
 }
 
@@ -1569,6 +1571,92 @@ it('does not resend actions back', async () => {
 
   expect(actions(client1)).toEqual([])
   expect(actions(client2)).toEqual([{ type: 'A' }, { type: 'B' }])
+})
+
+it('moves position of clients without the action', async () => {
+  let app = createServer()
+  app.type('A', { access: () => true })
+
+  let receiver = await connectClient(app, '10:1:uuid')
+  let other = await connectClient(app, '20:1:uuid')
+
+  await app.log.add({ type: 'A' }, { users: ['10'] })
+  await setTimeout(10)
+
+  expect(actions(receiver)).toEqual([{ type: 'A' }])
+  expect(actions(other)).toEqual([])
+  let lastAdded = app.log.entries().at(-1)![1].added
+  expect(privateMethods(other.node).lastAddedCache).toEqual(lastAdded)
+})
+
+it('moves position to the last action of the batch', async () => {
+  let app = createServer()
+  app.type('A', { access: () => true })
+
+  let other = await connectClient(app, '20:1:uuid')
+
+  app.log.add({ type: 'A' }, { status: 'processed', users: ['10'] })
+  app.log.add({ type: 'A' }, { status: 'processed', users: ['10'] })
+  await setTimeout(10)
+
+  expect(app.log.entries()).toHaveLength(2)
+  expect(actions(other)).toEqual([])
+  expect(privateMethods(other.node).lastAddedCache).toEqual(2)
+})
+
+it('does not move position on actions without reasons', async () => {
+  let app = createServer()
+  app.on('preadd', (action, meta) => {
+    meta.reasons = []
+  })
+  app.type('A', { access: () => true })
+
+  let other = await connectClient(app, '20:1:uuid')
+
+  // The action is not stored, so nobody can ask for it after reconnect
+  await app.log.add({ type: 'A' }, { status: 'processed', users: ['10'] })
+  await setTimeout(10)
+
+  expect(app.log.entries()).toEqual([])
+  expect(privateMethods(other.node).lastAddedCache).toEqual(0)
+})
+
+it('moves the author position to not resend own actions', async () => {
+  let app = createServer()
+  // In the real server `logux/processed` has no reasons and is not stored
+  app.on('preadd', (action, meta) => {
+    if (action.type.startsWith('logux/')) meta.reasons = []
+  })
+  app.type('A', {
+    access: () => true,
+    resend: () => ({ users: ['10'] })
+  })
+
+  let client = await connectClient(app, '10:1:uuid')
+  await sendTo(client, [
+    'sync',
+    1,
+    { type: 'A' },
+    { id: '1 10:1:uuid', time: 1 }
+  ])
+  await setTimeout(10)
+  expect(actions(client)).toEqual([])
+
+  // The client learns the new log position from `pong`
+  await sendTo(client, ['ping', 1])
+  let pong = sent(client).find(i => i[0] === 'pong')
+  let synced = pong![1]
+  expect(synced).toEqual(app.log.entries().at(-1)![1].added)
+
+  // Reconnect with the reported position: the action must not come back
+  let restored = await connectClient(app, '10:1:uuid', synced)
+  await setTimeout(10)
+  expect(actions(restored)).toEqual([])
+
+  // But an outdated position still gets the action
+  let outdated = await connectClient(app, '10:1:uuid', 0)
+  await setTimeout(10)
+  expect(actions(outdated)).toEqual([{ type: 'A' }])
 })
 
 it('keeps context', async () => {

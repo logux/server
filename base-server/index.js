@@ -25,13 +25,25 @@ function addTarget(targets, client, action, meta) {
   }
 }
 
-function sendTargets(targets) {
+function sendTargets(app, targets, settled) {
   for (let [client, entries] of targets) {
     let sending = client.node.onAdd(entries)
     // Only `ServerClient` tracks sending for `Server#drain()`
     if (client.track) client.track(sending)
   }
+  if (settled > 0) {
+    for (let client of app.connected.values()) {
+      if (!targets.has(client) && client.node.lastAddedCache < settled) {
+        client.node.lastAddedCache = settled
+      }
+    }
+  }
   targets.clear()
+}
+
+function maxAdded(settled, meta) {
+  if (typeof meta.added === 'undefined' || meta.added < settled) return settled
+  return meta.added
 }
 
 function optionError(msg) {
@@ -939,22 +951,24 @@ export class BaseServer {
     let targets = new Map()
     let waiting = this.resolveTargets(action, meta, targets)
     if (waiting) await waiting
-    sendTargets(targets)
+    sendTargets(this, targets, maxAdded(0, meta))
   }
 
   sendBatch(entries) {
     let targets = new Map()
     let waiting = []
+    let settled = 0
     for (let [action, meta] of entries) {
+      settled = maxAdded(settled, meta)
       let promise = this.resolveTargets(action, meta, targets)
       if (promise) waiting.push(promise)
     }
     if (waiting.length === 0) {
-      sendTargets(targets)
+      sendTargets(this, targets, settled)
       return undefined
     }
     return Promise.all(waiting).then(() => {
-      sendTargets(targets)
+      sendTargets(this, targets, settled)
     })
   }
 
