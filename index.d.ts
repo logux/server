@@ -19,6 +19,13 @@ export {
 export { Context, ConnectContext, ChannelContext } from './context/index.js'
 export { filterMeta } from './filter-meta/index.js'
 export {
+  PostgresDriver,
+  PostgresQuery,
+  PostgresRows,
+  PostgresStore,
+  PostgresStoreOptions
+} from './postgres-store/index.js'
+export {
   del,
   get,
   patch,
