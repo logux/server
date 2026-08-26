@@ -88,3 +88,21 @@ eachDriver('keeps binary actions in the blob column', async db => {
     expect((await new PostgresStore(reader).byId('1 a'))[0]).toEqual(action)
   }
 })
+
+eachDriver('gives every action its own added number', async db => {
+  let store = new PostgresStore(db)
+  await store.init()
+
+  // Real connections run in parallel, unlike the single-connection PGlite
+  let metas = await Promise.all(
+    Array.from({ length: 20 }, (_, i) =>
+      store.add({ type: 'A' }, meta(`${i} a`, i, ['test']))
+    )
+  )
+
+  let added = metas
+    .map(i => (i === false ? 0 : i.added))
+    .toSorted((a, b) => a - b)
+  expect(added).toEqual(Array.from({ length: 20 }, (_, i) => i + 1))
+  expect(await store.getLastAdded()).toEqual(20)
+})

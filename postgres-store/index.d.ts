@@ -1,4 +1,4 @@
-import type { ActionPacker } from '@logux/actions'
+import type { ActionPackerMap } from '@logux/actions'
 import type {
   Action,
   AnyAction,
@@ -68,19 +68,19 @@ export type PostgresDriver =
       ): Promise<unknown>
     }
 
-export interface PostgresStoreOptions {
+export interface PostgresStoreOptions<Packers = Record<string, never>> {
   /**
    * How many entries to load by a single query in `get()`.
    */
   pageSize?: number
 
   /**
-   * Packers by the action type to keep the binary parts of the action
-   * in the `blob` column instead of Base64 inside JSON.
+   * Packers to keep the binary parts of the action in the `blob` column
+   * instead of Base64 inside JSON. The key must be the `type` of the action.
    *
    * `zeroPacker` is always added, so this is only for custom actions.
    */
-  packers?: Record<string, ActionPacker<Action, Action>>
+  packers?: Packers
 }
 
 /**
@@ -105,8 +105,15 @@ export interface PostgresStoreOptions {
  * }))
  * ```
  */
-export class PostgresStore implements LogStore {
-  constructor(db: PostgresDriver | PostgresQuery, opts?: PostgresStoreOptions)
+export class PostgresStore<
+  Packers extends ActionPackerMap<Packers> = Record<string, never>
+>
+  implements LogStore
+{
+  constructor(
+    db: PostgresDriver | PostgresQuery,
+    opts?: PostgresStoreOptions<Packers>
+  )
 
   add(action: AnyAction, meta: Meta): Promise<false | Meta>
 

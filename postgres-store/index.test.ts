@@ -1,4 +1,5 @@
 import { PGlite } from '@electric-sql/pglite'
+import type { ActionPacker } from '@logux/actions'
 import {
   type Action,
   eachStoreCheck,
@@ -14,9 +15,11 @@ import {
   PostgresStore
 } from '../index.js'
 
-const BIN_PACKER = {
-  pack: (action: any) => ({ action: { type: action.type }, blob: action.body }),
-  unpack: (packed: any) => ({ body: packed.blob, type: packed.action.type })
+type BinAction = { body: Uint8Array; type: 'BIN' }
+
+const BIN_PACKER: ActionPacker<BinAction, { type: 'BIN' }> = {
+  pack: action => ({ action: { type: action.type }, blob: action.body }),
+  unpack: packed => ({ body: packed.blob, type: packed.action.type })
 }
 
 function createQuery(db: PGlite): PostgresQuery {
@@ -63,10 +66,12 @@ async function createEmpty(): Promise<PGlite> {
   return fresh
 }
 
-function storeWith(
-  opts: ConstructorParameters<typeof PostgresStore>[1]
-): PostgresStore {
-  return new PostgresStore(db, opts)
+function storeWith(pageSize: number): PostgresStore {
+  return new PostgresStore(db, { pageSize })
+}
+
+function storeWithPackers(): PostgresStore<{ BIN: typeof BIN_PACKER }> {
+  return new PostgresStore(db, { packers: { BIN: BIN_PACKER } })
 }
 
 beforeEach(async () => {
@@ -79,7 +84,10 @@ afterAll(async () => {
 })
 
 eachStoreCheck((desc, creator) => {
-  it(desc, creator(() => store))
+  it(
+    desc,
+    creator(() => store)
+  )
 })
 
 it('does not spend the added number on a duplicate ID', async () => {
@@ -94,7 +102,7 @@ it('does not spend the added number on a duplicate ID', async () => {
 })
 
 it('reads entries by pages', async () => {
-  let paged = storeWith({ pageSize: 2 })
+  let paged = storeWith(2)
   for (let i = 1; i <= 5; i++) {
     await paged.add({ type: `${i}` }, meta(`${i} a`, i))
   }
@@ -204,7 +212,7 @@ it('keeps bytes of unpacked actions in JSON', async () => {
 })
 
 it('supports custom packers', async () => {
-  let packing = storeWith({ packers: { BIN: BIN_PACKER } })
+  let packing = storeWithPackers()
 
   let action = { body: new Uint8Array([4, 5, 6]), type: 'BIN' }
   await packing.add(action, meta('1 a', 1, ['test']))
@@ -217,7 +225,7 @@ it('supports custom packers', async () => {
 })
 
 it('throws when the packer for the blob is missing', async () => {
-  let packing = storeWith({ packers: { BIN: BIN_PACKER } })
+  let packing = storeWithPackers()
   await packing.add(
     { body: new Uint8Array([1]), type: 'BIN' },
     meta('1 a', 1, ['test'])

@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@logux/actions':
-        specifier: ^0.7.1
-        version: 0.7.1(@logux/core@0.11.6)
+        specifier: ^0.7.2
+        version: 0.7.2(@logux/core@0.11.6)
       '@logux/core':
         specifier: ^0.11.6
         version: 0.11.6
@@ -121,8 +121,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@logux/actions@0.7.1':
-    resolution: {integrity: sha512-TWylONEZbcWlitw10/S4CLGoaf+0IYQdTXKvCnb73PtHelLBwjFR5TJWWWK0TiK1TG9PT+wTBaZReQHZzBJNqg==}
+  '@logux/actions@0.7.2':
+    resolution: {integrity: sha512-a1/VPoXCXzEty3OKh2HVdK8PLEXsBowmP6dHfaPWmaaxiZ7arOHnD2XY3Jts9yOSf0zXr+8zF1FWiZ0CXygOzw==}
     engines: {node: ^22.0.0 || ^24.0.0 || >=26.0.0}
     peerDependencies:
       '@logux/core': ^0.11.0
@@ -1070,7 +1070,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@logux/actions@0.7.1(@logux/core@0.11.6)':
+  '@logux/actions@0.7.2(@logux/core@0.11.6)':
     dependencies:
       '@logux/core': 0.11.6
 
