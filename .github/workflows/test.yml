@@ -11,6 +11,20 @@ jobs:
   full:
     name: Node.js Latest Full
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: logux_test
+          POSTGRES_PASSWORD: logux
+          POSTGRES_USER: logux
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
     steps:
       - name: Checkout the repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -25,6 +39,8 @@ jobs:
         run: pnpm ci
       - name: Run tests
         run: pnpm test
+        env:
+          DATABASE_URL: postgres://logux:logux@localhost:5432/logux_test
   short:
     runs-on: ubuntu-latest
     strategy:

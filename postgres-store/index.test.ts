@@ -370,3 +370,26 @@ it('works with a driver without transactions', async () => {
   await store2.add({ type: 'A' }, meta('1 a', 1, ['test']))
   expect((await store2.byId('1 a'))[0]).toEqual({ type: 'A' })
 })
+
+it('reads bytea returned as Buffer', async () => {
+  let action = {
+    d: new Uint8Array([1, 2, 3]),
+    iv: new Uint8Array(12).fill(9),
+    type: '0'
+  }
+  await store.add(action, meta('1 a', 1, ['test']))
+
+  // `pg` and `postgres` return `bytea` as `Buffer`, PGlite as `Uint8Array`
+  let buffers = {
+    query: async (sql: string, params: unknown[]) => {
+      let rows = (await db.query(sql, params)).rows as Record<string, any>[]
+      return rows.map(row => {
+        return row.blob ? { ...row, blob: Buffer.from(row.blob) } : row
+      })
+    }
+  }
+
+  let [loaded] = await new PostgresStore(buffers).byId('1 a')
+  expect(loaded).toEqual(action)
+  expect((loaded as any).d.constructor).toBe(Uint8Array)
+})

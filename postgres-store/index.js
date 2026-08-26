@@ -430,6 +430,8 @@ export class PostgresStore {
     let type = row.type
     let packer = this.packers[type]
     if (!packer) throw new Error(`No packer to unpack ${type} action`)
+    // `pg` and `postgres` return `bytea` as `Buffer`
+    if (Buffer.isBuffer(blob)) blob = new Uint8Array(blob)
     return packer.unpack({ action, blob })
   }
 

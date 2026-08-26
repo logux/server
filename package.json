@@ -43,6 +43,7 @@
     "@logux/oxc-configs": "^1.1.0",
     "@types/cross-spawn": "^6.0.6",
     "@types/node": "^26.3.0",
+    "@types/pg": "^8.23.1",
     "@types/ws": "^8.18.1",
     "@vitest/coverage-v8": "^4.1.11",
     "check-dts": "^2.0.1",
@@ -51,6 +52,8 @@
     "nanospy": "^2.0.2",
     "oxlint": "^1.80.0",
     "oxlint-tsgolint": "^7.0.2001",
+    "pg": "^8.23.0",
+    "postgres": "^3.4.9",
     "typescript": "^7.0.2",
     "vite": "^8.2.2",
     "vitest": "^4.1.11"
