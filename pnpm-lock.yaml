@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       '@logux/actions':
-        specifier: ^0.7.0
-        version: 0.7.0(@logux/core@0.11.5)
+        specifier: ^0.7.1
+        version: 0.7.1(@logux/core@0.11.6)
       '@logux/core':
-        specifier: ^0.11.5
-        version: 0.11.5
+        specifier: ^0.11.6
+        version: 0.11.6
       cookie:
         specifier: ^2.0.1
         version: 2.0.1
@@ -121,14 +121,14 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@logux/actions@0.7.0':
-    resolution: {integrity: sha512-ltWkRZqRD9h/vRGDpfldEq7HKVcpt+V/ly7vnoSzeET8XyWxA6Ob9z/BIj0Onivdd1kt7cZJD2nuPpxZJiQlsQ==}
+  '@logux/actions@0.7.1':
+    resolution: {integrity: sha512-TWylONEZbcWlitw10/S4CLGoaf+0IYQdTXKvCnb73PtHelLBwjFR5TJWWWK0TiK1TG9PT+wTBaZReQHZzBJNqg==}
     engines: {node: ^22.0.0 || ^24.0.0 || >=26.0.0}
     peerDependencies:
       '@logux/core': ^0.11.0
 
-  '@logux/core@0.11.5':
-    resolution: {integrity: sha512-olYML2wZ3xRbl6edEl9jUU1nYEus+nARAbSooOx+CnLUKtH+mF/3UI5cbKo7S12PM4LQlzcO3ap6RjLvHO5bbg==}
+  '@logux/core@0.11.6':
+    resolution: {integrity: sha512-N2Dg6ix0lFUe7s6aoRTzbri3gwLAsOcZZM3yCVHtatTJw35lgz5w976p+kn4LSwB7AWOYMc8wGsN5qQFxkQK+w==}
     engines: {node: ^22.0.0 || ^24.0.0 || >=26.0.0}
 
   '@logux/oxc-configs@1.1.0':
@@ -1070,11 +1070,11 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@logux/actions@0.7.0(@logux/core@0.11.5)':
+  '@logux/actions@0.7.1(@logux/core@0.11.6)':
     dependencies:
-      '@logux/core': 0.11.5
+      '@logux/core': 0.11.6
 
-  '@logux/core@0.11.5':
+  '@logux/core@0.11.6':
     dependencies:
       nanoevents: 10.0.0
 
