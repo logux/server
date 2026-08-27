@@ -2,6 +2,11 @@
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.16 “Chasing Wind”
+
+- Added `PostgresStore` to keep the log in PostgreSQL.
+- Fixed re-sending client’s own actions back on reconnect.
+
 ## 0.15 “Unparalleled Innocence”
 
 - Added Protocol 6 with binary messages support.
