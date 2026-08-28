@@ -2,6 +2,10 @@
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.16.1
+
+- Fixed name conflicts across Logux types.
+
 ## 0.16 “Chasing Wind”
 
 - Added `PostgresStore` to keep the log in PostgreSQL.
