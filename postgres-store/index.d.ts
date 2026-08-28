@@ -5,15 +5,10 @@ import type {
   Criteria,
   LogPage,
   LogStore,
-  Meta
+  Meta,
+  GetOptions,
+  LastSynced
 } from '@logux/core'
-
-/**
- * Logux declares these two, but does not export them, so they are taken
- * from the methods not to repeat the definition here.
- */
-type GetOptions = NonNullable<Parameters<LogStore['get']>[0]>
-type LastSynced = Awaited<ReturnType<LogStore['getLastSynced']>>
 
 /**
  * Rows of the query. `pg` and PGlite keep them in the result object,
@@ -107,9 +102,7 @@ export interface PostgresStoreOptions<Packers = Record<string, never>> {
  */
 export class PostgresStore<
   Packers extends ActionPackerMap<Packers> = Record<string, never>
->
-  implements LogStore
-{
+> implements LogStore {
   constructor(
     db: PostgresDriver | PostgresQuery,
     opts?: PostgresStoreOptions<Packers>
