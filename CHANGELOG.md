@@ -2,6 +2,10 @@
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.16.2
+
+- Fixed killing the server process in `pnpm run --parallel` by Ctrl+C.
+
 ## 0.16.1
 
 - Fixed name conflicts across Logux types.
