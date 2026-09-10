@@ -4,15 +4,15 @@ export default defineConfig({
   test: {
     coverage: {
       exclude: [
-        'node_modules',
+        '**/node_modules/**',
         'server/index.js',
-        'test/*',
+        'test/**',
         '**/*.d.ts',
         '**/*.test.ts',
-        '*/errors.ts',
-        '*/types.ts',
+        '**/errors.ts',
+        '**/types.ts',
         '*.config.*',
-        'human-formatter'
+        'human-formatter/**'
       ],
       provider: 'v8',
       thresholds: {
@@ -20,6 +20,6 @@ export default defineConfig({
       }
     },
     environment: 'node',
-    exclude: ['node_modules', 'test/servers']
+    exclude: ['**/node_modules/**', 'test/servers/**']
   }
 })

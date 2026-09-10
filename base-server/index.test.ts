@@ -1351,6 +1351,50 @@ it('checks callbacks in unknown type handler', () => {
   }).toThrow('Callbacks for unknown types are already defined')
 })
 
+it('processes actions on broken channel filter', async () => {
+  let test = createReporter()
+  let client: any = {
+    node: { onAdd: () => false, remoteSubprotocol: 0 }
+  }
+  test.app.nodeIds.set('10:a:uuid', client)
+  test.app.clientIds.set('10:a', client)
+
+  let err = new Error('Broken filter')
+  test.app.channel('posts', {
+    access: () => true,
+    filter: () => async () => {
+      throw err
+    }
+  })
+
+  let processed = 0
+  test.app.type('FOO', {
+    access: () => true,
+    process() {
+      processed += 1
+    }
+  })
+
+  let rejection: unknown
+  let onRejection = (e: unknown): void => {
+    rejection = e
+  }
+  process.on('unhandledRejection', onRejection)
+
+  await test.app.log.add(
+    { channel: 'posts', type: 'logux/subscribe' },
+    { id: '1 10:a:uuid' }
+  )
+  await setTimeout(1)
+
+  await test.app.log.add({ type: 'FOO' }, { channels: ['posts'] })
+  await setTimeout(10)
+  process.off('unhandledRejection', onRejection)
+
+  expect(processed).toEqual(1)
+  expect(rejection).toBe(err)
+})
+
 it('reports about useless actions', async () => {
   let test = createReporter()
   test.app.type('known', {

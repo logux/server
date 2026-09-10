@@ -30,33 +30,33 @@
     "test": "pnpm run /^test:/"
   },
   "dependencies": {
-    "@logux/actions": "^0.7.2",
-    "@logux/core": "^0.11.6",
+    "@logux/actions": "^0.7.3",
+    "@logux/core": "^0.11.7",
     "cookie": "^2.0.1",
-    "fastq": "^1.20.1",
+    "fastq": "^1.20.3",
     "nanoevents": "^10.0.0",
     "nanoid": "^6.0.1",
     "ws": "^8.21.3"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",
-    "@logux/oxc-configs": "^1.1.0",
+    "@logux/oxc-configs": "^1.2.0",
     "@types/cross-spawn": "^6.0.6",
-    "@types/node": "^26.4.0",
+    "@types/node": "^26.5.1",
     "@types/pg": "^8.23.1",
     "@types/ws": "^8.18.1",
-    "@vitest/coverage-v8": "^4.1.11",
+    "@vitest/coverage-v8": "^5.0.0",
     "check-dts": "^2.0.1",
     "cross-spawn": "^7.0.6",
     "eslint-plugin-prefer-let": "^4.2.2",
     "nanospy": "^2.0.2",
-    "oxlint": "^1.80.0",
+    "oxlint": "^1.82.0",
     "oxlint-tsgolint": "^7.0.2001",
     "pg": "^8.23.0",
     "postgres": "^3.4.9",
     "typescript": "^7.0.2",
     "vite": "^8.2.2",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.0"
   },
   "engines": {
     "node": "^22.5.0 || ^24.0.0 || >=26.0.0"

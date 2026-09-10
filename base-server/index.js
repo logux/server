@@ -846,10 +846,6 @@ export class BaseServer {
       meta = { ...meta, ...diff }
     }
 
-    if (this.isUseless(action, meta)) {
-      this.emitter.emit('report', 'useless', { action, meta })
-    }
-
     await this.sendAction(action, meta)
     this.runProcessor(action, meta, processor, start)
   }
