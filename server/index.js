@@ -87,9 +87,20 @@ export class Server extends BaseServer {
       process.exit(0)
     }
     process.on('SIGINT', onExit)
+    // Docker, Kubernetes and PaaS stop the process with SIGTERM.
+    process.on('SIGTERM', onExit)
+
+    // Ctrl+C to `pnpm run --parallel` go only to group.
+    if (this.env === 'development') {
+      process.stdin.on('end', onExit)
+      process.stdin.resume()
+    }
 
     this.unbind.push(() => {
       process.removeListener('SIGINT', onExit)
+      process.removeListener('SIGTERM', onExit)
+      process.stdin.removeListener('end', onExit)
+      process.stdin.pause()
     })
   }
 
