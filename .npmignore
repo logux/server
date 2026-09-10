@@ -4,5 +4,6 @@ tsconfig.json
 **/*.test.ts
 **/types.ts
 **/errors.ts
+vite.config.ts
 
 __snapshots__
