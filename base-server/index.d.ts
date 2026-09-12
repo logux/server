@@ -239,6 +239,13 @@ export interface BaseServerOptions {
   subprotocol?: number
 
   /**
+   * How long an action can stay in the processing queue of the client
+   * before the server answers `logux/undo` and moves to the next action.
+   * `300000` (5 minutes) by default, `0` disables it.
+   */
+  queueTimeout?: number
+
+  /**
    * How many actions could be sent in a single message. `100` by default.
    *
    * Actions from a single `Server#log.add()` call (or from `ctx.sendBack()`
@@ -602,6 +609,7 @@ interface ReportersArguments {
   }
   unsubscribed: SubscriptionReporter
   useless: ActionReporter
+  duplicate: ActionReporter
   wrongChannel: SubscriptionReporter
   zombie: {
     nodeId: string

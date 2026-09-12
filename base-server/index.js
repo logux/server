@@ -120,6 +120,9 @@ export class BaseServer {
   constructor(opts = {}) {
     this.options = opts
     this.env = this.options.env || process.env.NODE_ENV || 'development'
+    if (typeof this.options.queueTimeout === 'undefined') {
+      this.options.queueTimeout = 5 * 60 * 1000
+    }
 
     if (typeof this.options.subprotocol === 'undefined') {
       throw optionError('Missed `subprotocol` option in server constructor')
@@ -326,6 +329,7 @@ export class BaseServer {
     this.typeToQueue = new Map()
     this.queues = new Map()
     this.actionToQueue = new Map()
+    this.queueTimers = new Map()
 
     this.httpListeners = {}
     this.httpAllListeners = []
@@ -334,6 +338,8 @@ export class BaseServer {
     this.listenNotes = {}
 
     let end = (actionId, queue, queueKey, ...args) => {
+      clearTimeout(this.queueTimers.get(actionId))
+      this.queueTimers.delete(actionId)
       this.actionToQueue.delete(actionId)
       if (queue.length() === 0) {
         this.queues.delete(queueKey)
@@ -346,17 +352,21 @@ export class BaseServer {
         for (let task of remainingTasks) {
           this.undo(task.action, task.meta, 'error')
           this.actionToQueue.delete(task.meta.id)
+          // The core waits for it to answer `synced`
+          task.onReceiveResolve(false)
         }
       }
       queue.killAndDrain()
     }
+    this.releaseQueue = (actionId, error) => {
+      let queueKey = this.actionToQueue.get(actionId)
+      if (!queueKey) return
+      let queue = this.queues.get(queueKey)
+      if (error) undoRemainingTasks(queue)
+      end(actionId, queue, queueKey, error ?? null)
+    }
     this.on('error', (e, action, meta) => {
-      let queueKey = this.actionToQueue.get(meta?.id)
-      if (queueKey) {
-        let queue = this.queues.get(queueKey)
-        undoRemainingTasks(queue)
-        end(meta.id, queue, queueKey, e)
-      }
+      if (meta) this.releaseQueue(meta.id, e)
     })
     this.on('processed', (action, meta) => {
       if (action.type === 'logux/undo') {
@@ -652,6 +662,26 @@ export class BaseServer {
       server: !!this.options.server,
       subprotocol: this.options.subprotocol
     })
+  }
+
+  /**
+   * The client re-sent the action, which the log already has: the server
+   * stored it, but the client did not get the answer. Answer again
+   * and release the queue of the client.
+   */
+  async resolveDuplicate(action, meta) {
+    let [stored, storedMeta] = await this.log.byId(meta.id)
+    this.emitter.emit('report', 'duplicate', {
+      actionId: meta.id,
+      status: storedMeta ? storedMeta.status : undefined
+    })
+    if (stored && storedMeta.status === 'processed') {
+      // The `processed` event of the answer releases the queue
+      this.markAsProcessed(storedMeta)
+    } else {
+      // Still processing or already answered by `logux/undo`
+      this.releaseQueue(meta.id)
+    }
   }
 
   markAsProcessed(meta) {

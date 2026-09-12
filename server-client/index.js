@@ -30,8 +30,20 @@ function denyBack(app, clientId, action, meta) {
 }
 
 async function queueWorker(task, next) {
-  let { action, app, clientId, meta, onReceiveResolve, queue } = task
+  let { action, app, client, clientId, meta, onReceiveResolve, queue } = task
   queue.next = next
+
+  if (app.options.queueTimeout) {
+    let timer = setTimeout(() => {
+      let error = new Error(
+        `Action "${meta.id}" was not processed in ${app.options.queueTimeout} ms`
+      )
+      app.undo(action, meta, 'error')
+      app.emitter.emit('error', error, action, meta)
+    }, app.options.queueTimeout)
+    if (timer.unref) timer.unref()
+    app.queueTimers.set(meta.id, timer)
+  }
 
   let type = action.type
   if (type === 'logux/subscribe' || type === 'logux/unsubscribe') {
@@ -56,7 +68,14 @@ async function queueWorker(task, next) {
       denyBack(app, clientId, action, meta)
       return onReceiveResolve(false)
     } else {
-      return onReceiveResolve([action, meta])
+      // The queue is released by the `processed` event of the action,
+      // which never comes for the action the log already has: `log.add()`
+      // returns `false` and no `batch` event fires. The core ignores
+      // `false`, so the action is added here to see the result
+      if (client.node.received) client.node.received[meta.id] = true
+      let added = await app.log.add(action, meta)
+      if (added === false) await app.resolveDuplicate(action, meta)
+      return onReceiveResolve(false)
     }
   } catch (e) {
     app.undo(action, meta, 'error')
@@ -315,6 +334,7 @@ export class ServerClient {
       queue.push({
         action,
         app: this.app,
+        client: this,
         clientId,
         meta,
         onReceiveResolve: result => {

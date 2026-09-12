@@ -233,6 +233,19 @@ exports[`reports disconnect from unauthenticated user 2`] = `
 "
 `;
 
+exports[`reports duplicate 1`] = `
+"{"level":40,"time":"1970-01-01T00:00:00.000Z","pid":21384,"actionId":"5o-8K2 100:uImkcF4z","status":"processed","msg":"Action was already received"}
+"
+`;
+
+exports[`reports duplicate 2`] = `
+"[43m[30m WARN [39m[49m  [1m[33mAction was already received[39m[22m [2mat 1970-01-01 00:00:00[22m
+        Action ID: [1m[31m5o-8[39m[34mK2[39m[22m [1m100[22m:[32muIm[39m[36mkcF[39m[33m4z[39m
+        Status:    [1mprocessed[22m
+
+"
+`;
+
 exports[`reports error 1`] = `
 "{"level":60,"time":"1970-01-01T00:00:00.000Z","pid":21384,"err":{"message":"Some mistake","name":"Error","stack":"Error: Some mistake\\n    at Object.<anonymous> (/dev/app/index.js:28:13)\\n    at Module._compile (module.js:573:32)\\n    at at runTest (/dev/app/node_modules/jest/index.js:50:10)\\n    at process._tickCallback (internal/process/next_tick.js:103:7)"},"msg":"Some mistake"}
 FLUSH"

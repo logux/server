@@ -79,6 +79,8 @@ const REPORTERS = {
 
   destroy: () => ({ msg: 'Shutting down Logux server' }),
 
+  duplicate: () => ({ level: 'warn', msg: 'Action was already received' }),
+
   disconnect: () => ({ msg: 'Client was disconnected' }),
 
   error: record => {

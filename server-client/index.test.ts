@@ -2383,6 +2383,149 @@ it('does not add action with same ID to the queue', async () => {
   expect(calls).toEqual(['FOO', 'BOM'])
 })
 
+it('answers the re-sent action again and keeps the queue working', async () => {
+  let app = createServer()
+  let processed: number[] = []
+  app.type<{ n: number; type: 'x' }>('x', {
+    access: () => true,
+    process(ctx, action) {
+      processed.push(action.n)
+    }
+  })
+
+  let client = await connectClient(app, '10:client:uuid')
+  async function send(n: number, time: number): Promise<void> {
+    await sendTo(client, [
+      'sync',
+      time,
+      { n, type: 'x' },
+      { id: `${time} 10:client:uuid`, time }
+    ])
+  }
+
+  await send(1, 1)
+  await setTimeout(50)
+  await send(1, 1)
+  await setTimeout(50)
+
+  expect(processed).toEqual([1])
+  expect(privateMethods(app).actionToQueue.size).toEqual(0)
+  expect(
+    sent(client)
+      .filter(msg => msg[0] === 'sync')
+      .map(msg => (msg[2] as Action).type)
+  ).toEqual(['logux/processed', 'logux/processed'])
+
+  await send(2, 2)
+  await setTimeout(50)
+
+  expect(processed).toEqual([1, 2])
+  expect(sent(client).filter(msg => msg[0] === 'synced')).toEqual([
+    ['synced', 1],
+    ['synced', 1],
+    ['synced', 2]
+  ])
+})
+
+it('releases the queue by the timeout', async () => {
+  let app = createServer({ queueTimeout: 100 })
+  let errors: string[] = []
+  app.on('error', e => {
+    errors.push(e.message)
+  })
+  let processed: number[] = []
+  app.type<{ hang?: boolean; n: number; type: 'x' }>('x', {
+    access: () => true,
+    async process(ctx, action) {
+      if (action.hang) await new Promise(() => {})
+      processed.push(action.n)
+    }
+  })
+
+  let client = await connectClient(app, '10:client:uuid')
+  await sendTo(client, [
+    'sync',
+    1,
+    { hang: true, n: 1, type: 'x' },
+    { id: '1 10:client:uuid', time: 1 }
+  ])
+  await sendTo(client, [
+    'sync',
+    2,
+    { n: 2, type: 'x' },
+    { id: '2 10:client:uuid', time: 2 }
+  ])
+  await setTimeout(300)
+
+  expect(errors).toEqual([
+    'Action "1 10:client:uuid" was not processed in 100 ms'
+  ])
+  expect(privateMethods(app).actionToQueue.size).toEqual(0)
+  expect(
+    sent(client)
+      .filter(
+        msg => msg[0] === 'sync' && (msg[2] as Action).type === 'logux/undo'
+      )
+      .map(msg => (msg[2] as any).id)
+  ).toEqual(['1 10:client:uuid', '2 10:client:uuid'])
+  expect(sent(client).filter(msg => msg[0] === 'synced')).toEqual([
+    ['synced', 1],
+    ['synced', 2]
+  ])
+
+  await sendTo(client, [
+    'sync',
+    3,
+    { n: 3, type: 'x' },
+    { id: '3 10:client:uuid', time: 3 }
+  ])
+  await setTimeout(50)
+
+  expect(processed).toEqual([3])
+})
+
+it('releases the queue on the re-sent action without the answer', async () => {
+  let test = createReporter()
+  let errors: string[] = []
+  test.app.on('error', e => {
+    errors.push(e.message)
+  })
+  let processed: number[] = []
+  test.app.type<{ n: number; type: 'x' }>('x', {
+    access: () => true,
+    process(ctx, action) {
+      if (action.n === 1) throw new Error('x')
+      processed.push(action.n)
+    }
+  })
+
+  let client = await connectClient(test.app, '10:client:uuid')
+  async function send(n: number, time: number): Promise<void> {
+    await sendTo(client, [
+      'sync',
+      time,
+      { n, type: 'x' },
+      { id: `${time} 10:client:uuid`, time }
+    ])
+  }
+
+  await send(1, 1)
+  await setTimeout(10)
+  expect(errors).toEqual(['x'])
+  await send(1, 1)
+  await setTimeout(10)
+
+  expect(processed).toEqual([])
+  expect(privateMethods(test.app).actionToQueue.size).toEqual(0)
+  expect(test.reports.filter(i => i[0] === 'duplicate')).toEqual([
+    ['duplicate', { actionId: '1 10:client:uuid', status: 'error' }]
+  ])
+
+  await send(2, 2)
+  await setTimeout(10)
+  expect(processed).toEqual([2])
+})
+
 it('does not undo actions in one queue if error occurs in another queue', async () => {
   let app = createServer()
   let calls: string[] = []

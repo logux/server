@@ -229,6 +229,13 @@ it('reports denied', () => {
   })
 })
 
+it('reports duplicate', () => {
+  check('duplicate', {
+    actionId: '5o-8K2 100:uImkcF4z',
+    status: 'processed'
+  })
+})
+
 it('reports unknownType', () => {
   check('unknownType', {
     actionId: '5o-8K2 100:vAApgNT9',
