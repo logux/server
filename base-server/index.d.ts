@@ -933,6 +933,13 @@ export class BaseServer<
    *   }
    * })
    * ```
+   *
+   * The URL can contain `*` to match the rest of the path, including `/`.
+   *
+   * Listeners are checked in the order they were added, so add the specific
+   * URLs before the patterns. Adding a listener for the same method and URL
+   * replaces the previous one: it allows to override the built-in pages
+   * like `/` or `/health`.
    */
   http(
     method: string,
@@ -947,6 +954,24 @@ export class BaseServer<
       req: IncomingMessage,
       res: ServerResponse
     ) => boolean | Promise<boolean>
+  ): void
+
+  /**
+   * Replace the default `404 Not found` answer for HTTP requests, which
+   * were not processed by `Server#http()` listeners.
+   *
+   * ```js
+   * server.httpNotFound((req, res) => {
+   *   res.writeHead(404, { 'Content-Type': 'application/json' })
+   *   res.end('{"error":"Not found"}')
+   * })
+   * ```
+   */
+  httpNotFound(
+    listener: (
+      req: IncomingMessage,
+      res: ServerResponse
+    ) => Promise<void> | void
   ): void
 
   /**

@@ -102,6 +102,17 @@ server.channel(/admin:\d/, {
   }
 })
 
+server.http('GET', '/proxy/*', async (req, res) => {
+  let upstream = await fetch(`https://example.com${req.url}`)
+  res.writeHead(upstream.status, { 'Content-Type': 'application/json' })
+  res.end(await upstream.text())
+})
+
+server.httpNotFound((req, res) => {
+  res.writeHead(404, { 'Content-Type': 'application/json' })
+  res.end(`{"error":"Unknown ${req.method}"}`)
+})
+
 server.on('connected', client => {
   console.log(client.remoteAddress)
 })

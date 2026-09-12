@@ -198,10 +198,117 @@ it('has custom HTTP processor', async () => {
   expect(unknownRest).toEqual(1)
 })
 
+it('supports `*` in HTTP processor URL', async () => {
+  let app = createServer()
+  app.http('GET', '/proxy/keep', (req, res) => {
+    res.end('exact')
+  })
+  app.http('GET', '/proxy/*', (req, res) => {
+    res.end(`proxy ${req.url}`)
+  })
+  app.http('GET', '/files/*/meta', (req, res) => {
+    res.end('meta')
+  })
+  await app.listen()
+
+  expect((await request(app, 'GET', '/proxy/a')).body).toEqual('proxy /proxy/a')
+  expect((await request(app, 'GET', '/proxy/a/b')).body).toEqual(
+    'proxy /proxy/a/b'
+  )
+  expect((await request(app, 'GET', '/proxy/a?b=1')).body).toEqual(
+    'proxy /proxy/a?b=1'
+  )
+  expect((await request(app, 'GET', '/files/a/b/meta')).body).toEqual('meta')
+  expect((await request(app, 'GET', '/proxy/keep')).body).toEqual('exact')
+
+  expect((await requestError(app, 'GET', '/proxy')).statusCode).toEqual(404)
+  expect((await requestError(app, 'POST', '/proxy/a')).statusCode).toEqual(404)
+  expect((await requestError(app, 'GET', '/other/a')).statusCode).toEqual(404)
+})
+
+it('checks listeners in the order they were added', async () => {
+  let app = createServer()
+  app.http('GET', '/a/*', (req, res) => {
+    res.end('first')
+  })
+  app.http('GET', '/*', (req, res) => {
+    res.end('second')
+  })
+  await app.listen()
+
+  expect((await request(app, 'GET', '/a/1')).body).toEqual('first')
+  expect((await request(app, 'GET', '/b/1')).body).toEqual('second')
+  // The built-in pages were added before the patterns
+  expect((await request(app, 'GET', '/health')).body).toContain('OK')
+})
+
+it('replaces the listener with the same method and URL', async () => {
+  let app = createServer()
+  app.http('GET', '/a', (req, res) => {
+    res.end('first')
+  })
+  app.http('GET', '/a', (req, res) => {
+    res.end('second')
+  })
+  app.http('GET', '/health', (req, res) => {
+    res.end('custom health')
+  })
+  await app.listen()
+
+  expect((await request(app, 'GET', '/a')).body).toEqual('second')
+  expect((await request(app, 'GET', '/health')).body).toEqual('custom health')
+})
+
+it('allows to replace 404 answer', async () => {
+  let app = createServer()
+  let unknown = 0
+  app.http('GET', '/a', (req, res) => {
+    res.end('a')
+  })
+  app.http(() => {
+    unknown += 1
+    return false
+  })
+  app.httpNotFound((req, res) => {
+    res.writeHead(404, { 'Content-Type': 'application/json' })
+    res.end(`{"error":"Unknown ${req.method} ${req.url}"}`)
+  })
+  await app.listen()
+
+  expect((await request(app, 'GET', '/a')).body).toEqual('a')
+  expect(unknown).toEqual(0)
+
+  let err = await requestError(app, 'POST', '/b')
+  expect(err.statusCode).toEqual(404)
+  expect(err.message).toEqual('{"error":"Unknown POST /b"}')
+  expect(unknown).toEqual(1)
+})
+
+it('does not call 404 processor on processed request', async () => {
+  let app = createServer()
+  let notFound = 0
+  app.http((req, res) => {
+    res.end('all')
+    return true
+  })
+  app.httpNotFound((req, res) => {
+    notFound += 1
+    res.writeHead(404)
+    res.end()
+  })
+  await app.listen()
+
+  expect((await request(app, 'GET', '/b')).body).toEqual('all')
+  expect(notFound).toEqual(0)
+})
+
 it('warns that HTTP is disables', () => {
   let app = createServer({ disableHttpServer: true })
   expect(() => {
     app.http(() => true)
+  }).toThrow(/when `disableHttpServer` enabled/)
+  expect(() => {
+    app.httpNotFound(() => {})
   }).toThrow(/when `disableHttpServer` enabled/)
 })
 

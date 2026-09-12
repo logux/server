@@ -333,8 +333,9 @@ export class BaseServer {
     this.actionToQueue = new Map()
     this.queueTimers = new Map()
 
-    this.httpListeners = {}
+    this.httpListeners = []
     this.httpAllListeners = []
+    this.httpNotFoundListener = undefined
     addHttpPages(this)
 
     this.listenNotes = {}
@@ -557,8 +558,26 @@ export class BaseServer {
     if (!url) {
       this.httpAllListeners.push(method)
     } else {
-      this.httpListeners[`${method} ${url}`] = listener
+      let route = { listener, match: createPattern(url), method, url }
+      let same = this.httpListeners.findIndex(i => {
+        return i.method === method && i.url === url
+      })
+      if (same === -1) {
+        this.httpListeners.push(route)
+      } else {
+        this.httpListeners[same] = route
+      }
     }
+  }
+
+  httpNotFound(listener) {
+    if (this.options.disableHttpServer) {
+      throw new Error(
+        '`server.httpNotFound()` can not be called when ' +
+          '`disableHttpServer` enabled'
+      )
+    }
+    this.httpNotFoundListener = listener
   }
 
   internalUnknownType(action, meta) {
@@ -801,23 +820,25 @@ export class BaseServer {
       urlString = decodeURIComponent(urlString)
     }
     let reqUrl = new URL(urlString, 'http://localhost')
-    let rule = this.httpListeners[req.method + ' ' + reqUrl.pathname]
 
-    if (!rule) {
-      let processed = false
-      for (let listener of this.httpAllListeners) {
-        let result = await listener(req, res)
-        if (result === true) {
-          processed = true
-          break
-        }
+    // Listeners are checked in the order they were added, like in Express
+    for (let route of this.httpListeners) {
+      if (route.method === req.method && route.match(reqUrl.pathname)) {
+        await route.listener(req, res)
+        return
       }
-      if (!processed) {
-        res.writeHead(404, { 'Content-Type': 'text/plain' })
-        res.end('Not found\n')
-      }
+    }
+
+    for (let listener of this.httpAllListeners) {
+      let result = await listener(req, res)
+      if (result === true) return
+    }
+
+    if (this.httpNotFoundListener) {
+      await this.httpNotFoundListener(req, res)
     } else {
-      await rule(req, res)
+      res.writeHead(404, { 'Content-Type': 'text/plain' })
+      res.end('Not found\n')
     }
   }
 

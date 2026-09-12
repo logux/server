@@ -1,4 +1,4 @@
-const PARAM = /:(\w+)/g
+const PARAM = /:(\w+)|\*/g
 const SPECIAL = /[.*+?^${}()|[\]\\]/g
 
 function escape(text) {
@@ -10,8 +10,14 @@ export function createPattern(pattern) {
   let source = ''
   let last = 0
   for (let param of pattern.matchAll(PARAM)) {
-    source += escape(pattern.slice(last, param.index)) + '([^/]+)'
-    names.push(param[1])
+    source += escape(pattern.slice(last, param.index))
+    if (param[1]) {
+      source += '([^/]+)'
+      names.push(param[1])
+    } else {
+      // `*` matches the rest of the URL, including `/`
+      source += '.*'
+    }
     last = param.index + param[0].length
   }
   let regexp = new RegExp('^' + source + escape(pattern.slice(last)) + '$')

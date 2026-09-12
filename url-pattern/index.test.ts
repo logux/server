@@ -24,6 +24,29 @@ it('matches multiple parameters', () => {
   expect(match('users/10/posts')).toBeNull()
 })
 
+it('matches the rest of the URL by `*`', () => {
+  let match = createPattern('proxy/*')
+  expect(match('proxy/')).toEqual({})
+  expect(match('proxy/posts')).toEqual({})
+  expect(match('proxy/posts/10?a=1')).toEqual({})
+  expect(match('proxy')).toBeNull()
+  expect(match('other/posts')).toBeNull()
+})
+
+it('matches `*` in the middle', () => {
+  let match = createPattern('files/*/meta')
+  expect(match('files/a/meta')).toEqual({})
+  expect(match('files/a/b/meta')).toEqual({})
+  expect(match('files/a/meta/b')).toBeNull()
+})
+
+it('mixes `*` with parameters', () => {
+  let match = createPattern('users/:id/*')
+  expect(match('users/10/posts/20')).toEqual({ id: '10' })
+  expect(match('users/10/')).toEqual({ id: '10' })
+  expect(match('users/10')).toBeNull()
+})
+
 it('does not treat pattern as RegExp', () => {
   let match = createPattern('a.b+c/:id')
   expect(match('a.b+c/10')).toEqual({ id: '10' })
