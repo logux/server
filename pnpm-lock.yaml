@@ -10,10 +10,10 @@ importers:
     dependencies:
       '@logux/actions':
         specifier: ^0.7.3
-        version: 0.7.3(@logux/core@0.11.8)
+        version: 0.7.3(@logux/core@git+https://github.com/logux/core.git#fe38192880bfb710427b6e5d316fa32838915177)
       '@logux/core':
-        specifier: ^0.11.8
-        version: 0.11.8
+        specifier: github:logux/core#next
+        version: git+https://github.com/logux/core.git#fe38192880bfb710427b6e5d316fa32838915177
       cookie:
         specifier: ^2.0.1
         version: 2.0.1
@@ -123,12 +123,14 @@ packages:
 
   '@logux/actions@0.7.3':
     resolution: {integrity: sha512-POtg57ROMDQNG6KzDZzOT19eAR2qxZVM7ot6A6vwKK9Ql6MASHZ0NhqptpY2OzG7EOG+jy8q3QVl5Z6OzrK2mQ==}
+    version: 0.7.3
     engines: {node: ^22.0.0 || ^24.0.0 || >=26.0.0}
     peerDependencies:
       '@logux/core': ^0.11.0
 
-  '@logux/core@0.11.8':
-    resolution: {integrity: sha512-AP+qaNqvu6ukGnaHksEgaVWvqmpWlrV9rwwXVc4rEHk5dcgm87+kxWsKJhez1bOeFOQ+l3mzOODrOhyjHnLEfA==}
+  '@logux/core@git+https://github.com/logux/core.git#fe38192880bfb710427b6e5d316fa32838915177':
+    resolution: {commit: fe38192880bfb710427b6e5d316fa32838915177, repo: https://github.com/logux/core.git, type: git}
+    version: 0.11.8
     engines: {node: ^22.0.0 || ^24.0.0 || >=26.0.0}
 
   '@logux/oxc-configs@1.2.0':
@@ -1023,11 +1025,11 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.6.0
 
-  '@logux/actions@0.7.3(@logux/core@0.11.8)':
+  '@logux/actions@0.7.3(@logux/core@git+https://github.com/logux/core.git#fe38192880bfb710427b6e5d316fa32838915177)':
     dependencies:
-      '@logux/core': 0.11.8
+      '@logux/core': git+https://github.com/logux/core.git#fe38192880bfb710427b6e5d316fa32838915177
 
-  '@logux/core@0.11.8':
+  '@logux/core@git+https://github.com/logux/core.git#fe38192880bfb710427b6e5d316fa32838915177':
     dependencies:
       nanoevents: 10.0.0
 

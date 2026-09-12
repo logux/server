@@ -213,7 +213,9 @@ export class BaseServer {
 
         if (action.type === 'logux/subscribe') {
           if (meta.server === this.nodeId) {
-            void this.subscribeAction(action, meta, start)
+            let loading = this.subscribeAction(action, meta, start)
+            let client = this.clientIds.get(parseId(meta.id).clientId)
+            if (client && client.trackLoading) client.trackLoading(loading)
           }
           continue
         }

@@ -94,6 +94,7 @@ export class ServerClient {
     this.data = {}
     this.processing = false
     this.sending = new Set()
+    this.loading = new Set()
     this.connection = connection
     this.key = key.toString()
     if (connection.ws) {
@@ -111,6 +112,7 @@ export class ServerClient {
       onReceive: this.onReceive.bind(this),
       onSend,
       ping: app.options.ping,
+      ready: () => this.whenReady(),
       subprotocol: app.options.subprotocol,
       syncBatch: app.options.syncBatch,
       timeout: app.options.timeout
@@ -351,5 +353,25 @@ export class ServerClient {
     void done.then(() => {
       this.sending.delete(done)
     })
+  }
+
+  trackLoading(loading) {
+    let done = Promise.resolve(loading).then(ignore, ignore)
+    this.loading.add(done)
+    void done.then(() => {
+      this.loading.delete(done)
+    })
+  }
+
+  async whenReady() {
+    if (!this.node.remoteReady) {
+      await new Promise(resolve => {
+        this.node.on('ready', resolve)
+      })
+    }
+    while (this.loading.size > 0) {
+      await Promise.all(this.loading)
+    }
+    await this.drain()
   }
 }

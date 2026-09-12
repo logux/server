@@ -130,6 +130,13 @@ async function connectClient(
   return client
 }
 
+async function ready(client: ServerClient, added: number = 0): Promise<void> {
+  sendTo(client, ['ready', added])
+  await client.node.waitFor('synchronized')
+  // The server sends its own `ready` only after the `synchronized` state
+  await setTimeout(10)
+}
+
 function sent(client: ServerClient): Message[] {
   return getPair(client).leftSent
 }
@@ -962,8 +969,8 @@ it('sends old actions by node ID', async () => {
   let client = await connectClient(app)
 
   sendTo(client, ['synced', 2])
-  await client.node.waitFor('synchronized')
-  expect(sentNames(client)).toEqual(['connected', 'sync'])
+  await ready(client)
+  expect(sentNames(client)).toEqual(['connected', 'sync', 'ready'])
   expect(sent(client)[1]).toEqual([
     'sync',
     2,
@@ -1000,8 +1007,8 @@ it('sends old actions by client ID', async () => {
   let client = await connectClient(app, '10:client:uuid')
 
   sendTo(client, ['synced', 2])
-  await client.node.waitFor('synchronized')
-  expect(sentNames(client)).toEqual(['connected', 'sync'])
+  await ready(client)
+  expect(sentNames(client)).toEqual(['connected', 'sync', 'ready'])
   expect(sent(client)[1]).toEqual([
     'sync',
     2,
@@ -1041,8 +1048,8 @@ it('does not send old action on client excluding', async () => {
   let client = await connectClient(app, '10:client:uuid')
 
   sendTo(client, ['synced', 2])
-  await client.node.waitFor('synchronized')
-  expect(sentNames(client)).toEqual(['connected'])
+  await ready(client)
+  expect(sentNames(client)).toEqual(['connected', 'ready'])
 })
 
 it('sends old actions by user', async () => {
@@ -1054,8 +1061,8 @@ it('sends old actions by user', async () => {
   let client = await connectClient(app)
 
   sendTo(client, ['synced', 2])
-  await client.node.waitFor('synchronized')
-  expect(sentNames(client)).toEqual(['connected', 'sync'])
+  await ready(client)
+  expect(sentNames(client)).toEqual(['connected', 'sync', 'ready'])
   expect(sent(client)[1]).toEqual([
     'sync',
     2,
@@ -1133,6 +1140,7 @@ it('waits for client confirmation', async () => {
   app.type('A', { access: () => true })
 
   let client = await connectClient(app, '10:client:uuid')
+  await ready(client)
   expect(await app.drain('10:client')).toBe(true)
   expect(await app.drain('10:unknown')).toBe(false)
 
@@ -1167,6 +1175,61 @@ it('stops waiting for confirmation on disconnect', async () => {
   expect(await app.drain('10:client')).toBe(false)
 })
 
+it('sends `ready` only after the client `ready`', async () => {
+  let app = createServer()
+  app.type('A', { access: () => true })
+
+  await app.log.add({ type: 'A' }, { id: '1 server:x', users: ['10'] })
+  let client = await connectClient(app)
+  sendTo(client, ['synced', 1])
+  await setTimeout(10)
+  expect(sentNames(client)).toEqual(['connected', 'sync'])
+
+  await ready(client)
+  expect(sentNames(client)).toEqual(['connected', 'sync', 'ready'])
+  expect(sent(client)[2]).toEqual(['ready', 1])
+})
+
+it('sends `ready` after channels were loaded', async () => {
+  let app = createServer()
+  let load: () => void = () => {}
+  app.channel('foo', {
+    access: () => true,
+    async load(ctx) {
+      await new Promise<void>(resolve => {
+        load = resolve
+      })
+      await ctx.sendBack({ type: 'FOO' })
+    }
+  })
+
+  let client = await connectClient(app, '10:1:uuid')
+  await sendTo(client, [
+    'sync',
+    1,
+    { channel: 'foo', type: 'logux/subscribe' },
+    { id: '1 10:1:uuid', time: 1 }
+  ])
+  sendTo(client, ['ready', 1])
+  await setTimeout(10)
+  expect(sentNames(client)).toEqual(['connected', 'synced'])
+
+  load()
+  await setTimeout(10)
+  expect(sentNames(client)).toEqual(['connected', 'synced', 'sync', 'sync'])
+
+  sendTo(client, ['synced', 2])
+  sendTo(client, ['synced', 3])
+  await setTimeout(10)
+  expect(sentNames(client)).toEqual([
+    'connected',
+    'synced',
+    'sync',
+    'sync',
+    'ready'
+  ])
+})
+
 it('sends new actions by channel', async () => {
   let app = createServer()
   app.type('FOO', { access: () => true })
@@ -1199,10 +1262,9 @@ it('sends new actions by channel', async () => {
   await app.log.add({ type: 'BAR' }, { channels: ['bar'], id: '4 server:x' })
   sendTo(client, ['synced', 2])
   sendTo(client, ['synced', 4])
-  await client.node.waitFor('synchronized')
-  await setTimeout(1)
+  await ready(client)
 
-  expect(sentNames(client)).toEqual(['connected', 'sync', 'sync'])
+  expect(sentNames(client)).toEqual(['connected', 'sync', 'sync', 'ready'])
   expect(sent(client)[1]).toEqual([
     'sync',
     2,
@@ -1282,8 +1344,8 @@ it('sends old action only once', async () => {
   let client = await connectClient(app)
 
   sendTo(client, ['synced', 2])
-  await client.node.waitFor('synchronized')
-  expect(sentNames(client)).toEqual(['connected', 'sync'])
+  await ready(client)
+  expect(sentNames(client)).toEqual(['connected', 'sync', 'ready'])
   expect(sent(client)[1]).toEqual([
     'sync',
     1,
