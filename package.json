@@ -30,7 +30,7 @@
     "test": "pnpm run /^test:/"
   },
   "dependencies": {
-    "@logux/actions": "^0.7.3",
+    "@logux/actions": "github:logux/actions#next",
     "@logux/core": "github:logux/core#next",
     "cookie": "^2.0.1",
     "fastq": "^1.20.3",

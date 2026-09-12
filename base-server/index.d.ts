@@ -1217,6 +1217,9 @@ export class BaseServer<
    * Set `meta.added` to let the client ask only for newer actions after
    * the reconnect: the biggest `added` will be sent as the sync position.
    *
+   * Like the default history, the returned actions are prefixed
+   * by `logux/prepare`.
+   *
    * @param loader Callback which loads list of actions and meta.
    */
   sendOnConnect(loader: ConnectLoader<Headers>): void

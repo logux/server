@@ -1,4 +1,4 @@
-import { LoguxError, parseId } from '@logux/core'
+import { idToTime, LoguxError, parseId } from '@logux/core'
 import { parseCookie } from 'cookie'
 import fastq from 'fastq'
 
@@ -133,6 +133,22 @@ export class ServerClient {
         }
         return { added, entries }
       }
+    }
+
+    let loadOnConnect = this.node.syncSinceQuery.bind(this.node)
+    this.node.syncSinceQuery = async lastSynced => {
+      let data = await loadOnConnect(lastSynced)
+      let actions = data.entries.length
+      if (actions > 0) {
+        let id = app.log.generateId()
+        // Entries are ordered from the newest to the oldest one,
+        // so the last entry will be sent to the client first
+        data.entries.push([
+          { actions, type: 'logux/prepare' },
+          { id, time: idToTime(id) }
+        ])
+      }
+      return data
     }
 
     this.node.catch(err => {

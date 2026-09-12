@@ -145,19 +145,27 @@ function sentNames(client: ServerClient): string[] {
   return sent(client).map(i => i[0])
 }
 
+// `logux/prepare` has its own tests, so other tests ignore it
 function actions(client: ServerClient): Action[] {
   let received: Action[] = []
   sent(client).forEach(i => {
     if (i[0] === 'sync') {
       for (let j = 2; j < i.length; j += 2) {
         let action: Action = i[j] as any
-        if (action.type !== 'logux/processed') {
+        if (
+          action.type !== 'logux/processed' &&
+          action.type !== 'logux/prepare'
+        ) {
           received.push(action)
         }
       }
     }
   })
   return received
+}
+
+function prepare(count: number, id: string, time: number): [object, object] {
+  return [{ actions: count, type: 'logux/prepare' }, { id, time }]
 }
 
 afterEach(() => {
@@ -974,6 +982,7 @@ it('sends old actions by node ID', async () => {
   expect(sent(client)[1]).toEqual([
     'sync',
     2,
+    ...prepare(1, '4', 1),
     { type: 'A' },
     { id: '2 server:x', time: -2 }
   ])
@@ -1012,6 +1021,7 @@ it('sends old actions by client ID', async () => {
   expect(sent(client)[1]).toEqual([
     'sync',
     2,
+    ...prepare(1, '4', 1),
     { type: 'A' },
     { id: '2 server:x', time: -2 }
   ])
@@ -1066,6 +1076,7 @@ it('sends old actions by user', async () => {
   expect(sent(client)[1]).toEqual([
     'sync',
     2,
+    ...prepare(1, '4', 1),
     { type: 'A' },
     { id: '2 server:x', time: -2 }
   ])
@@ -1349,9 +1360,93 @@ it('sends old action only once', async () => {
   expect(sent(client)[1]).toEqual([
     'sync',
     1,
+    ...prepare(1, '3', 1),
     { type: 'FOO' },
     { id: '1 server:x', time: -2 }
   ])
+})
+
+function prepares(client: ServerClient): Action[] {
+  return sent(client)
+    .filter(i => i[0] === 'sync')
+    .flatMap(i => i.filter((j, index) => index > 1 && index % 2 === 0))
+    .filter((i: any) => i.type === 'logux/prepare') as Action[]
+}
+
+it('sends `logux/prepare` before all other actions', async () => {
+  let app = createServer()
+  app.type('A', { access: () => true })
+
+  await app.log.add({ type: 'A' }, { id: '1 server:x', users: ['10'] })
+  await app.log.add({ type: 'A' }, { id: '2 server:x' })
+  await app.log.add({ type: 'A' }, { id: '3 server:x', users: ['10'] })
+  let client = await connectClient(app)
+  await setTimeout(10)
+
+  let first = sent(client)[1]!
+  // Only the actions for this client are counted
+  expect(first.filter((i, index) => index > 1 && index % 2 === 0)).toEqual([
+    { actions: 2, type: 'logux/prepare' },
+    { type: 'A' },
+    { type: 'A' }
+  ])
+})
+
+it('counts actions from all the messages in `logux/prepare`', async () => {
+  let app = createServer({ syncBatch: 2 })
+  app.type('A', { access: () => true })
+
+  for (let i = 1; i <= 5; i++) {
+    await app.log.add({ type: 'A' }, { id: `${i} server:x`, users: ['10'] })
+  }
+  let client = await connectClient(app)
+  await setTimeout(10)
+
+  let syncs = sent(client).filter(i => i[0] === 'sync')
+  expect(syncs.map(i => (i.length - 2) / 2)).toEqual([2, 2, 2])
+  expect(prepares(client)).toEqual([{ actions: 5, type: 'logux/prepare' }])
+})
+
+it('does not send `logux/prepare` without actions in the log', async () => {
+  let app = createServer()
+  app.type('A', { access: () => true })
+
+  let client = await connectClient(app)
+  await setTimeout(10)
+  expect(sentNames(client)).toEqual(['connected'])
+
+  await app.log.add({ type: 'A' }, { id: '1 server:x', users: ['10'] })
+  await setTimeout(10)
+  expect(prepares(client)).toEqual([])
+  expect(actions(client)).toEqual([{ type: 'A' }])
+})
+
+it('does not count channel actions in `logux/prepare`', async () => {
+  let app = createServer()
+  app.type('A', { access: () => true })
+  app.channel('foo', {
+    access: () => true,
+    load() {
+      return [{ type: 'FOO' }, { type: 'FOO' }]
+    }
+  })
+
+  await app.log.add({ type: 'A' }, { id: '1 server:x', users: ['10'] })
+  let client = await connectClient(app, '10:1:uuid')
+  await sendTo(client, [
+    'sync',
+    1,
+    { channel: 'foo', type: 'logux/subscribe' },
+    { id: '1 10:1:uuid', time: 1 }
+  ])
+  await setTimeout(10)
+
+  expect(actions(client)).toEqual([
+    { type: 'A' },
+    { type: 'FOO' },
+    { type: 'FOO' }
+  ])
+  expect(prepares(client)).toEqual([{ actions: 1, type: 'logux/prepare' }])
 })
 
 it('sends debug back on unknown type', async () => {
@@ -2946,8 +3041,10 @@ it('splits initial actions into messages', async () => {
   await setTimeout(10)
 
   let syncs = sent(client).filter(i => i[0] === 'sync')
-  expect(syncs.map(i => (i.length - 2) / 2)).toEqual([60, 60, 60, 60, 10])
+  // `logux/prepare` takes a place in the first message
+  expect(syncs.map(i => (i.length - 2) / 2)).toEqual([60, 60, 60, 60, 11])
   expect(syncs.map(i => i[1])).toEqual([250, 250, 250, 250, 250])
+  expect(syncs[0]![2]).toEqual({ actions: 250, type: 'logux/prepare' })
 })
 
 it('allows to change how server loads initial actions', async () => {
