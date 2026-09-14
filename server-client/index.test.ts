@@ -1840,8 +1840,8 @@ it('keeps context', async () => {
   ])
   await setTimeout(1)
 
-  expect(sentNames(client)[2]).toEqual('sync')
-  expect((sent(client)[2]![2] as Action).type).toEqual('logux/processed')
+  expect(sentNames(client)).toEqual(['connected', 'sync', 'synced'])
+  expect((sent(client)[1]![2] as Action).type).toEqual('logux/processed')
 })
 
 it('uses resend for own actions', async () => {
@@ -1898,9 +1898,9 @@ it('does not duplicate channel load actions', async () => {
   }
 
   expect(sent(client).slice(1)).toEqual([
-    ['synced', 1],
     ['sync', 2, { type: 'FOO' }, meta('2', 1)],
-    ['sync', 3, { id: '1 10:1:uuid', type: 'logux/processed' }, meta('3', 2)]
+    ['sync', 3, { id: '1 10:1:uuid', type: 'logux/processed' }, meta('3', 2)],
+    ['synced', 1]
   ])
 })
 
@@ -1950,15 +1950,15 @@ it('allows to return actions', async () => {
   }
 
   expect(sent(client).slice(1)).toEqual([
-    ['synced', 1],
     ['sync', 2, { type: 'A' }, meta('2', 1)],
     ['sync', 3, { id: '1 10:1:uuid', type: 'logux/processed' }, meta('3', 2)],
-    ['synced', 2],
+    ['synced', 1],
     ['sync', 5, { type: 'B' }, meta('4', 3)],
     ['sync', 6, { id: '2 10:1:uuid', type: 'logux/processed' }, meta('5', 4)],
-    ['synced', 3],
+    ['synced', 2],
     ['sync', 8, { type: 'C' }, { ...meta('6', 5), time: 98 }],
-    ['sync', 9, { id: '3 10:1:uuid', type: 'logux/processed' }, meta('7', 6)]
+    ['sync', 9, { id: '3 10:1:uuid', type: 'logux/processed' }, meta('7', 6)],
+    ['synced', 3]
   ])
 })
 
@@ -3043,7 +3043,9 @@ it('splits initial actions into messages', async () => {
   let syncs = sent(client).filter(i => i[0] === 'sync')
   // `logux/prepare` takes a place in the first message
   expect(syncs.map(i => (i.length - 2) / 2)).toEqual([60, 60, 60, 60, 11])
-  expect(syncs.map(i => i[1])).toEqual([250, 250, 250, 250, 250])
+  // Every message reports its own position, so the client will not lose
+  // the actions of the next messages after the disconnect in the middle
+  expect(syncs.map(i => i[1])).toEqual([59, 119, 179, 239, 250])
   expect(syncs[0]![2]).toEqual({ actions: 250, type: 'logux/prepare' })
 })
 

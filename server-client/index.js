@@ -47,7 +47,14 @@ async function queueWorker(task, next) {
 
   let type = action.type
   if (type === 'logux/subscribe' || type === 'logux/unsubscribe') {
-    return onReceiveResolve([action, meta])
+    // The core adds the actions of the message to the log only after
+    // `onReceive()` of all of them. The queue is released by the `processed`
+    // event of the subscription, which needs the action in the log,
+    // so the server adds the action by itself to avoid the deadlock
+    if (client.node.received) client.node.received[meta.id] = true
+    let added = await app.log.add(action, meta)
+    if (added === false) await app.resolveDuplicate(action, meta)
+    return onReceiveResolve(false)
   }
 
   let processor = app.getProcessor(type)
@@ -128,8 +135,12 @@ export class ServerClient {
         let added = 0
         for (let entry of entries) {
           // `added` should be taken before `filterMeta()` removes it
-          if (entry[1].added > added) added = entry[1].added
+          let entryAdded = entry[1].added
+          if (entryAdded > added) added = entryAdded
           entry[1] = filterMeta(entry[1])
+          // The core needs `added` to set the sync position of every message
+          // and removes it before sending the action to the client
+          if (typeof entryAdded !== 'undefined') entry[1].added = entryAdded
         }
         return { added, entries }
       }
