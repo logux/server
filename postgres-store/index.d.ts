@@ -108,7 +108,7 @@ export class PostgresStore<
     opts?: PostgresStoreOptions<Packers>
   )
 
-  add(action: AnyAction, meta: Meta): Promise<false | Meta>
+  add(entries: [AnyAction, Meta][]): Promise<(false | Meta)[]>
 
   addReason(reasons: string[], criteria: Criteria): Promise<void>
 
@@ -123,6 +123,8 @@ export class PostgresStore<
   getLastAdded(): Promise<number>
 
   getLastSynced(): Promise<LastSynced>
+
+  has(ids: string[]): Promise<string[]>
 
   /**
    * Bring the log tables to the latest version, creating them if they were

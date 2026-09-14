@@ -51,8 +51,10 @@ eachDriver('stores and reads actions', async db => {
   let store = new PostgresStore(db)
   await store.init()
 
-  await store.add({ type: 'A' }, meta('1 a', 1, ['test']))
-  await store.add({ type: 'B' }, meta('2 a', 2, ['test']))
+  await store.add([
+    [{ type: 'A' }, meta('1 a', 1, ['test'])],
+    [{ type: 'B' }, meta('2 a', 2, ['test'])]
+  ])
 
   expect((await store.byId('1 a'))[0]).toEqual({ type: 'A' })
   expect(await store.getLastAdded()).toEqual(2)
@@ -81,7 +83,7 @@ eachDriver('keeps binary actions in the blob column', async db => {
 
   let writer = new PostgresStore(db)
   await writer.init()
-  await writer.add(action, meta('1 a', 1, ['test']))
+  await writer.add([[action, meta('1 a', 1, ['test'])]])
 
   // Every driver must read the blob, which any other driver wrote
   for (let [, reader] of DRIVERS) {
@@ -95,12 +97,16 @@ eachDriver('gives every action its own added number', async db => {
 
   // Real connections run in parallel, unlike the single-connection PGlite
   let metas = await Promise.all(
-    Array.from({ length: 20 }, (_, i) =>
-      store.add({ type: 'A' }, meta(`${i} a`, i, ['test']))
+    Array.from({ length: 10 }, (_, i) =>
+      store.add([
+        [{ type: 'A' }, meta(`${2 * i} a`, 2 * i, ['test'])],
+        [{ type: 'B' }, meta(`${2 * i + 1} a`, 2 * i + 1, ['test'])]
+      ])
     )
   )
 
   let added = metas
+    .flat()
     .map(i => (i === false ? 0 : i.added))
     .toSorted((a, b) => a - b)
   expect(added).toEqual(Array.from({ length: 20 }, (_, i) => i + 1))

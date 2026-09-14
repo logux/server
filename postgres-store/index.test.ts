@@ -91,20 +91,46 @@ eachStoreCheck((desc, creator) => {
 })
 
 it('does not spend the added number on a duplicate ID', async () => {
-  expect(await store.add({ type: 'A' }, meta('1 a', 1))).toMatchObject({
-    added: 1
-  })
-  expect(await store.add({ type: 'B' }, meta('1 a', 2))).toBe(false)
-  expect(await store.add({ type: 'C' }, meta('2 a', 3))).toMatchObject({
-    added: 2
-  })
+  expect(await store.add([[{ type: 'A' }, meta('1 a', 1)]])).toMatchObject([
+    { added: 1 }
+  ])
+  expect(await store.add([[{ type: 'B' }, meta('1 a', 2)]])).toEqual([false])
+  expect(await store.add([[{ type: 'C' }, meta('2 a', 3)]])).toMatchObject([
+    { added: 2 }
+  ])
   expect(await store.getLastAdded()).toEqual(2)
+})
+
+it('adds the whole call by a single query', async () => {
+  let sqls: string[] = []
+  let counting = new PostgresStore({
+    query: (sql: string, params: unknown[]) => {
+      sqls.push(sql)
+      return db.query(sql, params)
+    }
+  })
+
+  expect(await counting.add([])).toEqual([])
+  expect(await counting.has([])).toEqual([])
+  expect(sqls).toEqual([])
+
+  let results = await counting.add([
+    [{ type: 'A' }, meta('1 a', 1)],
+    [{ type: 'B' }, meta('2 a', 2)],
+    // The duplicate must not spend the next `added` number
+    [{ type: 'C' }, meta('1 a', 3)]
+  ])
+
+  expect(sqls).toHaveLength(1)
+  expect(results.map(i => i && i.added)).toEqual([1, 2, false])
+  expect(await counting.getLastAdded()).toEqual(2)
+  expect((await counting.has(['1 a', '3 a'])).toSorted()).toEqual(['1 a'])
 })
 
 it('reads entries by pages', async () => {
   let paged = storeWith(2)
   for (let i = 1; i <= 5; i++) {
-    await paged.add({ type: `${i}` }, meta(`${i} a`, i))
+    await paged.add([[{ type: `${i}` }, meta(`${i} a`, i)]])
   }
 
   let byCreated = await all(await paged.get())
@@ -115,7 +141,7 @@ it('reads entries by pages', async () => {
 })
 
 it('applies migrations only once', async () => {
-  await store.add({ type: 'A' }, meta('1 a', 1, ['test']))
+  await store.add([[{ type: 'A' }, meta('1 a', 1, ['test'])]])
 
   await store.init()
 
@@ -185,7 +211,7 @@ it('keeps binary actions in the blob column', async () => {
     iv: new Uint8Array(12).fill(9),
     type: '0'
   }
-  await store.add(action, meta('1 a', 1, ['test']))
+  await store.add([[action, meta('1 a', 1, ['test'])]])
 
   let rows = await db.query<{ action: object; blob: null | Uint8Array }>(
     `SELECT "action", "blob" FROM "logux_log"`
@@ -198,7 +224,7 @@ it('keeps binary actions in the blob column', async () => {
 
 it('keeps bytes of unpacked actions in JSON', async () => {
   let action = { list: [new Uint8Array([1, 2])], type: 'A' }
-  await store.add(action, meta('1 a', 1, ['test']))
+  await store.add([[action, meta('1 a', 1, ['test'])]])
 
   let rows = await db.query<{ action: any; blob: null | Uint8Array }>(
     `SELECT "action", "blob" FROM "logux_log"`
@@ -215,7 +241,7 @@ it('supports custom packers', async () => {
   let packing = storeWithPackers()
 
   let action = { body: new Uint8Array([4, 5, 6]), type: 'BIN' }
-  await packing.add(action, meta('1 a', 1, ['test']))
+  await packing.add([[action, meta('1 a', 1, ['test'])]])
 
   let rows = await db.query<{ blob: Uint8Array }>(
     `SELECT "blob" FROM "logux_log"`
@@ -226,10 +252,9 @@ it('supports custom packers', async () => {
 
 it('throws when the packer for the blob is missing', async () => {
   let packing = storeWithPackers()
-  await packing.add(
-    { body: new Uint8Array([1]), type: 'BIN' },
-    meta('1 a', 1, ['test'])
-  )
+  await packing.add([
+    [{ body: new Uint8Array([1]), type: 'BIN' }, meta('1 a', 1, ['test'])]
+  ])
 
   // Another server, which does not know about the `BIN` packer
   await expect(store.byId('1 a')).rejects.toThrow(
@@ -276,7 +301,7 @@ it('takes queries and transactions from PGlite', async () => {
   await store2.init()
   expect(sqls[0]).toContain('pg_advisory_xact_lock')
 
-  await store2.add({ type: 'A' }, meta('1 a', 1, ['test']))
+  await store2.add([[{ type: 'A' }, meta('1 a', 1, ['test'])]])
   expect((await store2.byId('1 a'))[0]).toEqual({ type: 'A' })
 })
 
@@ -304,7 +329,7 @@ it('takes queries and transactions from pg', async () => {
   expect(sqls.at(-1)).toEqual('COMMIT')
   expect(released).toEqual(1)
 
-  await store2.add({ type: 'A' }, meta('1 a', 1, ['test']))
+  await store2.add([[{ type: 'A' }, meta('1 a', 1, ['test'])]])
   expect((await store2.byId('1 a'))[0]).toEqual({ type: 'A' })
 })
 
@@ -358,7 +383,7 @@ it('takes queries and transactions from postgres', async () => {
   await store2.init()
   expect(sqls[0]).toContain('pg_advisory_xact_lock')
 
-  await store2.add({ type: 'A' }, meta('1 a', 1, ['test']))
+  await store2.add([[{ type: 'A' }, meta('1 a', 1, ['test'])]])
   expect((await store2.byId('1 a'))[0]).toEqual({ type: 'A' })
 })
 
@@ -375,7 +400,7 @@ it('works with a driver without transactions', async () => {
   await store2.init()
 
   expect(sqls.join()).not.toContain('pg_advisory_xact_lock')
-  await store2.add({ type: 'A' }, meta('1 a', 1, ['test']))
+  await store2.add([[{ type: 'A' }, meta('1 a', 1, ['test'])]])
   expect((await store2.byId('1 a'))[0]).toEqual({ type: 'A' })
 })
 
@@ -385,7 +410,7 @@ it('reads bytea returned as Buffer', async () => {
     iv: new Uint8Array(12).fill(9),
     type: '0'
   }
-  await store.add(action, meta('1 a', 1, ['test']))
+  await store.add([[action, meta('1 a', 1, ['test'])]])
 
   // `pg` and `postgres` return `bytea` as `Buffer`, PGlite as `Uint8Array`
   let buffers = {

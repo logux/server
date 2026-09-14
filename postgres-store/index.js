@@ -76,6 +76,13 @@ function position(meta) {
   return toSorted({ ...meta, time: meta.time ?? 0 })
 }
 
+// A row of the `VALUES` list. Every cell keeps its own parameter with
+// an explicit type, since the drivers send them all as text
+function valuesSql(params, at, cells) {
+  let sql = cells.map(([type, value]) => `${params.add(value)}::${type}`)
+  return `(${at}, ${sql.join(', ')})`
+}
+
 function criteriaSql(criteria, params) {
   let where = []
   if (typeof criteria.id !== 'undefined') {
@@ -167,48 +174,76 @@ export class PostgresStore {
     this.packers = { [zero.type]: zeroPacker, ...opts.packers }
   }
 
-  async add(action, meta) {
-    let packed = this.packers[action.type]?.pack(action)
-    let rest = { ...meta }
-    delete rest.added
-    let rows = await this.query(
-      // The action with the same ID is ignored, so it must not spend
-      // the next `added` number
-      `WITH "found" AS (
-         SELECT 1 FROM "logux_log" WHERE "id" = $1
+  async add(entries) {
+    if (entries.length === 0) return []
+
+    let params = new Params()
+    let rows = entries.map(([action, meta], i) => {
+      let packed = this.packers[action.type]?.pack(action)
+      let rest = { ...meta }
+      delete rest.added
+      // The place in the call sets the `added` order and keeps the first
+      // action among the duplicates of the same call
+      return valuesSql(params, i + 1, [
+        ['text', meta.id],
+        ['text', position(meta)],
+        ['bigint', meta.time ?? 0],
+        ['text', typeof action.type === 'string' ? action.type : ''],
+        ['text[]', meta.reasons ?? []],
+        ['text[]', meta.indexes ?? []],
+        ['jsonb', toJson(rest)],
+        ['jsonb', toJson(packed ? packed.action : action)],
+        ['bytea', packed ? packed.blob : null]
+      ])
+    })
+
+    // The action with the same ID is ignored, so it must not spend
+    // the next `added` number
+    let added = await this.query(
+      `WITH "input" (
+         "at", "id", "sorted", "time", "type",
+         "reasons", "indexes", "meta", "action", "blob"
+       ) AS (
+         VALUES ${rows.join(', ')}
+       ), "fresh" AS (
+         SELECT DISTINCT ON ("id") * FROM "input"
+         WHERE NOT EXISTS (
+           SELECT 1 FROM "logux_log" WHERE "logux_log"."id" = "input"."id"
+         )
+         ORDER BY "id", "at"
+       ), "numbered" AS (
+         SELECT *, row_number() OVER (ORDER BY "at") AS "offset" FROM "fresh"
        ), "next" AS (
-         UPDATE "logux_extra" SET "value" = "value" + 1
-         WHERE "key" = 'added' AND NOT EXISTS (SELECT 1 FROM "found")
-         RETURNING "value" AS "added"
+         UPDATE "logux_extra"
+         SET "value" = "value" + (SELECT count(*) FROM "numbered")
+         WHERE "key" = 'added' AND EXISTS (SELECT 1 FROM "numbered")
+         RETURNING "value" - (SELECT count(*) FROM "numbered") AS "base"
        )
        INSERT INTO "logux_log" (
          "added", "id", "sorted", "time", "type",
          "reasons", "indexes", "meta", "action", "blob"
        )
        SELECT
-         "next"."added", $1, $2, $3, $4,
-         $5::text[], $6::text[], $7::jsonb, $8::jsonb, $9
-       FROM "next"
+         "next"."base" + "numbered"."offset", "id", "sorted", "time", "type",
+         "reasons", "indexes", "meta", "action", "blob"
+       FROM "numbered", "next"
        ON CONFLICT ("id") DO NOTHING
-       RETURNING "added"`,
-      [
-        meta.id,
-        position(meta),
-        meta.time ?? 0,
-        typeof action.type === 'string' ? action.type : '',
-        meta.reasons ?? [],
-        meta.indexes ?? [],
-        toJson(rest),
-        toJson(packed ? packed.action : action),
-        packed ? packed.blob : null
-      ]
+       RETURNING "added", "id"`,
+      params.values
     )
-    if (rows.length === 0) return false
+
     // Drivers can return `bigint` as a string not to lose the precision above
     // `Number.MAX_SAFE_INTEGER`. Logux keeps `added` in `meta` as a number,
     // so these columns can never go that high
-    meta.added = Number(rows[0].added)
-    return meta
+    let numbers = new Map(added.map(i => [i.id, Number(i.added)]))
+    return entries.map(([, meta]) => {
+      let number = numbers.get(meta.id)
+      if (typeof number === 'undefined') return false
+      // Only the first action with the ID was inserted
+      numbers.delete(meta.id)
+      meta.added = number
+      return meta
+    })
   }
 
   async addReason(reasons, criteria) {
@@ -318,6 +353,15 @@ export class PostgresStore {
       }
     }
     return synced
+  }
+
+  async has(ids) {
+    if (ids.length === 0) return []
+    let rows = await this.query(
+      `SELECT "id" FROM "logux_log" WHERE "id" = ANY($1::text[])`,
+      [ids]
+    )
+    return rows.map(i => i.id)
   }
 
   async init() {
