@@ -16,6 +16,14 @@ const DEFAULT_OPTIONS = {
 
 let lastPort = 9111
 
+async function until(check: () => unknown): Promise<void> {
+  for (let i = 0; i < 100; i++) {
+    if (check()) return
+    await setTimeout(10)
+  }
+  throw new Error('Timeout of the waiting')
+}
+
 function createServer(
   options: Partial<BaseServerOptions> = {}
 ): BaseServer<object, TestLog<ServerMeta>> {
@@ -330,7 +338,7 @@ it('waits until all HTTP processing ends', async () => {
 
   request(app, 'GET', '/a')
   request(app, 'GET', '/other')
-  await setTimeout(10)
+  await until(() => resolveA && resolveResult)
 
   let destroyed = false
   app.destroy().then(() => {
@@ -349,6 +357,6 @@ it('waits until all HTTP processing ends', async () => {
   expect(destroyed).toBe(false)
 
   resolveResult!(true)
-  await setTimeout(100)
+  await until(() => destroyed)
   expect(destroyed).toBe(true)
 })
