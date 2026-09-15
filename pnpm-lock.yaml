@@ -10,16 +10,13 @@ importers:
     dependencies:
       '@logux/actions':
         specifier: github:logux/actions#next
-        version: git+https://github.com/logux/actions.git#a25e3218e2d1a8295d935ca70d14b38337ee678a(@logux/core@git+https://github.com/logux/core.git#e9bc105c10a57e0342272c8723e9a5c9f34fa670)
+        version: git+https://github.com/logux/actions.git#a25e3218e2d1a8295d935ca70d14b38337ee678a(@logux/core@git+https://github.com/logux/core.git#f1e5a4cb28d241cb9a62524866552eb9e6064aa4)
       '@logux/core':
         specifier: github:logux/core#next
-        version: git+https://github.com/logux/core.git#e9bc105c10a57e0342272c8723e9a5c9f34fa670
+        version: git+https://github.com/logux/core.git#f1e5a4cb28d241cb9a62524866552eb9e6064aa4
       cookie:
         specifier: ^2.0.1
         version: 2.0.1
-      fastq:
-        specifier: ^1.20.3
-        version: 1.20.3
       nanoevents:
         specifier: ^10.0.0
         version: 10.0.0
@@ -128,8 +125,8 @@ packages:
     peerDependencies:
       '@logux/core': ^0.11.0
 
-  '@logux/core@git+https://github.com/logux/core.git#e9bc105c10a57e0342272c8723e9a5c9f34fa670':
-    resolution: {commit: e9bc105c10a57e0342272c8723e9a5c9f34fa670, repo: https://github.com/logux/core.git, type: git}
+  '@logux/core@git+https://github.com/logux/core.git#f1e5a4cb28d241cb9a62524866552eb9e6064aa4':
+    resolution: {commit: f1e5a4cb28d241cb9a62524866552eb9e6064aa4, repo: https://github.com/logux/core.git, type: git}
     version: 0.11.8
     engines: {node: ^22.0.0 || ^24.0.0 || >=26.0.0}
 
@@ -611,9 +608,6 @@ packages:
     resolution: {integrity: sha512-KfYbmpRm0VbLjEvVa9yGwCi9GI34xvi7A/HXYWQO65CSD2u3MczUJSuwXKFIxlGsgBQizV9q5J9NHj4VG0n+pA==}
     engines: {node: '>=12.0.0'}
 
-  fastq@1.20.3:
-    resolution: {integrity: sha512-XKv5nnLs6nLF71NgiKJLIZFLkPyIEuOselLG7ujZnGrRfQK8HpvY+WqKhAJUAdLomwVHErVS4LfxFlPq0/FTAw==}
-
   fdir@6.5.0:
     resolution: {integrity: sha512-tIbYtZbucOs0BRGqPJkshJUYdL+SDH7dVM8gjy+ERp3WAUjLEFJE+02kanyHtwjWOnwrKYBiwAmM0p4kLJAnXg==}
     engines: {node: '>=12.0.0'}
@@ -829,10 +823,6 @@ packages:
     resolution: {integrity: sha512-L9jEkOi3ASd9PYit2cwRfyppc9NoABujTP8/5gFcbERmo5jUoAKovIC3fsF17pkTnGsrByysqX+Kxd2OTNI1ww==}
     engines: {node: '>=0.10.5'}
 
-  reusify@1.1.0:
-    resolution: {integrity: sha512-g6QUff04oZpHs0eG5p83rFLhHeV00ug/Yf9nZM6fLeUrPguBTkTQOdpAWWspMh55TZfVQDPaN3NQJfbVRAxdIw==}
-    engines: {iojs: '>=1.0.0', node: '>=0.10.0'}
-
   rolldown@1.2.8:
     resolution: {integrity: sha512-Z67nTmhZe7anqnM/EjI392w5i/ANUinjip7QYsOyN37oayduxt3ksdX0hf5OOamkAd53BiIHfbfSzfUmzKFQqQ==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -1025,11 +1015,11 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.6.0
 
-  '@logux/actions@git+https://github.com/logux/actions.git#a25e3218e2d1a8295d935ca70d14b38337ee678a(@logux/core@git+https://github.com/logux/core.git#e9bc105c10a57e0342272c8723e9a5c9f34fa670)':
+  '@logux/actions@git+https://github.com/logux/actions.git#a25e3218e2d1a8295d935ca70d14b38337ee678a(@logux/core@git+https://github.com/logux/core.git#f1e5a4cb28d241cb9a62524866552eb9e6064aa4)':
     dependencies:
-      '@logux/core': git+https://github.com/logux/core.git#e9bc105c10a57e0342272c8723e9a5c9f34fa670
+      '@logux/core': git+https://github.com/logux/core.git#f1e5a4cb28d241cb9a62524866552eb9e6064aa4
 
-  '@logux/core@git+https://github.com/logux/core.git#e9bc105c10a57e0342272c8723e9a5c9f34fa670':
+  '@logux/core@git+https://github.com/logux/core.git#f1e5a4cb28d241cb9a62524866552eb9e6064aa4':
     dependencies:
       nanoevents: 10.0.0
 
@@ -1317,10 +1307,6 @@ snapshots:
 
   expect-type@1.4.0: {}
 
-  fastq@1.20.3:
-    dependencies:
-      reusify: 1.1.0
-
   fdir@6.5.0(picomatch@4.0.7):
     optionalDependencies:
       picomatch: 4.0.7
@@ -1497,8 +1483,6 @@ snapshots:
   postgres@3.4.9: {}
 
   requireindex@1.2.0: {}
-
-  reusify@1.1.0: {}
 
   rolldown@1.2.8:
     dependencies:

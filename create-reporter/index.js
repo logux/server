@@ -79,6 +79,12 @@ const REPORTERS = {
 
   destroy: () => ({ msg: 'Shutting down Logux server' }),
 
+  destroyDetached: () => ({
+    level: 'warn',
+    msg: 'Shutting down, but some actions that exceeded ' +
+      'queueTimeout will be killed'
+  }),
+
   duplicate: () => ({ level: 'warn', msg: 'Action was already received' }),
 
   disconnect: () => ({ msg: 'Client was disconnected' }),

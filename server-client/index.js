@@ -1,11 +1,10 @@
-import { idToTime, LoguxError, parseId } from '@logux/core'
+import { LoguxError, parseId } from '@logux/core'
 import { parseCookie } from 'cookie'
-import fastq from 'fastq'
 
 import { ALLOWED_META } from '../allowed-meta/index.js'
-import { Context } from '../context/index.js'
 import { filterMeta } from '../filter-meta/index.js'
 import { FilteredNode } from '../filtered-node/index.js'
+import { removeMembership } from '../processing/index.js'
 
 async function onSend(action, meta) {
   return [action, filterMeta(meta)]
@@ -21,77 +20,6 @@ function reportDetails(client) {
   }
 }
 
-function denyBack(app, clientId, action, meta) {
-  app.emitter.emit('report', 'denied', { actionId: meta.id })
-  let [undoAction, undoMeta] = app.buildUndo(action, meta, 'denied')
-  undoMeta.clients = (undoMeta.clients || []).concat([clientId])
-  app.log.add(undoAction, undoMeta)
-  app.debugActionError(meta, `Action "${meta.id}" was denied`)
-}
-
-async function queueWorker(task, next) {
-  let { action, app, client, clientId, meta, onReceiveResolve, queue } = task
-  queue.next = next
-
-  if (app.options.queueTimeout) {
-    let timer = setTimeout(() => {
-      let error = new Error(
-        `Action "${meta.id}" was not processed in ${app.options.queueTimeout} ms`
-      )
-      app.undo(action, meta, 'error')
-      app.emitter.emit('error', error, action, meta)
-    }, app.options.queueTimeout)
-    if (timer.unref) timer.unref()
-    app.queueTimers.set(meta.id, timer)
-  }
-
-  let type = action.type
-  if (type === 'logux/subscribe' || type === 'logux/unsubscribe') {
-    // The core adds the actions of the message to the log only after
-    // `onReceive()` of all of them. The queue is released by the `processed`
-    // event of the subscription, which needs the action in the log,
-    // so the server adds the action by itself to avoid the deadlock
-    if (client.node.received) client.node.received[meta.id] = true
-    let added = await app.log.add(action, meta)
-    if (added === false) await app.resolveDuplicate(action, meta)
-    return onReceiveResolve(false)
-  }
-
-  let processor = app.getProcessor(type)
-  if (!processor) {
-    app.internalUnknownType(action, meta)
-    return onReceiveResolve(false)
-  }
-
-  let ctx = app.createContext(action, meta)
-  try {
-    let result = await processor.access(ctx, action, meta)
-    if (app.unknownTypes[meta.id]) {
-      delete app.unknownTypes[meta.id]
-      app.finally(processor, ctx, action, meta)
-      return false
-    } else if (!result) {
-      app.finally(processor, ctx, action, meta)
-      denyBack(app, clientId, action, meta)
-      return onReceiveResolve(false)
-    } else {
-      // The queue is released by the `processed` event of the action,
-      // which never comes for the action the log already has: `log.add()`
-      // returns `false` and no `batch` event fires. The core ignores
-      // `false`, so the action is added here to see the result
-      if (client.node.received) client.node.received[meta.id] = true
-      let added = await app.log.add(action, meta)
-      if (added === false) await app.resolveDuplicate(action, meta)
-      return onReceiveResolve(false)
-    }
-  } catch (e) {
-    app.undo(action, meta, 'error')
-    app.emitter.emit('error', e, action, meta)
-    app.finally(processor, ctx, action, meta)
-    return onReceiveResolve(false)
-  }
-}
-
 export class ServerClient {
   constructor(app, connection, key) {
     this.app = app
@@ -99,9 +27,7 @@ export class ServerClient {
     this.clientId = undefined
     this.nodeId = undefined
     this.data = {}
-    this.processing = false
     this.sending = new Set()
-    this.loading = new Set()
     this.connection = connection
     this.key = key.toString()
     if (connection.ws) {
@@ -119,47 +45,13 @@ export class ServerClient {
       onReceive: this.onReceive.bind(this),
       onSend,
       ping: app.options.ping,
-      ready: () => this.whenReady(),
+      ready: () => this.waitForReady(),
       subprotocol: app.options.subprotocol,
       syncBatch: app.options.syncBatch,
       timeout: app.options.timeout
     })
     if (this.app.env === 'development') {
       this.node.setLocalHeaders({ env: 'development' })
-    }
-
-    if (app.connectLoader) {
-      this.node.syncSinceQuery = async lastSynced => {
-        let context = new Context(app, this)
-        let entries = await app.connectLoader(context, lastSynced)
-        let added = 0
-        for (let entry of entries) {
-          // `added` should be taken before `filterMeta()` removes it
-          let entryAdded = entry[1].added
-          if (entryAdded > added) added = entryAdded
-          entry[1] = filterMeta(entry[1])
-          // The core needs `added` to set the sync position of every message
-          // and removes it before sending the action to the client
-          if (typeof entryAdded !== 'undefined') entry[1].added = entryAdded
-        }
-        return { added, entries }
-      }
-    }
-
-    let loadOnConnect = this.node.syncSinceQuery.bind(this.node)
-    this.node.syncSinceQuery = async lastSynced => {
-      let data = await loadOnConnect(lastSynced)
-      let actions = data.entries.length
-      if (actions > 0) {
-        let id = app.log.generateId()
-        // Entries are ordered from the newest to the oldest one,
-        // so the last entry will be sent to the client first
-        data.entries.push([
-          { actions, type: 'logux/prepare' },
-          { id, time: idToTime(id) }
-        ])
-      }
-      return data
     }
 
     this.node.catch(err => {
@@ -263,6 +155,7 @@ export class ServerClient {
   destroy() {
     this.destroyed = true
     this.node.destroy()
+    this.app.runner.cleanConnection(this)
     if (this.userId) {
       let users = this.app.userIds.get(this.userId)
       if (users) {
@@ -281,7 +174,7 @@ export class ServerClient {
           let action = { channel, type: 'logux/unsubscribe' }
           let actionId = this.app.log.generateId()
           let meta = { id: actionId, reasons: [], time: parseInt(actionId) }
-          this.app.performUnsubscribe(this.nodeId, action, meta)
+          removeMembership(this.app, this.nodeId, action, meta)
         }
       }
       this.app.clientIds.delete(this.clientId)
@@ -311,67 +204,26 @@ export class ServerClient {
   }
 
   onReceive(action, meta) {
-    if (this.app.actionToQueue.has(meta.id)) {
-      return Promise.resolve(false)
-    }
-
     let actionClientId = parseId(meta.id).clientId
     let wrongUser = !this.clientId || this.clientId !== actionClientId
     let wrongMeta = Object.keys(meta).some(i => !ALLOWED_META.includes(i))
     if (wrongUser || wrongMeta) {
-      denyBack(this.app, this.clientId, action, meta)
+      this.app.reportFailure('denied', action, meta)
+      void this.app.publishUndo(action, meta, 'denied', {}, this.clientId)
       return Promise.resolve(false)
     }
 
-    return new Promise(resolve => {
-      let clientId = parseId(meta.id).clientId
-      let queueName = ''
+    if (!meta.subprotocol) {
+      meta.subprotocol = this.node.remoteSubprotocol
+    }
 
-      let isChannel =
-        (action.type === 'logux/subscribe' ||
-          action.type === 'logux/unsubscribe') &&
-        action.channel
-
-      if (isChannel) {
-        for (let channel of this.app.channels) {
-          let match = channel.regexp
-            ? action.channel.match(channel.regexp)
-            : channel.pattern(action.channel)
-          if (match) {
-            queueName = channel.queue
-            break
-          }
-        }
-      } else {
-        queueName = this.app.typeToQueue.get(action.type)
+    return this.app.runner.submit({ action, client: this, meta }).then(
+      () => false,
+      err => {
+        if (err.transportFailure) throw err
+        return false
       }
-
-      queueName = queueName || 'main'
-      let queueKey = `${clientId}/${queueName}`
-      let queue = this.app.queues.get(queueKey)
-
-      if (!queue) {
-        queue = fastq(queueWorker, 1)
-        this.app.queues.set(queueKey, queue)
-      }
-
-      if (!meta.subprotocol) {
-        meta.subprotocol = this.node.remoteSubprotocol
-      }
-
-      this.app.actionToQueue.set(meta.id, queueKey)
-      queue.push({
-        action,
-        app: this.app,
-        client: this,
-        clientId,
-        meta,
-        onReceiveResolve: result => {
-          resolve(result)
-        },
-        queue
-      })
-    })
+    )
   }
 
   track(sending) {
@@ -382,23 +234,13 @@ export class ServerClient {
     })
   }
 
-  trackLoading(loading) {
-    let done = Promise.resolve(loading).then(ignore, ignore)
-    this.loading.add(done)
-    void done.then(() => {
-      this.loading.delete(done)
-    })
-  }
-
-  async whenReady() {
+  async waitForReady() {
     if (!this.node.remoteReady) {
       await new Promise(resolve => {
         this.node.on('ready', resolve)
       })
     }
-    while (this.loading.size > 0) {
-      await Promise.all(this.loading)
-    }
+    await this.app.runner.waitForClient(this)
     await this.drain()
   }
 }

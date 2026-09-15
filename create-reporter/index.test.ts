@@ -294,6 +294,10 @@ it('reports destroy', () => {
   check('destroy')
 })
 
+it('reports destroy with detached callbacks', () => {
+  check('destroyDetached', { actions: 1 })
+})
+
 it('reports EACCES error', () => {
   check('error', { err: { code: 'EACCES', port: 80 }, fatal: true })
 })

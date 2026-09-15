@@ -82,16 +82,11 @@ server.channel<UserParams, UserData, UserSubscribeAction>('user/:id', {
     }
   },
   async load(ctx) {
-    await ctx.sendBack(
-      {
-        name: ctx.data.user.name,
-        type: 'user/rename',
-        userId: ctx.data.user.id
-      },
-      {
-        status: 'processed'
-      }
-    )
+    await ctx.sendBack({
+      name: ctx.data.user.name,
+      type: 'user/rename',
+      userId: ctx.data.user.id
+    })
   }
 })
 

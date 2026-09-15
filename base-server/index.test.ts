@@ -18,7 +18,9 @@ import WebSocket from 'ws'
 import {
   BaseServer,
   type BaseServerOptions,
-  type ServerMeta
+  ResponseError,
+  type ServerMeta,
+  wasNot403
 } from '../index.js'
 
 const ROOT = join(import.meta.dirname, '..')
@@ -344,7 +346,6 @@ it('reporters on log events', async () => {
           id: '0 server:uuid',
           reasons: ['some'],
           server: 'server:uuid',
-          status: 'waiting',
           subprotocol: 0,
           time: 1
         }
@@ -360,7 +361,6 @@ it('reporters on log events', async () => {
           id: '1 server:uuid',
           reasons: [],
           server: 'server:uuid',
-          status: 'waiting',
           subprotocol: 0,
           time: 2
         }
@@ -487,22 +487,6 @@ it('marks actions with own node ID', async () => {
   expect(servers).toEqual([app.nodeId, 'server2'])
 })
 
-it('marks actions with waiting status', async () => {
-  let app = createServer()
-  app.type('A', { access: () => true })
-  app.channel('a', { access: () => true })
-
-  let statuses: (string | undefined)[] = []
-  app.on('add', (action, meta) => {
-    statuses.push(meta.status)
-  })
-
-  await app.log.add({ type: 'A' })
-  await app.log.add({ type: 'A' }, { status: 'processed' })
-  await app.log.add({ channel: 'a', type: 'logux/subscribe' })
-  expect(statuses).toEqual(['waiting', 'processed', undefined])
-})
-
 it('defines actions types', () => {
   let app = createServer()
   app.type('FOO', { access: () => true })
@@ -527,9 +511,11 @@ it('requires access callback for type', () => {
 
 it('reports about unknown action type', async () => {
   let test = createReporter()
-  await test.app.log.add({ type: 'UNKNOWN' }, { id: '1 10:uuid' })
-  expect(test.names).toEqual(['addClean', 'unknownType', 'addClean'])
-  expect(test.reports[1]).toEqual([
+  await catchError(() =>
+    test.app.process({ type: 'UNKNOWN' }, { id: '1 10:uuid' })
+  )
+  expect(test.names).toEqual(['unknownType', 'addClean'])
+  expect(test.reports[0]).toEqual([
     'unknownType',
     {
       actionId: '1 10:uuid',
@@ -538,12 +524,9 @@ it('reports about unknown action type', async () => {
   ])
 })
 
-it('ignores unknown type for processed actions', async () => {
+it('does not process published actions', async () => {
   let test = createReporter()
-  await test.app.log.add(
-    { type: 'A' },
-    { channels: ['a'], status: 'processed' }
-  )
+  await test.app.log.add({ type: 'A' }, { channels: ['a'] })
   expect(test.names).toEqual(['addClean'])
 })
 
@@ -592,7 +575,7 @@ it('processes actions', async () => {
   test.app.type('FOO', {
     access: () => true,
     async process(ctx, action, meta) {
-      expect(meta.added).toEqual(1)
+      expect(meta.added).toBeUndefined()
       expect(ctx.isServer).toBe(true)
       await setTimeout(25)
       processed.push(action)
@@ -604,13 +587,13 @@ it('processes actions', async () => {
     fired.push(action)
   })
 
-  await test.app.log.add({ type: 'FOO' }, { reasons: ['test'] })
+  let promise = test.app.process({ type: 'FOO' }, { reasons: ['test'] })
   expect(fired).toEqual([])
-  expect(test.app.log.entries()[0]![1].status).toEqual('waiting')
-  await setTimeout(30)
-  expect(test.app.log.entries()[0]![1].status).toEqual('processed')
+  expect(test.app.log.entries()).toEqual([])
+  await promise
   expect(processed).toEqual([{ type: 'FOO' }])
   expect(fired).toEqual([{ type: 'FOO' }])
+  expect(test.app.log.entries()[0]![1].added).toEqual(1)
 })
 
 it('processes regex matching action', async () => {
@@ -621,7 +604,7 @@ it('processes regex matching action', async () => {
   test.app.type(/.*TODO$/, {
     access: () => true,
     async process(ctx, action, meta) {
-      expect(meta.added).toEqual(1)
+      expect(meta.added).toBeUndefined()
       expect(ctx.isServer).toBe(true)
       await setTimeout(25)
       processed.push(action)
@@ -633,13 +616,13 @@ it('processes regex matching action', async () => {
     fired.push(action)
   })
 
-  await test.app.log.add({ type: 'ADD_TODO' }, { reasons: ['test'] })
+  let promise = test.app.process({ type: 'ADD_TODO' }, { reasons: ['test'] })
   expect(fired).toEqual([])
-  expect(test.app.log.entries()[0]![1].status).toEqual('waiting')
-  await setTimeout(30)
-  expect(test.app.log.entries()[0]![1].status).toEqual('processed')
+  expect(test.app.log.entries()).toEqual([])
+  await promise
   expect(processed).toEqual([{ type: 'ADD_TODO' }])
   expect(fired).toEqual([{ type: 'ADD_TODO' }])
+  expect(test.app.log.entries()[0]![1].added).toEqual(1)
 })
 
 it('has full events API', () => {
@@ -675,19 +658,21 @@ it('waits for last processing before destroy', async () => {
   })
 
   let destroyed = false
-  await app.log.add({ type: 'FOO' })
+  let promise = app.process({ type: 'FOO' })
   app.destroy().then(() => {
     destroyed = true
   })
   await setTimeout(1)
 
   expect(destroyed).toBe(false)
-  expect(privateMethods(app).processing).toEqual(1)
+  expect(privateMethods(app).runner.active.size).toEqual(1)
+  // Published actions do not start the processing
   await app.log.add({ type: 'FOO' })
 
   expect(started).toEqual(1)
   if (typeof process === 'undefined') throw new Error('process is not set')
   process()
+  await promise
   await setTimeout(1)
 
   expect(destroyed).toBe(true)
@@ -704,18 +689,21 @@ it('reports about error during action processing', async () => {
     }
   })
 
-  await test.app.log.add({ type: 'FOO' }, { reasons: ['test'] })
-  await setTimeout(1)
+  let thrown = await catchError(() =>
+    test.app.process({ type: 'FOO' }, { reasons: ['test'] })
+  )
+  expect(thrown).toBe(err)
 
-  expect(test.names).toEqual(['add', 'error', 'add'])
-  expect(test.reports[1]).toEqual([
+  // The failed action is not published, only the answer is
+  expect(test.names).toEqual(['error', 'add'])
+  expect(test.reports[0]).toEqual([
     'error',
     {
       actionId: '0 server:uuid',
       err
     }
   ])
-  expect(test.reports[2]![1].action).toEqual({
+  expect(test.reports[1]![1].action).toEqual({
     action: { type: 'FOO' },
     id: '0 server:uuid',
     reason: 'error',
@@ -765,7 +753,6 @@ it('undoes actions on client', async () => {
         nodes: ['2:client:uuid'],
         reasons: ['user/1/lastValue'],
         server: 'server:uuid',
-        status: 'processed',
         subprotocol: 0,
         time: 1,
         users: ['3']
@@ -818,13 +805,15 @@ it('reports about wrong channel name', async () => {
   }
   test.app.nodeIds.set('10:uuid', client)
   test.app.clientIds.set('10:uuid', client)
-  await test.app.log.add({ type: 'logux/subscribe' }, { id: '1 10:uuid' })
-  expect(test.names).toEqual(['addClean', 'wrongChannel', 'addClean'])
-  expect(test.reports[1]![1]).toEqual({
+  await catchError(() =>
+    test.app.process({ type: 'logux/subscribe' }, { id: '1 10:uuid' })
+  )
+  expect(test.names).toEqual(['wrongChannel', 'addClean'])
+  expect(test.reports[0]![1]).toEqual({
     actionId: '1 10:uuid',
     channel: undefined
   })
-  expect(test.reports[2]![1].action).toEqual({
+  expect(test.reports[1]![1].action).toEqual({
     action: { type: 'logux/subscribe' },
     id: '1 10:uuid',
     reason: 'wrongChannel',
@@ -833,18 +822,20 @@ it('reports about wrong channel name', async () => {
   expect(calls(client.connection.send)).toEqual([
     [['debug', 'error', 'Wrong channel name undefined']]
   ])
-  await test.app.log.add({ type: 'logux/unsubscribe' })
+  await catchError(() => test.app.process({ type: 'logux/unsubscribe' }))
 
-  expect(test.reports[4]).toEqual([
+  expect(test.reports[2]).toEqual([
     'wrongChannel',
     {
       actionId: '2 server:uuid',
       channel: undefined
     }
   ])
-  await test.app.log.add({ channel: 'unknown', type: 'logux/subscribe' })
+  await catchError(() =>
+    test.app.process({ channel: 'unknown', type: 'logux/subscribe' })
+  )
 
-  expect(test.reports[7]).toEqual([
+  expect(test.reports[4]).toEqual([
     'wrongChannel',
     {
       actionId: '4 server:uuid',
@@ -883,16 +874,22 @@ it('allows to have custom channel name check', async () => {
   }
   test.app.nodeIds.set('10:uuid', client)
   test.app.clientIds.set('10:uuid', client)
-  await test.app.log.add({ channel: 'foo', type: 'logux/subscribe' })
+  await catchError(() =>
+    test.app.process({ channel: 'foo', type: 'logux/subscribe' })
+  )
   expect(channels).toEqual(['foo'])
-  expect(test.names).toEqual(['addClean', 'wrongChannel', 'addClean'])
+  expect(test.names).toEqual(['wrongChannel', 'addClean'])
 })
 
-it('ignores subscription for other servers', async () => {
+it('does not subscribe on direct log writes', async () => {
   let test = createReporter()
-  let action = { type: 'logux/subscribe' }
-  await test.app.log.add(action, { server: 'server:other' })
+  test.app.channel('a', { access: () => true })
+  await test.app.log.add(
+    { channel: 'a', type: 'logux/subscribe' },
+    { id: '1 10:uuid' }
+  )
   expect(test.names).toEqual(['addClean'])
+  expect(test.app.subscribers).toEqual({})
 })
 
 it('checks channel access', async () => {
@@ -915,15 +912,16 @@ it('checks channel access', async () => {
     }
   })
 
-  await test.app.log.add(
-    { channel: 'user/10', type: 'logux/subscribe' },
-    { id: '1 10:uuid' }
+  await catchError(() =>
+    test.app.process(
+      { channel: 'user/10', type: 'logux/subscribe' },
+      { id: '1 10:uuid' }
+    )
   )
-  await setTimeout(1)
 
-  expect(test.names).toEqual(['addClean', 'denied', 'addClean'])
-  expect(test.reports[1]![1]).toEqual({ actionId: '1 10:uuid' })
-  expect(test.reports[2]![1].action).toEqual({
+  expect(test.names).toEqual(['denied', 'addClean'])
+  expect(test.reports[0]![1]).toEqual({ actionId: '1 10:uuid' })
+  expect(test.reports[1]![1].action).toEqual({
     action: { channel: 'user/10', type: 'logux/subscribe' },
     id: '1 10:uuid',
     reason: 'denied',
@@ -948,16 +946,16 @@ it('reports about errors during channel authorization', async () => {
     }
   })
 
-  await test.app.log.add(
-    { channel: 'user/10', type: 'logux/subscribe' },
-    { id: '1 10:uuid' }
+  await catchError(() =>
+    test.app.process(
+      { channel: 'user/10', type: 'logux/subscribe' },
+      { id: '1 10:uuid' }
+    )
   )
-  await Promise.resolve()
-  await Promise.resolve()
 
-  expect(test.names).toEqual(['addClean', 'error', 'addClean'])
-  expect(test.reports[1]![1]).toEqual({ actionId: '1 10:uuid', err })
-  expect(test.reports[2]![1].action).toEqual({
+  expect(test.names).toEqual(['error', 'addClean'])
+  expect(test.reports[0]![1]).toEqual({ actionId: '1 10:uuid', err })
+  expect(test.reports[1]![1].action).toEqual({
     action: { channel: 'user/10', type: 'logux/subscribe' },
     id: '1 10:uuid',
     reason: 'error',
@@ -1004,34 +1002,35 @@ it('subscribes clients', async () => {
     events += 1
   })
 
-  await test.app.log.add(
+  await test.app.process(
     { channel: 'user/10', type: 'logux/subscribe' },
     { id: '1 10:a:uuid' }
   )
-  await setTimeout(1)
   expect(events).toEqual(1)
   expect(userSubsriptions).toEqual(1)
-  expect(test.names).toEqual(['addClean', 'subscribed', 'addClean'])
-  expect(test.reports[1]![1]).toEqual({
+  expect(test.names).toEqual(['subscribed', 'addClean', 'addClean'])
+  expect(test.reports[0]![1]).toEqual({
     actionId: '1 10:a:uuid',
     channel: 'user/10'
+  })
+  expect(test.reports[1]![1].action).toEqual({
+    channel: 'user/10',
+    type: 'logux/subscribe'
   })
   expect(test.reports[2]![1].action).toEqual({
     id: '1 10:a:uuid',
     type: 'logux/processed'
   })
   expect(test.reports[2]![1].meta.clients).toEqual(['10:a'])
-  expect(test.reports[2]![1].meta.status).toEqual('processed')
   expect(test.app.subscribers).toEqual({
     'user/10': {
       '10:a:uuid': { filters: { '{}': true } }
     }
   })
-  await test.app.log.add(
+  await test.app.process(
     { channel: 'posts', type: 'logux/subscribe' },
     { id: '2 10:a:uuid' }
   )
-  await setTimeout(1)
 
   expect(events).toEqual(2)
   expect(test.app.subscribers).toEqual({
@@ -1042,13 +1041,12 @@ it('subscribes clients', async () => {
       '10:a:uuid': { filters: { '{}': true } }
     }
   })
-  await test.app.log.add(
+  await test.app.process(
     { channel: 'user/10', type: 'logux/unsubscribe' },
     { id: '3 10:a:uuid' }
   )
 
   expect(test.names).toEqual([
-    'addClean',
     'subscribed',
     'addClean',
     'addClean',
@@ -1056,9 +1054,10 @@ it('subscribes clients', async () => {
     'addClean',
     'addClean',
     'unsubscribed',
+    'addClean',
     'addClean'
   ])
-  expect(test.reports[7]![1]).toEqual({
+  expect(test.reports[6]![1]).toEqual({
     actionId: '3 10:a:uuid',
     channel: 'user/10'
   })
@@ -1091,19 +1090,18 @@ it('subscribes clients with multiple filters', async () => {
     }
   })
 
-  await test.app.log.add(
+  await test.app.process(
     { channel: 'posts', type: 'logux/subscribe' },
     { id: '1 10:a:uuid' }
   )
-  await test.app.log.add(
+  await test.app.process(
     { channel: 'posts', filter: { category: 'a' }, type: 'logux/subscribe' },
-    { id: '1 10:a:uuid' }
+    { id: '2 10:a:uuid' }
   )
-  await test.app.log.add(
+  await test.app.process(
     { channel: 'posts', filter: { category: 'b' }, type: 'logux/subscribe' },
-    { id: '1 10:a:uuid' }
+    { id: '3 10:a:uuid' }
   )
-  await setTimeout(1)
   expect(test.app.subscribers).toEqual({
     posts: {
       '10:a:uuid': {
@@ -1116,15 +1114,14 @@ it('subscribes clients with multiple filters', async () => {
     }
   })
 
-  await test.app.log.add(
+  await test.app.process(
     { channel: 'posts', type: 'logux/unsubscribe' },
-    { id: '2 10:a:uuid' }
+    { id: '4 10:a:uuid' }
   )
-  await test.app.log.add(
+  await test.app.process(
     { channel: 'posts', filter: { category: 'b' }, type: 'logux/unsubscribe' },
-    { id: '2 10:a:uuid' }
+    { id: '5 10:a:uuid' }
   )
-  await setTimeout(1)
   expect(test.app.subscribers).toEqual({
     posts: {
       '10:a:uuid': {
@@ -1161,11 +1158,10 @@ it('cancels subscriptions on disconnect', async () => {
     }
   })
 
-  await app.log.add(
+  await app.process(
     { channel: 'test', type: 'logux/subscribe' },
     { id: '1 10:uuid' }
   )
-  await setTimeout(10)
 
   expect(cancels).toEqual(1)
 })
@@ -1186,20 +1182,20 @@ it('reports about errors during channel initialization', async () => {
     }
   })
 
-  await test.app.log.add(
-    { channel: 'user/10', type: 'logux/subscribe' },
-    { id: '1 10:uuid' }
+  await catchError(() =>
+    test.app.process(
+      { channel: 'user/10', type: 'logux/subscribe' },
+      { id: '1 10:uuid' }
+    )
   )
-  await setTimeout(1)
 
   expect(test.names).toEqual([
-    'addClean',
     'subscribed',
     'error',
-    'addClean',
-    'unsubscribed'
+    'unsubscribed',
+    'addClean'
   ])
-  expect(test.reports[2]![1]).toEqual({ actionId: '1 10:uuid', err })
+  expect(test.reports[1]![1]).toEqual({ actionId: '1 10:uuid', err })
   expect(test.reports[3]![1].action).toEqual({
     action: { channel: 'user/10', type: 'logux/subscribe' },
     id: '1 10:uuid',
@@ -1237,7 +1233,7 @@ it('loads initial actions during subscription', async () => {
     }
   })
 
-  await test.app.log.add(
+  let promise = test.app.process(
     { channel: 'user/10', type: 'logux/subscribe' },
     { id: '1 10:uuid' }
   )
@@ -1248,14 +1244,13 @@ it('loads initial actions during subscription', async () => {
       '10:uuid': { filters: { '{}': true } }
     }
   })
-  expect(test.app.log.actions()).toEqual([
-    { channel: 'user/10', type: 'logux/subscribe' }
-  ])
+  // The subscription is published after the successful loading
+  expect(test.app.log.actions()).toEqual([])
   if (typeof initializating === 'undefined') {
     throw new Error('callback is not set')
   }
   initializating()
-  await setTimeout(1)
+  await promise
 
   expect(test.app.log.actions()).toEqual([
     { channel: 'user/10', type: 'logux/subscribe' },
@@ -1289,13 +1284,13 @@ it('calls unsubscribe() channel callback with logux/unsubscribe', async () => {
     unsubscribe: unsubscribeCallback
   })
 
-  await test.app.log.add(
+  await test.app.process(
     { channel: 'user/10', type: 'logux/subscribe' },
     { id: `1 ${nodeId}` }
   )
   expect(Object.keys(test.app.subscribers)).toHaveLength(1)
 
-  await test.app.log.add(
+  await test.app.process(
     { channel: 'user/10', type: 'logux/unsubscribe' },
     { id: `2 ${nodeId}` }
   )
@@ -1323,7 +1318,7 @@ it('calls unsubscribe() channel callback with logux/unsubscribe', async () => {
         type: 'logux/unsubscribe'
       }),
       expect.objectContaining({
-        status: 'processed'
+        id: `2 ${nodeId}`
       })
     ]
   ])
@@ -1331,10 +1326,9 @@ it('calls unsubscribe() channel callback with logux/unsubscribe', async () => {
 
 it('does not need type definition for own actions', async () => {
   let test = createReporter()
-  await test.app.log.add({ type: 'unknown' }, { users: ['10'] })
+  await test.app.process({ type: 'unknown' }, { users: ['10'] })
   expect(test.names).toEqual(['addClean'])
   expect(test.reports[0]![1].action.type).toEqual('unknown')
-  expect(test.reports[0]![1].meta.status).toEqual('processed')
 })
 
 it('checks callbacks in unknown type handler', () => {
@@ -1375,24 +1369,20 @@ it('processes actions on broken channel filter', async () => {
     }
   })
 
-  let rejection: unknown
-  let onRejection = (e: unknown): void => {
-    rejection = e
-  }
-  process.on('unhandledRejection', onRejection)
+  let errors: unknown[] = []
+  test.app.on('error', e => {
+    errors.push(e)
+  })
 
-  await test.app.log.add(
+  await test.app.process(
     { channel: 'posts', type: 'logux/subscribe' },
     { id: '1 10:a:uuid' }
   )
-  await setTimeout(1)
 
-  await test.app.log.add({ type: 'FOO' }, { channels: ['posts'] })
-  await setTimeout(10)
-  process.off('unhandledRejection', onRejection)
+  await test.app.process({ type: 'FOO' }, { channels: ['posts'] })
 
   expect(processed).toEqual(1)
-  expect(rejection).toBe(err)
+  expect(errors).toEqual([err])
 })
 
 it('reports about useless actions', async () => {
@@ -1405,7 +1395,7 @@ it('reports about useless actions', async () => {
   test.app.on('preadd', (action, meta) => {
     meta.reasons.push('test')
   })
-  await test.app.log.add({ type: 'unknown' }, { status: 'processed' })
+  await test.app.log.add({ type: 'unknown' })
   await test.app.log.add({ type: 'known' })
   await test.app.log.add({ channel: 'a', type: 'logux/subscribe' })
   await test.app.log.add({ type: 'known' }, { channels: ['a'] })
@@ -1424,55 +1414,15 @@ it('reports about useless actions', async () => {
   ])
 })
 
-it('has shortcuts for resend arrays', async () => {
-  let test = createReporter()
-  test.app.type('A', {
-    access: () => true,
-    process: () => {}
-  })
-  test.app.on('preadd', (action, meta) => {
-    meta.reasons.push('test')
-  })
-  await test.app.log.add(
-    { type: 'A' },
-    { channel: 'a', client: '1:1', node: '1:1:1', user: '1' }
-  )
-  expect(test.app.log.entries()).toEqual([
-    [
-      { type: 'A' },
-      {
-        added: 1,
-        channels: ['a'],
-        clients: ['1:1'],
-        id: '0 server:uuid',
-        nodes: ['1:1:1'],
-        reasons: ['test'],
-        server: 'server:uuid',
-        status: 'waiting',
-        subprotocol: 0,
-        time: 1,
-        users: ['1']
-      }
-    ]
-  ])
-  await setTimeout(10)
-  expect(test.app.log.entries()).toEqual([
-    [
-      { type: 'A' },
-      {
-        added: 1,
-        channels: ['a'],
-        clients: ['1:1'],
-        id: '0 server:uuid',
-        nodes: ['1:1:1'],
-        reasons: ['test'],
-        server: 'server:uuid',
-        status: 'processed',
-        subprotocol: 0,
-        time: 1,
-        users: ['1']
-      }
-    ]
+it('warns about singular meta keys', async () => {
+  let app = createServer()
+  app.type('A', { access: () => true })
+  spyOn(app.logger, 'warn', () => {})
+
+  await app.log.add({ type: 'A' }, { channel: 'a', user: '1' } as object)
+
+  expect(calls(app.logger.warn)).toEqual([
+    [{ actionId: '0 server:uuid' }, 'Replace meta.channel with meta.channels']
   ])
 })
 
@@ -1518,6 +1468,138 @@ it('has shortcut API for action creators', async () => {
 
   await app.process(createA({ aValue: 'test' }))
   expect(processed).toEqual(['test'])
+})
+
+it('returns false on 403 error in wasNot403()', async () => {
+  let error403 = new ResponseError(403, '/a')
+  let error500 = new ResponseError(500, '/a')
+
+  expect(await wasNot403(async () => {})).toBe(true)
+  expect(
+    await wasNot403(async () => {
+      throw error403
+    })
+  ).toBe(false)
+  expect(
+    await catchError(() =>
+      wasNot403(async () => {
+        throw error500
+      })
+    )
+  ).toBe(error500)
+})
+
+it('sends actions of other servers without the log', async () => {
+  let app = createServer()
+  let sent: object[] = []
+  let client: any = {
+    clientId: '10:client',
+    node: {
+      lastAddedCache: 0,
+      onAdd(entries: object[]) {
+        sent.push(...entries)
+      }
+    }
+  }
+  app.clientIds.set('10:client', client)
+
+  await app.sendWithoutProcess({ type: 'A' }, {
+    clients: ['10:client'],
+    id: '1 server:other',
+    time: 1
+  } as ServerMeta)
+
+  expect(sent).toEqual([[{ type: 'A' }, expect.objectContaining({ id: '1 server:other' })]])
+  expect(app.log.entries()).toEqual([])
+})
+
+it('reports unknown type and wrong channel outside of the task', async () => {
+  let test = createReporter()
+  test.app.unknownType({ type: 'A' }, { id: '1 10:uuid' } as ServerMeta)
+  test.app.wrongChannel(
+    { channel: 'a', type: 'logux/subscribe' },
+    { id: '2 10:uuid' } as ServerMeta
+  )
+  test.app.unknownType({ type: 'A' }, { id: '3 server:uuid' } as ServerMeta)
+  await setTimeout(10)
+
+  expect(test.names).toEqual([
+    'unknownType',
+    'addClean',
+    'wrongChannel',
+    'addClean',
+    'unknownType'
+  ])
+  // Own actions are not undone
+  expect(
+    test.reports
+      .filter(i => i[0] === 'addClean')
+      .map(i => i[1].action.reason)
+  ).toEqual(['unknownType', 'wrongChannel'])
+})
+
+it('takes the queue from the resolved handler', async () => {
+  let app = createServer()
+  type ActionA = { type: 'A' }
+  let createA = defineAction<ActionA>('A')
+
+  let waiting: (() => void)[] = []
+  let hang = (): Promise<boolean> =>
+    new Promise(resolve => {
+      waiting.push(() => {
+        resolve(true)
+      })
+    })
+
+  app.type(createA, { access: hang }, { queue: 'creator' })
+  app.type('B', { access: hang }, { queue: 'exact' })
+  app.type(/^C/, { access: hang }, { queue: 'regexp' })
+  app.otherType({ access: hang })
+  app.channel('a', { access: hang }, { queue: 'channel' })
+
+  let client: any = {
+    key: '1',
+    node: { remoteSubprotocol: 0 },
+    taskKeys: new Set(),
+    tasks: new Set()
+  }
+  let lastId = 0
+  function submit(action: object): void {
+    lastId += 1
+    void privateMethods(app)
+      .runner.submit({ action, client, meta: { id: `${lastId} 10:c:uuid` } })
+      .catch(() => {})
+  }
+
+  submit(createA({}))
+  submit({ type: 'B' })
+  submit({ type: 'C1' })
+  submit({ type: 'UNKNOWN' })
+  submit({ channel: 'a', type: 'logux/subscribe' })
+  submit({ channel: 'a', type: 'logux/unsubscribe' })
+
+  await setTimeout(10)
+  let queues = privateMethods(app).runner.queues.queues
+  expect([...queues.keys()].toSorted((a: string, b: string) =>
+    a.localeCompare(b)
+  )).toEqual([
+    '10:c/channel',
+    '10:c/creator',
+    '10:c/exact',
+    '10:c/main',
+    '10:c/regexp'
+  ])
+
+  for (let resolve of waiting) resolve()
+  await setTimeout(10)
+})
+
+it('does not report useless actions of the unknown type handler', async () => {
+  let test = createReporter()
+  test.app.otherType({ access: () => true })
+
+  await test.app.log.add({ type: 'unknown' })
+  expect(test.names).toEqual(['addClean'])
 })
 
 it('has alias to root from file URL', () => {

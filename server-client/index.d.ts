@@ -83,15 +83,6 @@ export class ServerClient<ClientData extends object = unknown> {
   nodeId?: string
 
   /**
-   * Does server process some action from client.
-   *
-   * ```js
-   * console.log('Clients in processing:', clients.map(i => i.processing))
-   * ```
-   */
-  processing: boolean
-
-  /**
    * Client IP address.
    *
    * ```js

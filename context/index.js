@@ -1,7 +1,7 @@
 import { parseId } from '@logux/core'
 
 export class Context {
-  constructor(server, meta) {
+  constructor(server, meta, task) {
     this.server = server
     this.data = {}
 
@@ -31,6 +31,8 @@ export class Context {
     } else {
       this.headers = {}
     }
+
+    if (task) this.signal = task.controller.signal
   }
 
   drain() {
@@ -38,7 +40,7 @@ export class Context {
   }
 
   sendBack(actions, meta = {}) {
-    let common = { clients: [this.clientId], status: 'processed', ...meta }
+    let common = { clients: [this.clientId], ...meta }
     if (Array.isArray(actions)) {
       return this.server.log.add(
         actions.map(item => {

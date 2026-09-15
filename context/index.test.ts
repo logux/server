@@ -89,8 +89,8 @@ it('sends action back', () => {
   expect(ctx.sendBack({ type: 'A' }) instanceof Promise).toBe(true)
   ctx.sendBack({ type: 'B' }, { clients: [], reasons: ['1'] })
   expect(added).toEqual([
-    [{ type: 'A' }, { clients: ['10:client'], status: 'processed' }],
-    [{ type: 'B' }, { clients: [], reasons: ['1'], status: 'processed' }]
+    [{ type: 'A' }, { clients: ['10:client'] }],
+    [{ type: 'B' }, { clients: [], reasons: ['1'] }]
   ])
 })
 
@@ -100,14 +100,8 @@ it('sends actions back in one batch', async () => {
   expect(added).toEqual([])
   expect(batches).toEqual([
     [
-      [
-        { type: 'A' },
-        { clients: ['10:client'], reasons: ['1'], status: 'processed' }
-      ],
-      [
-        { type: 'B' },
-        { clients: ['10:client'], reasons: ['1'], status: 'processed' }
-      ]
+      [{ type: 'A' }, { clients: ['10:client'], reasons: ['1'] }],
+      [{ type: 'B' }, { clients: ['10:client'], reasons: ['1'] }]
     ]
   ])
   expect(batches[0]![0]![1]).not.toBe(batches[0]![1]![1])

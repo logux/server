@@ -97,7 +97,7 @@ export class ConnectContext<Headers extends object = unknown> {
    *
    * @param action The action or the array of actions.
    * @param meta Action’s meta.
-   * @returns Promise until action was added to the server log.
+   * @returns Promise until the action was sent to the client.
    */
   sendBack<TypeAction extends Action = AnyAction>(
     action:
@@ -140,6 +140,18 @@ export class Context<
    * ```
    */
   isServer: boolean
+
+  /**
+   * Signal, which will be aborted when the action will be undone
+   * by `queueTimeout`.
+   *
+   * ```js
+   * process (ctx, action) {
+   *   return fetch(url, { signal: ctx.signal })
+   * }
+   * ```
+   */
+  signal: AbortSignal
 
   constructor(server: Server, meta: ServerMeta)
 }

@@ -50,7 +50,7 @@ it('sends and collect actions', async () => {
   })
   server.type('RESEND', {
     access: () => true,
-    resend: () => ({ user: '10' })
+    resend: () => ({ users: ['10'] })
   })
   let [client1, client2] = await Promise.all([
     server.connect('10'),
@@ -58,9 +58,8 @@ it('sends and collect actions', async () => {
   ])
   client1.log.keepActions()
   let received = await client1.collect(async () => {
-    await client1.log.add({ type: 'FOO' })
-    await setTimeout(10)
-    await client2.log.add({ type: 'RESEND' })
+    await client1.process({ type: 'FOO' })
+    await client2.process({ type: 'RESEND' })
     await setTimeout(10)
   })
   expect(received).toEqual([

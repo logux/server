@@ -1,7 +1,9 @@
 import { LoguxNotFoundError } from '@logux/actions'
 import {
   type Action,
+  type AnyAction,
   LoguxError,
+  MemoryStore,
   type Message,
   type Meta,
   type ServerConnection,
@@ -26,6 +28,15 @@ let destroyable: { destroy(): void }[] = []
 
 function privateMethods(obj: object): any {
   return obj
+}
+
+class SlowStore extends MemoryStore {
+  delay = 0
+
+  override async add(entries: [AnyAction, Meta][]): Promise<(false | Meta)[]> {
+    if (this.delay) await setTimeout(this.delay)
+    return super.add(entries)
+  }
 }
 
 function getPair(client: ServerClient): TestPair {
@@ -799,8 +810,8 @@ it('checks user access for action', async () => {
     'connect',
     'authenticated',
     'add',
-    'denied',
     'add',
+    'denied',
     'add'
   ])
   expect(test.reports.find(i => i[0] === 'denied')![1].actionId).toEqual(
@@ -824,7 +835,7 @@ it('takes subprotocol from action meta', async () => {
   })
 
   let client = await connectClient(app)
-  app.log.add({ type: 'FOO' }, { id: `1 ${client.nodeId}`, subprotocol: 1 })
+  app.process({ type: 'FOO' }, { id: `1 ${client.nodeId}`, subprotocol: 1 })
   await setTimeout(1)
 
   expect(subprotocols).toEqual([1])
@@ -1215,7 +1226,8 @@ it('sends `ready` after channels were loaded', async () => {
   })
 
   let client = await connectClient(app, '10:1:uuid')
-  await sendTo(client, [
+  // `synced` is sent after the terminal answer of the subscription
+  sendTo(client, [
     'sync',
     1,
     { channel: 'foo', type: 'logux/subscribe' },
@@ -1223,22 +1235,94 @@ it('sends `ready` after channels were loaded', async () => {
   ])
   sendTo(client, ['ready', 1])
   await setTimeout(10)
-  expect(sentNames(client)).toEqual(['connected', 'synced'])
+  expect(sentNames(client)).toEqual(['connected'])
 
   load()
   await setTimeout(10)
-  expect(sentNames(client)).toEqual(['connected', 'synced', 'sync', 'sync'])
+  expect(sentNames(client)).toEqual(['connected', 'sync', 'sync', 'synced'])
 
+  sendTo(client, ['synced', 1])
   sendTo(client, ['synced', 2])
-  sendTo(client, ['synced', 3])
   await setTimeout(10)
   expect(sentNames(client)).toEqual([
     'connected',
+    'sync',
+    'sync',
     'synced',
-    'sync',
-    'sync',
     'ready'
   ])
+})
+
+it('sends `ready` after the pending actions', async () => {
+  let app = createServer()
+  let finish: (() => void) | undefined
+  app.type('SLOW', {
+    access: () => true,
+    process() {
+      return new Promise<void>(resolve => {
+        finish = resolve
+      })
+    }
+  })
+
+  let client = await connectClient(app, '10:1:uuid')
+  void sendTo(client, [
+    'sync',
+    1,
+    { type: 'SLOW' },
+    { id: '1 10:1:uuid', time: 1 }
+  ])
+  await setTimeout(10)
+  sendTo(client, ['ready', 0])
+  await setTimeout(10)
+  expect(sentNames(client)).toEqual(['connected'])
+
+  if (typeof finish === 'undefined') throw new Error('process is not set')
+  finish()
+  await setTimeout(10)
+  sendTo(client, ['synced', 1])
+  await setTimeout(10)
+  expect(sentNames(client)).toEqual(['connected', 'sync', 'synced', 'ready'])
+})
+
+it('waits for the client tasks in the ready barrier', async () => {
+  let app = createServer()
+  let finish: (() => void) | undefined
+  app.type('SLOW', {
+    access: () => true,
+    process() {
+      return new Promise<void>(resolve => {
+        finish = resolve
+      })
+    }
+  })
+
+  let client = await connectClient(app, '10:1:uuid')
+  void sendTo(client, [
+    'sync',
+    1,
+    { type: 'SLOW' },
+    { id: '1 10:1:uuid', time: 1 }
+  ])
+  await setTimeout(10)
+
+  // The client could send `ready` before this action
+  client.node.remoteReady = true
+  let barrier = false
+  void privateMethods(client)
+    .waitForReady()
+    .then(() => {
+      barrier = true
+    })
+  await setTimeout(10)
+  expect(barrier).toBe(false)
+
+  if (typeof finish === 'undefined') throw new Error('process is not set')
+  finish()
+  await setTimeout(10)
+  sendTo(client, ['synced', 1])
+  await setTimeout(10)
+  expect(barrier).toBe(true)
 })
 
 it('sends new actions by channel', async () => {
@@ -1453,8 +1537,8 @@ it('sends debug back on unknown type', async () => {
   let app = createServer({ env: 'development' })
   let client1 = await connectClient(app)
   let client2 = await connectClient(app, '20:uuid')
-  app.log.add({ type: 'UNKNOWN' }, { id: '1 server:x' })
-  app.log.add({ type: 'UNKNOWN' }, { id: '2 10:uuid' })
+  void app.process({ type: 'UNKNOWN' }, { id: '1 server:x' })
+  void app.process({ type: 'UNKNOWN' }, { id: '2 10:uuid' }).catch(() => {})
   await getPair(client1).wait('right')
 
   expect(sent(client1).find(i => i[0] === 'debug')).toEqual([
@@ -1468,7 +1552,7 @@ it('sends debug back on unknown type', async () => {
 it('does not send debug back on unknown type in production', async () => {
   let app = createServer({ env: 'production' })
   let client = await connectClient(app)
-  await app.log.add({ type: 'U' }, { id: '1 10:uuid' })
+  await app.process({ type: 'U' }, { id: '1 10:uuid' }).catch(() => {})
   await getPair(client).wait('right')
 
   expect(sentNames(client)).toEqual(['connected', 'sync'])
@@ -1665,8 +1749,8 @@ it('has finally callback', async () => {
     { id: '5 10:client:other', time: 1 }
   ])
 
-  expect(calls).toEqual(['D', 'C', 'A', 'E', 'B'])
-  expect(errors).toEqual(['D', 'C', 'E', 'EE'])
+  expect(calls.toSorted()).toEqual(['A', 'B', 'C', 'D', 'E'])
+  expect(errors.toSorted()).toEqual(['C', 'D', 'E', 'EE'])
 })
 
 it('sends error to author', async () => {
@@ -1752,8 +1836,8 @@ it('moves position to the last action of the batch', async () => {
 
   let other = await connectClient(app, '20:1:uuid')
 
-  app.log.add({ type: 'A' }, { status: 'processed', users: ['10'] })
-  app.log.add({ type: 'A' }, { status: 'processed', users: ['10'] })
+  void app.log.add({ type: 'A' }, { users: ['10'] })
+  void app.log.add({ type: 'A' }, { users: ['10'] })
   await setTimeout(10)
 
   expect(app.log.entries()).toHaveLength(2)
@@ -1771,7 +1855,7 @@ it('does not move position on actions without reasons', async () => {
   let other = await connectClient(app, '20:1:uuid')
 
   // The action is not stored, so nobody can ask for it after reconnect
-  await app.log.add({ type: 'A' }, { status: 'processed', users: ['10'] })
+  await app.log.add({ type: 'A' }, { users: ['10'] })
   await setTimeout(10)
 
   expect(app.log.entries()).toEqual([])
@@ -1848,7 +1932,7 @@ it('uses resend for own actions', async () => {
   let app = createServer()
   app.type('FOO', {
     access: () => false,
-    resend: () => ({ channel: 'foo' })
+    resend: () => ({ channels: ['foo'] })
   })
   app.channel('foo', {
     access: () => true
@@ -1862,12 +1946,12 @@ it('uses resend for own actions', async () => {
   ])
   await setTimeout(10)
 
-  app.log.add({ type: 'FOO' })
+  void app.process({ type: 'FOO' })
   await setTimeout(10)
   expect(app.log.entries()[2]![1].channels).toEqual(['foo'])
   expect(sent(client)[3]![2]).toEqual({ type: 'FOO' })
 
-  app.log.add({ type: 'FOO' }, { status: 'processed' })
+  void app.log.add({ type: 'FOO' })
   await setTimeout(10)
   expect(app.log.entries()[3]![1].channels).not.toBeDefined()
 })
@@ -1876,7 +1960,7 @@ it('does not duplicate channel load actions', async () => {
   let app = createServer()
   app.type('FOO', {
     access: () => true,
-    resend: () => ({ channel: 'foo' })
+    resend: () => ({ channels: ['foo'] })
   })
   app.channel('foo', {
     access: () => true,
@@ -1898,7 +1982,7 @@ it('does not duplicate channel load actions', async () => {
   }
 
   expect(sent(client).slice(1)).toEqual([
-    ['sync', 2, { type: 'FOO' }, meta('2', 1)],
+    ['sync', 1, { type: 'FOO' }, meta('2', 1)],
     ['sync', 3, { id: '1 10:1:uuid', type: 'logux/processed' }, meta('3', 2)],
     ['synced', 1]
   ])
@@ -1950,13 +2034,13 @@ it('allows to return actions', async () => {
   }
 
   expect(sent(client).slice(1)).toEqual([
-    ['sync', 2, { type: 'A' }, meta('2', 1)],
+    ['sync', 1, { type: 'A' }, meta('2', 1)],
     ['sync', 3, { id: '1 10:1:uuid', type: 'logux/processed' }, meta('3', 2)],
     ['synced', 1],
-    ['sync', 5, { type: 'B' }, meta('4', 3)],
+    ['sync', 4, { type: 'B' }, meta('4', 3)],
     ['sync', 6, { id: '2 10:1:uuid', type: 'logux/processed' }, meta('5', 4)],
     ['synced', 2],
-    ['sync', 8, { type: 'C' }, { ...meta('6', 5), time: 98 }],
+    ['sync', 7, { type: 'C' }, { ...meta('6', 5), time: 98 }],
     ['sync', 9, { id: '3 10:1:uuid', type: 'logux/processed' }, meta('7', 6)],
     ['synced', 3]
   ])
@@ -2018,7 +2102,7 @@ it('does not process send-back actions', async () => {
     }
   })
 
-  app.log.add({ data: 'server', type: 'A' })
+  void app.process({ data: 'server', type: 'A' })
   let client = await connectClient(app, '10:1:uuid')
   await sendTo(client, [
     'sync',
@@ -2338,11 +2422,8 @@ it('undoes action with notFound on 404 error', async () => {
     { id: '4 10:1:uuid', time: 1 }
   ])
   await setTimeout(100)
+  // Failed actions are not published, only their answers
   expect(app.log.actions()).toEqual([
-    { channel: 'e500', type: 'logux/subscribe' },
-    { channel: 'e404', type: 'logux/subscribe' },
-    { channel: 'e403', type: 'logux/subscribe' },
-    { channel: 'error', type: 'logux/subscribe' },
     {
       action: { channel: 'e500', type: 'logux/subscribe' },
       id: '1 10:1:uuid',
@@ -2395,7 +2476,6 @@ it('allows to throws LoguxNotFoundError', async () => {
   ])
   await setTimeout(100)
   expect(app.log.actions()).toEqual([
-    { channel: 'notFound', type: 'logux/subscribe' },
     {
       action: { channel: 'notFound', type: 'logux/subscribe' },
       id: '2 10:1:uuid',
@@ -2566,7 +2646,7 @@ it('answers the re-sent action again and keeps the queue working', async () => {
   await setTimeout(50)
 
   expect(processed).toEqual([1])
-  expect(privateMethods(app).actionToQueue.size).toEqual(0)
+  expect(privateMethods(app).runner.byId.size).toEqual(0)
   expect(
     sent(client)
       .filter(msg => msg[0] === 'sync')
@@ -2600,15 +2680,13 @@ it('releases the queue by the timeout', async () => {
   })
 
   let client = await connectClient(app, '10:client:uuid')
-  await sendTo(client, [
-    'sync',
-    1,
-    { hang: true, n: 1, type: 'x' },
-    { id: '1 10:client:uuid', time: 1 }
-  ])
-  await sendTo(client, [
+  // `synced` comes after the terminal answer, so the actions are sent
+  // in a single message to be in the queue together
+  void sendTo(client, [
     'sync',
     2,
+    { hang: true, n: 1, type: 'x' },
+    { id: '1 10:client:uuid', time: 1 },
     { n: 2, type: 'x' },
     { id: '2 10:client:uuid', time: 2 }
   ])
@@ -2617,7 +2695,7 @@ it('releases the queue by the timeout', async () => {
   expect(errors).toEqual([
     'Action "1 10:client:uuid" was not processed in 100 ms'
   ])
-  expect(privateMethods(app).actionToQueue.size).toEqual(0)
+  expect(privateMethods(app).runner.byId.size).toEqual(0)
   expect(
     sent(client)
       .filter(
@@ -2626,7 +2704,6 @@ it('releases the queue by the timeout', async () => {
       .map(msg => (msg[2] as any).id)
   ).toEqual(['1 10:client:uuid', '2 10:client:uuid'])
   expect(sent(client).filter(msg => msg[0] === 'synced')).toEqual([
-    ['synced', 1],
     ['synced', 2]
   ])
 
@@ -2673,9 +2750,9 @@ it('releases the queue on the re-sent action without the answer', async () => {
   await setTimeout(10)
 
   expect(processed).toEqual([])
-  expect(privateMethods(test.app).actionToQueue.size).toEqual(0)
+  expect(privateMethods(test.app).runner.byId.size).toEqual(0)
   expect(test.reports.filter(i => i[0] === 'duplicate')).toEqual([
-    ['duplicate', { actionId: '1 10:client:uuid', status: 'error' }]
+    ['duplicate', { actionId: '1 10:client:uuid' }]
   ])
 
   await send(2, 2)
@@ -2923,6 +3000,169 @@ it('all actions are processed before destroy', async () => {
   ])
 })
 
+it('does not start the next action before the previous write', async () => {
+  let store = new SlowStore()
+  let app = createServer({ store })
+  let calls: string[] = []
+  app.type('A', {
+    access() {
+      calls.push('access A')
+      return true
+    },
+    process() {
+      calls.push('process A')
+    }
+  })
+  app.type('B', {
+    access() {
+      calls.push('access B')
+      return true
+    },
+    process() {
+      calls.push('process B')
+    }
+  })
+
+  let client = await connectClient(app, '10:client:uuid')
+  store.delay = 100
+  void sendTo(client, [
+    'sync',
+    2,
+    { type: 'A' },
+    { id: '1 10:client:uuid', time: 1 },
+    { type: 'B' },
+    { id: '2 10:client:uuid', time: 2 }
+  ])
+  await setTimeout(50)
+
+  // The write of A is not deferred to the end of the message
+  expect(calls).toEqual(['access A', 'process A'])
+
+  await setTimeout(400)
+  expect(calls).toEqual(['access A', 'process A', 'access B', 'process B'])
+})
+
+it('cancels the queue on unknown type and wrong channel', async () => {
+  let app = createServer()
+  let processed: string[] = []
+  app.type('GOOD', {
+    access: () => true,
+    process() {
+      processed.push('GOOD')
+    }
+  })
+
+  let client = await connectClient(app, '10:client:uuid')
+  await sendTo(client, [
+    'sync',
+    2,
+    { type: 'UNKNOWN' },
+    { id: '1 10:client:uuid', time: 1 },
+    { type: 'GOOD' },
+    { id: '2 10:client:uuid', time: 2 }
+  ])
+  await setTimeout(50)
+
+  expect(processed).toEqual([])
+  expect(
+    app.log
+      .actions()
+      .filter(i => i.type === 'logux/undo')
+      .map(i => (i as any).reason)
+  ).toEqual(['unknownType', 'error'])
+
+  await sendTo(client, [
+    'sync',
+    4,
+    { channel: 'unknown', type: 'logux/subscribe' },
+    { id: '3 10:client:uuid', time: 3 },
+    { type: 'GOOD' },
+    { id: '4 10:client:uuid', time: 4 }
+  ])
+  await setTimeout(50)
+
+  expect(processed).toEqual([])
+  expect(
+    app.log
+      .actions()
+      .filter(i => i.type === 'logux/undo')
+      .map(i => (i as any).reason)
+  ).toEqual(['unknownType', 'error', 'wrongChannel', 'error'])
+})
+
+it('runs the subscription again after the reconnect', async () => {
+  let app = createServer()
+  let loaded = 0
+  app.channel('a', {
+    access: () => true,
+    load() {
+      loaded += 1
+    }
+  })
+
+  let client1 = await connectClient(app, '10:client:uuid')
+  await sendTo(client1, [
+    'sync',
+    1,
+    { channel: 'a', type: 'logux/subscribe' },
+    { id: '1 10:client:uuid', time: 1 }
+  ])
+  expect(loaded).toEqual(1)
+  expect(Object.keys(app.subscribers.a!)).toEqual(['10:client:uuid'])
+
+  // The new connection re-sends the unacknowledged request ID
+  let client2 = await connectClient(app, '10:client:uuid')
+  expect(app.subscribers).toEqual({})
+  await sendTo(client2, [
+    'sync',
+    1,
+    { channel: 'a', type: 'logux/subscribe' },
+    { id: '1 10:client:uuid', time: 1 }
+  ])
+  await setTimeout(10)
+  expect(loaded).toEqual(2)
+  expect(Object.keys(app.subscribers.a!)).toEqual(['10:client:uuid'])
+
+  // A fresh request ID is an ordinary new task
+  await sendTo(client2, [
+    'sync',
+    2,
+    { channel: 'a', type: 'logux/subscribe' },
+    { id: '2 10:client:uuid', time: 2 }
+  ])
+  await setTimeout(10)
+  expect(loaded).toEqual(3)
+})
+
+it('shares the task with the duplicate of the same connection', async () => {
+  let app = createServer()
+  let loaded = 0
+  app.channel('a', {
+    access: () => true,
+    async load() {
+      await setTimeout(10)
+      loaded += 1
+    }
+  })
+
+  let client = await connectClient(app, '10:client:uuid')
+  void sendTo(client, [
+    'sync',
+    1,
+    { channel: 'a', type: 'logux/subscribe' },
+    { id: '1 10:client:uuid', time: 1 }
+  ])
+  void sendTo(client, [
+    'sync',
+    1,
+    { channel: 'a', type: 'logux/subscribe' },
+    { id: '1 10:client:uuid', time: 1 }
+  ])
+  await setTimeout(50)
+
+  expect(loaded).toEqual(1)
+})
+
 it('recognizes channel regex', async () => {
   let app = createServer()
   let calls: string[] = []
@@ -2996,14 +3236,17 @@ it('removes empty queues', async () => {
   ])
 
   await setTimeout(10)
-  expect(privateMethods(app).queues.size).toEqual(1)
+  expect(privateMethods(app).runner.queues.size).toEqual(1)
   await setTimeout(50)
-  expect(privateMethods(app).queues.size).toEqual(0)
+  expect(privateMethods(app).runner.queues.size).toEqual(0)
 })
 
 it('replaces Node class if necessary', async () => {
   class OtherNode extends FilteredNode {
-    syncSinceQuery(): { added: number; entries: [Action, Meta][] } {
+    override async syncSinceQuery(): Promise<{
+      added: number
+      entries: [Action, Meta][]
+    }> {
       return {
         added: 0,
         entries: [

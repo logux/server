@@ -20,7 +20,12 @@ function createTest(): Test {
     meta.reasons.push('test')
   })
 
-  let data = { clientId: '1:a', nodeId: '1:a:b', userId: '1' }
+  let data = {
+    app: { log: log2 },
+    clientId: '1:a',
+    nodeId: '1:a:b',
+    userId: '1'
+  }
   let pair = new TestPair()
   let client = new ClientNode('1:a:b', log1, pair.left)
   let server = new FilteredNode(data, 'server', log2, pair.right)
@@ -51,7 +56,10 @@ it('synchronizes only node-specific actions on connection', async () => {
 
   await test.server.waitFor('synchronized')
 
-  expect(test.client.log.actions()).toEqual([{ type: 'B' }])
+  expect(test.client.log.actions()).toEqual([
+    { type: 'B' },
+    { actions: 1, type: 'logux/prepare' }
+  ])
 })
 
 it('synchronizes only client-specific actions on connection', async () => {
@@ -63,7 +71,10 @@ it('synchronizes only client-specific actions on connection', async () => {
 
   await test.server.waitFor('synchronized')
 
-  expect(test.client.log.actions()).toEqual([{ type: 'B' }])
+  expect(test.client.log.actions()).toEqual([
+    { type: 'B' },
+    { actions: 1, type: 'logux/prepare' }
+  ])
 })
 
 it('synchronizes only user-specific actions on connection', async () => {
@@ -75,7 +86,10 @@ it('synchronizes only user-specific actions on connection', async () => {
 
   await test.server.waitFor('synchronized')
 
-  expect(test.client.log.actions()).toEqual([{ type: 'B' }])
+  expect(test.client.log.actions()).toEqual([
+    { type: 'B' },
+    { actions: 1, type: 'logux/prepare' }
+  ])
 })
 
 it('still sends only new actions', async () => {
@@ -88,5 +102,8 @@ it('still sends only new actions', async () => {
 
   await test.server.waitFor('synchronized')
 
-  expect(test.client.log.actions()).toEqual([{ type: 'B' }])
+  expect(test.client.log.actions()).toEqual([
+    { type: 'B' },
+    { actions: 1, type: 'logux/prepare' }
+  ])
 })

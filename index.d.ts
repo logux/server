@@ -26,6 +26,11 @@ export {
   PostgresStoreOptions
 } from './postgres-store/index.js'
 export {
+  ProcessingEntry,
+  ProcessingOutcome,
+  ProcessingStore
+} from './processing-store/index.js'
+export {
   del,
   get,
   patch,

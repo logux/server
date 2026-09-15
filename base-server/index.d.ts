@@ -67,19 +67,9 @@ type ServerNodeConstructor = new (...args: unknown[]) => ServerNode
 
 export interface ServerMeta extends Meta {
   /**
-   * All nodes subscribed to channel will receive the action.
-   */
-  channel?: string
-
-  /**
    * All nodes subscribed to listed channels will receive the action.
    */
   channels?: string[]
-
-  /**
-   * All nodes with listed client ID will receive the action.
-   */
-  client?: string
 
   /**
    * All nodes with listed client IDs will receive the action.
@@ -92,11 +82,6 @@ export interface ServerMeta extends Meta {
   excludeClients?: string[]
 
   /**
-   * Node with listed node ID will receive the action.
-   */
-  node?: string
-
-  /**
    * All nodes with listed node IDs will receive the action.
    */
   nodes?: string[]
@@ -105,16 +90,6 @@ export interface ServerMeta extends Meta {
    * Node ID of the server received the action.
    */
   server: string
-
-  /**
-   * Action processing status
-   */
-  status?: 'error' | 'processed' | 'waiting'
-
-  /**
-   * All nodes with listed user ID will receive the action.
-   */
-  user?: string
 
   /**
    * All nodes with listed user IDs will receive the action.
@@ -318,6 +293,10 @@ interface Authorizer<
 
 /**
  * Return object with keys for meta to resend action to other users.
+ *
+ * It is called only for the actions from the clients and
+ * from {@link BaseServer#process}. Facts, which were added
+ * by `Server#log.add()`, are routed by their meta alone.
  *
  * @param ctx Information about node, who create this action.
  * @param action The action data.
@@ -609,7 +588,10 @@ interface ReportersArguments {
   }
   unsubscribed: SubscriptionReporter
   useless: ActionReporter
-  duplicate: ActionReporter
+  duplicate: CleanReporter
+  destroyDetached: {
+    actions: number
+  }
   wrongChannel: SubscriptionReporter
   zombie: {
     nodeId: string
@@ -625,14 +607,10 @@ export interface Reporter {
 
 export type Resend =
   | {
-      channel?: string
       channels?: string[]
-      client?: string
       clients?: string[]
       excludeClients?: string[]
-      node?: string
       nodes?: string[]
-      user?: string
       users?: string[]
     }
   | string
@@ -706,6 +684,16 @@ export class BaseServer<
    *
    * ```js
    * server.log.each(finder)
+   * ```
+   *
+   * Adding an action delivers it by `meta.channels`, `users`, `clients`,
+   * `nodes`. Callbacks from {@link BaseServer#type} are not called,
+   * use {@link BaseServer#process} for that.
+   *
+   * ```js
+   * server.log.add({ type: 'users/renamed', userId, name }, {
+   *   channels: [`users/${userId}`]
+   * })
    * ```
    */
   log: ServerLog
@@ -1173,7 +1161,8 @@ export class BaseServer<
    *
    * @param action New action to resend and process.
    * @param meta Action’s meta.
-   * @returns Promise until new action will be resend to clients and processed.
+   * @returns Promise with the action’s meta. It will be rejected
+   *          with the error of the failed callback.
    */
   process<TypeAction extends Action = AnyAction>(
     action: TypeAction,
@@ -1181,8 +1170,12 @@ export class BaseServer<
   ): Promise<Readonly<ServerMeta>>
 
   /**
-   * Send action, received by other server, to all clients of current server.
-   * This method is for multi-server configuration only.
+   * Send an action, which was already processed by another server,
+   * to the clients of this server. The action is not written to the log
+   * and no callback from {@link BaseServer#type} is called.
+   *
+   * This method is for multi-server configuration only. Use
+   * `Server#log.add()` to also store the action in this server’s log.
    *
    * ```js
    * server.on('add', (action, meta) => {
@@ -1191,14 +1184,14 @@ export class BaseServer<
    *   }
    * })
    * onReceivingFromOtherServer((action, meta) => {
-   *   server.sendAction(action, meta)
+   *   server.sendWithoutProcess(action, meta)
    * })
    * ```
    *
    * @param action New action.
    * @param meta Action’s metadata.
    */
-  sendAction(action: Action, meta: ServerMeta): Promise<void> | void
+  sendWithoutProcess(action: Action, meta: ServerMeta): Promise<void> | void
 
   /**
    * Change a way how server loads actions history for the client.
@@ -1233,8 +1226,9 @@ export class BaseServer<
    *
    * @param nodeId Node ID.
    * @param channel Channel name.
+   * @returns Promise until `logux/subscribed` was published.
    */
-  subscribe(nodeId: string, channel: string): void
+  subscribe(nodeId: string, channel: string): Promise<unknown>
 
   /**
    * @param actionCreator Action creator function.
@@ -1284,11 +1278,15 @@ export class BaseServer<
    * }
    * ```
    *
+   * During the action processing it sets the outcome of the current task:
+   * the callback can not answer `logux/processed` after it. Outside
+   * of the processing it publishes the compensating action.
+   *
    * @param action The original action to undo.
    * @param meta The action’s metadata.
    * @param reason Optional code for reason. Default is `'error'`.
    * @param extra Extra fields to `logux/undo` action.
-   * @returns When action was saved to the log.
+   * @returns When the answer was published.
    */
   undo(
     action: Action,
@@ -1298,8 +1296,8 @@ export class BaseServer<
   ): Promise<void>
 
   /**
-   * If you receive action with unknown type, this method will mark this action
-   * with `error` status and undo it on the clients.
+   * If you receive action with unknown type, this method will undo it
+   * on the clients.
    *
    * If you didn’t set {@link Server#otherType},
    * Logux will call it automatically.
