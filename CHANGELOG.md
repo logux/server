@@ -2,6 +2,41 @@
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.17 “Engineer-of-Souls”
+
+- Moved to Logux Core 0.12 and Protocol 7.
+- Changed `Server#log.add()` to only store and send action.
+  Use `Server#process()` to run `access`, `resend` and `process`.
+- Changed processing order: action is added to the log and sent to clients
+  only after successful processing. Failed actions are not sent.
+- Changed `synced` answer to be sent only after processing all actions
+  from client’s `sync` message.
+- Changed `preadd` log event to be called after processing.
+- Renamed `Server#sendAction()` to `Server#sendWithoutProcess()`.
+- Removed singular `channel`, `client`, `node` and `user` from meta.
+- Removed `meta.status`, `ServerClient#processing` and `SKIP_PROCESS`.
+- Added `ProcessingStore` and `processingStore` option.
+- Added `Context#signal` to abort callbacks on `queueTimeout`.
+- Added `logux/prepare` action before sending the history to the client.
+- Added `ready` message after loading client’s subscriptions.
+- Added `Server#httpNotFound()`.
+- Added `*` support and built-in pages overriding to `Server#http()`.
+- Changed `duplicate` report to have only `actionId`.
+- Fixed nested `Server#process()` calls waiting for client’s queue.
+- Changed `Server#subscribe()` and `Server#process()` to return a promise.
+- Reduced dependencies.
+
+### Migration
+
+1. Update clients first: slow actions now delay `synced`.
+2. Resolve or remove actions with `waiting` or `error` status from the log.
+   Server will process them again.
+3. Replace `server.log.add()` with `server.process()` where action must be
+   processed. Remove `status: 'processed'` from meta.
+4. Move `preadd` input preparation before `server.process()`.
+5. Make non-repeatable side effects idempotent by `meta.id`.
+   On crash between the effect and the log write server will repeat it.
+
 ## 0.16.3
 
 - Fixed broken actio processing queue.
