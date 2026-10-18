@@ -56,8 +56,7 @@ describe('loadOptions', () => {
       },
       fakeProcess([], {
         LOGUX_PORT: '31337'
-      }),
-      {}
+      })
     )
 
     expect(options.port).toEqual(31337)
@@ -94,8 +93,7 @@ describe('loadOptions', () => {
       },
       fakeProcess(['--some-port', '1'], {
         LOGUX_SOME_PORT: '1'
-      }),
-      {}
+      })
     )
 
     expect(options.somePort).toEqual(1)

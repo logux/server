@@ -10,9 +10,15 @@ const DATE = /\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/g
 
 let started: ChildProcess | undefined
 
+function withoutColors(opts: SpawnOptions = {}): SpawnOptions {
+  let env = { ...(opts.env ?? process.env) }
+  delete env.FORCE_COLOR
+  return { ...opts, env }
+}
+
 function start(name: string, args?: string[]): Promise<void> {
   return new Promise<void>(resolve => {
-    started = spawn(join(ROOT, 'test/servers/', name), args)
+    started = spawn(join(ROOT, 'test/servers/', name), args, withoutColors())
     let running = false
     function callback(): void {
       if (!running) {
@@ -33,7 +39,11 @@ function check(
 ): Promise<[string, number]> {
   return new Promise<[string, number]>(resolve => {
     let out = ''
-    let server = spawn(join(ROOT, 'test/servers/', name), args, opts)
+    let server = spawn(
+      join(ROOT, 'test/servers/', name),
+      args,
+      withoutColors(opts)
+    )
     server.stdout?.on('data', chank => {
       out += chank
     })
@@ -54,10 +64,13 @@ function check(
       resolve([fixed, exit || 0])
     })
 
+    // Server could print in several steps, so wait until output stops
+    let printed = 0
     function waitOut(): void {
-      if (out.length > 0) {
+      if (out.length > 0 && out.length === printed) {
         server.kill('SIGINT')
       } else {
+        printed = out.length
         setTimeout(waitOut, 500)
       }
     }

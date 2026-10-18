@@ -1214,7 +1214,7 @@ it('sends `ready` only after the client `ready`', async () => {
 
 it('sends `ready` after channels were loaded', async () => {
   let app = createServer()
-  let load: () => void = () => {}
+  let load: (() => void) | undefined
   app.channel('foo', {
     access: () => true,
     async load(ctx) {
@@ -1234,17 +1234,17 @@ it('sends `ready` after channels were loaded', async () => {
     { id: '1 10:1:uuid', time: 1 }
   ])
   sendTo(client, ['ready', 1])
-  await setTimeout(10)
+  await expect.poll(() => load).toBeDefined()
   expect(sentNames(client)).toEqual(['connected'])
 
-  load()
-  await setTimeout(10)
-  expect(sentNames(client)).toEqual(['connected', 'sync', 'sync', 'synced'])
+  load!()
+  await expect
+    .poll(() => sentNames(client))
+    .toEqual(['connected', 'sync', 'sync', 'synced'])
 
   sendTo(client, ['synced', 1])
   sendTo(client, ['synced', 2])
-  await setTimeout(10)
-  expect(sentNames(client)).toEqual([
+  await expect.poll(() => sentNames(client)).toEqual([
     'connected',
     'sync',
     'sync',

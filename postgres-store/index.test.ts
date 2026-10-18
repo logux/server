@@ -1,4 +1,4 @@
-import { PGlite } from '@electric-sql/pglite'
+import { PGlite, type PGliteInterface } from '@electric-sql/pglite'
 import type { ActionPacker } from '@logux/actions'
 import {
   type Action,
@@ -22,7 +22,7 @@ const BIN_PACKER: ActionPacker<BinAction, { type: 'BIN' }> = {
   unpack: packed => ({ body: packed.blob, type: packed.action.type })
 }
 
-function createQuery(db: PGlite): PostgresQuery {
+function createQuery(db: PGliteInterface): PostgresQuery {
   let query: PostgresQuery = async (sql, params) => {
     let result = await db.query(sql, params)
     return result.rows as Record<string, unknown>[]
@@ -56,12 +56,14 @@ let db = await PGlite.create()
 let store = new PostgresStore(db)
 await store.init()
 
-let empty: PGlite[] = []
+let pristine = await PGlite.create()
+let empty: PGliteInterface[] = [pristine]
 
 // Only the migration tests need a database without the log tables.
 // Booting PGlite takes seconds, so the rest reuse the migrated one
-async function createEmpty(): Promise<PGlite> {
-  let fresh = await PGlite.create()
+// and migration tests clone a pristine one booted outside test timeout
+async function createEmpty(): Promise<PGliteInterface> {
+  let fresh = await pristine.clone()
   empty.push(fresh)
   return fresh
 }
