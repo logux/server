@@ -2,6 +2,10 @@
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.17.1
+
+- Fixed broken `pglite` databases but fixing lack of API.
+
 ## 0.17 “Engineer-of-Souls”
 
 - Moved to Logux Core 0.12 and Protocol 7.
