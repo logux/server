@@ -277,10 +277,11 @@ export class BaseServer {
     }
   }
 
-  destroy() {
+  async destroy() {
     this.destroying = true
     this.emitter.emit('report', 'destroy')
-    return Promise.all(this.unbind.map(i => i()))
+    await Promise.all(this.unbind.map(i => i()))
+    for (let listener of this.emitter.events.destroyed ?? []) await listener()
   }
 
   drain(clientId) {

@@ -18,6 +18,11 @@ app.unbind.push(async () => {
   app.logger.info('Custom destroy task finished')
 })
 
+app.on('destroyed', async () => {
+  await setTimeout(10)
+  app.logger.info('Destroyed listener finished')
+})
+
 await app.listen()
 
 process.on('message', async msg => {

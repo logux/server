@@ -224,6 +224,36 @@ it('destroys application without runned server', async () => {
   app.destroy()
 })
 
+it('calls destroyed listeners one by one after unbind', async () => {
+  let app = new BaseServer(DEFAULT_OPTIONS)
+  let events: string[] = []
+  privateMethods(app).unbind.push(async () => {
+    await setTimeout(10)
+    events.push('unbind')
+  })
+  app.on('destroyed', async () => {
+    events.push('first start')
+    await setTimeout(10)
+    events.push('first end')
+  })
+  app.on('destroyed', () => {
+    events.push('second')
+  })
+
+  await app.destroy()
+  expect(events).toEqual(['unbind', 'first start', 'first end', 'second'])
+})
+
+it('removes destroyed listener', async () => {
+  let app = new BaseServer(DEFAULT_OPTIONS)
+  let listener = spy()
+  let unbind = app.on('destroyed', listener)
+  unbind()
+
+  await app.destroy()
+  expect(listener.called).toBe(false)
+})
+
 it('throws without authenticator', async () => {
   expect.assertions(1)
   let app = new BaseServer(DEFAULT_OPTIONS)

@@ -975,6 +975,21 @@ export class BaseServer<
    */
   on(event: 'subscriptionCancelled', listener: () => void): Unsubscribe
   /**
+   * Server calls listeners at the end of `destroy()`, after it stopped
+   * processing actions, one by one and waits for returned promises.
+   * Server exits on `SIGINT` and `SIGTERM` only after them.
+   *
+   * ```js
+   * server.on('destroyed', async () => {
+   *   await db.close()
+   * })
+   * ```
+   *
+   * @param event The event name.
+   * @param listener Event listener.
+   */
+  on(event: 'destroyed', listener: () => Promise<void> | void): Unsubscribe
+  /**
    * @param event The event name.
    * @param listener Subscription listener.
    */
