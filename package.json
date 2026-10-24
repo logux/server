@@ -38,7 +38,7 @@
     "ws": "^8.22.0"
   },
   "devDependencies": {
-    "@electric-sql/pglite": "^0.5.10",
+    "@electric-sql/pglite": "^0.5.11",
     "@logux/oxc-configs": "^1.2.0",
     "@types/cross-spawn": "^6.0.6",
     "@types/node": "^26.6.5",
@@ -49,12 +49,12 @@
     "cross-spawn": "^7.0.6",
     "eslint-plugin-prefer-let": "^4.2.2",
     "nanospy": "^2.0.2",
-    "oxlint": "^1.88.0",
-    "oxlint-tsgolint": "^7.0.2004",
+    "oxlint": "^1.89.0",
+    "oxlint-tsgolint": "^7.0.2005",
     "pg": "^8.23.1",
     "postgres": "^3.4.9",
     "typescript": "^7.0.2",
-    "vite": "^8.3.4",
+    "vite": "^8.3.5",
     "vitest": "^5.0.5"
   },
   "engines": {
