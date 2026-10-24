@@ -114,6 +114,20 @@ server.channel<UserParams, UserData, UserSubscribeAction>('user/:id', {
   }
 })
 
+server.channel('post/:postId', {
+  access(ctx) {
+    // THROWS Property 'id' does not exist on type '{ postId: string; }'
+    return ctx.params.id === ctx.userId
+  }
+})
+
+server.channel('room:id', {
+  access(ctx) {
+    // THROWS Property 'id' does not exist on type '{}'
+    return ctx.params.id === ctx.userId
+  }
+})
+
 server.channel(/admin:\d/, {
   access(ctx, action, meta) {
     console.log(meta.id, action.since)

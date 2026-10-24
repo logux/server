@@ -11,6 +11,7 @@ export { ALLOWED_META } from './allowed-meta/index.js'
 export {
   BaseServer,
   BaseServerOptions,
+  ChannelPatternParams,
   Logger,
   SendBackActions,
   ServerMeta,

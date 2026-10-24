@@ -28,6 +28,27 @@ import type {
 } from '../context/index.js'
 import type { ServerClient } from '../server-client/index.js'
 
+// Collecting `:param` names from `/`-separated channel pattern segments
+type PatternParamNames<S extends string> =
+  S extends `${infer Segment}/${infer Rest}`
+    ? PatternParamNames<Segment> | PatternParamNames<Rest>
+    : S extends `:${infer Name}`
+      ? Name
+      : never
+
+/**
+ * Params object for channel pattern like `user/:id`.
+ *
+ * Only whole segments like `:id` are detected. For complex patterns
+ * like `room:id.:format` pass params type to `server.channel()` explicitly.
+ */
+export type ChannelPatternParams<Pattern extends string> =
+  string extends Pattern
+    ? Record<string, string>
+    : {
+        [Name in Exclude<PatternParamNames<Pattern>, ''>]: string
+      }
+
 interface LogFn {
   (...objs: unknown[]): void
 }
@@ -820,6 +841,39 @@ export class BaseServer<
    * })
    * ```
    *
+   * Types of `ctx.params` are taken from the pattern:
+   * `'user/:id'` gives `{ id: string }`.
+   *
+   * To set `ctx.data` type, pass params and data types explicitly:
+   *
+   * ```ts
+   * server.channel<{ id: string }, { user: User }>('user/:id', {
+   *   async access (ctx) {
+   *     ctx.data.user = await db.loadUser(ctx.params.id)
+   *     return ctx.data.user.id === ctx.userId
+   *   }
+   * })
+   * ```
+   *
+   * @param pattern Pattern for channel name.
+   * @param callbacks Callback during subscription process.
+   * @param options Additional options
+   */
+  channel<
+    Pattern extends string,
+    Data extends object = unknown,
+    SubscribeAction extends LoguxSubscribeAction = LoguxSubscribeAction
+  >(
+    pattern: Pattern,
+    callbacks: ChannelCallbacks<
+      SubscribeAction,
+      Data,
+      ChannelPatternParams<Pattern>,
+      Headers
+    >,
+    options?: ChannelOptions
+  ): void
+  /**
    * @param pattern Pattern for channel name.
    * @param callbacks Callback during subscription process.
    * @param options Additional options

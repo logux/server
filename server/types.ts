@@ -90,6 +90,27 @@ server.channel<UserParams, UserData, UserSubscribeAction>('user/:id', {
   }
 })
 
+server.channel('post/:postId/comments/:commentId', {
+  access(ctx) {
+    let postId: string = ctx.params.postId
+    let commentId: string = ctx.params.commentId
+    return postId === commentId
+  }
+})
+
+server.channel<{ format: string; id: string }>('room:id.:format/*', {
+  access(ctx) {
+    return ctx.params.id === ctx.params.format
+  }
+})
+
+server.channel('posts', {
+  access(ctx) {
+    let params: Record<string, never> = ctx.params
+    return !!params
+  }
+})
+
 server.channel(/admin:\d/, {
   access(ctx, action, meta) {
     console.log(meta.id, action.since)
