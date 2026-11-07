@@ -32,30 +32,30 @@
   "dependencies": {
     "@logux/actions": "^0.8.1",
     "@logux/core": "^0.12.1",
-    "cookie": "^2.0.1",
+    "cookie": "^2.0.2",
     "nanoevents": "^10.0.0",
     "nanoid": "^6.0.2",
-    "ws": "^8.22.0"
+    "ws": "^8.22.1"
   },
   "devDependencies": {
-    "@electric-sql/pglite": "^0.5.11",
+    "@electric-sql/pglite": "^0.5.15",
     "@logux/oxc-configs": "^1.2.0",
     "@types/cross-spawn": "^6.0.6",
-    "@types/node": "^26.6.5",
+    "@types/node": "^26.6.6",
     "@types/pg": "^8.23.1",
     "@types/ws": "^8.18.2",
-    "@vitest/coverage-v8": "^5.0.5",
+    "@vitest/coverage-v8": "^5.1.0",
     "check-dts": "^2.0.1",
     "cross-spawn": "^7.0.6",
     "eslint-plugin-prefer-let": "^4.2.2",
     "nanospy": "^2.0.2",
-    "oxlint": "^1.89.0",
-    "oxlint-tsgolint": "^7.0.2005",
+    "oxlint": "^1.92.0",
+    "oxlint-tsgolint": "^7.0.2006",
     "pg": "^8.23.1",
-    "postgres": "^3.4.9",
+    "postgres": "^4.1.0",
     "typescript": "^7.0.2",
-    "vite": "^8.3.5",
-    "vitest": "^5.0.5"
+    "vite": "^8.3.6",
+    "vitest": "^5.1.0"
   },
   "engines": {
     "node": "^22.5.0 || ^24.0.0 || >=26.0.0"
