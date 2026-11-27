@@ -2,6 +2,12 @@
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.17.2
+
+- Added `ctx.params` types detection from `Server#channel()` pattern.
+- Added `ChannelPatternParams` type.
+- Fixed `PostgresStore` types.
+
 ## 0.17.1
 
 - Fixed broken `pglite` databases but fixing lack of API.
