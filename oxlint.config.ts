@@ -14,6 +14,12 @@ export default defineConfig({
   },
   overrides: [
     {
+      files: ['**/index.js'],
+      rules: {
+        'typescript/no-unsafe-class-instance-assignment': 'off'
+      }
+    },
+    {
       files: ['test/**/*', '*/*.test.ts'],
       rules: {
         'typescript/no-unsafe-function-type': 'off',
