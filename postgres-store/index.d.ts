@@ -102,7 +102,7 @@ export interface PostgresStoreOptions<Packers = Record<string, never>> {
  */
 export class PostgresStore<
   Packers extends ActionPackerMap<Packers> = Record<string, never>
-> implements LogStore {
+> extends LogStore {
   constructor(
     db: PostgresDriver | PostgresQuery,
     opts?: PostgresStoreOptions<Packers>
